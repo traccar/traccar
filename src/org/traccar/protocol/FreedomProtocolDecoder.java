@@ -69,7 +69,7 @@ public class FreedomProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN));
         position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN));
 
-        position.setSpeed(parser.nextDouble());
+        position.setSpeed(parser.nextDouble(0));
 
         return position;
     }

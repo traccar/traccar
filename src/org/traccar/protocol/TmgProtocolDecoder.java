@@ -115,24 +115,24 @@ public class TmgProtocolDecoder extends BaseProtocolDecoder {
 
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
 
-        position.setValid(parser.nextInt() > 0);
+        position.setValid(parser.nextInt(0) > 0);
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
-        position.setCourse(parser.nextDouble());
-        position.setAltitude(parser.nextDouble());
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
+        position.setCourse(parser.nextDouble(0));
+        position.setAltitude(parser.nextDouble(0));
 
-        position.set(Position.KEY_HDOP, parser.nextDouble());
-        position.set(Position.KEY_SATELLITES, parser.nextInt());
-        position.set(Position.KEY_SATELLITES_VISIBLE, parser.nextInt());
+        position.set(Position.KEY_HDOP, parser.nextDouble(0));
+        position.set(Position.KEY_SATELLITES, parser.nextInt(0));
+        position.set(Position.KEY_SATELLITES_VISIBLE, parser.nextInt(0));
         position.set(Position.KEY_OPERATOR, parser.next());
-        position.set(Position.KEY_RSSI, parser.nextInt());
-        position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
-        position.set(Position.KEY_BATTERY, parser.nextDouble());
-        position.set(Position.KEY_POWER, parser.nextDouble());
+        position.set(Position.KEY_RSSI, parser.nextInt(0));
+        position.set(Position.KEY_IGNITION, parser.nextInt(0) == 1);
+        position.set(Position.KEY_BATTERY, parser.nextDouble(0));
+        position.set(Position.KEY_POWER, parser.nextDouble(0));
 
-        int input = parser.nextInt(2);
-        int output = parser.nextInt(2);
+        int input = parser.nextBinInt(0);
+        int output = parser.nextBinInt(0);
 
         if (!BitUtil.check(input, 0)) {
             position.set(Position.KEY_ALARM, Position.ALARM_SOS);
@@ -141,8 +141,8 @@ public class TmgProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_INPUT, input);
         position.set(Position.KEY_OUTPUT, output);
 
-        position.set(Position.PREFIX_ADC + 1, parser.nextDouble());
-        position.set(Position.PREFIX_ADC + 2, parser.nextDouble());
+        position.set(Position.PREFIX_ADC + 1, parser.nextDouble(0));
+        position.set(Position.PREFIX_ADC + 2, parser.nextDouble(0));
         position.set(Position.KEY_VERSION_FW, parser.next());
         position.set(Position.KEY_RFID, parser.next());
 

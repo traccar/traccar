@@ -103,9 +103,9 @@ public class AisProtocolDecoder extends BaseProtocolDecoder {
                 Parser parser = new Parser(PATTERN, sentence);
                 if (parser.matches()) {
 
-                    int count = parser.nextInt();
-                    int index = parser.nextInt();
-                    int id = parser.nextInt();
+                    int count = parser.nextInt(0);
+                    int index = parser.nextInt(0);
+                    int id = parser.nextInt(0);
 
                     Position position = null;
 

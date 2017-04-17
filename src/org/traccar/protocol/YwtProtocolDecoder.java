@@ -91,11 +91,11 @@ public class YwtProtocolDecoder extends BaseProtocolDecoder {
 
         position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG));
         position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG));
-        position.setAltitude(parser.nextDouble());
-        position.setSpeed(parser.nextDouble());
-        position.setCourse(parser.nextDouble());
+        position.setAltitude(parser.nextDouble(0));
+        position.setSpeed(parser.nextDouble(0));
+        position.setCourse(parser.nextDouble(0));
 
-        int satellites = parser.nextInt();
+        int satellites = parser.nextInt(0);
         position.setValid(satellites >= 3);
         position.set(Position.KEY_SATELLITES, satellites);
 

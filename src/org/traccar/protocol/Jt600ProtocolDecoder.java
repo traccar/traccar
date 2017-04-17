@@ -194,13 +194,13 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
 
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
-        position.setCourse(parser.nextDouble());
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
+        position.setCourse(parser.nextDouble(0));
 
-        position.set(Position.KEY_POWER, parser.nextDouble());
-        position.set(Position.KEY_GPS, parser.nextInt());
-        position.set(Position.KEY_RSSI, parser.nextInt());
-        position.set("alertType", parser.nextInt());
+        position.set(Position.KEY_POWER, parser.nextDouble(0));
+        position.set(Position.KEY_GPS, parser.nextInt(0));
+        position.set(Position.KEY_RSSI, parser.nextInt(0));
+        position.set("alertType", parser.nextInt(0));
 
         return position;
     }
@@ -253,19 +253,19 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
         position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
 
-        position.setSpeed(UnitsConverter.knotsFromMph(parser.nextDouble()));
-        position.setCourse(parser.nextDouble());
+        position.setSpeed(UnitsConverter.knotsFromMph(parser.nextDouble(0)));
+        position.setCourse(parser.nextDouble(0));
 
-        position.set(Position.KEY_SATELLITES, parser.nextInt());
+        position.set(Position.KEY_SATELLITES, parser.nextInt(0));
         position.set(Position.KEY_BATTERY, parser.next());
-        position.set(Position.KEY_STATUS, parser.nextInt(2));
+        position.set(Position.KEY_STATUS, parser.nextBinInt(0));
 
-        CellTower cellTower = CellTower.fromCidLac(parser.nextInt(), parser.nextInt());
-        cellTower.setSignalStrength(parser.nextInt());
+        CellTower cellTower = CellTower.fromCidLac(parser.nextInt(0), parser.nextInt(0));
+        cellTower.setSignalStrength(parser.nextInt(0));
         position.setNetwork(new Network(cellTower));
 
-        position.set(Position.KEY_ODOMETER, parser.nextLong() * 1000);
-        position.set(Position.KEY_INDEX, parser.nextInt());
+        position.set(Position.KEY_ODOMETER, parser.nextLong(0) * 1000);
+        position.set(Position.KEY_INDEX, parser.nextInt(0));
 
         if (channel != null) {
             if (type.equals("U01") || type.equals("U02") || type.equals("U03")) {

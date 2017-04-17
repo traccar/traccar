@@ -105,14 +105,14 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         position.setProtocol(getProtocolName());
 
         if (parser.hasNext(3)) {
-            position.set(Position.KEY_EVENT, parser.nextInt());
-            position.setTime(getTime(parser.nextInt(), parser.nextInt(), parser.nextInt()));
+            position.set(Position.KEY_EVENT, parser.nextInt(0));
+            position.setTime(getTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0)));
         } else if (parser.hasNext()) {
-            position.setTime(getTime(parser.nextInt()));
+            position.setTime(getTime(parser.nextInt(0)));
         }
 
         if (parser.hasNext()) {
-            position.set(Position.KEY_EVENT, parser.nextInt());
+            position.set(Position.KEY_EVENT, parser.nextInt(0));
         }
 
         if (parser.hasNext(6)) {
@@ -128,17 +128,17 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN));
         }
 
-        position.setSpeed(UnitsConverter.knotsFromMph(parser.nextDouble()));
-        position.setCourse(parser.nextDouble());
+        position.setSpeed(UnitsConverter.knotsFromMph(parser.nextDouble(0)));
+        position.setCourse(parser.nextDouble(0));
 
         if (parser.hasNext(4)) {
-            position.set(Position.KEY_INPUT, parser.nextInt(16));
-            position.set(Position.KEY_SATELLITES, parser.nextInt(16));
-            position.set(Position.KEY_BATTERY, parser.nextInt());
-            position.set(Position.KEY_ODOMETER, parser.nextLong(16));
+            position.set(Position.KEY_INPUT, parser.nextHexInt(0));
+            position.set(Position.KEY_SATELLITES, parser.nextHexInt(0));
+            position.set(Position.KEY_BATTERY, parser.nextInt(0));
+            position.set(Position.KEY_ODOMETER, parser.nextLong(16, 0));
         }
 
-        position.setValid(parser.nextInt() != 0);
+        position.setValid(parser.nextInt(0) != 0);
 
         String[] attributes = null;
         beginIndex = sentence.indexOf(';');

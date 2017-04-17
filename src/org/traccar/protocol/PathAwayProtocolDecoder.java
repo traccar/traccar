@@ -79,11 +79,11 @@ public class PathAwayProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
 
         position.setValid(true);
-        position.setLatitude(parser.nextDouble());
-        position.setLongitude(parser.nextDouble());
-        position.setAltitude(parser.nextDouble());
-        position.setSpeed(parser.nextDouble());
-        position.setCourse(parser.nextDouble());
+        position.setLatitude(parser.nextDouble(0));
+        position.setLongitude(parser.nextDouble(0));
+        position.setAltitude(parser.nextDouble(0));
+        position.setSpeed(parser.nextDouble(0));
+        position.setCourse(parser.nextDouble(0));
 
         if (channel != null) {
             HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);

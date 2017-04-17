@@ -186,17 +186,17 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             position.setValid(parser.next().equals("A"));
             position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
             position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
-            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
-            position.setCourse(parser.nextDouble());
-            position.setAltitude(parser.nextDouble());
+            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
+            position.setCourse(parser.nextDouble(0));
+            position.setAltitude(parser.nextDouble(0));
 
-            position.set(Position.KEY_SATELLITES, parser.nextInt());
-            position.set(Position.KEY_RSSI, parser.nextInt());
-            position.set(Position.KEY_BATTERY, parser.nextInt());
+            position.set(Position.KEY_SATELLITES, parser.nextInt(0));
+            position.set(Position.KEY_RSSI, parser.nextInt(0));
+            position.set(Position.KEY_BATTERY, parser.nextInt(0));
 
-            position.set("steps", parser.nextInt());
+            position.set("steps", parser.nextInt(0));
 
-            position.set(Position.KEY_ALARM, decodeAlarm(parser.nextInt(16)));
+            position.set(Position.KEY_ALARM, decodeAlarm(parser.nextHexInt(0)));
 
             decodeTail(position, parser.next());
 

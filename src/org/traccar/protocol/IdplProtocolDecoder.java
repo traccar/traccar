@@ -72,7 +72,7 @@ public class IdplProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        position.set(Position.KEY_TYPE, parser.nextInt());
+        position.set(Position.KEY_TYPE, parser.nextInt(0));
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
@@ -85,23 +85,23 @@ public class IdplProtocolDecoder extends BaseProtocolDecoder {
         position.setValid(parser.next().equals("A"));
         position.setLatitude(parser.nextCoordinate(CoordinateFormat.DEG_MIN_MIN_HEM));
         position.setLongitude(parser.nextCoordinate(CoordinateFormat.DEG_MIN_MIN_HEM));
-        position.setSpeed(parser.nextDouble());
-        position.setCourse(parser.nextDouble());
+        position.setSpeed(parser.nextDouble(0));
+        position.setCourse(parser.nextDouble(0));
 
-        position.set(Position.KEY_SATELLITES, parser.nextInt());
-        position.set(Position.KEY_RSSI, parser.nextInt());
+        position.set(Position.KEY_SATELLITES, parser.nextInt(0));
+        position.set(Position.KEY_RSSI, parser.nextInt(0));
         position.set("vehicleStatus", parser.next());
-        position.set(Position.KEY_POWER, parser.nextInt());
-        position.set(Position.KEY_BATTERY, parser.nextDouble());
-        if (parser.nextInt() == 1) {
+        position.set(Position.KEY_POWER, parser.nextInt(0));
+        position.set(Position.KEY_BATTERY, parser.nextDouble(0));
+        if (parser.nextInt(0) == 1) {
             position.set(Position.KEY_ALARM, Position.ALARM_SOS);
         }
-        parser.nextInt(); // body tamper
-        position.set("acStatus", parser.nextInt());
-        position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
-        position.set(Position.KEY_OUTPUT, parser.nextInt());
-        position.set(Position.PREFIX_ADC + 1, parser.nextInt());
-        position.set(Position.PREFIX_ADC + 2, parser.nextInt());
+        parser.nextInt(0); // body tamper
+        position.set("acStatus", parser.nextInt(0));
+        position.set(Position.KEY_IGNITION, parser.nextInt(0) == 1);
+        position.set(Position.KEY_OUTPUT, parser.nextInt(0));
+        position.set(Position.PREFIX_ADC + 1, parser.nextInt(0));
+        position.set(Position.PREFIX_ADC + 2, parser.nextInt(0));
         position.set(Position.KEY_VERSION_FW, parser.next());
         position.set(Position.KEY_ARCHIVE, parser.next().equals("R"));
 

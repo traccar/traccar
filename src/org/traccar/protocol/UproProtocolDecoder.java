@@ -64,13 +64,13 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
         if (parser.matches()) {
 
             DateBuilder dateBuilder = new DateBuilder()
-                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+                    .setTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
 
             position.setValid(true);
             position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN));
             position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN));
 
-            int flags = parser.nextInt();
+            int flags = parser.nextInt(0);
             position.setValid(BitUtil.check(flags, 0));
             if (!BitUtil.check(flags, 1)) {
                 position.setLatitude(-position.getLatitude());
@@ -79,10 +79,10 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                 position.setLongitude(-position.getLongitude());
             }
 
-            position.setSpeed(parser.nextInt() * 2);
-            position.setCourse(parser.nextInt() * 10);
+            position.setSpeed(parser.nextInt(0) * 2);
+            position.setCourse(parser.nextInt(0) * 10);
 
-            dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
+            dateBuilder.setDateReverse(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
             position.setTime(dateBuilder.getDate());
 
         }

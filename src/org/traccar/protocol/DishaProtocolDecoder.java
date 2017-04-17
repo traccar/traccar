@@ -81,19 +81,19 @@ public class DishaProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
 
-        position.setSpeed(parser.nextDouble());
-        position.setCourse(parser.nextDouble());
+        position.setSpeed(parser.nextDouble(0));
+        position.setCourse(parser.nextDouble(0));
 
         position.set(Position.KEY_SATELLITES, parser.next());
         position.set(Position.KEY_HDOP, parser.next());
         position.set(Position.KEY_RSSI, parser.next());
-        position.set(Position.KEY_CHARGE, parser.nextInt() == 2);
+        position.set(Position.KEY_CHARGE, parser.nextInt(0) == 2);
         position.set(Position.KEY_BATTERY, parser.next());
 
-        position.set(Position.PREFIX_ADC + 1, parser.nextInt());
-        position.set(Position.PREFIX_ADC + 2, parser.nextInt());
+        position.set(Position.PREFIX_ADC + 1, parser.nextInt(0));
+        position.set(Position.PREFIX_ADC + 2, parser.nextInt(0));
 
-        position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
+        position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1000);
         position.set(Position.KEY_INPUT, parser.next());
 
         return position;

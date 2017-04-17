@@ -76,11 +76,11 @@ public class Xt013ProtocolDecoder extends BaseProtocolDecoder {
 
         position.setTime(parser.nextDateTime());
 
-        position.setLatitude(parser.nextDouble());
-        position.setLongitude(parser.nextDouble());
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
-        position.setCourse(parser.nextDouble());
-        position.setAltitude(parser.nextDouble());
+        position.setLatitude(parser.nextDouble(0));
+        position.setLongitude(parser.nextDouble(0));
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
+        position.setCourse(parser.nextDouble(0));
+        position.setAltitude(parser.nextDouble(0));
         position.setValid(parser.next().equals("F"));
 
         position.set(Position.KEY_GPS, parser.next());

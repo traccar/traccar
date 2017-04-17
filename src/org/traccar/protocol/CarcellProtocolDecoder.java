@@ -107,24 +107,24 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
             position.setLongitude(parser.nextCoordinate(CoordinateFormat.HEM_DEG));
         }
 
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt()));
-        position.setCourse(parser.nextInt());
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt(0)));
+        position.setCourse(parser.nextInt(0));
 
         if (parser.hasNext(3)) {
-            position.set("x", parser.nextInt());
-            position.set("y", parser.nextInt());
-            position.set("z", parser.nextInt());
+            position.set("x", parser.nextInt(0));
+            position.set("y", parser.nextInt(0));
+            position.set("z", parser.nextInt(0));
         }
 
         if (parser.hasNext(1)) {
-            position.set(Position.KEY_ACCELERATION, parser.nextInt());
+            position.set(Position.KEY_ACCELERATION, parser.nextInt(0));
         }
 
-        Double internalBattery = (parser.nextDouble() + 100d) * 0.0294d;
+        Double internalBattery = (parser.nextDouble(0) + 100d) * 0.0294d;
         position.set(Position.KEY_BATTERY, internalBattery);
-        position.set(Position.KEY_RSSI, parser.nextInt());
+        position.set(Position.KEY_RSSI, parser.nextInt(0));
         position.set("jamming", parser.next().equals("1"));
-        position.set(Position.KEY_GPS, parser.nextInt());
+        position.set(Position.KEY_GPS, parser.nextInt(0));
 
         position.set("clockType", parser.next());
 
@@ -144,16 +144,16 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
             }
             position.set("painel", painelStatus.equals("2"));
 
-            Double mainVoltage = parser.nextDouble() / 100d;
+            Double mainVoltage = parser.nextDouble(0) / 100d;
             position.set(Position.KEY_POWER, mainVoltage);
         }
 
         if (parser.hasNext(5)) {
-            position.set("timeUntilDelivery", parser.nextInt());
+            position.set("timeUntilDelivery", parser.nextInt(0));
             parser.next(); // panic button status
             position.set(Position.KEY_INPUT, parser.next());
 
-            Double mainVoltage = parser.nextDouble() / 100d;
+            Double mainVoltage = parser.nextDouble(0) / 100d;
             position.set(Position.KEY_POWER, mainVoltage);
 
             position.set("iccid", parser.next());

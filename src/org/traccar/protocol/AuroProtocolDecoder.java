@@ -65,7 +65,7 @@ public class AuroProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        position.set(Position.KEY_INDEX, parser.nextInt());
+        position.set(Position.KEY_INDEX, parser.nextInt(0));
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
@@ -79,11 +79,11 @@ public class AuroProtocolDecoder extends BaseProtocolDecoder {
 
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
 
-        position.setCourse(parser.nextDouble());
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+        position.setCourse(parser.nextDouble(0));
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
 
-        position.set(Position.KEY_BATTERY, parser.nextInt());
-        position.set(Position.KEY_CHARGE, parser.nextInt() == 1);
+        position.set(Position.KEY_BATTERY, parser.nextInt(0));
+        position.set(Position.KEY_CHARGE, parser.nextInt(0) == 1);
 
         return position;
     }

@@ -87,23 +87,23 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(parser.nextDateTime());
 
         position.setValid(parser.next().equals("A"));
-        position.setLatitude(parser.nextDouble());
-        position.setLongitude(parser.nextDouble());
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt()));
-        position.setCourse(parser.nextInt());
-        position.setAltitude(parser.nextInt());
+        position.setLatitude(parser.nextDouble(0));
+        position.setLongitude(parser.nextDouble(0));
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt(0)));
+        position.setCourse(parser.nextInt(0));
+        position.setAltitude(parser.nextInt(0));
 
-        position.set(Position.KEY_ODOMETER, parser.nextLong());
-        position.set(Position.KEY_STATUS, parser.nextInt(16));
+        position.set(Position.KEY_ODOMETER, parser.nextLong(0));
+        position.set(Position.KEY_STATUS, parser.nextHexInt(0));
         if (parser.hasNext()) {
-            position.set(Position.KEY_INPUT, parser.nextInt(16));
+            position.set(Position.KEY_INPUT, parser.nextHexInt(0));
         }
         if (parser.hasNext()) {
-            position.set(Position.KEY_OUTPUT, parser.nextInt(16));
+            position.set(Position.KEY_OUTPUT, parser.nextHexInt(0));
         }
 
         position.setNetwork(new Network(CellTower.from(
-                parser.nextInt(), parser.nextInt(), parser.nextInt(16), parser.nextInt(16))));
+                parser.nextInt(0), parser.nextInt(0), parser.nextHexInt(0), parser.nextHexInt(0))));
 
         String[] adc = parser.next().split("\\|");
         for (int i = 0; i < adc.length; i++) {

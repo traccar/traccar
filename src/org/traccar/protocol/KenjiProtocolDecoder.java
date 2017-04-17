@@ -85,24 +85,24 @@ public class KenjiProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.set(Position.KEY_ALARM, decodeAlarm(parser.nextInt(16)));
-        position.set(Position.KEY_OUTPUT, parser.nextInt(16));
-        position.set(Position.KEY_INPUT, parser.nextInt(16));
+        position.set(Position.KEY_ALARM, decodeAlarm(parser.nextHexInt(0)));
+        position.set(Position.KEY_OUTPUT, parser.nextHexInt(0));
+        position.set(Position.KEY_INPUT, parser.nextHexInt(0));
 
         DateBuilder dateBuilder = new DateBuilder()
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+                .setTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
 
         position.setValid(parser.next().equals("A"));
 
         position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN));
         position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN));
-        position.setSpeed(parser.nextDouble());
-        position.setCourse(parser.nextDouble());
+        position.setSpeed(parser.nextDouble(0));
+        position.setCourse(parser.nextDouble(0));
 
-        dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        dateBuilder.setDateReverse(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
         position.setTime(dateBuilder.getDate());
 
-        position.set(Position.KEY_SATELLITES, parser.nextInt());
+        position.set(Position.KEY_SATELLITES, parser.nextInt(0));
 
         return position;
     }

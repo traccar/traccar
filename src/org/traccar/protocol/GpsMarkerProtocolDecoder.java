@@ -75,10 +75,10 @@ public class GpsMarkerProtocolDecoder extends BaseProtocolDecoder {
         position.setValid(true);
         position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN_MIN));
         position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN_MIN));
-        position.setSpeed(parser.nextDouble());
-        position.setCourse(parser.nextDouble());
+        position.setSpeed(parser.nextDouble(0));
+        position.setCourse(parser.nextDouble(0));
 
-        position.set(Position.KEY_SATELLITES, parser.nextInt(16));
+        position.set(Position.KEY_SATELLITES, parser.nextHexInt(0));
         position.set(Position.KEY_BATTERY, parser.next());
         position.set(Position.KEY_INPUT, parser.next());
         position.set(Position.KEY_OUTPUT, parser.next());

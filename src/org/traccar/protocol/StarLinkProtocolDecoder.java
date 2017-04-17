@@ -83,7 +83,7 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        int type = parser.nextInt();
+        int type = parser.nextInt(0);
         if (type != MSG_EVENT_REPORT) {
             return null;
         }
@@ -93,7 +93,7 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
         position.setValid(true);
 
-        position.set(Position.KEY_INDEX, parser.nextInt());
+        position.set(Position.KEY_INDEX, parser.nextInt(0));
 
         String[] data = parser.next().split(",");
         Integer lac = null, cid = null;

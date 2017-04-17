@@ -75,14 +75,14 @@ public class AppelloProtocolDecoder extends BaseProtocolDecoder {
             getLastLocation(position, null);
         }
 
-        position.setLatitude(parser.nextDouble());
-        position.setLongitude(parser.nextDouble());
-        position.setSpeed(parser.nextDouble());
-        position.setCourse(parser.nextDouble());
+        position.setLatitude(parser.nextDouble(0));
+        position.setLongitude(parser.nextDouble(0));
+        position.setSpeed(parser.nextDouble(0));
+        position.setCourse(parser.nextDouble(0));
 
-        position.set(Position.KEY_SATELLITES, parser.nextInt());
+        position.set(Position.KEY_SATELLITES, parser.nextInt(0));
 
-        position.setAltitude(parser.nextDouble());
+        position.setAltitude(parser.nextDouble(0));
 
         position.setValid(parser.next().equals("F"));
 

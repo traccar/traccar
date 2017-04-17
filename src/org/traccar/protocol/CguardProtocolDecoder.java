@@ -65,14 +65,14 @@ public class CguardProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(parser.nextDateTime());
 
         position.setValid(true);
-        position.setLatitude(parser.nextDouble());
-        position.setLongitude(parser.nextDouble());
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+        position.setLatitude(parser.nextDouble(0));
+        position.setLongitude(parser.nextDouble(0));
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
 
-        position.setAccuracy(parser.nextDouble());
+        position.setAccuracy(parser.nextDouble(0));
 
-        position.setCourse(parser.nextDouble());
-        position.setAltitude(parser.nextDouble());
+        position.setCourse(parser.nextDouble(0));
+        position.setAltitude(parser.nextDouble(0));
 
         return position;
     }

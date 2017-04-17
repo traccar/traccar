@@ -69,17 +69,17 @@ public class GpsmtaProtocolDecoder extends BaseProtocolDecoder {
         String time = parser.next();
         position.setTime(new Date(Long.parseLong(time) * 1000));
 
-        position.setLatitude(parser.nextDouble());
-        position.setLongitude(parser.nextDouble());
-        position.setSpeed(parser.nextInt());
-        position.setCourse(parser.nextInt());
-        position.setAccuracy(parser.nextInt());
-        position.setAltitude(parser.nextInt());
+        position.setLatitude(parser.nextDouble(0));
+        position.setLongitude(parser.nextDouble(0));
+        position.setSpeed(parser.nextInt(0));
+        position.setCourse(parser.nextInt(0));
+        position.setAccuracy(parser.nextInt(0));
+        position.setAltitude(parser.nextInt(0));
 
-        position.set(Position.KEY_STATUS, parser.nextInt());
-        position.set(Position.KEY_BATTERY, parser.nextInt());
-        position.set(Position.PREFIX_TEMP + 1, parser.nextInt());
-        position.set(Position.KEY_CHARGE, parser.nextInt() == 1);
+        position.set(Position.KEY_STATUS, parser.nextInt(0));
+        position.set(Position.KEY_BATTERY, parser.nextInt(0));
+        position.set(Position.PREFIX_TEMP + 1, parser.nextInt(0));
+        position.set(Position.KEY_CHARGE, parser.nextInt(0) == 1);
 
         if (channel != null) {
             channel.write(time, remoteAddress);

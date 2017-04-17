@@ -78,8 +78,8 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
     private void decodeFix(Position position, Parser parser) {
 
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
-        position.setLatitude(parser.nextDouble());
-        position.setLongitude(parser.nextDouble());
+        position.setLatitude(parser.nextDouble(0));
+        position.setLongitude(parser.nextDouble(0));
     }
 
     private void decodeFlags(Position position, int flags) {
@@ -114,25 +114,25 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
 
     private void decodeState(Position position, Parser parser) {
 
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
 
-        position.setCourse(parser.nextDouble());
+        position.setCourse(parser.nextDouble(0));
         if (position.getCourse() > 360) {
             position.setCourse(0);
         }
 
-        decodeFlags(position, parser.nextInt(16));
+        decodeFlags(position, parser.nextHexInt(0));
 
-        position.setAltitude(parser.nextDouble());
+        position.setAltitude(parser.nextDouble(0));
 
-        position.set(Position.KEY_BATTERY, parser.nextInt());
+        position.set(Position.KEY_BATTERY, parser.nextInt(0));
     }
 
     private void decodeGPSPrecision(Position position, Parser parser) {
 
-        position.set(Position.KEY_SATELLITES, parser.nextInt());
-        position.set(Position.KEY_SATELLITES_VISIBLE, parser.nextInt());
-        position.set(Position.KEY_HDOP, parser.nextDouble());
+        position.set(Position.KEY_SATELLITES, parser.nextInt(0));
+        position.set(Position.KEY_SATELLITES_VISIBLE, parser.nextInt(0));
+        position.set(Position.KEY_HDOP, parser.nextDouble(0));
     }
 
     @Override

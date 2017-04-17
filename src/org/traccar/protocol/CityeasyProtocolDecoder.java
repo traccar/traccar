@@ -105,9 +105,9 @@ public class CityeasyProtocolDecoder extends BaseProtocolDecoder {
                 position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG));
                 position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG));
 
-                position.setSpeed(parser.nextDouble());
-                position.set(Position.KEY_HDOP, parser.nextDouble());
-                position.setAltitude(parser.nextDouble());
+                position.setSpeed(parser.nextDouble(0));
+                position.set(Position.KEY_HDOP, parser.nextDouble(0));
+                position.setAltitude(parser.nextDouble(0));
 
             } else {
 
@@ -116,7 +116,7 @@ public class CityeasyProtocolDecoder extends BaseProtocolDecoder {
             }
 
             position.setNetwork(new Network(CellTower.from(
-                    parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextInt())));
+                    parser.nextInt(0), parser.nextInt(0), parser.nextInt(0), parser.nextInt(0))));
 
             return position;
         }

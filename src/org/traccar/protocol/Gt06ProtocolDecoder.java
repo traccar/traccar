@@ -232,8 +232,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        position.set(Position.PREFIX_TEMP + 1, parser.nextDouble());
-        position.set(Position.KEY_FUEL_LEVEL, parser.nextDouble());
+        position.set(Position.PREFIX_TEMP + 1, parser.nextDouble(0));
+        position.set(Position.KEY_FUEL_LEVEL, parser.nextDouble(0));
 
         return position;
     }

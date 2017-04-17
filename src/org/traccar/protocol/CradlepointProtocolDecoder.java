@@ -72,8 +72,8 @@ public class CradlepointProtocolDecoder extends BaseProtocolDecoder {
         position.setValid(true);
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
-        position.setSpeed(parser.nextDouble());
-        position.setCourse(parser.nextDouble());
+        position.setSpeed(parser.nextDouble(0));
+        position.setCourse(parser.nextDouble(0));
 
         parser.skip(4);
 

@@ -77,19 +77,19 @@ public class RaveonProtocolDecoder extends BaseProtocolDecoder {
 
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS));
 
-        position.setValid(parser.nextInt() != 0);
+        position.setValid(parser.nextInt(0) != 0);
 
-        position.set(Position.KEY_SATELLITES, parser.nextInt());
+        position.set(Position.KEY_SATELLITES, parser.nextInt(0));
 
-        position.setAltitude(parser.nextInt());
+        position.setAltitude(parser.nextInt(0));
 
-        position.set(Position.PREFIX_TEMP + 1, parser.nextInt());
-        position.set(Position.KEY_POWER, parser.nextDouble());
-        position.set(Position.KEY_INPUT, parser.nextInt());
-        position.set(Position.KEY_RSSI, parser.nextInt());
+        position.set(Position.PREFIX_TEMP + 1, parser.nextInt(0));
+        position.set(Position.KEY_POWER, parser.nextDouble(0));
+        position.set(Position.KEY_INPUT, parser.nextInt(0));
+        position.set(Position.KEY_RSSI, parser.nextInt(0));
 
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt()));
-        position.setCourse(parser.nextInt());
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt(0)));
+        position.setCourse(parser.nextInt(0));
 
         position.set(Position.KEY_ALARM, parser.next());
 

@@ -73,7 +73,7 @@ public class ManPowerProtocolDecoder extends BaseProtocolDecoder {
         position.setValid(parser.next().equals("A"));
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
-        position.setSpeed(parser.nextDouble());
+        position.setSpeed(parser.nextDouble(0));
 
         return position;
     }

@@ -82,23 +82,23 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         DateBuilder dateBuilder = new DateBuilder()
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextInt());
+                .setTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
 
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
 
         position.set(Position.KEY_HDOP, parser.next());
 
-        position.setAltitude(parser.nextDouble());
+        position.setAltitude(parser.nextDouble(0));
 
-        int fix = parser.nextInt();
+        int fix = parser.nextInt(0);
         position.set(Position.KEY_GPS, fix);
         position.setValid(fix > 0);
 
-        position.setCourse(parser.nextDouble());
-        position.setSpeed(parser.nextDouble());
+        position.setCourse(parser.nextDouble(0));
+        position.setSpeed(parser.nextDouble(0));
 
-        dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        dateBuilder.setDateReverse(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
         position.setTime(dateBuilder.getDate());
 
         position.set(Position.KEY_SATELLITES, parser.next());

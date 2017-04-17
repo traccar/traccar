@@ -70,10 +70,10 @@ public class ArknavProtocolDecoder extends BaseProtocolDecoder {
         position.setValid(parser.next().equals("A"));
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
-        position.setSpeed(parser.nextDouble());
-        position.setCourse(parser.nextDouble());
+        position.setSpeed(parser.nextDouble(0));
+        position.setCourse(parser.nextDouble(0));
 
-        position.set(Position.KEY_HDOP, parser.nextDouble());
+        position.set(Position.KEY_HDOP, parser.nextDouble(0));
 
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY));
 

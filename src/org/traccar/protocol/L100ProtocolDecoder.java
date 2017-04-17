@@ -92,26 +92,26 @@ public class L100ProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         DateBuilder dateBuilder = new DateBuilder()
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextInt());
+                .setTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
 
         position.setValid(parser.next().equals("A"));
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
-        position.setSpeed(parser.nextDouble());
-        position.setCourse(parser.nextDouble());
+        position.setSpeed(parser.nextDouble(0));
+        position.setCourse(parser.nextDouble(0));
 
-        dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        dateBuilder.setDateReverse(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
         position.setTime(dateBuilder.getDate());
 
         position.set(Position.KEY_STATUS, parser.next());
         position.set(Position.PREFIX_ADC + 1, parser.next());
-        position.set(Position.KEY_ODOMETER, parser.nextDouble());
-        position.set(Position.PREFIX_TEMP + 1, parser.nextDouble());
-        position.set(Position.KEY_BATTERY, parser.nextDouble());
+        position.set(Position.KEY_ODOMETER, parser.nextDouble(0));
+        position.set(Position.PREFIX_TEMP + 1, parser.nextDouble(0));
+        position.set(Position.KEY_BATTERY, parser.nextDouble(0));
 
-        int rssi = parser.nextInt();
+        int rssi = parser.nextInt(0);
         position.setNetwork(new Network(CellTower.from(
-                parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextInt(), rssi)));
+                parser.nextInt(0), parser.nextInt(0), parser.nextInt(0), parser.nextInt(0), rssi)));
 
         return position;
     }

@@ -89,14 +89,14 @@ public class GnxProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(deviceSession.getDeviceId());
 
-        if (parser.nextInt() == 1) {
+        if (parser.nextInt(0) == 1) {
             position.set(Position.KEY_ARCHIVE, true);
         }
 
         position.setDeviceTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY, "GMT+5:30"));
         position.setFixTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY, "GMT+5:30"));
 
-        position.setValid(parser.nextInt() != 0);
+        position.setValid(parser.nextInt(0) != 0);
 
         position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
         position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));

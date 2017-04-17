@@ -121,17 +121,17 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
 
         position.setTime(parser.nextDateTime());
 
-        position.setLatitude(parser.nextDouble());
-        position.setLongitude(parser.nextDouble());
-        position.setAltitude(parser.nextDouble());
-        position.setSpeed(UnitsConverter.knotsFromMph(parser.nextDouble()));
-        position.setCourse(parser.nextDouble());
+        position.setLatitude(parser.nextDouble(0));
+        position.setLongitude(parser.nextDouble(0));
+        position.setAltitude(parser.nextDouble(0));
+        position.setSpeed(UnitsConverter.knotsFromMph(parser.nextDouble(0)));
+        position.setCourse(parser.nextDouble(0));
 
         position.set(Position.KEY_SATELLITES, parser.next());
         position.set(Position.KEY_HDOP, parser.next());
 
         if (newFormat) {
-            position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1609.34);
+            position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1609.34);
             position.set(Position.KEY_FUEL_CONSUMPTION, parser.next());
         }
 
@@ -139,10 +139,10 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_RSSI, parser.next());
 
         if (!newFormat) {
-            position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1609.34);
+            position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1609.34);
         }
 
-        position.setValid(parser.nextInt() == 1);
+        position.setValid(parser.nextInt(0) == 1);
 
         return position;
     }

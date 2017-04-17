@@ -396,8 +396,8 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         parser.next(); // odometer or external power
 
-        position.set(Position.KEY_BATTERY, parser.nextDouble());
-        position.set(Position.KEY_CHARGE, parser.nextInt() == 1);
+        position.set(Position.KEY_BATTERY, parser.nextDouble(0));
+        position.set(Position.KEY_CHARGE, parser.nextInt(0) == 1);
 
         if (parser.hasNext()) {
             position.set(Position.KEY_BATTERY, parser.next() + "%");
@@ -413,7 +413,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         getLastLocation(position, parser.nextDateTime());
 
-        position.set(Position.KEY_INDEX, parser.nextInt(16));
+        position.set(Position.KEY_INDEX, parser.nextHexInt(0));
 
         return position;
     }
@@ -426,8 +426,8 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         position.set("deviceType", parser.next());
-        position.set(Position.KEY_VERSION_FW, parser.nextInt(16));
-        position.set(Position.KEY_VERSION_HW, parser.nextInt(16));
+        position.set(Position.KEY_VERSION_FW, parser.nextHexInt(0));
+        position.set(Position.KEY_VERSION_HW, parser.nextHexInt(0));
 
         getLastLocation(position, parser.nextDateTime());
 
@@ -435,35 +435,35 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void decodeLocation(Position position, Parser parser) {
-        int hdop = parser.nextInt();
+        int hdop = parser.nextInt(0);
         position.setValid(hdop > 0);
         position.set(Position.KEY_HDOP, hdop);
 
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
-        position.setCourse(parser.nextDouble());
-        position.setAltitude(parser.nextDouble());
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
+        position.setCourse(parser.nextDouble(0));
+        position.setAltitude(parser.nextDouble(0));
 
         if (parser.hasNext(8)) {
             position.setValid(true);
-            position.setLongitude(parser.nextDouble());
-            position.setLatitude(parser.nextDouble());
+            position.setLongitude(parser.nextDouble(0));
+            position.setLatitude(parser.nextDouble(0));
             position.setTime(parser.nextDateTime());
         } else {
             getLastLocation(position, null);
         }
 
         if (parser.hasNext(6)) {
-            int mcc = parser.nextInt();
-            int mnc = parser.nextInt();
+            int mcc = parser.nextInt(0);
+            int mnc = parser.nextInt(0);
             if (parser.hasNext(2)) {
-                position.setNetwork(new Network(CellTower.from(mcc, mnc, parser.nextInt(), parser.nextInt())));
+                position.setNetwork(new Network(CellTower.from(mcc, mnc, parser.nextInt(0), parser.nextInt(0))));
             }
             if (parser.hasNext(2)) {
-                position.setNetwork(new Network(CellTower.from(mcc, mnc, parser.nextInt(16), parser.nextInt(16))));
+                position.setNetwork(new Network(CellTower.from(mcc, mnc, parser.nextHexInt(0), parser.nextHexInt(0))));
             }
         }
 
-        position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
+        position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1000);
     }
 
     private Object decodeObd(Channel channel, SocketAddress remoteAddress, String sentence) {
@@ -473,21 +473,21 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        position.set(Position.KEY_RPM, parser.nextInt());
-        position.set(Position.KEY_OBD_SPEED, parser.nextInt());
-        position.set(Position.PREFIX_TEMP + 1, parser.nextInt());
+        position.set(Position.KEY_RPM, parser.nextInt(0));
+        position.set(Position.KEY_OBD_SPEED, parser.nextInt(0));
+        position.set(Position.PREFIX_TEMP + 1, parser.nextInt(0));
         position.set(Position.KEY_FUEL_CONSUMPTION, parser.next());
-        position.set("dtcsClearedDistance", parser.nextInt());
-        position.set("odbConnect", parser.nextInt() == 1);
-        position.set("dtcsNumber", parser.nextInt());
+        position.set("dtcsClearedDistance", parser.nextInt(0));
+        position.set("odbConnect", parser.nextInt(0) == 1);
+        position.set("dtcsNumber", parser.nextInt(0));
         position.set("dtcsCodes", parser.next());
-        position.set(Position.KEY_THROTTLE, parser.nextInt());
-        position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
-        position.set(Position.KEY_OBD_ODOMETER, parser.nextInt() * 1000);
+        position.set(Position.KEY_THROTTLE, parser.nextInt(0));
+        position.set(Position.KEY_FUEL_LEVEL, parser.nextInt(0));
+        position.set(Position.KEY_OBD_ODOMETER, parser.nextInt(0) * 1000);
 
         decodeLocation(position, parser);
 
-        position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
+        position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1000);
 
         decodeDeviceTime(position, parser);
 
@@ -496,14 +496,14 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
     private void decodeStatus(Position position, Parser parser) {
         if (parser.hasNext(3)) {
-            int ignition = parser.nextInt(16);
+            int ignition = parser.nextHexInt(0);
             if (BitUtil.check(ignition, 4)) {
                 position.set(Position.KEY_IGNITION, false);
             } else if (BitUtil.check(ignition, 5)) {
                 position.set(Position.KEY_IGNITION, true);
             }
-            position.set(Position.KEY_INPUT, parser.nextInt(16));
-            position.set(Position.KEY_OUTPUT, parser.nextInt(16));
+            position.set(Position.KEY_INPUT, parser.nextHexInt(0));
+            position.set(Position.KEY_OUTPUT, parser.nextHexInt(0));
         }
     }
 
@@ -521,7 +521,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         LinkedList<Position> positions = new LinkedList<>();
 
         String vin = parser.next();
-        int power = parser.nextInt();
+        int power = parser.nextInt(0);
 
         Parser itemParser = new Parser(PATTERN_LOCATION, parser.next());
         while (itemParser.find()) {
@@ -545,10 +545,10 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_POWER, power);
         }
 
-        position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
+        position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1000);
         position.set(Position.KEY_BATTERY, parser.next());
 
-        position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
+        position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1000);
         position.set(Position.KEY_HOURS, parser.next());
         position.set(Position.PREFIX_ADC + 1, parser.next());
         position.set(Position.PREFIX_ADC + 2, parser.next());
@@ -556,8 +556,8 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         decodeStatus(position, parser);
 
-        position.set(Position.KEY_RPM, parser.nextInt());
-        position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
+        position.set(Position.KEY_RPM, parser.nextInt(0));
+        position.set(Position.KEY_FUEL_LEVEL, parser.nextInt(0));
 
         decodeDeviceTime(position, parser);
 
@@ -577,7 +577,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         LinkedList<Position> positions = new LinkedList<>();
 
-        int power = parser.nextInt();
+        int power = parser.nextInt(0);
 
         Parser itemParser = new Parser(PATTERN_LOCATION, parser.next());
         while (itemParser.find()) {
@@ -595,7 +595,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         decodeLocation(position, parser);
 
         position.set(Position.KEY_POWER, power);
-        position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
+        position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1000);
         position.set(Position.KEY_HOURS, parser.next());
         position.set(Position.PREFIX_ADC + 1, parser.next());
         position.set(Position.PREFIX_ADC + 2, parser.next());
@@ -618,7 +618,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         decodeLocation(position, parser);
 
         position.set(Position.KEY_HOURS, parser.next());
-        position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
+        position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1000);
 
         decodeDeviceTime(position, parser);
 
@@ -636,7 +636,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         decodeLocation(position, parser);
 
-        position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
+        position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1000);
 
         decodeDeviceTime(position, parser);
 
@@ -654,7 +654,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         Network network = new Network();
 
-        parser.nextInt(); // count
+        parser.nextInt(0); // count
         Matcher matcher = Pattern.compile("([0-9a-fA-F]{12}),(-?\\d+),,,,").matcher(parser.next());
         while (matcher.find()) {
             String mac = matcher.group(1).replaceAll("(..)", "$1:");
@@ -664,7 +664,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         position.setNetwork(network);
 
-        position.set(Position.KEY_BATTERY, parser.nextInt());
+        position.set(Position.KEY_BATTERY, parser.nextInt(0));
 
         return position;
     }
@@ -702,7 +702,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        int reportType = parser.nextInt();
+        int reportType = parser.nextInt(0);
         if (type.equals("NMR")) {
             position.set(Position.KEY_MOTION, reportType);
         } else if (type.equals("SOS")) {
@@ -711,10 +711,10 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         decodeLocation(position, parser);
 
-        position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
+        position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1000);
         position.set(Position.KEY_BATTERY, parser.next());
 
-        position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
+        position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1000);
 
         decodeDeviceTime(position, parser);
 
@@ -732,17 +732,17 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        int hdop = parser.nextInt();
+        int hdop = parser.nextInt(0);
         position.setValid(hdop > 0);
         position.set(Position.KEY_HDOP, hdop);
 
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
-        position.setCourse(parser.nextDouble());
-        position.setAltitude(parser.nextDouble());
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
+        position.setCourse(parser.nextDouble(0));
+        position.setAltitude(parser.nextDouble(0));
 
         if (parser.hasNext(2)) {
-            position.setLongitude(parser.nextDouble());
-            position.setLatitude(parser.nextDouble());
+            position.setLongitude(parser.nextDouble(0));
+            position.setLatitude(parser.nextDouble(0));
         } else {
             getLastLocation(position, null);
         }
@@ -753,7 +753,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext(4)) {
             position.setNetwork(new Network(CellTower.from(
-                    parser.nextInt(), parser.nextInt(), parser.nextInt(16), parser.nextInt(16))));
+                    parser.nextInt(0), parser.nextInt(0), parser.nextHexInt(0), parser.nextHexInt(0))));
         }
 
         decodeDeviceTime(position, parser);

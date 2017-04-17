@@ -83,15 +83,15 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
 
             position.setTime(parser.nextDateTime());
 
-            position.setLatitude(parser.nextDouble());
-            position.setLongitude(parser.nextDouble());
-            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
-            position.setCourse(parser.nextDouble());
+            position.setLatitude(parser.nextDouble(0));
+            position.setLongitude(parser.nextDouble(0));
+            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
+            position.setCourse(parser.nextDouble(0));
 
-            position.set(Position.KEY_ODOMETER_TRIP, parser.nextDouble() * 1000);
+            position.set(Position.KEY_ODOMETER_TRIP, parser.nextDouble(0) * 1000);
             position.set(Position.KEY_EVENT, parser.next());
 
-            int status = parser.nextInt();
+            int status = parser.nextInt(0);
             position.setValid((status & 0x04) == 0);
             position.set(Position.KEY_STATUS, status);
 

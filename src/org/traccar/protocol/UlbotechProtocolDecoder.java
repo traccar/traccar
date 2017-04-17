@@ -193,8 +193,8 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         DateBuilder dateBuilder = new DateBuilder()
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
+                .setTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0))
+                .setDateReverse(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
 
         getLastLocation(position, dateBuilder.getDate());
 

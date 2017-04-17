@@ -81,14 +81,14 @@ public class PretraceProtocolDecoder extends BaseProtocolDecoder {
 
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt()));
-        position.setCourse(parser.nextInt());
-        position.setAltitude(parser.nextInt(16));
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt(0)));
+        position.setCourse(parser.nextInt(0));
+        position.setAltitude(parser.nextHexInt(0));
 
-        position.set(Position.KEY_ODOMETER, parser.nextInt(16));
-        position.set(Position.KEY_SATELLITES, parser.nextInt(16));
-        position.set(Position.KEY_HDOP, parser.nextInt());
-        position.set(Position.KEY_RSSI, parser.nextInt());
+        position.set(Position.KEY_ODOMETER, parser.nextHexInt(0));
+        position.set(Position.KEY_SATELLITES, parser.nextHexInt(0));
+        position.set(Position.KEY_HDOP, parser.nextInt(0));
+        position.set(Position.KEY_RSSI, parser.nextInt(0));
 
         return position;
     }

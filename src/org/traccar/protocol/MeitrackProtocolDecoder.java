@@ -121,43 +121,43 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(deviceSession.getDeviceId());
 
-        int event = parser.nextInt();
+        int event = parser.nextInt(0);
         position.set(Position.KEY_EVENT, event);
         position.set(Position.KEY_ALARM, decodeAlarm(event));
 
-        position.setLatitude(parser.nextDouble());
-        position.setLongitude(parser.nextDouble());
+        position.setLatitude(parser.nextDouble(0));
+        position.setLongitude(parser.nextDouble(0));
 
         position.setTime(parser.nextDateTime());
 
         position.setValid(parser.next().equals("A"));
 
         position.set(Position.KEY_SATELLITES, parser.next());
-        int rssi = parser.nextInt();
+        int rssi = parser.nextInt(0);
 
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
-        position.setCourse(parser.nextDouble());
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
+        position.setCourse(parser.nextDouble(0));
 
         position.set(Position.KEY_HDOP, parser.next());
 
-        position.setAltitude(parser.nextDouble());
+        position.setAltitude(parser.nextDouble(0));
 
-        position.set(Position.KEY_ODOMETER, parser.nextInt());
+        position.set(Position.KEY_ODOMETER, parser.nextInt(0));
         position.set("runtime", parser.next());
 
-        position.setNetwork(new Network(
-                CellTower.from(parser.nextInt(), parser.nextInt(), parser.nextInt(16), parser.nextInt(16), rssi)));
+        position.setNetwork(new Network(CellTower.from(
+                parser.nextInt(0), parser.nextInt(0), parser.nextHexInt(0), parser.nextHexInt(0), rssi)));
 
         position.set(Position.KEY_STATUS, parser.next());
 
         for (int i = 1; i <= 3; i++) {
             if (parser.hasNext()) {
-                position.set(Position.PREFIX_ADC + i, parser.nextInt(16));
+                position.set(Position.PREFIX_ADC + i, parser.nextHexInt(0));
             }
         }
 
-        position.set(Position.KEY_BATTERY, parser.nextInt(16));
-        position.set(Position.KEY_POWER, parser.nextInt(16));
+        position.set(Position.KEY_BATTERY, parser.nextHexInt(0));
+        position.set(Position.KEY_POWER, parser.nextHexInt(0));
 
         String eventData = parser.next();
         if (eventData != null && !eventData.isEmpty()) {

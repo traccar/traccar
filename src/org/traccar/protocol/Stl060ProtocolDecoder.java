@@ -88,28 +88,28 @@ public class Stl060ProtocolDecoder extends BaseProtocolDecoder {
 
         position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN_HEM));
         position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN_HEM));
-        position.setSpeed(parser.nextDouble());
-        position.setCourse(parser.nextDouble());
+        position.setSpeed(parser.nextDouble(0));
+        position.setCourse(parser.nextDouble(0));
 
         // Old format
         if (parser.hasNext(5)) {
-            position.set(Position.KEY_ODOMETER, parser.nextInt());
-            position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
-            position.set(Position.KEY_INPUT, parser.nextInt() + parser.nextInt() << 1);
-            position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
+            position.set(Position.KEY_ODOMETER, parser.nextInt(0));
+            position.set(Position.KEY_IGNITION, parser.nextInt(0) == 1);
+            position.set(Position.KEY_INPUT, parser.nextInt(0) + parser.nextInt(0) << 1);
+            position.set(Position.KEY_FUEL_LEVEL, parser.nextInt(0));
         }
 
         // New format
         if (parser.hasNext(10)) {
-            position.set(Position.KEY_CHARGE, parser.nextInt() == 1);
-            position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
-            position.set(Position.KEY_INPUT, parser.nextInt());
+            position.set(Position.KEY_CHARGE, parser.nextInt(0) == 1);
+            position.set(Position.KEY_IGNITION, parser.nextInt(0) == 1);
+            position.set(Position.KEY_INPUT, parser.nextInt(0));
             position.set(Position.KEY_RFID, parser.next());
-            position.set(Position.KEY_ODOMETER, parser.nextInt());
-            position.set(Position.PREFIX_TEMP + 1, parser.nextInt());
-            position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
-            position.set(Position.KEY_ACCELERATION, parser.nextInt() == 1);
-            position.set(Position.KEY_OUTPUT, parser.nextInt() + parser.nextInt() << 1);
+            position.set(Position.KEY_ODOMETER, parser.nextInt(0));
+            position.set(Position.PREFIX_TEMP + 1, parser.nextInt(0));
+            position.set(Position.KEY_FUEL_LEVEL, parser.nextInt(0));
+            position.set(Position.KEY_ACCELERATION, parser.nextInt(0) == 1);
+            position.set(Position.KEY_OUTPUT, parser.nextInt(0) + parser.nextInt(0) << 1);
         }
 
         position.setValid(parser.next().equals("A"));

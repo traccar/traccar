@@ -85,15 +85,15 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceId(deviceSession.getDeviceId());
 
             position.set("user", parser.next());
-            position.setValid(parser.nextInt() > 0);
+            position.setValid(parser.nextInt(0) > 0);
             position.set("password", parser.next());
             position.set(Position.KEY_EVENT, parser.next());
             position.set("packet", parser.next());
             position.set(Position.KEY_RSSI, parser.next());
 
-            double lon = parser.nextDouble();
+            double lon = parser.nextDouble(0);
             boolean west = parser.next().equals("W");
-            double lat = parser.nextDouble();
+            double lat = parser.nextDouble(0);
             boolean south = parser.next().equals("S");
 
             if (lat > 90 || lon > 180) {
@@ -109,18 +109,18 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
             position.setLongitude(west ? -lon : lon);
             position.setLatitude(south ? -lat : lat);
 
-            position.setSpeed(parser.nextDouble());
-            position.setCourse(parser.nextDouble());
+            position.setSpeed(parser.nextDouble(0));
+            position.setCourse(parser.nextDouble(0));
 
-            int day = parser.nextInt();
-            int month = parser.nextInt();
+            int day = parser.nextInt(0);
+            int month = parser.nextInt(0);
             if (day == 0 && month == 0) {
                 return null; // invalid date
             }
 
             DateBuilder dateBuilder = new DateBuilder()
-                    .setDate(parser.nextInt(), month, day)
-                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+                    .setDate(parser.nextInt(0), month, day)
+                    .setTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
             position.setTime(dateBuilder.getDate());
 
             return position;

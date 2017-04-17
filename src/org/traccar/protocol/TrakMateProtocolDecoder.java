@@ -116,8 +116,8 @@ public class TrakMateProtocolDecoder extends BaseProtocolDecoder {
         position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.setLatitude(parser.nextDouble());
-        position.setLongitude(parser.nextDouble());
+        position.setLatitude(parser.nextDouble(0));
+        position.setLongitude(parser.nextDouble(0));
 
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY));
 
@@ -144,16 +144,16 @@ public class TrakMateProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         parser.next(); // seq
-        position.set(Position.KEY_ALARM, decodeAlarm(parser.nextInt()));
+        position.set(Position.KEY_ALARM, decodeAlarm(parser.nextInt(0)));
         parser.next(); // alert status or data
 
-        position.setLatitude(parser.nextDouble());
-        position.setLongitude(parser.nextDouble());
+        position.setLatitude(parser.nextDouble(0));
+        position.setLongitude(parser.nextDouble(0));
 
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY));
 
-        position.setSpeed(parser.nextDouble());
-        position.setCourse(parser.nextDouble());
+        position.setSpeed(parser.nextDouble(0));
+        position.setCourse(parser.nextDouble(0));
 
         return position;
     }
@@ -176,27 +176,27 @@ public class TrakMateProtocolDecoder extends BaseProtocolDecoder {
 
         parser.next(); // seq
 
-        position.setLatitude(parser.nextDouble());
-        position.setLongitude(parser.nextDouble());
+        position.setLatitude(parser.nextDouble(0));
+        position.setLongitude(parser.nextDouble(0));
 
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY));
 
-        position.setSpeed(parser.nextDouble());
-        position.setCourse(parser.nextDouble());
+        position.setSpeed(parser.nextDouble(0));
+        position.setCourse(parser.nextDouble(0));
 
-        position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
+        position.set(Position.KEY_IGNITION, parser.nextInt(0) == 1);
         position.set("dop1", parser.next());
         position.set("dop2", parser.next());
         position.set(Position.KEY_INPUT, parser.next());
-        position.set(Position.KEY_BATTERY, parser.nextDouble());
+        position.set(Position.KEY_BATTERY, parser.nextDouble(0));
         position.set(Position.KEY_POWER, parser.next());
-        position.set(Position.KEY_ODOMETER, parser.nextDouble());
+        position.set(Position.KEY_ODOMETER, parser.nextDouble(0));
         position.set("pulseOdometer", parser.next());
-        position.set(Position.KEY_STATUS, parser.nextInt());
+        position.set(Position.KEY_STATUS, parser.nextInt(0));
 
-        position.setValid(parser.nextInt() != 0);
+        position.setValid(parser.nextInt(0) != 0);
 
-        position.set(Position.KEY_ARCHIVE, parser.nextInt() == 1);
+        position.set(Position.KEY_ARCHIVE, parser.nextInt(0) == 1);
 
         return position;
     }

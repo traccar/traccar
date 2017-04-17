@@ -75,33 +75,33 @@ public class HaicomProtocolDecoder extends BaseProtocolDecoder {
 
         position.setTime(parser.nextDateTime());
 
-        int flags = parser.nextInt();
+        int flags = parser.nextInt(0);
 
         position.setValid(BitUtil.check(flags, 0));
 
-        double latitude = parser.nextDouble() + parser.nextDouble() / 60000;
+        double latitude = parser.nextDouble(0) + parser.nextDouble(0) / 60000;
         if (BitUtil.check(flags, 2)) {
             position.setLatitude(latitude);
         } else {
             position.setLatitude(-latitude);
         }
 
-        double longitude = parser.nextDouble() + parser.nextDouble() / 60000;
+        double longitude = parser.nextDouble(0) + parser.nextDouble(0) / 60000;
         if (BitUtil.check(flags, 1)) {
             position.setLongitude(longitude);
         } else {
             position.setLongitude(-longitude);
         }
 
-        position.setSpeed(parser.nextDouble() / 10);
-        position.setCourse(parser.nextDouble() / 10);
+        position.setSpeed(parser.nextDouble(0) / 10);
+        position.setCourse(parser.nextDouble(0) / 10);
 
         position.set(Position.KEY_STATUS, parser.next());
         position.set(Position.KEY_RSSI, parser.next());
         position.set(Position.KEY_GPS, parser.next());
         position.set(Position.KEY_INPUT, parser.next());
         position.set(Position.KEY_OUTPUT, parser.next());
-        position.set(Position.KEY_BATTERY, parser.nextDouble() * 0.1);
+        position.set(Position.KEY_BATTERY, parser.nextDouble(0) * 0.1);
 
         return position;
     }

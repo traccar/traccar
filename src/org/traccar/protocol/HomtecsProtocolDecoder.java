@@ -72,18 +72,18 @@ public class HomtecsProtocolDecoder extends BaseProtocolDecoder {
 
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.YMD_HMS));
 
-        position.set(Position.KEY_SATELLITES, parser.nextInt());
+        position.set(Position.KEY_SATELLITES, parser.nextInt(0));
 
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
-        position.setSpeed(parser.nextDouble());
-        position.setCourse(parser.nextDouble());
+        position.setSpeed(parser.nextDouble(0));
+        position.setCourse(parser.nextDouble(0));
 
-        position.setValid(parser.nextInt() > 0);
+        position.setValid(parser.nextInt(0) > 0);
 
-        position.set(Position.KEY_HDOP, parser.nextDouble());
+        position.set(Position.KEY_HDOP, parser.nextDouble(0));
 
-        position.setAltitude(parser.nextDouble());
+        position.setAltitude(parser.nextDouble(0));
 
         return position;
     }

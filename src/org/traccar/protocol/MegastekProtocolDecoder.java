@@ -88,15 +88,15 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
         }
 
         DateBuilder dateBuilder = new DateBuilder()
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextInt());
+                .setTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
 
         position.setValid(parser.next().equals("A"));
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
-        position.setSpeed(parser.nextDouble());
-        position.setCourse(parser.nextDouble());
+        position.setSpeed(parser.nextDouble(0));
+        position.setCourse(parser.nextDouble(0));
 
-        dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        dateBuilder.setDateReverse(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
         position.setTime(dateBuilder.getDate());
 
         return true;
@@ -168,9 +168,9 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
 
                 position.set(Position.KEY_SATELLITES, parser.next());
 
-                position.setAltitude(parser.nextDouble());
+                position.setAltitude(parser.nextDouble(0));
 
-                position.set(Position.KEY_POWER, parser.nextDouble());
+                position.set(Position.KEY_POWER, parser.nextDouble(0));
 
                 String charger = parser.next();
                 if (charger != null) {
@@ -179,7 +179,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
 
                 if (parser.hasNext(4)) {
                     position.setNetwork(new Network(CellTower.from(
-                            parser.nextInt(), parser.nextInt(), parser.nextInt(16), parser.nextInt(16))));
+                            parser.nextInt(0), parser.nextInt(0), parser.nextHexInt(0), parser.nextHexInt(0))));
                 }
 
             } else {
@@ -203,8 +203,8 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
                 }
                 position.setDeviceId(deviceSession.getDeviceId());
 
-                position.setNetwork(new Network(CellTower.from(
-                        parser.nextInt(), parser.nextInt(), parser.nextInt(16), parser.nextInt(16), parser.nextInt())));
+                position.setNetwork(new Network(CellTower.from(parser.nextInt(0), parser.nextInt(0),
+                        parser.nextHexInt(0), parser.nextHexInt(0), parser.nextInt(0))));
 
                 position.set(Position.KEY_BATTERY, Double.parseDouble(parser.next()));
 
@@ -293,25 +293,25 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
 
-        position.set(Position.KEY_SATELLITES, parser.nextInt());
-        position.set(Position.KEY_HDOP, parser.nextDouble());
+        position.set(Position.KEY_SATELLITES, parser.nextInt(0));
+        position.set(Position.KEY_HDOP, parser.nextDouble(0));
 
-        position.setSpeed(parser.nextDouble());
-        position.setCourse(parser.nextDouble());
-        position.setAltitude(parser.nextDouble());
+        position.setSpeed(parser.nextDouble(0));
+        position.setCourse(parser.nextDouble(0));
+        position.setAltitude(parser.nextDouble(0));
 
         if (parser.hasNext()) {
-            position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
+            position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1000);
         }
 
         position.setNetwork(new Network(CellTower.from(
-                parser.nextInt(), parser.nextInt(), parser.nextInt(16), parser.nextInt(16), parser.nextInt())));
+                parser.nextInt(0), parser.nextInt(0), parser.nextHexInt(0), parser.nextHexInt(0), parser.nextInt(0))));
 
-        position.set(Position.KEY_INPUT, parser.nextInt(2));
-        position.set(Position.KEY_OUTPUT, parser.nextInt(2));
+        position.set(Position.KEY_INPUT, parser.nextBinInt(0));
+        position.set(Position.KEY_OUTPUT, parser.nextBinInt(0));
 
         for (int i = 1; i <= 3; i++) {
-            position.set(Position.PREFIX_ADC + i, parser.nextInt());
+            position.set(Position.PREFIX_ADC + i, parser.nextInt(0));
         }
 
         for (int i = 1; i <= 2; i++) {

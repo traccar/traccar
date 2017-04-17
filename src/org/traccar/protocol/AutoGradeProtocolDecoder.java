@@ -77,17 +77,17 @@ public class AutoGradeProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         DateBuilder dateBuilder = new DateBuilder()
-                .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
+                .setDateReverse(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
 
         position.setValid(parser.next().equals("A"));
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
-        position.setSpeed(parser.nextDouble());
+        position.setSpeed(parser.nextDouble(0));
 
-        dateBuilder.setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        dateBuilder.setTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
         position.setTime(dateBuilder.getDate());
 
-        position.setCourse(parser.nextDouble());
+        position.setCourse(parser.nextDouble(0));
 
         int status = parser.next().charAt(0);
         position.set(Position.KEY_STATUS, status);

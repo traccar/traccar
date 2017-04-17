@@ -114,24 +114,25 @@ public class FlextrackProtocolDecoder extends BaseProtocolDecoder {
             position.setValid(true);
             position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN));
             position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN));
-            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt()));
-            position.setCourse(parser.nextInt());
+            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt(0)));
+            position.setCourse(parser.nextInt(0));
 
-            position.set(Position.KEY_SATELLITES, parser.nextInt());
-            position.set(Position.KEY_BATTERY, parser.nextInt());
-            int rssi = parser.nextInt();
-            position.set(Position.KEY_STATUS, parser.nextInt(16));
+            position.set(Position.KEY_SATELLITES, parser.nextInt(0));
+            position.set(Position.KEY_BATTERY, parser.nextInt(0));
+            int rssi = parser.nextInt(0);
+            position.set(Position.KEY_STATUS, parser.nextHexInt(0));
 
-            int mcc = parser.nextInt();
-            int mnc = parser.nextInt();
+            int mcc = parser.nextInt(0);
+            int mnc = parser.nextInt(0);
 
-            position.setAltitude(parser.nextInt());
+            position.setAltitude(parser.nextInt(0));
 
-            position.set(Position.KEY_HDOP, parser.nextInt() * 0.1);
+            position.set(Position.KEY_HDOP, parser.nextInt(0) * 0.1);
 
-            position.setNetwork(new Network(CellTower.from(mcc, mnc, parser.nextInt(16), parser.nextInt(16), rssi)));
+            position.setNetwork(new Network(CellTower.from(
+                    mcc, mnc, parser.nextHexInt(0), parser.nextHexInt(0), rssi)));
 
-            position.set(Position.KEY_ODOMETER, parser.nextInt());
+            position.set(Position.KEY_ODOMETER, parser.nextInt(0));
 
             return position;
         }

@@ -92,25 +92,25 @@ public class FoxProtocolDecoder extends BaseProtocolDecoder {
             position.setProtocol(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
-            position.set(Position.KEY_STATUS, parser.nextInt());
+            position.set(Position.KEY_STATUS, parser.nextInt(0));
 
             position.setValid(parser.next().equals("A"));
 
             position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
             position.setLatitude(parser.nextCoordinate());
             position.setLongitude(parser.nextCoordinate());
-            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
-            position.setCourse(parser.nextDouble());
+            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
+            position.setCourse(parser.nextDouble(0));
 
-            position.set(Position.KEY_INPUT, parser.nextInt(2));
-            position.set(Position.KEY_POWER, parser.nextDouble() * 0.1);
-            position.set(Position.PREFIX_TEMP + 1, parser.nextInt());
-            position.set(Position.KEY_RPM, parser.nextInt());
-            position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
-            position.set(Position.PREFIX_ADC + 1, parser.nextInt());
-            position.set(Position.PREFIX_ADC + 2, parser.nextInt());
-            position.set(Position.KEY_OUTPUT, parser.nextInt(2));
-            position.set(Position.KEY_ODOMETER, parser.nextInt());
+            position.set(Position.KEY_INPUT, parser.nextBinInt(0));
+            position.set(Position.KEY_POWER, parser.nextDouble(0) * 0.1);
+            position.set(Position.PREFIX_TEMP + 1, parser.nextInt(0));
+            position.set(Position.KEY_RPM, parser.nextInt(0));
+            position.set(Position.KEY_FUEL_LEVEL, parser.nextInt(0));
+            position.set(Position.PREFIX_ADC + 1, parser.nextInt(0));
+            position.set(Position.PREFIX_ADC + 2, parser.nextInt(0));
+            position.set(Position.KEY_OUTPUT, parser.nextBinInt(0));
+            position.set(Position.KEY_ODOMETER, parser.nextInt(0));
 
             position.set("statusData", parser.next());
 

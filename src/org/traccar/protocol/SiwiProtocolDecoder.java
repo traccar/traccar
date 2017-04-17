@@ -76,17 +76,17 @@ public class SiwiProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_EVENT, parser.next());
         position.set(Position.KEY_IGNITION, parser.next().equals("1"));
-        position.set(Position.KEY_ODOMETER, parser.nextInt());
+        position.set(Position.KEY_ODOMETER, parser.nextInt(0));
 
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt()));
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt(0)));
 
-        position.set(Position.KEY_SATELLITES, parser.nextInt());
+        position.set(Position.KEY_SATELLITES, parser.nextInt(0));
 
         position.setValid(parser.next().equals("A"));
-        position.setLatitude(parser.nextDouble());
-        position.setLongitude(parser.nextDouble());
-        position.setAltitude(parser.nextDouble());
-        position.setCourse(parser.nextInt());
+        position.setLatitude(parser.nextDouble(0));
+        position.setLongitude(parser.nextDouble(0));
+        position.setAltitude(parser.nextDouble(0));
+        position.setCourse(parser.nextInt(0));
 
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY, "IST"));
 

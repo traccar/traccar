@@ -104,12 +104,12 @@ public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(
                 parser.next().replace(".", "")) / 10));
 
-        position.setCourse(parser.nextDouble());
+        position.setCourse(parser.nextDouble(0));
 
         if (parser.hasNext(9)) {
-            position.setAltitude(parser.nextDouble());
+            position.setAltitude(parser.nextDouble(0));
             position.set(Position.KEY_SATELLITES, parser.next());
-            position.set(Position.KEY_ODOMETER, parser.nextInt() * 1000);
+            position.set(Position.KEY_ODOMETER, parser.nextInt(0) * 1000);
             position.set(Position.KEY_IGNITION, parser.next().equals("1"));
             position.set(Position.PREFIX_IO + 1, parser.next());
             position.set(Position.PREFIX_IO + 2, parser.next());
@@ -120,8 +120,8 @@ public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext(7)) {
             position.set(Position.KEY_HDOP, parser.next());
-            position.setAltitude(parser.nextDouble());
-            position.set(Position.KEY_ODOMETER, parser.nextInt() * 1000);
+            position.setAltitude(parser.nextDouble(0));
+            position.set(Position.KEY_ODOMETER, parser.nextInt(0) * 1000);
             position.set(Position.KEY_INPUT, parser.next());
             position.set(Position.KEY_OUTPUT, parser.next());
             position.set(Position.PREFIX_ADC + 1, parser.next());

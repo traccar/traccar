@@ -73,15 +73,15 @@ public class JpKorjarProtocolDecoder extends BaseProtocolDecoder {
 
         position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
         position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
-        position.setSpeed(parser.nextDouble());
-        position.setCourse(parser.nextDouble());
+        position.setSpeed(parser.nextDouble(0));
+        position.setCourse(parser.nextDouble(0));
 
-        position.set(Position.KEY_BATTERY, parser.nextDouble());
+        position.set(Position.KEY_BATTERY, parser.nextDouble(0));
 
-        position.setValid(parser.nextInt() == 1);
+        position.setValid(parser.nextInt(0) == 1);
 
         position.setNetwork(new Network(CellTower.from(
-                parser.nextInt(), parser.nextInt(), parser.nextInt(16), parser.nextInt(16))));
+                parser.nextInt(0), parser.nextInt(0), parser.nextHexInt(0), parser.nextHexInt(0))));
 
         return position;
     }

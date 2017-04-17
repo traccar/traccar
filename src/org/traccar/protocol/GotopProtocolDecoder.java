@@ -70,11 +70,11 @@ public class GotopProtocolDecoder extends BaseProtocolDecoder {
 
         position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
         position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
 
         position.set(Position.KEY_STATUS, parser.next());
 
-        position.setCourse(parser.nextDouble());
+        position.setCourse(parser.nextDouble(0));
 
         return position;
     }

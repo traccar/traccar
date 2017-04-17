@@ -109,15 +109,15 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         DateBuilder dateBuilder = new DateBuilder()
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextInt());
+                .setTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
 
         position.setValid(parser.next().equals("A"));
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
-        position.setSpeed(parser.nextDouble());
-        position.setCourse(parser.nextDouble());
+        position.setSpeed(parser.nextDouble(0));
+        position.setCourse(parser.nextDouble(0));
 
-        dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        dateBuilder.setDateReverse(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
         position.setTime(dateBuilder.getDate());
 
         position.set(Position.KEY_INPUT, parser.next());
@@ -130,11 +130,11 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        position.set(Position.KEY_ODOMETER, parser.nextInt());
+        position.set(Position.KEY_ODOMETER, parser.nextInt(0));
         position.set(Position.KEY_RFID, parser.next());
 
         if (parser.hasNext()) {
-            int value = parser.nextInt(16);
+            int value = parser.nextHexInt(0);
             position.set(Position.KEY_BATTERY, value >> 8);
             position.set(Position.KEY_RSSI, (value >> 4) & 0xf);
             position.set(Position.KEY_SATELLITES, value & 0xf);

@@ -74,27 +74,27 @@ public class MaestroProtocolDecoder extends BaseProtocolDecoder {
         position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.setValid(parser.nextInt() == 1);
+        position.setValid(parser.nextInt(0) == 1);
 
-        position.set(Position.KEY_BATTERY, parser.nextDouble());
-        position.set(Position.KEY_RSSI, parser.nextInt());
-        position.set(Position.KEY_CHARGE, parser.nextInt() == 1);
-        position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
+        position.set(Position.KEY_BATTERY, parser.nextDouble(0));
+        position.set(Position.KEY_RSSI, parser.nextInt(0));
+        position.set(Position.KEY_CHARGE, parser.nextInt(0) == 1);
+        position.set(Position.KEY_IGNITION, parser.nextInt(0) == 1);
 
         position.setTime(parser.nextDateTime());
 
-        position.setLatitude(parser.nextDouble());
-        position.setLongitude(parser.nextDouble());
-        position.setAltitude(parser.nextDouble());
-        position.setSpeed(UnitsConverter.knotsFromMph(parser.nextDouble()));
-        position.setCourse(parser.nextDouble());
+        position.setLatitude(parser.nextDouble(0));
+        position.setLongitude(parser.nextDouble(0));
+        position.setAltitude(parser.nextDouble(0));
+        position.setSpeed(UnitsConverter.knotsFromMph(parser.nextDouble(0)));
+        position.setCourse(parser.nextDouble(0));
 
-        position.set(Position.KEY_SATELLITES, parser.nextInt());
-        position.set(Position.KEY_HDOP, parser.nextDouble());
-        position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1609.34);
+        position.set(Position.KEY_SATELLITES, parser.nextInt(0));
+        position.set(Position.KEY_HDOP, parser.nextDouble(0));
+        position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1609.34);
 
         if (parser.hasNext()) {
-            position.set(Position.PREFIX_ADC + 1, parser.nextInt());
+            position.set(Position.PREFIX_ADC + 1, parser.nextInt(0));
         }
 
         return position;

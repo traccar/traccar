@@ -72,19 +72,19 @@ public class Tr900ProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.setValid(parser.nextInt() == 1);
+        position.setValid(parser.nextInt(0) == 1);
 
         position.setTime(parser.nextDateTime());
 
         position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN));
         position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN));
-        position.setSpeed(parser.nextDouble());
-        position.setCourse(parser.nextDouble());
+        position.setSpeed(parser.nextDouble(0));
+        position.setCourse(parser.nextDouble(0));
 
         position.set(Position.KEY_RSSI, parser.next());
-        position.set(Position.KEY_EVENT, parser.nextInt());
-        position.set(Position.PREFIX_ADC + 1, parser.nextInt());
-        position.set(Position.KEY_BATTERY, parser.nextInt());
+        position.set(Position.KEY_EVENT, parser.nextInt(0));
+        position.set(Position.PREFIX_ADC + 1, parser.nextInt(0));
+        position.set(Position.KEY_BATTERY, parser.nextInt(0));
         position.set(Position.KEY_INPUT, parser.next());
         position.set(Position.KEY_STATUS, parser.next());
 

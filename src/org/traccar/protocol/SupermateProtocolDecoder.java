@@ -19,6 +19,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
@@ -79,28 +80,31 @@ public class SupermateProtocolDecoder extends BaseProtocolDecoder {
 
         position.setValid(parser.next().equals("A"));
 
-        position.setTime(parser.nextDateTime(16));
+        DateBuilder dateBuilder = new DateBuilder()
+                .setDate(parser.nextHexInt(0), parser.nextHexInt(0), parser.nextHexInt(0))
+                .setTime(parser.nextHexInt(0), parser.nextHexInt(0), parser.nextHexInt(0));
+        position.setTime(dateBuilder.getDate());
 
-        if (parser.nextInt(16) == 8) {
-            position.setLatitude(-parser.nextInt(16) / 600000.0);
+        if (parser.nextHexInt(0) == 8) {
+            position.setLatitude(-parser.nextHexInt(0) / 600000.0);
         } else {
-            position.setLatitude(parser.nextInt(16) / 600000.0);
+            position.setLatitude(parser.nextHexInt(0) / 600000.0);
         }
 
-        if (parser.nextInt(16) == 8) {
-            position.setLongitude(-parser.nextInt(16) / 600000.0);
+        if (parser.nextHexInt(0) == 8) {
+            position.setLongitude(-parser.nextHexInt(0) / 600000.0);
         } else {
-            position.setLongitude(parser.nextInt(16) / 600000.0);
+            position.setLongitude(parser.nextHexInt(0) / 600000.0);
         }
 
-        position.setSpeed(parser.nextInt(16) / 100.0);
-        position.setCourse(parser.nextInt(16) / 100.0);
+        position.setSpeed(parser.nextHexInt(0) / 100.0);
+        position.setCourse(parser.nextHexInt(0) / 100.0);
 
         position.set(Position.KEY_STATUS, parser.next());
         position.set("signal", parser.next());
-        position.set(Position.KEY_POWER, parser.nextDouble());
-        position.set("oil", parser.nextInt(16));
-        position.set(Position.KEY_ODOMETER, parser.nextInt(16));
+        position.set(Position.KEY_POWER, parser.nextDouble(0));
+        position.set("oil", parser.nextHexInt(0));
+        position.set(Position.KEY_ODOMETER, parser.nextHexInt(0));
 
         if (channel != null) {
             Calendar calendar = Calendar.getInstance();

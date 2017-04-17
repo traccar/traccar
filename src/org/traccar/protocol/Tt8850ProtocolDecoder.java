@@ -79,18 +79,18 @@ public class Tt8850ProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.setValid(true);
-        position.setAccuracy(parser.nextInt());
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
-        position.setCourse(parser.nextDouble());
-        position.setAltitude(parser.nextDouble());
-        position.setLongitude(parser.nextDouble());
-        position.setLatitude(parser.nextDouble());
+        position.setAccuracy(parser.nextInt(0));
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
+        position.setCourse(parser.nextDouble(0));
+        position.setAltitude(parser.nextDouble(0));
+        position.setLongitude(parser.nextDouble(0));
+        position.setLatitude(parser.nextDouble(0));
 
         position.setTime(parser.nextDateTime());
 
         if (parser.hasNext(4)) {
             position.setNetwork(new Network(
-                    CellTower.from(parser.nextInt(), parser.nextInt(), parser.nextInt(16), parser.nextInt(16))));
+                    CellTower.from(parser.nextInt(0), parser.nextInt(0), parser.nextHexInt(0), parser.nextHexInt(0))));
         }
 
         return position;

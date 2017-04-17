@@ -106,13 +106,13 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, null);
 
-            position.set(Position.KEY_RSSI, parser.nextInt());
-            position.set(Position.KEY_SATELLITES, parser.nextInt());
-            position.set(Position.KEY_BATTERY, parser.nextInt());
-            position.set(Position.KEY_IGNITION, parser.nextInt() != 0);
+            position.set(Position.KEY_RSSI, parser.nextInt(0));
+            position.set(Position.KEY_SATELLITES, parser.nextInt(0));
+            position.set(Position.KEY_BATTERY, parser.nextInt(0));
+            position.set(Position.KEY_IGNITION, parser.nextInt(0) != 0);
 
-            position.set("arm", parser.nextInt());
-            position.set("mode", parser.nextInt());
+            position.set("arm", parser.nextInt(0));
+            position.set("mode", parser.nextInt(0));
 
             return position;
 
@@ -128,29 +128,29 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceId(deviceSession.getDeviceId());
 
             DateBuilder dateBuilder = new DateBuilder()
-                    .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt());
+                    .setDate(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
 
             position.setValid(parser.next().equals("A"));
             position.setLatitude(parser.nextCoordinate());
             position.setLongitude(parser.nextCoordinate());
-            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
 
-            dateBuilder.setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+            dateBuilder.setTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
             position.setTime(dateBuilder.getDate());
 
-            position.setCourse(parser.nextDouble());
+            position.setCourse(parser.nextDouble(0));
 
-            int rssi = parser.nextInt();
-            position.set(Position.KEY_SATELLITES, parser.nextInt());
-            position.set(Position.KEY_BATTERY, parser.nextInt());
+            int rssi = parser.nextInt(0);
+            position.set(Position.KEY_SATELLITES, parser.nextInt(0));
+            position.set(Position.KEY_BATTERY, parser.nextInt(0));
 
-            int acc = parser.nextInt();
+            int acc = parser.nextInt(0);
             if (acc != 0) {
                 position.set(Position.KEY_IGNITION, acc == 1);
             }
 
             position.setNetwork(new Network(CellTower.from(
-                    parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextInt(), rssi)));
+                    parser.nextInt(0), parser.nextInt(0), parser.nextInt(0), parser.nextInt(0), rssi)));
 
             return position;
         }

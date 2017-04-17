@@ -99,20 +99,20 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
 
             position.setTime(parser.nextDateTime());
 
-            position.setLongitude(parser.nextDouble());
-            position.setLatitude(parser.nextDouble());
-            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
-            position.setCourse(parser.nextDouble());
-            position.setAltitude(parser.nextDouble());
+            position.setLongitude(parser.nextDouble(0));
+            position.setLatitude(parser.nextDouble(0));
+            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
+            position.setCourse(parser.nextDouble(0));
+            position.setAltitude(parser.nextDouble(0));
 
-            int satellites = parser.nextInt();
+            int satellites = parser.nextInt(0);
             position.setValid(satellites >= 3);
             position.set(Position.KEY_SATELLITES, satellites);
 
             position.set(Position.KEY_EVENT, parser.next());
             position.set(Position.KEY_BATTERY, parser.next());
             if (parser.hasNext()) {
-                position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
+                position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1000);
             }
             position.set(Position.KEY_INPUT, parser.next());
             position.set(Position.PREFIX_ADC + 1, parser.next());

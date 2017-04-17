@@ -215,11 +215,11 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
         position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN));
         position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN));
-        position.setAltitude(parser.nextDouble());
-        position.setSpeed(parser.nextDouble());
-        position.setCourse(parser.nextDouble());
+        position.setAltitude(parser.nextDouble(0));
+        position.setSpeed(parser.nextDouble(0));
+        position.setCourse(parser.nextDouble(0));
 
-        position.set(Position.KEY_SATELLITES, parser.nextInt());
+        position.set(Position.KEY_SATELLITES, parser.nextInt(0));
         position.set(Position.KEY_HDOP, parser.next());
 
         return position;
