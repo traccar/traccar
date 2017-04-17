@@ -61,6 +61,7 @@ public final class Summary {
                     .lookupAttributeBoolean(deviceId, "report.ignoreOdometer", false, true);
             result.setDistance(ReportUtils.calculateDistance(firstPosition, previousPosition, !ignoreOdometer));
             result.setAverageSpeed(speedSum / positions.size());
+            result.setSpentFuel(ReportUtils.calculateFuel(firstPosition, previousPosition));
         }
         return result;
     }

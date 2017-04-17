@@ -90,24 +90,12 @@ public final class ReportUtils {
 
         if (firstPosition.getAttributes().get(Position.KEY_FUEL_LEVEL) != null
                 && lastPosition.getAttributes().get(Position.KEY_FUEL_LEVEL) != null) {
-            try {
-                switch (firstPosition.getProtocol()) {
-                    case "meitrack":
-                    case "galileo":
-                    case "noran":
-                        BigDecimal v = new BigDecimal(
-                                firstPosition.getAttributes().get(Position.KEY_FUEL_LEVEL).toString());
-                        v = v.subtract(new BigDecimal(
-                                lastPosition.getAttributes().get(Position.KEY_FUEL_LEVEL).toString()));
-                        return v.setScale(2, RoundingMode.HALF_EVEN).toString() + " %";
-                    default:
-                        break;
-                }
-            } catch (Exception error) {
-                Log.warning(error);
-            }
+
+            BigDecimal value = new BigDecimal(firstPosition.getDouble(Position.KEY_FUEL_LEVEL)
+                    - lastPosition.getDouble(Position.KEY_FUEL_LEVEL));
+            return value.setScale(1, RoundingMode.HALF_EVEN).toString();
         }
-        return "-";
+        return null;
     }
 
     public static org.jxls.common.Context initializeContext(long userId) {
