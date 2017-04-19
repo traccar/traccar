@@ -155,9 +155,14 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.PREFIX_ADC + i, parser.nextHexInt(0));
             }
         }
-
-        position.set(Position.KEY_BATTERY, parser.nextHexInt(0));
-        position.set(Position.KEY_POWER, parser.nextHexInt(0));
+        
+        if (Context.getConfig().hasKey(getProtocolName() + ".devicetype") == "tc68s") {
+            position.set(Position.KEY_BATTERY, parser.nextHexInt(0) * 3.3 * 2.0 / 4096.0);
+            position.set(Position.KEY_POWER, parser.nextHexInt(0) * 3.3 * 16.0 / 4096.0);
+        } else {
+            position.set(Position.KEY_BATTERY, parser.nextHexInt(0));
+            position.set(Position.KEY_POWER, parser.nextHexInt(0));
+        }
 
         String eventData = parser.next();
         if (eventData != null && !eventData.isEmpty()) {
