@@ -156,59 +156,59 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             }
         }
         switch (Context.getIdentityManager().getDeviceById(deviceSession.getDeviceId()).getModel()) {
-            case MVT340:
+            case "MVT340":
                 position.set(Position.KEY_BATTERY, parser.nextHexInt(0) * 3.0 * 2.0 / 1024.0);
                 position.set(Position.KEY_POWER, parser.nextHexInt(0) * 3.0 * 16.0 / 1024.0);
                 break;
-            case MVT380:
+            case "MVT380":
                 position.set(Position.KEY_BATTERY, parser.nextHexInt(0) * 3.0 * 2.0 / 1024.0);
                 position.set(Position.KEY_POWER, parser.nextHexInt(0) * 3.0 * 16.0 / 1024.0);
                 break;
-            case MT90:
+            case "MT90":
                 position.set(Position.KEY_BATTERY, parser.nextHexInt(0) * 3.3 * 2.0 / 4096.0);
                 position.set(Position.KEY_POWER, parser.nextHexInt(0));
                 break;
-            case T1:
+            case "T1":
                 position.set(Position.KEY_BATTERY, parser.nextHexInt(0) * 3.3 * 2.0 / 4096.0);
                 position.set(Position.KEY_POWER, parser.nextHexInt(0) * 3.3 * 16.0 / 4096.0);
                 break;
-            case T3:
+            case "T3":
                 position.set(Position.KEY_BATTERY, parser.nextHexInt(0) * 3.3 * 2.0 / 4096.0);
                 position.set(Position.KEY_POWER, parser.nextHexInt(0) * 3.3 * 16.0 / 4096.0);
                 break;
-            case MVT100:
+            case "MVT100":
                 position.set(Position.KEY_BATTERY, parser.nextHexInt(0) * 3.3 * 2.0 / 4096.0);
                 position.set(Position.KEY_POWER, parser.nextHexInt(0) * 3.3 * 16.0 / 4096.0);
                 break;
-            case MVT600:
+            case "MVT600":
                 position.set(Position.KEY_BATTERY, parser.nextHexInt(0) * 3.3 * 2.0 / 4096.0);
                 position.set(Position.KEY_POWER, parser.nextHexInt(0) * 3.3 * 16.0 / 4096.0);
                 break;
-            case MVT800:
+            case "MVT800":
                 position.set(Position.KEY_BATTERY, parser.nextHexInt(0) * 3.3 * 2.0 / 4096.0);
                 position.set(Position.KEY_POWER, parser.nextHexInt(0) * 3.3 * 16.0 / 4096.0);
                 break;
-            case TC68:
+            case "TC68":
                 position.set(Position.KEY_BATTERY, parser.nextHexInt(0) * 3.3 * 2.0 / 4096.0);
                 position.set(Position.KEY_POWER, parser.nextHexInt(0) * 3.3 * 16.0 / 4096.0);
                 break;
-            case TC68S:
+            case "TC68S":
                 position.set(Position.KEY_BATTERY, parser.nextHexInt(0) * 3.3 * 2.0 / 4096.0);
                 position.set(Position.KEY_POWER, parser.nextHexInt(0) * 3.3 * 16.0 / 4096.0);
                 break;
-            case T311:
+            case "T311":
                 position.set(Position.KEY_BATTERY, parser.nextHexInt(0) / 100.0);
                 position.set(Position.KEY_POWER, parser.nextHexInt(0) / 100.0);
                 break;
-            case T322X:
+            case "T322X":
                 position.set(Position.KEY_BATTERY, parser.nextHexInt(0) / 100.0);
                 position.set(Position.KEY_POWER, parser.nextHexInt(0) / 100.0);
                 break;
-            case T333:
+            case "T333":
                 position.set(Position.KEY_BATTERY, parser.nextHexInt(0) / 100.0);
                 position.set(Position.KEY_POWER, parser.nextHexInt(0) / 100.0);
                 break;
-            case T355:
+            case "T355":
                 position.set(Position.KEY_BATTERY, parser.nextHexInt(0) / 100.0);
                 position.set(Position.KEY_POWER, parser.nextHexInt(0) / 100.0);
                 break;
