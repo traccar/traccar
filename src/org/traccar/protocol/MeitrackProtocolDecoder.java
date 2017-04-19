@@ -155,8 +155,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.PREFIX_ADC + i, parser.nextHexInt(0));
             }
         }
-        switch (Context.getIdentityManager().getDeviceById(deviceSession.getDeviceId()).getModel())
-        {
+        switch (Context.getIdentityManager().getDeviceById(deviceSession.getDeviceId()).getModel()) {
             case MVT340:
                 position.set(Position.KEY_BATTERY, parser.nextHexInt(0) * 3.0 * 2.0 / 1024.0);
                 position.set(Position.KEY_POWER, parser.nextHexInt(0) * 3.0 * 16.0 / 1024.0);
