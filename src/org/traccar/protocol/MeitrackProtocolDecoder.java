@@ -211,7 +211,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             case T355:
                 position.set(Position.KEY_BATTERY, parser.nextHexInt(0) / 100.0);
                 position.set(Position.KEY_POWER, parser.nextHexInt(0) / 100.0);
-                break;        
+                break;
             default:
                 position.set(Position.KEY_BATTERY, parser.nextHexInt(0));
                 position.set(Position.KEY_POWER, parser.nextHexInt(0));
