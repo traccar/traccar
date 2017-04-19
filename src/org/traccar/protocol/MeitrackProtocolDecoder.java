@@ -215,7 +215,6 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             default:
                 position.set(Position.KEY_BATTERY, parser.nextHexInt(0));
                 position.set(Position.KEY_POWER, parser.nextHexInt(0));
-                break;
         }
 
         String eventData = parser.next();
