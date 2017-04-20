@@ -83,7 +83,6 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             .number("xx")
             .text("\r\n").optional()
             .compile();
-
     private String decodeAlarm(int event) {
         switch (event) {
             case 1:
@@ -91,13 +90,17 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             case 17:
                 return Position.ALARM_LOW_BATTERY;
             case 18:
-                return Position.ALARM_POWER_CUT;
+                return Position.ALARM_LOW_POWER;
             case 19:
                 return Position.ALARM_OVERSPEED;
             case 20:
                 return Position.ALARM_GEOFENCE_ENTER;
             case 21:
                 return Position.ALARM_GEOFENCE_EXIT;
+            case 22:
+                return Position.ALARM_POWER_RESTORED;
+            case 23:
+                return Position.ALARM_POWER_CUT;
             case 36:
                 return Position.ALARM_TOW;
             default:
