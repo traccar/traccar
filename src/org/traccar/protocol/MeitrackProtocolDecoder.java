@@ -83,6 +83,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             .number("xx")
             .text("\r\n").optional()
             .compile();
+
     private String decodeAlarm(int event) {
         switch (event) {
             case 1:
