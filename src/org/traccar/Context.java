@@ -222,7 +222,7 @@ public final class Context {
             int cacheSize = config.getInteger("geocoder.cacheSize");
             switch (type) {
                 case "nominatim":
-                    geocoder = new NominatimGeocoder(url, key, cacheSize);
+                    geocoder = new NominatimGeocoder(url, key, language, cacheSize);
                     break;
                 case "gisgraphy":
                     geocoder = new GisgraphyGeocoder(url, cacheSize);
