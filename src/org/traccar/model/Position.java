@@ -106,6 +106,7 @@ public class Position extends Message {
     public static final String ALARM_BREAKING = "hardBreaking";
     public static final String ALARM_FATIGUE_DRIVING = "fatigueDriving";
     public static final String ALARM_POWER_CUT = "powerCut";
+    public static final String ALARM_POWER_RESTORED = "powerRestored";
     public static final String ALARM_JAMMING = "jamming";
     public static final String ALARM_TEMPERATURE = "temperature";
     public static final String ALARM_PARKING = "parking";
