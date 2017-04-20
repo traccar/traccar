@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2014 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,7 +136,9 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
 
         if (sentence.startsWith("#L#")) {
 
-            String imei = sentence.substring(3, sentence.indexOf(';'));
+            String[] values = sentence.substring(3).split(";");
+
+            String imei = values[0].indexOf('.') >= 0 ? values[1] : values[0];
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
             if (deviceSession != null) {
                 sendResponse(channel, "#AL#", 1);
