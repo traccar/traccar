@@ -45,7 +45,7 @@ public class GeocoderTest {
     }
 
     public void testNominatim() throws InterruptedException {
-        Geocoder geocoder = new NominatimGeocoder(null, null, 0);
+        Geocoder geocoder = new NominatimGeocoder(null, null, null, 0);
 
         geocoder.getAddress(new AddressFormat(), 40.7337807, -73.9974401, new Geocoder.ReverseGeocoderCallback() {
             @Override
