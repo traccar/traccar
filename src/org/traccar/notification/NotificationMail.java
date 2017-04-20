@@ -24,6 +24,7 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.util.Date;
 
 import org.traccar.Context;
 import org.traccar.helper.Log;
@@ -109,6 +110,7 @@ public final class NotificationMail {
         message.addRecipient(Message.RecipientType.TO, new InternetAddress(user.getEmail()));
         MailMessage mailMessage = NotificationFormatter.formatMailMessage(userId, event, position);
         message.setSubject(mailMessage.getSubject());
+        message.setSentDate(new Date());
         message.setContent(mailMessage.getBody(), "text/html; charset=utf-8");
 
         Transport transport = session.getTransport();
