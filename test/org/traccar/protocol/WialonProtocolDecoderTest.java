@@ -11,6 +11,9 @@ public class WialonProtocolDecoderTest extends ProtocolTest {
         WialonProtocolDecoder decoder = new WialonProtocolDecoder(new WialonProtocol());
 
         verifyNull(decoder, text(
+                "#L#2.0;42001300083;;CE45"));
+
+        verifyNull(decoder, text(
                 "#L#123456789012345;test"));
         
         verifyNull(decoder, text(
