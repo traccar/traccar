@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.regex.Pattern;
 
 public class TrvProtocolDecoder extends BaseProtocolDecoder {
@@ -36,7 +38,7 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .text("TRV")
+            .expression("[A-Z]{2,3}")
             .number("APdd")
             .number("(dd)(dd)(dd)")              // date (yymmdd)
             .expression("([AV])")                // validity
@@ -61,7 +63,7 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private static final Pattern PATTERN_HEATRBEAT = new PatternBuilder()
-            .text("TRV")
+            .expression("[A-Z]{2,3}")
             .text("CP01,")
             .number("(ddd)")                     // gsm
             .number("(ddd)")                     // gps
@@ -78,13 +80,20 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
 
         String sentence = (String) msg;
 
-        String type = sentence.substring(3, 7);
+        String id = sentence.startsWith("TRV") ? sentence.substring(0, 3) : sentence.substring(0, 2);
+        String type = sentence.substring(id.length(), id.length() + 4);
+
         if (channel != null) {
-            channel.write("TRV" + (char) (type.charAt(0) + 1) + type.substring(1) + "#"); // response
+            if (type.equals("AP00") && id.equals("IW")) {
+                String time = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+                channel.write(id + (char) (type.charAt(0) + 1) + type.substring(1) + "," + time + ",0#");
+            } else {
+                channel.write(id + (char) (type.charAt(0) + 1) + type.substring(1) + "#");
+            }
         }
 
         if (type.equals("AP00")) {
-            getDeviceSession(channel, remoteAddress, sentence.substring(7));
+            getDeviceSession(channel, remoteAddress, sentence.substring(id.length() + type.length()));
             return null;
         }
 
