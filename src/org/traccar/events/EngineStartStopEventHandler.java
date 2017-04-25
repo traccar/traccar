@@ -47,7 +47,7 @@ public class EngineStartStopEventHandler extends BaseEventHandler {
         // If no power threshold specified for current device using attributes
         if (engineStartStopPowerThreshold == 0) {
             return null;
-       }
+        }
 
         // Getting current power
         double power = position.getAttributes().containsKey(Position.KEY_POWER);
@@ -69,20 +69,6 @@ public class EngineStartStopEventHandler extends BaseEventHandler {
         }
         return null;
 
-
-
-        if (position.getAttributes().containsKey(Position.KEY_POWER)
-                && lastPosition != null && lastPosition.getAttributes().containsKey(Position.KEY_POWER)) {
-
-            double drop = lastPosition.getDouble(Position.KEY_POWER) - position.getDouble(Position.KEY_POWER);
-            if (drop >= fuelDropThreshold) {
-                Event event = new Event(Event.TYPE_DEVICE_FUEL_DROP, position.getDeviceId(), position.getId());
-                event.set(ATTRIBUTE_FUEL_DROP_THRESHOLD, fuelDropThreshold);
-                return Collections.singleton(event);
-            }
-        }
-
-        return null;
     }
 
 }
