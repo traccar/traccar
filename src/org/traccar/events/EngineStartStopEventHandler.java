@@ -51,7 +51,7 @@ public class EngineStartStopEventHandler extends BaseEventHandler {
 
         // Getting current power
         double power = position.getAttributes().containsKey(Position.KEY_POWER);
-        
+
         // Getting old power
         double oldPower = 0;
         Position lastPosition = Context.getIdentityManager().getLastPosition(position.getDeviceId());
