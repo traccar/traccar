@@ -121,6 +121,14 @@ public class Parser {
         }
     }
 
+    public Double nextDouble() {
+        if (hasNext()) {
+            return Double.parseDouble(next());
+        } else {
+            return null;
+        }
+    }
+
     public double nextDouble(double defaultValue) {
         if (hasNext()) {
             return Double.parseDouble(next());

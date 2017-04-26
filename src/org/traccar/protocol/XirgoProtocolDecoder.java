@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,6 +75,23 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d+),")                  // battery
             .number("(d+),")                     // gsm
             .number("(d+),")                     // gps
+            .groupBegin()
+            .number("d,")                        // reset mode
+            .expression("([01])")                // input 1
+            .expression("([01])")                // input 1
+            .expression("([01])")                // input 1
+            .expression("([01]),")               // output 1
+            .number("(d+.?d*),")                 // adc 1
+            .number("(d+.?d*),")                 // fuel level
+            .number("d+,")                       // engine load
+            .number("(d+),")                     // engine hours
+            .number("(d+),")                     // oil pressure
+            .number("(d+),")                     // oil level
+            .number("(-?d+),")                   // oil temperature
+            .number("(d+),")                     // coolant pressure
+            .number("(d+),")                     // coolant level
+            .number("(-?d+)")                    // coolant temperature
+            .groupEnd("?")
             .any()
             .compile();
 
@@ -131,7 +148,7 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_HDOP, parser.next());
 
         if (newFormat) {
-            position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1609.34);
+            position.set(Position.KEY_ODOMETER, UnitsConverter.metersFromMiles(parser.nextDouble(0)));
             position.set(Position.KEY_FUEL_CONSUMPTION, parser.next());
         }
 
@@ -139,10 +156,26 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_RSSI, parser.next());
 
         if (!newFormat) {
-            position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1609.34);
+            position.set(Position.KEY_ODOMETER, UnitsConverter.metersFromMiles(parser.nextDouble(0)));
         }
 
         position.setValid(parser.nextInt(0) == 1);
+
+        if (newFormat && parser.hasNext(13)) {
+            position.set(Position.PREFIX_IN + 1, parser.nextInt());
+            position.set(Position.PREFIX_IN + 2, parser.nextInt());
+            position.set(Position.PREFIX_IN + 3, parser.nextInt());
+            position.set(Position.PREFIX_OUT + 1, parser.nextInt());
+            position.set(Position.PREFIX_ADC + 1, parser.nextDouble());
+            position.set(Position.KEY_FUEL_LEVEL, parser.nextDouble());
+            position.set(Position.KEY_HOURS, parser.nextInt());
+            position.set("oilPressure", parser.nextInt());
+            position.set("oilLevel", parser.nextInt());
+            position.set("oilTemp", parser.nextInt());
+            position.set("coolantPressure", parser.nextInt());
+            position.set("coolantLevel", parser.nextInt());
+            position.set("coolantTemp", parser.nextInt());
+        }
 
         return position;
     }

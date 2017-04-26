@@ -11,6 +11,12 @@ public class XirgoProtocolDecoderTest extends ProtocolTest {
         XirgoProtocolDecoder decoder = new XirgoProtocolDecoder(new XirgoProtocol());
 
         verifyPosition(decoder, text(
+                "$$352054058132185,4001,2017/04/21,00:01:05,32.54659,-116.90670,143.2,0,0,0,598,0.0,12,0.9,765840,7.0,14.5,19,1,1,0011,8.5,63.2,5,21999,184,255,671,207,100,185##"));
+
+        verifyPosition(decoder, text(
+                "$$352054058132185,6011,2017/04/21,04:57:10,32.49658,-116.85957,250.9,0,0,0,602,0.0,12,0.8,765876,7.0,14.1,21,1,1,0011,10.1,0.0,5,170917890,280,255,627,0,100,167##"));
+
+        verifyPosition(decoder, text(
                 "$$355922061611345,6001,2016/08/25,20:10:51,51.13042,-114.22752,1197,44.7,0.0,0.0,2622,27,12,0.8,1,0.0,13.9,24,1,0,0.0,-70,-809,688##"));
 
         verifyPosition(decoder, text(
