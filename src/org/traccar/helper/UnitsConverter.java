@@ -22,6 +22,7 @@ public final class UnitsConverter {
     private static final double KNOTS_TO_MPS_RATIO = 1.94384;
     private static final double KNOTS_TO_CPS_RATIO = 0.0194384449;
     private static final double METERS_TO_FEET_RATIO = 0.3048;
+    private static final double METERS_TO_MILE_RATIO = 1609.34;
 
     private UnitsConverter() {
     }
@@ -60,6 +61,14 @@ public final class UnitsConverter {
 
     public static double metersFromFeet(double value) {
         return value * METERS_TO_FEET_RATIO;
+    }
+
+    public static double milesFromMeters(double value) {
+        return value / METERS_TO_MILE_RATIO;
+    }
+
+    public static double metersFromMiles(double value) {
+        return value * METERS_TO_MILE_RATIO;
     }
 
 }
