@@ -40,8 +40,9 @@ public class L100ProtocolDecoder extends BaseProtocolDecoder {
             .text("ATL")
             .number("(d{15}),")                  // imei
             .text("$GPRMC,")
-            .number("(dd)(dd)(dd).(ddd),")       // time (hhmmss.sss)
-            .expression("([AV]),")               // validity
+            .number("(dd)(dd)(dd)")              // time (hhmmss.sss)
+            .number(".(ddd)").optional()
+            .expression(",([AV]),")              // validity
             .number("(dd)(dd.d+),")              // latitude
             .expression("([NS]),")
             .number("(ddd)(dd.d+),")             // longitude
@@ -52,7 +53,7 @@ public class L100ProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .text("#")
             .number("([01]+),")                  // io status
-            .number("(d+.d+|N.C),")              // adc
+            .number("(d+.?d*|N.C),")             // adc
             .expression("[^,]*,")                // reserved
             .expression("[^,]*,")                // reserved
             .number("(d+.d+),")                  // odometer
@@ -61,8 +62,8 @@ public class L100ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // gsm
             .number("(d+),")                     // mcc
             .number("(d+),")                     // mnc
-            .number("(d+),")                     // lac
-            .number("(d+)")                      // cid
+            .number("(x+),")                     // lac
+            .number("(x+)")                      // cid
             .text("ATL")
             .compile();
 
@@ -111,7 +112,7 @@ public class L100ProtocolDecoder extends BaseProtocolDecoder {
 
         int rssi = parser.nextInt(0);
         position.setNetwork(new Network(CellTower.from(
-                parser.nextInt(0), parser.nextInt(0), parser.nextInt(0), parser.nextInt(0), rssi)));
+                parser.nextInt(0), parser.nextInt(0), parser.nextHexInt(0), parser.nextHexInt(0), rssi)));
 
         return position;
     }
