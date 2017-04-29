@@ -315,8 +315,8 @@
     </entry>
 
     <entry key='database.insertStatistics'>
-        INSERT INTO statistics (captureTime, activeUsers, activeDevices, requests, messagesReceived, messagesStored, attributes)
-        VALUES (:captureTime, :activeUsers, :activeDevices, :requests, :messagesReceived, :messagesStored, :attributes)
+        INSERT INTO statistics (captureTime, activeUsers, activeDevices, requests, messagesReceived, messagesStored, mailSent, smsSent, geocoderRequests, geolocationRequests, attributes)
+        VALUES (:captureTime, :activeUsers, :activeDevices, :requests, :messagesReceived, :messagesStored, :mailSent, :smsSent, :geocoderRequests, :geolocationRequests, :attributes)
     </entry>
     
     <entry key='database.selectCalendarsAll'>

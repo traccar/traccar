@@ -34,6 +34,7 @@ public final class NotificationSms {
     public static void sendSmsAsync(long userId, Event event, Position position) {
         User user = Context.getPermissionsManager().getUser(userId);
         if (Context.getSmppManager() != null && user.getPhone() != null) {
+            Context.getStatisticsManager().registerSms();
             Context.getSmppManager().sendMessageAsync(user.getPhone(),
                     NotificationFormatter.formatSmsMessage(userId, event, position), false);
         }
@@ -43,6 +44,7 @@ public final class NotificationSms {
             UnrecoverablePduException, SmppTimeoutException, SmppChannelException, InterruptedException {
         User user = Context.getPermissionsManager().getUser(userId);
         if (Context.getSmppManager() != null && user.getPhone() != null) {
+            Context.getStatisticsManager().registerSms();
             Context.getSmppManager().sendMessageSync(user.getPhone(),
                     NotificationFormatter.formatSmsMessage(userId, event, position), false);
         }
