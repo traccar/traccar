@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,6 +85,45 @@ public class Statistics extends Extensible {
 
     public void setMessagesStored(int messagesStored) {
         this.messagesStored = messagesStored;
+    }
+
+    private int mailSent;
+
+    public int getMailSent() {
+        return mailSent;
+    }
+
+    public void setMailSent(int mailSent) {
+        this.mailSent = mailSent;
+    }
+
+    private int smsSent;
+
+    public int getSmsSent() {
+        return smsSent;
+    }
+
+    public void setSmsSent(int smsSent) {
+        this.smsSent = smsSent;
+    }
+
+    private int geocoderRequests;
+
+    public int getGeocoderRequests() {
+        return geocoderRequests;
+    }
+
+    public void setGeocoderRequests(int geocoderRequests) {
+        this.geocoderRequests = geocoderRequests;
+    }
+    private int geolocationRequests;
+
+    public int getGeolocationRequests() {
+        return geolocationRequests;
+    }
+
+    public void setGeolocationRequests(int geolocationRequests) {
+        this.geolocationRequests = geolocationRequests;
     }
 
 }

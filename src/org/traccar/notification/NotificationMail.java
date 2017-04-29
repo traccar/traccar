@@ -115,6 +115,7 @@ public final class NotificationMail {
 
         Transport transport = session.getTransport();
         try {
+            Context.getStatisticsManager().registerMail();
             transport.connect(
                     properties.getProperty("mail.smtp.host"),
                     properties.getProperty("mail.smtp.username"),

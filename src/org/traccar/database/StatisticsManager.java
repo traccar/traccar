@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,10 @@ public class StatisticsManager {
     private int requests;
     private int messagesReceived;
     private int messagesStored;
+    private int mailSent;
+    private int smsSent;
+    private int geocoderRequests;
+    private int geolocationRequests;
 
     private void checkSplit() {
         int currentUpdate = Calendar.getInstance().get(SPLIT_MODE);
@@ -48,6 +52,10 @@ public class StatisticsManager {
             statistics.setRequests(requests);
             statistics.setMessagesReceived(messagesReceived);
             statistics.setMessagesStored(messagesStored);
+            statistics.setMailSent(mailSent);
+            statistics.setSmsSent(smsSent);
+            statistics.setGeocoderRequests(geocoderRequests);
+            statistics.setGeolocationRequests(geolocationRequests);
 
             try {
                 Context.getDataManager().addStatistics(statistics);
@@ -60,6 +68,10 @@ public class StatisticsManager {
             requests = 0;
             messagesReceived = 0;
             messagesStored = 0;
+            mailSent = 0;
+            smsSent = 0;
+            geocoderRequests = 0;
+            geolocationRequests = 0;
             lastUpdate = currentUpdate;
         }
     }
@@ -83,6 +95,26 @@ public class StatisticsManager {
         if (deviceId != 0) {
             devices.add(deviceId);
         }
+    }
+
+    public synchronized void registerMail() {
+        checkSplit();
+        mailSent += 1;
+    }
+
+    public synchronized void registerSms() {
+        checkSplit();
+        smsSent += 1;
+    }
+
+    public synchronized void registerGeocoderRequest() {
+        checkSplit();
+        geocoderRequests += 1;
+    }
+
+    public synchronized void registerGeolocationRequest() {
+        checkSplit();
+        geolocationRequests += 1;
     }
 
 }
