@@ -18,44 +18,50 @@ package org.traccar;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Enumeration;
 import java.util.Properties;
 
 public class Config {
 
     private final Properties properties = new Properties();
 
-    void load(String file) throws IOException {
-        try (InputStream inputStream = new FileInputStream(file)) {
-            properties.loadFromXML(inputStream);
-        }
+    private boolean useEnvVars = false;
 
+    void load(String file) throws IOException {
+        // First we load default config (if any)
         String defaultConfigFile = properties.getProperty("config.default");
         if (defaultConfigFile != null) {
             try (InputStream inputStream = new FileInputStream(defaultConfigFile)) {
-                Properties defaultProperties = new Properties();
-                defaultProperties.loadFromXML(inputStream);
-
-                Enumeration props = defaultProperties.propertyNames();
-                while (props.hasMoreElements()) {
-                    String key = (String) props.nextElement();
-                    if (!properties.containsKey(key)) {
-                        properties.setProperty(key, defaultProperties.getProperty(key));
-                    }
-                }
+                properties.loadFromXML(inputStream);
             }
+        }
+        // Then we override by loading <code>file</code>
+        try (InputStream inputStream = new FileInputStream(file)) {
+            Properties props = new Properties();
+            props.loadFromXML(inputStream);
+            properties.putAll(props);
+        }
+        // Environment variables interpolation support
+        if ("true".equals(System.getenv("CONFIG_USE_ENV"))) {
+            useEnvVars = true;
+        } else {
+            useEnvVars = properties.getProperty("config.useEnv", "false").equalsIgnoreCase("true");
         }
     }
 
+
     public boolean hasKey(String key) {
+        if (useEnvVars && System.getenv().containsKey(getEnvVarName(key))) {
+            return true;
+        }
         return properties.containsKey(key);
     }
 
     public String getString(String key) {
-        String envName = key.toUpperCase().replaceAll("\\.", "_");
-        String envValue = System.getenv(envName);
-        if (envValue != null && !envValue.isEmpty()) {
-            return envValue;
+        if (useEnvVars) {
+            String envValue = System.getenv(getEnvVarName(key));
+            if (envValue != null && !envValue.isEmpty()) {
+                return envValue;
+            }
         }
         return properties.getProperty(key);
     }
@@ -90,6 +96,10 @@ public class Config {
 
     public double getDouble(String key, double defaultValue) {
         return hasKey(key) ? Double.parseDouble(getString(key)) : defaultValue;
+    }
+
+    public static String getEnvVarName(String key) {
+        return key.replaceAll("\\.", "_").replaceAll("(.)(\\p{Lu})", "$1_$2").toUpperCase();
     }
 
 }
