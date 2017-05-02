@@ -15,17 +15,19 @@
  */
 package org.traccar;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Enumeration;
 import java.util.Properties;
 
 public class Config {
 
     private final Properties properties = new Properties();
-    private Properties defaultProperties;
 
-    public void load(String file) throws IOException {
+    void load(String file) throws IOException {
         try (InputStream inputStream = new FileInputStream(file)) {
             properties.loadFromXML(inputStream);
         }
@@ -33,30 +35,35 @@ public class Config {
         String defaultConfigFile = properties.getProperty("config.default");
         if (defaultConfigFile != null) {
             try (InputStream inputStream = new FileInputStream(defaultConfigFile)) {
-                defaultProperties = new Properties();
+                Properties defaultProperties = new Properties();
                 defaultProperties.loadFromXML(inputStream);
+
+                Enumeration props = defaultProperties.propertyNames();
+                while (props.hasMoreElements()) {
+                    String key = (String) props.nextElement();
+                    if (!properties.containsKey(key)) {
+                        properties.setProperty(key, defaultProperties.getProperty(key));
+                    }
+                }
             }
         }
     }
 
     public boolean hasKey(String key) {
-        return properties.containsKey(key) || defaultProperties != null && defaultProperties.containsKey(key);
+        return properties.containsKey(key);
     }
 
     public String getString(String key) {
-        if (properties.containsKey(key) || defaultProperties == null) {
-            return properties.getProperty(key);
-        } else {
-            return defaultProperties.getProperty(key);
+        String envName = key.toUpperCase().replaceAll("\\.", "_");
+        String envValue = System.getenv(envName);
+        if (StringUtils.isNotBlank(envValue)) {
+            return envValue;
         }
+        return properties.getProperty(key);
     }
 
     public String getString(String key, String defaultValue) {
-        if (hasKey(key)) {
-            return getString(key);
-        } else {
-            return defaultValue;
-        }
+        return hasKey(key) ? getString(key) : defaultValue;
     }
 
     public boolean getBoolean(String key) {
@@ -68,11 +75,7 @@ public class Config {
     }
 
     public int getInteger(String key, int defaultValue) {
-        if (hasKey(key)) {
-            return Integer.parseInt(getString(key));
-        } else {
-            return defaultValue;
-        }
+        return hasKey(key) ? Integer.parseInt(getString(key)) : defaultValue;
     }
 
     public long getLong(String key) {
@@ -80,11 +83,7 @@ public class Config {
     }
 
     public long getLong(String key, long defaultValue) {
-        if (hasKey(key)) {
-            return Long.parseLong(getString(key));
-        } else {
-            return defaultValue;
-        }
+        return hasKey(key) ? Long.parseLong(getString(key)) : defaultValue;
     }
 
     public double getDouble(String key) {
@@ -92,11 +91,7 @@ public class Config {
     }
 
     public double getDouble(String key, double defaultValue) {
-        if (hasKey(key)) {
-            return Double.parseDouble(getString(key));
-        } else {
-            return defaultValue;
-        }
+        return hasKey(key) ? Double.parseDouble(getString(key)) : defaultValue;
     }
 
 }
