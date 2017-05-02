@@ -15,8 +15,6 @@
  */
 package org.traccar;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -56,7 +54,7 @@ public class Config {
     public String getString(String key) {
         String envName = key.toUpperCase().replaceAll("\\.", "_");
         String envValue = System.getenv(envName);
-        if (StringUtils.isNotBlank(envValue)) {
+        if (envValue != null && !envValue.isEmpty()) {
             return envValue;
         }
         return properties.getProperty(key);
