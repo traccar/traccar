@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,43 +24,37 @@ public class Config {
 
     private final Properties properties = new Properties();
 
-    private boolean useEnvVars = false;
+    private boolean useEnvironmentVariables;
 
     void load(String file) throws IOException {
-        // First we load default config (if any)
-        String defaultConfigFile = properties.getProperty("config.default");
+        Properties mainProperties = new Properties();
+        try (InputStream inputStream = new FileInputStream(file)) {
+            mainProperties.loadFromXML(inputStream);
+        }
+
+        String defaultConfigFile = mainProperties.getProperty("config.default");
         if (defaultConfigFile != null) {
             try (InputStream inputStream = new FileInputStream(defaultConfigFile)) {
                 properties.loadFromXML(inputStream);
             }
         }
-        // Then we override by loading <code>file</code>
-        try (InputStream inputStream = new FileInputStream(file)) {
-            Properties props = new Properties();
-            props.loadFromXML(inputStream);
-            properties.putAll(props);
-        }
-        // Environment variables interpolation support
-        if ("true".equals(System.getenv("CONFIG_USE_ENV"))) {
-            useEnvVars = true;
-        } else {
-            useEnvVars = properties.getProperty("config.useEnv", "false").equalsIgnoreCase("true");
-        }
+
+        properties.putAll(mainProperties); // override defaults
+
+        useEnvironmentVariables = Boolean.parseBoolean(System.getenv("CONFIG_USE_ENVIRONMENT_VARIABLES"))
+                || Boolean.parseBoolean(properties.getProperty("config.useEnvironmentVariables"));
     }
 
-
     public boolean hasKey(String key) {
-        if (useEnvVars && System.getenv().containsKey(getEnvVarName(key))) {
-            return true;
-        }
-        return properties.containsKey(key);
+        return useEnvironmentVariables && System.getenv().containsKey(getEnvironmentVariableName(key))
+                || properties.containsKey(key);
     }
 
     public String getString(String key) {
-        if (useEnvVars) {
-            String envValue = System.getenv(getEnvVarName(key));
-            if (envValue != null && !envValue.isEmpty()) {
-                return envValue;
+        if (useEnvironmentVariables) {
+            String value = System.getenv(getEnvironmentVariableName(key));
+            if (value != null && !value.isEmpty()) {
+                return value;
             }
         }
         return properties.getProperty(key);
@@ -98,8 +92,8 @@ public class Config {
         return hasKey(key) ? Double.parseDouble(getString(key)) : defaultValue;
     }
 
-    public static String getEnvVarName(String key) {
-        return key.replaceAll("\\.", "_").replaceAll("(.)(\\p{Lu})", "$1_$2").toUpperCase();
+    public static String getEnvironmentVariableName(String key) {
+        return key.replaceAll("\\.", "_").replaceAll("(\\p{Lu})", "_$1").toUpperCase();
     }
 
 }
