@@ -63,6 +63,8 @@ public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
                 return encodeContent(alternative ? "DYD,123456#" : "Relay,1#");
             case Command.TYPE_ENGINE_RESUME:
                 return encodeContent(alternative ? "HFYD,123456#" : "Relay,0#");
+            case Command.TYPE_CUSTOM:
+                return encodeContent(command.getString(Command.KEY_DATA));
             default:
                 Log.warning(new UnsupportedOperationException(command.getType()));
                 break;
