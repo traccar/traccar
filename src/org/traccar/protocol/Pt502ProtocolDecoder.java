@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
  * Copyright 2012 Luis Parada (luis.parada@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,9 +43,9 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // id
             .number("(dd)(dd)(dd).(ddd),")       // time (hhmmss.sss)
             .expression("([AV]),")               // validity
-            .number("(dd)(dd.dddd),")            // latitude
+            .number("(d+)(dd.dddd),")            // latitude
             .expression("([NS]),")
-            .number("(ddd)(dd.dddd),")           // longitude
+            .number("(d+)(dd.dddd),")            // longitude
             .expression("([EW]),")
             .number("(d+.d+)?,")                 // speed
             .number("(d+.d+)?,")                 // course
@@ -83,9 +83,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        String sentence = (String) msg;
-
-        Parser parser = new Parser(PATTERN, sentence);
+        Parser parser = new Parser(PATTERN, (String) msg);
         if (!parser.matches()) {
             return null;
         }
