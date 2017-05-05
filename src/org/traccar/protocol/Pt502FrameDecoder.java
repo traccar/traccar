@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Anton Tananaev (anton@traccar.org)
+ * Copyright 2014 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,25 +32,15 @@ public class Pt502FrameDecoder extends FrameDecoder {
             return null;
         }
 
-        if (buf.getUnsignedByte(buf.readerIndex()) == 0xbf && buf.getUnsignedByte(buf.readerIndex() + 1) == 0xfb) {
+        if (buf.getUnsignedByte(buf.readerIndex()) == 0xbf) {
+            buf.skipBytes(BINARY_HEADER);
+        }
 
-            int length = buf.getShort(buf.readerIndex() + 3);
-            if (buf.readableBytes() >= length) {
-                buf.skipBytes(BINARY_HEADER);
-                ChannelBuffer result = buf.readBytes(length - BINARY_HEADER - 2);
-                buf.skipBytes(2);
-                return result;
-            }
-
-        } else {
-
-            int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '\n');
-            if (index != -1) {
-                ChannelBuffer result = buf.readBytes(index - 1);
-                buf.skipBytes(2);
-                return result;
-            }
-
+        int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '\r');
+        if (index != -1 && index + 1 < buf.writerIndex()) {
+            ChannelBuffer result = buf.readBytes(index - buf.readerIndex());
+            buf.skipBytes(2);
+            return result;
         }
 
         return null;
