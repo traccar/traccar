@@ -103,7 +103,7 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_ALARM, Position.ALARM_MOVEMENT);
         }
 
-        position.set(Position.KEY_RSSI, BitUtil.between(flags, 16, 20));
+        position.set(Position.KEY_RSSI, BitUtil.between(flags, 16, 21));
         position.set(Position.KEY_CHARGE, BitUtil.check(flags, 22));
     }
 
