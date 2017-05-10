@@ -109,7 +109,16 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
         position.setValid(parser.next().equals("A"));
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
-        position.setSpeed(parser.nextDouble(0));
+
+        switch (Context.getConfig().getString(getProtocolName() + ".speed", "kn")) {
+            case "kmh":
+                position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
+                break;
+            default:
+                position.setSpeed(parser.nextDouble(0));
+                break;
+        }
+
         position.setCourse(parser.nextDouble(0));
 
         dateBuilder.setDateReverse(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
