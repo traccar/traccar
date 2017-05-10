@@ -18,6 +18,7 @@
     <entry key='logger.file'>./logs/tracker-server.log</entry>
 
     <entry key='event.enable'>true</entry>
+    <entry key='processing.computedAttributes.enable'>true</entry>
 
     <!-- DATABASE CONFIG -->
 
@@ -367,6 +368,65 @@
     <entry key='database.unlinkUser'>
         DELETE FROM user_user WHERE userId = :userId AND managedUserId = :managedUserId
     </entry>
+
+    <entry key='database.selectAttributes'>
+        SELECT * FROM attributes
+    </entry>
+
+    <entry key='database.insertAttribute'>
+        INSERT INTO attributes (description, type, attribute, expression)
+        VALUES (:description, :type, :attribute, :expression)
+    </entry>
+
+    <entry key='database.updateAttribute'>
+        UPDATE attributes SET
+        description = :description,
+        type = :type,
+        attribute = :attribute,
+        expression = :expression
+        WHERE id = :id
+    </entry>
+
+    <entry key='database.deleteAttribute'>
+        DELETE FROM attributes WHERE id = :id
+    </entry>
+    
+        <entry key='database.selectAttributePermissions'>
+        SELECT userId, attributeId FROM user_attribute
+    </entry>
+
+    <entry key='database.linkAttribute'>
+        INSERT INTO user_attribute (userId, attributeId) VALUES (:userId, :attributeId)
+    </entry>
+
+    <entry key='database.unlinkAttribute'>
+        DELETE FROM user_attribute WHERE userId = :userId AND attributeId = :attributeId
+    </entry>
+
+    <entry key='database.selectGroupAttributes'>
+        SELECT groupId, attributeId FROM group_attribute
+    </entry>
+
+    <entry key='database.linkGroupAttribute'>
+        INSERT INTO group_attribute (groupId, attributeId) VALUES (:groupId, :attributeId)
+    </entry>
+
+    <entry key='database.unlinkGroupAttribute'>
+        DELETE FROM group_attribute WHERE groupId = :groupId AND attributeId = :attributeId
+    </entry>
+
+    <entry key='database.selectDeviceAttributes'>
+        SELECT deviceId, attributeId FROM device_attribute
+    </entry>
+
+    <entry key='database.linkDeviceAttribute'>
+        INSERT INTO device_attribute (deviceId, attributeId) VALUES (:deviceId, :attributeId)
+    </entry>
+
+    <entry key='database.unlinkDeviceAttribute'>
+        DELETE FROM device_attribute WHERE deviceId = :deviceId AND attributeId = :attributeId
+    </entry>
+
 
     <!-- PROTOCOL CONFIG -->
 

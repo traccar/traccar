@@ -310,6 +310,18 @@ public class PermissionsManager {
         }
     }
 
+    public void checkAttribute(long userId, long attributeId) throws SecurityException {
+        if (!Context.getAttributesManager().checkAttribute(userId, attributeId) && !isAdmin(userId)) {
+            checkManager(userId);
+            for (long managedUserId : getUserPermissions(userId)) {
+                if (Context.getAttributesManager().checkAttribute(managedUserId, attributeId)) {
+                    return;
+                }
+            }
+            throw new SecurityException("Attribute access denied");
+        }
+    }
+
     public void checkCalendar(long userId, long calendarId) throws SecurityException {
         if (!Context.getCalendarManager().checkCalendar(userId, calendarId) && !isAdmin(userId)) {
             checkManager(userId);
