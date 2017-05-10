@@ -27,6 +27,7 @@ import org.apache.velocity.app.VelocityEngine;
 import org.eclipse.jetty.util.URIUtil;
 import org.traccar.database.AliasesManager;
 import org.traccar.database.CalendarManager;
+import org.traccar.database.AttributesManager;
 import org.traccar.database.ConnectionManager;
 import org.traccar.database.DataManager;
 import org.traccar.database.DeviceManager;
@@ -173,6 +174,12 @@ public final class Context {
         return aliasesManager;
     }
 
+    private static AttributesManager attributesManager;
+
+    public static AttributesManager getAttributesManager() {
+        return attributesManager;
+    }
+
     private static StatisticsManager statisticsManager;
 
     public static StatisticsManager getStatisticsManager() {
@@ -309,6 +316,8 @@ public final class Context {
         }
 
         aliasesManager = new AliasesManager(dataManager);
+
+        attributesManager = new AttributesManager(dataManager);
 
         statisticsManager = new StatisticsManager();
 

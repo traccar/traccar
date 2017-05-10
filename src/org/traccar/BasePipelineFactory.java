@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,8 @@ import org.traccar.events.MotionEventHandler;
 import org.traccar.events.OverspeedEventHandler;
 import org.traccar.events.AlertEventHandler;
 import org.traccar.helper.Log;
+import org.traccar.processing.ComputedAttributesHandler;
+import org.traccar.processing.CopyAttributesHandler;
 
 import java.net.InetSocketAddress;
 
@@ -53,6 +55,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
     private GeolocationHandler geolocationHandler;
     private HemisphereHandler hemisphereHandler;
     private CopyAttributesHandler copyAttributesHandler;
+    private ComputedAttributesHandler computedAttributesHandler;
 
     private CommandResultEventHandler commandResultEventHandler;
     private OverspeedEventHandler overspeedEventHandler;
@@ -153,6 +156,10 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             copyAttributesHandler = new CopyAttributesHandler();
         }
 
+        if (Context.getConfig().getBoolean("processing.computedAttributes.enable")) {
+            computedAttributesHandler = new ComputedAttributesHandler();
+        }
+
         if (Context.getConfig().getBoolean("event.enable")) {
             commandResultEventHandler = new CommandResultEventHandler();
             overspeedEventHandler = new OverspeedEventHandler();
@@ -207,6 +214,10 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
         if (copyAttributesHandler != null) {
             pipeline.addLast("copyAttributes", copyAttributesHandler);
+        }
+
+        if (computedAttributesHandler != null) {
+            pipeline.addLast("computedAttributes", computedAttributesHandler);
         }
 
         if (Context.getDataManager() != null) {
