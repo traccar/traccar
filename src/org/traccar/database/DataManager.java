@@ -311,11 +311,12 @@ public class DataManager {
     public void clearHistory() throws SQLException {
         long historyDays = config.getInteger("database.historyDays");
         if (historyDays != 0) {
+            Date timeLimit = new Date(System.currentTimeMillis() - historyDays * 24 * 3600 * 1000);
             QueryBuilder.create(dataSource, getQuery("database.deletePositions"))
-                    .setDate("serverTime", new Date(System.currentTimeMillis() - historyDays * 24 * 3600 * 1000))
+                    .setDate("serverTime", timeLimit)
                     .executeUpdate();
             QueryBuilder.create(dataSource, getQuery("database.deleteEvents"))
-                    .setDate("serverTime", new Date(System.currentTimeMillis() - historyDays * 24 * 3600 * 1000))
+                    .setDate("serverTime", timeLimit)
                     .executeUpdate();
         }
     }
