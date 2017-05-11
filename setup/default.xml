@@ -289,6 +289,10 @@
         DELETE FROM positions WHERE serverTime &lt; :serverTime AND id NOT IN (SELECT positionId FROM devices)
     </entry>
 
+    <entry key='database.deleteEvents'>
+        DELETE FROM events WHERE serverTime &lt; :serverTime
+    </entry>
+
     <entry key='database.selectAttributeAliases'>
         SELECT * FROM attribute_aliases
     </entry>
