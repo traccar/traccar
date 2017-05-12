@@ -22,6 +22,60 @@
         <constraints nullable="false" />
       </column>
     </addColumn>
+    
+    <createTable tableName="attributes">
+      <column name="id" type="INT" autoIncrement="true">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="description" type="VARCHAR(4000)">
+        <constraints nullable="false" />
+      </column>
+      <column name="type" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="attribute" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="expression" type="VARCHAR(4000)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+    
+    <createTable tableName="user_attribute">
+      <column name="userid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="attributeid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="user_attribute" baseColumnNames="userid" constraintName="fk_user_attribute_userid" referencedTableName="users" referencedColumnNames="id" onDelete="CASCADE" />
+    <addForeignKeyConstraint baseTableName="user_attribute" baseColumnNames="attributeid" constraintName="fk_user_attribute_attributeid" referencedTableName="attributes" referencedColumnNames="id" onDelete="CASCADE" />
+
+    <createTable tableName="group_attribute">
+      <column name="groupid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="attributeid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="group_attribute" baseColumnNames="groupid" constraintName="fk_group_attribute_groupid" referencedTableName="groups" referencedColumnNames="id" onDelete="CASCADE" />
+    <addForeignKeyConstraint baseTableName="group_attribute" baseColumnNames="attributeid" constraintName="fk_group_attribute_attributeid" referencedTableName="attributes" referencedColumnNames="id" onDelete="CASCADE" />
+
+    <createTable tableName="device_attribute">
+      <column name="deviceid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="attributeid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="device_attribute" baseColumnNames="deviceid" constraintName="fk_device_attribute_deviceid" referencedTableName="devices" referencedColumnNames="id" onDelete="CASCADE" />
+    <addForeignKeyConstraint baseTableName="device_attribute" baseColumnNames="attributeid" constraintName="fk_device_attribute_attributeid" referencedTableName="attributes" referencedColumnNames="id" onDelete="CASCADE" />
 
   </changeSet>
 
