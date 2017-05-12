@@ -22,11 +22,12 @@ public class FilterHandlerTest extends BaseTest {
         filtingHandler.setFilterInvalid(true);
         filtingHandler.setFilterZero(true);
         filtingHandler.setFilterDuplicate(true);
+        filtingHandler.setFilterFuture(5 * 60);
         filtingHandler.setFilterApproximate(true);
         filtingHandler.setFilterStatic(true);
         filtingHandler.setFilterDistance(10);
+        filtingHandler.setFilterMaxSpeed(500);
         filtingHandler.setFilterLimit(10);
-        filtingHandler.setFilterFuture(5 * 60);
     }
 
     @After

@@ -44,6 +44,10 @@ public class FilterHandler extends BaseDataHandler {
         this.filterDuplicate = filterDuplicate;
     }
 
+    public void setFilterFuture(long filterFuture) {
+        this.filterFuture = filterFuture;
+    }
+
     public void setFilterApproximate(boolean filterApproximate) {
         this.filterApproximate = filterApproximate;
     }
@@ -54,6 +58,10 @@ public class FilterHandler extends BaseDataHandler {
 
     public void setFilterDistance(int filterDistance) {
         this.filterDistance = filterDistance;
+    }
+
+    public void setFilterMaxSpeed(int filterMaxSpeed) {
+        this.filterMaxSpeed = filterMaxSpeed;
     }
 
     public void setFilterLimit(long filterLimit) {
