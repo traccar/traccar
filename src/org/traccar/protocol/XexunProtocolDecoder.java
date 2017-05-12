@@ -17,11 +17,13 @@ package org.traccar.protocol;
 
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
+import org.traccar.helper.UnitsConverter;
 
 import java.net.SocketAddress;
 import java.util.regex.Pattern;
@@ -109,7 +111,16 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
         position.setValid(parser.next().equals("A"));
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
-        position.setSpeed(parser.nextDouble(0));
+
+        switch (Context.getConfig().getString(getProtocolName() + ".speed", "kn")) {
+            case "kmh":
+                position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
+                break;
+            default:
+                position.setSpeed(parser.nextDouble(0));
+                break;
+        }
+
         position.setCourse(parser.nextDouble(0));
 
         dateBuilder.setDateReverse(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
