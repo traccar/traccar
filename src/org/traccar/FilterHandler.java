@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2014 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.traccar;
 
 import org.traccar.helper.DistanceCalculator;
 import org.traccar.helper.Log;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 public class FilterHandler extends BaseDataHandler {
@@ -24,11 +25,12 @@ public class FilterHandler extends BaseDataHandler {
     private boolean filterInvalid;
     private boolean filterZero;
     private boolean filterDuplicate;
+    private long filterFuture;
     private boolean filterApproximate;
     private boolean filterStatic;
     private int filterDistance;
+    private int filterMaxSpeed;
     private long filterLimit;
-    private long filterFuture;
 
     public void setFilterInvalid(boolean filterInvalid) {
         this.filterInvalid = filterInvalid;
@@ -58,29 +60,19 @@ public class FilterHandler extends BaseDataHandler {
         this.filterLimit = filterLimit;
     }
 
-    public void setFilterFuture(long filterFuture) {
-        this.filterFuture = filterFuture;
-    }
-
     public FilterHandler() {
         Config config = Context.getConfig();
         if (config != null) {
             filterInvalid = config.getBoolean("filter.invalid");
             filterZero = config.getBoolean("filter.zero");
             filterDuplicate = config.getBoolean("filter.duplicate");
+            filterFuture = config.getLong("filter.future") * 1000;
             filterApproximate = config.getBoolean("filter.approximate");
             filterStatic = config.getBoolean("filter.static");
             filterDistance = config.getInteger("filter.distance");
+            filterMaxSpeed = config.getInteger("filter.maxSpeed");
             filterLimit = config.getLong("filter.limit") * 1000;
-            filterFuture = config.getLong("filter.future") * 1000;
         }
-    }
-
-    private Position getLastPosition(long deviceId) {
-        if (Context.getIdentityManager() != null) {
-            return Context.getIdentityManager().getLastPosition(deviceId);
-        }
-        return null;
     }
 
     private boolean filterInvalid(Position position) {
@@ -91,17 +83,8 @@ public class FilterHandler extends BaseDataHandler {
         return filterZero && position.getLatitude() == 0.0 && position.getLongitude() == 0.0;
     }
 
-    private boolean filterDuplicate(Position position) {
-        if (filterDuplicate) {
-            Position last = getLastPosition(position.getDeviceId());
-            if (last != null) {
-                return position.getFixTime().equals(last.getFixTime());
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
+    private boolean filterDuplicate(Position position, Position last) {
+        return filterDuplicate && last != null && position.getFixTime().equals(last.getFixTime());
     }
 
     private boolean filterFuture(Position position) {
@@ -116,25 +99,29 @@ public class FilterHandler extends BaseDataHandler {
         return filterStatic && position.getSpeed() == 0.0;
     }
 
-    private boolean filterDistance(Position position) {
-        if (filterDistance != 0) {
-            Position last = getLastPosition(position.getDeviceId());
-            if (last != null) {
-                double distance = DistanceCalculator.distance(
-                        position.getLatitude(), position.getLongitude(),
-                        last.getLatitude(), last.getLongitude());
-                return distance < filterDistance;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
+    private boolean filterDistance(Position position, Position last) {
+        if (filterDistance != 0 && last != null) {
+            double distance = DistanceCalculator.distance(
+                    position.getLatitude(), position.getLongitude(),
+                    last.getLatitude(), last.getLongitude());
+            return distance < filterDistance;
         }
+        return false;
     }
 
-    private boolean filterLimit(Position position) {
+    private boolean filterMaxSpeed(Position position, Position last) {
+        if (filterMaxSpeed != 0 && last != null) {
+            double distance = DistanceCalculator.distance(
+                    position.getLatitude(), position.getLongitude(),
+                    last.getLatitude(), last.getLongitude());
+            long time = position.getFixTime().getTime() - last.getFixTime().getTime();
+            return UnitsConverter.knotsFromMps(distance / time) > filterMaxSpeed;
+        }
+        return false;
+    }
+
+    private boolean filterLimit(Position position, Position last) {
         if (filterLimit != 0) {
-            Position last = getLastPosition(position.getDeviceId());
             if (last != null) {
                 return (position.getFixTime().getTime() - last.getFixTime().getTime()) > filterLimit;
             } else {
@@ -149,13 +136,18 @@ public class FilterHandler extends BaseDataHandler {
 
         StringBuilder filterType = new StringBuilder();
 
+        Position last = null;
+        if (Context.getIdentityManager() != null) {
+            last = Context.getIdentityManager().getLastPosition(position.getDeviceId());
+        }
+
         if (filterInvalid(position)) {
             filterType.append("Invalid ");
         }
         if (filterZero(position)) {
             filterType.append("Zero ");
         }
-        if (filterDuplicate(position)) {
+        if (filterDuplicate(position, last)) {
             filterType.append("Duplicate ");
         }
         if (filterFuture(position)) {
@@ -167,11 +159,14 @@ public class FilterHandler extends BaseDataHandler {
         if (filterStatic(position)) {
             filterType.append("Static ");
         }
-        if (filterDistance(position)) {
+        if (filterDistance(position, last)) {
             filterType.append("Distance ");
         }
+        if (filterMaxSpeed(position, last)) {
+            filterType.append("MaxSpeed ");
+        }
 
-        if (filterType.length() > 0 && !filterLimit(position)) {
+        if (filterType.length() > 0 && !filterLimit(position, last)) {
 
             StringBuilder message = new StringBuilder();
             message.append("Position filtered by ");
