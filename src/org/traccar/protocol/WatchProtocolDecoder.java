@@ -206,7 +206,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
             sendResponse(channel, manufacturer, id, "TKQ");
 
-        } else if (type.equals("PULSE")) {
+        } else if (type.equals("PULSE") || type.equals("heart")) {
 
             Position position = new Position();
             position.setProtocol(getProtocolName());

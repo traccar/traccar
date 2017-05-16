@@ -69,6 +69,12 @@ public class WatchProtocolDecoderTest extends ProtocolTest {
         verifyAttributes(decoder, text(
                 "[CS*8800000015*0008*PULSE,72"));
 
+        verifyAttributes(decoder, text(
+                "[3G*6005412902*0007*heart,0"));
+
+        verifyAttributes(decoder, text(
+                "[3G*6005412902*0008*heart,71"));
+
     }
 
 }
