@@ -17,6 +17,7 @@ package org.traccar.protocol;
 
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
+import org.jboss.netty.handler.codec.http.HttpChunkAggregator;
 import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.traccar.BaseProtocol;
@@ -37,6 +38,7 @@ public class DmtHttpProtocol extends BaseProtocol {
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("httpEncoder", new HttpResponseEncoder());
                 pipeline.addLast("httpDecoder", new HttpRequestDecoder());
+                pipeline.addLast("httpAggregator", new HttpChunkAggregator(16384));
                 pipeline.addLast("objectDecoder", new DmtHttpProtocolDecoder(DmtHttpProtocol.this));
             }
         });
