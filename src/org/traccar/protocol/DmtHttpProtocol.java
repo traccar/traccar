@@ -38,7 +38,7 @@ public class DmtHttpProtocol extends BaseProtocol {
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("httpEncoder", new HttpResponseEncoder());
                 pipeline.addLast("httpDecoder", new HttpRequestDecoder());
-                pipeline.addLast("httpAggregator", new HttpChunkAggregator(16384));
+                pipeline.addLast("httpAggregator", new HttpChunkAggregator(65535));
                 pipeline.addLast("objectDecoder", new DmtHttpProtocolDecoder(DmtHttpProtocol.this));
             }
         });
