@@ -16,7 +16,10 @@
  */
 package org.traccar.processing;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.Map;
 
 import org.apache.commons.jexl2.JexlEngine;
 import org.apache.commons.jexl2.JexlException;
@@ -36,10 +39,32 @@ public class ComputedAttributesHandler extends BaseDataHandler {
         engine.setStrict(true);
     }
 
+    private MapContext prepareContext(Position position) {
+        MapContext result = new MapContext();
+        Method[] methods = position.getClass().getMethods();
+        for (Method method : methods) {
+            if (method.getName().startsWith("get") && method.getParameterTypes().length == 0
+                    && !method.getName().equals("getClass")) {
+                String name = method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4);
+
+                try {
+                    if (!method.getReturnType().equals(Map.class)) {
+                        result.set(name, method.invoke(position));
+                    } else {
+                        for (Object key : ((Map) method.invoke(position)).keySet()) {
+                            result.set((String) key, ((Map) method.invoke(position)).get(key));
+                        }
+                    }
+                } catch (IllegalAccessException | InvocationTargetException error) {
+                    Log.warning(error);
+                }
+            }
+        }
+        return result;
+    }
+
     public Object computeAttribute(Attribute attribute, Position position) throws JexlException {
-        MapContext expressionContext = new MapContext();
-        expressionContext.set("position", position);
-        return engine.createExpression(attribute.getExpression()).evaluate(expressionContext);
+        return engine.createExpression(attribute.getExpression()).evaluate(prepareContext(position));
     }
 
     @Override
