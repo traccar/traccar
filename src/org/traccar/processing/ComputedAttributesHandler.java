@@ -18,8 +18,11 @@ package org.traccar.processing;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.jexl2.JexlEngine;
 import org.apache.commons.jexl2.JexlException;
@@ -41,11 +44,11 @@ public class ComputedAttributesHandler extends BaseDataHandler {
 
     private MapContext prepareContext(Position position) {
         MapContext result = new MapContext();
-        Method[] methods = position.getClass().getMethods();
+        Set<Method> methods = new HashSet<>(Arrays.asList(position.getClass().getMethods()));
+        methods.removeAll(Arrays.asList(Object.class.getMethods()));
         for (Method method : methods) {
-            if (method.getName().startsWith("get") && method.getParameterTypes().length == 0
-                    && !method.getName().equals("getClass")) {
-                String name = method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4);
+            if (method.getName().startsWith("get") && method.getParameterTypes().length == 0) {
+                String name = Character.toLowerCase(method.getName().charAt(3)) + method.getName().substring(4);
 
                 try {
                     if (!method.getReturnType().equals(Map.class)) {
