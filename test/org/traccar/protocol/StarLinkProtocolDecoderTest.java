@@ -10,6 +10,21 @@ public class StarLinkProtocolDecoderTest extends ProtocolTest {
 
         StarLinkProtocolDecoder decoder = new StarLinkProtocolDecoder(new StarLinkProtocol());
 
+        verifyAttributes(decoder, text(
+                "$SLU068328,06,55,170518122023,16,,,,,,000000,1,1,0,0,0,0,0,0,10443,32722,12.664,03.910,,0,0,,01000001FDB3A9*BF"));
+
+        verifyAttributes(decoder, text(
+                "$SLU068328,06,56,170518122023,20,,,,,,000000,1,1,0,0,0,0,0,0,10443,32722,12.664,03.910,,0,0,2,01000001FDB3A9,00000000000000000000*D9"));
+
+        verifyAttributes(decoder, text(
+                "$SLU068328,06,57,170518122038,01,,,,,,000000,1,1,0,0,1,0,0,0,10443,32722,12.669,03.910,,0,0,0,99*6E"));
+
+        verifyAttributes(decoder, text(
+                "$SLU068328,06,58,170518122045,19,,,,,,000000,1,1,0,0,1,0,0,0,10443,32722,12.678,03.910,,0,0*7C"));
+
+        verifyAttributes(decoder, text(
+                "$SLU068328,06,59,170518122054,16,,,,,,000000,1,1,0,0,0,0,0,0,10443,32723,12.678,03.910,,0,0,01000001FDB3A9,01000001ACE0A6*BF"));
+
         verifyPosition(decoder, text(
                 "$SLU031B2B,06,622,170329035057,01,170329035057,+3158.0018,+03446.6968,004.9,007,000099,1,1,0,0,0,0,0,0,,,14.176,03.826,,1,1,1,4*B0"));
 
