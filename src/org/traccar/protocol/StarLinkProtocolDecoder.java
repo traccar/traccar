@@ -100,6 +100,9 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
         int event = 0;
 
         for (int i = 0; i < Math.min(data.length, dataTags.length); i++) {
+            if (data[i].isEmpty()) {
+                continue;
+            }
             switch (dataTags[i]) {
                 case "#EDT#":
                     position.setDeviceTime(dateFormat.parse(data[i]));
@@ -178,6 +181,10 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
                 default:
                     break;
             }
+        }
+
+        if (position.getFixTime() == null) {
+            getLastLocation(position, null);
         }
 
         if (lac != null && cid != null) {
