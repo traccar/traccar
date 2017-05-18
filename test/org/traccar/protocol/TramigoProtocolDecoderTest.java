@@ -12,6 +12,9 @@ public class TramigoProtocolDecoderTest extends ProtocolTest {
 
         TramigoProtocolDecoder decoder = new TramigoProtocolDecoder(new TramigoProtocol());
 
+        verifyNull(decoder, binary(ByteOrder.LITTLE_ENDIAN,
+                "80003d1ac0001c00010100000367152b13bc1d5970696e6720454f46"));
+
         verifyAttributes(decoder, binary(ByteOrder.LITTLE_ENDIAN,
                 "8000d316b000860001018f8703771bee11fdf2585472616d69676f3a205061726b65642c20302e3131206b6d2053206f6620492e452e532e2050756572746120426f6e6974612c204361726162616e6368656c2c204d61647269642c2045532c2034302e33373736362c202d332e37333833352c2030353a3131204170722031362020454f46"));
 
