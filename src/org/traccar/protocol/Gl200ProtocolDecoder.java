@@ -759,9 +759,25 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         decodeDeviceTime(position, parser);
 
         switch (type) {
+            case "PNA":
+                position.set(Position.KEY_ALARM, Position.ALARM_POWER_ON);
+                break;
+            case "PFA":
+                position.set(Position.KEY_ALARM, Position.ALARM_POWER_OFF);
+                break;
+            case "EPN":
+                position.set(Position.KEY_ALARM, Position.ALARM_POWER_RESTORED);
+                break;
+            case "EPF":
+                position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
+                break;
             case "BPL":
                 position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
                 break;
+            case "STT":
+                position.set(Position.KEY_ALARM, Position.ALARM_MOVEMENT);
+                break;
+            case "TMP":
             case "TEM":
                 position.set(Position.KEY_ALARM, Position.ALARM_TEMPERATURE);
                 break;
