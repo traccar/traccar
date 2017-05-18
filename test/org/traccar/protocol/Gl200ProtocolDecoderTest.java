@@ -11,6 +11,9 @@ public class Gl200ProtocolDecoderTest extends ProtocolTest {
         Gl200ProtocolDecoder decoder = new Gl200ProtocolDecoder(new Gl200Protocol());
 
         verifyPosition(decoder, text(
+                "+RESP:GTSWG,110100,358688000000158,,1,0,2.1,0,27.1,121.390717,31.164424,20110901073917,0460,0000,1878,0873,,20110901154653,0015$"));
+
+        verifyPosition(decoder, text(
                 "+RESP:GTTMP,110100,358688000000158,,2,60,1,1,4.3,92,70.0,121.354335,31.222073,20110214013254,0460,0000,18d8,6141,00,80,20110214093254,000F$"));
 
         verifyPosition(decoder, text(

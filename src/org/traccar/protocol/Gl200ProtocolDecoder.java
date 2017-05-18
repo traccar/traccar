@@ -777,6 +777,9 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             case "STT":
                 position.set(Position.KEY_ALARM, Position.ALARM_MOVEMENT);
                 break;
+            case "SWG":
+                position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE);
+                break;
             case "TMP":
             case "TEM":
                 position.set(Position.KEY_ALARM, Position.ALARM_TEMPERATURE);
