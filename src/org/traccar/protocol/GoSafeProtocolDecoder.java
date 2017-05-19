@@ -165,7 +165,7 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_ODOMETER, parser.nextInt(0));
         }
         position.set(Position.KEY_POWER, parser.nextDouble(0));
-        position.set(Position.KEY_BATTERY, parser.nextDouble(0));
+        position.set(Position.KEY_BATTERY, parser.nextDouble());
 
         if (parser.hasNext(6)) {
             long status = parser.nextLong(16, 0);
