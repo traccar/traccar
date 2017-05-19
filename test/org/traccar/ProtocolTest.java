@@ -197,9 +197,8 @@ public class ProtocolTest extends BaseTest {
         }
 
         if (attributes.containsKey(Position.KEY_BATTERY_LEVEL)) {
-            Object batteryLevel = attributes.get(Position.KEY_BATTERY_LEVEL);
-            Assert.assertTrue(batteryLevel instanceof Number);
-            Assert.assertTrue(((Number) batteryLevel).intValue() <=100 && ((Number) batteryLevel).intValue() >= 0);
+            int batteryLevel = ((Number) attributes.get(Position.KEY_BATTERY_LEVEL)).intValue();
+            Assert.assertTrue(batteryLevel <= 100 && batteryLevel >= 0);
         }
 
         if (position.getNetwork() != null && position.getNetwork().getCellTowers() != null) {
