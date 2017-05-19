@@ -252,7 +252,11 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             }
 
             position.set(Position.PREFIX_IO + 1, parser.next());
-            position.set(Position.KEY_BATTERY, parser.next());
+            if (pattern == PATTERN1) {
+                position.set(Position.KEY_BATTERY, parser.nextDouble(0) * 0.01);
+            } else {
+                position.set(Position.KEY_BATTERY, parser.nextDouble(0) * 0.1);
+            }
             position.set(Position.KEY_POWER, parser.nextDouble(0));
             position.set(Position.PREFIX_ADC + 1, parser.next());
 

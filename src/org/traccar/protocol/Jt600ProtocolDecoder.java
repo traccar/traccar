@@ -107,7 +107,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
             if (battery == 0xff) {
                 position.set(Position.KEY_CHARGE, true);
             } else {
-                position.set(Position.KEY_BATTERY, battery + "%");
+                position.set(Position.KEY_BATTERY_LEVEL, battery);
             }
 
             CellTower cellTower = CellTower.fromCidLac(buf.readUnsignedShort(), buf.readUnsignedShort());
@@ -218,7 +218,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.?d*),")                 // speed
             .number("(d+),")                     // course
             .number("(d+),")                     // satellites
-            .number("(d+%),")                    // battery
+            .number("(d+)%,")                    // battery
             .expression("([01]+),")              // status
             .number("(d+),")                     // cid
             .number("(d+),")                     // lac
@@ -257,7 +257,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(parser.nextDouble(0));
 
         position.set(Position.KEY_SATELLITES, parser.nextInt(0));
-        position.set(Position.KEY_BATTERY, parser.next());
+        position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt(0));
         position.set(Position.KEY_STATUS, parser.nextBinInt(0));
 
         CellTower cellTower = CellTower.fromCidLac(parser.nextInt(0), parser.nextInt(0));

@@ -78,7 +78,7 @@ public class Ardi01ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_SATELLITES, satellites);
 
         position.set(Position.KEY_EVENT, parser.next());
-        position.set(Position.KEY_BATTERY, parser.next());
+        position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt(0));
         position.set(Position.PREFIX_TEMP + 1, parser.next());
 
         return position;

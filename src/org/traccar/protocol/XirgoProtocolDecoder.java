@@ -152,7 +152,7 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_FUEL_CONSUMPTION, parser.next());
         }
 
-        position.set(Position.KEY_BATTERY, parser.next());
+        position.set(Position.KEY_BATTERY, parser.nextDouble(0));
         position.set(Position.KEY_RSSI, parser.next());
 
         if (!newFormat) {

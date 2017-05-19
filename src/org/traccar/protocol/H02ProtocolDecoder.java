@@ -82,18 +82,18 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
     }
 
-    private String decodeBattery(int value) {
+    private Integer decodeBattery(int value) {
         switch (value) {
             case 6:
-                return "100%";
+                return 100;
             case 5:
-                return "80%";
+                return 80;
             case 4:
-                return "60%";
+                return 60;
             case 3:
-                return "20%";
+                return 20;
             case 2:
-                return "10%";
+                return 10;
             default:
                 return null;
         }
@@ -123,7 +123,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(dateBuilder.getDate());
 
         double latitude = readCoordinate(buf, false);
-        position.set(Position.KEY_BATTERY, decodeBattery(buf.readUnsignedByte()));
+        position.set(Position.KEY_BATTERY_LEVEL, decodeBattery(buf.readUnsignedByte()));
         double longitude = readCoordinate(buf, true);
 
         int flags = buf.readUnsignedByte() & 0x0f;
