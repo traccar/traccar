@@ -110,7 +110,7 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_SATELLITES, satellites);
 
             position.set(Position.KEY_EVENT, parser.next());
-            position.set(Position.KEY_BATTERY, parser.next());
+            position.set(Position.KEY_BATTERY, parser.nextDouble());
             if (parser.hasNext()) {
                 position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1000);
             }

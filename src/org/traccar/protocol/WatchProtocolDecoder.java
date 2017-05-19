@@ -160,7 +160,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
                     getLastLocation(position, null);
 
-                    position.set(Position.KEY_BATTERY, values[3]);
+                    position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(values[3]));
 
                     return position;
                 }
@@ -193,7 +193,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Position.KEY_SATELLITES, parser.nextInt(0));
             position.set(Position.KEY_RSSI, parser.nextInt(0));
-            position.set(Position.KEY_BATTERY, parser.nextInt(0));
+            position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt(0));
 
             position.set("steps", parser.nextInt(0));
 
