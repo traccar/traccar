@@ -192,6 +192,16 @@ public class ProtocolTest extends BaseTest {
             Assert.assertTrue(attributes.get(Position.KEY_FUEL_LEVEL) instanceof Number);
         }
 
+        if (attributes.containsKey(Position.KEY_BATTERY)) {
+            Assert.assertTrue(attributes.get(Position.KEY_BATTERY) instanceof Number);
+        }
+
+        if (attributes.containsKey(Position.KEY_BATTERY_LEVEL)) {
+            Object batteryLevel = attributes.get(Position.KEY_BATTERY_LEVEL);
+            Assert.assertTrue(batteryLevel instanceof Number);
+            Assert.assertTrue(((Number) batteryLevel).intValue() <=100 && ((Number) batteryLevel).intValue() >= 0);
+        }
+
         if (position.getNetwork() != null && position.getNetwork().getCellTowers() != null) {
             for (CellTower cellTower : position.getNetwork().getCellTowers()) {
                 checkInteger(cellTower.getMobileCountryCode(), 0, 999);

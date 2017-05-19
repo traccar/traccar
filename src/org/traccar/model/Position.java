@@ -41,7 +41,8 @@ public class Position extends Message {
     // The units for the below four KEYs currently vary.
     // The preferred units of measure are specified in the comment for each.
     public static final String KEY_POWER = "power"; // volts
-    public static final String KEY_BATTERY = "battery"; // volts (or percentage appending %)
+    public static final String KEY_BATTERY = "battery"; // volts
+    public static final String KEY_BATTERY_LEVEL = "batteryLevel"; // percentage
     public static final String KEY_FUEL_LEVEL = "fuel"; // liters
     public static final String KEY_FUEL_CONSUMPTION = "fuelConsumption"; // liters/hour
 

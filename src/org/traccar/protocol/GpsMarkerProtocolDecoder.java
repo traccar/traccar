@@ -79,7 +79,7 @@ public class GpsMarkerProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(parser.nextDouble(0));
 
         position.set(Position.KEY_SATELLITES, parser.nextHexInt(0));
-        position.set(Position.KEY_BATTERY, parser.next());
+        position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt(0));
         position.set(Position.KEY_INPUT, parser.next());
         position.set(Position.KEY_OUTPUT, parser.next());
         position.set(Position.PREFIX_TEMP + 1, parser.next());
