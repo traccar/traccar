@@ -95,7 +95,7 @@ public class DmtHttpProtocolDecoder extends BaseProtocolDecoder {
                     case 0:
                         position.setFixTime(dateFormat.parse(field.getString("GpsUTC")));
                         position.setLatitude(field.getJsonNumber("Lat").doubleValue());
-                        position.setLatitude(field.getJsonNumber("Long").doubleValue());
+                        position.setLongitude(field.getJsonNumber("Long").doubleValue());
                         position.setAltitude(field.getInt("Alt"));
                         position.setSpeed(UnitsConverter.knotsFromCps(field.getInt("Spd")));
                         position.setCourse(field.getInt("Head"));
