@@ -219,7 +219,7 @@ public class User extends Extensible {
 
     public void setToken(String token) {
         if (token != null && !token.isEmpty()) {
-            if (!token.matches("^[a-zA-Z0-9]{16,}$")) {
+            if (!token.matches("^[a-zA-Z0-9]{32,}$")) {
                 throw new IllegalArgumentException("Illegal token");
             }
             this.token = token;
