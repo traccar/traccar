@@ -192,6 +192,10 @@ public class ProtocolTest extends BaseTest {
             Assert.assertTrue(attributes.get(Position.KEY_FUEL_LEVEL) instanceof Number);
         }
 
+        if (attributes.containsKey(Position.KEY_POWER)) {
+            Assert.assertTrue(attributes.get(Position.KEY_POWER) instanceof Number);
+        }
+
         if (attributes.containsKey(Position.KEY_BATTERY)) {
             Assert.assertTrue(attributes.get(Position.KEY_BATTERY) instanceof Number);
         }
@@ -199,6 +203,10 @@ public class ProtocolTest extends BaseTest {
         if (attributes.containsKey(Position.KEY_BATTERY_LEVEL)) {
             int batteryLevel = ((Number) attributes.get(Position.KEY_BATTERY_LEVEL)).intValue();
             Assert.assertTrue(batteryLevel <= 100 && batteryLevel >= 0);
+        }
+
+        if (attributes.containsKey(Position.KEY_CHARGE)) {
+            Assert.assertTrue(attributes.get(Position.KEY_CHARGE) instanceof Boolean);
         }
 
         if (position.getNetwork() != null && position.getNetwork().getCellTowers() != null) {

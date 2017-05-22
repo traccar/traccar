@@ -125,7 +125,7 @@ public class BlackKiteProtocolDecoder extends BaseProtocolDecoder {
                     if (BitUtil.check(status, 15)) {
                         position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
                     }
-                    position.set(Position.KEY_POWER, BitUtil.check(status, 2));
+                    position.set(Position.KEY_CHARGE, BitUtil.check(status, 2));
                     break;
 
                 case TAG_DIGITAL_INPUTS:
