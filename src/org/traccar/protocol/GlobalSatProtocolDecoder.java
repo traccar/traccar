@@ -225,7 +225,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(parser.nextDouble(0));
 
         position.set(Position.KEY_SATELLITES, parser.nextInt(0));
-        position.set(Position.KEY_HDOP, parser.next());
+        position.set(Position.KEY_HDOP, parser.nextDouble());
 
         return position;
     }

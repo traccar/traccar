@@ -98,7 +98,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_SATELLITES, satellites);
         }
 
-        position.set(Position.KEY_HDOP, parser.next());
+        position.set(Position.KEY_HDOP, parser.nextDouble());
         position.set(Position.KEY_INPUT, parser.next());
         position.set(Position.KEY_OUTPUT, parser.next());
 
