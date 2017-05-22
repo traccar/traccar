@@ -180,6 +180,22 @@ public class ProtocolTest extends BaseTest {
             Assert.assertFalse("no attributes", attributes.isEmpty());
         }
 
+        if (attributes.containsKey(Position.KEY_INDEX)) {
+            Assert.assertTrue(attributes.get(Position.KEY_INDEX) instanceof Number);
+        }
+
+        if (attributes.containsKey(Position.KEY_HDOP)) {
+            Assert.assertTrue(attributes.get(Position.KEY_HDOP) instanceof Number);
+        }
+
+        if (attributes.containsKey(Position.KEY_VDOP)) {
+            Assert.assertTrue(attributes.get(Position.KEY_VDOP) instanceof Number);
+        }
+
+        if (attributes.containsKey(Position.KEY_PDOP)) {
+            Assert.assertTrue(attributes.get(Position.KEY_PDOP) instanceof Number);
+        }
+
         if (attributes.containsKey(Position.KEY_ODOMETER)) {
             Assert.assertTrue(attributes.get(Position.KEY_ODOMETER) instanceof Number);
         }

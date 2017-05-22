@@ -244,11 +244,11 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(dateBuilder.getDate());
 
             if (pattern == PATTERN1) {
-                position.set(Position.KEY_PDOP, parser.next());
-                position.set(Position.KEY_HDOP, parser.next());
-                position.set(Position.KEY_VDOP, parser.next());
+                position.set(Position.KEY_PDOP, parser.nextDouble());
+                position.set(Position.KEY_HDOP, parser.nextDouble());
+                position.set(Position.KEY_VDOP, parser.nextDouble());
             } else {
-                position.set(Position.KEY_HDOP, parser.next());
+                position.set(Position.KEY_HDOP, parser.nextDouble());
             }
 
             position.set(Position.PREFIX_IO + 1, parser.next());
@@ -291,7 +291,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_SATELLITES, parser.next());
             position.setCourse(parser.nextDouble(0));
             position.setSpeed(parser.nextDouble(0));
-            position.set(Position.KEY_PDOP, parser.next());
+            position.set(Position.KEY_PDOP, parser.nextDouble());
             position.set(Position.KEY_ODOMETER, parser.nextInt(0) * 1000);
 
             position.setLatitude(parser.nextCoordinate());

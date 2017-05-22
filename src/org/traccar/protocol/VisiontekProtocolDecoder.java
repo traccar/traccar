@@ -119,7 +119,7 @@ public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (parser.hasNext(7)) {
-            position.set(Position.KEY_HDOP, parser.next());
+            position.set(Position.KEY_HDOP, parser.nextDouble());
             position.setAltitude(parser.nextDouble(0));
             position.set(Position.KEY_ODOMETER, parser.nextInt(0) * 1000);
             position.set(Position.KEY_INPUT, parser.next());
