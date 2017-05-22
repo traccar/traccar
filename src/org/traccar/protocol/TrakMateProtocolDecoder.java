@@ -189,7 +189,7 @@ public class TrakMateProtocolDecoder extends BaseProtocolDecoder {
         position.set("dop2", parser.next());
         position.set(Position.KEY_INPUT, parser.next());
         position.set(Position.KEY_BATTERY, parser.nextDouble(0));
-        position.set(Position.KEY_POWER, parser.next());
+        position.set(Position.KEY_POWER, parser.nextDouble());
         position.set(Position.KEY_ODOMETER, parser.nextDouble(0));
         position.set("pulseOdometer", parser.next());
         position.set(Position.KEY_STATUS, parser.nextInt(0));
