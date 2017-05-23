@@ -101,7 +101,7 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
         dateBuilder.setDateReverse(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
         position.setTime(dateBuilder.getDate());
 
-        position.set(Position.KEY_SATELLITES, parser.next());
+        position.set(Position.KEY_SATELLITES, parser.nextInt());
 
         return position;
     }

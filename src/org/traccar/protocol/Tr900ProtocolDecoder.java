@@ -81,7 +81,7 @@ public class Tr900ProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(parser.nextDouble(0));
         position.setCourse(parser.nextDouble(0));
 
-        position.set(Position.KEY_RSSI, parser.next());
+        position.set(Position.KEY_RSSI, parser.nextDouble());
         position.set(Position.KEY_EVENT, parser.nextInt(0));
         position.set(Position.PREFIX_ADC + 1, parser.nextInt(0));
         position.set(Position.KEY_BATTERY, parser.nextInt(0));

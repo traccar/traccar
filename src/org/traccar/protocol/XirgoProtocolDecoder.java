@@ -144,7 +144,7 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(UnitsConverter.knotsFromMph(parser.nextDouble(0)));
         position.setCourse(parser.nextDouble(0));
 
-        position.set(Position.KEY_SATELLITES, parser.next());
+        position.set(Position.KEY_SATELLITES, parser.nextInt());
         position.set(Position.KEY_HDOP, parser.nextDouble());
 
         if (newFormat) {
@@ -153,7 +153,7 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
         }
 
         position.set(Position.KEY_BATTERY, parser.nextDouble(0));
-        position.set(Position.KEY_RSSI, parser.next());
+        position.set(Position.KEY_RSSI, parser.nextDouble());
 
         if (!newFormat) {
             position.set(Position.KEY_ODOMETER, UnitsConverter.metersFromMiles(parser.nextDouble(0)));

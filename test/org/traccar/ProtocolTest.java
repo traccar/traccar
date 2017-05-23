@@ -196,6 +196,18 @@ public class ProtocolTest extends BaseTest {
             Assert.assertTrue(attributes.get(Position.KEY_PDOP) instanceof Number);
         }
 
+        if (attributes.containsKey(Position.KEY_SATELLITES)) {
+            Assert.assertTrue(attributes.get(Position.KEY_SATELLITES) instanceof Number);
+        }
+
+        if (attributes.containsKey(Position.KEY_SATELLITES_VISIBLE)) {
+            Assert.assertTrue(attributes.get(Position.KEY_SATELLITES_VISIBLE) instanceof Number);
+        }
+
+        if (attributes.containsKey(Position.KEY_RSSI)) {
+            Assert.assertTrue(attributes.get(Position.KEY_RSSI) instanceof Number);
+        }
+
         if (attributes.containsKey(Position.KEY_ODOMETER)) {
             Assert.assertTrue(attributes.get(Position.KEY_ODOMETER) instanceof Number);
         }
