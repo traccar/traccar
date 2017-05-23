@@ -37,6 +37,8 @@ import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.database.AttributesManager;
 import org.traccar.model.Attribute;
+import org.traccar.model.Position;
+import org.traccar.processing.ComputedAttributesHandler;
 
 @Path("attributes/computed")
 @Produces(MediaType.APPLICATION_JSON)
@@ -81,13 +83,36 @@ public class AttributeResource extends BaseResource {
         return attributesManager.getAttributes(result);
 
     }
+
     @POST
-    public Response add(Attribute entity) throws SQLException {
+    public Response add(@QueryParam("deviceId") long deviceId, Attribute entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getAttributesManager().addAttribute(entity);
-        Context.getDataManager().linkAttribute(getUserId(), entity.getId());
-        Context.getAttributesManager().refreshUserAttributes();
-        return Response.ok(entity).build();
+        if (deviceId != 0) {
+            Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
+            Position last = Context.getIdentityManager().getLastPosition(deviceId);
+            if (last != null) {
+                Object result = new ComputedAttributesHandler().computeAttribute(entity, last);
+                if (result != null) {
+                    switch (entity.getType()) {
+                        case "number":
+                            return Response.ok((Number) result).build();
+                        case "boolean":
+                            return Response.ok((Boolean) result).build();
+                        default:
+                            return Response.ok(result.toString()).build();
+                    }
+                } else {
+                    return Response.noContent().build();
+                }
+            } else {
+                throw new IllegalArgumentException("Device has no last position");
+            }
+        } else {
+            Context.getAttributesManager().addAttribute(entity);
+            Context.getDataManager().linkAttribute(getUserId(), entity.getId());
+            Context.getAttributesManager().refreshUserAttributes();
+            return Response.ok(entity).build();
+        }
     }
 
     @Path("{id}")
