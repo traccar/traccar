@@ -37,6 +37,8 @@ import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.database.AttributesManager;
 import org.traccar.model.Attribute;
+import org.traccar.model.Position;
+import org.traccar.processing.ComputedAttributesHandler;
 
 @Path("attributes/computed")
 @Produces(MediaType.APPLICATION_JSON)
@@ -81,13 +83,44 @@ public class AttributeResource extends BaseResource {
         return attributesManager.getAttributes(result);
 
     }
-    @POST
-    public Response add(Attribute entity) throws SQLException {
-        Context.getPermissionsManager().checkReadonly(getUserId());
+
+    private Response add(Attribute entity) throws SQLException {
         Context.getAttributesManager().addAttribute(entity);
         Context.getDataManager().linkAttribute(getUserId(), entity.getId());
         Context.getAttributesManager().refreshUserAttributes();
         return Response.ok(entity).build();
+    }
+
+    private Response test(long deviceId, Attribute entity) {
+        Position last = Context.getIdentityManager().getLastPosition(deviceId);
+        if (last != null) {
+            Object result = new ComputedAttributesHandler().computeAttribute(entity, last);
+            if (result != null) {
+                switch (entity.getType()) {
+                    case "number":
+                        return Response.ok((Number) result).build();
+                    case "boolean":
+                        return Response.ok((Boolean) result).build();
+                    default:
+                        return Response.ok(result.toString()).build();
+                }
+            } else {
+                return Response.noContent().build();
+            }
+        } else {
+            throw new IllegalArgumentException("Device has no last position");
+        }
+    }
+
+    @POST
+    public Response post(@QueryParam("deviceId") long deviceId, Attribute entity) throws SQLException {
+        Context.getPermissionsManager().checkReadonly(getUserId());
+        if (deviceId != 0) {
+            Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
+            return test(deviceId, entity);
+        } else {
+            return add(entity);
+        }
     }
 
     @Path("{id}")
