@@ -288,7 +288,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
                     CellTower.fromLacCid(parser.nextHexInt(0), parser.nextHexInt(0))));
 
             position.setValid(parser.next().equals("A"));
-            position.set(Position.KEY_SATELLITES, parser.next());
+            position.set(Position.KEY_SATELLITES, parser.nextInt());
             position.setCourse(parser.nextDouble(0));
             position.setSpeed(parser.nextDouble(0));
             position.set(Position.KEY_PDOP, parser.nextDouble());

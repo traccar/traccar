@@ -136,7 +136,7 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         if (full) {
-            position.set(Position.KEY_SATELLITES, parser.next().replaceFirst("^0*(?![\\.$])", ""));
+            position.set(Position.KEY_SATELLITES, parser.nextInt());
 
             position.setAltitude(parser.nextDouble(0));
 

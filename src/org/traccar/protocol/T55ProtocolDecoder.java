@@ -127,7 +127,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(dateBuilder.getDate());
 
         if (parser.hasNext(5)) {
-            position.set(Position.KEY_SATELLITES, parser.next());
+            position.set(Position.KEY_SATELLITES, parser.nextInt());
 
             deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
             if (deviceSession == null) {

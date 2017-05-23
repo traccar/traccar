@@ -166,11 +166,17 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
                 }
                 position.setDeviceId(deviceSession.getDeviceId());
 
-                position.set(Position.KEY_SATELLITES, parser.next());
+                String sat = parser.next();
+                if (sat.contains("/")) {
+                    position.set(Position.KEY_SATELLITES, Integer.parseInt(sat.split("/")[0]));
+                    position.set(Position.KEY_SATELLITES_VISIBLE, Integer.parseInt(sat.split("/")[1]));
+                } else {
+                    position.set(Position.KEY_SATELLITES, Integer.parseInt(sat));
+                }
 
                 position.setAltitude(parser.nextDouble(0));
 
-                position.set(Position.KEY_POWER, parser.nextDouble(0));
+                position.set(Position.KEY_BATTERY_LEVEL, parser.nextDouble(0));
 
                 String charger = parser.next();
                 if (charger != null) {
@@ -206,7 +212,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
                 position.setNetwork(new Network(CellTower.from(parser.nextInt(0), parser.nextInt(0),
                         parser.nextHexInt(0), parser.nextHexInt(0), parser.nextInt(0))));
 
-                position.set(Position.KEY_BATTERY, Double.parseDouble(parser.next()));
+                position.set(Position.KEY_BATTERY_LEVEL, parser.nextDouble());
 
                 position.set(Position.KEY_FLAGS, parser.next());
                 position.set(Position.KEY_INPUT, parser.next());
