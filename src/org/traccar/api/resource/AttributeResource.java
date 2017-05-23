@@ -84,34 +84,42 @@ public class AttributeResource extends BaseResource {
 
     }
 
+    private Response add(Attribute entity) throws SQLException {
+        Context.getAttributesManager().addAttribute(entity);
+        Context.getDataManager().linkAttribute(getUserId(), entity.getId());
+        Context.getAttributesManager().refreshUserAttributes();
+        return Response.ok(entity).build();
+    }
+
+    private Response test(long deviceId, Attribute entity) {
+        Position last = Context.getIdentityManager().getLastPosition(deviceId);
+        if (last != null) {
+            Object result = new ComputedAttributesHandler().computeAttribute(entity, last);
+            if (result != null) {
+                switch (entity.getType()) {
+                    case "number":
+                        return Response.ok((Number) result).build();
+                    case "boolean":
+                        return Response.ok((Boolean) result).build();
+                    default:
+                        return Response.ok(result.toString()).build();
+                }
+            } else {
+                return Response.noContent().build();
+            }
+        } else {
+            throw new IllegalArgumentException("Device has no last position");
+        }
+    }
+
     @POST
-    public Response add(@QueryParam("deviceId") long deviceId, Attribute entity) throws SQLException {
+    public Response post(@QueryParam("deviceId") long deviceId, Attribute entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         if (deviceId != 0) {
             Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
-            Position last = Context.getIdentityManager().getLastPosition(deviceId);
-            if (last != null) {
-                Object result = new ComputedAttributesHandler().computeAttribute(entity, last);
-                if (result != null) {
-                    switch (entity.getType()) {
-                        case "number":
-                            return Response.ok((Number) result).build();
-                        case "boolean":
-                            return Response.ok((Boolean) result).build();
-                        default:
-                            return Response.ok(result.toString()).build();
-                    }
-                } else {
-                    return Response.noContent().build();
-                }
-            } else {
-                throw new IllegalArgumentException("Device has no last position");
-            }
+            return test(deviceId, entity);
         } else {
-            Context.getAttributesManager().addAttribute(entity);
-            Context.getDataManager().linkAttribute(getUserId(), entity.getId());
-            Context.getAttributesManager().refreshUserAttributes();
-            return Response.ok(entity).build();
+            return add(entity);
         }
     }
 
