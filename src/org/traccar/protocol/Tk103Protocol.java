@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.TrackerServer;
+import org.traccar.model.Command;
 
 import java.util.List;
 
@@ -30,6 +31,9 @@ public class Tk103Protocol extends BaseProtocol {
 
     public Tk103Protocol() {
         super("tk103");
+        setSupportedDataCommands(
+                Command.TYPE_ENGINE_STOP,
+                Command.TYPE_ENGINE_RESUME);
     }
 
     @Override
@@ -40,6 +44,7 @@ public class Tk103Protocol extends BaseProtocol {
                 pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, ')'));
                 pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("stringEncoder", new StringEncoder());
+                pipeline.addLast("objectEncoder", new Tk103ProtocolEncoder());
                 pipeline.addLast("objectDecoder", new Tk103ProtocolDecoder(Tk103Protocol.this));
             }
         });
@@ -48,6 +53,7 @@ public class Tk103Protocol extends BaseProtocol {
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("stringEncoder", new StringEncoder());
+                pipeline.addLast("objectEncoder", new Tk103ProtocolEncoder());
                 pipeline.addLast("objectDecoder", new Tk103ProtocolDecoder(Tk103Protocol.this));
             }
         });
