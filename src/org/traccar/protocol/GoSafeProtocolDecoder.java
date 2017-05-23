@@ -146,7 +146,7 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_EVENT, parser.next());
 
         position.setValid(parser.next().equals("A"));
-        position.set(Position.KEY_SATELLITES, parser.next());
+        position.set(Position.KEY_SATELLITES, parser.nextInt());
 
         position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG));
         position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG));

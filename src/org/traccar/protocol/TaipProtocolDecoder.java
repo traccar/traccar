@@ -171,7 +171,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
                             break;
 
                         case "sv":
-                            position.set(Position.KEY_SATELLITES, value);
+                            position.set(Position.KEY_SATELLITES, Integer.parseInt(value));
                             break;
 
                         case "bl":
