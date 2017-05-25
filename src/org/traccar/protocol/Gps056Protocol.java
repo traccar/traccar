@@ -18,7 +18,6 @@ package org.traccar.protocol;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.traccar.BaseProtocol;
-import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.TrackerServer;
 
 import java.util.List;
