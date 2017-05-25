@@ -427,7 +427,6 @@
         DELETE FROM device_attribute WHERE deviceId = :deviceId AND attributeId = :attributeId
     </entry>
 
-
     <!-- PROTOCOL CONFIG -->
 
     <entry key='gps103.port'>5001</entry>
@@ -571,5 +570,6 @@
     <entry key='xt2400.port'>5138</entry>
     <entry key='dmthttp.port'>5139</entry>
     <entry key='alematics.port'>5140</entry>
+    <entry key='gps056.port'>5141</entry>
 
 </properties>
