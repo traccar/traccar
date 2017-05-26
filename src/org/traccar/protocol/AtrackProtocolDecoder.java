@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,10 @@ import org.traccar.model.Position;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
@@ -40,6 +42,8 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
     private boolean longDate;
     private boolean custom;
     private String form;
+
+    private final Map<Integer, String> alarmMap = new HashMap<>();
 
     public AtrackProtocolDecoder(AtrackProtocol protocol) {
         super(protocol);
@@ -50,6 +54,13 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         form = Context.getConfig().getString(getProtocolName() + ".form");
         if (form != null) {
             custom = true;
+        }
+
+        for (String pair : Context.getConfig().getString(getProtocolName() + ".alarmMap", "").split(",")) {
+            if (!pair.isEmpty()) {
+                alarmMap.put(
+                        Integer.parseInt(pair.substring(0, pair.indexOf('='))), pair.substring(pair.indexOf('=') + 1));
+            }
         }
     }
 
@@ -240,7 +251,10 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             position.setLatitude(buf.readInt() * 0.000001);
             position.setCourse(buf.readUnsignedShort());
 
-            position.set(Position.KEY_TYPE, buf.readUnsignedByte());
+            int type = buf.readUnsignedByte();
+            position.set(Position.KEY_TYPE, type);
+            position.set(Position.KEY_ALARM, alarmMap.get(type));
+
             position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 100);
             position.set(Position.KEY_HDOP, buf.readUnsignedShort() * 0.1);
             position.set(Position.KEY_INPUT, buf.readUnsignedByte());
