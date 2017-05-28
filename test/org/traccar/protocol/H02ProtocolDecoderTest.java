@@ -11,6 +11,9 @@ public class H02ProtocolDecoderTest extends ProtocolTest {
 
         H02ProtocolDecoder decoder = new H02ProtocolDecoder(new H02Protocol());
 
+        verifyAttributes(decoder, buffer(
+                "*HQ,1700086468,LINK,180902,15,0,84,0,0,240517,FFFFFBFF#"));
+
         verifyNull(decoder, buffer(
                 "*HQ,355488020882405,V3,095426,74001,01,010278,045142,128,-92,02DE,0,X,090517,FFFFFBFF#"));
 
@@ -68,7 +71,7 @@ public class H02ProtocolDecoderTest extends ProtocolTest {
         verifyAttributes(decoder, buffer(
                 "*HQ,1600068860,NBR,110326,262,03,255,6,802,23152,23,812,49449,14,802,35382,13,802,35402,11,812,56622,09,802,23132,04,081116,FFFFFBFF#"));
 
-        verifyNull(decoder, buffer(
+        verifyAttributes(decoder, buffer(
                 "*HQ,1600068860,LINK,112137,20,8,67,0,0,081116,FFFFFBFF#"));
 
         verifyNull(decoder, buffer(

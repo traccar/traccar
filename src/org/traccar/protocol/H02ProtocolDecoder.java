@@ -206,6 +206,22 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
+    private static final Pattern PATTERN_LINK = new PatternBuilder()
+            .text("*")
+            .expression("..,")                   // manufacturer
+            .number("(d+),")                     // imei
+            .text("LINK,")
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
+            .number("(d+),")                     // rssi
+            .number("(d+),")                     // satellites
+            .number("(d+),")                     // battery
+            .number("(d+),")                     // steps
+            .number("(d+),")                     // turnovers
+            .number("(dd)(dd)(dd),")             // date (ddmmyy)
+            .number("(x{8})")                    // status
+            .any()
+            .compile();
+
     private Position decodeText(String sentence, Channel channel, SocketAddress remoteAddress) {
 
         Parser parser = new Parser(PATTERN, sentence);
@@ -316,6 +332,40 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private Position decodeLink(String sentence, Channel channel, SocketAddress remoteAddress) {
+
+        Parser parser = new Parser(PATTERN_LINK, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        DateBuilder dateBuilder = new DateBuilder()
+                .setTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
+
+        position.set(Position.KEY_RSSI, parser.nextInt());
+        position.set(Position.KEY_SATELLITES, parser.nextInt());
+        position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
+        position.set("steps", parser.nextInt());
+        position.set("turnovers", parser.nextInt());
+
+        dateBuilder.setDateReverse(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
+
+        getLastLocation(position, dateBuilder.getDate());
+
+        processStatus(position, parser.nextLong(16, 0));
+
+        return position;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -326,10 +376,15 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         switch (marker) {
             case "*":
                 String sentence = buf.toString(StandardCharsets.US_ASCII);
-                if (sentence.contains(",NBR,")) {
-                    return decodeLbs(sentence, channel, remoteAddress);
-                } else {
-                    return decodeText(sentence, channel, remoteAddress);
+                int typeStart = sentence.indexOf(',', sentence.indexOf(',') + 1) + 1;
+                String type = sentence.substring(typeStart, sentence.indexOf(',', typeStart));
+                switch (type) {
+                    case "NBR":
+                        return decodeLbs(sentence, channel, remoteAddress);
+                    case "LINK":
+                        return decodeLink(sentence, channel, remoteAddress);
+                    default:
+                        return decodeText(sentence, channel, remoteAddress);
                 }
             case "$":
                 return decodeBinary(buf, channel, remoteAddress);
