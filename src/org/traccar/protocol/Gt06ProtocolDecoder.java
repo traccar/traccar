@@ -70,6 +70,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_COMMAND_1 = 0x81;
     public static final int MSG_COMMAND_2 = 0x82;
     public static final int MSG_INFO = 0x94;
+    public static final int MSG_STRING_INFO = 0x21;
 
     private static boolean isSupported(int type) {
         return hasGps(type) || hasLbs(type) || hasStatus(type);
@@ -238,6 +239,33 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private static final Pattern PATTERN_LOCATION = new PatternBuilder()
+            .text("Current position!")
+            .number("Lat:([NS])(d+.d+),")        // latitude
+            .number("Lon:([EW])(d+.d+),")        // longitude
+            .text("Course:").number("(d+.d+),")  // course
+            .text("Speed:").number("(d+.d+),")   // speed
+            .text("DateTime:")
+            .number("(dddd)-(dd)-(dd)  ")        // date
+            .number("(dd):(dd):(dd)")            // time
+            .compile();
+
+    private Position decodeLocationString(Position position, String sentence) {
+        Parser parser = new Parser(PATTERN_LOCATION, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        position.setValid(true);
+        position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG));
+        position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG));
+        position.setCourse(parser.nextDouble());
+        position.setSpeed(parser.nextDouble());
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.YMD_HMS));
+
+        return position;
+    }
+
     protected Object decodeBasic(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) throws Exception {
 
         int length = buf.readUnsignedByte();
@@ -358,15 +386,28 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
+        Position position = new Position();
+        position.setDeviceId(deviceSession.getDeviceId());
+        position.setProtocol(getProtocolName());
+
         buf.readUnsignedShort(); // length
         int type = buf.readUnsignedByte();
 
-        if (type == MSG_INFO) {
-            int subType = buf.readUnsignedByte();
+        if (type == MSG_STRING_INFO) {
 
-            Position position = new Position();
-            position.setDeviceId(deviceSession.getDeviceId());
-            position.setProtocol(getProtocolName());
+            buf.readUnsignedInt(); // server flag
+            String data;
+            if (buf.readUnsignedByte() == 1) {
+                data = buf.readBytes(buf.readableBytes() - 6).toString(StandardCharsets.US_ASCII);
+            } else {
+                data = buf.readBytes(buf.readableBytes() - 6).toString(StandardCharsets.UTF_16BE);
+            }
+
+            return decodeLocationString(position, data);
+
+        } else if (type == MSG_INFO) {
+
+            int subType = buf.readUnsignedByte();
 
             getLastLocation(position, null);
 
@@ -389,6 +430,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                         buf.readerIndex(), buf.readableBytes() - 4 - 2, StandardCharsets.US_ASCII));
 
             }
+
         }
 
         return null;
