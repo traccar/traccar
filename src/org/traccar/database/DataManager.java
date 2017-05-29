@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 
@@ -316,6 +317,7 @@ public class DataManager {
         long historyDays = config.getInteger("database.historyDays");
         if (historyDays != 0) {
             Date timeLimit = new Date(System.currentTimeMillis() - historyDays * 24 * 3600 * 1000);
+            Log.debug("Clearing history earlier than " + new SimpleDateFormat(Log.DATE_FORMAT).format(timeLimit));
             QueryBuilder.create(dataSource, getQuery("database.deletePositions"))
                     .setDate("serverTime", timeLimit)
                     .executeUpdate();
