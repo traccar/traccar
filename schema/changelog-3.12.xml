@@ -77,6 +77,35 @@
     <addForeignKeyConstraint baseTableName="device_attribute" baseColumnNames="deviceid" constraintName="fk_device_attribute_deviceid" referencedTableName="devices" referencedColumnNames="id" onDelete="CASCADE" />
     <addForeignKeyConstraint baseTableName="device_attribute" baseColumnNames="attributeid" constraintName="fk_device_attribute_attributeid" referencedTableName="attributes" referencedColumnNames="id" onDelete="CASCADE" />
 
+    <dropForeignKeyConstraint baseTableName="positions" constraintName="fk_position_deviceid" />
+    <addForeignKeyConstraint baseTableName="positions" baseColumnNames="deviceid" constraintName="fk_positions_deviceid" referencedTableName="devices" referencedColumnNames="id" onDelete="CASCADE" />
+
+    <dropForeignKeyConstraint baseTableName="events" constraintName="fk_event_deviceid" />
+    <addForeignKeyConstraint baseTableName="events" baseColumnNames="deviceid" constraintName="fk_events_deviceid" referencedTableName="devices" referencedColumnNames="id" onDelete="CASCADE" />
+
+    <dropForeignKeyConstraint baseTableName="device_geofence" constraintName="fk_user_device_geofence_deviceid" />
+    <addForeignKeyConstraint baseTableName="device_geofence" baseColumnNames="deviceid" constraintName="fk_device_geofence_deviceid" referencedTableName="devices" referencedColumnNames="id" onDelete="CASCADE" />
+    <dropForeignKeyConstraint baseTableName="device_geofence" constraintName="fk_user_device_geofence_geofenceid" />
+    <addForeignKeyConstraint baseTableName="device_geofence" baseColumnNames="geofenceid" constraintName="fk_device_geofence_geofenceid" referencedTableName="geofences" referencedColumnNames="id" onDelete="CASCADE" />
+
+    <dropForeignKeyConstraint baseTableName="devices" constraintName="fk_device_group_groupid" />
+    <addForeignKeyConstraint baseTableName="devices" baseColumnNames="groupid" constraintName="fk_devices_groupid" onDelete="SET NULL" onUpdate="RESTRICT" referencedColumnNames="id" referencedTableName="groups" />
+
+    <dropForeignKeyConstraint baseTableName="user_calendar" constraintName="fk_user_calendar_geofenceid" />
+    <addForeignKeyConstraint baseTableName="user_calendar" baseColumnNames="calendarid" constraintName="fk_user_calendar_calendarid" referencedTableName="calendars" referencedColumnNames="id" onDelete="CASCADE" />
+
+  </changeSet>
+
+  <changeSet author="author" id="changelog-3.12-notmssql">
+
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <dbms type="mssql" />
+      </not>
+    </preConditions>
+    <dropForeignKeyConstraint baseTableName="groups" constraintName="fk_group_group_groupid" />
+    <addForeignKeyConstraint baseTableName="groups" baseColumnNames="groupid" constraintName="fk_groups_groupid" onDelete="SET NULL" onUpdate="RESTRICT" referencedColumnNames="id" referencedTableName="groups" />
+
   </changeSet>
 
 </databaseChangeLog>
