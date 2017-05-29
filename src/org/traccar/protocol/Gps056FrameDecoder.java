@@ -33,7 +33,11 @@ public class Gps056FrameDecoder extends FrameDecoder {
         if (buf.readableBytes() >= MESSAGE_HEADER) {
             int length = Integer.parseInt(buf.toString(2, 2, StandardCharsets.US_ASCII)) + 5;
             if (buf.readableBytes() >= length) {
-                return buf.readBytes(length);
+                ChannelBuffer frame = buf.readBytes(length);
+                while (buf.readable() && buf.getUnsignedByte(buf.readerIndex()) != '$') {
+                    buf.readByte();
+                }
+                return frame;
             }
         }
 
