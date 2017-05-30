@@ -571,5 +571,6 @@
     <entry key='dmthttp.port'>5139</entry>
     <entry key='alematics.port'>5140</entry>
     <entry key='gps056.port'>5141</entry>
+    <entry key='flexcomm'>5142</entry>
 
 </properties>
