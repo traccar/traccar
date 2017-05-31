@@ -111,6 +111,10 @@ public class FlexCommProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
         position.set(Position.KEY_POWER, parser.nextInt() * 0.1);
 
+        if (channel != null) {
+            channel.write("{01}");
+        }
+
         return position;
     }
 
