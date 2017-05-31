@@ -25,7 +25,7 @@ import java.nio.charset.StandardCharsets;
 
 public class WatchFrameDecoder extends FrameDecoder {
 
-    private static final int MESSAGE_HEADER = 20;
+    public static final int MESSAGE_HEADER = 20;
 
     @Override
     protected Object decode(
