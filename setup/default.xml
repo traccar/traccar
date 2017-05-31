@@ -20,6 +20,8 @@
     <entry key='event.enable'>true</entry>
     <entry key='processing.computedAttributes.enable'>true</entry>
 
+    <entry key='media.path'>./media</entry>
+
     <!-- DATABASE CONFIG -->
 
     <entry key='database.ignoreUnknown'>true</entry>

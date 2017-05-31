@@ -32,6 +32,7 @@ import org.traccar.database.ConnectionManager;
 import org.traccar.database.DataManager;
 import org.traccar.database.DeviceManager;
 import org.traccar.database.IdentityManager;
+import org.traccar.database.MediaManager;
 import org.traccar.database.NotificationManager;
 import org.traccar.database.PermissionsManager;
 import org.traccar.database.GeofenceManager;
@@ -88,6 +89,12 @@ public final class Context {
 
     public static DataManager getDataManager() {
         return dataManager;
+    }
+
+    private static MediaManager mediaManager;
+
+    public static MediaManager getMediaManager() {
+        return mediaManager;
     }
 
     private static DeviceManager deviceManager;
@@ -212,6 +219,10 @@ public final class Context {
 
         if (config.hasKey("database.url")) {
             dataManager = new DataManager(config);
+        }
+
+        if (config.hasKey("media.path")) {
+            mediaManager = new MediaManager(config);
         }
 
         if (dataManager != null) {
