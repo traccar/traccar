@@ -17,10 +17,8 @@ package org.traccar.protocol;
 
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.handler.codec.string.StringDecoder;
 import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
-import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.TrackerServer;
 import org.traccar.model.Command;
 
@@ -53,7 +51,6 @@ public class WatchProtocol extends BaseProtocol {
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new WatchFrameDecoder());
                 pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("objectEncoder", new WatchProtocolEncoder());
                 pipeline.addLast("objectDecoder", new WatchProtocolDecoder(WatchProtocol.this));
             }

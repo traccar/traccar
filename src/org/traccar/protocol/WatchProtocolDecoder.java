@@ -15,6 +15,7 @@
  */
 package org.traccar.protocol;
 
+import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
@@ -28,6 +29,7 @@ import org.traccar.model.Position;
 import org.traccar.model.WifiAccessPoint;
 
 import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.regex.Pattern;
 
@@ -37,17 +39,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern PATTERN = new PatternBuilder()
-            .text("[")
-            .expression("(..)").text("*")        // manufacturer
-            .number("(d+)").text("*")            // equipment id
-            .number("xxxx").text("*")            // length
-            .expression("([^,]+)")               // type
-            .expression("(.*)")                  // content
-            .compile();
-
     private static final Pattern PATTERN_POSITION = new PatternBuilder()
-            .text(",")
             .number("(dd)(dd)(dd),")             // date (ddmmyy)
             .number("(dd)(dd)(dd),")             // time (hhmmss)
             .expression("([AV]),")               // validity
@@ -64,8 +56,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // steps
             .number("d+,")                       // tumbles
             .number("(x+),")                     // status
-            .expression("([^\\]]*)")             // cell and wifi
-            .text("]")
+            .expression("(.*)")                  // cell and wifi
             .compile();
 
     private void sendResponse(Channel channel, String manufacturer, String id, String content) {
@@ -132,36 +123,46 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        Parser parser = new Parser(PATTERN, (String) msg);
-        if (!parser.matches()) {
-            return null;
-        }
+        ChannelBuffer buf = (ChannelBuffer) msg;
 
-        String manufacturer = parser.next();
-        String id = parser.next();
+        buf.skipBytes(1); // header
+        String manufacturer = buf.readBytes(2).toString(StandardCharsets.US_ASCII);
+        buf.skipBytes(1); // delimiter
+
+        String id = buf.readBytes(10).toString(StandardCharsets.US_ASCII);
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
         if (deviceSession == null) {
             return null;
         }
 
-        String type = parser.next();
-        String content = parser.next();
+        buf.skipBytes(1); // delimiter
+        buf.skipBytes(4); // length
+        buf.skipBytes(1); // delimiter
+
+        String content = null;
+        int contentIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ',');
+        if (contentIndex > 0) {
+            content = buf.toString(contentIndex + 1, buf.writerIndex() - 2 - contentIndex, StandardCharsets.US_ASCII);
+        } else {
+            contentIndex = buf.writerIndex() - 1;
+        }
+
+        String type = buf.readBytes(contentIndex - buf.readerIndex()).toString(StandardCharsets.US_ASCII);
 
         if (type.equals("LK")) {
 
             sendResponse(channel, manufacturer, id, "LK");
 
-            if (!content.isEmpty()) {
+            if (content != null) {
                 String[] values = content.split(",");
-                if (values.length >= 4) {
+                if (values.length >= 3) {
                     Position position = new Position();
                     position.setProtocol(getProtocolName());
                     position.setDeviceId(deviceSession.getDeviceId());
 
                     getLastLocation(position, null);
 
-                    position.set(Position.KEY_BATTERY_LEVEL,
-                            Integer.parseInt(values[3].substring(0, values[3].length() - 1)));
+                    position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(values[2]));
 
                     return position;
                 }
@@ -174,7 +175,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
                 sendResponse(channel, manufacturer, id, "AL");
             }
 
-            parser = new Parser(PATTERN_POSITION, content);
+            Parser parser = new Parser(PATTERN_POSITION, content);
             if (!parser.matches()) {
                 return null;
             }
@@ -210,15 +211,16 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type.equals("PULSE") || type.equals("heart")) {
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
-            position.setDeviceId(deviceSession.getDeviceId());
-            getLastLocation(position, new Date());
-            position.setValid(false);
-            String pulse = content.substring(1);
-            position.set("pulse", pulse);
-            position.set(Position.KEY_RESULT, pulse);
-            return position;
+            if (content != null) {
+                Position position = new Position();
+                position.setProtocol(getProtocolName());
+                position.setDeviceId(deviceSession.getDeviceId());
+                getLastLocation(position, new Date());
+                position.setValid(false);
+                position.set("pulse", content);
+                position.set(Position.KEY_RESULT, content);
+                return position;
+            }
 
         }
 
