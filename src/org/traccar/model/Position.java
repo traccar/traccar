@@ -37,6 +37,9 @@ public class Position extends Message {
     public static final String KEY_HOURS = "hours";
     public static final String KEY_INPUT = "input";
     public static final String KEY_OUTPUT = "output";
+    public static final String KEY_IMAGE = "image";
+    public static final String KEY_VIDEO = "video";
+    public static final String KEY_SOUND = "sound";
 
     // The units for the below four KEYs currently vary.
     // The preferred units of measure are specified in the comment for each.
