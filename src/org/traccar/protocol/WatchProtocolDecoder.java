@@ -65,7 +65,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             .number("d+,")                       // tumbles
             .number("(x+),")                     // status
             .expression("([^\\]]*)")             // cell and wifi
-            .text("]").optional()
+            .text("]")
             .compile();
 
     private void sendResponse(Channel channel, String manufacturer, String id, String content) {
@@ -160,7 +160,8 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
                     getLastLocation(position, null);
 
-                    position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(values[3]));
+                    position.set(Position.KEY_BATTERY_LEVEL,
+                            Integer.parseInt(values[3].substring(0, values[3].length() - 1)));
 
                     return position;
                 }
