@@ -217,7 +217,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .number("(x+)?,")                    // adc 2
             .number("(d{1,3})?,")                // battery
             .number("(?:(xx)(xx)(xx))?,")        // device status
-            .any()
+            .expression("(.*)")                  // additional data
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
             .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
             .text(",")
@@ -600,6 +600,20 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
 
         decodeStatus(position, parser);
+
+        int index = 0;
+        String[] data = parser.next().split(",");
+        if (data.length > 1) {
+            int deviceType = Integer.parseInt(data[index++]);
+            if (deviceType == 2) {
+                int deviceCount = Integer.parseInt(data[index++]);
+                for (int i = 1; i <= deviceCount; i++) {
+                    index++; // id
+                    index++; // type
+                    position.set(Position.PREFIX_TEMP + i, Short.parseShort(data[index++], 16) * 0.0625);
+                }
+            }
+        }
 
         decodeDeviceTime(position, parser);
 
