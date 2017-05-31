@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Parser;
@@ -139,22 +140,25 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
         buf.skipBytes(4); // length
         buf.skipBytes(1); // delimiter
 
-        String content = null;
+        buf.writerIndex(buf.writerIndex() - 1); // ignore ending
+
         int contentIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ',');
-        if (contentIndex > 0) {
-            content = buf.toString(contentIndex + 1, buf.writerIndex() - 2 - contentIndex, StandardCharsets.US_ASCII);
-        } else {
-            contentIndex = buf.writerIndex() - 1;
+        if (contentIndex < 0) {
+            contentIndex = buf.writerIndex();
         }
 
         String type = buf.readBytes(contentIndex - buf.readerIndex()).toString(StandardCharsets.US_ASCII);
+
+        if (contentIndex < buf.writerIndex()) {
+            buf.readerIndex(contentIndex + 1);
+        }
 
         if (type.equals("LK")) {
 
             sendResponse(channel, manufacturer, id, "LK");
 
-            if (content != null) {
-                String[] values = content.split(",");
+            if (buf.readable()) {
+                String[] values = buf.toString(StandardCharsets.US_ASCII).split(",");
                 if (values.length >= 3) {
                     Position position = new Position();
                     position.setProtocol(getProtocolName());
@@ -175,7 +179,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
                 sendResponse(channel, manufacturer, id, "AL");
             }
 
-            Parser parser = new Parser(PATTERN_POSITION, content);
+            Parser parser = new Parser(PATTERN_POSITION, buf.toString(StandardCharsets.US_ASCII));
             if (!parser.matches()) {
                 return null;
             }
@@ -211,16 +215,31 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type.equals("PULSE") || type.equals("heart")) {
 
-            if (content != null) {
+            if (buf.readable()) {
                 Position position = new Position();
                 position.setProtocol(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());
                 getLastLocation(position, new Date());
                 position.setValid(false);
-                position.set("pulse", content);
-                position.set(Position.KEY_RESULT, content);
+                String pulse = buf.toString(StandardCharsets.US_ASCII);
+                position.set("pulse", pulse);
+                position.set(Position.KEY_RESULT, pulse);
                 return position;
             }
+
+        } else if (type.equals("img")) {
+
+            Position position = new Position();
+            position.setProtocol(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            int timeIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ',');
+            buf.readerIndex(timeIndex + 12 + 2);
+            position.set(Position.KEY_IMAGE, Context.getMediaManager().writeFile(id, buf, "jpg"));
+
+            return position;
 
         }
 
