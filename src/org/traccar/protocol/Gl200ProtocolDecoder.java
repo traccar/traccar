@@ -335,6 +335,33 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .number("(xxxx)")                    // count number
             .text("$").optional()
             .compile();
+    
+    private static final Pattern PATTERN_NOGPS = new PatternBuilder()
+            .text("+").expression("(?:RESP|BUFF):GTFRI,")
+            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
+            .number("(d{15}|x{14}),")            // imei
+            .text(",")
+            .number("(d{1,2})?,")                // report id
+            .number("(d{1,2})?,")                // report type
+            .number("(d{1,2})?,")                // number
+            .text(",")
+            .text(",")
+            .text(",")
+            .text(",")
+            .text(",")
+            .text(",")
+            .text(",")
+            .number("(d{1,2})?,")                // hdop
+            .number("(d{1,2})?,")                // hdop
+            .number("(0ddd),")                   // mcc
+            .number("(0ddd),")                   // mnc
+            .number("(xxxx),")                   // lac
+            .number("(xxxx),")                   // cell
+            .any()
+            .number("(d{1,3})?,")                // battery
+            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
+            .compile();
 
     private Object decodeAck(Channel channel, SocketAddress remoteAddress, String sentence, String type) {
         Parser parser = new Parser(PATTERN_ACK, sentence);
@@ -734,6 +761,44 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             channel.write("+SACK:" + parser.next() + "$", remoteAddress);
         }
 
+        return position;
+    }
+    
+    private Object decodeNogps(Channel channel, SocketAddress remoteAddress, String sentence, String type) {
+        Parser parser = new Parser(PATTERN_NOGPS, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+        
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+        
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+        position.setValid(false);
+        
+        int report_id = parser.nextInt();
+        int report_type = parser.nextInt();
+        int number = parser.nextInt();
+        
+        if (parser.hasNext(4)) {
+            position.setNetwork(new Network(CellTower.from(
+                    parser.nextInt(), parser.nextInt(), parser.nextInt(16), parser.nextInt(16))));
+        }
+        
+        parser.skip(1);
+        
+        if (parser.hasNext(1)) {
+            position.set(Position.KEY_BATTERY, parser.nextInt());
+        }
+        
+        if (parser.hasNext(1)) {
+            position.setTime(parser.nextDateTime());
+        }
+        
         return position;
     }
 
