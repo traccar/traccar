@@ -89,8 +89,8 @@ public class FlexCommProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.setValid(parser.next().equals("1"));
         position.setTime(parser.nextDateTime());
+        position.setValid(parser.next().equals("1"));
         position.setLatitude(parseSignedValue(parser, 6));
         position.setLongitude(parseSignedValue(parser, 6));
         position.setAltitude(parseSignedValue(parser, 0));
@@ -104,8 +104,8 @@ public class FlexCommProtocolDecoder extends BaseProtocolDecoder {
         position.setNetwork(new Network(CellTower.from(
                 parser.nextInt(), parser.nextInt(), parser.nextHexInt(), parser.nextHexInt())));
 
-        position.set(Position.KEY_INPUT, parser.nextInt());
-        position.set(Position.KEY_OUTPUT, parser.nextInt());
+        position.set(Position.KEY_INPUT, parser.nextBinInt());
+        position.set(Position.KEY_OUTPUT, parser.nextBinInt());
         position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
         position.set(Position.PREFIX_TEMP + 1, parseSignedValue(parser, 0));
         position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
