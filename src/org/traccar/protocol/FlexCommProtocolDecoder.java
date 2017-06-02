@@ -53,8 +53,8 @@ public class FlexCommProtocolDecoder extends BaseProtocolDecoder {
             .number("(ddd)")                     // mnc
             .number("(x{6})")                    // lac
             .number("(x{6})")                    // cid
-            .expression("([01]{3})")             // input
-            .expression("([01]{2})")             // output
+            .expression("([01])([01])([01])")    // input
+            .expression("([01])([01])")          // output
             .number("(ddd)")                     // fuel
             .number("(d{4})")                    // temperature
             .number("(ddd)")                     // battery
@@ -104,8 +104,14 @@ public class FlexCommProtocolDecoder extends BaseProtocolDecoder {
         position.setNetwork(new Network(CellTower.from(
                 parser.nextInt(), parser.nextInt(), parser.nextHexInt(), parser.nextHexInt())));
 
-        position.set(Position.KEY_INPUT, parser.nextBinInt());
-        position.set(Position.KEY_OUTPUT, parser.nextBinInt());
+        for (int i = 1; i <= 3; i++) {
+            position.set(Position.PREFIX_IN + i, parser.nextInt());
+        }
+
+        for (int i = 1; i <= 2; i++) {
+            position.set(Position.PREFIX_OUT + i, parser.nextInt());
+        }
+
         position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
         position.set(Position.PREFIX_TEMP + 1, parseSignedValue(parser, 0));
         position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
