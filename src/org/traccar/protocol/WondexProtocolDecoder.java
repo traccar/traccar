@@ -69,7 +69,8 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
 
             return null;
         } else if (buf.toString(StandardCharsets.US_ASCII).startsWith("$OK:")
-                || buf.toString(StandardCharsets.US_ASCII).startsWith("$ERR:")) {
+                || buf.toString(StandardCharsets.US_ASCII).startsWith("$ERR:")
+                  || buf.toString(StandardCharsets.US_ASCII).startsWith("$MSG:")) {
 
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
 
