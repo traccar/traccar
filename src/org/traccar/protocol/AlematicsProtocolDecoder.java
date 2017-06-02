@@ -54,8 +54,13 @@ public class AlematicsProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d+),")                  // adc
             .number("(d+.d+),")                  // power
             .number("(d+),")                     // odometer
+            .groupBegin()
+            .text("0,$S,")
+            .expression("(.*)")                  // text message
+            .or()
             .number("(d+),")                     // extra mask
             .expression("(.*)")                  // extra data
+            .groupEnd()
             .compile();
 
     private void decodeExtras(Position position, Parser parser) {
@@ -138,7 +143,11 @@ public class AlematicsProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_POWER, parser.nextDouble());
         position.set(Position.KEY_ODOMETER, parser.nextInt());
 
-        decodeExtras(position, parser);
+        if (parser.hasNext()) {
+            position.set("text", parser.next());
+        } else {
+            decodeExtras(position, parser);
+        }
 
         return position;
     }
