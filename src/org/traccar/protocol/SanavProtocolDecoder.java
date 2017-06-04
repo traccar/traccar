@@ -38,7 +38,7 @@ public class SanavProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)")                      // imei
             .expression("&?rmc[:=]")
             .text("$GPRMC,")
-            .number("(dd)(dd)(dd).(ddd),")       // time (hhmmss.sss)
+            .number("(dd)(dd)(dd).d+,")          // time (hhmmss.sss)
             .expression("([AV]),")               // validity
             .number("(d+)(dd.d+),")              // latitude
             .expression("([NS]),")
@@ -69,7 +69,7 @@ public class SanavProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         DateBuilder dateBuilder = new DateBuilder()
-                .setTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
+                .setTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
 
         position.setValid(parser.next().equals("A"));
         position.setLatitude(parser.nextCoordinate());
