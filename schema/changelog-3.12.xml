@@ -108,4 +108,19 @@
 
   </changeSet>
 
+  <changeSet author="author" id="changelog-3.12-pgsql">
+
+    <preConditions onFail="MARK_RAN">
+      <dbms type="postgresql" />
+      <sqlCheck expectedResult="oid">SELECT data_type FROM information_schema.columns WHERE table_name = 'calendars' AND column_name = 'data';</sqlCheck>
+    </preConditions>
+    <dropColumn tableName="calendars" columnName="data" />
+    <addColumn tableName="calendars">
+      <column name="data" type="bytea">
+        <constraints nullable="false" />
+      </column>
+    </addColumn>
+
+  </changeSet>
+
 </databaseChangeLog>
