@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,16 +66,25 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
-    private String decodeAlarm(String value) {
+    private String decodeStatus(Position position, String value) {
         if (value != null) {
-            switch (value) {
+            switch (value.toLowerCase()) {
+                case "acc on":
+                    position.set(Position.KEY_IGNITION, true);
+                    break;
+                case "acc off":
+                    position.set(Position.KEY_IGNITION, false);
+                    break;
                 case "help me!":
-                    return Position.ALARM_SOS;
+                    position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+                    break;
                 case "low battery":
-                    return Position.ALARM_LOW_BATTERY;
+                    position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                    break;
                 case "move!":
                 case "moved!":
-                    return Position.ALARM_MOVEMENT;
+                    position.set(Position.KEY_ALARM, Position.ALARM_MOVEMENT);
+                    break;
                 default:
                     break;
             }
@@ -127,7 +136,8 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(dateBuilder.getDate());
 
         position.set("signal", parser.next());
-        position.set(Position.KEY_ALARM, decodeAlarm(parser.next()));
+
+        decodeStatus(position, parser.next());
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {

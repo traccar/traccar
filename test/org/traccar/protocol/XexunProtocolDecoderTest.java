@@ -54,6 +54,12 @@ public class XexunProtocolDecoderTest extends ProtocolTest {
                 "GPRMC,043435.000,A,811.299200,S,11339.9500,E,0.93,29.52,160313,00,0000.0,A*65,F,,imei:359585014597923,"));
 
         decoder = new XexunProtocolDecoder(new XexunProtocol(), true);
+
+        verifyPosition(decoder, text(
+                "170505103845,TELKOMSEL,GPRMC,103845.000,A,0340.2482,N,09841.9689,E,0.00,68.23,050517,,,A*5D,F,ACC On, imei:013227002782161,05,-8.2,F:4.22V,1,141,44712,510,10,2BE5,EC47"));
+
+        verifyPosition(decoder, text(
+                "170607031932,+6282167979090,GPRMC,031932.000,A,0347.2515,N,09841.9433,E,0.00,261.22,070617,,,A*6C,F,ACC OFF, imei:013226004613135,11,23.1,F:4.25V,1,148,44989,510,10,2B34,0268"));
         
         verifyNull(decoder, text(
                 ",+48606717068,,L,, imei:012207005047292,,,F:4.28V,1,52,11565,247,01,000E,1FC5"));
