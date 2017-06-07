@@ -1766,7 +1766,7 @@
         "deviceId": {
             "name": "deviceId",
             "in": "query",
-            "description": "Standard users can use this only with _userId_s, they have access to",
+            "description": "Standard users can use this only with _deviceId_s, they have access to",
             "type": "integer"
         },
         "Device": {
