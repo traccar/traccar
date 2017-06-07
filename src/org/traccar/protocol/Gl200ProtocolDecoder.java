@@ -312,7 +312,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN_BASIC = new PatternBuilder()
             .text("+").expression("(?:RESP|BUFF)").text(":")
             .expression("GT...,")
-            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
+            .number("(?:[0-9A-Z]{2}xxxx)?,").optional() // protocol version
             .number("(d{15}|x{14}),")            // imei
             .any()
             .number("(d{1,2})?,")                // hdop
