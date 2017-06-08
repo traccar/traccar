@@ -20,6 +20,7 @@ import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.traccar.BaseProtocol;
 import org.traccar.TrackerServer;
+import org.traccar.model.Command;
 
 import java.util.List;
 
@@ -27,6 +28,8 @@ public class AtrackProtocol extends BaseProtocol {
 
     public AtrackProtocol() {
         super("atrack");
+        setSupportedDataCommands(
+                Command.TYPE_CUSTOM);
     }
 
     @Override
@@ -35,12 +38,14 @@ public class AtrackProtocol extends BaseProtocol {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new AtrackFrameDecoder());
+                pipeline.addLast("objectEncoder", new AtrackProtocolEncoder());
                 pipeline.addLast("objectDecoder", new AtrackProtocolDecoder(AtrackProtocol.this));
             }
         });
         serverList.add(new TrackerServer(new ConnectionlessBootstrap(), getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                pipeline.addLast("objectEncoder", new AtrackProtocolEncoder());
                 pipeline.addLast("objectDecoder", new AtrackProtocolDecoder(AtrackProtocol.this));
             }
         });
