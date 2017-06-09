@@ -574,5 +574,6 @@
     <entry key='alematics.port'>5140</entry>
     <entry key='gps056.port'>5141</entry>
     <entry key='flexcomm'>5142</entry>
+    <entry key='vt200'>5143</entry>
 
 </properties>
