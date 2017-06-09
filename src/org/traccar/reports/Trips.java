@@ -55,7 +55,7 @@ public final class Trips {
 
         TripReport trip = new TripReport();
 
-        long tripDuration = endTrip.getFixTime().getTime() - positions.get(startIndex).getFixTime().getTime();
+        long tripDuration = endTrip.getFixTime().getTime() - startTrip.getFixTime().getTime();
         long deviceId = startTrip.getDeviceId();
         trip.setDeviceId(deviceId);
         trip.setDeviceName(Context.getIdentityManager().getDeviceById(deviceId).getName());
