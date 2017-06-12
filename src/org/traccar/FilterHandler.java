@@ -68,7 +68,7 @@ public class FilterHandler extends BaseDataHandler {
     public void setFilterLimit(long filterLimit) {
         this.filterLimit = filterLimit;
     }
-    public void setFilterNotEarth(long filterNotEarth) {
+    public void setFilterNotEarth(boolean filterNotEarth) {
         this.filterNotEarth = filterNotEarth;
     }
 
