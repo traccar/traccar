@@ -107,11 +107,7 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
             position.setAltitude(parser.nextDouble(0));
 
             int satellites = parser.nextInt(0);
-            
-            if (satellites <3 || latitude > 90 || longitude > 180) {
-                 position.setValid(false);
-            }
-            position.setValid(satellites >=3 && latitude < 91 && longitude < 181);
+            position.setValid(satellites >= 3);
             
             position.set(Position.KEY_SATELLITES, satellites);
 
