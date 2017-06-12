@@ -68,7 +68,6 @@ public class FilterHandler extends BaseDataHandler {
     public void setFilterLimit(long filterLimit) {
         this.filterLimit = filterLimit;
     }
-    
     public void setFilterNotEarth(long filterNotEarth) {
         this.filterNotEarth = filterNotEarth;
     }
@@ -145,13 +144,10 @@ public class FilterHandler extends BaseDataHandler {
             return false;
         }
     }
-    
     private boolean filterNotEarth(Position position) {
         return filterNotEarth && position.getLatitude() > 90.0 || position.getLongitude() > 180.0;
     }
-    
     private boolean filter(Position position) {
-
         StringBuilder filterType = new StringBuilder();
 
         Position last = null;
