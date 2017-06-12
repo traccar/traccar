@@ -31,6 +31,7 @@ public class FilterHandler extends BaseDataHandler {
     private int filterDistance;
     private int filterMaxSpeed;
     private long filterLimit;
+    private boolean filterNotEarth;
 
     public void setFilterInvalid(boolean filterInvalid) {
         this.filterInvalid = filterInvalid;
@@ -66,6 +67,10 @@ public class FilterHandler extends BaseDataHandler {
 
     public void setFilterLimit(long filterLimit) {
         this.filterLimit = filterLimit;
+    }
+    
+    public void setFilterNotEarth(long filterNotEarth) {
+        this.filterNotEarth = filterNotEarth;
     }
 
     public FilterHandler() {
