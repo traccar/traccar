@@ -144,12 +144,11 @@ public class FilterHandler extends BaseDataHandler {
         } else {
             return false;
         }
+    }
     private boolean filterNotEarth(Position position) {
         return filterNotEarth && position.getLatitude() > 90.0 || position.getLongitude() > 180.0;
     }
         
-    }
-
     private boolean filter(Position position) {
 
         StringBuilder filterType = new StringBuilder();
