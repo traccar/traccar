@@ -108,7 +108,6 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
 
             int satellites = parser.nextInt(0);
             position.setValid(satellites >= 3);
-            
             position.set(Position.KEY_SATELLITES, satellites);
 
             position.set(Position.KEY_EVENT, parser.next());
