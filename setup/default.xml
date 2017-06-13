@@ -575,5 +575,6 @@
     <entry key='gps056.port'>5141</entry>
     <entry key='flexcomm.port'>5142</entry>
     <entry key='vt200.port'>5143</entry>
+    <entry key='owntracks.port'>5144</entry>
 
 </properties>
