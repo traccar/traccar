@@ -56,7 +56,7 @@ public class OwnTracksProtocolDecoder extends BaseProtocolDecoder {
 
         HttpRequest request = (HttpRequest) msg;
         JsonObject root = Json.createReader(
-            new StringReader(request.getContent().toString(StandardCharsets.US_ASCII))).readObject();
+                          new StringReader(request.getContent().toString(StandardCharsets.US_ASCII))).readObject();
 
         Position position = new Position();
         position.setProtocol(getProtocolName());
@@ -66,22 +66,22 @@ public class OwnTracksProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(root.getJsonNumber("lon").doubleValue());
 
         if (root.containsKey("vel")) {
-                position.setSpeed(UnitsConverter.knotsFromCps(root.getInt("vel")));
+            position.setSpeed(UnitsConverter.knotsFromCps(root.getInt("vel")));
         }
         if (root.containsKey("alt")) {
-                position.setAltitude(root.getInt("alt"));
+            position.setAltitude(root.getInt("alt"));
         }
         if (root.containsKey("cog")) {
-                position.setCourse(root.getInt("cog"));
+            position.setCourse(root.getInt("cog"));
         }
         if (root.containsKey("acc")) {
-                position.setAccuracy(root.getInt("acc"));
+            position.setAccuracy(root.getInt("acc"));
         }
         if (root.containsKey("t")) {
-                position.set("t", root.getString("t"));
+            position.set("t", root.getString("t"));
         }
         if (root.containsKey("batt")) {
-                position.set(Position.KEY_BATTERY, root.getInt("batt"));
+            position.set(Position.KEY_BATTERY, root.getInt("batt"));
         }
 
         long timestamp = root.getJsonNumber("tst").longValue();
@@ -92,8 +92,8 @@ public class OwnTracksProtocolDecoder extends BaseProtocolDecoder {
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, root.getString("tid"));
         if (deviceSession == null) {
-                sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
-                return null;
+            sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
+            return null;
         }
         position.setDeviceId(deviceSession.getDeviceId());
 
