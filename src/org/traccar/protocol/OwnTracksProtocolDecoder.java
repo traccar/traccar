@@ -56,7 +56,7 @@ public class OwnTracksProtocolDecoder extends BaseProtocolDecoder {
 
         HttpRequest request = (HttpRequest) msg;
         JsonObject root = Json.createReader(
-                          new StringReader(request.getContent().toString(StandardCharsets.US_ASCII))).readObject();
+                new StringReader(request.getContent().toString(StandardCharsets.US_ASCII))).readObject();
 
         Position position = new Position();
         position.setProtocol(getProtocolName());
