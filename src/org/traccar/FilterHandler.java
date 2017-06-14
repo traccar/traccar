@@ -31,6 +31,7 @@ public class FilterHandler extends BaseDataHandler {
     private int filterDistance;
     private int filterMaxSpeed;
     private long filterLimit;
+    private boolean filterNotEarth;
 
     public void setFilterInvalid(boolean filterInvalid) {
         this.filterInvalid = filterInvalid;
@@ -67,6 +68,9 @@ public class FilterHandler extends BaseDataHandler {
     public void setFilterLimit(long filterLimit) {
         this.filterLimit = filterLimit;
     }
+    public void setFilterNotEarth(boolean filterNotEarth) {
+        this.filterNotEarth = filterNotEarth;
+    }
 
     public FilterHandler() {
         Config config = Context.getConfig();
@@ -80,6 +84,7 @@ public class FilterHandler extends BaseDataHandler {
             filterDistance = config.getInteger("filter.distance");
             filterMaxSpeed = config.getInteger("filter.maxSpeed");
             filterLimit = config.getLong("filter.limit") * 1000;
+            filterNotEarth = config.getBoolean("filter.notEarth");
         }
     }
 
@@ -140,8 +145,11 @@ public class FilterHandler extends BaseDataHandler {
         }
     }
 
-    private boolean filter(Position position) {
+    private boolean filterNotEarth(Position position) {
+        return filterNotEarth && position.getLatitude() > 90.0 || position.getLongitude() > 180.0;
+    }
 
+    private boolean filter(Position position) {
         StringBuilder filterType = new StringBuilder();
 
         Position last = null;
@@ -172,6 +180,9 @@ public class FilterHandler extends BaseDataHandler {
         }
         if (filterMaxSpeed(position, last)) {
             filterType.append("MaxSpeed ");
+        }
+         if (filterNotEarth(position)) {
+            filterType.append("NotEarth ");
         }
 
         if (filterType.length() > 0 && !filterLimit(position, last)) {
