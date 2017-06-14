@@ -119,6 +119,7 @@ public class Position extends Message {
     public static final String ALARM_FOOT_BRAKE = "footBrake";
     public static final String ALARM_OIL_LEAK = "oilLeak";
     public static final String ALARM_TAMPERING = "tampering";
+    public static final String ALARM_REMOVING = "removing";
 
     private String protocol;
 
