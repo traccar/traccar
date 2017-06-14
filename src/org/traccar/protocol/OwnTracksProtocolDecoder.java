@@ -94,15 +94,17 @@ public class OwnTracksProtocolDecoder extends BaseProtocolDecoder {
 
         position.setTime(new Date(root.getJsonNumber("tst").longValue() * 1000));
 
-        String uniqueId = "";
-        if (root.containsKey("tid")) {
-            uniqueId = root.getString("tid");
-        }
-        if (root.containsKey("topic")) {
+        Boolean haveTopic = root.containsKey("topic");
+        Boolean haveTid = root.containsKey("tid");
+        String uniqueId = null;
+
+        if (haveTopic) {
             uniqueId = root.getString("topic");
-            if (root.containsKey("tid")) {
+            if (haveTid) {
                 position.set("tid", root.getString("tid"));
             }
+        } else {
+            uniqueId = root.getString("tid");
         }
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, uniqueId);
@@ -115,5 +117,4 @@ public class OwnTracksProtocolDecoder extends BaseProtocolDecoder {
         sendResponse(channel, HttpResponseStatus.OK);
         return position;
     }
-
 }
