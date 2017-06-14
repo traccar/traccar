@@ -83,6 +83,9 @@ public class OwnTracksProtocolDecoder extends BaseProtocolDecoder {
         if (root.containsKey("batt")) {
             position.set(Position.KEY_BATTERY, root.getInt("batt"));
         }
+        if (root.containsKey("topic")) {
+            position.set("topic", root.getString("topic"));
+        }
 
         long timestamp = root.getJsonNumber("tst").longValue();
         if (timestamp < Integer.MAX_VALUE) {
