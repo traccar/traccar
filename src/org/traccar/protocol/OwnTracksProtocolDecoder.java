@@ -58,6 +58,13 @@ public class OwnTracksProtocolDecoder extends BaseProtocolDecoder {
         JsonObject root = Json.createReader(
                 new StringReader(request.getContent().toString(StandardCharsets.US_ASCII))).readObject();
 
+        if (!root.containsKey("_type") || !root.getString("_type").equals("location")) {
+            sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
+            return null;
+        }
+
+        long timestamp;
+        String deviceId = new String();
         Position position = new Position();
         position.setProtocol(getProtocolName());
         position.setValid(true);
@@ -80,16 +87,34 @@ public class OwnTracksProtocolDecoder extends BaseProtocolDecoder {
         if (root.containsKey("t")) {
             position.set("t", root.getString("t"));
         }
+        if (root.containsKey("p")) {
+            position.set("pb", root.getInt("p"));
+        }
         if (root.containsKey("batt")) {
             position.set(Position.KEY_BATTERY, root.getInt("batt"));
         }
+
+        if (root.containsKey("tst")) {
+            timestamp = root.getJsonNumber("tst").longValue();
+            if (timestamp < Integer.MAX_VALUE) {
+                timestamp *= 1000;
+            }
+        } else {
+            timestamp = new Date().getTime();
+        }
+        position.setTime(new Date(timestamp));
+
+        if (root.containsKey("tid")) {
+            deviceId = root.getString("tid");
+        }
         if (root.containsKey("topic")) {
-            position.set("topic", root.getString("topic"));
+            deviceId = root.getString("topic");
+            if (root.containsKey("tid")) {
+                position.set("tid", root.getString("tid"));
+            }
         }
 
-        position.setTime(new Date(root.getJsonNumber("tst").longValue() * 1000));
-
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, root.getString("tid"));
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, deviceId);
         if (deviceSession == null) {
             sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
             return null;
