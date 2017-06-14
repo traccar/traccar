@@ -11,6 +11,9 @@ public class AquilaProtocolDecoderTest extends ProtocolTest {
         AquilaProtocolDecoder decoder = new AquilaProtocolDecoder(new AquilaProtocol());
 
         verifyPosition(decoder, text(
+                "$$CLIENT_1ZF,170215089,1,18.462809,73.824188,170613182744,A,19,0,0,256,4,4.860000,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,259,3731,*37"));
+
+        verifyPosition(decoder, text(
                 "$$CLIENT_1ZF,170222318,101,22.846016,75.949104,170321103506,A,0,0,244991,0,10,0.860000,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,12483,294,*3D"));
 
         verifyNull(decoder, text(
