@@ -1,6 +1,6 @@
 /*
  * Copyright 2017 Jan-Piet Mens (jpmens@gmail.com)
- * Copyright 2013 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,11 +87,7 @@ public class OwnTracksProtocolDecoder extends BaseProtocolDecoder {
             position.set("topic", root.getString("topic"));
         }
 
-        long timestamp = root.getJsonNumber("tst").longValue();
-        if (timestamp < Integer.MAX_VALUE) {
-            timestamp *= 1000;
-        }
-        position.setTime(new Date(timestamp));
+        position.setTime(new Date(root.getJsonNumber("tst").longValue() * 1000));
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, root.getString("tid"));
         if (deviceSession == null) {
@@ -103,4 +99,5 @@ public class OwnTracksProtocolDecoder extends BaseProtocolDecoder {
         sendResponse(channel, HttpResponseStatus.OK);
         return position;
     }
+
 }
