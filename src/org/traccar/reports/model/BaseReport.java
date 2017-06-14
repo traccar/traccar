@@ -74,4 +74,14 @@ public class BaseReport {
         }
     }
 
+    private String spentFuel;
+
+    public String getSpentFuel() {
+        return spentFuel;
+    }
+
+    public void setSpentFuel(String spentFuel) {
+        this.spentFuel = spentFuel;
+    }
+
 }

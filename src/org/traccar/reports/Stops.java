@@ -1,6 +1,6 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
- * Copyright 2016 Andrey Kunitsyn (andrey@traccar.org)
+ * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.traccar.reports;
 
 import java.io.FileInputStream;
@@ -31,15 +32,15 @@ import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.reports.model.BaseReport;
 import org.traccar.reports.model.DeviceReport;
-import org.traccar.reports.model.TripReport;
+import org.traccar.reports.model.StopReport;
 import org.traccar.reports.model.TripsConfig;
 
-public final class Trips {
+public final class Stops {
 
-    private Trips() {
+    private Stops() {
     }
 
-    private static Collection<TripReport> detectTrips(long deviceId, Date from, Date to) throws SQLException {
+    private static Collection<StopReport> detectStops(long deviceId, Date from, Date to) throws SQLException {
         double speedThreshold = Context.getConfig().getDouble("event.motion.speedThreshold", 0.01);
 
         TripsConfig tripsConfig = ReportUtils.initTripsConfig();
@@ -49,17 +50,17 @@ public final class Trips {
 
         Collection<? extends BaseReport> result = ReportUtils.detectTripsAndStops(tripsConfig,
                 ignoreOdometer, speedThreshold,
-                Context.getDataManager().getPositions(deviceId, from, to), true);
+                Context.getDataManager().getPositions(deviceId, from, to), false);
 
-        return (Collection<TripReport>) result;
+        return (Collection<StopReport>) result;
     }
 
-    public static Collection<TripReport> getObjects(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
+    public static Collection<StopReport> getObjects(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws SQLException {
-        ArrayList<TripReport> result = new ArrayList<>();
+        ArrayList<StopReport> result = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            result.addAll(detectTrips(deviceId, from, to));
+            result.addAll(detectStops(deviceId, from, to));
         }
         return result;
     }
@@ -67,29 +68,29 @@ public final class Trips {
     public static void getExcel(OutputStream outputStream,
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws SQLException, IOException {
-        ArrayList<DeviceReport> devicesTrips = new ArrayList<>();
+        ArrayList<DeviceReport> devicesStops = new ArrayList<>();
         ArrayList<String> sheetNames = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            Collection<TripReport> trips = detectTrips(deviceId, from, to);
-            DeviceReport deviceTrips = new DeviceReport();
+            Collection<StopReport> stops = detectStops(deviceId, from, to);
+            DeviceReport deviceStops = new DeviceReport();
             Device device = Context.getIdentityManager().getDeviceById(deviceId);
-            deviceTrips.setDeviceName(device.getName());
-            sheetNames.add(WorkbookUtil.createSafeSheetName(deviceTrips.getDeviceName()));
+            deviceStops.setDeviceName(device.getName());
+            sheetNames.add(WorkbookUtil.createSafeSheetName(deviceStops.getDeviceName()));
             if (device.getGroupId() != 0) {
                 Group group = Context.getDeviceManager().getGroupById(device.getGroupId());
                 if (group != null) {
-                    deviceTrips.setGroupName(group.getName());
+                    deviceStops.setGroupName(group.getName());
                 }
             }
-            deviceTrips.setObjects(trips);
-            devicesTrips.add(deviceTrips);
+            deviceStops.setObjects(stops);
+            devicesStops.add(deviceStops);
         }
         String templatePath = Context.getConfig().getString("report.templatesPath",
                 "templates/export/");
-        try (InputStream inputStream = new FileInputStream(templatePath + "/trips.xlsx")) {
+        try (InputStream inputStream = new FileInputStream(templatePath + "/stops.xlsx")) {
             org.jxls.common.Context jxlsContext = ReportUtils.initializeContext(userId);
-            jxlsContext.putVar("devices", devicesTrips);
+            jxlsContext.putVar("devices", devicesStops);
             jxlsContext.putVar("sheetNames", sheetNames);
             jxlsContext.putVar("from", from);
             jxlsContext.putVar("to", to);

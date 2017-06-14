@@ -1,6 +1,6 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
- * Copyright 2016 Andrey Kunitsyn (andrey@traccar.org)
+ * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,66 +18,36 @@ package org.traccar.reports.model;
 
 import java.util.Date;
 
-public class TripReport extends BaseReport {
+public class StopReport extends BaseReport  {
 
-    private long startPositionId;
+    private long positionId;
 
-    public long getStartPositionId() {
-        return startPositionId;
+    public long getPositionId() {
+        return positionId;
     }
 
-    public void setStartPositionId(long startPositionId) {
-        this.startPositionId = startPositionId;
+    public void setPositionId(long positionId) {
+        this.positionId = positionId;
     }
 
-    private long endPositionId;
+    private double latitude;
 
-    public long getEndPositionId() {
-        return endPositionId;
+    public double getLatitude() {
+        return latitude;
     }
 
-    public void setEndPositionId(long endPositionId) {
-        this.endPositionId = endPositionId;
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
     }
 
-    private double startLat;
+    private double longitude;
 
-    public double getStartLat() {
-        return startLat;
+    public double getLongitude() {
+        return longitude;
     }
 
-    public void setStartLat(double startLat) {
-        this.startLat = startLat;
-    }
-
-    private double startLon;
-
-    public double getStartLon() {
-        return startLon;
-    }
-
-    public void setStartLon(double startLon) {
-        this.startLon = startLon;
-    }
-
-    private double endLat;
-
-    public double getEndLat() {
-        return endLat;
-    }
-
-    public void setEndLat(double endLat) {
-        this.endLat = endLat;
-    }
-
-    private double endLon;
-
-    public double getEndLon() {
-        return endLon;
-    }
-
-    public void setEndLon(double endLon) {
-        this.endLon = endLon;
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 
     private Date startTime;
@@ -98,16 +68,6 @@ public class TripReport extends BaseReport {
         }
     }
 
-    private String startAddress;
-
-    public String getStartAddress() {
-        return startAddress;
-    }
-
-    public void setStartAddress(String address) {
-        this.startAddress = address;
-    }
-
     private Date endTime;
 
     public Date getEndTime() {
@@ -126,14 +86,14 @@ public class TripReport extends BaseReport {
         }
     }
 
-    private String endAddress;
+    private String address;
 
-    public String getEndAddress() {
-        return endAddress;
+    public String getAddress() {
+        return address;
     }
 
-    public void setEndAddress(String address) {
-        this.endAddress = address;
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     private long duration;
@@ -144,5 +104,19 @@ public class TripReport extends BaseReport {
 
     public void setDuration(long duration) {
         this.duration = duration;
+    }
+
+    private long engineHours; // milliseconds
+
+    public long getEngineHours() {
+        return engineHours;
+    }
+
+    public void setEngineHours(long engineHours) {
+        this.engineHours = engineHours;
+    }
+
+    public void addEngineHours(long engineHours) {
+        this.engineHours += engineHours;
     }
 }
