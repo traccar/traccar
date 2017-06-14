@@ -212,9 +212,8 @@ public final class ReportUtils {
 
     }
 
-    public static Collection<BaseReport> detectTripsAndStops(TripsConfig tripsConfig,
-             boolean ignoreOdometer, double speedThreshold,
-            Collection<Position> positionCollection, boolean trips) {
+    public static Collection<BaseReport> detectTripsAndStops(TripsConfig tripsConfig, boolean ignoreOdometer,
+            double speedThreshold, Collection<Position> positionCollection, boolean trips) {
 
         Collection<BaseReport> result = new ArrayList<>();
 
