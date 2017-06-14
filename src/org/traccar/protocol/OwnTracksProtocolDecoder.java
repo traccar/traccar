@@ -63,8 +63,6 @@ public class OwnTracksProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        long timestamp;
-        String deviceId = new String();
         Position position = new Position();
         position.setProtocol(getProtocolName());
         position.setValid(true);
@@ -94,27 +92,20 @@ public class OwnTracksProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_BATTERY, root.getInt("batt"));
         }
 
-        if (root.containsKey("tst")) {
-            timestamp = root.getJsonNumber("tst").longValue();
-            if (timestamp < Integer.MAX_VALUE) {
-                timestamp *= 1000;
-            }
-        } else {
-            timestamp = new Date().getTime();
-        }
-        position.setTime(new Date(timestamp));
+        position.setTime(new Date(root.getJsonNumber("tst").longValue() * 1000));
 
+        String uniqueId = "";
         if (root.containsKey("tid")) {
-            deviceId = root.getString("tid");
+            uniqueId = root.getString("tid");
         }
         if (root.containsKey("topic")) {
-            deviceId = root.getString("topic");
+            uniqueId = root.getString("topic");
             if (root.containsKey("tid")) {
                 position.set("tid", root.getString("tid"));
             }
         }
 
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, deviceId);
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, uniqueId);
         if (deviceSession == null) {
             sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
             return null;

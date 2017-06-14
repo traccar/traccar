@@ -18,7 +18,7 @@ public class OwnTracksProtocolDecoderTest extends ProtocolTest {
                 buffer("{\"cog\":271,\"lon\":2.29513,\"acc\":5,\"vel\":61,\"vac\":21,\"lat\":48.85833,\"tst\":1497349316,\"alt\":167,\"_type\":\"location\",\"tid\":\"JJ\",\"t\":\"u\",\"batt\":67}")));
 
         verifyPosition(decoder, request(HttpMethod.POST, "/",
-                buffer(text("{\"lat\":48.85,\"lon\":2.295,\"_type\":\"location\",\"tid\":\"JJ\"}"))));
+                buffer("{\"lat\":48.85,\"lon\":2.295,\"_type\":\"location\",\"tid\":\"JJ\",\"tst\":1497476456}")));
     }
 
 }
