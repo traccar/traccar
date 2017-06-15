@@ -79,7 +79,7 @@ public class ReportUtilsTest extends BaseTest {
                 position("2016-01-01 00:06:00.000", 0, 3000),
                 position("2016-01-01 00:07:00.000", 0, 3000));
 
-        TripsConfig tripsConfig = new TripsConfig(500, 300000, 180000, false);
+        TripsConfig tripsConfig = new TripsConfig(500, 300000, 180000, false, 900000);
 
         Collection<? extends BaseReport> result = ReportUtils.detectTripsAndStops(tripsConfig, false, 0.01, data, true);
 
@@ -119,7 +119,7 @@ public class ReportUtilsTest extends BaseTest {
                 position("2016-01-01 00:04:00.000", 1, 0),
                 position("2016-01-01 00:05:00.000", 0, 0));
 
-        TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, false);
+        TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, false, 900000);
 
         Collection<? extends BaseReport> result = ReportUtils.detectTripsAndStops(tripsConfig, false, 0.01, data, false);
 
@@ -145,7 +145,7 @@ public class ReportUtilsTest extends BaseTest {
                 position("2016-01-01 00:04:00.000", 1, 0),
                 position("2016-01-01 00:05:00.000", 2, 0));
 
-        TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, false);
+        TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, false, 900000);
 
         Collection<? extends BaseReport> result = ReportUtils.detectTripsAndStops(tripsConfig, false, 0.01, data, false);
 
@@ -184,7 +184,7 @@ public class ReportUtilsTest extends BaseTest {
                 position("2016-01-01 00:04:00.000", 0, 0),
                 position("2016-01-01 00:05:00.000", 0, 0));
 
-        TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, false);
+        TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, false, 900000);
 
         Collection<? extends BaseReport> result = ReportUtils.detectTripsAndStops(tripsConfig, false, 0.01, data, false);
 
@@ -210,13 +210,54 @@ public class ReportUtilsTest extends BaseTest {
                 position("2016-01-01 00:04:00.000", 5, 0),
                 position("2016-01-01 00:05:00.000", 5, 0));
 
-        TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, false);
+        TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, false, 900000);
 
         Collection<? extends BaseReport> result = ReportUtils.detectTripsAndStops(tripsConfig, false, 0.01, data, false);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
 
+    }
+
+    @Test
+    public void testDetectTripAndStopByGap() throws ParseException {
+
+        Collection<Position> data = Arrays.asList(
+                position("2016-01-01 00:00:00.000", 7, 100),
+                position("2016-01-01 00:01:00.000", 7, 300),
+                position("2016-01-01 00:02:00.000", 5, 500),
+                position("2016-01-01 00:03:00.000", 5, 600),
+                position("2016-01-01 00:04:00.000", 3, 700),
+                position("2016-01-01 00:23:00.000", 2, 700),
+                position("2016-01-01 00:24:00.000", 5, 800),
+                position("2016-01-01 00:25:00.000", 5, 900));
+
+        TripsConfig tripsConfig = new TripsConfig(500, 200000, 200000, false, 900000);
+
+        Collection<? extends BaseReport> result = ReportUtils.detectTripsAndStops(tripsConfig, false, 0.01, data, true);
+
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+
+        TripReport itemTrip = (TripReport) result.iterator().next();
+
+        assertEquals(date("2016-01-01 00:00:00.000"), itemTrip.getStartTime());
+        assertEquals(date("2016-01-01 00:04:00.000"), itemTrip.getEndTime());
+        assertEquals(240000, itemTrip.getDuration());
+        assertEquals(6.75, itemTrip.getAverageSpeed(), 0.01);
+        assertEquals(7, itemTrip.getMaxSpeed(), 0.01);
+        assertEquals(600, itemTrip.getDistance(), 0.01);
+
+        result = ReportUtils.detectTripsAndStops(tripsConfig, false, 0.01, data, false);
+
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+
+        StopReport itemStop = (StopReport) result.iterator().next();
+
+        assertEquals(date("2016-01-01 00:04:00.000"), itemStop.getStartTime());
+        assertEquals(date("2016-01-01 00:23:00.000"), itemStop.getEndTime());
+        assertEquals(1140000, itemStop.getDuration());
     }
 
 }
