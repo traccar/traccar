@@ -133,7 +133,7 @@ public final class ReportUtils {
                 Context.getConfig().getLong("report.trip.minimalTripDistance", 500),
                 Context.getConfig().getLong("report.trip.minimalParkingDuration", 300) * 1000,
                 Context.getConfig().getBoolean("report.trip.greedyParking"),
-                Context.getConfig().getLong("report.trip.minimalNoDataDuration", 0) * 1000);
+                Context.getConfig().getLong("report.trip.minimalNoDataDuration", 3600) * 1000);
     }
 
     private static TripReport calculateTrip(
