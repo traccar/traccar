@@ -132,7 +132,8 @@ public final class ReportUtils {
                 Context.getConfig().getLong("report.trip.minimalTripDuration", 300) * 1000,
                 Context.getConfig().getLong("report.trip.minimalTripDistance", 500),
                 Context.getConfig().getLong("report.trip.minimalParkingDuration", 300) * 1000,
-                Context.getConfig().getBoolean("report.trip.greedyParking"));
+                Context.getConfig().getBoolean("report.trip.greedyParking"),
+                Context.getConfig().getLong("report.trip.minimalNoDataDuration", 3600) * 1000);
     }
 
     private static TripReport calculateTrip(
@@ -212,6 +213,16 @@ public final class ReportUtils {
 
     }
 
+    private static boolean isMoving(ArrayList<Position> positions, int index,
+            TripsConfig tripsConfig, double speedThreshold) {
+        if (tripsConfig.getMinimalNoDataDuration() > 0 && index < positions.size() - 1
+                && positions.get(index + 1).getFixTime().getTime() - positions.get(index).getFixTime().getTime()
+                >= tripsConfig.getMinimalNoDataDuration()) {
+            return false;
+        }
+        return positions.get(index).getSpeed() > speedThreshold;
+    }
+
     public static Collection<BaseReport> detectTripsAndStops(TripsConfig tripsConfig, boolean ignoreOdometer,
             double speedThreshold, Collection<Position> positionCollection, boolean trips) {
 
@@ -230,7 +241,7 @@ public final class ReportUtils {
             boolean tripFiltered = false;
 
             for (int i = 0; i < positions.size(); i++) {
-                isMoving = positions.get(i).getSpeed() > speedThreshold;
+                isMoving = isMoving(positions, i, tripsConfig, speedThreshold);
                 isLast = i == positions.size() - 1;
 
                 if ((isMoving || isLast) && startParkingIndex != -1) {
