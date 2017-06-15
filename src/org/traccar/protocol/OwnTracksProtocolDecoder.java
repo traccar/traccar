@@ -91,13 +91,11 @@ public class OwnTracksProtocolDecoder extends BaseProtocolDecoder {
 
         position.setTime(new Date(root.getJsonNumber("tst").longValue() * 1000));
 
-        boolean haveTopic = root.containsKey("topic");
-        boolean haveTid = root.containsKey("tid");
         String uniqueId;
 
-        if (haveTopic) {
+        if (root.containsKey("topic")) {
             uniqueId = root.getString("topic");
-            if (haveTid) {
+            if (root.containsKey("tid")) {
                 position.set("tid", root.getString("tid"));
             }
         } else {
