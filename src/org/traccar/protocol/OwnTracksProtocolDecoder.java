@@ -85,18 +85,15 @@ public class OwnTracksProtocolDecoder extends BaseProtocolDecoder {
         if (root.containsKey("t")) {
             position.set("t", root.getString("t"));
         }
-        if (root.containsKey("p")) {
-            position.set("pb", root.getInt("p"));
-        }
         if (root.containsKey("batt")) {
             position.set(Position.KEY_BATTERY, root.getInt("batt"));
         }
 
         position.setTime(new Date(root.getJsonNumber("tst").longValue() * 1000));
 
-        Boolean haveTopic = root.containsKey("topic");
-        Boolean haveTid = root.containsKey("tid");
-        String uniqueId = null;
+        boolean haveTopic = root.containsKey("topic");
+        boolean haveTid = root.containsKey("tid");
+        String uniqueId;
 
         if (haveTopic) {
             uniqueId = root.getString("topic");
