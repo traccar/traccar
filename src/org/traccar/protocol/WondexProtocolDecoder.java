@@ -78,7 +78,6 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
             position.setProtocol(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
             getLastLocation(position, new Date());
-            position.setValid(false);
             position.set(Position.KEY_RESULT, buf.toString(StandardCharsets.US_ASCII));
 
             return position;
@@ -106,9 +105,8 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
             position.setCourse(parser.nextDouble(0));
             position.setAltitude(parser.nextDouble(0));
 
-            int satellites = parser.nextInt(0);
-            position.setValid(satellites >= 3);
-            position.set(Position.KEY_SATELLITES, satellites);
+            position.setValid(true);
+            position.set(Position.KEY_SATELLITES, parser.nextInt(0));
 
             position.set(Position.KEY_EVENT, parser.next());
             position.set(Position.KEY_BATTERY, parser.nextDouble());
