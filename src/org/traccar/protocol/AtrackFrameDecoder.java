@@ -50,9 +50,7 @@ public class AtrackFrameDecoder extends FrameDecoder {
 
                 int endIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), new StringFinder("\r\n"));
                 if (endIndex > 0) {
-                    ChannelBuffer frame = buf.readBytes(endIndex - buf.readerIndex());
-                    buf.skipBytes(2);
-                    return frame;
+                    return buf.readBytes(endIndex - buf.readerIndex() + 2);
                 }
 
             }

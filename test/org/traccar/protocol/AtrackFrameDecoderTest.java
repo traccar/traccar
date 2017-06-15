@@ -12,7 +12,7 @@ public class AtrackFrameDecoderTest extends ProtocolTest {
         AtrackFrameDecoder decoder = new AtrackFrameDecoder();
 
         Assert.assertEquals(
-                binary("244F4B"),
+                binary("244F4B0D0A"),
                 decoder.decode(null, null, binary("244F4B0D0A")));
 
         Assert.assertEquals(
