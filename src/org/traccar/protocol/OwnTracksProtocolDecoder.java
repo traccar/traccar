@@ -59,7 +59,7 @@ public class OwnTracksProtocolDecoder extends BaseProtocolDecoder {
                 new StringReader(request.getContent().toString(StandardCharsets.US_ASCII))).readObject();
 
         if (!root.containsKey("_type") || !root.getString("_type").equals("location")) {
-            sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
+            sendResponse(channel, HttpResponseStatus.OK);
             return null;
         }
 
