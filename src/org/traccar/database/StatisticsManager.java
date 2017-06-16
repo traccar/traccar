@@ -30,7 +30,7 @@ import java.util.Set;
 
 public class StatisticsManager {
 
-    private static final int SPLIT_MODE = Calendar.MINUTE;
+    private static final int SPLIT_MODE = Calendar.DAY_OF_MONTH;
 
     private int lastUpdate = Calendar.getInstance().get(SPLIT_MODE);
 
