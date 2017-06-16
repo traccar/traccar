@@ -377,14 +377,19 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             case "*":
                 String sentence = buf.toString(StandardCharsets.US_ASCII);
                 int typeStart = sentence.indexOf(',', sentence.indexOf(',') + 1) + 1;
-                String type = sentence.substring(typeStart, sentence.indexOf(',', typeStart));
-                switch (type) {
-                    case "NBR":
-                        return decodeLbs(sentence, channel, remoteAddress);
-                    case "LINK":
-                        return decodeLink(sentence, channel, remoteAddress);
-                    default:
-                        return decodeText(sentence, channel, remoteAddress);
+                int typeEnd = sentence.indexOf(',', typeStart);
+                if (typeEnd > 0) {
+                    String type = sentence.substring(typeStart, typeEnd);
+                    switch (type) {
+                        case "NBR":
+                            return decodeLbs(sentence, channel, remoteAddress);
+                        case "LINK":
+                            return decodeLink(sentence, channel, remoteAddress);
+                        default:
+                            return decodeText(sentence, channel, remoteAddress);
+                    }
+                } else {
+                    return null;
                 }
             case "$":
                 return decodeBinary(buf, channel, remoteAddress);
