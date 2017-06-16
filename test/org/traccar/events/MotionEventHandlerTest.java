@@ -18,7 +18,7 @@ public class MotionEventHandlerTest extends BaseTest {
         MotionEventHandler motionEventHandler = new MotionEventHandler();
         
         Position position = new Position();
-        position.setSpeed(10.0);
+        position.set(Position.KEY_MOTION, true);
         position.setValid(true);
         Collection<Event> events = motionEventHandler.analyzePosition(position);
         assertNotNull(events);

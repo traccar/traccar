@@ -12,7 +12,7 @@ public class DistanceHandlerTest {
 
         DistanceHandler distanceHandler = new DistanceHandler();
 
-        Position position = distanceHandler.calculateDistance(new Position());
+        Position position = distanceHandler.handlePosition(new Position());
 
         assertEquals(0.0, position.getAttributes().get(Position.KEY_DISTANCE));
         assertEquals(0.0, position.getAttributes().get(Position.KEY_TOTAL_DISTANCE));

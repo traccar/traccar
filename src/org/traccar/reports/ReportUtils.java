@@ -220,7 +220,12 @@ public final class ReportUtils {
                 >= tripsConfig.getMinimalNoDataDuration()) {
             return false;
         }
-        return positions.get(index).getSpeed() > speedThreshold;
+        if (positions.get(index).getAttributes().containsKey(Position.KEY_MOTION)
+                && positions.get(index).getAttributes().get(Position.KEY_MOTION) instanceof Boolean) {
+            return positions.get(index).getBoolean(Position.KEY_MOTION);
+        } else {
+            return positions.get(index).getSpeed() > speedThreshold;
+        }
     }
 
     public static Collection<BaseReport> detectTripsAndStops(TripsConfig tripsConfig, boolean ignoreOdometer,
@@ -295,7 +300,7 @@ public final class ReportUtils {
                                                 previousEndParkingIndex));
                                     }
                                 }
-                                result.add(calculateStop(positions, startParkingIndex, endParkingIndex));
+                                result.add(calculateStop(positions, startParkingIndex, isLast ? i : endParkingIndex));
                             }
                         }
                         previousEndParkingIndex = endParkingIndex;
