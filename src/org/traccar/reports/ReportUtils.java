@@ -300,7 +300,7 @@ public final class ReportUtils {
                                                 previousEndParkingIndex));
                                     }
                                 }
-                                result.add(calculateStop(positions, startParkingIndex, endParkingIndex));
+                                result.add(calculateStop(positions, startParkingIndex, isLast ? i : endParkingIndex));
                             }
                         }
                         previousEndParkingIndex = endParkingIndex;
