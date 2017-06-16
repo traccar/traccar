@@ -36,7 +36,7 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .number("[^d]*")                     // deader
+            .number("[^d]*")                     // header
             .number("(d+),")                     // device identifier
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
             .number("(dd)(dd)(dd),")             // time (hhmmss)
@@ -105,8 +105,9 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
             position.setCourse(parser.nextDouble(0));
             position.setAltitude(parser.nextDouble(0));
 
-            position.setValid(true);
-            position.set(Position.KEY_SATELLITES, parser.nextInt(0));
+            int satellites = parser.nextInt(0);
+            position.setValid(satellites != 0);
+            position.set(Position.KEY_SATELLITES, satellites);
 
             position.set(Position.KEY_EVENT, parser.next());
             position.set(Position.KEY_BATTERY, parser.nextDouble());

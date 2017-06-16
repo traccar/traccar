@@ -224,6 +224,7 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
                         position.setDeviceId(deviceSession.getDeviceId());
                         position.setTime(new Date((unixTime + i * timeIncrement) * 1000));
                         decodeStructure(buf, position);
+                        position.set(Position.KEY_ARCHIVE, true);
                         positions.add(position);
                     } else {
                         buf.skipBytes(20); // skip filled 0xFE structure
