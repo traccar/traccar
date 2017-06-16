@@ -166,6 +166,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             for (String message : messages) {
                 Position position = decodePosition(channel, remoteAddress, message);
                 if (position != null) {
+                    position.set(Position.KEY_ARCHIVE, true);
                     positions.add(position);
                 }
             }
