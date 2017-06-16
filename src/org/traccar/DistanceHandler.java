@@ -31,7 +31,8 @@ public class DistanceHandler extends BaseDataHandler {
         return null;
     }
 
-    public Position calculateDistance(Position position) {
+    @Override
+    protected Position handlePosition(Position position) {
 
         double distance = 0.0;
         double totalDistance = 0.0;
@@ -57,11 +58,6 @@ public class DistanceHandler extends BaseDataHandler {
         position.set(Position.KEY_TOTAL_DISTANCE, totalDistance);
 
         return position;
-    }
-
-    @Override
-    protected Position handlePosition(Position position) {
-        return calculateDistance(position);
     }
 
 }

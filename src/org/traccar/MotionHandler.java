@@ -26,16 +26,12 @@ public class MotionHandler extends BaseDataHandler {
         this.speedThreshold = speedThreshold;
     }
 
-    public Position calculateMotion(Position position) {
+    @Override
+    protected Position handlePosition(Position position) {
         if (!position.getAttributes().containsKey(Position.KEY_MOTION)) {
             position.set(Position.KEY_MOTION, position.getSpeed() > speedThreshold);
         }
         return position;
-    }
-
-    @Override
-    protected Position handlePosition(Position position) {
-        return calculateMotion(position);
     }
 
 }
