@@ -22,6 +22,8 @@
 
     <entry key='media.path'>./media</entry>
 
+    <entry key='server.statistics'>https://www.traccar.org/analytics/</entry>
+
     <!-- DATABASE CONFIG -->
 
     <entry key='database.ignoreUnknown'>true</entry>

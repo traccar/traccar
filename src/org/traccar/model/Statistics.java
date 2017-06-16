@@ -116,6 +116,7 @@ public class Statistics extends Extensible {
     public void setGeocoderRequests(int geocoderRequests) {
         this.geocoderRequests = geocoderRequests;
     }
+
     private int geolocationRequests;
 
     public int getGeolocationRequests() {
