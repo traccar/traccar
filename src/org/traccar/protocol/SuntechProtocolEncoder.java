@@ -28,7 +28,7 @@ public class SuntechProtocolEncoder extends StringProtocolEncoder {
             case Command.TYPE_REBOOT_DEVICE:
                 return formatCommand(command, "SA200CMD;{%s};02;Reboot\r", Command.KEY_UNIQUE_ID);
             case Command.TYPE_POSITION_SINGLE:
-                return formatCommand(command, "SA200GTR;{%s};02;\r", Command.KEY_UNIQUE_ID);
+                return formatCommand(command, "SA200CMD;{%s};02;StatusReq\r", Command.KEY_UNIQUE_ID);
             case Command.TYPE_OUTPUT_CONTROL:
                 if (command.getAttributes().containsKey(Command.KEY_DATA)) {
                     if (command.getAttributes().get(Command.KEY_DATA).equals("1")) {
@@ -48,6 +48,7 @@ public class SuntechProtocolEncoder extends StringProtocolEncoder {
             case Command.TYPE_ALARM_DISARM:
                 return formatCommand(command, "SA200CMD;{%s};02;Disable2\r", Command.KEY_UNIQUE_ID);
             default:    
+
                 Log.warning(new UnsupportedOperationException(command.getType()));
                 break;
         }
