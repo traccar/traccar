@@ -716,7 +716,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         int reportType = parser.nextInt(0);
         if (type.equals("NMR")) {
-            position.set(Position.KEY_MOTION, reportType);
+            position.set(Position.KEY_MOTION, reportType == 1);
         } else if (type.equals("SOS")) {
             position.set(Position.KEY_ALARM, Position.ALARM_SOS);
         }
