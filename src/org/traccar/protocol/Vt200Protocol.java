@@ -17,7 +17,6 @@ package org.traccar.protocol;
 
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.TrackerServer;
 
@@ -34,7 +33,7 @@ public class Vt200Protocol extends BaseProtocol {
         serverList.add(new TrackerServer(new ServerBootstrap(), getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 1 + 6 + 2, 2, 2, 0));
+                pipeline.addLast("frameDecoder", new Vt200FrameDecoder());
                 pipeline.addLast("objectDecoder", new Vt200ProtocolDecoder(Vt200Protocol.this));
             }
         });
