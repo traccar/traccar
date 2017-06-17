@@ -66,6 +66,11 @@ public class FilterHandlerTest extends BaseTest {
         assertNotNull(filtingHandler.decode(null, null, position));
         assertNotNull(passingHandler.decode(null, null, position));
 
+        position = createPosition(0, new Date(), true, 500, 10, 10, 10, 10);
+
+        assertNull(filtingHandler.decode(null, null, position));
+        assertNotNull(passingHandler.decode(null, null, position));
+
         position = createPosition(0, new Date(Long.MAX_VALUE), true, 10, 10, 10, 10, 10);
 
         assertNull(filtingHandler.decode(null, null, position));
