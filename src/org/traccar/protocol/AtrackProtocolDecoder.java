@@ -195,6 +195,31 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private Position decodeString(Channel channel, SocketAddress remoteAddress, String sentence) {
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, null);
+
+        if (sentence.startsWith("$INFO")) {
+
+            return null;
+
+        } else {
+
+            position.set(Position.KEY_RESULT, sentence);
+
+        }
+
+        return position;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -206,6 +231,8 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                 channel.write(buf, remoteAddress); // keep-alive message
             }
             return null;
+        } else if (buf.getByte(buf.readerIndex()) == '$') {
+            return decodeString(channel, remoteAddress, buf.toString(StandardCharsets.US_ASCII).trim());
         }
 
         buf.skipBytes(2); // prefix
