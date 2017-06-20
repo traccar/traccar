@@ -22,7 +22,6 @@ import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.MessageEvent;
 import org.traccar.geocoder.AddressFormat;
 import org.traccar.geocoder.Geocoder;
-import org.traccar.helper.DistanceCalculator;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
@@ -62,10 +61,7 @@ public class GeocoderHandler implements ChannelUpstreamHandler {
                 if (geocoderReuseDistance != 0) {
                     Position lastPosition = Context.getIdentityManager().getLastPosition(position.getDeviceId());
                     if (lastPosition != null && lastPosition.getAddress() != null) {
-                        double distance = DistanceCalculator.distance(
-                                position.getLatitude(), position.getLongitude(),
-                                lastPosition.getLatitude(), lastPosition.getLongitude());
-                        if (distance <= geocoderReuseDistance) {
+                        if (position.getDouble(Position.KEY_DISTANCE) <= geocoderReuseDistance) {
                             position.setAddress(lastPosition.getAddress());
                             Channels.fireMessageReceived(ctx, position, event.getRemoteAddress());
                             return;

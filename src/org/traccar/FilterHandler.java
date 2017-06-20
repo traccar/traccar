@@ -15,7 +15,6 @@
  */
 package org.traccar;
 
-import org.traccar.helper.DistanceCalculator;
 import org.traccar.helper.Log;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -111,19 +110,14 @@ public class FilterHandler extends BaseDataHandler {
 
     private boolean filterDistance(Position position, Position last) {
         if (filterDistance != 0 && last != null) {
-            double distance = DistanceCalculator.distance(
-                    position.getLatitude(), position.getLongitude(),
-                    last.getLatitude(), last.getLongitude());
-            return distance < filterDistance;
+            return position.getDouble(Position.KEY_DISTANCE) < filterDistance;
         }
         return false;
     }
 
     private boolean filterMaxSpeed(Position position, Position last) {
         if (filterMaxSpeed != 0 && last != null) {
-            double distance = DistanceCalculator.distance(
-                    position.getLatitude(), position.getLongitude(),
-                    last.getLatitude(), last.getLongitude());
+            double distance = position.getDouble(Position.KEY_DISTANCE);
             long time = position.getFixTime().getTime() - last.getFixTime().getTime();
             return UnitsConverter.knotsFromMps(distance / time) > filterMaxSpeed;
         }
