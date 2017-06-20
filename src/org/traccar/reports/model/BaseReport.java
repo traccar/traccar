@@ -74,13 +74,13 @@ public class BaseReport {
         }
     }
 
-    private String spentFuel;
+    private double spentFuel;
 
-    public String getSpentFuel() {
+    public double getSpentFuel() {
         return spentFuel;
     }
 
-    public void setSpentFuel(String spentFuel) {
+    public void setSpentFuel(double spentFuel) {
         this.spentFuel = spentFuel;
     }
 

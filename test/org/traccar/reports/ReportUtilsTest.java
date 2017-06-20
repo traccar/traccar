@@ -60,10 +60,10 @@ public class ReportUtilsTest extends BaseTest {
     public void testCalculateSpentFuel() {
         Position startPosition = new Position();
         Position endPosition = new Position();
-        Assert.assertNull(ReportUtils.calculateFuel(startPosition, endPosition));
+        Assert.assertEquals(ReportUtils.calculateFuel(startPosition, endPosition), 0.0, 0.01);
         startPosition.set(Position.KEY_FUEL_LEVEL, 0.7);
         endPosition.set(Position.KEY_FUEL_LEVEL, 0.5);
-        Assert.assertEquals(ReportUtils.calculateFuel(startPosition, endPosition), "0.2");
+        Assert.assertEquals(ReportUtils.calculateFuel(startPosition, endPosition), 0.2, 0.01);
     }
 
     @Test

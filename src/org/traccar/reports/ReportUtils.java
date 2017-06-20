@@ -89,16 +89,16 @@ public final class ReportUtils {
         return distance;
     }
 
-    public static String calculateFuel(Position firstPosition, Position lastPosition) {
+    public static double calculateFuel(Position firstPosition, Position lastPosition) {
 
         if (firstPosition.getAttributes().get(Position.KEY_FUEL_LEVEL) != null
                 && lastPosition.getAttributes().get(Position.KEY_FUEL_LEVEL) != null) {
 
             BigDecimal value = new BigDecimal(firstPosition.getDouble(Position.KEY_FUEL_LEVEL)
                     - lastPosition.getDouble(Position.KEY_FUEL_LEVEL));
-            return value.setScale(1, RoundingMode.HALF_EVEN).toString();
+            return value.setScale(1, RoundingMode.HALF_EVEN).doubleValue();
         }
-        return null;
+        return 0;
     }
 
     public static org.jxls.common.Context initializeContext(long userId) {
