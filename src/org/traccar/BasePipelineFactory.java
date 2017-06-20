@@ -49,7 +49,6 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
     private int timeout;
 
     private FilterHandler filterHandler;
-    private CoordinatesHandler coordinatesHandler;
     private DistanceHandler distanceHandler;
     private MotionHandler motionHandler;
     private GeocoderHandler geocoderHandler;
@@ -126,12 +125,12 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             }
         }
 
+        distanceHandler = new DistanceHandler(Context.getConfig().getBoolean("coordinates.filter"),
+                Context.getConfig().getInteger("coordinates.minError"),
+                Context.getConfig().getInteger("coordinates.maxError"));
+
         if (Context.getConfig().getBoolean("filter.enable")) {
             filterHandler = new FilterHandler();
-        }
-
-        if (Context.getConfig().getBoolean("coordinates.filter")) {
-            coordinatesHandler = new CoordinatesHandler();
         }
 
         if (Context.getGeocoder() != null) {
@@ -145,8 +144,6 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
                     Context.getGeolocationProvider(),
                     Context.getConfig().getBoolean("geolocation.processInvalidPositions"));
         }
-
-        distanceHandler = new DistanceHandler();
 
         motionHandler = new MotionHandler(Context.getConfig().getDouble("event.motion.speedThreshold", 0.01));
 
@@ -196,6 +193,11 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
         if (hemisphereHandler != null) {
             pipeline.addLast("hemisphere", hemisphereHandler);
         }
+
+        if (distanceHandler != null) {
+            pipeline.addLast("distance", distanceHandler);
+        }
+
         if (geocoderHandler != null) {
             pipeline.addLast("geocoder", geocoderHandler);
         }
@@ -205,14 +207,6 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
         if (filterHandler != null) {
             pipeline.addLast("filter", filterHandler);
-        }
-
-        if (coordinatesHandler != null) {
-            pipeline.addLast("coordinatesHandler", coordinatesHandler);
-        }
-
-        if (distanceHandler != null) {
-            pipeline.addLast("distance", distanceHandler);
         }
 
         if (motionHandler != null) {
