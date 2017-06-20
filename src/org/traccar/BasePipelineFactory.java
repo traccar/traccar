@@ -198,15 +198,16 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             pipeline.addLast("distance", distanceHandler);
         }
 
-        if (geocoderHandler != null) {
-            pipeline.addLast("geocoder", geocoderHandler);
-        }
         pipeline.addLast("remoteAddress", new RemoteAddressHandler());
 
         addDynamicHandlers(pipeline);
 
         if (filterHandler != null) {
             pipeline.addLast("filter", filterHandler);
+        }
+
+        if (geocoderHandler != null) {
+            pipeline.addLast("geocoder", geocoderHandler);
         }
 
         if (motionHandler != null) {
