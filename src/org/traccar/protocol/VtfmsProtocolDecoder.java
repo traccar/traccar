@@ -35,12 +35,12 @@ public class VtfmsProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN = new PatternBuilder()
             .text("(")
             .number("(d{15}),")                  // imei
-            .number("[0-9A-Z]{3}dd,")               // packet count
+            .number("[0-9A-Z]{3}dd,")            // packet count
             .number("(dd),")                     // packet id
             .number("[^,]*,")                    // reserved
-            .number("(d+),")                     // rssi
-            .number("d+,")                       // fix status
-            .number("(d+),")                     // satellites
+            .number("(d+)?,")                    // rssi
+            .number("(?:d+)?,")                  // fix status
+            .number("(d+)?,")                    // satellites
             .number("[^,]*,")                    // reserved
             .expression("([AV]),")               // validity
             .number("(dd)(dd)(dd),")             // time (hhmmss)
