@@ -126,7 +126,7 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_HDOP, Double.parseDouble(value));
                     break;
                 case "batt":
-                    position.set(Position.KEY_BATTERY, Double.parseDouble(value));
+                    position.set(Position.KEY_BATTERY_LEVEL, Double.parseDouble(value));
                     break;
                 default:
                     try {
