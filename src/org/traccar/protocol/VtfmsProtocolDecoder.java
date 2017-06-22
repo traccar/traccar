@@ -28,6 +28,8 @@ import java.util.regex.Pattern;
 
 public class VtfmsProtocolDecoder extends BaseProtocolDecoder {
 
+    private static final String[] DIRECTIONS = new String[] {"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
+
     public VtfmsProtocolDecoder(VtfmsProtocol protocol) {
         super(protocol);
     }
@@ -47,7 +49,7 @@ public class VtfmsProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd)(dd)(dd),")             // time (ddmmyy)
             .number("(-?d+.d+),")                // latitude
             .number("(-?d+.d+),")                // longitude
-            .number("(d+),")                     // course
+            .number("(?:(d+)|([NESW]{1,2})),")   // course
             .number("(d+),")                     // speed
             .number("(d+),")                     // hours
             .number("(d+),")                     // idle hours
@@ -56,10 +58,10 @@ public class VtfmsProtocolDecoder extends BaseProtocolDecoder {
             .expression("([01]),")               // power status
             .number("(d+.d+),")                  // power voltage
             .number("[^,]*,")                    // reserved
-            .number("(d+),")                     // fuel level
+            .number("(d+)?,")                    // fuel level
             .number("(d+.d+),")                  // adc 1
             .number("[^,]*,")                    // reserved
-            .number("(d+.d+),")                  // adc 2
+            .number("(d+.d+)?,")                 // adc 2
             .expression("([01]),")               // di 1
             .expression("([01]),")               // di 2
             .expression("([01]),")               // di 3
@@ -116,7 +118,20 @@ public class VtfmsProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY));
         position.setLatitude(parser.nextDouble(0));
         position.setLongitude(parser.nextDouble(0));
-        position.setCourse(parser.nextDouble(0));
+
+        if (parser.hasNext()) {
+            position.setCourse(parser.nextDouble(0));
+        }
+        if (parser.hasNext()) {
+            String direction = parser.next();
+            for (int i = 0; i < DIRECTIONS.length; i++) {
+                if (direction.equals(DIRECTIONS[i])) {
+                    position.setCourse(i * 45.0);
+                    break;
+                }
+            }
+        }
+
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
 
         position.set(Position.KEY_HOURS, parser.nextInt());
