@@ -71,7 +71,7 @@ public class OwnTracksProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(root.getJsonNumber("lon").doubleValue());
 
         if (root.containsKey("vel")) {
-            position.setSpeed(UnitsConverter.knotsFromCps(root.getInt("vel")));
+            position.setSpeed(UnitsConverter.knotsFromKph(root.getInt("vel")));
         }
         if (root.containsKey("alt")) {
             position.setAltitude(root.getInt("alt"));
