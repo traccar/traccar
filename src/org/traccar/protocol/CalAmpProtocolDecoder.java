@@ -104,7 +104,9 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_HDOP, buf.readUnsignedByte());
         }
 
-        position.set(Position.KEY_INPUT, buf.readUnsignedByte());
+        int input = buf.readUnsignedByte();
+        position.set(Position.KEY_INPUT, input);
+        position.set(Position.KEY_IGNITION, BitUtil.check(input, 0));
 
         if (type != MSG_MINI_EVENT_REPORT) {
             position.set(Position.KEY_STATUS, buf.readUnsignedByte());
