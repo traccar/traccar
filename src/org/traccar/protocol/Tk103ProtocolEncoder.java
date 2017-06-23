@@ -1,4 +1,5 @@
 /*
+ * Copyright 2017 Christoph Krey (c@ckrey.de)
  * Copyright 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,6 +26,8 @@ public class Tk103ProtocolEncoder extends StringProtocolEncoder {
     protected Object encodeCommand(Command command) {
 
         switch (command.getType()) {
+            case Command.TYPE_POSITION_SINGLE:
+                return formatCommand(command, "({%s}AP00)", Command.KEY_UNIQUE_ID);
             case Command.TYPE_ENGINE_STOP:
                 return formatCommand(command, "({%s}AV011)", Command.KEY_UNIQUE_ID);
             case Command.TYPE_ENGINE_RESUME:
