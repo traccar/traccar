@@ -1,4 +1,5 @@
 /*
+ * Copyright 2017 Christoph Krey (c@ckrey.de)
  * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,6 +33,12 @@ public class Tk103Protocol extends BaseProtocol {
     public Tk103Protocol() {
         super("tk103");
         setSupportedDataCommands(
+                Command.TYPE_POSITION_SINGLE,
+                Command.TYPE_POSITION_PERIODIC,
+                Command.TYPE_POSITION_STOP,
+                Command.TYPE_GET_VERSION,
+                Command.TYPE_REBOOT_DEVICE,
+                Command.TYPE_SET_ODOMETER,
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME);
     }
