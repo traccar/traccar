@@ -10,6 +10,9 @@ public class AtrackProtocolDecoderTest extends ProtocolTest {
 
         AtrackProtocolDecoder decoder = new AtrackProtocolDecoder(new AtrackProtocol());
 
+        verifyAttributes(decoder, buffer(
+                "$INFO=358683066267395,AX7,Rev.0.61 Build.1624,358683066267395,466924131626767,89886920041316267670,144,0,9,1,12,1,0\r\n"));
+
         decoder.setLongDate(true);
 
         verifyPositions(decoder, binary(
