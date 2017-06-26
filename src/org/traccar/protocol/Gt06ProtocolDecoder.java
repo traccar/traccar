@@ -28,11 +28,14 @@ import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
+import org.traccar.model.Device;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
@@ -40,6 +43,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
     private boolean forceTimeZone = false;
     private final TimeZone timeZone = TimeZone.getTimeZone("UTC");
+
+    private final Map<Integer, ChannelBuffer> photos = new HashMap<>();
 
     public Gt06ProtocolDecoder(Gt06Protocol protocol) {
         super(protocol);
@@ -95,15 +100,34 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 || type == MSG_GPS_LBS_STATUS_1 || type == MSG_GPS_LBS_STATUS_2 || type == MSG_GPS_LBS_STATUS_3;
     }
 
-    private static void sendResponse(Channel channel, int type, int index) {
+    private void sendResponse(Channel channel, int type, int index) {
         if (channel != null) {
             ChannelBuffer response = ChannelBuffers.dynamicBuffer();
-            response.writeByte(0x78); response.writeByte(0x78); // header
+            response.writeShort(0x7878); // header
             response.writeByte(5); // size
             response.writeByte(type);
             response.writeShort(index);
-            response.writeShort(Checksum.crc16(Checksum.CRC16_X25, response.toByteBuffer(2, 4)));
-            response.writeByte(0x0D); response.writeByte(0x0A); // ending
+            response.writeShort(Checksum.crc16(Checksum.CRC16_X25,
+                    response.toByteBuffer(2, response.writerIndex() - 2)));
+            response.writeByte('\r'); response.writeByte('\n'); // ending
+            channel.write(response);
+        }
+    }
+
+    private void sendPhotoRequest(Channel channel, int pictureId) {
+        if (channel != null) {
+            ChannelBuffer photo = photos.get(pictureId);
+            ChannelBuffer response = ChannelBuffers.dynamicBuffer();
+            response.writeShort(0x7878); // header
+            response.writeByte(15); // size
+            response.writeByte(MSG_X1_PHOTO_DATA);
+            response.writeInt(pictureId);
+            response.writeInt(photo.writerIndex());
+            response.writeShort(Math.min(photo.writableBytes(), 1024));
+            response.writeShort(1);
+            response.writeShort(Checksum.crc16(Checksum.CRC16_X25,
+                    response.toByteBuffer(2, response.writerIndex() - 2)));
+            response.writeByte('\r'); response.writeByte('\n'); // ending
             channel.write(response);
         }
     }
@@ -277,6 +301,14 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         int dataLength = length - 5;
         int type = buf.readUnsignedByte();
 
+        DeviceSession deviceSession = null;
+        if (type != MSG_LOGIN) {
+            deviceSession = getDeviceSession(channel, remoteAddress);
+            if (deviceSession == null) {
+                return null;
+            }
+        }
+
         if (type == MSG_LOGIN) {
 
             String imei = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
@@ -303,11 +335,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == MSG_X1_GPS) {
 
-            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
-            if (deviceSession == null) {
-                return null;
-            }
-
             Position position = new Position();
             position.setDeviceId(deviceSession.getDeviceId());
             position.setProtocol(getProtocolName());
@@ -324,19 +351,24 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     buf.readUnsignedShort(), buf.readUnsignedByte(),
                     buf.readUnsignedShort(), buf.readUnsignedInt())));
 
-            if (buf.readableBytes() > 6) {
-                buf.skipBytes(buf.readableBytes() - 6);
-            }
-            sendResponse(channel, type, buf.readUnsignedShort());
-
             return position;
 
-        } else {
+        } else if (type == MSG_X1_PHOTO_INFO) {
 
-            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
-            if (deviceSession == null) {
-                return null;
-            }
+            buf.skipBytes(6); // time
+            buf.readUnsignedByte(); // fix status
+            buf.readUnsignedInt(); // latitude
+            buf.readUnsignedInt(); // longitude
+            buf.readUnsignedByte(); // camera id
+            buf.readUnsignedByte(); // photo source
+            buf.readUnsignedByte(); // picture format
+
+            ChannelBuffer photo = ChannelBuffers.buffer(buf.readInt());
+            int pictureId = buf.readInt();
+            photos.put(pictureId, photo);
+            sendPhotoRequest(channel, pictureId);
+
+        } else {
 
             Position position = new Position();
             position.setDeviceId(deviceSession.getDeviceId());
@@ -464,6 +496,23 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 return decodeFuelData(position, buf.toString(
                         buf.readerIndex(), buf.readableBytes() - 4 - 2, StandardCharsets.US_ASCII));
 
+            }
+
+        } else if (type == MSG_X1_PHOTO_DATA) {
+
+            int pictureId = buf.readInt();
+
+            ChannelBuffer photo = photos.get(pictureId);
+
+            buf.readUnsignedInt(); // offset
+            buf.readBytes(photo, buf.readUnsignedShort());
+
+            if (buf.writableBytes() > 0) {
+                sendPhotoRequest(channel, pictureId);
+            } else {
+                Device device = Context.getDeviceManager().getDeviceById(deviceSession.getDeviceId());
+                Context.getMediaManager().writeFile(device.getUniqueId(), photo, "jpg");
+                photos.remove(pictureId);
             }
 
         }
