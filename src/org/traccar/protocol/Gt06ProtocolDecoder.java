@@ -66,6 +66,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_LBS_STATUS = 0x19;
     public static final int MSG_GPS_PHONE = 0x1A;
     public static final int MSG_GPS_LBS_EXTEND = 0x1E;
+    public static final int MSG_X1_GPS = 0x34;
+    public static final int MSG_X1_PHOTO_INFO = 0x35;
+    public static final int MSG_X1_PHOTO_DATA = 0x36;
     public static final int MSG_COMMAND_0 = 0x80;
     public static final int MSG_COMMAND_1 = 0x81;
     public static final int MSG_COMMAND_2 = 0x82;
@@ -138,7 +141,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_IGNITION, BitUtil.check(flags, 15));
         }
 
-        buf.skipBytes(length - 12); // skip reserved
+        if (length > 0) {
+            buf.skipBytes(length - 12); // skip reserved
+        }
     }
 
     private void decodeLbs(Position position, ChannelBuffer buf, boolean hasLength) {
@@ -266,7 +271,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    protected Object decodeBasic(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) throws Exception {
+    private Object decodeBasic(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) throws Exception {
 
         int length = buf.readUnsignedByte();
         int dataLength = length - 5;
@@ -295,6 +300,36 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 buf.skipBytes(buf.readableBytes() - 6);
                 sendResponse(channel, type, buf.readUnsignedShort());
             }
+
+        } else if (type == MSG_X1_GPS) {
+
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+            if (deviceSession == null) {
+                return null;
+            }
+
+            Position position = new Position();
+            position.setDeviceId(deviceSession.getDeviceId());
+            position.setProtocol(getProtocolName());
+
+            buf.readUnsignedInt(); // data and alarm
+
+            decodeGps(position, buf);
+
+            buf.readUnsignedShort(); // terminal info
+
+            position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+
+            position.setNetwork(new Network(CellTower.from(
+                    buf.readUnsignedShort(), buf.readUnsignedByte(),
+                    buf.readUnsignedShort(), buf.readUnsignedInt())));
+
+            if (buf.readableBytes() > 6) {
+                buf.skipBytes(buf.readableBytes() - 6);
+            }
+            sendResponse(channel, type, buf.readUnsignedShort());
+
+            return position;
 
         } else {
 
@@ -379,7 +414,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
-    protected Object decodeExtended(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) throws Exception {
+    private Object decodeExtended(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) throws Exception {
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
         if (deviceSession == null) {
