@@ -507,7 +507,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedInt(); // offset
             buf.readBytes(photo, buf.readUnsignedShort());
 
-            if (buf.writableBytes() > 0) {
+            if (photo.writableBytes() > 0) {
                 sendPhotoRequest(channel, pictureId);
             } else {
                 Device device = Context.getDeviceManager().getDeviceById(deviceSession.getDeviceId());
