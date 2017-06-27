@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,8 +39,8 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN = new PatternBuilder()
             .number("(d+)(,)?")                  // device id
-            .expression(".{4},?")                // command
-            .number("d*")                        // imei?
+            .expression("(.{4}),?")              // command
+            .number("(d*)")
             .number("(dd)(dd)(dd),?")            // date (mmddyy if comma-delimited, otherwise yyddmm)
             .expression("([AV]),?")              // validity
             .number("(d+)(dd.d+)")               // latitude
@@ -97,19 +97,106 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private void decodeType(Position position, String type, String data) {
+        switch (type) {
+            case "BO01":
+                position.set(Position.KEY_ALARM, decodeAlarm(data.charAt(0) - '0'));
+                break;
+            case "ZC11":
+                position.set(Position.KEY_ALARM, Position.ALARM_MOVEMENT);
+                break;
+            case "ZC12":
+                position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                break;
+            case "ZC13":
+                position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
+                break;
+            case "ZC15":
+                position.set(Position.KEY_IGNITION, true);
+                break;
+            case "ZC16":
+                position.set(Position.KEY_IGNITION, false);
+                break;
+            case "ZC17":
+                position.set(Position.KEY_ALARM, Position.ALARM_REMOVING);
+                break;
+            case "ZC25":
+                position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+                break;
+            case "ZC26":
+                position.set(Position.KEY_ALARM, Position.ALARM_TAMPERING);
+                break;
+            case "ZC27":
+                position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private Position decodeBattery(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN_BATTERY, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
+
+        int battery = parser.nextInt(0);
+        if (battery != 65535) {
+            position.set(Position.KEY_BATTERY, battery * 0.01);
+        }
+
+        int power = parser.nextInt(0);
+        if (power != 65535) {
+            position.set(Position.KEY_POWER, power * 0.1);
+        }
+
+        return position;
+    }
+
+    private Position decodeNetwork(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN_NETWORK, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, null);
+
+        position.setNetwork(new Network(CellTower.from(
+                parser.nextInt(0), parser.nextInt(0), parser.nextHexInt(0), parser.nextHexInt(0))));
+
+        return position;
+    }
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         String sentence = (String) msg;
 
-        // Find message start
         int beginIndex = sentence.indexOf('(');
         if (beginIndex != -1) {
             sentence = sentence.substring(beginIndex + 1);
         }
 
-        // Send response
         if (channel != null) {
             String id = sentence.substring(0, 12);
             String type = sentence.substring(12, 16);
@@ -127,49 +214,13 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
-
-        Parser parser = new Parser(PATTERN_BATTERY, sentence);
-        if (parser.matches()) {
-            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
-            if (deviceSession == null) {
-                return null;
-            }
-            position.setDeviceId(deviceSession.getDeviceId());
-
-            getLastLocation(position, parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
-
-            int battery = parser.nextInt(0);
-            if (battery != 65535) {
-                position.set(Position.KEY_BATTERY, battery * 0.01);
-            }
-
-            int power = parser.nextInt(0);
-            if (power != 65535) {
-                position.set(Position.KEY_POWER, power * 0.1);
-            }
-
-            return position;
+        if (sentence.contains("ZC20")) {
+            return decodeBattery(channel, remoteAddress, sentence);
+        } else if (sentence.contains("BZ00")) {
+            return decodeNetwork(channel, remoteAddress, sentence);
         }
 
-        parser = new Parser(PATTERN_NETWORK, sentence);
-        if (parser.matches()) {
-            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
-            if (deviceSession == null) {
-                return null;
-            }
-            position.setDeviceId(deviceSession.getDeviceId());
-
-            getLastLocation(position, null);
-
-            position.setNetwork(new Network(CellTower.from(
-                    parser.nextInt(0), parser.nextInt(0), parser.nextHexInt(0), parser.nextHexInt(0))));
-
-            return position;
-        }
-
-        parser = new Parser(PATTERN, sentence);
+        Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
             return null;
         }
@@ -178,18 +229,20 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         if (deviceSession == null) {
             return null;
         }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        int alarm = sentence.indexOf("BO01");
-        if (alarm != -1) {
-            position.set(Position.KEY_ALARM, decodeAlarm(Integer.parseInt(sentence.substring(alarm + 4, alarm + 5))));
-        }
+        boolean alternative = parser.next() != null;
+
+        decodeType(position, parser.next(), parser.next());
 
         DateBuilder dateBuilder = new DateBuilder();
-        if (parser.next() == null) {
-            dateBuilder.setDate(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
-        } else {
+        if (alternative) {
             dateBuilder.setDateReverse(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
+        } else {
+            dateBuilder.setDate(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
         }
 
         position.setValid(parser.next().equals("A"));
