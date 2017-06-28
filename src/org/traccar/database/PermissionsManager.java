@@ -182,14 +182,14 @@ public class PermissionsManager {
 
     public void checkManager(long userId, long managedUserId) throws SecurityException {
         checkManager(userId);
-        if (!userPermissions.get(userId).contains(managedUserId)) {
+        if (!getUserPermissions(userId).contains(managedUserId)) {
             throw new SecurityException("User access denied");
         }
     }
 
     public void checkUserLimit(long userId) throws SecurityException {
         int userLimit = users.get(userId).getUserLimit();
-        if (userLimit != -1 && userPermissions.get(userId).size() >= userLimit) {
+        if (userLimit != -1 && getUserPermissions(userId).size() >= userLimit) {
             throw new SecurityException("Manager user limit reached");
         }
     }
