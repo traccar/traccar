@@ -11,6 +11,9 @@ public class MeitrackProtocolDecoderTest extends ProtocolTest {
 
         MeitrackProtocolDecoder decoder = new MeitrackProtocolDecoder(new MeitrackProtocol());
 
+        verifyNotNull(decoder, buffer(
+                "$$F153,863835026880190,AAA,29,25.313160,55.422473,170628150902,V,0,0,0,0,0.0,0,6553,6697,0|0|0000|00000000,0000,0002|0000|0000|018B|0000,,,3,0000,,110,386*22"));
+
         verifyPosition(decoder, buffer(
                 "$$T143,869013024733944,AAA,1,18.459575,-69.947161,170220142912,A,5,15,10,300,1.6,115,3989,187884,370|2|5337|2B2C,0100,0000|0000|0000|0964|0B04,,*C2"));
 
