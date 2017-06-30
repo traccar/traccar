@@ -27,7 +27,7 @@ public class AplicomFrameDecoder extends FrameDecoder {
             ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
 
         // Skip Alive message
-        while (buf.readableBytes() > 0 && Character.isDigit(buf.getByte(buf.readerIndex()))) {
+        while (buf.readable() && Character.isDigit(buf.getByte(buf.readerIndex()))) {
             buf.readByte();
         }
 
