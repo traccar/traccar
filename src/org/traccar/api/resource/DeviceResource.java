@@ -31,6 +31,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.WebApplicationException;
 
 import java.sql.SQLException;
 import java.util.Collection;
@@ -71,6 +72,18 @@ public class DeviceResource extends BaseResource {
             Context.getGeofenceManager().refresh();
         }
         return Response.ok(entity).build();
+    }
+
+    @Path("{id}")
+    @GET
+    public Response get(@PathParam("id") long id) throws SQLException {
+        Context.getPermissionsManager().checkDevice(getUserId(), id);
+        Device device = Context.getDeviceManager().getDeviceById(id);
+        if (device != null) {
+            return Response.ok(Context.getDeviceManager().getDeviceById(id)).build();
+        } else {
+            throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).build());
+        }
     }
 
     @Path("{id}")

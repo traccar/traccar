@@ -92,6 +92,25 @@
             }
         },
         "/devices/{id}": {
+            "get": {
+                "summary": "Get a Device",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/entityId"
+                    },
+                    {
+                        "$ref": "#/parameters/Device"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Device"
+                        }
+                    }
+                }
+            },
             "put": {
                 "summary": "Update a Device",
                 "parameters": [
@@ -112,7 +131,7 @@
                 }
             },
             "delete": {
-                "summary": "Update a Device",
+                "summary": "Delete a Device",
                 "parameters": [
                     {
                         "$ref": "#/parameters/entityId"
