@@ -57,6 +57,14 @@
                     },
                     {
                         "$ref": "#/parameters/userId"
+                    },
+                    {
+                        "name" : "id",
+                        "in" : "query",
+                        "description" : "To fetch one or more devices. Multiple params can be passed like `id=31&id=42`",
+                        "required" : false,
+                        "type" : "integer",
+                        "collectionFormat" : "multi"
                     }
                 ],
                 "responses": {
@@ -92,25 +100,6 @@
             }
         },
         "/devices/{id}": {
-            "get": {
-                "summary": "Get a Device",
-                "parameters": [
-                    {
-                        "$ref": "#/parameters/entityId"
-                    },
-                    {
-                        "$ref": "#/parameters/Device"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/Device"
-                        }
-                    }
-                }
-            },
             "put": {
                 "summary": "Update a Device",
                 "parameters": [

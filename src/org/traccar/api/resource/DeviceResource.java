@@ -31,10 +31,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.WebApplicationException;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @Path("devices")
 @Produces(MediaType.APPLICATION_JSON)
@@ -43,20 +44,31 @@ public class DeviceResource extends BaseResource {
 
     @GET
     public Collection<Device> get(
-            @QueryParam("all") boolean all, @QueryParam("userId") long userId) throws SQLException {
-        if (all) {
-            if (Context.getPermissionsManager().isAdmin(getUserId())) {
-                return Context.getDeviceManager().getAllDevices();
+            @QueryParam("all") boolean all, @QueryParam("userId") long userId,
+            @QueryParam("id") List<Long> deviceIds) throws SQLException {
+        if (deviceIds.isEmpty()) {
+            if (all) {
+                if (Context.getPermissionsManager().isAdmin(getUserId())) {
+                    return Context.getDeviceManager().getAllDevices();
+                } else {
+                    Context.getPermissionsManager().checkManager(getUserId());
+                    return Context.getDeviceManager().getManagedDevices(getUserId());
+                }
             } else {
-                Context.getPermissionsManager().checkManager(getUserId());
-                return Context.getDeviceManager().getManagedDevices(getUserId());
+                if (userId == 0) {
+                    userId = getUserId();
+                }
+                Context.getPermissionsManager().checkUser(getUserId(), userId);
+                return Context.getDeviceManager().getDevices(userId);
             }
         } else {
-            if (userId == 0) {
-                userId = getUserId();
+            ArrayList<Device> devices = new ArrayList<>();
+            for (Long deviceId : deviceIds) {
+                Device device = Context.getDeviceManager().getDeviceById(deviceId);
+                Context.getPermissionsManager().checkDevice(getUserId(), device.getId());
+                devices.add(device);
             }
-            Context.getPermissionsManager().checkUser(getUserId(), userId);
-            return Context.getDeviceManager().getDevices(userId);
+            return devices;
         }
     }
 
@@ -72,18 +84,6 @@ public class DeviceResource extends BaseResource {
             Context.getGeofenceManager().refresh();
         }
         return Response.ok(entity).build();
-    }
-
-    @Path("{id}")
-    @GET
-    public Response get(@PathParam("id") long id) throws SQLException {
-        Context.getPermissionsManager().checkDevice(getUserId(), id);
-        Device device = Context.getDeviceManager().getDeviceById(id);
-        if (device != null) {
-            return Response.ok(Context.getDeviceManager().getDeviceById(id)).build();
-        } else {
-            throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).build());
-        }
     }
 
     @Path("{id}")
