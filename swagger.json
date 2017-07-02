@@ -57,6 +57,14 @@
                     },
                     {
                         "$ref": "#/parameters/userId"
+                    },
+                    {
+                        "name" : "id",
+                        "in" : "query",
+                        "description" : "To fetch one or more devices. Multiple params can be passed like `id=31&id=42`",
+                        "required" : false,
+                        "type" : "integer",
+                        "collectionFormat" : "multi"
                     }
                 ],
                 "responses": {
@@ -112,7 +120,7 @@
                 }
             },
             "delete": {
-                "summary": "Update a Device",
+                "summary": "Delete a Device",
                 "parameters": [
                     {
                         "$ref": "#/parameters/entityId"

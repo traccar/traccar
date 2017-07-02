@@ -33,7 +33,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @Path("devices")
 @Produces(MediaType.APPLICATION_JSON)
@@ -42,20 +44,30 @@ public class DeviceResource extends BaseResource {
 
     @GET
     public Collection<Device> get(
-            @QueryParam("all") boolean all, @QueryParam("userId") long userId) throws SQLException {
-        if (all) {
-            if (Context.getPermissionsManager().isAdmin(getUserId())) {
-                return Context.getDeviceManager().getAllDevices();
+            @QueryParam("all") boolean all, @QueryParam("userId") long userId,
+            @QueryParam("id") List<Long> deviceIds) throws SQLException {
+        if (deviceIds.isEmpty()) {
+            if (all) {
+                if (Context.getPermissionsManager().isAdmin(getUserId())) {
+                    return Context.getDeviceManager().getAllDevices();
+                } else {
+                    Context.getPermissionsManager().checkManager(getUserId());
+                    return Context.getDeviceManager().getManagedDevices(getUserId());
+                }
             } else {
-                Context.getPermissionsManager().checkManager(getUserId());
-                return Context.getDeviceManager().getManagedDevices(getUserId());
+                if (userId == 0) {
+                    userId = getUserId();
+                }
+                Context.getPermissionsManager().checkUser(getUserId(), userId);
+                return Context.getDeviceManager().getDevices(userId);
             }
         } else {
-            if (userId == 0) {
-                userId = getUserId();
+            ArrayList<Device> devices = new ArrayList<>();
+            for (Long deviceId : deviceIds) {
+                Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
+                devices.add(Context.getDeviceManager().getDeviceById(deviceId));
             }
-            Context.getPermissionsManager().checkUser(getUserId(), userId);
-            return Context.getDeviceManager().getDevices(userId);
+            return devices;
         }
     }
 
