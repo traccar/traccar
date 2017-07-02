@@ -64,9 +64,8 @@ public class DeviceResource extends BaseResource {
         } else {
             ArrayList<Device> devices = new ArrayList<>();
             for (Long deviceId : deviceIds) {
-                Device device = Context.getDeviceManager().getDeviceById(deviceId);
-                Context.getPermissionsManager().checkDevice(getUserId(), device.getId());
-                devices.add(device);
+                Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
+                devices.add(Context.getDeviceManager().getDeviceById(deviceId));
             }
             return devices;
         }
