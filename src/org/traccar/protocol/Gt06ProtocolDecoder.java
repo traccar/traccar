@@ -485,7 +485,12 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 data = buf.readBytes(buf.readableBytes() - 6).toString(StandardCharsets.UTF_16BE);
             }
 
-            return decodeLocationString(position, data);
+            if (decodeLocationString(position, data) == null) {
+                getLastLocation(position, null);
+                position.set(Position.KEY_RESULT, data);
+            }
+
+            return position;
 
         } else if (type == MSG_INFO) {
 
