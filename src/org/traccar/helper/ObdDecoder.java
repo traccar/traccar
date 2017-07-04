@@ -87,15 +87,15 @@ public final class ObdDecoder {
     public static Map.Entry<String, Object> decodeData(int pid, int value, boolean convert) {
         switch (pid) {
             case PID_ENGINE_LOAD:
-                return createEntry("engineLoad", convert ? value * 100 / 255 : value);
+                return createEntry(Position.KEY_ENGINE_LOAD, convert ? value * 100 / 255 : value);
             case PID_COOLANT_TEMPERATURE:
-                return createEntry("coolantTemperature", convert ? value - 40 : value);
+                return createEntry(Position.KEY_COOLANT_TEMP, convert ? value - 40 : value);
             case PID_ENGINE_RPM:
                 return createEntry(Position.KEY_RPM, convert ? value / 4 : value);
             case PID_VEHICLE_SPEED:
                 return createEntry(Position.KEY_OBD_SPEED, value);
             case PID_THROTTLE_POSITION:
-                return createEntry("throttle", convert ? value * 100 / 255 : value);
+                return createEntry(Position.KEY_THROTTLE, convert ? value * 100 / 255 : value);
             case PID_MIL_DISTANCE:
                 return createEntry("milDistance", value);
             case PID_FUEL_LEVEL:

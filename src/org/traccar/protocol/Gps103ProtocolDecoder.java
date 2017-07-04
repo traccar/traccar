@@ -211,8 +211,8 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_FUEL_CONSUMPTION, parser.nextDouble(0));
             position.set(Position.KEY_HOURS, parser.nextInt());
             position.set(Position.KEY_OBD_SPEED, parser.nextInt(0));
-            position.set("powerLoad", parser.next());
-            position.set(Position.PREFIX_TEMP + 1, parser.nextInt());
+            position.set(Position.KEY_ENGINE_LOAD, parser.next());
+            position.set(Position.KEY_COOLANT_TEMP, parser.nextInt());
             position.set(Position.KEY_THROTTLE, parser.next());
             position.set(Position.KEY_RPM, parser.nextInt(0));
             position.set(Position.KEY_BATTERY, parser.nextDouble(0));
