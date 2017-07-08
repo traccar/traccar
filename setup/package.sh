@@ -118,6 +118,7 @@ package_unix () {
   find out -type f \( -name \*.sh -o -name \*.vm \) -print0 | xargs -0 dos2unix
   copy_files
 
+  cp java-test/test.jar out
   cp setup.sh out
   makeself --notemp out traccar.run "traccar" ./setup.sh
 
