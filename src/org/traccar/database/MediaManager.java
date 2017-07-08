@@ -40,7 +40,10 @@ public class MediaManager {
 
     private File createFile(String uniqueId, String name) throws IOException {
         Path filePath = Paths.get(path, uniqueId, name);
-        Files.createDirectories(filePath.getParent());
+        Path directoryPath = filePath.getParent();
+        if (directoryPath != null) {
+            Files.createDirectories(directoryPath);
+        }
         return filePath.toFile();
     }
 

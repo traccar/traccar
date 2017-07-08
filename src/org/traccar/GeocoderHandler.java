@@ -60,12 +60,11 @@ public class GeocoderHandler implements ChannelUpstreamHandler {
             if (processInvalidPositions || position.getValid()) {
                 if (geocoderReuseDistance != 0) {
                     Position lastPosition = Context.getIdentityManager().getLastPosition(position.getDeviceId());
-                    if (lastPosition != null && lastPosition.getAddress() != null) {
-                        if (position.getDouble(Position.KEY_DISTANCE) <= geocoderReuseDistance) {
-                            position.setAddress(lastPosition.getAddress());
-                            Channels.fireMessageReceived(ctx, position, event.getRemoteAddress());
-                            return;
-                        }
+                    if (lastPosition != null && lastPosition.getAddress() != null
+                            && position.getDouble(Position.KEY_DISTANCE) <= geocoderReuseDistance) {
+                        position.setAddress(lastPosition.getAddress());
+                        Channels.fireMessageReceived(ctx, position, event.getRemoteAddress());
+                        return;
                     }
                 }
 

@@ -88,7 +88,7 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
             position.set("gpsAntennaStatus", buf.readUnsignedShort());
 
             position.setSpeed(buf.readUnsignedShort() * 0.194384);
-            position.setCourse((double) buf.readUnsignedShort());
+            position.setCourse(buf.readUnsignedShort());
 
             position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
 
