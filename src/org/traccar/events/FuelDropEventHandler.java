@@ -42,15 +42,17 @@ public class FuelDropEventHandler extends BaseEventHandler {
         double fuelDropThreshold = Context.getDeviceManager()
                 .lookupAttributeDouble(device.getId(), ATTRIBUTE_FUEL_DROP_THRESHOLD, 0, false);
 
-        Position lastPosition = Context.getIdentityManager().getLastPosition(position.getDeviceId());
-        if (position.getAttributes().containsKey(Position.KEY_FUEL_LEVEL)
-                && lastPosition != null && lastPosition.getAttributes().containsKey(Position.KEY_FUEL_LEVEL)) {
+        if (fuelDropThreshold > 0) {
+            Position lastPosition = Context.getIdentityManager().getLastPosition(position.getDeviceId());
+            if (position.getAttributes().containsKey(Position.KEY_FUEL_LEVEL)
+                    && lastPosition != null && lastPosition.getAttributes().containsKey(Position.KEY_FUEL_LEVEL)) {
 
-            double drop = lastPosition.getDouble(Position.KEY_FUEL_LEVEL) - position.getDouble(Position.KEY_FUEL_LEVEL);
-            if (drop >= fuelDropThreshold) {
-                Event event = new Event(Event.TYPE_DEVICE_FUEL_DROP, position.getDeviceId(), position.getId());
-                event.set(ATTRIBUTE_FUEL_DROP_THRESHOLD, fuelDropThreshold);
-                return Collections.singleton(event);
+                double drop = lastPosition.getDouble(Position.KEY_FUEL_LEVEL) - position.getDouble(Position.KEY_FUEL_LEVEL);
+                if (drop >= fuelDropThreshold) {
+                    Event event = new Event(Event.TYPE_DEVICE_FUEL_DROP, position.getDeviceId(), position.getId());
+                    event.set(ATTRIBUTE_FUEL_DROP_THRESHOLD, fuelDropThreshold);
+                    return Collections.singleton(event);
+                }
             }
         }
 
