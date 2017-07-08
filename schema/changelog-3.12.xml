@@ -77,11 +77,11 @@
     <addForeignKeyConstraint baseTableName="device_attribute" baseColumnNames="deviceid" constraintName="fk_device_attribute_deviceid" referencedTableName="devices" referencedColumnNames="id" onDelete="CASCADE" />
     <addForeignKeyConstraint baseTableName="device_attribute" baseColumnNames="attributeid" constraintName="fk_device_attribute_attributeid" referencedTableName="attributes" referencedColumnNames="id" onDelete="CASCADE" />
 
-    <dropForeignKeyConstraint baseTableName="positions" constraintName="fk_position_deviceid" />
+    <!--<dropForeignKeyConstraint baseTableName="positions" constraintName="fk_position_deviceid" />
     <addForeignKeyConstraint baseTableName="positions" baseColumnNames="deviceid" constraintName="fk_positions_deviceid" referencedTableName="devices" referencedColumnNames="id" onDelete="CASCADE" />
 
     <dropForeignKeyConstraint baseTableName="events" constraintName="fk_event_deviceid" />
-    <addForeignKeyConstraint baseTableName="events" baseColumnNames="deviceid" constraintName="fk_events_deviceid" referencedTableName="devices" referencedColumnNames="id" onDelete="CASCADE" />
+    <addForeignKeyConstraint baseTableName="events" baseColumnNames="deviceid" constraintName="fk_events_deviceid" referencedTableName="devices" referencedColumnNames="id" onDelete="CASCADE" />-->
 
     <dropForeignKeyConstraint baseTableName="device_geofence" constraintName="fk_user_device_geofence_deviceid" />
     <addForeignKeyConstraint baseTableName="device_geofence" baseColumnNames="deviceid" constraintName="fk_device_geofence_deviceid" referencedTableName="devices" referencedColumnNames="id" onDelete="CASCADE" />
