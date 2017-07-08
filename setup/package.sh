@@ -119,7 +119,7 @@ package_unix () {
   copy_files
 
   cp setup.sh out
-  makeself out traccar.run "traccar" ./setup.sh
+  makeself --notemp out traccar.run "traccar" ./setup.sh
 
   zip -j traccar-linux-$VERSION.zip traccar.run README.txt
   cp traccar-linux-$VERSION.zip traccar-macos-$VERSION.zip

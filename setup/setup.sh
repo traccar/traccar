@@ -8,8 +8,9 @@ then
   else
     mkdir -p /opt/traccar
     cp -r * /opt/traccar
+    rm -r ../out
     rm /opt/traccar/setup.sh
-    chmod -R go+rX /opt/traccar
+    chmod -r go+rX /opt/traccar
     /opt/traccar/bin/installDaemon.sh
   fi
 else
