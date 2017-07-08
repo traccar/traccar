@@ -8,7 +8,7 @@ then
     cp -r * /opt/traccar
     rm -r ../out
     rm /opt/traccar/setup.sh
-    chmod -r go+rX /opt/traccar
+    chmod -R go+rX /opt/traccar
     /opt/traccar/bin/installDaemon.sh
   else
     echo 'Java 7 or higher is required'
