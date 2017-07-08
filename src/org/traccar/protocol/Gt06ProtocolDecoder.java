@@ -187,16 +187,19 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
     private boolean decodeLbs(Position position, ChannelBuffer buf, boolean hasLength) {
 
-        int lbsLength = 0;
+        int length = 0;
         if (hasLength) {
-            lbsLength = buf.readUnsignedByte();
+            length = buf.readUnsignedByte();
+            if (length == 0) {
+                return false;
+            }
         }
 
         position.setNetwork(new Network(CellTower.from(
                 buf.readUnsignedShort(), buf.readUnsignedByte(), buf.readUnsignedShort(), buf.readUnsignedMedium())));
 
-        if (lbsLength > 0) {
-            buf.skipBytes(lbsLength - 9);
+        if (length > 0) {
+            buf.skipBytes(length - 8);
         }
 
         return true;
@@ -542,6 +545,37 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             }
 
             decodeLbs(position, buf, true);
+
+            buf.skipBytes(buf.readUnsignedByte()); // additional cell towers
+            buf.skipBytes(buf.readUnsignedByte()); // wifi access point
+
+            int status = buf.readUnsignedByte();
+            position.set(Position.KEY_STATUS, status);
+
+            if (type == MSG_AZ735_ALARM) {
+                switch (status) {
+                    case 0xA0:
+                        position.set(Position.KEY_ARMED, true);
+                        break;
+                    case 0xA1:
+                        position.set(Position.KEY_ARMED, false);
+                        break;
+                    case 0xA2:
+                    case 0xA3:
+                        position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                        break;
+                    case 0xA4:
+                        position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+                        break;
+                    case 0xA5:
+                        position.set(Position.KEY_ALARM, Position.ALARM_DOOR);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            buf.skipBytes(buf.readUnsignedByte()); // reserved extension
 
             sendResponse(channel, true, type);
 
