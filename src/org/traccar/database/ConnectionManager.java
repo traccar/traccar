@@ -48,7 +48,7 @@ public class ConnectionManager {
 
     public ConnectionManager() {
         deviceTimeout = Context.getConfig().getLong("status.timeout", DEFAULT_TIMEOUT) * 1000;
-        enableStatusEvents = Context.getConfig().getBoolean("event.statusHandler");
+        enableStatusEvents = Context.getConfig().getBoolean("event.enable");
     }
 
     public void addActiveDevice(long deviceId, Protocol protocol, Channel channel, SocketAddress remoteAddress) {
