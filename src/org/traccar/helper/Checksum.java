@@ -131,6 +131,7 @@ public final class Checksum {
 
     // More info: http://reveng.sourceforge.net/crc-catalogue/16.htm
     public static final String CRC16_IBM = "IBM";
+    public static final String CRC16_MODBUS = "MODBUS";
     public static final String CRC16_X25 = "X-25";
     public static final String CRC16_CCITT_FALSE = "CCITT-FALSE";
     public static final String CRC16_KERMIT = "KERMIT";
@@ -159,6 +160,8 @@ public final class Checksum {
         switch (type) {
             case CRC16_IBM:
                 return crc16Reflected(buf, 0, CRC16_IBM_TABLE);
+            case CRC16_MODBUS:
+                return crc16Reflected(buf, 0xFFFF, CRC16_IBM_TABLE);
             case CRC16_X25:
                 return crc16Reflected(buf, 0xFFFF, CRC16_CCITT_TABLE_REVERSE) ^ 0xFFFF;
             case CRC16_CCITT_FALSE:
