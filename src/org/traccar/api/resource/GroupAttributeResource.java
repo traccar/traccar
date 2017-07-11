@@ -49,7 +49,7 @@ public class GroupAttributeResource extends BaseResource {
     public Response remove(GroupAttribute entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkGroup(getUserId(), entity.getGroupId());
-        Context.getPermissionsManager().checkGeofence(getUserId(), entity.getAttributeId());
+        Context.getPermissionsManager().checkAttribute(getUserId(), entity.getAttributeId());
         Context.getDataManager().unlinkGroupAttribute(entity.getGroupId(), entity.getAttributeId());
         Context.getAttributesManager().refresh();
         return Response.noContent().build();

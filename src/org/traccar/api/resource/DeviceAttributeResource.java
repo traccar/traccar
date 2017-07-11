@@ -49,7 +49,7 @@ public class DeviceAttributeResource extends BaseResource {
     public Response remove(DeviceAttribute entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkDevice(getUserId(), entity.getDeviceId());
-        Context.getPermissionsManager().checkGeofence(getUserId(), entity.getAttributeId());
+        Context.getPermissionsManager().checkAttribute(getUserId(), entity.getAttributeId());
         Context.getDataManager().unlinkDeviceAttribute(entity.getDeviceId(), entity.getAttributeId());
         Context.getAttributesManager().refresh();
         return Response.noContent().build();
