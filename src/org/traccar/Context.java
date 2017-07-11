@@ -31,6 +31,7 @@ import org.traccar.database.AttributesManager;
 import org.traccar.database.ConnectionManager;
 import org.traccar.database.DataManager;
 import org.traccar.database.DeviceManager;
+import org.traccar.database.DriversManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.database.MediaManager;
 import org.traccar.database.NotificationManager;
@@ -187,6 +188,12 @@ public final class Context {
         return attributesManager;
     }
 
+    private static DriversManager driversManager;
+
+    public static DriversManager getDriversManager() {
+        return driversManager;
+    }
+
     private static StatisticsManager statisticsManager;
 
     public static StatisticsManager getStatisticsManager() {
@@ -329,6 +336,8 @@ public final class Context {
         aliasesManager = new AliasesManager(dataManager);
 
         attributesManager = new AttributesManager(dataManager);
+
+        driversManager = new DriversManager(dataManager);
 
         statisticsManager = new StatisticsManager();
 

@@ -322,6 +322,19 @@ public class PermissionsManager {
         }
     }
 
+    public void checkDriver(long userId, long driverId) throws SecurityException {
+        if (!Context.getDriversManager().checkDriver(userId, driverId) && !isAdmin(userId)) {
+            checkManager(userId);
+            for (long managedUserId : getUserPermissions(userId)) {
+                if (Context.getDriversManager().checkDriver(managedUserId, driverId)) {
+                    return;
+                }
+            }
+            throw new SecurityException("Driver access denied");
+        }
+    }
+
+
     public void checkCalendar(long userId, long calendarId) throws SecurityException {
         if (!Context.getCalendarManager().checkCalendar(userId, calendarId) && !isAdmin(userId)) {
             checkManager(userId);
