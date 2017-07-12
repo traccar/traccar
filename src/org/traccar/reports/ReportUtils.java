@@ -26,6 +26,7 @@ import org.jxls.transform.Transformer;
 import org.jxls.transform.poi.PoiTransformer;
 import org.jxls.util.TransformerFactory;
 import org.traccar.Context;
+import org.traccar.model.Driver;
 import org.traccar.model.Position;
 import org.traccar.reports.model.BaseReport;
 import org.traccar.reports.model.StopReport;
@@ -99,6 +100,20 @@ public final class ReportUtils {
             return value.setScale(1, RoundingMode.HALF_EVEN).doubleValue();
         }
         return 0;
+    }
+
+    public static String findDriverName(Position firstPosition, Position lastPosition) {
+        String driverUniqueId = null;
+        if (firstPosition.getAttributes().containsKey(Position.KEY_DRIVER_UNIQUE_ID)) {
+            driverUniqueId =  firstPosition.getString(Position.KEY_DRIVER_UNIQUE_ID);
+        } else if (lastPosition.getAttributes().containsKey(Position.KEY_DRIVER_UNIQUE_ID)) {
+            driverUniqueId = lastPosition.getString(Position.KEY_DRIVER_UNIQUE_ID);
+        }
+        if (driverUniqueId != null && Context.getDriversManager() != null) {
+            Driver driver = Context.getDriversManager().getDriverByUniqueId(driverUniqueId);
+            return driver != null ? driver.getName() : null;
+        }
+        return null;
     }
 
     public static org.jxls.common.Context initializeContext(long userId) {
@@ -175,6 +190,7 @@ public final class ReportUtils {
         trip.setAverageSpeed(speedSum / (endIndex - startIndex));
         trip.setMaxSpeed(speedMax);
         trip.setSpentFuel(calculateFuel(startTrip, endTrip));
+        trip.setDriverName(findDriverName(startTrip, endTrip));
 
         return trip;
     }

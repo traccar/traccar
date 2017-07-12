@@ -210,4 +210,16 @@ public class DriversManager {
         }
         return drivers;
     }
+
+    public final boolean authorizeDriverByUniqueId(String driverUniqueId, long deviceId) {
+        if (driversByUniqueId.containsKey(driverUniqueId)) {
+            long chekingDriverId = getDriverByUniqueId(driverUniqueId).getId();
+            for (long driverId : getAllDeviceDrivers(deviceId)) {
+                if (chekingDriverId == driverId) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }

@@ -253,7 +253,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (parser.hasNext()) {
-            position.set(Position.KEY_RFID, parser.nextHexInt(0));
+            position.set(Position.KEY_RFID, String.valueOf(parser.nextHexInt(0)));
         }
 
         return position;

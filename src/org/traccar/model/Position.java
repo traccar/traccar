@@ -81,6 +81,8 @@ public class Position extends Message {
 
     public static final String KEY_RESULT = "result";
 
+    public static final String KEY_DRIVER_UNIQUE_ID = "driverUniqueId";
+
     // Start with 1 not 0
     public static final String PREFIX_TEMP = "temp";
     public static final String PREFIX_ADC = "adc";
