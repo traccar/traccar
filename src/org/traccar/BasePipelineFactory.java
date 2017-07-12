@@ -125,7 +125,8 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             }
         }
 
-        distanceHandler = new DistanceHandler(Context.getConfig().getBoolean("coordinates.filter"),
+        distanceHandler = new DistanceHandler(
+                Context.getConfig().getBoolean("coordinates.filter"),
                 Context.getConfig().getInteger("coordinates.minError"),
                 Context.getConfig().getInteger("coordinates.maxError"));
 
