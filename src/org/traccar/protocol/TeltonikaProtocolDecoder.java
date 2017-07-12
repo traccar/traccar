@@ -35,8 +35,11 @@ import java.util.List;
 
 public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
-    public TeltonikaProtocolDecoder(TeltonikaProtocol protocol) {
+    boolean connectionless;
+
+    public TeltonikaProtocolDecoder(TeltonikaProtocol protocol, boolean connectionless) {
         super(protocol);
+        this.connectionless = connectionless;
     }
 
     private DeviceSession parseIdentification(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
@@ -249,7 +252,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, ChannelBuffer buf, int locationPacketId, String... imei) {
         List<Position> positions = new LinkedList<>();
 
-        if (!(channel instanceof DatagramChannel)) {
+        if (!connectionless) {
             buf.readUnsignedInt(); // data length
         }
 
@@ -278,7 +281,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (channel != null) {
-            if (channel instanceof DatagramChannel) {
+            if (connectionless) {
                 ChannelBuffer response = ChannelBuffers.dynamicBuffer();
                 response.writeShort(5);
                 response.writeShort(0);
@@ -301,7 +304,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
-        if (channel instanceof DatagramChannel) {
+        if (connectionless) {
             return decodeUdp(channel, remoteAddress, buf);
         } else {
             return decodeTcp(channel, remoteAddress, buf);

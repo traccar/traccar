@@ -1,5 +1,6 @@
 package org.traccar.protocol;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.traccar.ProtocolTest;
 
@@ -8,7 +9,7 @@ public class TeltonikaProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        TeltonikaProtocolDecoder decoder = new TeltonikaProtocolDecoder(new TeltonikaProtocol());
+        TeltonikaProtocolDecoder decoder = new TeltonikaProtocolDecoder(new TeltonikaProtocol(), false);
 
         verifyNull(decoder, binary(
                 "000F313233343536373839303132333435"));
@@ -58,6 +59,17 @@ public class TeltonikaProtocolDecoderTest extends ProtocolTest {
         verifyPositions(decoder, binary(
                 "00000000000000a608010000013f14a1d1ce000f0eb790209a778000ab010c0500000000000000000100003390"));
         
+    }
+
+    @Ignore
+    @Test
+    public void testDecodeConnectionless() throws Exception {
+
+        TeltonikaProtocolDecoder decoder = new TeltonikaProtocolDecoder(new TeltonikaProtocol(), true);
+
+        verifyPositions(decoder, false, binary(
+                "0049cafe0122000f33353734353430373237313339373508010000015d3766f6a800003eef961ec6215e0063006d09003100070401000200f001c8000242381c18003201c7000000e10001"));
+
     }
 
 }
