@@ -214,7 +214,11 @@ public class DriversManager {
     public final boolean authorizeDriverByUniqueId(String driverUniqueId, long deviceId) {
         if (driversByUniqueId.containsKey(driverUniqueId)) {
             long chekingDriverId = getDriverByUniqueId(driverUniqueId).getId();
-            for (long driverId : getAllDeviceDrivers(deviceId)) {
+            Set<Long> deviceDrivers = getAllDeviceDrivers(deviceId);
+            if (deviceDrivers.isEmpty()) {
+                return true;
+            }
+            for (long driverId : deviceDrivers) {
                 if (chekingDriverId == driverId) {
                     return true;
                 }
