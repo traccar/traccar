@@ -168,7 +168,7 @@ public class DriversManager {
     }
 
     public void removeDriver(long driverId) throws SQLException {
-        dataManager.removeAttribute(driverId);
+        dataManager.removeDriver(driverId);
         if (drivers.containsKey(driverId)) {
             String driverUniqueId = drivers.get(driverId).getUniqueId();
             drivers.remove(driverId);

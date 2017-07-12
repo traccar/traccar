@@ -86,8 +86,8 @@ public class DriverResource extends BaseResource {
     public Response add(Driver entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getDriversManager().addDriver(entity);
-        Context.getDataManager().linkAttribute(getUserId(), entity.getId());
-        Context.getAttributesManager().refreshUserAttributes();
+        Context.getDataManager().linkDriver(getUserId(), entity.getId());
+        Context.getDriversManager().refreshUserDrivers();
         return Response.ok(entity).build();
     }
 

@@ -443,7 +443,7 @@
     <entry key='database.updateDriver'>
         UPDATE drivers SET
         name = :name,
-        uniqueId = :uniqueId
+        uniqueId = :uniqueId,
         attributes = :attributes
         WHERE id = :id
     </entry>
@@ -461,7 +461,7 @@
     </entry>
 
     <entry key='database.unlinkDriver'>
-        DELETE FROM user_attribute WHERE userId = :userId AND driverId = :driverId
+        DELETE FROM user_driver WHERE userId = :userId AND driverId = :driverId
     </entry>
 
     <entry key='database.selectGroupDrivers'>
