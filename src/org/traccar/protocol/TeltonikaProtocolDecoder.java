@@ -34,7 +34,7 @@ import java.util.List;
 
 public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
-    boolean connectionless;
+    private boolean connectionless;
 
     public TeltonikaProtocolDecoder(TeltonikaProtocol protocol, boolean connectionless) {
         super(protocol);
