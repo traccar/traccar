@@ -30,6 +30,7 @@ import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.handler.logging.LoggingHandler;
 import org.jboss.netty.handler.timeout.IdleStateHandler;
 import org.traccar.events.CommandResultEventHandler;
+import org.traccar.events.DriverEventHandler;
 import org.traccar.events.FuelDropEventHandler;
 import org.traccar.events.GeofenceEventHandler;
 import org.traccar.events.IgnitionEventHandler;
@@ -67,6 +68,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
     private AlertEventHandler alertEventHandler;
     private IgnitionEventHandler ignitionEventHandler;
     private MaintenanceEventHandler maintenanceEventHandler;
+    private DriverEventHandler driverEventHandler;
 
     private static final class OpenChannelHandler extends SimpleChannelHandler {
 
@@ -173,6 +175,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             alertEventHandler = new AlertEventHandler();
             ignitionEventHandler = new IgnitionEventHandler();
             maintenanceEventHandler = new MaintenanceEventHandler();
+            driverEventHandler = new DriverEventHandler();
         }
     }
 
@@ -268,6 +271,10 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
         if (maintenanceEventHandler != null) {
             pipeline.addLast("MaintenanceEventHandler", maintenanceEventHandler);
+        }
+
+        if (driverEventHandler != null) {
+            pipeline.addLast("DriverEventHandler", driverEventHandler);
         }
 
         pipeline.addLast("mainHandler", new MainEventHandler());
