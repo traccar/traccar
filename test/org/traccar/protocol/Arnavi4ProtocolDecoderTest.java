@@ -3,7 +3,7 @@ package org.traccar.protocol;
 import org.junit.Test;
 import org.traccar.ProtocolTest;
 
-import static org.junit.Assert.*;
+import java.nio.ByteOrder;
 
 /**
  * Created by Ivan Muratov @binakot on 11.07.2017.
@@ -13,14 +13,25 @@ public class Arnavi4ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        Arnavi4ProtocolDecoder decoder = new Arnavi4ProtocolDecoder(new Arnavi4Protocol());
+        Arnavi4ProtocolDecoder decoder;
 
-        verifyPosition(decoder, text(
-                "$AV,V2,32768,12487,2277,203,-1,0,0,193,0,0,1,13,200741,5950.6773N,03029.1043E,0.0,0.0,121012,*6E"));
+        decoder = new Arnavi4ProtocolDecoder(new Arnavi4Protocol());
 
-        verifyPosition(decoder, text(
-                "$AV,V3,999999,12487,2277,203,65534,0,0,193,65535,65535,65535,65535,1,13,200741,5950.6773N,03029.1043E,300.0,360.0,121012,65535,65535,65535,SF*6E"));
+        verifyNull(decoder, binary(ByteOrder.LITTLE_ENDIAN, // Valid HEADER v1 packet with IMEI
+                "ff22f30c45f5c90f0300"));
 
+        verifyPositions(decoder, binary(ByteOrder.LITTLE_ENDIAN, // Valid PACKAGE packet with one DATA packet
+                "5b01012800a3175f5903513934420447221c42055402781E0900f0c5215b4e0084005c00007c005d0000a300fa37010000295d"),
+                position("2017-07-07 05:09:55.000", true, 45.05597, 39.03347));
+
+        decoder = new Arnavi4ProtocolDecoder(new Arnavi4Protocol());
+
+        verifyNull(decoder, binary(ByteOrder.LITTLE_ENDIAN, // Valid HEADER v2 packet with IMEI
+                "ff23f30c45f5c90f0300"));
+
+        verifyPositions(decoder, binary(ByteOrder.LITTLE_ENDIAN, // Valid PACKAGE packet with two DATA packet
+                "5b01012800a3175f5903513934420447221c42055402781E0900f0c5215b4e0084005c00007c005d0000a300fa3701000029012800a3175f5903513934420447221c42055402781E0900f0c5215b4e0084005c00007c005d0000a300fa37010000295d"),
+                position("2017-07-07 05:09:55.000", true, 45.05597, 39.03347));
     }
 
 }
