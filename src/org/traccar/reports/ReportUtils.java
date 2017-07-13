@@ -102,16 +102,19 @@ public final class ReportUtils {
         return 0;
     }
 
-    public static String findDriverName(Position firstPosition, Position lastPosition) {
-        String driverUniqueId = null;
+    public static String findDriver(Position firstPosition, Position lastPosition) {
         if (firstPosition.getAttributes().containsKey(Position.KEY_DRIVER_UNIQUE_ID)) {
-            driverUniqueId =  firstPosition.getString(Position.KEY_DRIVER_UNIQUE_ID);
+            return firstPosition.getString(Position.KEY_DRIVER_UNIQUE_ID);
         } else if (lastPosition.getAttributes().containsKey(Position.KEY_DRIVER_UNIQUE_ID)) {
-            driverUniqueId = lastPosition.getString(Position.KEY_DRIVER_UNIQUE_ID);
+            return lastPosition.getString(Position.KEY_DRIVER_UNIQUE_ID);
         }
+        return null;
+    }
+
+    public static String findDriverName(String driverUniqueId) {
         if (driverUniqueId != null && Context.getDriversManager() != null) {
             Driver driver = Context.getDriversManager().getDriverByUniqueId(driverUniqueId);
-            return driver != null ? driver.getName() : null;
+            return driver != null ? driver.getName() : driverUniqueId;
         }
         return null;
     }
@@ -190,7 +193,9 @@ public final class ReportUtils {
         trip.setAverageSpeed(speedSum / (endIndex - startIndex));
         trip.setMaxSpeed(speedMax);
         trip.setSpentFuel(calculateFuel(startTrip, endTrip));
-        trip.setDriverName(findDriverName(startTrip, endTrip));
+
+        trip.setDriverUniqueId(findDriver(startTrip, endTrip));
+        trip.setDriverName(findDriverName(trip.getDriverUniqueId()));
 
         return trip;
     }

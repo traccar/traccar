@@ -146,6 +146,16 @@ public class TripReport extends BaseReport {
         this.duration = duration;
     }
 
+    private String driverUniqueId;
+
+    public String getDriverUniqueId() {
+        return driverUniqueId;
+    }
+
+    public void setDriverUniqueId(String driverUniqueId) {
+        this.driverUniqueId = driverUniqueId;
+    }
+
     private String driverName;
 
     public String getDriverName() {
