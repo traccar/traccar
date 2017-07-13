@@ -15,7 +15,11 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-import static org.traccar.protocol.Arnavi4FrameDecoder.*;
+import static org.traccar.protocol.Arnavi4FrameDecoder.HEADER_START_SIGN;
+import static org.traccar.protocol.Arnavi4FrameDecoder.HEADER_VERSION_1;
+import static org.traccar.protocol.Arnavi4FrameDecoder.HEADER_VERSION_2;
+import static org.traccar.protocol.Arnavi4FrameDecoder.PACKAGE_START_SIGN;
+import static org.traccar.protocol.Arnavi4FrameDecoder.PACKAGE_END_SIGN;
 
 /**
  * Created by Ivan Muratov @binakot on 11.07.2017.
@@ -99,9 +103,9 @@ public class Arnavi4ProtocolDecoder extends BaseProtocolDecoder {
                 } else if (version == HEADER_VERSION_2) {
                     response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 9);
                     response.writeBytes(new byte[]{0x7B, 0x04, 0x00});
-                    byte[] timestampBytes = ByteBuffer.allocate(4).putInt((int) (System.currentTimeMillis() / 1000)).array();
-                    response.writeByte(Checksum.modulo256(timestampBytes));
-                    response.writeBytes(timestampBytes);
+                    byte[] timeBytes = ByteBuffer.allocate(4).putInt((int) (System.currentTimeMillis() / 1000)).array();
+                    response.writeByte(Checksum.modulo256(timeBytes));
+                    response.writeBytes(timeBytes);
                     response.writeByte(0x7D);
 
                 } else {
@@ -132,7 +136,7 @@ public class Arnavi4ProtocolDecoder extends BaseProtocolDecoder {
                     case RECORD_DATA:
                     case RECORD_TEXT:
                     case RECORD_FILE:
-                    case RECORD_BINARY: {
+                    case RECORD_BINARY:
                         int length = buf.readUnsignedShort();
                         long timestamp = buf.readUnsignedInt() * 1000;
                         ChannelBuffer recordBuf = buf.readBytes(length);
@@ -142,9 +146,7 @@ public class Arnavi4ProtocolDecoder extends BaseProtocolDecoder {
                         }
 
                         buf.readUnsignedByte(); // crc
-
                         break;
-                    }
 
                     default:
                         throw new IllegalArgumentException("unsupported record type");
