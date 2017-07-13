@@ -19,6 +19,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
@@ -35,10 +36,16 @@ import java.util.List;
 public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
     private boolean connectionless;
+    private boolean extended;
+
+    public void setExtended(boolean extended) {
+        this.extended = extended;
+    }
 
     public TeltonikaProtocolDecoder(TeltonikaProtocol protocol, boolean connectionless) {
         super(protocol);
         this.connectionless = connectionless;
+        this.extended = Context.getConfig().getBoolean(getProtocolName() + ".extended");
     }
 
     private DeviceSession parseIdentification(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
@@ -242,6 +249,14 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             int cnt = buf.readUnsignedByte();
             for (int j = 0; j < cnt; j++) {
                 decodeParameter(position, buf.readUnsignedByte(), buf, 8);
+            }
+        }
+
+        // Read 16 byte data
+        if (extended) {
+            int cnt = buf.readUnsignedByte();
+            for (int j = 0; j < cnt; j++) {
+                position.set(Position.PREFIX_IO + buf.readUnsignedByte(), ChannelBuffers.hexDump(buf.readBytes(16)));
             }
         }
 
