@@ -4,6 +4,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.junit.Assert;
 import org.junit.Test;
+import org.traccar.protocol.Arnavi4ProtocolDecoder;
 
 import java.nio.charset.StandardCharsets;
 
@@ -26,6 +27,13 @@ public class ChecksumTest {
     public void testLuhn() {
         Assert.assertEquals(7, Checksum.luhn(12345678901234L));
         Assert.assertEquals(0, Checksum.luhn(63070019470771L));
+    }
+
+    @Test
+    public void testModulo256() {
+        Assert.assertEquals(0x00, Checksum.modulo256((byte)0x00));
+        Assert.assertEquals(0x00, Checksum.modulo256((byte)0x00, (byte)0x00, (byte)0x00));
+        Assert.assertEquals(0x06, Checksum.modulo256((byte)0x01, (byte)0x02, (byte)0x03));
     }
 
 }

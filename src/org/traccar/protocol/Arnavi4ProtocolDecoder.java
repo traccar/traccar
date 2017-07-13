@@ -5,6 +5,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.helper.Checksum;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -33,14 +34,6 @@ public class Arnavi4ProtocolDecoder extends BaseProtocolDecoder {
 
     public Arnavi4ProtocolDecoder(Arnavi4Protocol protocol) {
         super(protocol);
-    }
-
-    private static int modulo256Checksum(byte[] bytes) {
-        int sum = 0;
-        for (byte b : bytes) {
-            sum = (sum + b) & 0xFF;
-        }
-        return sum;
     }
 
     private Position decodePosition(DeviceSession deviceSession, ChannelBuffer buf, long timestamp) {
@@ -107,7 +100,7 @@ public class Arnavi4ProtocolDecoder extends BaseProtocolDecoder {
                     response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 9);
                     response.writeBytes(new byte[]{0x7B, 0x04, 0x00});
                     byte[] timestampBytes = ByteBuffer.allocate(4).putInt((int) (System.currentTimeMillis() / 1000)).array();
-                    response.writeByte(modulo256Checksum(timestampBytes));
+                    response.writeByte(Checksum.modulo256(timestampBytes));
                     response.writeBytes(timestampBytes);
                     response.writeByte(0x7D);
 

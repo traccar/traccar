@@ -243,4 +243,12 @@ public final class Checksum {
         return (10 - (checksum % 10)) % 10;
     }
 
+    public static int modulo256(byte... bytes) {
+        int sum = 0;
+        for (byte b : bytes) {
+            sum = (sum + b) & 0xFF;
+        }
+        return sum;
+    }
+
 }
