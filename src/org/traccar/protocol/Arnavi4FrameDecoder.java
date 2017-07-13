@@ -10,7 +10,7 @@ import org.jboss.netty.handler.codec.frame.FrameDecoder;
  */
 public class Arnavi4FrameDecoder extends FrameDecoder {
 
-    static final byte HEADER_START_SIGN = (byte)0xFF;
+    static final byte HEADER_START_SIGN = (byte) 0xFF;
     static final byte HEADER_VERSION_1 = 0x22;
     static final byte HEADER_VERSION_2 = 0x23;
     static final int HEADER_LENGTH = 10;
