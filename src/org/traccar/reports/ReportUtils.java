@@ -114,7 +114,9 @@ public final class ReportUtils {
     public static String findDriverName(String driverUniqueId) {
         if (driverUniqueId != null && Context.getDriversManager() != null) {
             Driver driver = Context.getDriversManager().getDriverByUniqueId(driverUniqueId);
-            return driver != null ? driver.getName() : driverUniqueId;
+            if (driver != null) {
+                return driver.getName();
+            }
         }
         return null;
     }
