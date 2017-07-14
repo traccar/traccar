@@ -431,6 +431,63 @@
         DELETE FROM device_attribute WHERE deviceId = :deviceId AND attributeId = :attributeId
     </entry>
 
+    <entry key='database.selectDrivers'>
+        SELECT * FROM drivers
+    </entry>
+
+    <entry key='database.insertDriver'>
+        INSERT INTO drivers (name, uniqueId, attributes)
+        VALUES (:name, :uniqueId, :attributes)
+    </entry>
+
+    <entry key='database.updateDriver'>
+        UPDATE drivers SET
+        name = :name,
+        uniqueId = :uniqueId,
+        attributes = :attributes
+        WHERE id = :id
+    </entry>
+
+    <entry key='database.deleteDriver'>
+        DELETE FROM drivers WHERE id = :id
+    </entry>
+    
+    <entry key='database.selectDriverPermissions'>
+        SELECT userId, driverId FROM user_driver
+    </entry>
+
+    <entry key='database.linkDriver'>
+        INSERT INTO user_driver (userId, driverId) VALUES (:userId, :driverId)
+    </entry>
+
+    <entry key='database.unlinkDriver'>
+        DELETE FROM user_driver WHERE userId = :userId AND driverId = :driverId
+    </entry>
+
+    <entry key='database.selectGroupDrivers'>
+        SELECT groupId, driverId FROM group_driver
+    </entry>
+
+    <entry key='database.linkGroupDriver'>
+        INSERT INTO group_driver (groupId, driverId) VALUES (:groupId, :driverId)
+    </entry>
+
+    <entry key='database.unlinkGroupDriver'>
+        DELETE FROM group_driver WHERE groupId = :groupId AND driverId = :driverId
+    </entry>
+
+    <entry key='database.selectDeviceDrivers'>
+        SELECT deviceId, driverId FROM device_driver
+    </entry>
+
+    <entry key='database.linkDeviceDriver'>
+        INSERT INTO device_driver (deviceId, driverId) VALUES (:deviceId, :driverId)
+    </entry>
+
+    <entry key='database.unlinkDeviceDriver'>
+        DELETE FROM device_driver WHERE deviceId = :deviceId AND driverId = :driverId
+    </entry>
+
     <!-- PROTOCOL CONFIG -->
 
     <entry key='gps103.port'>5001</entry>

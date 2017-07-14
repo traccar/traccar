@@ -129,7 +129,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         position.set(Position.KEY_ODOMETER, parser.nextInt(0));
-        position.set(Position.KEY_RFID, parser.next());
+        position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
 
         if (parser.hasNext()) {
             int value = parser.nextHexInt(0);

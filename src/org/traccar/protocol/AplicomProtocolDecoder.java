@@ -263,7 +263,8 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if ((selector & 0x0200) != 0) {
-            position.set(Position.KEY_RFID, (((long) buf.readUnsignedShort()) << 32) + buf.readUnsignedInt());
+            position.set(Position.KEY_DRIVER_UNIQUE_ID,
+                    String.valueOf(((long) buf.readUnsignedShort()) << 32) + buf.readUnsignedInt());
         }
 
         if ((selector & 0x0400) != 0) {

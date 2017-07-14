@@ -44,11 +44,15 @@ import org.traccar.model.CalendarPermission;
 import org.traccar.model.Attribute;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceAttribute;
+import org.traccar.model.DeviceDriver;
 import org.traccar.model.DevicePermission;
+import org.traccar.model.Driver;
+import org.traccar.model.DriverPermission;
 import org.traccar.model.Event;
 import org.traccar.model.Geofence;
 import org.traccar.model.Group;
 import org.traccar.model.GroupAttribute;
+import org.traccar.model.GroupDriver;
 import org.traccar.model.GroupGeofence;
 import org.traccar.model.GroupPermission;
 import org.traccar.model.Notification;
@@ -635,6 +639,86 @@ public class DataManager {
         QueryBuilder.create(dataSource, getQuery("database.unlinkDeviceAttribute"))
                 .setLong("deviceId", deviceId)
                 .setLong("attributeId", attributeId)
+                .executeUpdate();
+    }
+
+    public Collection<Driver> getDrivers() throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.selectDrivers"))
+                .executeQuery(Driver.class);
+    }
+
+    public void addDriver(Driver driver) throws SQLException {
+        driver.setId(QueryBuilder.create(dataSource, getQuery("database.insertDriver"), true)
+                .setObject(driver)
+                .executeUpdate());
+    }
+
+    public void updateDriver(Driver driver) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.updateDriver"))
+                .setObject(driver)
+                .executeUpdate();
+    }
+
+    public void removeDriver(long driverId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.deleteDriver"))
+                .setLong("id", driverId)
+                .executeUpdate();
+    }
+
+    public Collection<DriverPermission> getDriverPermissions() throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.selectDriverPermissions"))
+                .executeQuery(DriverPermission.class);
+    }
+
+    public void linkDriver(long userId, long driverId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.linkDriver"))
+                .setLong("userId", userId)
+                .setLong("driverId", driverId)
+                .executeUpdate();
+    }
+
+    public void unlinkDriver(long userId, long driverId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.unlinkDriver"))
+                .setLong("userId", userId)
+                .setLong("driverId", driverId)
+                .executeUpdate();
+    }
+
+    public Collection<GroupDriver> getGroupDrivers() throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.selectGroupDrivers"))
+                .executeQuery(GroupDriver.class);
+    }
+
+    public void linkGroupDriver(long groupId, long driverId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.linkGroupDriver"))
+                .setLong("groupId", groupId)
+                .setLong("driverId", driverId)
+                .executeUpdate();
+    }
+
+    public void unlinkGroupDriver(long groupId, long driverId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.unlinkGroupDriver"))
+                .setLong("groupId", groupId)
+                .setLong("driverId", driverId)
+                .executeUpdate();
+    }
+
+    public Collection<DeviceDriver> getDeviceDrivers() throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.selectDeviceDrivers"))
+                .executeQuery(DeviceDriver.class);
+    }
+
+    public void linkDeviceDriver(long deviceId, long driverId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.linkDeviceDriver"))
+                .setLong("deviceId", deviceId)
+                .setLong("driverId", driverId)
+                .executeUpdate();
+    }
+
+    public void unlinkDeviceDriver(long deviceId, long driverId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.unlinkDeviceDriver"))
+                .setLong("deviceId", deviceId)
+                .setLong("driverId", driverId)
                 .executeUpdate();
     }
 

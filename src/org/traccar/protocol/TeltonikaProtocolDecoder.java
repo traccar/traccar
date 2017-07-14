@@ -123,7 +123,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.PREFIX_TEMP + 3, readValue(buf, length, true) * 0.1);
                 break;
             case 78:
-                position.set(Position.KEY_RFID, readValue(buf, length, false));
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(readValue(buf, length, false)));
                 break;
             case 182:
                 position.set(Position.KEY_HDOP, readValue(buf, length, false) * 0.1);

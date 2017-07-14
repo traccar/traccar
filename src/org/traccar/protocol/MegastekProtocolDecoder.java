@@ -327,7 +327,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        position.set(Position.KEY_RFID, parser.next());
+        position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
 
         String battery = parser.next();
         if (battery != null) {

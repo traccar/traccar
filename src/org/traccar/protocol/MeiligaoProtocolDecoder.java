@@ -253,7 +253,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (parser.hasNext()) {
-            position.set(Position.KEY_RFID, parser.nextHexInt(0));
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(parser.nextHexInt(0)));
         }
 
         return position;
@@ -370,7 +370,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
                 if (rfid != 0) {
                     String card = String.format("%010d", rfid);
                     position.set("card" + (i + 1), card);
-                    position.set(Position.KEY_RFID, card);
+                    position.set(Position.KEY_DRIVER_UNIQUE_ID, card);
                 }
             }
         }

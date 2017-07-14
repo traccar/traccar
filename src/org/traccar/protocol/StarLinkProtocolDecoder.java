@@ -196,7 +196,7 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
             if (rfid.matches("0+")) {
                 rfid = data[data.length - 2];
             }
-            position.set(Position.KEY_RFID, rfid);
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, rfid);
         }
 
         return position;

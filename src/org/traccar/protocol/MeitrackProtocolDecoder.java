@@ -201,7 +201,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         if (eventData != null && !eventData.isEmpty()) {
             switch (event) {
                 case 37:
-                    position.set(Position.KEY_RFID, eventData);
+                    position.set(Position.KEY_DRIVER_UNIQUE_ID, eventData);
                     break;
                 default:
                     position.set("eventData", eventData);
