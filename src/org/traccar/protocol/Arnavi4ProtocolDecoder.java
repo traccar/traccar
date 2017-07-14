@@ -78,7 +78,7 @@ public class Arnavi4ProtocolDecoder extends BaseProtocolDecoder {
                     position.setCourse(buf.readUnsignedByte() * 2.0);
                     position.setAltitude(buf.readUnsignedByte() * 10.0);
                     byte satellites = buf.readByte();
-                    position.set(Position.KEY_SATELLITES, satellites & 0x0F + (satellites >> 4) & 0x0F); // gps + glonass
+                    position.set(Position.KEY_SATELLITES, satellites & 0x0F + (satellites >> 4) & 0x0F); // gps+glonass
                     position.setSpeed(buf.readByte() * 1.852);
                     break;
 
