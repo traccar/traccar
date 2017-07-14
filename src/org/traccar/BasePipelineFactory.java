@@ -41,7 +41,6 @@ import org.traccar.events.AlertEventHandler;
 import org.traccar.helper.Log;
 import org.traccar.processing.ComputedAttributesHandler;
 import org.traccar.processing.CopyAttributesHandler;
-import org.traccar.processing.PopulateDriverHandler;
 
 import java.net.InetSocketAddress;
 
@@ -56,7 +55,6 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
     private GeocoderHandler geocoderHandler;
     private GeolocationHandler geolocationHandler;
     private HemisphereHandler hemisphereHandler;
-    private PopulateDriverHandler populateDriverHandler;
     private CopyAttributesHandler copyAttributesHandler;
     private ComputedAttributesHandler computedAttributesHandler;
 
@@ -156,8 +154,6 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             hemisphereHandler = new HemisphereHandler();
         }
 
-        populateDriverHandler = new PopulateDriverHandler();
-
         if (Context.getConfig().getBoolean("processing.copyAttributes.enable")) {
             copyAttributesHandler = new CopyAttributesHandler();
         }
@@ -219,10 +215,6 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
         if (motionHandler != null) {
             pipeline.addLast("motion", motionHandler);
-        }
-
-        if (populateDriverHandler != null) {
-            pipeline.addLast("populateDriver", populateDriverHandler);
         }
 
         if (copyAttributesHandler != null) {

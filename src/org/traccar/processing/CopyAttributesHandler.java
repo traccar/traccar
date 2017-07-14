@@ -35,6 +35,7 @@ public class CopyAttributesHandler extends BaseDataHandler {
                 position.getDeviceId(), "processing.copyAttributes", null, true);
         Position last = getLastPosition(position.getDeviceId());
         if (attributesString != null && last != null) {
+            attributesString += Position.KEY_DRIVER_UNIQUE_ID + ",";
             for (String attribute : attributesString.split("[ ,]")) {
                 if (last.getAttributes().containsKey(attribute) && !position.getAttributes().containsKey(attribute)) {
                     position.getAttributes().put(attribute, last.getAttributes().get(attribute));
