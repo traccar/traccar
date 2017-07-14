@@ -26,12 +26,6 @@ import org.traccar.model.Position;
 
 public class DriverEventHandler extends BaseEventHandler {
 
-    private boolean notRepeat;
-
-    public DriverEventHandler() {
-        notRepeat = Context.getConfig().getBoolean("event.driver.notRepeat");
-    }
-
     @Override
     protected Collection<Event> analyzePosition(Position position) {
         if (!Context.getIdentityManager().isLatestPosition(position)) {
@@ -40,15 +34,12 @@ public class DriverEventHandler extends BaseEventHandler {
         String driverUniqueId = position.getString(Position.KEY_DRIVER_UNIQUE_ID);
         if (driverUniqueId != null) {
             String oldDriverUniqueId = null;
-            if (notRepeat) {
-                Position lastPosition = Context.getIdentityManager().getLastPosition(position.getDeviceId());
-                if (lastPosition != null) {
-                    oldDriverUniqueId = lastPosition.getString(Position.KEY_DRIVER_UNIQUE_ID);
-                }
+            Position lastPosition = Context.getIdentityManager().getLastPosition(position.getDeviceId());
+            if (lastPosition != null) {
+                oldDriverUniqueId = lastPosition.getString(Position.KEY_DRIVER_UNIQUE_ID);
             }
-            if (!driverUniqueId.equals(oldDriverUniqueId)
-                    && !Context.getDriversManager().authorizeDriverByUniqueId(driverUniqueId, position.getDeviceId())) {
-                Event event = new Event(Event.TYPE_DRIVER_UNAUTHORIZED, position.getDeviceId(), position.getId());
+            if (!driverUniqueId.equals(oldDriverUniqueId)) {
+                Event event = new Event(Event.TYPE_DRIVER_CHANGED, position.getDeviceId(), position.getId());
                 event.set(Position.KEY_DRIVER_UNIQUE_ID, driverUniqueId);
                 return Collections.singleton(event);
             }

@@ -210,20 +210,4 @@ public class DriversManager {
         }
         return drivers;
     }
-
-    public final boolean authorizeDriverByUniqueId(String driverUniqueId, long deviceId) {
-        if (driversByUniqueId.containsKey(driverUniqueId)) {
-            long chekingDriverId = getDriverByUniqueId(driverUniqueId).getId();
-            Set<Long> deviceDrivers = getAllDeviceDrivers(deviceId);
-            if (deviceDrivers.isEmpty()) {
-                return true;
-            }
-            for (long driverId : deviceDrivers) {
-                if (chekingDriverId == driverId) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
 }

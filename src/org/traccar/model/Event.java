@@ -61,7 +61,7 @@ public class Event extends Message {
 
     public static final String TYPE_TEXT_MESSAGE = "textMessage";
 
-    public static final String TYPE_DRIVER_UNAUTHORIZED = "driverUnauthorized";
+    public static final String TYPE_DRIVER_CHANGED = "driverChanged";
 
     private Date serverTime;
 

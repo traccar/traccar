@@ -452,7 +452,7 @@
         DELETE FROM drivers WHERE id = :id
     </entry>
     
-        <entry key='database.selectDriverPermissions'>
+    <entry key='database.selectDriverPermissions'>
         SELECT userId, driverId FROM user_driver
     </entry>
 
