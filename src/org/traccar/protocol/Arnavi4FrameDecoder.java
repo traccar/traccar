@@ -50,10 +50,18 @@ public class Arnavi4FrameDecoder extends FrameDecoder {
             return buf.readBytes(HEADER_LENGTH);
         }
 
-        int parcelNumber = buf.getByte(1) & 0xFF;
-        if (buf.getByte(0) == PACKAGE_START_SIGN && buf.getByte(buf.readableBytes() - 1) == PACKAGE_END_SIGN
-                && parcelNumber >= PACKAGE_MIN_PARCEL_NUMBER && parcelNumber <= PACKAGE_MAX_PARCEL_NUMBER) {
-            return buf;
+        int index = buf.getByte(1) & 0xFF; // parcel number
+        if (buf.getByte(0) == PACKAGE_START_SIGN
+                && index >= PACKAGE_MIN_PARCEL_NUMBER && index <= PACKAGE_MAX_PARCEL_NUMBER) {
+
+            // package: 1 byte start sign, 1 byte parcel number, packets, 1 byte end sign
+            int packetStartIndex = 2;
+            while (packetStartIndex + 8 < buf.readableBytes() && buf.getByte(packetStartIndex) != PACKAGE_END_SIGN) {
+                // packet: 1 byte type, 2 bytes length, 4 bytes unixtime, length-bytes data, 1 byte crc
+                packetStartIndex += buf.getUnsignedShort(packetStartIndex + 1) + 8;
+            }
+
+            return buf.readBytes(packetStartIndex + 1);
         }
 
         return null;

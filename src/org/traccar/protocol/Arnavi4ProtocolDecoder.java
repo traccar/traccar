@@ -52,6 +52,34 @@ public class Arnavi4ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
+    private void sendHeaderResponse(Channel channel, byte version) {
+        if (channel != null) {
+            final ChannelBuffer response;
+            if (version == HEADER_VERSION_1) {
+                response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 4);
+                response.writeBytes(new byte[]{0x7B, 0x00, 0x00, 0x7D});
+            } else if (version == HEADER_VERSION_2) {
+                response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 9);
+                response.writeBytes(new byte[]{0x7B, 0x04, 0x00});
+                byte[] timeBytes = ByteBuffer.allocate(4).putInt((int) (System.currentTimeMillis() / 1000)).array();
+                response.writeByte(Checksum.modulo256(timeBytes));
+                response.writeBytes(timeBytes);
+                response.writeByte(0x7D);
+            } else {
+                return; // Ignore unsupported versions of header
+            }
+            channel.write(response);
+        }
+    }
+
+    private void sendPackageResponse(Channel channel, int index) {
+        if (channel != null) {
+            final ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 4);
+            response.writeBytes(new byte[]{0x7B, 0x00, (byte) index, 0x7D});
+            channel.write(response);
+        }
+    }
+
     private Position decodePosition(DeviceSession deviceSession, ChannelBuffer buf, int length, Date time) {
 
         final Position position = new Position();
@@ -75,15 +103,15 @@ public class Arnavi4ProtocolDecoder extends BaseProtocolDecoder {
                     break;
 
                 case TAG_COORD_PARAMS:
-                    position.setCourse(buf.readUnsignedByte() * 2.0);
-                    position.setAltitude(buf.readUnsignedByte() * 10.0);
+                    position.setCourse(buf.readUnsignedByte() * 2);
+                    position.setAltitude(buf.readUnsignedByte() * 10);
                     byte satellites = buf.readByte();
                     position.set(Position.KEY_SATELLITES, satellites & 0x0F + (satellites >> 4) & 0x0F); // gps+glonass
-                    position.setSpeed(buf.readByte() * 1.852);
+                    position.setSpeed(buf.readUnsignedByte());
                     break;
 
                 default:
-                    buf.readBytes(4); // Skip other tags
+                    buf.readBytes(4); // Skip unsupported tags
                     break;
             }
 
@@ -108,27 +136,8 @@ public class Arnavi4ProtocolDecoder extends BaseProtocolDecoder {
             String imei = String.valueOf(buf.readLong());
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
 
-            if (deviceSession != null && channel != null) {
-
-                final ChannelBuffer response;
-
-                if (version == HEADER_VERSION_1) {
-                    response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 4);
-                    response.writeBytes(new byte[]{0x7B, 0x00, 0x00, 0x7D});
-
-                } else if (version == HEADER_VERSION_2) {
-                    response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 9);
-                    response.writeBytes(new byte[]{0x7B, 0x04, 0x00});
-                    byte[] timeBytes = ByteBuffer.allocate(4).putInt((int) (System.currentTimeMillis() / 1000)).array();
-                    response.writeByte(Checksum.modulo256(timeBytes));
-                    response.writeBytes(timeBytes);
-                    response.writeByte(0x7D);
-
-                } else {
-                    throw new IllegalArgumentException("unsupported header version");
-                }
-
-                channel.write(response);
+            if (deviceSession != null) {
+                sendHeaderResponse(channel, version);
             }
 
             return null;
@@ -139,47 +148,40 @@ public class Arnavi4ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        if (startSign == PACKAGE_START_SIGN) {
+        List<Position> positions = new LinkedList<>();
 
-            List<Position> positions = new LinkedList<>();
+        int index = buf.readUnsignedByte();
 
-            int index = buf.readUnsignedByte();
+        byte recordType = buf.readByte();
+        while (buf.readableBytes() > 0) {
+            switch (recordType) {
+                case RECORD_PING:
+                case RECORD_DATA:
+                case RECORD_TEXT:
+                case RECORD_FILE:
+                case RECORD_BINARY:
+                    int length = buf.readUnsignedShort();
+                    Date time = new Date(buf.readUnsignedInt() * 1000);
 
-            byte recordType = buf.readByte();
-            while (recordType != PACKAGE_END_SIGN) {
-                switch (recordType) {
-                    case RECORD_PING:
-                    case RECORD_DATA:
-                    case RECORD_TEXT:
-                    case RECORD_FILE:
-                    case RECORD_BINARY:
-                        int length = buf.readUnsignedShort();
-                        Date time = new Date(buf.readUnsignedInt() * 1000);
+                    if (recordType == RECORD_DATA) {
+                        positions.add(decodePosition(deviceSession, buf, length, time));
+                    } else {
+                        buf.readBytes(length); // Skip other records
+                    }
 
-                        if (recordType == RECORD_DATA) {
-                            positions.add(decodePosition(deviceSession, buf, length, time));
-                        }
+                    buf.readUnsignedByte(); // crc
+                    break;
 
-                        buf.readUnsignedByte(); // crc
-                        break;
-
-                    default:
-                        return null; // Unsupported types of package
-                }
-
-                recordType = buf.readByte();
+                default:
+                    return null; // Ignore unsupported types of package
             }
 
-            if (channel != null) {
-                final ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 4);
-                response.writeBytes(new byte[]{0x7B, 0x00, (byte) index, 0x7D});
-                channel.write(response);
-            }
-
-            return positions;
+            recordType = buf.readByte(); // The last byte in package is end sign
         }
 
-        return null;
+        sendPackageResponse(channel, index);
+
+        return positions;
     }
 
 }
