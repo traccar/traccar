@@ -153,7 +153,7 @@ public class Arnavi4ProtocolDecoder extends BaseProtocolDecoder {
         int index = buf.readUnsignedByte();
 
         byte recordType = buf.readByte();
-        while (recordType != PACKAGE_END_SIGN && buf.readableBytes() != 1) { // The last end sign byte
+        while (buf.readableBytes() > 0) {
             switch (recordType) {
                 case RECORD_PING:
                 case RECORD_DATA:
@@ -176,7 +176,7 @@ public class Arnavi4ProtocolDecoder extends BaseProtocolDecoder {
                     return null; // Ignore unsupported types of package
             }
 
-            recordType = buf.readByte();
+            recordType = buf.readByte(); // The last byte in package is end sign
         }
 
         sendPackageResponse(channel, index);
