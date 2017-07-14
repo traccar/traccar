@@ -6,9 +6,6 @@ import org.traccar.ProtocolTest;
 
 import java.nio.ByteOrder;
 
-/**
- * Created by Ivan Muratov @binakot on 13.07.2017.
- */
 public class Arnavi4FrameDecoderTest extends ProtocolTest {
 
     @Test
