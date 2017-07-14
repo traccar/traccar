@@ -1,3 +1,18 @@
+/*
+ * Copyright 2017 Ivan Muratov (binakot@gmail.com)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.traccar.protocol;
 
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -21,9 +36,6 @@ import static org.traccar.protocol.Arnavi4FrameDecoder.HEADER_VERSION_2;
 import static org.traccar.protocol.Arnavi4FrameDecoder.PACKAGE_START_SIGN;
 import static org.traccar.protocol.Arnavi4FrameDecoder.PACKAGE_END_SIGN;
 
-/**
- * Created by Ivan Muratov @binakot on 11.07.2017.
- */
 public class Arnavi4ProtocolDecoder extends BaseProtocolDecoder {
 
     private static final byte RECORD_PING = 0x00;
@@ -40,18 +52,19 @@ public class Arnavi4ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private Position decodePosition(DeviceSession deviceSession, ChannelBuffer buf, long timestamp) {
+    private Position decodePosition(DeviceSession deviceSession, ChannelBuffer buf, int length, Date time) {
 
         final Position position = new Position();
         position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.setTime(new Date(timestamp));
+        position.setTime(time);
 
-        while (buf.readableBytes() > 0) {
-            short tagId = buf.readUnsignedByte();
+        int readBytes = 0;
+        while (readBytes < length) {
+            short tag = buf.readUnsignedByte();
             int tagValue = buf.readInt();
-            switch (tagId) {
+            switch (tag) {
                 case TAG_LATITUDE:
                     position.setLatitude(Float.intBitsToFloat(tagValue));
                     position.setValid(true);
@@ -72,6 +85,8 @@ public class Arnavi4ProtocolDecoder extends BaseProtocolDecoder {
                 default:
                     break; // Skip other tags
             }
+
+            readBytes += 5; // 1 byte tag + 4 bytes value
         }
 
         return position;
@@ -127,37 +142,36 @@ public class Arnavi4ProtocolDecoder extends BaseProtocolDecoder {
 
             List<Position> positions = new LinkedList<>();
 
-            int parcelNumber = buf.readUnsignedByte();
+            int index = buf.readUnsignedByte();
 
-            byte recordStartSign = buf.readByte();
-            while (recordStartSign != PACKAGE_END_SIGN) {
-                switch (recordStartSign) {
+            byte recordType = buf.readByte();
+            while (recordType != PACKAGE_END_SIGN) {
+                switch (recordType) {
                     case RECORD_PING:
                     case RECORD_DATA:
                     case RECORD_TEXT:
                     case RECORD_FILE:
                     case RECORD_BINARY:
                         int length = buf.readUnsignedShort();
-                        long timestamp = buf.readUnsignedInt() * 1000;
-                        ChannelBuffer recordBuf = buf.readBytes(length);
+                        Date time = new Date(buf.readUnsignedInt() * 1000);
 
-                        if (recordStartSign == RECORD_DATA) {
-                            positions.add(decodePosition(deviceSession, recordBuf, timestamp));
+                        if (recordType == RECORD_DATA) {
+                            positions.add(decodePosition(deviceSession, buf, length, time));
                         }
 
                         buf.readUnsignedByte(); // crc
                         break;
 
                     default:
-                        throw new IllegalArgumentException("unsupported record type");
+                        return null; // Unsupported types of package
                 }
 
-                recordStartSign = buf.readByte();
+                recordType = buf.readByte();
             }
 
             if (channel != null) {
                 final ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 4);
-                response.writeBytes(new byte[]{0x7B, 0x00, (byte) parcelNumber, 0x7D});
+                response.writeBytes(new byte[]{0x7B, 0x00, (byte) index, 0x7D});
                 channel.write(response);
             }
 
