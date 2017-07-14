@@ -158,6 +158,8 @@ public class Arnavi4ProtocolDecoder extends BaseProtocolDecoder {
 
                         if (recordType == RECORD_DATA) {
                             positions.add(decodePosition(deviceSession, buf, length, time));
+                        } else {
+                            buf.readBytes(length); // Skip other records
                         }
 
                         buf.readUnsignedByte(); // crc
