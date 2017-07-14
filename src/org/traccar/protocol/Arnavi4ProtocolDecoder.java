@@ -63,27 +63,28 @@ public class Arnavi4ProtocolDecoder extends BaseProtocolDecoder {
         int readBytes = 0;
         while (readBytes < length) {
             short tag = buf.readUnsignedByte();
-            int tagValue = buf.readInt();
             switch (tag) {
                 case TAG_LATITUDE:
-                    position.setLatitude(Float.intBitsToFloat(tagValue));
+                    position.setLatitude(buf.readFloat());
                     position.setValid(true);
                     break;
 
                 case TAG_LONGITUDE:
-                    position.setLongitude(Float.intBitsToFloat(tagValue));
+                    position.setLongitude(buf.readFloat());
                     position.setValid(true);
                     break;
 
                 case TAG_COORD_PARAMS:
-                    position.setSpeed((tagValue >> 24) * 1.852);
-                    position.set(Position.KEY_SATELLITES, (tagValue >> 16 & 0x0F) + (tagValue >> 20 & 0x0F));
-                    position.setAltitude((tagValue >> 8 & 0xFF) * 10.0);
-                    position.setCourse((tagValue & 0xFF) * 2.0);
+                    position.setCourse(buf.readUnsignedByte() * 2.0);
+                    position.setAltitude(buf.readUnsignedByte() * 10.0);
+                    byte satellites = buf.readByte();
+                    position.set(Position.KEY_SATELLITES, satellites & 0x0F + (satellites >> 4) & 0x0F); // gps + glonass
+                    position.setSpeed(buf.readByte() * 1.852);
                     break;
 
                 default:
-                    break; // Skip other tags
+                    buf.readBytes(4); // Skip other tags
+                    break;
             }
 
             readBytes += 5; // 1 byte tag + 4 bytes value

@@ -44,19 +44,16 @@ public class Arnavi4FrameDecoder extends FrameDecoder {
             return null;
         }
 
-        byte[] bytes = new byte[buf.readableBytes()];
-        buf.getBytes(0, bytes);
-
-        if (bytes[0] == HEADER_START_SIGN
-                && bytes.length == HEADER_LENGTH
-                && (bytes[1] == HEADER_VERSION_1 || bytes[1] == HEADER_VERSION_2)) {
+        if (buf.getByte(0) == HEADER_START_SIGN
+                && buf.readableBytes() == HEADER_LENGTH
+                && (buf.getByte(1) == HEADER_VERSION_1 || buf.getByte(1) == HEADER_VERSION_2)) {
             return buf.readBytes(HEADER_LENGTH);
         }
 
-        int parcelNumber = bytes[1] & 0xFF;
-        if (bytes[0] == PACKAGE_START_SIGN && bytes[bytes.length - 1] == PACKAGE_END_SIGN
+        int parcelNumber = buf.getByte(1) & 0xFF;
+        if (buf.getByte(0) == PACKAGE_START_SIGN && buf.getByte(buf.readableBytes() - 1) == PACKAGE_END_SIGN
                 && parcelNumber >= PACKAGE_MIN_PARCEL_NUMBER && parcelNumber <= PACKAGE_MAX_PARCEL_NUMBER) {
-            return buf.readBytes(bytes.length);
+            return buf;
         }
 
         return null;
