@@ -644,7 +644,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        position.set(Position.KEY_RFID, parser.next());
+        position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
 
         decodeLocation(position, parser);
 

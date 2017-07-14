@@ -129,7 +129,7 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_BATTERY_LEVEL, Double.parseDouble(value));
                     break;
                 case "rfid":
-                    position.set(Position.KEY_RFID, value);
+                    position.set(Position.KEY_DRIVER_UNIQUE_ID, value);
                     break;
                 default:
                     try {

@@ -258,7 +258,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
         String rfid = parser.next();
         if (alarm.equals("rfid")) {
-            position.set(Position.KEY_RFID, rfid);
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, rfid);
         }
 
         String utcHours = parser.next();

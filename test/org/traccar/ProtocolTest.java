@@ -245,8 +245,8 @@ public class ProtocolTest extends BaseTest {
             Assert.assertTrue(attributes.get(Position.KEY_ARCHIVE) instanceof Boolean);
         }
 
-        if (attributes.containsKey(Position.KEY_RFID)) {
-            Assert.assertTrue(attributes.get(Position.KEY_RFID) instanceof String);
+        if (attributes.containsKey(Position.KEY_DRIVER_UNIQUE_ID)) {
+            Assert.assertTrue(attributes.get(Position.KEY_DRIVER_UNIQUE_ID) instanceof String);
         }
 
         if (position.getNetwork() != null && position.getNetwork().getCellTowers() != null) {
