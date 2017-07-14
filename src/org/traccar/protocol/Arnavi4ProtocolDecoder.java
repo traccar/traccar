@@ -33,8 +33,6 @@ import java.util.List;
 import static org.traccar.protocol.Arnavi4FrameDecoder.HEADER_START_SIGN;
 import static org.traccar.protocol.Arnavi4FrameDecoder.HEADER_VERSION_1;
 import static org.traccar.protocol.Arnavi4FrameDecoder.HEADER_VERSION_2;
-import static org.traccar.protocol.Arnavi4FrameDecoder.PACKAGE_START_SIGN;
-import static org.traccar.protocol.Arnavi4FrameDecoder.PACKAGE_END_SIGN;
 
 public class Arnavi4ProtocolDecoder extends BaseProtocolDecoder {
 
