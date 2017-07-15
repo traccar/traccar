@@ -15,6 +15,7 @@
  */
 package org.traccar.protocol;
 
+import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
@@ -29,16 +30,17 @@ import org.traccar.model.Position;
 import org.traccar.model.WifiAccessPoint;
 
 import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
+public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private boolean ignoreFixTime;
 
-    public Gl200ProtocolDecoder(Gl200Protocol protocol) {
+    public Gl200TextProtocolDecoder(Gl200Protocol protocol) {
         super(protocol);
 
         ignoreFixTime = Context.getConfig().getBoolean(getProtocolName() + ".ignoreFixTime");
@@ -811,7 +813,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        String sentence = (String) msg;
+        String sentence = ((ChannelBuffer) msg).toString(StandardCharsets.US_ASCII);
 
         int typeIndex = sentence.indexOf(":GT");
         if (typeIndex < 0) {
