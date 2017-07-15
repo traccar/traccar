@@ -18,7 +18,6 @@ package org.traccar.protocol;
 import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.handler.codec.string.StringDecoder;
 import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.TrackerServer;
@@ -46,7 +45,7 @@ public class Gl200Protocol extends BaseProtocol {
                 pipeline.addLast("frameDecoder", new Gl200FrameDecoder());
                 pipeline.addLast("stringEncoder", new StringEncoder());
                 pipeline.addLast("objectEncoder", new Gl200ProtocolEncoder());
-                pipeline.addLast("objectDecoder", new Gl200TextProtocolDecoder(Gl200Protocol.this));
+                pipeline.addLast("objectDecoder", new Gl200ProtocolDecoder(Gl200Protocol.this));
             }
         });
         serverList.add(new TrackerServer(new ConnectionlessBootstrap(), getName()) {
@@ -54,7 +53,7 @@ public class Gl200Protocol extends BaseProtocol {
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("stringEncoder", new StringEncoder());
                 pipeline.addLast("objectEncoder", new Gl200ProtocolEncoder());
-                pipeline.addLast("objectDecoder", new Gl200TextProtocolDecoder(Gl200Protocol.this));
+                pipeline.addLast("objectDecoder", new Gl200ProtocolDecoder(Gl200Protocol.this));
             }
         });
     }
