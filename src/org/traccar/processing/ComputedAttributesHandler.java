@@ -44,8 +44,7 @@ public class ComputedAttributesHandler extends BaseDataHandler {
         engine = new JexlEngine();
         engine.setStrict(true);
         if (Context.getConfig() != null) {
-            mapDeviceAttributes = Context.getConfig().getBoolean(
-                    "processing.computedAttributes.mapDeviceAttributes.enable");
+            mapDeviceAttributes = Context.getConfig().getBoolean("processing.computedAttributes.deviceAttributes");
         }
     }
 
