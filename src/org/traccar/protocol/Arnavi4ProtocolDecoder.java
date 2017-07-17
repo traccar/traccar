@@ -74,7 +74,7 @@ public class Arnavi4ProtocolDecoder extends BaseProtocolDecoder {
             channel.write(response);
         }
     }
-    
+
     private Position decodePosition(DeviceSession deviceSession, ChannelBuffer buf, int length, Date time) {
 
         final Position position = new Position();
