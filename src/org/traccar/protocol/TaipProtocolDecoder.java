@@ -104,15 +104,21 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
+        Integer event = null;
+
         if (parser.hasNext(3)) {
-            position.set(Position.KEY_EVENT, parser.nextInt(0));
+            event = parser.nextInt();
             position.setTime(getTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0)));
         } else if (parser.hasNext()) {
             position.setTime(getTime(parser.nextInt(0)));
         }
 
         if (parser.hasNext()) {
-            position.set(Position.KEY_EVENT, parser.nextInt(0));
+            event = parser.nextInt();
+        }
+
+        if (event != null) {
+            position.set(Position.KEY_EVENT, event);
         }
 
         if (parser.hasNext(6)) {
@@ -149,6 +155,12 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             }
             attributes = sentence.substring(beginIndex, endIndex).split(";");
         }
+
+        return decodeAttributes(channel, remoteAddress, position, attributes);
+    }
+
+    private Position decodeAttributes(
+            Channel channel, SocketAddress remoteAddress, Position position, String[] attributes) {
 
         String uniqueId = null;
         DeviceSession deviceSession = null;
