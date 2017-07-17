@@ -50,34 +50,31 @@ public class Arnavi4ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private void sendHeaderResponse(Channel channel, byte version) {
+    private void sendResponse(Channel channel, byte version, int index) {
         if (channel != null) {
             final ChannelBuffer response;
             if (version == HEADER_VERSION_1) {
                 response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 4);
-                response.writeBytes(new byte[]{0x7B, 0x00, 0x00, 0x7D});
+                response.writeByte(0x7b);
+                response.writeByte(0x00);
+                response.writeByte((byte) index);
+                response.writeByte(0x7d);
             } else if (version == HEADER_VERSION_2) {
                 response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 9);
-                response.writeBytes(new byte[]{0x7B, 0x04, 0x00});
+                response.writeByte(0x7b);
+                response.writeByte(0x04);
+                response.writeByte(0x00);
                 byte[] timeBytes = ByteBuffer.allocate(4).putInt((int) (System.currentTimeMillis() / 1000)).array();
                 response.writeByte(Checksum.modulo256(timeBytes));
                 response.writeBytes(timeBytes);
-                response.writeByte(0x7D);
+                response.writeByte(0x7d);
             } else {
-                return; // Ignore unsupported versions of header
+                return; // Ignore unsupported header's versions
             }
             channel.write(response);
         }
     }
-
-    private void sendPackageResponse(Channel channel, int index) {
-        if (channel != null) {
-            final ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 4);
-            response.writeBytes(new byte[]{0x7B, 0x00, (byte) index, 0x7D});
-            channel.write(response);
-        }
-    }
-
+    
     private Position decodePosition(DeviceSession deviceSession, ChannelBuffer buf, int length, Date time) {
 
         final Position position = new Position();
@@ -135,7 +132,7 @@ public class Arnavi4ProtocolDecoder extends BaseProtocolDecoder {
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
 
             if (deviceSession != null) {
-                sendHeaderResponse(channel, version);
+                sendResponse(channel, version, 0);
             }
 
             return null;
@@ -164,20 +161,20 @@ public class Arnavi4ProtocolDecoder extends BaseProtocolDecoder {
                     if (recordType == RECORD_DATA) {
                         positions.add(decodePosition(deviceSession, buf, length, time));
                     } else {
-                        buf.readBytes(length); // Skip other records
+                        buf.readBytes(length); // Skip other types of record
                     }
 
                     buf.readUnsignedByte(); // crc
                     break;
 
                 default:
-                    return null; // Ignore unsupported types of package
+                    return null; // Ignore unsupported types of record
             }
 
-            recordType = buf.readByte(); // The last byte in package is end sign
+            recordType = buf.readByte();
         }
 
-        sendPackageResponse(channel, index);
+        sendResponse(channel, HEADER_VERSION_1, index);
 
         return positions;
     }
