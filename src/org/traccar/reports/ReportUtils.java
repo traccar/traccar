@@ -91,7 +91,9 @@ public final class ReportUtils {
     }
 
     public static double calculateFuel(Position firstPosition, Position lastPosition) {
-
+        if (firstPosition == null || lastPosition == null) {
+            return 0;
+        }
         if (firstPosition.getAttributes().get(Position.KEY_FUEL_LEVEL) != null
                 && lastPosition.getAttributes().get(Position.KEY_FUEL_LEVEL) != null) {
 
@@ -163,11 +165,23 @@ public final class ReportUtils {
 
         double speedMax = 0.0;
         double speedSum = 0.0;
+        Position firstFuelPosition = null;
+        Position lastFuelPosition = null;
         for (int i = startIndex; i <= endIndex; i++) {
-            double speed = positions.get(i).getSpeed();
+            Position position = positions.get(i);
+            double speed = position.getSpeed();
             speedSum += speed;
             if (speed > speedMax) {
                 speedMax = speed;
+            }
+
+            if (firstFuelPosition == null
+                    && position.getAttributes().get(Position.KEY_FUEL_LEVEL) != null) {
+                firstFuelPosition = position;
+            }
+
+            if (position.getAttributes().get(Position.KEY_FUEL_LEVEL) != null) {
+                lastFuelPosition = position;
             }
         }
 
@@ -194,7 +208,7 @@ public final class ReportUtils {
         trip.setDuration(tripDuration);
         trip.setAverageSpeed(speedSum / (endIndex - startIndex));
         trip.setMaxSpeed(speedMax);
-        trip.setSpentFuel(calculateFuel(startTrip, endTrip));
+        trip.setSpentFuel(calculateFuel(firstFuelPosition, lastFuelPosition));
 
         trip.setDriverUniqueId(findDriver(startTrip, endTrip));
         trip.setDriverName(findDriverName(trip.getDriverUniqueId()));
@@ -221,15 +235,28 @@ public final class ReportUtils {
 
         long stopDuration = endStop.getFixTime().getTime() - startStop.getFixTime().getTime();
         stop.setDuration(stopDuration);
-        stop.setSpentFuel(calculateFuel(startStop, endStop));
 
         long engineHours = 0;
+        Position firstFuelPosition = null;
+        Position lastFuelPosition = null;
         for (int i = startIndex + 1; i <= endIndex; i++) {
-            if (positions.get(i).getBoolean(Position.KEY_IGNITION)
+            Position position = positions.get(i);
+            if (position.getBoolean(Position.KEY_IGNITION)
                     && positions.get(i - 1).getBoolean(Position.KEY_IGNITION)) {
-                engineHours += positions.get(i).getFixTime().getTime() - positions.get(i - 1).getFixTime().getTime();
+                engineHours += position.getFixTime().getTime() - positions.get(i - 1).getFixTime().getTime();
+            }
+
+            if (firstFuelPosition == null
+                    && position.getAttributes().get(Position.KEY_FUEL_LEVEL) != null) {
+                firstFuelPosition = position;
+            }
+
+            if (position.getAttributes().get(Position.KEY_FUEL_LEVEL) != null) {
+                lastFuelPosition = position;
             }
         }
+
+        stop.setSpentFuel(calculateFuel(firstFuelPosition, lastFuelPosition));
         stop.setEngineHours(engineHours);
 
         return stop;
