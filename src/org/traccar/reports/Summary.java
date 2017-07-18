@@ -43,6 +43,8 @@ public final class Summary {
         if (positions != null && !positions.isEmpty()) {
             Position firstPosition = null;
             Position previousPosition = null;
+            Position firstFuelPosition = null;
+            Position lastFuelPosition = null;
             double speedSum = 0;
             for (Position position : positions) {
                 if (firstPosition == null) {
@@ -56,12 +58,20 @@ public final class Summary {
                 previousPosition = position;
                 speedSum += position.getSpeed();
                 result.setMaxSpeed(position.getSpeed());
+
+                if (firstFuelPosition == null && position.getAttributes().get(Position.KEY_FUEL_LEVEL) != null) {
+                    firstFuelPosition = position;
+                }
+
+                if (position.getAttributes().get(Position.KEY_FUEL_LEVEL) != null) {
+                    lastFuelPosition = position;
+                }
             }
             boolean ignoreOdometer = Context.getDeviceManager()
                     .lookupAttributeBoolean(deviceId, "report.ignoreOdometer", false, true);
             result.setDistance(ReportUtils.calculateDistance(firstPosition, previousPosition, !ignoreOdometer));
             result.setAverageSpeed(speedSum / positions.size());
-            result.setSpentFuel(ReportUtils.calculateFuel(firstPosition, previousPosition));
+            result.setSpentFuel(ReportUtils.calculateFuel(firstFuelPosition, lastFuelPosition));
         }
         return result;
     }
