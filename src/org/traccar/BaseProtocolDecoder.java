@@ -106,7 +106,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     }
 
     public DeviceSession getDeviceSession(Channel channel, SocketAddress remoteAddress, String... uniqueIds) {
-        if (channel.getPipeline().get(HttpRequestDecoder.class) != null
+        if (channel != null && channel.getPipeline().get(HttpRequestDecoder.class) != null
                 || Context.getConfig().getBoolean("decoder.ignoreSessionCache")) {
             long deviceId = findDeviceId(remoteAddress, uniqueIds);
             if (deviceId != 0) {
