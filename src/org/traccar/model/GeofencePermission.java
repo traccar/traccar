@@ -15,17 +15,7 @@
  */
 package org.traccar.model;
 
-public class GeofencePermission {
-
-    private long userId;
-
-    public long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(long userId) {
-        this.userId = userId;
-    }
+public class GeofencePermission extends BaseUserPermission {
 
     private long geofenceId;
 
@@ -35,6 +25,11 @@ public class GeofencePermission {
 
     public void setGeofenceId(long geofenceId) {
         this.geofenceId = geofenceId;
+    }
+
+    @Override
+    public long getSlaveId() {
+        return geofenceId;
     }
 
 }

@@ -207,7 +207,7 @@
         SELECT * FROM events WHERE deviceId = :deviceId AND serverTime BETWEEN :from AND :to ORDER BY serverTime
     </entry>
 
-    <entry key='database.selectGeofencesAll'>
+    <entry key='database.selectGeofences'>
         SELECT * FROM geofences
     </entry>
 
@@ -328,7 +328,7 @@
         VALUES (:captureTime, :activeUsers, :activeDevices, :requests, :messagesReceived, :messagesStored, :mailSent, :smsSent, :geocoderRequests, :geolocationRequests, :attributes)
     </entry>
     
-    <entry key='database.selectCalendarsAll'>
+    <entry key='database.selectCalendars'>
         SELECT * FROM calendars
     </entry>
 

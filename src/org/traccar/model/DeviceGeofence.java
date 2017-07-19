@@ -15,17 +15,7 @@
  */
 package org.traccar.model;
 
-public class DeviceGeofence {
-
-    private long deviceId;
-
-    public long getDeviceId() {
-        return deviceId;
-    }
-
-    public void setDeviceId(long deviceId) {
-        this.deviceId = deviceId;
-    }
+public class DeviceGeofence extends BaseDevicePermission {
 
     private long geofenceId;
 
@@ -35,6 +25,11 @@ public class DeviceGeofence {
 
     public void setGeofenceId(long geofenceId) {
         this.geofenceId = geofenceId;
+    }
+
+    @Override
+    public long getSlaveId() {
+        return geofenceId;
     }
 
 }

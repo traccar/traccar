@@ -16,17 +16,7 @@
  */
 package org.traccar.model;
 
-public class GroupDriver {
-
-    private long groupId;
-
-    public long getGroupId() {
-        return groupId;
-    }
-
-    public void setGroupId(long groupId) {
-        this.groupId = groupId;
-    }
+public class GroupDriver extends BaseGroupPermission {
 
     private long driverId;
 
@@ -36,6 +26,11 @@ public class GroupDriver {
 
     public void setDriverId(long driverId) {
         this.driverId = driverId;
+    }
+
+    @Override
+    public long getSlaveId() {
+        return driverId;
     }
 
 }

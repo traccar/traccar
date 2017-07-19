@@ -18,17 +18,7 @@ package org.traccar.model;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class Extensible {
-
-    private long id;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
+public class Extensible extends Identifiable {
 
     private Map<String, Object> attributes = new LinkedHashMap<>();
 

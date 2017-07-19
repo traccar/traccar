@@ -15,17 +15,7 @@
  */
 package org.traccar.model;
 
-public class GroupGeofence {
-
-    private long groupId;
-
-    public long getGroupId() {
-        return groupId;
-    }
-
-    public void setGroupId(long groupId) {
-        this.groupId = groupId;
-    }
+public class GroupGeofence extends BaseGroupPermission {
 
     private long geofenceId;
 
@@ -35,6 +25,11 @@ public class GroupGeofence {
 
     public void setGeofenceId(long geofenceId) {
         this.geofenceId = geofenceId;
+    }
+
+    @Override
+    public long getSlaveId() {
+        return geofenceId;
     }
 
 }

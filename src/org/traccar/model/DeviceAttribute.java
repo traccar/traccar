@@ -16,17 +16,7 @@
  */
 package org.traccar.model;
 
-public class DeviceAttribute {
-
-    private long deviceId;
-
-    public long getDeviceId() {
-        return deviceId;
-    }
-
-    public void setDeviceId(long deviceId) {
-        this.deviceId = deviceId;
-    }
+public class DeviceAttribute extends BaseDevicePermission {
 
     private long attributeId;
 
@@ -36,5 +26,10 @@ public class DeviceAttribute {
 
     public void setAttributeId(long attributeId) {
         this.attributeId = attributeId;
+    }
+
+    @Override
+    public long getSlaveId() {
+        return attributeId;
     }
 }

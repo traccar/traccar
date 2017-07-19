@@ -39,7 +39,7 @@ public class GroupAttributeResource extends BaseResource {
     public Response add(GroupAttribute entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkGroup(getUserId(), entity.getGroupId());
-        Context.getPermissionsManager().checkAttribute(getUserId(), entity.getAttributeId());
+        Context.getPermissionsManager().checkPermission("attribute", getUserId(), entity.getAttributeId());
         Context.getDataManager().linkGroupAttribute(entity.getGroupId(), entity.getAttributeId());
         Context.getAttributesManager().refresh();
         return Response.ok(entity).build();
@@ -49,7 +49,7 @@ public class GroupAttributeResource extends BaseResource {
     public Response remove(GroupAttribute entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkGroup(getUserId(), entity.getGroupId());
-        Context.getPermissionsManager().checkAttribute(getUserId(), entity.getAttributeId());
+        Context.getPermissionsManager().checkPermission("attribute", getUserId(), entity.getAttributeId());
         Context.getDataManager().unlinkGroupAttribute(entity.getGroupId(), entity.getAttributeId());
         Context.getAttributesManager().refresh();
         return Response.noContent().build();

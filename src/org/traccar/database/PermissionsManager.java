@@ -298,52 +298,37 @@ public class PermissionsManager {
         }
     }
 
-    public void checkGeofence(long userId, long geofenceId) throws SecurityException {
-        if (!Context.getGeofenceManager().checkGeofence(userId, geofenceId) && !isAdmin(userId)) {
-            checkManager(userId);
-            for (long managedUserId : getUserPermissions(userId)) {
-                if (Context.getGeofenceManager().checkGeofence(managedUserId, geofenceId)) {
-                    return;
-                }
-            }
-            throw new SecurityException("Geofence access denied");
+    public void checkPermission(String object, long userId, long objectId) throws SecurityException {
+        SimpleObjectManager manager = null;
+
+        switch (object) {
+            case "geofence":
+                manager = Context.getGeofenceManager();
+                break;
+            case "attribute":
+                manager = Context.getAttributesManager();
+                break;
+            case "driver":
+                manager = Context.getDriversManager();
+                break;
+            case "calendar":
+                manager = Context.getCalendarManager();
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown object type");
         }
-    }
 
-    public void checkAttribute(long userId, long attributeId) throws SecurityException {
-        if (!Context.getAttributesManager().checkAttribute(userId, attributeId) && !isAdmin(userId)) {
-            checkManager(userId);
-            for (long managedUserId : getUserPermissions(userId)) {
-                if (Context.getAttributesManager().checkAttribute(managedUserId, attributeId)) {
-                    return;
+        if (manager != null) {
+            if (manager.checkItemPermission(userId, objectId) && !isAdmin(userId)) {
+                checkManager(userId);
+                for (long managedUserId : getUserPermissions(userId)) {
+                    if (manager.checkItemPermission(managedUserId, objectId)) {
+                        return;
+                    }
                 }
+                throw new SecurityException(object.substring(0, 1).toUpperCase() + object.substring(1)
+                         + " access denied");
             }
-            throw new SecurityException("Attribute access denied");
-        }
-    }
-
-    public void checkDriver(long userId, long driverId) throws SecurityException {
-        if (!Context.getDriversManager().checkDriver(userId, driverId) && !isAdmin(userId)) {
-            checkManager(userId);
-            for (long managedUserId : getUserPermissions(userId)) {
-                if (Context.getDriversManager().checkDriver(managedUserId, driverId)) {
-                    return;
-                }
-            }
-            throw new SecurityException("Driver access denied");
-        }
-    }
-
-
-    public void checkCalendar(long userId, long calendarId) throws SecurityException {
-        if (!Context.getCalendarManager().checkCalendar(userId, calendarId) && !isAdmin(userId)) {
-            checkManager(userId);
-            for (long managedUserId : getUserPermissions(userId)) {
-                if (Context.getCalendarManager().checkCalendar(managedUserId, calendarId)) {
-                    return;
-                }
-            }
-            throw new SecurityException("Calendar access denied");
         }
     }
 

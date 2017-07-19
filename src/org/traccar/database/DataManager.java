@@ -38,31 +38,18 @@ import liquibase.resource.ResourceAccessor;
 import org.traccar.Config;
 import org.traccar.helper.Log;
 import org.traccar.model.AttributeAlias;
-import org.traccar.model.AttributePermission;
-import org.traccar.model.Calendar;
-import org.traccar.model.CalendarPermission;
-import org.traccar.model.Attribute;
 import org.traccar.model.Device;
-import org.traccar.model.DeviceAttribute;
-import org.traccar.model.DeviceDriver;
 import org.traccar.model.DevicePermission;
-import org.traccar.model.Driver;
-import org.traccar.model.DriverPermission;
 import org.traccar.model.Event;
-import org.traccar.model.Geofence;
 import org.traccar.model.Group;
-import org.traccar.model.GroupAttribute;
-import org.traccar.model.GroupDriver;
-import org.traccar.model.GroupGeofence;
 import org.traccar.model.GroupPermission;
+import org.traccar.model.Identifiable;
 import org.traccar.model.Notification;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
 import org.traccar.model.Statistics;
 import org.traccar.model.User;
 import org.traccar.model.UserPermission;
-import org.traccar.model.DeviceGeofence;
-import org.traccar.model.GeofencePermission;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -362,34 +349,6 @@ public class DataManager {
                 .executeQuery(Event.class);
     }
 
-    public Collection<Geofence> getGeofences() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectGeofencesAll"))
-                .executeQuery(Geofence.class);
-    }
-
-    public void addGeofence(Geofence geofence) throws SQLException {
-        geofence.setId(QueryBuilder.create(dataSource, getQuery("database.insertGeofence"), true)
-                .setObject(geofence)
-                .executeUpdate());
-    }
-
-    public void updateGeofence(Geofence geofence) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.updateGeofence"))
-                .setObject(geofence)
-                .executeUpdate();
-    }
-
-    public void removeGeofence(long geofenceId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.deleteGeofence"))
-                .setLong("id", geofenceId)
-                .executeUpdate();
-    }
-
-    public Collection<GeofencePermission> getGeofencePermissions() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectGeofencePermissions"))
-                .executeQuery(GeofencePermission.class);
-    }
-
     public void linkGeofence(long userId, long geofenceId) throws SQLException {
         QueryBuilder.create(dataSource, getQuery("database.linkGeofence"))
                 .setLong("userId", userId)
@@ -404,11 +363,6 @@ public class DataManager {
                 .executeUpdate();
     }
 
-    public Collection<GroupGeofence> getGroupGeofences() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectGroupGeofences"))
-                .executeQuery(GroupGeofence.class);
-    }
-
     public void linkGroupGeofence(long groupId, long geofenceId) throws SQLException {
         QueryBuilder.create(dataSource, getQuery("database.linkGroupGeofence"))
                 .setLong("groupId", groupId)
@@ -421,11 +375,6 @@ public class DataManager {
                 .setLong("groupId", groupId)
                 .setLong("geofenceId", geofenceId)
                 .executeUpdate();
-    }
-
-    public Collection<DeviceGeofence> getDeviceGeofences() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectDeviceGeofences"))
-                .executeQuery(DeviceGeofence.class);
     }
 
     public void linkDeviceGeofence(long deviceId, long geofenceId) throws SQLException {
@@ -501,34 +450,6 @@ public class DataManager {
                 .executeUpdate());
     }
 
-    public Collection<Calendar> getCalendars() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectCalendarsAll"))
-                .executeQuery(Calendar.class);
-    }
-
-    public void addCalendar(Calendar calendar) throws SQLException {
-        calendar.setId(QueryBuilder.create(dataSource, getQuery("database.insertCalendar"), true)
-                .setObject(calendar)
-                .executeUpdate());
-    }
-
-    public void updateCalendar(Calendar calendar) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.updateCalendar"))
-                .setObject(calendar)
-                .executeUpdate();
-    }
-
-    public void removeCalendar(long calendarId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.deleteCalendar"))
-                .setLong("id", calendarId)
-                .executeUpdate();
-    }
-
-    public Collection<CalendarPermission> getCalendarPermissions() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectCalendarPermissions"))
-                .executeQuery(CalendarPermission.class);
-    }
-
     public void linkCalendar(long userId, long calendarId) throws SQLException {
         QueryBuilder.create(dataSource, getQuery("database.linkCalendar"))
                 .setLong("userId", userId)
@@ -562,34 +483,6 @@ public class DataManager {
                 .executeUpdate();
     }
 
-    public Collection<Attribute> getAttributes() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectAttributes"))
-                .executeQuery(Attribute.class);
-    }
-
-    public void addAttribute(Attribute attribute) throws SQLException {
-        attribute.setId(QueryBuilder.create(dataSource, getQuery("database.insertAttribute"), true)
-                .setObject(attribute)
-                .executeUpdate());
-    }
-
-    public void updateAttribute(Attribute attribute) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.updateAttribute"))
-                .setObject(attribute)
-                .executeUpdate();
-    }
-
-    public void removeAttribute(long computedAttributeId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.deleteAttribute"))
-                .setLong("id", computedAttributeId)
-                .executeUpdate();
-    }
-
-    public Collection<AttributePermission> getAttributePermissions() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectAttributePermissions"))
-                .executeQuery(AttributePermission.class);
-    }
-
     public void linkAttribute(long userId, long attributeId) throws SQLException {
         QueryBuilder.create(dataSource, getQuery("database.linkAttribute"))
                 .setLong("userId", userId)
@@ -602,11 +495,6 @@ public class DataManager {
                 .setLong("userId", userId)
                 .setLong("attributeId", attributeId)
                 .executeUpdate();
-    }
-
-    public Collection<GroupAttribute> getGroupAttributes() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectGroupAttributes"))
-                .executeQuery(GroupAttribute.class);
     }
 
     public void linkGroupAttribute(long groupId, long attributeId) throws SQLException {
@@ -623,11 +511,6 @@ public class DataManager {
                 .executeUpdate();
     }
 
-    public Collection<DeviceAttribute> getDeviceAttributes() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectDeviceAttributes"))
-                .executeQuery(DeviceAttribute.class);
-    }
-
     public void linkDeviceAttribute(long deviceId, long attributeId) throws SQLException {
         QueryBuilder.create(dataSource, getQuery("database.linkDeviceAttribute"))
                 .setLong("deviceId", deviceId)
@@ -640,34 +523,6 @@ public class DataManager {
                 .setLong("deviceId", deviceId)
                 .setLong("attributeId", attributeId)
                 .executeUpdate();
-    }
-
-    public Collection<Driver> getDrivers() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectDrivers"))
-                .executeQuery(Driver.class);
-    }
-
-    public void addDriver(Driver driver) throws SQLException {
-        driver.setId(QueryBuilder.create(dataSource, getQuery("database.insertDriver"), true)
-                .setObject(driver)
-                .executeUpdate());
-    }
-
-    public void updateDriver(Driver driver) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.updateDriver"))
-                .setObject(driver)
-                .executeUpdate();
-    }
-
-    public void removeDriver(long driverId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.deleteDriver"))
-                .setLong("id", driverId)
-                .executeUpdate();
-    }
-
-    public Collection<DriverPermission> getDriverPermissions() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectDriverPermissions"))
-                .executeQuery(DriverPermission.class);
     }
 
     public void linkDriver(long userId, long driverId) throws SQLException {
@@ -684,11 +539,6 @@ public class DataManager {
                 .executeUpdate();
     }
 
-    public Collection<GroupDriver> getGroupDrivers() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectGroupDrivers"))
-                .executeQuery(GroupDriver.class);
-    }
-
     public void linkGroupDriver(long groupId, long driverId) throws SQLException {
         QueryBuilder.create(dataSource, getQuery("database.linkGroupDriver"))
                 .setLong("groupId", groupId)
@@ -703,11 +553,6 @@ public class DataManager {
                 .executeUpdate();
     }
 
-    public Collection<DeviceDriver> getDeviceDrivers() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectDeviceDrivers"))
-                .executeQuery(DeviceDriver.class);
-    }
-
     public void linkDeviceDriver(long deviceId, long driverId) throws SQLException {
         QueryBuilder.create(dataSource, getQuery("database.linkDeviceDriver"))
                 .setLong("deviceId", deviceId)
@@ -719,6 +564,32 @@ public class DataManager {
         QueryBuilder.create(dataSource, getQuery("database.unlinkDeviceDriver"))
                 .setLong("deviceId", deviceId)
                 .setLong("driverId", driverId)
+                .executeUpdate();
+    }
+
+    public <T> Collection<T> getObjects(Class<T> clazz) throws SQLException {
+        String query = "database.select" + clazz.getSimpleName() + "s";
+        return QueryBuilder.create(dataSource, getQuery(query)).executeQuery(clazz);
+    }
+
+    public void addObject(Identifiable entity) throws SQLException {
+        String query = "database.insert" + entity.getClass().getSimpleName();
+        entity.setId(QueryBuilder.create(dataSource, getQuery(query), true)
+                .setObject(entity)
+                .executeUpdate());
+    }
+
+    public void updateObject(Identifiable entity) throws SQLException {
+        String query = "database.update" + entity.getClass().getSimpleName();
+        QueryBuilder.create(dataSource, getQuery(query))
+                .setObject(entity)
+                .executeUpdate();
+    }
+
+    public void removeObject(Class<? extends Identifiable> clazz, long entityId) throws SQLException {
+        String query = "database.delete" + clazz.getSimpleName();
+        QueryBuilder.create(dataSource, getQuery(query))
+                .setLong("id", entityId)
                 .executeUpdate();
     }
 

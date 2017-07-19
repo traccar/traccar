@@ -16,17 +16,7 @@
  */
 package org.traccar.model;
 
-public class GroupAttribute {
-
-    private long groupId;
-
-    public long getGroupId() {
-        return groupId;
-    }
-
-    public void setGroupId(long groupId) {
-        this.groupId = groupId;
-    }
+public class GroupAttribute extends BaseGroupPermission {
 
     private long attributeId;
 
@@ -36,5 +26,10 @@ public class GroupAttribute {
 
     public void setAttributeId(long attributeId) {
         this.attributeId = attributeId;
+    }
+
+    @Override
+    public long getSlaveId() {
+        return attributeId;
     }
 }

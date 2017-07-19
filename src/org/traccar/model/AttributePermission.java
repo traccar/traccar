@@ -16,17 +16,7 @@
  */
 package org.traccar.model;
 
-public class AttributePermission {
-
-    private long userId;
-
-    public long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(long userId) {
-        this.userId = userId;
-    }
+public class AttributePermission extends BaseUserPermission {
 
     private long attributeId;
 
@@ -36,6 +26,11 @@ public class AttributePermission {
 
     public void setAttributeId(long attributeId) {
         this.attributeId = attributeId;
+    }
+
+    @Override
+    public long getSlaveId() {
+        return attributeId;
     }
 
 }

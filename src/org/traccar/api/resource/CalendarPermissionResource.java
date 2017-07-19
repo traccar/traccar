@@ -39,9 +39,9 @@ public class CalendarPermissionResource extends BaseResource {
     public Response add(CalendarPermission entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkUser(getUserId(), entity.getUserId());
-        Context.getPermissionsManager().checkCalendar(getUserId(), entity.getCalendarId());
+        Context.getPermissionsManager().checkPermission("calendar", getUserId(), entity.getCalendarId());
         Context.getDataManager().linkCalendar(entity.getUserId(), entity.getCalendarId());
-        Context.getCalendarManager().refreshUserCalendars();
+        Context.getCalendarManager().refreshUserItems();
         return Response.ok(entity).build();
     }
 
@@ -49,9 +49,9 @@ public class CalendarPermissionResource extends BaseResource {
     public Response remove(CalendarPermission entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkUser(getUserId(), entity.getUserId());
-        Context.getPermissionsManager().checkCalendar(getUserId(), entity.getCalendarId());
+        Context.getPermissionsManager().checkPermission("calendar", getUserId(), entity.getCalendarId());
         Context.getDataManager().unlinkCalendar(entity.getUserId(), entity.getCalendarId());
-        Context.getCalendarManager().refreshUserCalendars();
+        Context.getCalendarManager().refreshUserItems();
         return Response.noContent().build();
     }
 }

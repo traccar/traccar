@@ -16,17 +16,7 @@
  */
 package org.traccar.model;
 
-public class DeviceDriver {
-
-    private long deviceId;
-
-    public long getDeviceId() {
-        return deviceId;
-    }
-
-    public void setDeviceId(long deviceId) {
-        this.deviceId = deviceId;
-    }
+public class DeviceDriver extends BaseDevicePermission {
 
     private long driverId;
 
@@ -36,6 +26,11 @@ public class DeviceDriver {
 
     public void setDriverId(long driverId) {
         this.driverId = driverId;
+    }
+
+    @Override
+    public long getSlaveId() {
+        return driverId;
     }
 
 }

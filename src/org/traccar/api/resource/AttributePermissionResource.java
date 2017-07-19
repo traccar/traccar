@@ -39,9 +39,9 @@ public class AttributePermissionResource extends BaseResource {
     public Response add(AttributePermission entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkUser(getUserId(), entity.getUserId());
-        Context.getPermissionsManager().checkAttribute(getUserId(), entity.getAttributeId());
+        Context.getPermissionsManager().checkPermission("attribute", getUserId(), entity.getAttributeId());
         Context.getDataManager().linkAttribute(entity.getUserId(), entity.getAttributeId());
-        Context.getAttributesManager().refreshUserAttributes();
+        Context.getAttributesManager().refreshUserItems();
         return Response.ok(entity).build();
     }
 
@@ -49,9 +49,9 @@ public class AttributePermissionResource extends BaseResource {
     public Response remove(AttributePermission entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkUser(getUserId(), entity.getUserId());
-        Context.getPermissionsManager().checkAttribute(getUserId(), entity.getAttributeId());
+        Context.getPermissionsManager().checkPermission("attribute", getUserId(), entity.getAttributeId());
         Context.getDataManager().unlinkAttribute(entity.getUserId(), entity.getAttributeId());
-        Context.getAttributesManager().refreshUserAttributes();
+        Context.getAttributesManager().refreshUserItems();
         return Response.noContent().build();
     }
 

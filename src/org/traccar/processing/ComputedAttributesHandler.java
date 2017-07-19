@@ -86,8 +86,8 @@ public class ComputedAttributesHandler extends BaseDataHandler {
 
     @Override
     protected Position handlePosition(Position position) {
-        Collection<Attribute> attributes = Context.getAttributesManager().getAttributes(
-                Context.getAttributesManager().getAllDeviceAttributes(position.getDeviceId()));
+        Collection<Attribute> attributes = Context.getAttributesManager().getItems(Attribute.class,
+                Context.getAttributesManager().getAllDeviceItems(position.getDeviceId()));
         for (Attribute attribute : attributes) {
             if (attribute.getAttribute() != null) {
                 Object result = null;

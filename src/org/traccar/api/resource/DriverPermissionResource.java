@@ -40,9 +40,9 @@ public class DriverPermissionResource extends BaseResource {
     public Response add(DriverPermission entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkUser(getUserId(), entity.getUserId());
-        Context.getPermissionsManager().checkDriver(getUserId(), entity.getDriverId());
+        Context.getPermissionsManager().checkPermission("driver", getUserId(), entity.getDriverId());
         Context.getDataManager().linkDriver(entity.getUserId(), entity.getDriverId());
-        Context.getDriversManager().refreshUserDrivers();
+        Context.getDriversManager().refreshUserItems();
         return Response.ok(entity).build();
     }
 
@@ -50,9 +50,9 @@ public class DriverPermissionResource extends BaseResource {
     public Response remove(DriverPermission entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkUser(getUserId(), entity.getUserId());
-        Context.getPermissionsManager().checkDriver(getUserId(), entity.getDriverId());
+        Context.getPermissionsManager().checkPermission("driver", getUserId(), entity.getDriverId());
         Context.getDataManager().unlinkDriver(entity.getUserId(), entity.getDriverId());
-        Context.getDriversManager().refreshUserDrivers();
+        Context.getDriversManager().refreshUserItems();
         return Response.noContent().build();
     }
 

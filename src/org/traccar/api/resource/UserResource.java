@@ -104,7 +104,7 @@ public class UserResource extends BaseResource {
         Context.getPermissionsManager().checkUser(getUserId(), id);
         Context.getPermissionsManager().removeUser(id);
         if (Context.getGeofenceManager() != null) {
-            Context.getGeofenceManager().refreshUserGeofences();
+            Context.getGeofenceManager().refreshUserItems();
         }
         if (Context.getNotificationManager() != null) {
             Context.getNotificationManager().refresh();

@@ -39,7 +39,7 @@ public class GroupDriverResource extends BaseResource {
     public Response add(GroupDriver entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkGroup(getUserId(), entity.getGroupId());
-        Context.getPermissionsManager().checkDriver(getUserId(), entity.getDriverId());
+        Context.getPermissionsManager().checkPermission("driver", getUserId(), entity.getDriverId());
         Context.getDataManager().linkGroupDriver(entity.getGroupId(), entity.getDriverId());
         Context.getDriversManager().refresh();
         return Response.ok(entity).build();
@@ -49,7 +49,7 @@ public class GroupDriverResource extends BaseResource {
     public Response remove(GroupDriver entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkGroup(getUserId(), entity.getGroupId());
-        Context.getPermissionsManager().checkDriver(getUserId(), entity.getDriverId());
+        Context.getPermissionsManager().checkPermission("driver", getUserId(), entity.getDriverId());
         Context.getDataManager().unlinkGroupDriver(entity.getGroupId(), entity.getDriverId());
         Context.getDriversManager().refresh();
         return Response.noContent().build();

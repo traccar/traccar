@@ -52,42 +52,42 @@ public class AttributeResource extends BaseResource {
 
         AttributesManager attributesManager = Context.getAttributesManager();
         if (refresh) {
-            attributesManager.refreshAttributes();
+            attributesManager.refreshItems();
         }
 
         Set<Long> result = new HashSet<>();
         if (all) {
             if (Context.getPermissionsManager().isAdmin(getUserId())) {
-                result.addAll(attributesManager.getAllAttributes());
+                result.addAll(attributesManager.getAllItems());
             } else {
                 Context.getPermissionsManager().checkManager(getUserId());
-                result.addAll(attributesManager.getManagedAttributes(getUserId()));
+                result.addAll(attributesManager.getManagedItems(getUserId()));
             }
         } else {
             if (userId == 0) {
                 userId = getUserId();
             }
             Context.getPermissionsManager().checkUser(getUserId(), userId);
-            result.addAll(attributesManager.getUserAttributes(userId));
+            result.addAll(attributesManager.getUserItems(userId));
         }
 
         if (groupId != 0) {
             Context.getPermissionsManager().checkGroup(getUserId(), groupId);
-            result.retainAll(attributesManager.getGroupAttributes(groupId));
+            result.retainAll(attributesManager.getGroupItems(groupId));
         }
 
         if (deviceId != 0) {
             Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
-            result.retainAll(attributesManager.getDeviceAttributes(deviceId));
+            result.retainAll(attributesManager.getDeviceItems(deviceId));
         }
-        return attributesManager.getAttributes(result);
+        return attributesManager.getItems(Attribute.class, result);
 
     }
 
     private Response add(Attribute entity) throws SQLException {
-        Context.getAttributesManager().addAttribute(entity);
+        Context.getAttributesManager().addItem(entity);
         Context.getDataManager().linkAttribute(getUserId(), entity.getId());
-        Context.getAttributesManager().refreshUserAttributes();
+        Context.getAttributesManager().refreshUserItems();
         return Response.ok(entity).build();
     }
 
@@ -127,8 +127,8 @@ public class AttributeResource extends BaseResource {
     @PUT
     public Response update(Attribute entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getPermissionsManager().checkAttribute(getUserId(), entity.getId());
-        Context.getAttributesManager().updateAttribute(entity);
+        Context.getPermissionsManager().checkPermission("attribute", getUserId(), entity.getId());
+        Context.getAttributesManager().updateItem(entity);
         return Response.ok(entity).build();
     }
 
@@ -136,8 +136,8 @@ public class AttributeResource extends BaseResource {
     @DELETE
     public Response remove(@PathParam("id") long id) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getPermissionsManager().checkAttribute(getUserId(), id);
-        Context.getAttributesManager().removeAttribute(id);
+        Context.getPermissionsManager().checkPermission("attribute", getUserId(), id);
+        Context.getAttributesManager().removeItem(id);
         return Response.noContent().build();
     }
 

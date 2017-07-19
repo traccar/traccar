@@ -57,7 +57,7 @@ public class NotificationManager {
         Set<Long> users = Context.getPermissionsManager().getDeviceUsers(event.getDeviceId());
         for (long userId : users) {
             if (event.getGeofenceId() == 0 || Context.getGeofenceManager() != null
-                    && Context.getGeofenceManager().checkGeofence(userId, event.getGeofenceId())) {
+                    && Context.getGeofenceManager().checkItemPermission(userId, event.getGeofenceId())) {
                 Notification notification = getUserNotificationByType(userId, event.getType());
                 if (notification != null) {
                     if (notification.getWeb()) {

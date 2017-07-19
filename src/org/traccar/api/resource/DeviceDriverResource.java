@@ -39,7 +39,7 @@ public class DeviceDriverResource extends BaseResource {
     public Response add(DeviceDriver entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkDevice(getUserId(), entity.getDeviceId());
-        Context.getPermissionsManager().checkDriver(getUserId(), entity.getDriverId());
+        Context.getPermissionsManager().checkPermission("driver", getUserId(), entity.getDriverId());
         Context.getDataManager().linkDeviceDriver(entity.getDeviceId(), entity.getDriverId());
         Context.getDriversManager().refresh();
         return Response.ok(entity).build();
@@ -49,7 +49,7 @@ public class DeviceDriverResource extends BaseResource {
     public Response remove(DeviceDriver entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkDevice(getUserId(), entity.getDeviceId());
-        Context.getPermissionsManager().checkDriver(getUserId(), entity.getDriverId());
+        Context.getPermissionsManager().checkPermission("driver", getUserId(), entity.getDriverId());
         Context.getDataManager().unlinkDeviceDriver(entity.getDeviceId(), entity.getDriverId());
         Context.getDriversManager().refresh();
         return Response.noContent().build();

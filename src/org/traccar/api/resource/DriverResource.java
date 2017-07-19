@@ -50,44 +50,44 @@ public class DriverResource extends BaseResource {
 
         DriversManager driversManager = Context.getDriversManager();
         if (refresh) {
-            driversManager.refreshDrivers();
+            driversManager.refreshItems();
         }
 
         Set<Long> result = new HashSet<>();
         if (all) {
             if (Context.getPermissionsManager().isAdmin(getUserId())) {
-                result.addAll(driversManager.getAllDrivers());
+                result.addAll(driversManager.getAllItems());
             } else {
                 Context.getPermissionsManager().checkManager(getUserId());
-                result.addAll(driversManager.getManagedDrivers(getUserId()));
+                result.addAll(driversManager.getManagedItems(getUserId()));
             }
         } else {
             if (userId == 0) {
                 userId = getUserId();
             }
             Context.getPermissionsManager().checkUser(getUserId(), userId);
-            result.addAll(driversManager.getUserDrivers(userId));
+            result.addAll(driversManager.getUserItems(userId));
         }
 
         if (groupId != 0) {
             Context.getPermissionsManager().checkGroup(getUserId(), groupId);
-            result.retainAll(driversManager.getGroupDrivers(groupId));
+            result.retainAll(driversManager.getGroupItems(groupId));
         }
 
         if (deviceId != 0) {
             Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
-            result.retainAll(driversManager.getDeviceDrivers(deviceId));
+            result.retainAll(driversManager.getDeviceItems(deviceId));
         }
-        return driversManager.getDrivers(result);
+        return driversManager.getItems(Driver.class, result);
 
     }
 
     @POST
     public Response add(Driver entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getDriversManager().addDriver(entity);
+        Context.getDriversManager().addItem(entity);
         Context.getDataManager().linkDriver(getUserId(), entity.getId());
-        Context.getDriversManager().refreshUserDrivers();
+        Context.getDriversManager().refreshUserItems();
         return Response.ok(entity).build();
     }
 
@@ -95,8 +95,8 @@ public class DriverResource extends BaseResource {
     @PUT
     public Response update(Driver entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getPermissionsManager().checkDriver(getUserId(), entity.getId());
-        Context.getDriversManager().updateDriver(entity);
+        Context.getPermissionsManager().checkPermission("driver", getUserId(), entity.getId());
+        Context.getDriversManager().updateItem(entity);
         return Response.ok(entity).build();
     }
 
@@ -104,8 +104,8 @@ public class DriverResource extends BaseResource {
     @DELETE
     public Response remove(@PathParam("id") long id) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getPermissionsManager().checkDriver(getUserId(), id);
-        Context.getDriversManager().removeDriver(id);
+        Context.getPermissionsManager().checkPermission("driver", getUserId(), id);
+        Context.getDriversManager().removeItem(id);
         return Response.noContent().build();
     }
 

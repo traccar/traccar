@@ -16,17 +16,7 @@
  */
 package org.traccar.model;
 
-public class CalendarPermission {
-
-    private long userId;
-
-    public long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(long userId) {
-        this.userId = userId;
-    }
+public class CalendarPermission extends BaseUserPermission {
 
     private long calendarId;
 
@@ -36,5 +26,10 @@ public class CalendarPermission {
 
     public void setCalendarId(long calendarId) {
         this.calendarId = calendarId;
+    }
+
+    @Override
+    public long getSlaveId() {
+        return calendarId;
     }
 }

@@ -16,20 +16,16 @@
  */
 package org.traccar.model;
 
-public class DriverPermission extends BaseUserPermission {
+public abstract class BaseUserPermission implements BasePermission {
 
-    private long driverId;
+    private long userId;
 
-    public long getDriverId() {
-        return driverId;
+    public long getUserId() {
+        return userId;
     }
 
-    public void setDriverId(long driverId) {
-        this.driverId = driverId;
+    public void setUserId(long userId) {
+        this.userId = userId;
     }
 
-    @Override
-    public long getSlaveId() {
-        return driverId;
-    }
 }

@@ -37,7 +37,7 @@ public class GroupGeofenceResource extends BaseResource {
     public Response add(GroupGeofence entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkGroup(getUserId(), entity.getGroupId());
-        Context.getPermissionsManager().checkGeofence(getUserId(), entity.getGeofenceId());
+        Context.getPermissionsManager().checkPermission("geofence", getUserId(), entity.getGeofenceId());
         Context.getDataManager().linkGroupGeofence(entity.getGroupId(), entity.getGeofenceId());
         Context.getGeofenceManager().refresh();
         return Response.ok(entity).build();
@@ -47,7 +47,7 @@ public class GroupGeofenceResource extends BaseResource {
     public Response remove(GroupGeofence entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkGroup(getUserId(), entity.getGroupId());
-        Context.getPermissionsManager().checkGeofence(getUserId(), entity.getGeofenceId());
+        Context.getPermissionsManager().checkPermission("geofence", getUserId(), entity.getGeofenceId());
         Context.getDataManager().unlinkGroupGeofence(entity.getGroupId(), entity.getGeofenceId());
         Context.getGeofenceManager().refresh();
         return Response.noContent().build();

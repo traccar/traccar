@@ -38,7 +38,7 @@ public class DeviceGeofenceResource extends BaseResource {
     public Response add(DeviceGeofence entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkDevice(getUserId(), entity.getDeviceId());
-        Context.getPermissionsManager().checkGeofence(getUserId(), entity.getGeofenceId());
+        Context.getPermissionsManager().checkPermission("geofence", getUserId(), entity.getGeofenceId());
         Context.getDataManager().linkDeviceGeofence(entity.getDeviceId(), entity.getGeofenceId());
         Context.getGeofenceManager().refresh();
         return Response.ok(entity).build();
@@ -48,7 +48,7 @@ public class DeviceGeofenceResource extends BaseResource {
     public Response remove(DeviceGeofence entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkDevice(getUserId(), entity.getDeviceId());
-        Context.getPermissionsManager().checkGeofence(getUserId(), entity.getGeofenceId());
+        Context.getPermissionsManager().checkPermission("geofence", getUserId(), entity.getGeofenceId());
         Context.getDataManager().unlinkDeviceGeofence(entity.getDeviceId(), entity.getGeofenceId());
         Context.getGeofenceManager().refresh();
         return Response.noContent().build();

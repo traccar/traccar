@@ -25,7 +25,7 @@ public class EventResource extends BaseResource {
         Event event = Context.getDataManager().getEvent(id);
         Context.getPermissionsManager().checkDevice(getUserId(), event.getDeviceId());
         if (event.getGeofenceId() != 0) {
-            Context.getPermissionsManager().checkGeofence(getUserId(), event.getGeofenceId());
+            Context.getPermissionsManager().checkPermission("geofence", getUserId(), event.getGeofenceId());
         }
         return event;
     }
