@@ -65,6 +65,14 @@
                         "required" : false,
                         "type" : "integer",
                         "collectionFormat" : "multi"
+                    },
+                    {
+                        "name" : "uniqueId",
+                        "in" : "query",
+                        "description" : "To fetch one or more devices. Multiple params can be passed like `uniqueId=333331&uniqieId=44442`",
+                        "required" : false,
+                        "type" : "string",
+                        "collectionFormat" : "multi"
                     }
                 ],
                 "responses": {
