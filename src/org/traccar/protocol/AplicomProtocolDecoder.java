@@ -352,15 +352,28 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_VIN, buf.readBytes(18).toString(StandardCharsets.US_ASCII).trim());
         }
 
+        if ((selector & 0x2000) != 0) {
+            buf.readUnsignedByte(); // card 1 type
+            buf.readUnsignedByte(); // card 1 country code
+            String card = buf.readBytes(20).toString(StandardCharsets.US_ASCII).trim();
+            if (!card.isEmpty()) {
+                position.set("card1", card);
+            }
+        }
+
+        if ((selector & 0x4000) != 0) {
+            buf.readUnsignedByte(); // card 2 type
+            buf.readUnsignedByte(); // card 2 country code
+            String card = buf.readBytes(20).toString(StandardCharsets.US_ASCII).trim();
+            if (!card.isEmpty()) {
+                position.set("card2", card);
+            }
+        }
+
         if ((selector & 0x10000) != 0) {
             int count = buf.readUnsignedByte();
             for (int i = 1; i <= count; i++) {
-                ChannelBuffer driver = buf.readBytes(22);
-                int endIndex = driver.indexOf(0, driver.writerIndex(), (byte) 0);
-                if (endIndex < 0) {
-                    endIndex = driver.writerIndex();
-                }
-                position.set("driver" + i, driver.toString(0, endIndex, StandardCharsets.US_ASCII).trim());
+                position.set("driver" + i, buf.readBytes(22).toString(StandardCharsets.US_ASCII).trim());
                 position.set("driverTime" + i, buf.readUnsignedInt());
             }
         }
