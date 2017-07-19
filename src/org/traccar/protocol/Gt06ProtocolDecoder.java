@@ -336,7 +336,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             String imei = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
             buf.readUnsignedShort(); // type
 
-            // Timezone offset
             if (dataLength > 10) {
                 int extensionBits = buf.readUnsignedShort();
                 int hours = (extensionBits >> 4) / 100;
@@ -405,7 +404,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
                 int mcc = buf.readUnsignedShort();
                 int mnc = buf.readUnsignedByte();
-
                 Network network = new Network();
                 for (int i = 0; i < 7; i++) {
                     network.addCellTower(CellTower.from(
@@ -441,8 +439,14 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     decodeStatus(position, buf);
                 }
 
-                if (type == MSG_GPS_LBS_1 && buf.readableBytes() == 4 + 6) {
+                if (type == MSG_GPS_LBS_1 && buf.readableBytes() >= 4 + 6) {
                     position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+                }
+
+                if (type == MSG_GPS_LBS_2 && buf.readableBytes() >= 3 + 6) {
+                    position.set(Position.KEY_IGNITION, buf.readUnsignedByte() > 0);
+                    position.set(Position.KEY_EVENT, buf.readUnsignedByte()); // reason
+                    position.set(Position.KEY_ARCHIVE, buf.readUnsignedByte() > 0);
                 }
 
             } else {
