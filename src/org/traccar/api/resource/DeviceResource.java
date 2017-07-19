@@ -64,18 +64,15 @@ public class DeviceResource extends BaseResource {
         }
 
         ArrayList<Device> devices = new ArrayList<>();
-        if (!uniqueIds.isEmpty()) {
-            for (String uniqueId : uniqueIds) {
-                Device device = Context.getDeviceManager().getDeviceByUniqueId(uniqueId);
-                Context.getPermissionsManager().checkDevice(getUserId(), device.getId());
-                devices.add(device);
-            }
+
+        for (String uniqueId : uniqueIds) {
+            Device device = Context.getDeviceManager().getDeviceByUniqueId(uniqueId);
+            Context.getPermissionsManager().checkDevice(getUserId(), device.getId());
+            devices.add(device);
         }
-        if (!deviceIds.isEmpty()) {
-            for (Long deviceId : deviceIds) {
-                Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
-                devices.add(Context.getDeviceManager().getDeviceById(deviceId));
-            }
+        for (Long deviceId : deviceIds) {
+            Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
+            devices.add(Context.getDeviceManager().getDeviceById(deviceId));
         }
         return devices;
     }
