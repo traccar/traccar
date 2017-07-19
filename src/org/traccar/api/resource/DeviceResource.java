@@ -45,30 +45,39 @@ public class DeviceResource extends BaseResource {
     @GET
     public Collection<Device> get(
             @QueryParam("all") boolean all, @QueryParam("userId") long userId,
+            @QueryParam("uniqueId") List<String> uniqueIds,
             @QueryParam("id") List<Long> deviceIds) throws SQLException {
-        if (deviceIds.isEmpty()) {
-            if (all) {
-                if (Context.getPermissionsManager().isAdmin(getUserId())) {
-                    return Context.getDeviceManager().getAllDevices();
-                } else {
-                    Context.getPermissionsManager().checkManager(getUserId());
-                    return Context.getDeviceManager().getManagedDevices(getUserId());
-                }
+        if (all) {
+            if (Context.getPermissionsManager().isAdmin(getUserId())) {
+                return Context.getDeviceManager().getAllDevices();
             } else {
-                if (userId == 0) {
-                    userId = getUserId();
-                }
-                Context.getPermissionsManager().checkUser(getUserId(), userId);
-                return Context.getDeviceManager().getDevices(userId);
+                Context.getPermissionsManager().checkManager(getUserId());
+                return Context.getDeviceManager().getManagedDevices(getUserId());
             }
-        } else {
-            ArrayList<Device> devices = new ArrayList<>();
+        }
+        if (uniqueIds.isEmpty() && deviceIds.isEmpty()) {
+            if (userId == 0) {
+                userId = getUserId();
+            }
+            Context.getPermissionsManager().checkUser(getUserId(), userId);
+            return Context.getDeviceManager().getDevices(userId);
+        }
+
+        ArrayList<Device> devices = new ArrayList<>();
+        if (!uniqueIds.isEmpty()) {
+            for (String uniqueId : uniqueIds) {
+                Device device = Context.getDeviceManager().getDeviceByUniqueId(uniqueId);
+                Context.getPermissionsManager().checkDevice(getUserId(), device.getId());
+                devices.add(device);
+            }
+        }
+        if (!deviceIds.isEmpty()) {
             for (Long deviceId : deviceIds) {
                 Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
                 devices.add(Context.getDeviceManager().getDeviceById(deviceId));
             }
-            return devices;
         }
+        return devices;
     }
 
     @POST
