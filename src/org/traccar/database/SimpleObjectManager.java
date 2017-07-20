@@ -27,20 +27,20 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.BaseUserPermission;
-import org.traccar.model.Identifiable;
+import org.traccar.model.BaseModel;
 
 public abstract class SimpleObjectManager {
 
     private final DataManager dataManager;
 
-    private final Map<Long, Identifiable> items = new ConcurrentHashMap<>();
+    private final Map<Long, BaseModel> items = new ConcurrentHashMap<>();
     private final Map<Long, Set<Long>> userItems = new ConcurrentHashMap<>();
 
-    private Class<? extends Identifiable> baseClass;
+    private Class<? extends BaseModel> baseClass;
     private Class<? extends BaseUserPermission> permissionClass;
 
     protected SimpleObjectManager(DataManager dataManager,
-            Class<? extends Identifiable> baseClass,
+            Class<? extends BaseModel> baseClass,
             Class<? extends BaseUserPermission> permissionClass) {
         this.dataManager = dataManager;
         this.baseClass = baseClass;
@@ -51,11 +51,11 @@ public abstract class SimpleObjectManager {
         return dataManager;
     }
 
-    protected final Class<? extends Identifiable> getBaseClass() {
+    protected final Class<? extends BaseModel> getBaseClass() {
         return baseClass;
     }
 
-    public final Identifiable getById(long itemId) {
+    public final BaseModel getById(long itemId) {
         return items.get(itemId);
     }
 
@@ -63,7 +63,7 @@ public abstract class SimpleObjectManager {
         items.clear();
     }
 
-    protected final void putItem(long itemId, Identifiable item) {
+    protected final void putItem(long itemId, BaseModel item) {
         items.put(itemId, item);
     }
 
@@ -90,7 +90,7 @@ public abstract class SimpleObjectManager {
         if (dataManager != null) {
             try {
                 clearItems();
-                for (Identifiable item : dataManager.getObjects(this.baseClass)) {
+                for (BaseModel item : dataManager.getObjects(this.baseClass)) {
                     putItem(item.getId(), item);
                 }
             } catch (SQLException error) {
@@ -113,18 +113,18 @@ public abstract class SimpleObjectManager {
         }
     }
 
-    public void addItem(Identifiable item) throws SQLException {
+    public void addItem(BaseModel item) throws SQLException {
         dataManager.addObject(item);
         putItem(item.getId(), item);
     }
 
-    public void updateItem(Identifiable item) throws SQLException {
+    public void updateItem(BaseModel item) throws SQLException {
         dataManager.updateObject(item);
         putItem(item.getId(), item);
     }
 
     public void removeItem(long itemId) throws SQLException {
-        Identifiable item = getById(itemId);
+        BaseModel item = getById(itemId);
         if (item != null) {
             dataManager.removeObject(item.getClass(), itemId);
             removeCachedItem(itemId);

@@ -16,7 +16,7 @@
  */
 package org.traccar.model;
 
-public class AttributeAlias extends Identifiable {
+public class AttributeAlias extends BaseModel {
 
     private long deviceId;
 

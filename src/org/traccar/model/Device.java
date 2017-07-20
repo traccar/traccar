@@ -18,7 +18,7 @@ package org.traccar.model;
 import java.util.Date;
 import java.util.List;
 
-public class Device extends Extensible {
+public class Device extends ExtendedModel {
 
     private String name;
 

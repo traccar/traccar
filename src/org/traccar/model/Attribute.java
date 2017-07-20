@@ -16,7 +16,7 @@
  */
 package org.traccar.model;
 
-public class Attribute extends Identifiable {
+public class Attribute extends BaseModel {
 
     private String description;
 

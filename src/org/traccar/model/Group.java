@@ -15,7 +15,7 @@
  */
 package org.traccar.model;
 
-public class Group extends Extensible {
+public class Group extends ExtendedModel {
 
     private String name;
 

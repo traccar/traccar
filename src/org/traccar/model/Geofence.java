@@ -26,7 +26,7 @@ import org.traccar.geofence.GeofencePolyline;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class Geofence extends Extensible {
+public class Geofence extends ExtendedModel {
 
     public static final String TYPE_GEOFENCE_CILCLE = "geofenceCircle";
     public static final String TYPE_GEOFENCE_POLYGON = "geofencePolygon";

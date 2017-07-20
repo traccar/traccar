@@ -41,7 +41,7 @@ import org.traccar.helper.Log;
 import org.traccar.model.AttributeAlias;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
-import org.traccar.model.Identifiable;
+import org.traccar.model.BaseModel;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
 import org.traccar.model.Statistics;
@@ -285,21 +285,21 @@ public class DataManager {
         return QueryBuilder.create(dataSource, getQuery(query)).executeQuery(clazz);
     }
 
-    public void addObject(Identifiable entity) throws SQLException {
+    public void addObject(BaseModel entity) throws SQLException {
         String query = "database.insert" + entity.getClass().getSimpleName();
         entity.setId(QueryBuilder.create(dataSource, getQuery(query), true)
                 .setObject(entity)
                 .executeUpdate());
     }
 
-    public void updateObject(Identifiable entity) throws SQLException {
+    public void updateObject(BaseModel entity) throws SQLException {
         String query = "database.update" + entity.getClass().getSimpleName();
         QueryBuilder.create(dataSource, getQuery(query))
                 .setObject(entity)
                 .executeUpdate();
     }
 
-    public void removeObject(Class<? extends Identifiable> clazz, long entityId) throws SQLException {
+    public void removeObject(Class<? extends BaseModel> clazz, long entityId) throws SQLException {
         String query = "database.delete" + clazz.getSimpleName();
         QueryBuilder.create(dataSource, getQuery(query))
                 .setLong("id", entityId)

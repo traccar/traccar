@@ -25,7 +25,7 @@ import org.traccar.model.DeviceDriver;
 import org.traccar.model.Driver;
 import org.traccar.model.DriverPermission;
 import org.traccar.model.GroupDriver;
-import org.traccar.model.Identifiable;
+import org.traccar.model.BaseModel;
 
 public class DriversManager extends ExtendedObjectManager {
 
@@ -42,7 +42,7 @@ public class DriversManager extends ExtendedObjectManager {
         if (getDataManager() != null) {
             try {
                 clearItems();
-                for (Identifiable item : getDataManager().getObjects(getBaseClass())) {
+                for (BaseModel item : getDataManager().getObjects(getBaseClass())) {
                     putItem(item.getId(), item);
                     driversByUniqueId.put(((Driver) item).getUniqueId(), (Driver) item);
                 }
@@ -54,13 +54,13 @@ public class DriversManager extends ExtendedObjectManager {
     }
 
     @Override
-    public void addItem(Identifiable item) throws SQLException {
+    public void addItem(BaseModel item) throws SQLException {
         super.addItem(item);
         driversByUniqueId.put(((Driver) item).getUniqueId(), (Driver) item);
     }
 
     @Override
-    public void updateItem(Identifiable item) throws SQLException {
+    public void updateItem(BaseModel item) throws SQLException {
         Driver driver = (Driver) item;
         getDataManager().updateObject(driver);
         Driver cachedDriver = (Driver) getById(driver.getId());

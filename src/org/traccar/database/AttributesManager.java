@@ -22,7 +22,7 @@ import org.traccar.model.AttributePermission;
 import org.traccar.model.Attribute;
 import org.traccar.model.DeviceAttribute;
 import org.traccar.model.GroupAttribute;
-import org.traccar.model.Identifiable;
+import org.traccar.model.BaseModel;
 
 public class AttributesManager extends ExtendedObjectManager {
 
@@ -33,7 +33,7 @@ public class AttributesManager extends ExtendedObjectManager {
     }
 
     @Override
-    public void updateItem(Identifiable item) throws SQLException {
+    public void updateItem(BaseModel item) throws SQLException {
         Attribute attribute = (Attribute) item;
         getDataManager().updateObject(attribute);
         Attribute cachedAttribute = (Attribute) getById(item.getId());

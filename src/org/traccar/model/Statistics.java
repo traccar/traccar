@@ -17,7 +17,7 @@ package org.traccar.model;
 
 import java.util.Date;
 
-public class Statistics extends Extensible {
+public class Statistics extends ExtendedModel {
 
     private Date captureTime;
 

@@ -16,7 +16,7 @@
  */
 package org.traccar.model;
 
-public class Driver extends Extensible {
+public class Driver extends ExtendedModel {
 
     private String name;
 

@@ -16,7 +16,7 @@
  */
 package org.traccar.model;
 
-public class Identifiable {
+public class BaseModel {
 
     private long id;
 

@@ -29,7 +29,7 @@ import org.traccar.model.BaseDevicePermission;
 import org.traccar.model.BaseGroupPermission;
 import org.traccar.model.BaseUserPermission;
 import org.traccar.model.Device;
-import org.traccar.model.Identifiable;
+import org.traccar.model.BaseModel;
 
 public abstract class ExtendedObjectManager extends SimpleObjectManager {
 
@@ -41,7 +41,7 @@ public abstract class ExtendedObjectManager extends SimpleObjectManager {
     private Class<? extends BaseGroupPermission> groupPermissionClass;
 
     protected ExtendedObjectManager(DataManager dataManager,
-            Class<? extends Identifiable> baseClass,
+            Class<? extends BaseModel> baseClass,
             Class<? extends BaseUserPermission> permissionClass,
             Class<? extends BaseDevicePermission> devicePermissionClass,
             Class<? extends BaseGroupPermission> groupPermissionClass) {

@@ -21,7 +21,7 @@ import org.traccar.helper.Hashing;
 import java.util.Date;
 import java.util.TimeZone;
 
-public class User extends Extensible {
+public class User extends ExtendedModel {
 
     private String name;
 
