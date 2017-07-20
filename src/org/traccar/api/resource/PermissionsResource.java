@@ -39,6 +39,9 @@ public class PermissionsResource  extends BaseResource {
     @POST
     public Response add(Map<String, Long> entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
+        if (entity.size() != 2) {
+            throw new IllegalArgumentException();
+        }
         for (String key : entity.keySet()) {
             Context.getPermissionsManager().checkPermission(key.replace("Id", ""), getUserId(), entity.get(key));
         }
@@ -51,6 +54,9 @@ public class PermissionsResource  extends BaseResource {
     @DELETE
     public Response remove(Map<String, Long> entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
+        if (entity.size() != 2) {
+            throw new IllegalArgumentException();
+        }
         for (String key : entity.keySet()) {
             Context.getPermissionsManager().checkPermission(key.replace("Id", ""), getUserId(), entity.get(key));
         }

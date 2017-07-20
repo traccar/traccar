@@ -125,6 +125,9 @@ public class DeviceResource extends BaseResource {
     @POST
     public Response add(Map<String, Long> entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
+        if (entity.size() != 2) {
+            throw new IllegalArgumentException();
+        }
         for (String key : entity.keySet()) {
             Context.getPermissionsManager().checkPermission(key.replace("Id", ""), getUserId(), entity.get(key));
         }
@@ -139,6 +142,9 @@ public class DeviceResource extends BaseResource {
         Context.getPermissionsManager().checkReadonly(getUserId());
         for (String key : entity.keySet()) {
             Context.getPermissionsManager().checkPermission(key.replace("Id", ""), getUserId(), entity.get(key));
+        }
+        if (entity.size() != 2) {
+            throw new IllegalArgumentException();
         }
         Context.getDataManager().linkObject(entity, false);
         Context.getPermissionsManager().refreshPermissions(entity);
