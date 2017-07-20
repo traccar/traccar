@@ -29,7 +29,7 @@ public class AttributesManager extends ExtendedObjectManager {
     public AttributesManager(DataManager dataManager) {
         super(dataManager, Attribute.class, AttributePermission.class, DeviceAttribute.class, GroupAttribute.class);
         refreshItems();
-        refresh();
+        refreshExtendedPermissions();
     }
 
     @Override

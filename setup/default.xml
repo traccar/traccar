@@ -60,7 +60,7 @@
         WHERE email = :email
     </entry>
 
-    <entry key='database.selectUsersAll'>
+    <entry key='database.selectUsers'>
         SELECT * FROM users
     </entry>
 
@@ -111,7 +111,7 @@
         SELECT userId, groupId FROM user_group
     </entry>
 
-    <entry key='database.selectDevicesAll'>
+    <entry key='database.selectDevices'>
         SELECT * FROM devices
     </entry>
 
@@ -141,15 +141,15 @@
         DELETE FROM devices WHERE id = :id
     </entry>
 
-    <entry key='database.linkDevice'>
+    <entry key='database.linkUserDevice'>
         INSERT INTO user_device (userId, deviceId) VALUES (:userId, :deviceId)
     </entry>
 
-    <entry key='database.unlinkDevice'>
+    <entry key='database.unlinkUserDevice'>
         DELETE FROM user_device WHERE userId = :userId AND deviceId = :deviceId
     </entry>
 
-    <entry key='database.selectGroupsAll'>
+    <entry key='database.selectGroups'>
         SELECT * FROM groups
     </entry>
 
@@ -165,11 +165,11 @@
         DELETE FROM groups WHERE id = :id
     </entry>
 
-    <entry key='database.linkGroup'>
+    <entry key='database.linkUserGroup'>
         INSERT INTO user_group (userId, groupId) VALUES (:userId, :groupId)
     </entry>
 
-    <entry key='database.unlinkGroup'>
+    <entry key='database.unlinkUserGroup'>
         DELETE FROM user_group WHERE userId = :userId AND groupId = :groupId
     </entry>
 
@@ -234,11 +234,11 @@
         SELECT userId, geofenceId FROM user_geofence
     </entry>
 
-    <entry key='database.linkGeofence'>
+    <entry key='database.linkUserGeofence'>
         INSERT INTO user_geofence (userId, geofenceId) VALUES (:userId, :geofenceId)
     </entry>
 
-    <entry key='database.unlinkGeofence'>
+    <entry key='database.unlinkUserGeofence'>
         DELETE FROM user_geofence WHERE userId = :userId AND geofenceId = :geofenceId
     </entry>
 
@@ -353,11 +353,11 @@
         SELECT userId, calendarId FROM user_calendar
     </entry>
 
-    <entry key='database.linkCalendar'>
+    <entry key='database.linkUserCalendar'>
         INSERT INTO user_calendar (userId, calendarId) VALUES (:userId, :calendarId)
     </entry>
 
-    <entry key='database.unlinkCalendar'>
+    <entry key='database.unlinkUserCalendar'>
         DELETE FROM user_calendar WHERE userId = :userId AND calendarId = :calendarId
     </entry>
     
@@ -365,11 +365,11 @@
         SELECT userId, managedUserId FROM user_user
     </entry>
 
-    <entry key='database.linkUser'>
+    <entry key='database.linkUserManagedUser'>
         INSERT INTO user_user (userId, managedUserId) VALUES (:userId, :managedUserId)
     </entry>
 
-    <entry key='database.unlinkUser'>
+    <entry key='database.unlinkUserManagedUser'>
         DELETE FROM user_user WHERE userId = :userId AND managedUserId = :managedUserId
     </entry>
 
@@ -399,11 +399,11 @@
         SELECT userId, attributeId FROM user_attribute
     </entry>
 
-    <entry key='database.linkAttribute'>
+    <entry key='database.linkUserAttribute'>
         INSERT INTO user_attribute (userId, attributeId) VALUES (:userId, :attributeId)
     </entry>
 
-    <entry key='database.unlinkAttribute'>
+    <entry key='database.unlinkUserAttribute'>
         DELETE FROM user_attribute WHERE userId = :userId AND attributeId = :attributeId
     </entry>
 
@@ -456,11 +456,11 @@
         SELECT userId, driverId FROM user_driver
     </entry>
 
-    <entry key='database.linkDriver'>
+    <entry key='database.linkUserDriver'>
         INSERT INTO user_driver (userId, driverId) VALUES (:userId, :driverId)
     </entry>
 
-    <entry key='database.unlinkDriver'>
+    <entry key='database.unlinkUserDriver'>
         DELETE FROM user_driver WHERE userId = :userId AND driverId = :driverId
     </entry>
 

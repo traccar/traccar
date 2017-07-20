@@ -85,7 +85,7 @@ public class DeviceManager implements IdentityManager {
         if ((force || System.currentTimeMillis() - lastUpdate > dataRefreshDelay)
                 && devicesLastUpdate.compareAndSet(lastUpdate, System.currentTimeMillis())) {
             GeofenceManager geofenceManager = Context.getGeofenceManager();
-            Collection<Device> databaseDevices = dataManager.getAllDevices();
+            Collection<Device> databaseDevices = dataManager.getObjects(Device.class);
             if (devicesById == null) {
                 devicesById = new ConcurrentHashMap<>(databaseDevices.size());
             }
@@ -199,7 +199,7 @@ public class DeviceManager implements IdentityManager {
     }
 
     public void addDevice(Device device) throws SQLException {
-        dataManager.addDevice(device);
+        dataManager.addObject(device);
 
         devicesById.put(device.getId(), device);
         devicesByUniqueId.put(device.getUniqueId(), device);
@@ -209,7 +209,7 @@ public class DeviceManager implements IdentityManager {
     }
 
     public void updateDevice(Device device) throws SQLException {
-        dataManager.updateDevice(device);
+        dataManager.updateObject(device);
 
         devicesById.put(device.getId(), device);
         devicesByUniqueId.put(device.getUniqueId(), device);
@@ -227,7 +227,7 @@ public class DeviceManager implements IdentityManager {
     }
 
     public void removeDevice(long deviceId) throws SQLException {
-        dataManager.removeDevice(deviceId);
+        dataManager.removeObject(Device.class, deviceId);
 
         if (devicesById.containsKey(deviceId)) {
             String deviceUniqueId = devicesById.get(deviceId).getUniqueId();
@@ -289,7 +289,7 @@ public class DeviceManager implements IdentityManager {
         long lastUpdate = groupsLastUpdate.get();
         if ((force || System.currentTimeMillis() - lastUpdate > dataRefreshDelay)
                 && groupsLastUpdate.compareAndSet(lastUpdate, System.currentTimeMillis())) {
-            Collection<Group> databaseGroups = dataManager.getAllGroups();
+            Collection<Group> databaseGroups = dataManager.getObjects(Group.class);
             if (groupsById == null) {
                 groupsById = new ConcurrentHashMap<>(databaseGroups.size());
             }
@@ -359,18 +359,18 @@ public class DeviceManager implements IdentityManager {
 
     public void addGroup(Group group) throws SQLException {
         checkGroupCycles(group);
-        dataManager.addGroup(group);
+        dataManager.addObject(group);
         groupsById.put(group.getId(), group);
     }
 
     public void updateGroup(Group group) throws SQLException {
         checkGroupCycles(group);
-        dataManager.updateGroup(group);
+        dataManager.updateObject(group);
         groupsById.put(group.getId(), group);
     }
 
     public void removeGroup(long groupId) throws SQLException {
-        dataManager.removeGroup(groupId);
+        dataManager.removeObject(Group.class, groupId);
         groupsById.remove(groupId);
     }
 

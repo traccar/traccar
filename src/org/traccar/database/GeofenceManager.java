@@ -31,11 +31,12 @@ public class GeofenceManager extends ExtendedObjectManager {
     public GeofenceManager(DataManager dataManager) {
         super(dataManager, Geofence.class, GeofencePermission.class, DeviceGeofence.class, GroupGeofence.class);
         refreshItems();
-        refresh();
+        refreshExtendedPermissions();
     }
 
-    public final void refresh() {
-        super.refresh();
+    @Override
+    public final void refreshExtendedPermissions() {
+        super.refreshExtendedPermissions();
         recalculateDevicesGeofences();
     }
 

@@ -35,6 +35,7 @@ import javax.ws.rs.core.Response;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Set;
 
 @Path("geofences")
@@ -85,7 +86,10 @@ public class GeofenceResource extends BaseResource {
     public Response add(Geofence entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getGeofenceManager().addItem(entity);
-        Context.getDataManager().linkGeofence(getUserId(), entity.getId());
+        LinkedHashMap<String, Long> link = new LinkedHashMap<>();
+        link.put("userId", getUserId());
+        link.put("geofenceId", entity.getId());
+        Context.getDataManager().linkObject(link, true);
         Context.getGeofenceManager().refreshUserItems();
         return Response.ok(entity).build();
     }

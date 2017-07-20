@@ -18,6 +18,7 @@ package org.traccar.api.resource;
 
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -66,7 +67,10 @@ public class CalendarResource extends BaseResource {
     public Response add(Calendar entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getCalendarManager().addItem(entity);
-        Context.getDataManager().linkCalendar(getUserId(), entity.getId());
+        LinkedHashMap<String, Long> link = new LinkedHashMap<>();
+        link.put("userId", getUserId());
+        link.put("calendarId", entity.getId());
+        Context.getDataManager().linkObject(link, true);
         Context.getCalendarManager().refreshUserItems();
         return Response.ok(entity).build();
     }

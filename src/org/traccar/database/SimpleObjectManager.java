@@ -132,14 +132,6 @@ public abstract class SimpleObjectManager {
         refreshUserItems();
     }
 
-//    public final Collection<? extends Identifiable> getItems(Set<Long> itemIds) {
-//        Collection<Identifiable> result = new LinkedList<>();
-//        for (long itemId : itemIds) {
-//            result.add(getById(itemId));
-//        }
-//        return result;
-//    }
-
     public final <T> Collection<T> getItems(Class<T> clazz, Set<Long> itemIds) {
         Collection<T> result = new LinkedList<>();
         for (long itemId : itemIds) {

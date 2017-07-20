@@ -34,7 +34,7 @@ public class DriversManager extends ExtendedObjectManager {
     public DriversManager(DataManager dataManager) {
         super(dataManager, Driver.class, DriverPermission.class, DeviceDriver.class, GroupDriver.class);
         refreshItems();
-        refresh();
+        refreshExtendedPermissions();
     }
 
     @Override
@@ -83,7 +83,7 @@ public class DriversManager extends ExtendedObjectManager {
             driversByUniqueId.remove(driverUniqueId);
         }
         refreshUserItems();
-        refresh();
+        refreshExtendedPermissions();
     }
 
     public Driver getDriverByUniqueId(String uniqueId) {

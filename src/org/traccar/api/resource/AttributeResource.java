@@ -19,6 +19,7 @@ package org.traccar.api.resource;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -86,7 +87,10 @@ public class AttributeResource extends BaseResource {
 
     private Response add(Attribute entity) throws SQLException {
         Context.getAttributesManager().addItem(entity);
-        Context.getDataManager().linkAttribute(getUserId(), entity.getId());
+        LinkedHashMap<String, Long> link = new LinkedHashMap<>();
+        link.put("userId", getUserId());
+        link.put("attributeId", entity.getId());
+        Context.getDataManager().linkObject(link, true);
         Context.getAttributesManager().refreshUserItems();
         return Response.ok(entity).build();
     }

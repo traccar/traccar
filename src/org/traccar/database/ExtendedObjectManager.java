@@ -82,10 +82,10 @@ public abstract class ExtendedObjectManager extends SimpleObjectManager {
     @Override
     public void removeItem(long itemId) throws SQLException {
         super.removeItem(itemId);
-        refresh();
+        refreshExtendedPermissions();
     }
 
-    public void refresh() {
+    public void refreshExtendedPermissions() {
         if (getDataManager() != null) {
             try {
 

@@ -19,6 +19,7 @@ package org.traccar.api.resource;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -86,7 +87,10 @@ public class DriverResource extends BaseResource {
     public Response add(Driver entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getDriversManager().addItem(entity);
-        Context.getDataManager().linkDriver(getUserId(), entity.getId());
+        LinkedHashMap<String, Long> link = new LinkedHashMap<>();
+        link.put("userId", getUserId());
+        link.put("driverId", entity.getId());
+        Context.getDataManager().linkObject(link, true);
         Context.getDriversManager().refreshUserItems();
         return Response.ok(entity).build();
     }

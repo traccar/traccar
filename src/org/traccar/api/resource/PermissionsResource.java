@@ -17,6 +17,7 @@
 package org.traccar.api.resource;
 
 import java.sql.SQLException;
+import java.util.Map;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -28,30 +29,33 @@ import javax.ws.rs.core.Response;
 
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
-import org.traccar.model.DeviceDriver;
 
-@Path("devices/drivers")
+@Path("permissions")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class DeviceDriverResource extends BaseResource {
+public class PermissionsResource  extends BaseResource {
 
+    @Path("/{slave : (users|devices|groups|geofences|drivers|attributes|calendars)}")
     @POST
-    public Response add(DeviceDriver entity) throws SQLException {
+    public Response add(Map<String, Long> entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getPermissionsManager().checkDevice(getUserId(), entity.getDeviceId());
-        Context.getPermissionsManager().checkPermission("driver", getUserId(), entity.getDriverId());
-        Context.getDataManager().linkDeviceDriver(entity.getDeviceId(), entity.getDriverId());
-        Context.getDriversManager().refresh();
-        return Response.ok(entity).build();
+        for (String key : entity.keySet()) {
+            Context.getPermissionsManager().checkPermission(key.replace("Id", ""), getUserId(), entity.get(key));
+        }
+        Context.getDataManager().linkObject(entity, true);
+        Context.getPermissionsManager().refreshPermissions(entity);
+        return Response.noContent().build();
     }
 
+    @Path("/{slave : (users|devices|groups|geofences|drivers|attributes|calendars)}")
     @DELETE
-    public Response remove(DeviceDriver entity) throws SQLException {
+    public Response remove(Map<String, Long> entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getPermissionsManager().checkDevice(getUserId(), entity.getDeviceId());
-        Context.getPermissionsManager().checkPermission("driver", getUserId(), entity.getDriverId());
-        Context.getDataManager().unlinkDeviceDriver(entity.getDeviceId(), entity.getDriverId());
-        Context.getDriversManager().refresh();
+        for (String key : entity.keySet()) {
+            Context.getPermissionsManager().checkPermission(key.replace("Id", ""), getUserId(), entity.get(key));
+        }
+        Context.getDataManager().linkObject(entity, false);
+        Context.getPermissionsManager().refreshPermissions(entity);
         return Response.noContent().build();
     }
 

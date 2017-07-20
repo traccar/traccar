@@ -98,7 +98,7 @@ public class PermissionsManager {
         usersTokens.clear();
         try {
             server = dataManager.getServer();
-            for (User user : dataManager.getUsers()) {
+            for (User user : dataManager.getObjects(User.class)) {
                 users.put(user.getId(), user);
                 if (user.getToken() != null) {
                     usersTokens.put(user.getToken(), user.getId());
@@ -112,7 +112,7 @@ public class PermissionsManager {
     public final void refreshUserPermissions() {
         userPermissions.clear();
         try {
-            for (UserPermission permission : dataManager.getUserPermissions()) {
+            for (UserPermission permission : dataManager.getObjects(UserPermission.class)) {
                 getUserPermissions(permission.getUserId()).add(permission.getManagedUserId());
             }
         } catch (SQLException error) {
@@ -126,7 +126,7 @@ public class PermissionsManager {
         try {
             GroupTree groupTree = new GroupTree(Context.getDeviceManager().getAllGroups(),
                     Context.getDeviceManager().getAllDevices());
-            for (GroupPermission permission : dataManager.getGroupPermissions()) {
+            for (GroupPermission permission : dataManager.getObjects(GroupPermission.class)) {
                 Set<Long> userGroupPermissions = getGroupPermissions(permission.getUserId());
                 Set<Long> userDevicePermissions = getDevicePermissions(permission.getUserId());
                 userGroupPermissions.add(permission.getGroupId());
@@ -137,7 +137,7 @@ public class PermissionsManager {
                     userDevicePermissions.add(device.getId());
                 }
             }
-            for (DevicePermission permission : dataManager.getDevicePermissions()) {
+            for (DevicePermission permission : dataManager.getObjects(DevicePermission.class)) {
                 getDevicePermissions(permission.getUserId()).add(permission.getDeviceId());
             }
 
@@ -302,6 +302,15 @@ public class PermissionsManager {
         SimpleObjectManager manager = null;
 
         switch (object) {
+            case "device":
+                checkDevice(userId, objectId);
+                break;
+            case "group":
+                checkGroup(userId, objectId);
+                break;
+            case "user":
+                checkUser(userId, objectId);
+                break;
             case "geofence":
                 manager = Context.getGeofenceManager();
                 break;
@@ -332,12 +341,51 @@ public class PermissionsManager {
         }
     }
 
+    public void refreshAllExtendedPermissions() {
+        if (Context.getGeofenceManager() != null) {
+            Context.getGeofenceManager().refreshExtendedPermissions();
+        }
+        Context.getDriversManager().refreshExtendedPermissions();
+        Context.getAttributesManager().refreshExtendedPermissions();
+    }
+
+    public void refreshPermissions(Map<String, Long> entity) {
+        if (entity.containsKey("userId")) {
+            if (entity.containsKey("deviceId") || entity.containsKey("groupId")) {
+                refreshPermissions();
+                refreshAllExtendedPermissions();
+            } else if (entity.containsKey("managedUserId")) {
+                refreshUserPermissions();
+            } else if (entity.containsKey("geofenceId")) {
+                if (Context.getGeofenceManager() != null) {
+                    Context.getGeofenceManager().refreshUserItems();
+                }
+            } else if (entity.containsKey("driverId")) {
+                Context.getDriversManager().refreshUserItems();
+            } else if (entity.containsKey("attributeId")) {
+                Context.getAttributesManager().refreshUserItems();
+            } else if (entity.containsKey("calendarId")) {
+                Context.getCalendarManager().refreshUserItems();
+            }
+        } else if (entity.containsKey("deviceId") || entity.containsKey("groupId")) {
+            if (entity.containsKey("geofenceId")) {
+                if (Context.getGeofenceManager() != null) {
+                    Context.getGeofenceManager().refreshExtendedPermissions();
+                }
+            } else if (entity.containsKey("driverId")) {
+                Context.getDriversManager().refreshExtendedPermissions();
+            } else if (entity.containsKey("attributeId")) {
+                Context.getAttributesManager().refreshExtendedPermissions();
+            }
+        }
+    }
+
     public Server getServer() {
         return server;
     }
 
     public void updateServer(Server server) throws SQLException {
-        dataManager.updateServer(server);
+        dataManager.updateObject(server);
         this.server = server;
     }
 
@@ -364,7 +412,7 @@ public class PermissionsManager {
     }
 
     public void addUser(User user) throws SQLException {
-        dataManager.addUser(user);
+        dataManager.addObject(user);
         users.put(user.getId(), user);
         if (user.getToken() != null) {
             usersTokens.put(user.getToken(), user.getId());
@@ -386,7 +434,7 @@ public class PermissionsManager {
     }
 
     public void removeUser(long userId) throws SQLException {
-        dataManager.removeUser(userId);
+        dataManager.removeObject(User.class, userId);
         usersTokens.remove(users.get(userId).getToken());
         users.remove(userId);
         refreshPermissions();

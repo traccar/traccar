@@ -32,6 +32,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Path("groups")
 @Produces(MediaType.APPLICATION_JSON)
@@ -61,11 +63,12 @@ public class GroupResource extends BaseResource {
     public Response add(Group entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getDeviceManager().addGroup(entity);
-        Context.getDataManager().linkGroup(getUserId(), entity.getId());
+        LinkedHashMap<String, Long> link = new LinkedHashMap<>();
+        link.put("userId", getUserId());
+        link.put("groupId", entity.getId());
+        Context.getDataManager().linkObject(link, true);
         Context.getPermissionsManager().refreshPermissions();
-        if (Context.getGeofenceManager() != null) {
-            Context.getGeofenceManager().refresh();
-        }
+        Context.getPermissionsManager().refreshAllExtendedPermissions();
         return Response.ok(entity).build();
     }
 
@@ -75,22 +78,42 @@ public class GroupResource extends BaseResource {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkGroup(getUserId(), entity.getId());
         Context.getDeviceManager().updateGroup(entity);
-        if (Context.getGeofenceManager() != null) {
-            Context.getGeofenceManager().refresh();
-        }
+        Context.getPermissionsManager().refreshAllExtendedPermissions();
         return Response.ok(entity).build();
     }
 
-    @Path("{id}")
+    @Path("{id : \\d+}")
     @DELETE
     public Response remove(@PathParam("id") long id) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkGroup(getUserId(), id);
         Context.getDeviceManager().removeGroup(id);
         Context.getPermissionsManager().refreshPermissions();
-        if (Context.getGeofenceManager() != null) {
-            Context.getGeofenceManager().refresh();
+        Context.getPermissionsManager().refreshAllExtendedPermissions();
+        return Response.noContent().build();
+    }
+
+    @Path("/{slave : (geofences|drivers|attributes)}")
+    @POST
+    public Response add(Map<String, Long> entity) throws SQLException {
+        Context.getPermissionsManager().checkReadonly(getUserId());
+        for (String key : entity.keySet()) {
+            Context.getPermissionsManager().checkPermission(key.replace("Id", ""), getUserId(), entity.get(key));
         }
+        Context.getDataManager().linkObject(entity, true);
+        Context.getPermissionsManager().refreshPermissions(entity);
+        return Response.noContent().build();
+    }
+
+    @Path("/{slave : (geofences|drivers|attributes)}")
+    @DELETE
+    public Response remove(Map<String, Long> entity) throws SQLException {
+        Context.getPermissionsManager().checkReadonly(getUserId());
+        for (String key : entity.keySet()) {
+            Context.getPermissionsManager().checkPermission(key.replace("Id", ""), getUserId(), entity.get(key));
+        }
+        Context.getDataManager().linkObject(entity, false);
+        Context.getPermissionsManager().refreshPermissions(entity);
         return Response.noContent().build();
     }
 
