@@ -268,10 +268,14 @@ public class DataManager {
                 .executeUpdate());
     }
 
+    private String makeName(String object) {
+        return object.substring(0, 1).toUpperCase() + object.replace("Id", "").substring(1);
+    }
+
     public void linkObject(Map<String, Long> permission, boolean link) throws SQLException {
         String query = "database." + (!link ? "un" : "") + "link";
         for (String key : permission.keySet()) {
-            query += key.substring(0, 1).toUpperCase() + key.replace("Id", "").substring(1);
+            query += makeName(key);
         }
         QueryBuilder queryBuilder = QueryBuilder.create(dataSource, getQuery(query));
         for (String key : permission.keySet()) {
@@ -286,10 +290,7 @@ public class DataManager {
     }
 
     public Collection<Map<String, Long>> getPermissions(String owner, String property) throws SQLException {
-        String query = "database.select"
-                + owner.substring(0, 1).toUpperCase() + owner.substring(1)
-                + property.substring(0, 1).toUpperCase() + property.substring(1)
-                + "s";
+        String query = "database.select" + makeName(owner) + makeName(property) + "s";
         return QueryBuilder.create(dataSource, getQuery(query)).executeMapQuery(Long.class);
     }
 
