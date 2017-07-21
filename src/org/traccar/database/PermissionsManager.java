@@ -333,8 +333,7 @@ public class PermissionsManager {
                         return;
                     }
                 }
-                throw new SecurityException(object.substring(0, 1).toUpperCase() + object.substring(1)
-                         + " access denied");
+                throw new SecurityException("Type " + object + " access denied");
             }
         }
     }
