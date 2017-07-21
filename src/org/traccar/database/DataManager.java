@@ -268,17 +268,19 @@ public class DataManager {
                 .executeUpdate());
     }
 
-    public static String makeName(String object) {
-        return object.substring(0, 1).toUpperCase() + object.replace("Id", "").substring(1);
+    public static Class<?> getClassByName(String name) throws ClassNotFoundException {
+        return Class.forName("org.traccar.model."
+                + name.substring(0, 1).toUpperCase() + name.replace("Id", "").substring(1));
     }
 
-    public static String makeNameId(String object) {
-        return object.substring(0, 1).toLowerCase() + object.substring(1) + (object.indexOf("Id") == -1 ? "Id" : "");
+    public static String makeNameId(Class<?> clazz) {
+        String name = clazz.getSimpleName();
+        return name.substring(0, 1).toLowerCase() + name.substring(1) + (name.indexOf("Id") == -1 ? "Id" : "");
     }
 
-    public void linkObject(String owner, long ownerId, String property, long propertyId,
-            boolean link) throws SQLException {
-        String query = "database." + (!link ? "un" : "") + "link" + makeName(owner) + makeName(property);
+    public void linkObject(Class<?> owner, long ownerId, Class<?> property, long propertyId, boolean link)
+            throws SQLException {
+        String query = "database." + (link ? "link" : "unlink") + owner.getSimpleName() + property.getSimpleName();
         QueryBuilder queryBuilder = QueryBuilder.create(dataSource, getQuery(query));
 
         queryBuilder.setLong(makeNameId(owner), ownerId);
@@ -291,8 +293,9 @@ public class DataManager {
         return QueryBuilder.create(dataSource, getQuery(query)).executeQuery(clazz);
     }
 
-    public Collection<Map<String, Long>> getPermissions(String owner, String property) throws SQLException {
-        String query = "database.select" + makeName(owner) + makeName(property) + "s";
+    public Collection<Map<String, Long>> getPermissions(Class<? extends BaseModel> owner,
+            Class<? extends BaseModel> property) throws SQLException {
+        String query = "database.select" + owner.getSimpleName() + property.getSimpleName() + "s";
         return QueryBuilder.create(dataSource, getQuery(query)).executeMapQuery(Long.class);
     }
 

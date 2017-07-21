@@ -17,7 +17,7 @@
 package org.traccar.api.resource;
 
 import java.sql.SQLException;
-import java.util.Map;
+import java.util.LinkedHashMap;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -36,17 +36,17 @@ import org.traccar.api.BaseResource;
 public class PermissionsResource  extends BaseResource {
 
     @POST
-    public Response add(Map<String, Long> entity) throws SQLException {
+    public Response add(LinkedHashMap<String, Long> entity) throws SQLException, ClassNotFoundException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        handlePermission(entity, true);
+        checkAndLinkPermission(entity, true);
         Context.getPermissionsManager().refreshPermissions(entity);
         return Response.noContent().build();
     }
 
     @DELETE
-    public Response remove(Map<String, Long> entity) throws SQLException {
+    public Response remove(LinkedHashMap<String, Long> entity) throws SQLException, ClassNotFoundException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        handlePermission(entity, false);
+        checkAndLinkPermission(entity, false);
         Context.getPermissionsManager().refreshPermissions(entity);
         return Response.noContent().build();
     }

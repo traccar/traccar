@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
+import org.traccar.model.Group;
 import org.traccar.model.BaseModel;
 
 public abstract class ExtendedObjectManager extends SimpleObjectManager {
@@ -79,23 +80,26 @@ public abstract class ExtendedObjectManager extends SimpleObjectManager {
             try {
 
                 Collection<Map<String, Long>> databaseGroupPermissions =
-                        getDataManager().getPermissions("Group", getBaseClassName());
+                        getDataManager().getPermissions(Group.class, getBaseClass());
 
                 clearGroupItems();
                 for (Map<String, Long> groupPermission : databaseGroupPermissions) {
-                    getGroupItems(groupPermission.get("groupId")).add(groupPermission.get(getBaseClassIdName()));
+                    getGroupItems(groupPermission.get(DataManager.makeNameId(Group.class)))
+                            .add(groupPermission.get(getBaseClassIdName()));
                 }
 
                 Collection<Map<String, Long>> databaseDevicePermissions =
-                        getDataManager().getPermissions("Device", getBaseClassName());
+                        getDataManager().getPermissions(Device.class, getBaseClass());
                 Collection<Device> allDevices = Context.getDeviceManager().getAllDevices();
 
                 clearDeviceItems();
                 deviceItemsWithGroups.clear();
 
                 for (Map<String, Long> devicePermission : databaseDevicePermissions) {
-                    getDeviceItems(devicePermission.get("deviceId")).add(devicePermission.get(getBaseClassIdName()));
-                    getAllDeviceItems(devicePermission.get("deviceId")).add(devicePermission.get(getBaseClassIdName()));
+                    getDeviceItems(devicePermission.get(DataManager.makeNameId(Device.class)))
+                            .add(devicePermission.get(getBaseClassIdName()));
+                    getAllDeviceItems(devicePermission.get(DataManager.makeNameId(Device.class)))
+                            .add(devicePermission.get(getBaseClassIdName()));
                 }
 
                 for (Device device : allDevices) {

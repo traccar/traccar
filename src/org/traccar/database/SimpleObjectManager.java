@@ -27,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.BaseModel;
+import org.traccar.model.User;
 
 public abstract class SimpleObjectManager {
 
@@ -36,14 +37,12 @@ public abstract class SimpleObjectManager {
     private final Map<Long, Set<Long>> userItems = new ConcurrentHashMap<>();
 
     private Class<? extends BaseModel> baseClass;
-    private String baseClassName;
     private String baseClassIdName;
 
     protected SimpleObjectManager(DataManager dataManager, Class<? extends BaseModel> baseClass) {
         this.dataManager = dataManager;
         this.baseClass = baseClass;
-        baseClassName = baseClass.getSimpleName();
-        baseClassIdName = baseClassName.substring(0, 1).toLowerCase() + baseClassName.substring(1) + "Id";
+        baseClassIdName = DataManager.makeNameId(baseClass);
     }
 
     protected final DataManager getDataManager() {
@@ -52,10 +51,6 @@ public abstract class SimpleObjectManager {
 
     protected final Class<? extends BaseModel> getBaseClass() {
         return baseClass;
-    }
-
-    protected final String getBaseClassName() {
-        return baseClassName;
     }
 
     protected final String getBaseClassIdName() {
@@ -111,8 +106,9 @@ public abstract class SimpleObjectManager {
         if (dataManager != null) {
             try {
                 clearUserItems();
-                for (Map<String, Long> permission : dataManager.getPermissions(baseClassName, "Permission")) {
-                    getUserItems(permission.get("userId")).add(permission.get(baseClassIdName));
+                for (Map<String, Long> permission : dataManager.getPermissions(User.class, baseClass)) {
+                    getUserItems(permission.get(DataManager.makeNameId(User.class)))
+                            .add(permission.get(baseClassIdName));
                 }
             } catch (SQLException error) {
                 Log.warning(error);
@@ -133,7 +129,7 @@ public abstract class SimpleObjectManager {
     public void removeItem(long itemId) throws SQLException {
         BaseModel item = getById(itemId);
         if (item != null) {
-            dataManager.removeObject(item.getClass(), itemId);
+            dataManager.removeObject(baseClass, itemId);
             removeCachedItem(itemId);
         }
         refreshUserItems();

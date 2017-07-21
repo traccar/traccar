@@ -103,11 +103,11 @@
         DELETE FROM users WHERE id = :id
     </entry>
 
-    <entry key='database.selectDevicePermissions'>
+    <entry key='database.selectUserDevices'>
         SELECT userId, deviceId FROM user_device
     </entry>
 
-    <entry key='database.selectGroupPermissions'>
+    <entry key='database.selectUserGroups'>
         SELECT userId, groupId FROM user_group
     </entry>
 
@@ -230,7 +230,7 @@
         DELETE FROM geofences WHERE id = :id
     </entry>
 
-    <entry key='database.selectGeofencePermissions'>
+    <entry key='database.selectUserGeofences'>
         SELECT userId, geofenceId FROM user_geofence
     </entry>
 
@@ -349,7 +349,7 @@
         DELETE FROM calendars WHERE id = :id
     </entry>
 
-    <entry key='database.selectCalendarPermissions'>
+    <entry key='database.selectUserCalendars'>
         SELECT userId, calendarId FROM user_calendar
     </entry>
 
@@ -361,7 +361,7 @@
         DELETE FROM user_calendar WHERE userId = :userId AND calendarId = :calendarId
     </entry>
     
-    <entry key='database.selectUserPermissions'>
+    <entry key='database.selectUserUsers'>
         SELECT userId, managedUserId FROM user_user
     </entry>
 
@@ -395,7 +395,7 @@
         DELETE FROM attributes WHERE id = :id
     </entry>
     
-        <entry key='database.selectAttributePermissions'>
+        <entry key='database.selectUserAttributes'>
         SELECT userId, attributeId FROM user_attribute
     </entry>
 
@@ -452,7 +452,7 @@
         DELETE FROM drivers WHERE id = :id
     </entry>
     
-    <entry key='database.selectDriverPermissions'>
+    <entry key='database.selectUserDrivers'>
         SELECT userId, driverId FROM user_driver
     </entry>
 

@@ -17,6 +17,7 @@ package org.traccar.api.resource;
 
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
+import org.traccar.model.ManagedUser;
 import org.traccar.model.User;
 
 import javax.annotation.security.PermitAll;
@@ -74,7 +75,7 @@ public class UserResource extends BaseResource {
         }
         Context.getPermissionsManager().addUser(entity);
         if (Context.getPermissionsManager().isManager(getUserId())) {
-            Context.getDataManager().linkObject("userId", getUserId(), "managedUserId", entity.getId(), true);
+            Context.getDataManager().linkObject(User.class, getUserId(), ManagedUser.class, entity.getId(), true);
         }
         Context.getPermissionsManager().refreshUserPermissions();
         if (Context.getNotificationManager() != null) {

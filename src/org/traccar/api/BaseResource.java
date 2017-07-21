@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,15 @@ package org.traccar.api;
 
 import java.sql.SQLException;
 import java.util.Iterator;
-import java.util.Map;
+import java.util.LinkedHashMap;
 
 import javax.ws.rs.core.SecurityContext;
 
 import org.traccar.Context;
 import org.traccar.database.DataManager;
 import org.traccar.model.BaseModel;
+import org.traccar.model.Device;
+import org.traccar.model.User;
 
 public class BaseResource {
 
@@ -38,34 +40,33 @@ public class BaseResource {
         return 0;
     }
 
-    protected void handlePermission(Map<String, Long> entity, boolean link) throws SQLException {
-        if (entity.size() != 2) {
-            throw new IllegalArgumentException();
-        }
+    protected void checkAndLinkPermission(LinkedHashMap<String, Long> entity, boolean link)
+            throws SQLException, ClassNotFoundException {
         Iterator<String> iterator = entity.keySet().iterator();
         String owner = iterator.next();
+        Class<?> ownerClass = DataManager.getClassByName(owner);
         String property = iterator.next();
+        Class<?> propertyClass = DataManager.getClassByName(property);
 
         long ownerId = entity.get(owner);
         long propertyId = entity.get(property);
 
-        if (!link && DataManager.makeName(owner).equals(Context.TYPE_USER)
-                && DataManager.makeName(property).equals(Context.TYPE_DEVICE)) {
+        if (!link && ownerClass.equals(User.class)
+                && propertyClass.equals(Device.class)) {
             if (getUserId() != ownerId) {
                 Context.getPermissionsManager().checkUser(getUserId(), ownerId);
             } else {
                 Context.getPermissionsManager().checkAdmin(getUserId());
             }
         } else {
-            Context.getPermissionsManager().checkPermission(owner, getUserId(), ownerId);
+            Context.getPermissionsManager().checkPermission(ownerClass, getUserId(), ownerId);
         }
-        Context.getPermissionsManager().checkPermission(property, getUserId(), propertyId);
+        Context.getPermissionsManager().checkPermission(propertyClass, getUserId(), propertyId);
 
-        Context.getDataManager().linkObject(owner, ownerId, property, propertyId, link);
+        Context.getDataManager().linkObject(ownerClass, ownerId, propertyClass, propertyId, link);
     }
 
-    protected void linkNew(BaseModel entity) throws SQLException {
-        Context.getDataManager().linkObject("userId", getUserId(),
-                entity.getClass().getSimpleName(), entity.getId(), true);
+    protected void linkNewEntity(BaseModel entity) throws SQLException {
+        Context.getDataManager().linkObject(User.class, getUserId(), entity.getClass(), entity.getId(), true);
     }
 }

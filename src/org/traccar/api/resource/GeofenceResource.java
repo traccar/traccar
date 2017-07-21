@@ -85,7 +85,7 @@ public class GeofenceResource extends BaseResource {
     public Response add(Geofence entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getGeofenceManager().addItem(entity);
-        linkNew(entity);
+        linkNewEntity(entity);
         Context.getGeofenceManager().refreshUserItems();
         return Response.ok(entity).build();
     }
@@ -94,7 +94,7 @@ public class GeofenceResource extends BaseResource {
     @PUT
     public Response update(Geofence entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getPermissionsManager().checkPermission(Context.TYPE_GEOFENCE, getUserId(), entity.getId());
+        Context.getPermissionsManager().checkPermission(Geofence.class, getUserId(), entity.getId());
         Context.getGeofenceManager().updateItem(entity);
         return Response.ok(entity).build();
     }
@@ -103,7 +103,7 @@ public class GeofenceResource extends BaseResource {
     @DELETE
     public Response remove(@PathParam("id") long id) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getPermissionsManager().checkPermission(Context.TYPE_GEOFENCE, getUserId(), id);
+        Context.getPermissionsManager().checkPermission(Geofence.class, getUserId(), id);
         Context.getGeofenceManager().removeItem(id);
         return Response.noContent().build();
     }

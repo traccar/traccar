@@ -73,7 +73,7 @@ public class DriversManager extends ExtendedObjectManager {
     @Override
     public void removeItem(long driverId) throws SQLException {
         Driver cachedDriver = (Driver) getById(driverId);
-        getDataManager().removeObject(cachedDriver.getClass(), driverId);
+        getDataManager().removeObject(Driver.class, driverId);
         if (cachedDriver != null) {
             String driverUniqueId = cachedDriver.getUniqueId();
             removeCachedItem(driverId);

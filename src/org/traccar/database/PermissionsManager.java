@@ -17,8 +17,13 @@ package org.traccar.database;
 
 import org.traccar.Context;
 import org.traccar.helper.Log;
+import org.traccar.model.Attribute;
+import org.traccar.model.Calendar;
 import org.traccar.model.Device;
+import org.traccar.model.Driver;
+import org.traccar.model.Geofence;
 import org.traccar.model.Group;
+import org.traccar.model.ManagedUser;
 import org.traccar.model.Server;
 import org.traccar.model.User;
 
@@ -109,8 +114,9 @@ public class PermissionsManager {
     public final void refreshUserPermissions() {
         userPermissions.clear();
         try {
-            for (Map<String, Long> permission : dataManager.getPermissions("User", "Permission")) {
-                getUserPermissions(permission.get("userId")).add(permission.get("managedUserId"));
+            for (Map<String, Long> permission : dataManager.getPermissions(User.class, User.class)) {
+                getUserPermissions(permission.get(DataManager.makeNameId(User.class)))
+                        .add(permission.get(DataManager.makeNameId(ManagedUser.class)));
             }
         } catch (SQLException error) {
             Log.warning(error);
@@ -123,20 +129,23 @@ public class PermissionsManager {
         try {
             GroupTree groupTree = new GroupTree(Context.getDeviceManager().getAllGroups(),
                     Context.getDeviceManager().getAllDevices());
-            for (Map<String, Long> groupPermission : dataManager.getPermissions("Group", "Permission")) {
-                Set<Long> userGroupPermissions = getGroupPermissions(groupPermission.get("userId"));
-                Set<Long> userDevicePermissions = getDevicePermissions(groupPermission.get("userId"));
-                userGroupPermissions.add(groupPermission.get("groupId"));
-                for (Group group : groupTree.getGroups(groupPermission.get("groupId"))) {
+            for (Map<String, Long> groupPermission : dataManager.getPermissions(User.class, Group.class)) {
+                Set<Long> userGroupPermissions = getGroupPermissions(groupPermission
+                        .get(DataManager.makeNameId(User.class)));
+                Set<Long> userDevicePermissions = getDevicePermissions(groupPermission
+                        .get(DataManager.makeNameId(User.class)));
+                userGroupPermissions.add(groupPermission.get(DataManager.makeNameId(Group.class)));
+                for (Group group : groupTree.getGroups(groupPermission.get(DataManager.makeNameId(Group.class)))) {
                     userGroupPermissions.add(group.getId());
                 }
-                for (Device device : groupTree.getDevices(groupPermission.get("groupId"))) {
+                for (Device device : groupTree.getDevices(groupPermission.get(DataManager.makeNameId(Group.class)))) {
                     userDevicePermissions.add(device.getId());
                 }
             }
 
-            for (Map<String, Long> devicePermission : dataManager.getPermissions("Device", "Permission")) {
-                getDevicePermissions(devicePermission.get("userId")).add(devicePermission.get("deviceId"));
+            for (Map<String, Long> devicePermission : dataManager.getPermissions(User.class, Device.class)) {
+                getDevicePermissions(devicePermission.get(DataManager.makeNameId(User.class)))
+                        .add(devicePermission.get(DataManager.makeNameId(Device.class)));
             }
 
             groupDevices.clear();
@@ -296,33 +305,26 @@ public class PermissionsManager {
         }
     }
 
-    public void checkPermission(String object, long userId, long objectId) throws SecurityException {
+    public void checkPermission(Class<?> object, long userId, long objectId)
+            throws SecurityException {
         SimpleObjectManager manager = null;
 
-        switch (DataManager.makeName(object)) {
-            case Context.TYPE_DEVICE:
-                checkDevice(userId, objectId);
-                break;
-            case Context.TYPE_GROUP:
-                checkGroup(userId, objectId);
-                break;
-            case Context.TYPE_USER:
-                checkUser(userId, objectId);
-                break;
-            case Context.TYPE_GEOFENCE:
-                manager = Context.getGeofenceManager();
-                break;
-            case Context.TYPE_ATTRIBUTE:
-                manager = Context.getAttributesManager();
-                break;
-            case Context.TYPE_DRIVER:
-                manager = Context.getDriversManager();
-                break;
-            case Context.TYPE_CALENDAR:
-                manager = Context.getCalendarManager();
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown object type");
+        if (object.equals(Device.class)) {
+            checkDevice(userId, objectId);
+        } else if (object.equals(Group.class)) {
+            checkGroup(userId, objectId);
+        } else if (object.equals(User.class) || object.equals(ManagedUser.class)) {
+            checkUser(userId, objectId);
+        } else if (object.equals(Geofence.class)) {
+            manager = Context.getGeofenceManager();
+        } else if (object.equals(Attribute.class)) {
+            manager = Context.getAttributesManager();
+        } else if (object.equals(Driver.class)) {
+            manager = Context.getDriversManager();
+        } else if (object.equals(Calendar.class)) {
+            manager = Context.getCalendarManager();
+        } else {
+            throw new IllegalArgumentException("Unknown object type");
         }
 
         if (manager != null) {
@@ -347,31 +349,33 @@ public class PermissionsManager {
     }
 
     public void refreshPermissions(Map<String, Long> entity) {
-        if (entity.containsKey("userId")) {
-            if (entity.containsKey("deviceId") || entity.containsKey("groupId")) {
+        if (entity.containsKey(DataManager.makeNameId(User.class))) {
+            if (entity.containsKey(DataManager.makeNameId(Device.class))
+                    || entity.containsKey(DataManager.makeNameId(Group.class))) {
                 refreshPermissions();
                 refreshAllExtendedPermissions();
-            } else if (entity.containsKey("managedUserId")) {
+            } else if (entity.containsKey(DataManager.makeNameId(ManagedUser.class))) {
                 refreshUserPermissions();
-            } else if (entity.containsKey("geofenceId")) {
+            } else if (entity.containsKey(DataManager.makeNameId(Geofence.class))) {
                 if (Context.getGeofenceManager() != null) {
                     Context.getGeofenceManager().refreshUserItems();
                 }
-            } else if (entity.containsKey("driverId")) {
+            } else if (entity.containsKey(DataManager.makeNameId(Driver.class))) {
                 Context.getDriversManager().refreshUserItems();
-            } else if (entity.containsKey("attributeId")) {
+            } else if (entity.containsKey(DataManager.makeNameId(Attribute.class))) {
                 Context.getAttributesManager().refreshUserItems();
-            } else if (entity.containsKey("calendarId")) {
+            } else if (entity.containsKey(DataManager.makeNameId(Calendar.class))) {
                 Context.getCalendarManager().refreshUserItems();
             }
-        } else if (entity.containsKey("deviceId") || entity.containsKey("groupId")) {
-            if (entity.containsKey("geofenceId")) {
+        } else if (entity.containsKey(DataManager.makeNameId(Device.class))
+                || entity.containsKey(DataManager.makeNameId(Group.class))) {
+            if (entity.containsKey(DataManager.makeNameId(Geofence.class))) {
                 if (Context.getGeofenceManager() != null) {
                     Context.getGeofenceManager().refreshExtendedPermissions();
                 }
-            } else if (entity.containsKey("driverId")) {
+            } else if (entity.containsKey(DataManager.makeNameId(Driver.class))) {
                 Context.getDriversManager().refreshExtendedPermissions();
-            } else if (entity.containsKey("attributeId")) {
+            } else if (entity.containsKey(DataManager.makeNameId(Attribute.class))) {
                 Context.getAttributesManager().refreshExtendedPermissions();
             }
         }
