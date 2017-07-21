@@ -128,7 +128,7 @@ public class AttributeResource extends BaseResource {
     @PUT
     public Response update(Attribute entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getPermissionsManager().checkPermission("attribute", getUserId(), entity.getId());
+        Context.getPermissionsManager().checkPermission(Context.TYPE_ATTRIBUTE, getUserId(), entity.getId());
         Context.getAttributesManager().updateItem(entity);
         return Response.ok(entity).build();
     }
@@ -137,7 +137,7 @@ public class AttributeResource extends BaseResource {
     @DELETE
     public Response remove(@PathParam("id") long id) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getPermissionsManager().checkPermission("attribute", getUserId(), id);
+        Context.getPermissionsManager().checkPermission(Context.TYPE_ATTRIBUTE, getUserId(), id);
         Context.getAttributesManager().removeItem(id);
         return Response.noContent().build();
     }

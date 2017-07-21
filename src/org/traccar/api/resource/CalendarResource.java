@@ -75,7 +75,7 @@ public class CalendarResource extends BaseResource {
     @PUT
     public Response update(Calendar entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getPermissionsManager().checkPermission("calendar", getUserId(), entity.getId());
+        Context.getPermissionsManager().checkPermission(Context.TYPE_CALENDAR, getUserId(), entity.getId());
         Context.getCalendarManager().updateItem(entity);
         return Response.ok(entity).build();
     }
@@ -84,7 +84,7 @@ public class CalendarResource extends BaseResource {
     @DELETE
     public Response remove(@PathParam("id") long id) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getPermissionsManager().checkPermission("calendar", getUserId(), id);
+        Context.getPermissionsManager().checkPermission(Context.TYPE_CALENDAR, getUserId(), id);
         Context.getCalendarManager().removeItem(id);
         return Response.noContent().build();
     }

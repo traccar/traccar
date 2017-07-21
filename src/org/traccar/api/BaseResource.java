@@ -22,6 +22,7 @@ import java.util.Map;
 import javax.ws.rs.core.SecurityContext;
 
 import org.traccar.Context;
+import org.traccar.database.DataManager;
 import org.traccar.model.BaseModel;
 
 public class BaseResource {
@@ -44,19 +45,21 @@ public class BaseResource {
         Iterator<String> iterator = entity.keySet().iterator();
         String owner = iterator.next();
         String property = iterator.next();
+
         long ownerId = entity.get(owner);
         long propertyId = entity.get(property);
 
-        if (!link && owner.equals("userId") && property.equals("deviceId")) {
+        if (!link && DataManager.makeName(owner).equals(Context.TYPE_USER)
+                && DataManager.makeName(property).equals(Context.TYPE_DEVICE)) {
             if (getUserId() != ownerId) {
                 Context.getPermissionsManager().checkUser(getUserId(), ownerId);
             } else {
                 Context.getPermissionsManager().checkAdmin(getUserId());
             }
         } else {
-            Context.getPermissionsManager().checkPermission(owner.replace("Id", ""), getUserId(), ownerId);
+            Context.getPermissionsManager().checkPermission(owner, getUserId(), ownerId);
         }
-        Context.getPermissionsManager().checkPermission(property.replace("Id", ""), getUserId(), propertyId);
+        Context.getPermissionsManager().checkPermission(property, getUserId(), propertyId);
 
         Context.getDataManager().linkObject(owner, ownerId, property, propertyId, link);
     }

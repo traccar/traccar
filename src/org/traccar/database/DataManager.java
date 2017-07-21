@@ -268,11 +268,11 @@ public class DataManager {
                 .executeUpdate());
     }
 
-    private String makeName(String object) {
+    public static String makeName(String object) {
         return object.substring(0, 1).toUpperCase() + object.replace("Id", "").substring(1);
     }
 
-    private String makeNameId(String object) {
+    public static String makeNameId(String object) {
         return object.substring(0, 1).toLowerCase() + object.substring(1) + (object.indexOf("Id") == -1 ? "Id" : "");
     }
 

@@ -59,6 +59,14 @@ import org.traccar.web.WebServer;
 
 public final class Context {
 
+    public static final String TYPE_USER = "User";
+    public static final String TYPE_DEVICE = "Device";
+    public static final String TYPE_GROUP = "Group";
+    public static final String TYPE_GEOFENCE = "Geofence";
+    public static final String TYPE_CALENDAR = "Calendar";
+    public static final String TYPE_ATTRIBUTE = "Attribute";
+    public static final String TYPE_DRIVER = "Driver";
+
     private Context() {
     }
 

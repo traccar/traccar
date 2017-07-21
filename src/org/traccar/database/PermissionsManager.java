@@ -299,26 +299,26 @@ public class PermissionsManager {
     public void checkPermission(String object, long userId, long objectId) throws SecurityException {
         SimpleObjectManager manager = null;
 
-        switch (object) {
-            case "device":
+        switch (DataManager.makeName(object)) {
+            case Context.TYPE_DEVICE:
                 checkDevice(userId, objectId);
                 break;
-            case "group":
+            case Context.TYPE_GROUP:
                 checkGroup(userId, objectId);
                 break;
-            case "user":
+            case Context.TYPE_USER:
                 checkUser(userId, objectId);
                 break;
-            case "geofence":
+            case Context.TYPE_GEOFENCE:
                 manager = Context.getGeofenceManager();
                 break;
-            case "attribute":
+            case Context.TYPE_ATTRIBUTE:
                 manager = Context.getAttributesManager();
                 break;
-            case "driver":
+            case Context.TYPE_DRIVER:
                 manager = Context.getDriversManager();
                 break;
-            case "calendar":
+            case Context.TYPE_CALENDAR:
                 manager = Context.getCalendarManager();
                 break;
             default:

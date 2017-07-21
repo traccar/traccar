@@ -95,7 +95,7 @@ public class DriverResource extends BaseResource {
     @PUT
     public Response update(Driver entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getPermissionsManager().checkPermission("driver", getUserId(), entity.getId());
+        Context.getPermissionsManager().checkPermission(Context.TYPE_DRIVER, getUserId(), entity.getId());
         Context.getDriversManager().updateItem(entity);
         return Response.ok(entity).build();
     }
@@ -104,7 +104,7 @@ public class DriverResource extends BaseResource {
     @DELETE
     public Response remove(@PathParam("id") long id) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getPermissionsManager().checkPermission("driver", getUserId(), id);
+        Context.getPermissionsManager().checkPermission(Context.TYPE_DRIVER, getUserId(), id);
         Context.getDriversManager().removeItem(id);
         return Response.noContent().build();
     }
