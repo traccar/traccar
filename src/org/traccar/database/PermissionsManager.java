@@ -18,12 +18,9 @@ package org.traccar.database;
 import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
-import org.traccar.model.DevicePermission;
 import org.traccar.model.Group;
-import org.traccar.model.GroupPermission;
 import org.traccar.model.Server;
 import org.traccar.model.User;
-import org.traccar.model.UserPermission;
 
 import java.lang.reflect.Method;
 import java.sql.SQLException;
@@ -112,8 +109,8 @@ public class PermissionsManager {
     public final void refreshUserPermissions() {
         userPermissions.clear();
         try {
-            for (UserPermission permission : dataManager.getObjects(UserPermission.class)) {
-                getUserPermissions(permission.getUserId()).add(permission.getManagedUserId());
+            for (Map<String, Long> permission : dataManager.getPermissions("User", "Permission")) {
+                getUserPermissions(permission.get("userId")).add(permission.get("managedUserId"));
             }
         } catch (SQLException error) {
             Log.warning(error);
@@ -126,19 +123,20 @@ public class PermissionsManager {
         try {
             GroupTree groupTree = new GroupTree(Context.getDeviceManager().getAllGroups(),
                     Context.getDeviceManager().getAllDevices());
-            for (GroupPermission permission : dataManager.getObjects(GroupPermission.class)) {
-                Set<Long> userGroupPermissions = getGroupPermissions(permission.getUserId());
-                Set<Long> userDevicePermissions = getDevicePermissions(permission.getUserId());
-                userGroupPermissions.add(permission.getGroupId());
-                for (Group group : groupTree.getGroups(permission.getGroupId())) {
+            for (Map<String, Long> groupPermission : dataManager.getPermissions("Group", "Permission")) {
+                Set<Long> userGroupPermissions = getGroupPermissions(groupPermission.get("userId"));
+                Set<Long> userDevicePermissions = getDevicePermissions(groupPermission.get("userId"));
+                userGroupPermissions.add(groupPermission.get("groupId"));
+                for (Group group : groupTree.getGroups(groupPermission.get("groupId"))) {
                     userGroupPermissions.add(group.getId());
                 }
-                for (Device device : groupTree.getDevices(permission.getGroupId())) {
+                for (Device device : groupTree.getDevices(groupPermission.get("groupId"))) {
                     userDevicePermissions.add(device.getId());
                 }
             }
-            for (DevicePermission permission : dataManager.getObjects(DevicePermission.class)) {
-                getDevicePermissions(permission.getUserId()).add(permission.getDeviceId());
+
+            for (Map<String, Long> devicePermission : dataManager.getPermissions("Device", "Permission")) {
+                getDevicePermissions(devicePermission.get("userId")).add(devicePermission.get("deviceId"));
             }
 
             groupDevices.clear();

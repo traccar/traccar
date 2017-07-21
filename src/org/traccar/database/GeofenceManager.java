@@ -20,16 +20,13 @@ import java.util.List;
 
 import org.traccar.Context;
 import org.traccar.model.Device;
-import org.traccar.model.DeviceGeofence;
 import org.traccar.model.Geofence;
-import org.traccar.model.GeofencePermission;
-import org.traccar.model.GroupGeofence;
 import org.traccar.model.Position;
 
 public class GeofenceManager extends ExtendedObjectManager {
 
     public GeofenceManager(DataManager dataManager) {
-        super(dataManager, Geofence.class, GeofencePermission.class, DeviceGeofence.class, GroupGeofence.class);
+        super(dataManager, Geofence.class);
         refreshItems();
         refreshExtendedPermissions();
     }

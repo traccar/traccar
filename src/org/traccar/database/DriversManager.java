@@ -21,10 +21,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.traccar.helper.Log;
-import org.traccar.model.DeviceDriver;
 import org.traccar.model.Driver;
-import org.traccar.model.DriverPermission;
-import org.traccar.model.GroupDriver;
 import org.traccar.model.BaseModel;
 
 public class DriversManager extends ExtendedObjectManager {
@@ -32,7 +29,7 @@ public class DriversManager extends ExtendedObjectManager {
     private final Map<String, Driver> driversByUniqueId = new ConcurrentHashMap<>();
 
     public DriversManager(DataManager dataManager) {
-        super(dataManager, Driver.class, DriverPermission.class, DeviceDriver.class, GroupDriver.class);
+        super(dataManager, Driver.class);
         refreshItems();
         refreshExtendedPermissions();
     }

@@ -285,6 +285,14 @@ public class DataManager {
         return QueryBuilder.create(dataSource, getQuery(query)).executeQuery(clazz);
     }
 
+    public Collection<Map<String, Long>> getPermissions(String owner, String property) throws SQLException {
+        String query = "database.select"
+                + owner.substring(0, 1).toUpperCase() + owner.substring(1)
+                + property.substring(0, 1).toUpperCase() + property.substring(1)
+                + "s";
+        return QueryBuilder.create(dataSource, getQuery(query)).executeMapQuery(Long.class);
+    }
+
     public void addObject(BaseModel entity) throws SQLException {
         String query = "database.insert" + entity.getClass().getSimpleName();
         entity.setId(QueryBuilder.create(dataSource, getQuery(query), true)

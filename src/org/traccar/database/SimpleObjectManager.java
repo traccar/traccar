@@ -26,7 +26,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.traccar.Context;
 import org.traccar.helper.Log;
-import org.traccar.model.BaseUserPermission;
 import org.traccar.model.BaseModel;
 
 public abstract class SimpleObjectManager {
@@ -37,14 +36,14 @@ public abstract class SimpleObjectManager {
     private final Map<Long, Set<Long>> userItems = new ConcurrentHashMap<>();
 
     private Class<? extends BaseModel> baseClass;
-    private Class<? extends BaseUserPermission> permissionClass;
+    private String baseClassName;
+    private String baseClassIdName;
 
-    protected SimpleObjectManager(DataManager dataManager,
-            Class<? extends BaseModel> baseClass,
-            Class<? extends BaseUserPermission> permissionClass) {
+    protected SimpleObjectManager(DataManager dataManager, Class<? extends BaseModel> baseClass) {
         this.dataManager = dataManager;
         this.baseClass = baseClass;
-        this.permissionClass = permissionClass;
+        baseClassName = baseClass.getSimpleName();
+        baseClassIdName = baseClassName.substring(0, 1).toLowerCase() + baseClassName.substring(1) + "Id";
     }
 
     protected final DataManager getDataManager() {
@@ -53,6 +52,14 @@ public abstract class SimpleObjectManager {
 
     protected final Class<? extends BaseModel> getBaseClass() {
         return baseClass;
+    }
+
+    protected final String getBaseClassName() {
+        return baseClassName;
+    }
+
+    protected final String getBaseClassIdName() {
+        return baseClassIdName;
     }
 
     public final BaseModel getById(long itemId) {
@@ -104,8 +111,8 @@ public abstract class SimpleObjectManager {
         if (dataManager != null) {
             try {
                 clearUserItems();
-                for (BaseUserPermission permission : dataManager.getObjects(this.permissionClass)) {
-                    getUserItems(permission.getUserId()).add(permission.getSlaveId());
+                for (Map<String, Long> permission : dataManager.getPermissions(baseClassName, "Permission")) {
+                    getUserItems(permission.get("userId")).add(permission.get(baseClassIdName));
                 }
             } catch (SQLException error) {
                 Log.warning(error);

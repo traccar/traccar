@@ -18,16 +18,13 @@ package org.traccar.database;
 
 import java.sql.SQLException;
 
-import org.traccar.model.AttributePermission;
 import org.traccar.model.Attribute;
-import org.traccar.model.DeviceAttribute;
-import org.traccar.model.GroupAttribute;
 import org.traccar.model.BaseModel;
 
 public class AttributesManager extends ExtendedObjectManager {
 
     public AttributesManager(DataManager dataManager) {
-        super(dataManager, Attribute.class, AttributePermission.class, DeviceAttribute.class, GroupAttribute.class);
+        super(dataManager, Attribute.class);
         refreshItems();
         refreshExtendedPermissions();
     }

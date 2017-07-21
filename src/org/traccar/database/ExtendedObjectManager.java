@@ -25,9 +25,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.traccar.Context;
 import org.traccar.helper.Log;
-import org.traccar.model.BaseDevicePermission;
-import org.traccar.model.BaseGroupPermission;
-import org.traccar.model.BaseUserPermission;
 import org.traccar.model.Device;
 import org.traccar.model.BaseModel;
 
@@ -37,17 +34,9 @@ public abstract class ExtendedObjectManager extends SimpleObjectManager {
     private final Map<Long, Set<Long>> deviceItemsWithGroups = new ConcurrentHashMap<>();
     private final Map<Long, Set<Long>> groupItems = new ConcurrentHashMap<>();
 
-    private Class<? extends BaseDevicePermission> devicePermissionClass;
-    private Class<? extends BaseGroupPermission> groupPermissionClass;
-
     protected ExtendedObjectManager(DataManager dataManager,
-            Class<? extends BaseModel> baseClass,
-            Class<? extends BaseUserPermission> permissionClass,
-            Class<? extends BaseDevicePermission> devicePermissionClass,
-            Class<? extends BaseGroupPermission> groupPermissionClass) {
-        super(dataManager, baseClass, permissionClass);
-        this.devicePermissionClass = devicePermissionClass;
-        this.groupPermissionClass = groupPermissionClass;
+            Class<? extends BaseModel> baseClass) {
+        super(dataManager, baseClass);
     }
 
     public final Set<Long> getGroupItems(long groupId) {
@@ -89,24 +78,24 @@ public abstract class ExtendedObjectManager extends SimpleObjectManager {
         if (getDataManager() != null) {
             try {
 
-                Collection<? extends BaseGroupPermission> databaseGroupPermissions =
-                        getDataManager().getObjects(groupPermissionClass);
+                Collection<Map<String, Long>> databaseGroupPermissions =
+                        getDataManager().getPermissions("Group", getBaseClassName());
 
                 clearGroupItems();
-                for (BaseGroupPermission groupPermission : databaseGroupPermissions) {
-                    getGroupItems(groupPermission.getGroupId()).add(groupPermission.getSlaveId());
+                for (Map<String, Long> groupPermission : databaseGroupPermissions) {
+                    getGroupItems(groupPermission.get("groupId")).add(groupPermission.get(getBaseClassIdName()));
                 }
 
-                Collection<? extends BaseDevicePermission> databaseDevicePermissions =
-                        getDataManager().getObjects(devicePermissionClass);
+                Collection<Map<String, Long>> databaseDevicePermissions =
+                        getDataManager().getPermissions("Device", getBaseClassName());
                 Collection<Device> allDevices = Context.getDeviceManager().getAllDevices();
 
                 clearDeviceItems();
                 deviceItemsWithGroups.clear();
 
-                for (BaseDevicePermission devicePermission : databaseDevicePermissions) {
-                    getDeviceItems(devicePermission.getDeviceId()).add(devicePermission.getSlaveId());
-                    getAllDeviceItems(devicePermission.getDeviceId()).add(devicePermission.getSlaveId());
+                for (Map<String, Long> devicePermission : databaseDevicePermissions) {
+                    getDeviceItems(devicePermission.get("deviceId")).add(devicePermission.get(getBaseClassIdName()));
+                    getAllDeviceItems(devicePermission.get("deviceId")).add(devicePermission.get(getBaseClassIdName()));
                 }
 
                 for (Device device : allDevices) {

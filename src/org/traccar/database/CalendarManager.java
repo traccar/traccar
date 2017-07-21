@@ -17,12 +17,11 @@
 package org.traccar.database;
 
 import org.traccar.model.Calendar;
-import org.traccar.model.CalendarPermission;
 
 public class CalendarManager extends SimpleObjectManager {
 
     public CalendarManager(DataManager dataManager) {
-        super(dataManager, Calendar.class, CalendarPermission.class);
+        super(dataManager, Calendar.class);
         refreshItems();
     }
 
