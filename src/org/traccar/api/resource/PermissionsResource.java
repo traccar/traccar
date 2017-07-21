@@ -35,32 +35,18 @@ import org.traccar.api.BaseResource;
 @Consumes(MediaType.APPLICATION_JSON)
 public class PermissionsResource  extends BaseResource {
 
-    @Path("/{slave : (users|devices|groups|geofences|drivers|attributes|calendars)}")
     @POST
     public Response add(Map<String, Long> entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        if (entity.size() != 2) {
-            throw new IllegalArgumentException();
-        }
-        for (String key : entity.keySet()) {
-            Context.getPermissionsManager().checkPermission(key.replace("Id", ""), getUserId(), entity.get(key));
-        }
-        Context.getDataManager().linkObject(entity, true);
+        handlePermission(entity, true);
         Context.getPermissionsManager().refreshPermissions(entity);
         return Response.noContent().build();
     }
 
-    @Path("/{slave : (users|devices|groups|geofences|drivers|attributes|calendars)}")
     @DELETE
     public Response remove(Map<String, Long> entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        if (entity.size() != 2) {
-            throw new IllegalArgumentException();
-        }
-        for (String key : entity.keySet()) {
-            Context.getPermissionsManager().checkPermission(key.replace("Id", ""), getUserId(), entity.get(key));
-        }
-        Context.getDataManager().linkObject(entity, false);
+        handlePermission(entity, false);
         Context.getPermissionsManager().refreshPermissions(entity);
         return Response.noContent().build();
     }

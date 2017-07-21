@@ -34,7 +34,6 @@ import javax.ws.rs.core.Response;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Date;
-import java.util.LinkedHashMap;
 
 @Path("users")
 @Produces(MediaType.APPLICATION_JSON)
@@ -75,10 +74,7 @@ public class UserResource extends BaseResource {
         }
         Context.getPermissionsManager().addUser(entity);
         if (Context.getPermissionsManager().isManager(getUserId())) {
-            LinkedHashMap<String, Long> link = new LinkedHashMap<>();
-            link.put("userId", getUserId());
-            link.put("managedUserId", entity.getId());
-            Context.getDataManager().linkObject(link, true);
+            Context.getDataManager().linkObject("userId", getUserId(), "managedUserId", entity.getId(), true);
         }
         Context.getPermissionsManager().refreshUserPermissions();
         if (Context.getNotificationManager() != null) {

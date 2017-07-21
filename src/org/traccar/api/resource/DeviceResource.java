@@ -35,9 +35,7 @@ import javax.ws.rs.core.Response;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 @Path("devices")
 @Produces(MediaType.APPLICATION_JSON)
@@ -79,10 +77,7 @@ public class DeviceResource extends BaseResource {
         Context.getPermissionsManager().checkDeviceReadonly(getUserId());
         Context.getPermissionsManager().checkDeviceLimit(getUserId());
         Context.getDeviceManager().addDevice(entity);
-        LinkedHashMap<String, Long> link = new LinkedHashMap<>();
-        link.put("userId", getUserId());
-        link.put("deviceId", entity.getId());
-        Context.getDataManager().linkObject(link, true);
+        linkNew(entity);
         Context.getPermissionsManager().refreshPermissions();
         Context.getPermissionsManager().refreshAllExtendedPermissions();
         return Response.ok(entity).build();
@@ -118,36 +113,6 @@ public class DeviceResource extends BaseResource {
     public Response updateTotalDistance(DeviceTotalDistance entity) throws SQLException {
         Context.getPermissionsManager().checkAdmin(getUserId());
         Context.getDeviceManager().resetTotalDistance(entity);
-        return Response.noContent().build();
-    }
-
-    @Path("/{slave : (geofences|drivers|attributes)}")
-    @POST
-    public Response add(Map<String, Long> entity) throws SQLException {
-        Context.getPermissionsManager().checkReadonly(getUserId());
-        if (entity.size() != 2) {
-            throw new IllegalArgumentException();
-        }
-        for (String key : entity.keySet()) {
-            Context.getPermissionsManager().checkPermission(key.replace("Id", ""), getUserId(), entity.get(key));
-        }
-        Context.getDataManager().linkObject(entity, true);
-        Context.getPermissionsManager().refreshPermissions(entity);
-        return Response.noContent().build();
-    }
-
-    @Path("/{slave : (geofences|drivers|attributes)}")
-    @DELETE
-    public Response remove(Map<String, Long> entity) throws SQLException {
-        Context.getPermissionsManager().checkReadonly(getUserId());
-        for (String key : entity.keySet()) {
-            Context.getPermissionsManager().checkPermission(key.replace("Id", ""), getUserId(), entity.get(key));
-        }
-        if (entity.size() != 2) {
-            throw new IllegalArgumentException();
-        }
-        Context.getDataManager().linkObject(entity, false);
-        Context.getPermissionsManager().refreshPermissions(entity);
         return Response.noContent().build();
     }
 

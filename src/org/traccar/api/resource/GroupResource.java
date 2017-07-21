@@ -32,8 +32,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 @Path("groups")
 @Produces(MediaType.APPLICATION_JSON)
@@ -63,10 +61,7 @@ public class GroupResource extends BaseResource {
     public Response add(Group entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getDeviceManager().addGroup(entity);
-        LinkedHashMap<String, Long> link = new LinkedHashMap<>();
-        link.put("userId", getUserId());
-        link.put("groupId", entity.getId());
-        Context.getDataManager().linkObject(link, true);
+        linkNew(entity);
         Context.getPermissionsManager().refreshPermissions();
         Context.getPermissionsManager().refreshAllExtendedPermissions();
         return Response.ok(entity).build();
@@ -90,36 +85,6 @@ public class GroupResource extends BaseResource {
         Context.getDeviceManager().removeGroup(id);
         Context.getPermissionsManager().refreshPermissions();
         Context.getPermissionsManager().refreshAllExtendedPermissions();
-        return Response.noContent().build();
-    }
-
-    @Path("/{slave : (geofences|drivers|attributes)}")
-    @POST
-    public Response add(Map<String, Long> entity) throws SQLException {
-        Context.getPermissionsManager().checkReadonly(getUserId());
-        if (entity.size() != 2) {
-            throw new IllegalArgumentException();
-        }
-        for (String key : entity.keySet()) {
-            Context.getPermissionsManager().checkPermission(key.replace("Id", ""), getUserId(), entity.get(key));
-        }
-        Context.getDataManager().linkObject(entity, true);
-        Context.getPermissionsManager().refreshPermissions(entity);
-        return Response.noContent().build();
-    }
-
-    @Path("/{slave : (geofences|drivers|attributes)}")
-    @DELETE
-    public Response remove(Map<String, Long> entity) throws SQLException {
-        Context.getPermissionsManager().checkReadonly(getUserId());
-        if (entity.size() != 2) {
-            throw new IllegalArgumentException();
-        }
-        for (String key : entity.keySet()) {
-            Context.getPermissionsManager().checkPermission(key.replace("Id", ""), getUserId(), entity.get(key));
-        }
-        Context.getDataManager().linkObject(entity, false);
-        Context.getPermissionsManager().refreshPermissions(entity);
         return Response.noContent().build();
     }
 

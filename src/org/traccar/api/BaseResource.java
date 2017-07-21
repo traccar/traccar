@@ -15,7 +15,14 @@
  */
 package org.traccar.api;
 
+import java.sql.SQLException;
+import java.util.Iterator;
+import java.util.Map;
+
 import javax.ws.rs.core.SecurityContext;
+
+import org.traccar.Context;
+import org.traccar.model.BaseModel;
 
 public class BaseResource {
 
@@ -28,5 +35,34 @@ public class BaseResource {
             return principal.getUserId();
         }
         return 0;
+    }
+
+    protected void handlePermission(Map<String, Long> entity, boolean link) throws SQLException {
+        if (entity.size() != 2) {
+            throw new IllegalArgumentException();
+        }
+        Iterator<String> iterator = entity.keySet().iterator();
+        String owner = iterator.next();
+        String property = iterator.next();
+        long ownerId = entity.get(owner);
+        long propertyId = entity.get(property);
+
+        if (!link && owner.equals("userId") && property.equals("deviceId")) {
+            if (getUserId() != ownerId) {
+                Context.getPermissionsManager().checkUser(getUserId(), ownerId);
+            } else {
+                Context.getPermissionsManager().checkAdmin(getUserId());
+            }
+        } else {
+            Context.getPermissionsManager().checkPermission(owner.replace("Id", ""), getUserId(), ownerId);
+        }
+        Context.getPermissionsManager().checkPermission(property.replace("Id", ""), getUserId(), propertyId);
+
+        Context.getDataManager().linkObject(owner, ownerId, property, propertyId, link);
+    }
+
+    protected void linkNew(BaseModel entity) throws SQLException {
+        Context.getDataManager().linkObject("userId", getUserId(),
+                entity.getClass().getSimpleName(), entity.getId(), true);
     }
 }
