@@ -60,9 +60,11 @@ public class GeofenceEventHandler extends BaseEventHandler {
         Collection<Event> events = new ArrayList<>();
         for (long geofenceId : newGeofences) {
             long calendarId = ((Geofence) geofenceManager.getById(geofenceId)).getCalendarId();
-            if (calendarId == 0 || Context.getCalendarManager().getById(calendarId) == null
-                    || ((Calendar) Context.getCalendarManager().getById(calendarId))
-                    .checkMoment(position.getFixTime())) {
+            Calendar calendar = null;
+            if (calendarId != 0) {
+                calendar = (Calendar) Context.getCalendarManager().getById(calendarId);
+            }
+            if (calendar == null || calendar.checkMoment(position.getFixTime())) {
                 Event event = new Event(Event.TYPE_GEOFENCE_ENTER, position.getDeviceId(), position.getId());
                 event.setGeofenceId(geofenceId);
                 events.add(event);
@@ -70,9 +72,11 @@ public class GeofenceEventHandler extends BaseEventHandler {
         }
         for (long geofenceId : oldGeofences) {
             long calendarId = ((Geofence) geofenceManager.getById(geofenceId)).getCalendarId();
-            if (calendarId == 0 || Context.getCalendarManager().getById(calendarId) == null
-                    || ((Calendar) Context.getCalendarManager().getById(calendarId))
-                    .checkMoment(position.getFixTime())) {
+            Calendar calendar = null;
+            if (calendarId != 0) {
+                calendar = (Calendar) Context.getCalendarManager().getById(calendarId);
+            }
+            if (calendar == null || calendar.checkMoment(position.getFixTime())) {
                 Event event = new Event(Event.TYPE_GEOFENCE_EXIT, position.getDeviceId(), position.getId());
                 event.setGeofenceId(geofenceId);
                 events.add(event);

@@ -16,15 +16,11 @@
 package org.traccar.api;
 
 import java.sql.SQLException;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 
 import javax.ws.rs.core.SecurityContext;
 
 import org.traccar.Context;
-import org.traccar.database.DataManager;
 import org.traccar.model.BaseModel;
-import org.traccar.model.Device;
 import org.traccar.model.User;
 
 public class BaseResource {
@@ -38,32 +34,6 @@ public class BaseResource {
             return principal.getUserId();
         }
         return 0;
-    }
-
-    protected void checkAndLinkPermission(LinkedHashMap<String, Long> entity, boolean link)
-            throws SQLException, ClassNotFoundException {
-        Iterator<String> iterator = entity.keySet().iterator();
-        String owner = iterator.next();
-        Class<?> ownerClass = DataManager.getClassByName(owner);
-        String property = iterator.next();
-        Class<?> propertyClass = DataManager.getClassByName(property);
-
-        long ownerId = entity.get(owner);
-        long propertyId = entity.get(property);
-
-        if (!link && ownerClass.equals(User.class)
-                && propertyClass.equals(Device.class)) {
-            if (getUserId() != ownerId) {
-                Context.getPermissionsManager().checkUser(getUserId(), ownerId);
-            } else {
-                Context.getPermissionsManager().checkAdmin(getUserId());
-            }
-        } else {
-            Context.getPermissionsManager().checkPermission(ownerClass, getUserId(), ownerId);
-        }
-        Context.getPermissionsManager().checkPermission(propertyClass, getUserId(), propertyId);
-
-        Context.getDataManager().linkObject(ownerClass, ownerId, propertyClass, propertyId, link);
     }
 
     protected void linkNewEntity(BaseModel entity) throws SQLException {

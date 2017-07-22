@@ -77,7 +77,7 @@ public class GroupResource extends BaseResource {
         return Response.ok(entity).build();
     }
 
-    @Path("{id : \\d+}")
+    @Path("{id}")
     @DELETE
     public Response remove(@PathParam("id") long id) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());

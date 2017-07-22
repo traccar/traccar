@@ -29,16 +29,38 @@ import javax.ws.rs.core.Response;
 
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
+import org.traccar.model.Device;
+import org.traccar.model.Permission;
+import org.traccar.model.User;
 
 @Path("permissions")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class PermissionsResource  extends BaseResource {
 
+    private void checkPermission(Permission permission, boolean link) {
+        if (!link && permission.getOwnerClass().equals(User.class)
+                && permission.getPropertyClass().equals(Device.class)) {
+            if (getUserId() != permission.getOwnerId()) {
+                Context.getPermissionsManager().checkUser(getUserId(), permission.getOwnerId());
+            } else {
+                Context.getPermissionsManager().checkAdmin(getUserId());
+            }
+        } else {
+            Context.getPermissionsManager().checkPermission(
+                    permission.getOwnerClass(), getUserId(), permission.getOwnerId());
+        }
+        Context.getPermissionsManager().checkPermission(
+                permission.getPropertyClass(), getUserId(), permission.getPropertyId());
+    }
+
     @POST
     public Response add(LinkedHashMap<String, Long> entity) throws SQLException, ClassNotFoundException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        checkAndLinkPermission(entity, true);
+        Permission permission = new Permission(entity);
+        checkPermission(permission, true);
+        Context.getDataManager().linkObject(permission.getOwnerClass(), permission.getOwnerId(),
+                permission.getPropertyClass(), permission.getPropertyId(), true);
         Context.getPermissionsManager().refreshPermissions(entity);
         return Response.noContent().build();
     }
@@ -46,7 +68,10 @@ public class PermissionsResource  extends BaseResource {
     @DELETE
     public Response remove(LinkedHashMap<String, Long> entity) throws SQLException, ClassNotFoundException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        checkAndLinkPermission(entity, false);
+        Permission permission = new Permission(entity);
+        checkPermission(permission, false);
+        Context.getDataManager().linkObject(permission.getOwnerClass(), permission.getOwnerId(),
+                permission.getPropertyClass(), permission.getPropertyId(), false);
         Context.getPermissionsManager().refreshPermissions(entity);
         return Response.noContent().build();
     }
