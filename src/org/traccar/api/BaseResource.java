@@ -17,7 +17,6 @@ package org.traccar.api;
 
 import javax.ws.rs.core.SecurityContext;
 
-
 public class BaseResource {
 
     @javax.ws.rs.core.Context
