@@ -61,7 +61,7 @@ public class PermissionsResource  extends BaseResource {
         checkPermission(permission, true);
         Context.getDataManager().linkObject(permission.getOwnerClass(), permission.getOwnerId(),
                 permission.getPropertyClass(), permission.getPropertyId(), true);
-        Context.getPermissionsManager().refreshPermissions(entity);
+        Context.getPermissionsManager().refreshPermissions(permission);
         return Response.noContent().build();
     }
 
@@ -72,7 +72,7 @@ public class PermissionsResource  extends BaseResource {
         checkPermission(permission, false);
         Context.getDataManager().linkObject(permission.getOwnerClass(), permission.getOwnerId(),
                 permission.getPropertyClass(), permission.getPropertyId(), false);
-        Context.getPermissionsManager().refreshPermissions(entity);
+        Context.getPermissionsManager().refreshPermissions(permission);
         return Response.noContent().build();
     }
 

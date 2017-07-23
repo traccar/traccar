@@ -24,6 +24,7 @@ import org.traccar.model.Driver;
 import org.traccar.model.Geofence;
 import org.traccar.model.Group;
 import org.traccar.model.ManagedUser;
+import org.traccar.model.Permission;
 import org.traccar.model.Server;
 import org.traccar.model.User;
 
@@ -348,34 +349,34 @@ public class PermissionsManager {
         Context.getAttributesManager().refreshExtendedPermissions();
     }
 
-    public void refreshPermissions(Map<String, Long> entity) {
-        if (entity.containsKey(DataManager.makeNameId(User.class))) {
-            if (entity.containsKey(DataManager.makeNameId(Device.class))
-                    || entity.containsKey(DataManager.makeNameId(Group.class))) {
+    public void refreshPermissions(Permission permission) {
+        if (permission.getOwnerClass().equals(User.class)) {
+            if (permission.getPropertyClass().equals(Device.class)
+                    || permission.getPropertyClass().equals(Group.class)) {
                 refreshPermissions();
                 refreshAllExtendedPermissions();
-            } else if (entity.containsKey(DataManager.makeNameId(ManagedUser.class))) {
+            } else if (permission.getPropertyClass().equals(ManagedUser.class)) {
                 refreshUserPermissions();
-            } else if (entity.containsKey(DataManager.makeNameId(Geofence.class))) {
+            } else if (permission.getPropertyClass().equals(Geofence.class)) {
                 if (Context.getGeofenceManager() != null) {
                     Context.getGeofenceManager().refreshUserItems();
                 }
-            } else if (entity.containsKey(DataManager.makeNameId(Driver.class))) {
+            } else if (permission.getPropertyClass().equals(Driver.class)) {
                 Context.getDriversManager().refreshUserItems();
-            } else if (entity.containsKey(DataManager.makeNameId(Attribute.class))) {
+            } else if (permission.getPropertyClass().equals(Attribute.class)) {
                 Context.getAttributesManager().refreshUserItems();
-            } else if (entity.containsKey(DataManager.makeNameId(Calendar.class))) {
+            } else if (permission.getPropertyClass().equals(Calendar.class)) {
                 Context.getCalendarManager().refreshUserItems();
             }
-        } else if (entity.containsKey(DataManager.makeNameId(Device.class))
-                || entity.containsKey(DataManager.makeNameId(Group.class))) {
-            if (entity.containsKey(DataManager.makeNameId(Geofence.class))) {
+        } else if (permission.getOwnerClass().equals(Device.class)
+                || permission.getOwnerClass().equals(Group.class)) {
+            if (permission.getPropertyClass().equals(Geofence.class)) {
                 if (Context.getGeofenceManager() != null) {
                     Context.getGeofenceManager().refreshExtendedPermissions();
                 }
-            } else if (entity.containsKey(DataManager.makeNameId(Driver.class))) {
+            } else if (permission.getPropertyClass().equals(Driver.class)) {
                 Context.getDriversManager().refreshExtendedPermissions();
-            } else if (entity.containsKey(DataManager.makeNameId(Attribute.class))) {
+            } else if (permission.getPropertyClass().equals(Attribute.class)) {
                 Context.getAttributesManager().refreshExtendedPermissions();
             }
         }

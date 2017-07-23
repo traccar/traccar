@@ -35,8 +35,7 @@ public abstract class ExtendedObjectManager extends SimpleObjectManager {
     private final Map<Long, Set<Long>> deviceItemsWithGroups = new ConcurrentHashMap<>();
     private final Map<Long, Set<Long>> groupItems = new ConcurrentHashMap<>();
 
-    protected ExtendedObjectManager(DataManager dataManager,
-            Class<? extends BaseModel> baseClass) {
+    protected ExtendedObjectManager(DataManager dataManager, Class<? extends BaseModel> baseClass) {
         super(dataManager, baseClass);
     }
 
