@@ -328,16 +328,14 @@ public class PermissionsManager {
             throw new IllegalArgumentException("Unknown object type");
         }
 
-        if (manager != null) {
-            if (manager.checkItemPermission(userId, objectId) && !isAdmin(userId)) {
-                checkManager(userId);
-                for (long managedUserId : getUserPermissions(userId)) {
-                    if (manager.checkItemPermission(managedUserId, objectId)) {
-                        return;
-                    }
+        if (manager != null && !manager.checkItemPermission(userId, objectId) && !isAdmin(userId)) {
+            checkManager(userId);
+            for (long managedUserId : getUserPermissions(userId)) {
+                if (manager.checkItemPermission(managedUserId, objectId)) {
+                    return;
                 }
-                throw new SecurityException("Type " + object + " access denied");
             }
+            throw new SecurityException("Type " + object + " access denied");
         }
     }
 
@@ -357,10 +355,8 @@ public class PermissionsManager {
                 refreshAllExtendedPermissions();
             } else if (permission.getPropertyClass().equals(ManagedUser.class)) {
                 refreshUserPermissions();
-            } else if (permission.getPropertyClass().equals(Geofence.class)) {
-                if (Context.getGeofenceManager() != null) {
-                    Context.getGeofenceManager().refreshUserItems();
-                }
+            } else if (permission.getPropertyClass().equals(Geofence.class) && Context.getGeofenceManager() != null) {
+                Context.getGeofenceManager().refreshUserItems();
             } else if (permission.getPropertyClass().equals(Driver.class)) {
                 Context.getDriversManager().refreshUserItems();
             } else if (permission.getPropertyClass().equals(Attribute.class)) {
@@ -368,12 +364,9 @@ public class PermissionsManager {
             } else if (permission.getPropertyClass().equals(Calendar.class)) {
                 Context.getCalendarManager().refreshUserItems();
             }
-        } else if (permission.getOwnerClass().equals(Device.class)
-                || permission.getOwnerClass().equals(Group.class)) {
-            if (permission.getPropertyClass().equals(Geofence.class)) {
-                if (Context.getGeofenceManager() != null) {
-                    Context.getGeofenceManager().refreshExtendedPermissions();
-                }
+        } else if (permission.getOwnerClass().equals(Device.class) || permission.getOwnerClass().equals(Group.class)) {
+            if (permission.getPropertyClass().equals(Geofence.class) && Context.getGeofenceManager() != null) {
+                Context.getGeofenceManager().refreshExtendedPermissions();
             } else if (permission.getPropertyClass().equals(Driver.class)) {
                 Context.getDriversManager().refreshExtendedPermissions();
             } else if (permission.getPropertyClass().equals(Attribute.class)) {
