@@ -19,6 +19,7 @@ import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.database.GeofenceManager;
 import org.traccar.model.Geofence;
+import org.traccar.model.User;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -85,7 +86,7 @@ public class GeofenceResource extends BaseResource {
     public Response add(Geofence entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getGeofenceManager().addItem(entity);
-        linkNewEntity(entity);
+        Context.getDataManager().linkObject(User.class, getUserId(), entity.getClass(), entity.getId(), true);
         Context.getGeofenceManager().refreshUserItems();
         return Response.ok(entity).build();
     }

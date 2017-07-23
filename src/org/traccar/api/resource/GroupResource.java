@@ -18,6 +18,7 @@ package org.traccar.api.resource;
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.model.Group;
+import org.traccar.model.User;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -61,7 +62,7 @@ public class GroupResource extends BaseResource {
     public Response add(Group entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getDeviceManager().addGroup(entity);
-        linkNewEntity(entity);
+        Context.getDataManager().linkObject(User.class, getUserId(), entity.getClass(), entity.getId(), true);
         Context.getPermissionsManager().refreshPermissions();
         Context.getPermissionsManager().refreshAllExtendedPermissions();
         return Response.ok(entity).build();

@@ -38,6 +38,7 @@ import org.traccar.api.BaseResource;
 import org.traccar.database.AttributesManager;
 import org.traccar.model.Attribute;
 import org.traccar.model.Position;
+import org.traccar.model.User;
 import org.traccar.processing.ComputedAttributesHandler;
 
 @Path("attributes/computed")
@@ -87,7 +88,7 @@ public class AttributeResource extends BaseResource {
     private Response add(Attribute entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getAttributesManager().addItem(entity);
-        linkNewEntity(entity);
+        Context.getDataManager().linkObject(User.class, getUserId(), entity.getClass(), entity.getId(), true);
         Context.getAttributesManager().refreshUserItems();
         return Response.ok(entity).build();
     }

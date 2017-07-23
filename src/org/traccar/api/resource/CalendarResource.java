@@ -35,6 +35,7 @@ import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.database.CalendarManager;
 import org.traccar.model.Calendar;
+import org.traccar.model.User;
 
 @Path("calendars")
 @Produces(MediaType.APPLICATION_JSON)
@@ -66,7 +67,7 @@ public class CalendarResource extends BaseResource {
     public Response add(Calendar entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getCalendarManager().addItem(entity);
-        linkNewEntity(entity);
+        Context.getDataManager().linkObject(User.class, getUserId(), entity.getClass(), entity.getId(), true);
         Context.getCalendarManager().refreshUserItems();
         return Response.ok(entity).build();
     }

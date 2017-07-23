@@ -15,13 +15,8 @@
  */
 package org.traccar.api;
 
-import java.sql.SQLException;
-
 import javax.ws.rs.core.SecurityContext;
 
-import org.traccar.Context;
-import org.traccar.model.BaseModel;
-import org.traccar.model.User;
 
 public class BaseResource {
 
@@ -34,9 +29,5 @@ public class BaseResource {
             return principal.getUserId();
         }
         return 0;
-    }
-
-    protected void linkNewEntity(BaseModel entity) throws SQLException {
-        Context.getDataManager().linkObject(User.class, getUserId(), entity.getClass(), entity.getId(), true);
     }
 }

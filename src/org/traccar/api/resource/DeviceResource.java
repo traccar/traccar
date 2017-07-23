@@ -19,6 +19,7 @@ import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceTotalDistance;
+import org.traccar.model.User;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -77,7 +78,7 @@ public class DeviceResource extends BaseResource {
         Context.getPermissionsManager().checkDeviceReadonly(getUserId());
         Context.getPermissionsManager().checkDeviceLimit(getUserId());
         Context.getDeviceManager().addDevice(entity);
-        linkNewEntity(entity);
+        Context.getDataManager().linkObject(User.class, getUserId(), entity.getClass(), entity.getId(), true);
         Context.getPermissionsManager().refreshPermissions();
         Context.getPermissionsManager().refreshAllExtendedPermissions();
         return Response.ok(entity).build();

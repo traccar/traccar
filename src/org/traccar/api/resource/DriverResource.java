@@ -37,6 +37,7 @@ import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.database.DriversManager;
 import org.traccar.model.Driver;
+import org.traccar.model.User;
 
 @Path("drivers")
 @Produces(MediaType.APPLICATION_JSON)
@@ -86,7 +87,7 @@ public class DriverResource extends BaseResource {
     public Response add(Driver entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getDriversManager().addItem(entity);
-        linkNewEntity(entity);
+        Context.getDataManager().linkObject(User.class, getUserId(), entity.getClass(), entity.getId(), true);
         Context.getDriversManager().refreshUserItems();
         return Response.ok(entity).build();
     }
