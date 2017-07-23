@@ -19,6 +19,7 @@ import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceTotalDistance;
+import org.traccar.model.User;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -83,11 +84,9 @@ public class DeviceResource extends BaseResource {
         Context.getPermissionsManager().checkDeviceReadonly(getUserId());
         Context.getPermissionsManager().checkDeviceLimit(getUserId());
         Context.getDeviceManager().addDevice(entity);
-        Context.getDataManager().linkDevice(getUserId(), entity.getId());
+        Context.getDataManager().linkObject(User.class, getUserId(), entity.getClass(), entity.getId(), true);
         Context.getPermissionsManager().refreshPermissions();
-        if (Context.getGeofenceManager() != null) {
-            Context.getGeofenceManager().refresh();
-        }
+        Context.getPermissionsManager().refreshAllExtendedPermissions();
         return Response.ok(entity).build();
     }
 
@@ -99,9 +98,7 @@ public class DeviceResource extends BaseResource {
         Context.getPermissionsManager().checkDevice(getUserId(), entity.getId());
         Context.getDeviceManager().updateDevice(entity);
         Context.getPermissionsManager().refreshPermissions();
-        if (Context.getGeofenceManager() != null) {
-            Context.getGeofenceManager().refresh();
-        }
+        Context.getPermissionsManager().refreshAllExtendedPermissions();
         return Response.ok(entity).build();
     }
 
@@ -113,9 +110,7 @@ public class DeviceResource extends BaseResource {
         Context.getPermissionsManager().checkDevice(getUserId(), id);
         Context.getDeviceManager().removeDevice(id);
         Context.getPermissionsManager().refreshPermissions();
-        if (Context.getGeofenceManager() != null) {
-            Context.getGeofenceManager().refresh();
-        }
+        Context.getPermissionsManager().refreshAllExtendedPermissions();
         Context.getAliasesManager().removeDevice(id);
         return Response.noContent().build();
     }

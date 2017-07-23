@@ -52,9 +52,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
 
             if (defaultGroupId != 0) {
                 Context.getPermissionsManager().refreshPermissions();
-                if (Context.getGeofenceManager() != null) {
-                    Context.getGeofenceManager().refresh();
-                }
+                Context.getPermissionsManager().refreshAllExtendedPermissions();
             }
 
             return device.getId();

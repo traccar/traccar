@@ -19,7 +19,7 @@ import java.util.TimeZone;
 
 import org.traccar.helper.Log;
 
-public class Server extends Extensible {
+public class Server extends ExtendedModel {
 
     public String getVersion() {
         return Log.getAppVersion();

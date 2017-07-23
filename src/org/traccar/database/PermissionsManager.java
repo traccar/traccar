@@ -17,13 +17,16 @@ package org.traccar.database;
 
 import org.traccar.Context;
 import org.traccar.helper.Log;
+import org.traccar.model.Attribute;
+import org.traccar.model.Calendar;
 import org.traccar.model.Device;
-import org.traccar.model.DevicePermission;
+import org.traccar.model.Driver;
+import org.traccar.model.Geofence;
 import org.traccar.model.Group;
-import org.traccar.model.GroupPermission;
+import org.traccar.model.ManagedUser;
+import org.traccar.model.Permission;
 import org.traccar.model.Server;
 import org.traccar.model.User;
-import org.traccar.model.UserPermission;
 
 import java.lang.reflect.Method;
 import java.sql.SQLException;
@@ -98,7 +101,7 @@ public class PermissionsManager {
         usersTokens.clear();
         try {
             server = dataManager.getServer();
-            for (User user : dataManager.getUsers()) {
+            for (User user : dataManager.getObjects(User.class)) {
                 users.put(user.getId(), user);
                 if (user.getToken() != null) {
                     usersTokens.put(user.getToken(), user.getId());
@@ -112,8 +115,9 @@ public class PermissionsManager {
     public final void refreshUserPermissions() {
         userPermissions.clear();
         try {
-            for (UserPermission permission : dataManager.getUserPermissions()) {
-                getUserPermissions(permission.getUserId()).add(permission.getManagedUserId());
+            for (Map<String, Long> permission : dataManager.getPermissions(User.class, User.class)) {
+                getUserPermissions(permission.get(DataManager.makeNameId(User.class)))
+                        .add(permission.get(DataManager.makeNameId(ManagedUser.class)));
             }
         } catch (SQLException error) {
             Log.warning(error);
@@ -126,19 +130,23 @@ public class PermissionsManager {
         try {
             GroupTree groupTree = new GroupTree(Context.getDeviceManager().getAllGroups(),
                     Context.getDeviceManager().getAllDevices());
-            for (GroupPermission permission : dataManager.getGroupPermissions()) {
-                Set<Long> userGroupPermissions = getGroupPermissions(permission.getUserId());
-                Set<Long> userDevicePermissions = getDevicePermissions(permission.getUserId());
-                userGroupPermissions.add(permission.getGroupId());
-                for (Group group : groupTree.getGroups(permission.getGroupId())) {
+            for (Map<String, Long> groupPermission : dataManager.getPermissions(User.class, Group.class)) {
+                Set<Long> userGroupPermissions = getGroupPermissions(groupPermission
+                        .get(DataManager.makeNameId(User.class)));
+                Set<Long> userDevicePermissions = getDevicePermissions(groupPermission
+                        .get(DataManager.makeNameId(User.class)));
+                userGroupPermissions.add(groupPermission.get(DataManager.makeNameId(Group.class)));
+                for (Group group : groupTree.getGroups(groupPermission.get(DataManager.makeNameId(Group.class)))) {
                     userGroupPermissions.add(group.getId());
                 }
-                for (Device device : groupTree.getDevices(permission.getGroupId())) {
+                for (Device device : groupTree.getDevices(groupPermission.get(DataManager.makeNameId(Group.class)))) {
                     userDevicePermissions.add(device.getId());
                 }
             }
-            for (DevicePermission permission : dataManager.getDevicePermissions()) {
-                getDevicePermissions(permission.getUserId()).add(permission.getDeviceId());
+
+            for (Map<String, Long> devicePermission : dataManager.getPermissions(User.class, Device.class)) {
+                getDevicePermissions(devicePermission.get(DataManager.makeNameId(User.class)))
+                        .add(devicePermission.get(DataManager.makeNameId(Device.class)));
             }
 
             groupDevices.clear();
@@ -298,52 +306,72 @@ public class PermissionsManager {
         }
     }
 
-    public void checkGeofence(long userId, long geofenceId) throws SecurityException {
-        if (!Context.getGeofenceManager().checkGeofence(userId, geofenceId) && !isAdmin(userId)) {
+    public void checkPermission(Class<?> object, long userId, long objectId)
+            throws SecurityException {
+        SimpleObjectManager manager = null;
+
+        if (object.equals(Device.class)) {
+            checkDevice(userId, objectId);
+        } else if (object.equals(Group.class)) {
+            checkGroup(userId, objectId);
+        } else if (object.equals(User.class) || object.equals(ManagedUser.class)) {
+            checkUser(userId, objectId);
+        } else if (object.equals(Geofence.class)) {
+            manager = Context.getGeofenceManager();
+        } else if (object.equals(Attribute.class)) {
+            manager = Context.getAttributesManager();
+        } else if (object.equals(Driver.class)) {
+            manager = Context.getDriversManager();
+        } else if (object.equals(Calendar.class)) {
+            manager = Context.getCalendarManager();
+        } else {
+            throw new IllegalArgumentException("Unknown object type");
+        }
+
+        if (manager != null && !manager.checkItemPermission(userId, objectId) && !isAdmin(userId)) {
             checkManager(userId);
             for (long managedUserId : getUserPermissions(userId)) {
-                if (Context.getGeofenceManager().checkGeofence(managedUserId, geofenceId)) {
+                if (manager.checkItemPermission(managedUserId, objectId)) {
                     return;
                 }
             }
-            throw new SecurityException("Geofence access denied");
+            throw new SecurityException("Type " + object + " access denied");
         }
     }
 
-    public void checkAttribute(long userId, long attributeId) throws SecurityException {
-        if (!Context.getAttributesManager().checkAttribute(userId, attributeId) && !isAdmin(userId)) {
-            checkManager(userId);
-            for (long managedUserId : getUserPermissions(userId)) {
-                if (Context.getAttributesManager().checkAttribute(managedUserId, attributeId)) {
-                    return;
-                }
-            }
-            throw new SecurityException("Attribute access denied");
+    public void refreshAllExtendedPermissions() {
+        if (Context.getGeofenceManager() != null) {
+            Context.getGeofenceManager().refreshExtendedPermissions();
         }
+        Context.getDriversManager().refreshExtendedPermissions();
+        Context.getAttributesManager().refreshExtendedPermissions();
     }
 
-    public void checkDriver(long userId, long driverId) throws SecurityException {
-        if (!Context.getDriversManager().checkDriver(userId, driverId) && !isAdmin(userId)) {
-            checkManager(userId);
-            for (long managedUserId : getUserPermissions(userId)) {
-                if (Context.getDriversManager().checkDriver(managedUserId, driverId)) {
-                    return;
-                }
+    public void refreshPermissions(Permission permission) {
+        if (permission.getOwnerClass().equals(User.class)) {
+            if (permission.getPropertyClass().equals(Device.class)
+                    || permission.getPropertyClass().equals(Group.class)) {
+                refreshPermissions();
+                refreshAllExtendedPermissions();
+            } else if (permission.getPropertyClass().equals(ManagedUser.class)) {
+                refreshUserPermissions();
+            } else if (permission.getPropertyClass().equals(Geofence.class) && Context.getGeofenceManager() != null) {
+                Context.getGeofenceManager().refreshUserItems();
+            } else if (permission.getPropertyClass().equals(Driver.class)) {
+                Context.getDriversManager().refreshUserItems();
+            } else if (permission.getPropertyClass().equals(Attribute.class)) {
+                Context.getAttributesManager().refreshUserItems();
+            } else if (permission.getPropertyClass().equals(Calendar.class)) {
+                Context.getCalendarManager().refreshUserItems();
             }
-            throw new SecurityException("Driver access denied");
-        }
-    }
-
-
-    public void checkCalendar(long userId, long calendarId) throws SecurityException {
-        if (!Context.getCalendarManager().checkCalendar(userId, calendarId) && !isAdmin(userId)) {
-            checkManager(userId);
-            for (long managedUserId : getUserPermissions(userId)) {
-                if (Context.getCalendarManager().checkCalendar(managedUserId, calendarId)) {
-                    return;
-                }
+        } else if (permission.getOwnerClass().equals(Device.class) || permission.getOwnerClass().equals(Group.class)) {
+            if (permission.getPropertyClass().equals(Geofence.class) && Context.getGeofenceManager() != null) {
+                Context.getGeofenceManager().refreshExtendedPermissions();
+            } else if (permission.getPropertyClass().equals(Driver.class)) {
+                Context.getDriversManager().refreshExtendedPermissions();
+            } else if (permission.getPropertyClass().equals(Attribute.class)) {
+                Context.getAttributesManager().refreshExtendedPermissions();
             }
-            throw new SecurityException("Calendar access denied");
         }
     }
 
@@ -352,7 +380,7 @@ public class PermissionsManager {
     }
 
     public void updateServer(Server server) throws SQLException {
-        dataManager.updateServer(server);
+        dataManager.updateObject(server);
         this.server = server;
     }
 
@@ -379,7 +407,7 @@ public class PermissionsManager {
     }
 
     public void addUser(User user) throws SQLException {
-        dataManager.addUser(user);
+        dataManager.addObject(user);
         users.put(user.getId(), user);
         if (user.getToken() != null) {
             usersTokens.put(user.getToken(), user.getId());
@@ -401,7 +429,7 @@ public class PermissionsManager {
     }
 
     public void removeUser(long userId) throws SQLException {
-        dataManager.removeUser(userId);
+        dataManager.removeObject(User.class, userId);
         usersTokens.remove(users.get(userId).getToken());
         users.remove(userId);
         refreshPermissions();

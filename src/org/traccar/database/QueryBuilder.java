@@ -35,6 +35,7 @@ import java.sql.Types;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -485,6 +486,30 @@ public final class QueryBuilder {
             }
         }
         return 0;
+    }
+
+    public <T> Collection<Map<String, T>> executeMapQuery(Class<T> clazz) throws SQLException {
+        List<Map<String, T>> result = new LinkedList<>();
+        if (query != null) {
+            try {
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    ResultSetMetaData resultMetaData = resultSet.getMetaData();
+                    while (resultSet.next()) {
+                        LinkedHashMap<String, T> map = new LinkedHashMap<>();
+                        for (int i = 1; i <= resultMetaData.getColumnCount(); i++) {
+                            String label = resultMetaData.getColumnLabel(i);
+                            map.put(label, resultSet.getObject(label, clazz));
+                        }
+                        result.add(map);
+                    }
+                }
+            } finally {
+                statement.close();
+                connection.close();
+            }
+        }
+
+        return result;
     }
 
 }

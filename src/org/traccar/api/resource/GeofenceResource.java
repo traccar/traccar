@@ -19,6 +19,7 @@ import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.database.GeofenceManager;
 import org.traccar.model.Geofence;
+import org.traccar.model.User;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -49,44 +50,44 @@ public class GeofenceResource extends BaseResource {
 
         GeofenceManager geofenceManager = Context.getGeofenceManager();
         if (refresh) {
-            geofenceManager.refreshGeofences();
+            geofenceManager.refreshItems();
         }
 
         Set<Long> result = new HashSet<>();
         if (all) {
             if (Context.getPermissionsManager().isAdmin(getUserId())) {
-                result.addAll(geofenceManager.getAllGeofencesIds());
+                result.addAll(geofenceManager.getAllItems());
             } else {
                 Context.getPermissionsManager().checkManager(getUserId());
-                result.addAll(geofenceManager.getManagedGeofencesIds(getUserId()));
+                result.addAll(geofenceManager.getManagedItems(getUserId()));
             }
         } else {
             if (userId == 0) {
                 userId = getUserId();
             }
             Context.getPermissionsManager().checkUser(getUserId(), userId);
-            result.addAll(geofenceManager.getUserGeofencesIds(userId));
+            result.addAll(geofenceManager.getUserItems(userId));
         }
 
         if (groupId != 0) {
             Context.getPermissionsManager().checkGroup(getUserId(), groupId);
-            result.retainAll(geofenceManager.getGroupGeofencesIds(groupId));
+            result.retainAll(geofenceManager.getGroupItems(groupId));
         }
 
         if (deviceId != 0) {
             Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
-            result.retainAll(geofenceManager.getDeviceGeofencesIds(deviceId));
+            result.retainAll(geofenceManager.getDeviceItems(deviceId));
         }
-        return geofenceManager.getGeofences(result);
+        return geofenceManager.getItems(Geofence.class, result);
 
     }
 
     @POST
     public Response add(Geofence entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getDataManager().addGeofence(entity);
-        Context.getDataManager().linkGeofence(getUserId(), entity.getId());
-        Context.getGeofenceManager().refreshGeofences();
+        Context.getGeofenceManager().addItem(entity);
+        Context.getDataManager().linkObject(User.class, getUserId(), entity.getClass(), entity.getId(), true);
+        Context.getGeofenceManager().refreshUserItems();
         return Response.ok(entity).build();
     }
 
@@ -94,8 +95,8 @@ public class GeofenceResource extends BaseResource {
     @PUT
     public Response update(Geofence entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getPermissionsManager().checkGeofence(getUserId(), entity.getId());
-        Context.getGeofenceManager().updateGeofence(entity);
+        Context.getPermissionsManager().checkPermission(Geofence.class, getUserId(), entity.getId());
+        Context.getGeofenceManager().updateItem(entity);
         return Response.ok(entity).build();
     }
 
@@ -103,9 +104,8 @@ public class GeofenceResource extends BaseResource {
     @DELETE
     public Response remove(@PathParam("id") long id) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getPermissionsManager().checkGeofence(getUserId(), id);
-        Context.getDataManager().removeGeofence(id);
-        Context.getGeofenceManager().refreshGeofences();
+        Context.getPermissionsManager().checkPermission(Geofence.class, getUserId(), id);
+        Context.getGeofenceManager().removeItem(id);
         return Response.noContent().build();
     }
 

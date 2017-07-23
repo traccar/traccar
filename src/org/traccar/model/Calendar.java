@@ -34,7 +34,7 @@ import net.fortuna.ical4j.model.Period;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import org.traccar.database.QueryIgnore;
 
-public class Calendar extends Extensible {
+public class Calendar extends ExtendedModel {
 
     private String name;
 

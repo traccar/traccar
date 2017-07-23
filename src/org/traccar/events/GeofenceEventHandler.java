@@ -22,8 +22,10 @@ import java.util.List;
 import org.traccar.BaseEventHandler;
 import org.traccar.Context;
 import org.traccar.database.GeofenceManager;
+import org.traccar.model.Calendar;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
+import org.traccar.model.Geofence;
 import org.traccar.model.Position;
 
 public class GeofenceEventHandler extends BaseEventHandler {
@@ -57,18 +59,18 @@ public class GeofenceEventHandler extends BaseEventHandler {
 
         Collection<Event> events = new ArrayList<>();
         for (long geofenceId : newGeofences) {
-            long calendarId = geofenceManager.getGeofence(geofenceId).getCalendarId();
-            if (calendarId == 0 || Context.getCalendarManager().getCalendar(calendarId) == null
-                    || Context.getCalendarManager().getCalendar(calendarId).checkMoment(position.getFixTime())) {
+            long calendarId = ((Geofence) geofenceManager.getById(geofenceId)).getCalendarId();
+            Calendar calendar = calendarId != 0 ? (Calendar) Context.getCalendarManager().getById(calendarId) : null;
+            if (calendar == null || calendar.checkMoment(position.getFixTime())) {
                 Event event = new Event(Event.TYPE_GEOFENCE_ENTER, position.getDeviceId(), position.getId());
                 event.setGeofenceId(geofenceId);
                 events.add(event);
             }
         }
         for (long geofenceId : oldGeofences) {
-            long calendarId = geofenceManager.getGeofence(geofenceId).getCalendarId();
-            if (calendarId == 0 || Context.getCalendarManager().getCalendar(calendarId) == null
-                    || Context.getCalendarManager().getCalendar(calendarId).checkMoment(position.getFixTime())) {
+            long calendarId = ((Geofence) geofenceManager.getById(geofenceId)).getCalendarId();
+            Calendar calendar = calendarId != 0 ? (Calendar) Context.getCalendarManager().getById(calendarId) : null;
+            if (calendar == null || calendar.checkMoment(position.getFixTime())) {
                 Event event = new Event(Event.TYPE_GEOFENCE_EXIT, position.getDeviceId(), position.getId());
                 event.setGeofenceId(geofenceId);
                 events.add(event);

@@ -50,7 +50,7 @@ public final class Events {
             for (Event event : events) {
                 if (all || types.contains(event.getType())) {
                     long geofenceId = event.getGeofenceId();
-                    if (geofenceId == 0 || Context.getGeofenceManager().checkGeofence(userId, geofenceId)) {
+                    if (geofenceId == 0 || Context.getGeofenceManager().checkItemPermission(userId, geofenceId)) {
                        result.add(event);
                     }
                 }
@@ -74,8 +74,8 @@ public final class Events {
                 if (all || types.contains(event.getType())) {
                     long geofenceId = event.getGeofenceId();
                     if (geofenceId != 0) {
-                        if (Context.getGeofenceManager().checkGeofence(userId, geofenceId)) {
-                            Geofence geofence = Context.getGeofenceManager().getGeofence(geofenceId);
+                        if (Context.getGeofenceManager().checkItemPermission(userId, geofenceId)) {
+                            Geofence geofence = (Geofence) Context.getGeofenceManager().getById(geofenceId);
                             if (geofence != null) {
                                 geofenceNames.put(geofenceId, geofence.getName());
                             }

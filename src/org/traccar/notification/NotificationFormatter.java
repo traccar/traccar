@@ -51,7 +51,7 @@ public final class NotificationFormatter {
             velocityContext.put("speedUnits", ReportUtils.getSpeedUnit(userId));
         }
         if (event.getGeofenceId() != 0) {
-            velocityContext.put("geofence", Context.getGeofenceManager().getGeofence(event.getGeofenceId()));
+            velocityContext.put("geofence", Context.getGeofenceManager().getById(event.getGeofenceId()));
         }
         String driverUniqueId = event.getString(Position.KEY_DRIVER_UNIQUE_ID);
         if (driverUniqueId != null) {

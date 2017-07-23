@@ -16,26 +16,16 @@
  */
 package org.traccar.model;
 
-public class DeviceDriver {
+public class BaseModel {
 
-    private long deviceId;
+    private long id;
 
-    public long getDeviceId() {
-        return deviceId;
+    public final long getId() {
+        return id;
     }
 
-    public void setDeviceId(long deviceId) {
-        this.deviceId = deviceId;
-    }
-
-    private long driverId;
-
-    public long getDriverId() {
-        return driverId;
-    }
-
-    public void setDriverId(long driverId) {
-        this.driverId = driverId;
+    public final void setId(long id) {
+        this.id = id;
     }
 
 }

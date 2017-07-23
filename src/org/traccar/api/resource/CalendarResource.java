@@ -33,7 +33,9 @@ import javax.ws.rs.core.Response;
 
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
+import org.traccar.database.CalendarManager;
 import org.traccar.model.Calendar;
+import org.traccar.model.User;
 
 @Path("calendars")
 @Produces(MediaType.APPLICATION_JSON)
@@ -44,28 +46,29 @@ public class CalendarResource extends BaseResource {
     public Collection<Calendar> get(
             @QueryParam("all") boolean all, @QueryParam("userId") long userId) throws SQLException {
 
+        CalendarManager calendarManager = Context.getCalendarManager();
         if (all) {
             if (Context.getPermissionsManager().isAdmin(getUserId())) {
-                return Context.getCalendarManager().getAllCalendars();
+                return calendarManager.getItems(Calendar.class, calendarManager.getAllItems());
             } else {
                 Context.getPermissionsManager().checkManager(getUserId());
-                return Context.getCalendarManager().getManagedCalendars(getUserId());
+                return calendarManager.getItems(Calendar.class, calendarManager.getManagedItems(getUserId()));
             }
         } else {
             if (userId == 0) {
                 userId = getUserId();
             }
             Context.getPermissionsManager().checkUser(getUserId(), userId);
-            return Context.getCalendarManager().getUserCalendars(userId);
+            return calendarManager.getItems(Calendar.class, calendarManager.getUserItems(userId));
         }
     }
 
     @POST
     public Response add(Calendar entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getCalendarManager().addCalendar(entity);
-        Context.getDataManager().linkCalendar(getUserId(), entity.getId());
-        Context.getCalendarManager().refreshUserCalendars();
+        Context.getCalendarManager().addItem(entity);
+        Context.getDataManager().linkObject(User.class, getUserId(), entity.getClass(), entity.getId(), true);
+        Context.getCalendarManager().refreshUserItems();
         return Response.ok(entity).build();
     }
 
@@ -73,8 +76,8 @@ public class CalendarResource extends BaseResource {
     @PUT
     public Response update(Calendar entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getPermissionsManager().checkCalendar(getUserId(), entity.getId());
-        Context.getCalendarManager().updateCalendar(entity);
+        Context.getPermissionsManager().checkPermission(Calendar.class, getUserId(), entity.getId());
+        Context.getCalendarManager().updateItem(entity);
         return Response.ok(entity).build();
     }
 
@@ -82,8 +85,8 @@ public class CalendarResource extends BaseResource {
     @DELETE
     public Response remove(@PathParam("id") long id) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getPermissionsManager().checkCalendar(getUserId(), id);
-        Context.getCalendarManager().removeCalendar(id);
+        Context.getPermissionsManager().checkPermission(Calendar.class, getUserId(), id);
+        Context.getCalendarManager().removeItem(id);
         return Response.noContent().build();
     }
 }

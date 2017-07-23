@@ -18,6 +18,7 @@ package org.traccar.api.resource;
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.model.Group;
+import org.traccar.model.User;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -61,11 +62,9 @@ public class GroupResource extends BaseResource {
     public Response add(Group entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getDeviceManager().addGroup(entity);
-        Context.getDataManager().linkGroup(getUserId(), entity.getId());
+        Context.getDataManager().linkObject(User.class, getUserId(), entity.getClass(), entity.getId(), true);
         Context.getPermissionsManager().refreshPermissions();
-        if (Context.getGeofenceManager() != null) {
-            Context.getGeofenceManager().refresh();
-        }
+        Context.getPermissionsManager().refreshAllExtendedPermissions();
         return Response.ok(entity).build();
     }
 
@@ -75,9 +74,7 @@ public class GroupResource extends BaseResource {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkGroup(getUserId(), entity.getId());
         Context.getDeviceManager().updateGroup(entity);
-        if (Context.getGeofenceManager() != null) {
-            Context.getGeofenceManager().refresh();
-        }
+        Context.getPermissionsManager().refreshAllExtendedPermissions();
         return Response.ok(entity).build();
     }
 
@@ -88,9 +85,7 @@ public class GroupResource extends BaseResource {
         Context.getPermissionsManager().checkGroup(getUserId(), id);
         Context.getDeviceManager().removeGroup(id);
         Context.getPermissionsManager().refreshPermissions();
-        if (Context.getGeofenceManager() != null) {
-            Context.getGeofenceManager().refresh();
-        }
+        Context.getPermissionsManager().refreshAllExtendedPermissions();
         return Response.noContent().build();
     }
 

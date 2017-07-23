@@ -1,5 +1,6 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,26 +16,6 @@
  */
 package org.traccar.model;
 
-public class DeviceGeofence {
-
-    private long deviceId;
-
-    public long getDeviceId() {
-        return deviceId;
-    }
-
-    public void setDeviceId(long deviceId) {
-        this.deviceId = deviceId;
-    }
-
-    private long geofenceId;
-
-    public long getGeofenceId() {
-        return geofenceId;
-    }
-
-    public void setGeofenceId(long geofenceId) {
-        this.geofenceId = geofenceId;
-    }
+public class ManagedUser extends User {
 
 }
