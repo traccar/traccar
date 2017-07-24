@@ -27,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.BaseModel;
+import org.traccar.model.Permission;
 import org.traccar.model.User;
 
 public abstract class SimpleObjectManager {
@@ -117,11 +118,10 @@ public abstract class SimpleObjectManager {
         if (dataManager != null) {
             try {
                 clearUserItems();
-                for (Map<String, Long> permission : dataManager.getPermissions(User.class, baseClass)) {
-                    getUserItems(permission.get(DataManager.makeNameId(User.class)))
-                            .add(permission.get(baseClassIdName));
+                for (Permission permission : dataManager.getPermissions(User.class, baseClass)) {
+                    getUserItems(permission.getOwnerId()).add(permission.getPropertyId());
                 }
-            } catch (SQLException error) {
+            } catch (SQLException | ClassNotFoundException error) {
                 Log.warning(error);
             }
         }

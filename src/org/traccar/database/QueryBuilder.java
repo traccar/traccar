@@ -19,6 +19,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.MiscFormatter;
+import org.traccar.model.Permission;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -488,19 +489,19 @@ public final class QueryBuilder {
         return 0;
     }
 
-    public <T> Collection<Map<String, T>> executeMapQuery(Class<T> clazz) throws SQLException {
-        List<Map<String, T>> result = new LinkedList<>();
+    public Collection<Permission> executePermissionsQuery() throws SQLException, ClassNotFoundException {
+        List<Permission> result = new LinkedList<>();
         if (query != null) {
             try {
                 try (ResultSet resultSet = statement.executeQuery()) {
                     ResultSetMetaData resultMetaData = resultSet.getMetaData();
                     while (resultSet.next()) {
-                        LinkedHashMap<String, T> map = new LinkedHashMap<>();
+                        LinkedHashMap<String, Long> map = new LinkedHashMap<>();
                         for (int i = 1; i <= resultMetaData.getColumnCount(); i++) {
                             String label = resultMetaData.getColumnLabel(i);
-                            map.put(label, resultSet.getObject(label, clazz));
+                            map.put(label, resultSet.getLong(label));
                         }
-                        result.add(map);
+                        result.add(new Permission(map));
                     }
                 }
             } finally {

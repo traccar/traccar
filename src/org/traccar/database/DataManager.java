@@ -23,7 +23,6 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Map;
 
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
@@ -41,6 +40,7 @@ import org.traccar.helper.Log;
 import org.traccar.model.AttributeAlias;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
+import org.traccar.model.Permission;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
@@ -293,10 +293,10 @@ public class DataManager {
         return QueryBuilder.create(dataSource, getQuery(query)).executeQuery(clazz);
     }
 
-    public Collection<Map<String, Long>> getPermissions(Class<? extends BaseModel> owner,
-            Class<? extends BaseModel> property) throws SQLException {
+    public Collection<Permission> getPermissions(Class<? extends BaseModel> owner,
+            Class<? extends BaseModel> property) throws SQLException, ClassNotFoundException {
         String query = "database.select" + owner.getSimpleName() + property.getSimpleName() + "s";
-        return QueryBuilder.create(dataSource, getQuery(query)).executeMapQuery(Long.class);
+        return QueryBuilder.create(dataSource, getQuery(query)).executePermissionsQuery();
     }
 
     public void addObject(BaseModel entity) throws SQLException {
