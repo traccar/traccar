@@ -613,10 +613,7 @@
                         "$ref": "#/parameters/groupId"
                     },
                     {
-                        "name": "refresh",
-                        "in": "query",
-                        "required": false,
-                        "type": "boolean"
+                        "$ref": "#/parameters/refresh"
                     }
                 ],
                 "responses": {
@@ -1052,6 +1049,9 @@
                     {
                         "$ref": "#/parameters/groupId"
                     },
+                    {
+                        "$ref": "#/parameters/refresh"
+                    }
                 ],
                 "responses": {
                     "200": {
@@ -1104,6 +1104,90 @@
             },
             "delete": {
                 "summary": "Delete an Attribute",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/entityId"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/drivers": {
+            "get": {
+                "summary": "Fetch a list of Drivers",
+                "description": "Without params, it returns a list of Drivers the user has access to",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/all"
+                    },
+                    {
+                        "$ref": "#/parameters/userId"
+                    },
+                    {
+                        "$ref": "#/parameters/deviceId"
+                    },
+                    {
+                        "$ref": "#/parameters/groupId"
+                    },
+                    {
+                        "$ref": "#/parameters/refresh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Driver"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create a Driver",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/Driver"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Driver"
+                        }
+                    }
+                }
+            }
+        },
+        "/drivers/{id}": {
+            "put": {
+                "summary": "Update a Driver",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/entityId"
+                    },
+                    {
+                        "$ref": "#/parameters/Driver"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Driver"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete a Driver",
                 "parameters": [
                     {
                         "$ref": "#/parameters/entityId"
@@ -1638,6 +1722,20 @@
                     "description": "String|Number|Boolean"
                 }
             }
+        },
+        "Driver": {
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "uniqueId": {
+                    "type": "string"
+                },
+                "atributes": {}
+            }
         }
     },
     "parameters": {
@@ -1651,6 +1749,13 @@
             "name": "all",
             "in": "query",
             "description": "Can only be used by admins or managers to fetch all entities",
+            "type": "boolean"
+        },
+        {
+        "refresh": {
+            "name": "refresh",
+            "in": "query",
+            "required": false,
             "type": "boolean"
         },
         "userId": {
@@ -1733,6 +1838,14 @@
             "required": true,
             "schema": {
                 "$ref": "#/definitions/Attribute"
+            }
+        },
+        "Driver": {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+                "$ref": "#/definitions/Driver"
             }
         },
         "deviceIdArray": {
