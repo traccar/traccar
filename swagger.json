@@ -607,12 +607,10 @@
                         "$ref": "#/parameters/userId"
                     },
                     {
-                        "name": "groupId",
-                        "in": "query",
-                        "type": "integer"
+                        "$ref": "#/parameters/deviceId"
                     },
                     {
-                        "$ref": "#/parameters/deviceId"
+                        "$ref": "#/parameters/groupId"
                     },
                     {
                         "name": "refresh",
@@ -1025,6 +1023,87 @@
             },
             "delete": {
                 "summary": "Delete a Calendar",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/entityId"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/attributes/computed": {
+            "get": {
+                "summary": "Fetch a list of Attributes",
+                "description": "Without params, it returns a list of Attributes the user has access to",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/all"
+                    },
+                    {
+                        "$ref": "#/parameters/userId"
+                    },
+                    {
+                        "$ref": "#/parameters/deviceId"
+                    },
+                    {
+                        "$ref": "#/parameters/groupId"
+                    },
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Attribute"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create an Attribute",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/Attribute"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Attribute"
+                        }
+                    }
+                }
+            }
+        },
+        "/attributes/computed/{id}": {
+            "put": {
+                "summary": "Update an Attribute",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/entityId"
+                    },
+                    {
+                        "$ref": "#/parameters/Attribute"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Attribute"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete an Attribute",
                 "parameters": [
                     {
                         "$ref": "#/parameters/entityId"
@@ -1539,6 +1618,26 @@
                 },
                 "atributes": {}
             }
+        },
+        "Attribute": {
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "attribute": {
+                    "type": "string"
+                },
+                "expression": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string",
+                    "description": "String|Number|Boolean"
+                }
+            }
         }
     },
     "parameters": {
@@ -1564,6 +1663,12 @@
             "name": "deviceId",
             "in": "query",
             "description": "Standard users can use this only with _deviceId_s, they have access to",
+            "type": "integer"
+        },
+        "groupId": {
+            "name": "groupId",
+            "in": "query",
+            "description": "Standard users can use this only with _groupId_s, they have access to",
             "type": "integer"
         },
         "Device": {
@@ -1620,6 +1725,14 @@
             "required": true,
             "schema": {
                 "$ref": "#/definitions/Calendar"
+            }
+        },
+        "Attribute": {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+                "$ref": "#/definitions/Attribute"
             }
         },
         "deviceIdArray": {
