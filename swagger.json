@@ -1451,41 +1451,41 @@
             }
         },
         "Permission": {
-          "description": "This is a permission map that contain two object indexes. It is used to link/unlink objects. Order is important. Example: { deviceId:8, geofenceId: 16 }",
-          "properties": {
-              "userId": {
-                  "description": "User Id, can be only first parameter",
-                  "type": "integer"
-              },
-              "deviceId": {
-                  "description": "Device Id, can be first parameter or second only in combination with userId",
-                  "type": "integer"
-              },
-              "groupId": {
-                  "description": "Group Id, can be first parameter or second only in combination with userId",
-                  "type": "integer"
-              },
-              "geofenceId": {
-                  "description": "Geofence Id, can be second parameter only",
-                  "type": "integer"
-              },
-              "calendarId": {
-                  "description": "Geofence Id, can be second parameter only and only in combination with userId",
-                  "type": "integer"
-              },
-              "attributeId": {
-                  "description": "Computed Attribute Id, can be second parameter only",
-                  "type": "integer"
-              },
-              "driverId": {
-                  "description": "Driver Id, can be second parameter only",
-                  "type": "integer"
-              },
-              "managedUserId": {
-                  "description": "User Id, can be second parameter only and only in combination with userId",
-                  "type": "integer"
-              }
-          }
+            "description": "This is a permission map that contain two object indexes. It is used to link/unlink objects. Order is important. Example: { deviceId:8, geofenceId: 16 }",
+            "properties": {
+                "userId": {
+                    "description": "User Id, can be only first parameter",
+                    "type": "integer"
+                },
+                "deviceId": {
+                    "description": "Device Id, can be first parameter or second only in combination with userId",
+                    "type": "integer"
+                },
+                "groupId": {
+                    "description": "Group Id, can be first parameter or second only in combination with userId",
+                    "type": "integer"
+                },
+                "geofenceId": {
+                    "description": "Geofence Id, can be second parameter only",
+                    "type": "integer"
+                },
+                "calendarId": {
+                    "description": "Geofence Id, can be second parameter only and only in combination with userId",
+                    "type": "integer"
+                },
+                "attributeId": {
+                    "description": "Computed Attribute Id, can be second parameter only",
+                    "type": "integer"
+                },
+                "driverId": {
+                    "description": "Driver Id, can be second parameter only",
+                    "type": "integer"
+                },
+                "managedUserId": {
+                    "description": "User Id, can be second parameter only and only in combination with userId",
+                    "type": "integer"
+                }
+            }
         },
         "CommandType": {
             "properties": {
@@ -1648,9 +1648,10 @@
                 },
                 "driverName": {
                     "type": "string"
-                },
-            },
-            "ReportStops": {
+                }
+            }
+        },
+        "ReportStops": {
             "properties": {
                 "deviceId": {
                     "type": "integer"
@@ -1687,7 +1688,6 @@
                 "engineHours": {
                     "type": "integer"
                 }
-  
             }
         },
         "Statistics": {
@@ -1804,7 +1804,6 @@
             "description": "Can only be used by admins or managers to fetch all entities",
             "type": "boolean"
         },
-        {
         "refresh": {
             "name": "refresh",
             "in": "query",
