@@ -1579,6 +1579,10 @@
                     "type": "number",
                     "description": "in meters"
                 },
+                "spentFuel": {
+                    "type": "number",
+                    "description": "in liters"
+                },
                 "engineHours": {
                     "type": "integer"
                 }
@@ -1603,6 +1607,10 @@
                 "distance": {
                     "type": "number",
                     "description": "in meters"
+                },
+                "spentFuel": {
+                    "type": "number",
+                    "description": "in liters"
                 },
                 "duration": {
                     "type": "integer"
@@ -1634,7 +1642,52 @@
                 },
                 "endLon": {
                     "type": "number"
+                },
+                "driverUniqueId": {
+                    "type": "integer"
+                },
+                "driverName": {
+                    "type": "string"
+                },
+            },
+            "ReportStops": {
+            "properties": {
+                "deviceId": {
+                    "type": "integer"
+                },
+                "deviceName": {
+                    "type": "string"
+                },
+                "duration": {
+                    "type": "integer"
+                },
+                "startTime": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "in IS0 8601 format. eg. `1963-11-22T18:30:00Z`"
+                },
+                "address": {
+                    "type": "string"
+                },
+                "lat": {
+                    "type": "number"
+                },
+                "lon": {
+                    "type": "number"
+                },
+                "endTime": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "in IS0 8601 format. eg. `1963-11-22T18:30:00Z`"
+                },
+                "spentFuel": {
+                    "type": "number",
+                    "description": "in liters"
+                },
+                "engineHours": {
+                    "type": "integer"
                 }
+  
             }
         },
         "Statistics": {
