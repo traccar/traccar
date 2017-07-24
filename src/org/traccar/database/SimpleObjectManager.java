@@ -162,7 +162,7 @@ public abstract class SimpleObjectManager {
         return result;
     }
 
-    public Set<Long> getAllItems() {
+    public final Set<Long> getAllItems() {
         return items.keySet();
     }
 

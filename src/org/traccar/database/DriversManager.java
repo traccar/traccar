@@ -24,16 +24,23 @@ import org.traccar.model.BaseModel;
 
 public class DriversManager extends ExtendedObjectManager {
 
-    private final Map<String, Driver> driversByUniqueId = new ConcurrentHashMap<>();
+    private Map<String, Driver> driversByUniqueId;
 
     public DriversManager(DataManager dataManager) {
         super(dataManager, Driver.class);
     }
 
+    private void putUniqueDriverId(Driver driver) {
+        if (driversByUniqueId == null) {
+            driversByUniqueId = new ConcurrentHashMap<>();
+        }
+        driversByUniqueId.put(driver.getUniqueId(), driver);
+    }
+
     @Override
     protected void addNewItem(BaseModel item) {
         super.addNewItem(item);
-        driversByUniqueId.put(((Driver) item).getUniqueId(), (Driver) item);
+        putUniqueDriverId((Driver) item);
     }
 
     @Override
@@ -44,7 +51,7 @@ public class DriversManager extends ExtendedObjectManager {
         if (!driver.getUniqueId().equals(cachedDriver.getUniqueId())) {
             driversByUniqueId.remove(cachedDriver.getUniqueId());
             cachedDriver.setUniqueId(driver.getUniqueId());
-            driversByUniqueId.put(cachedDriver.getUniqueId(), cachedDriver);
+            putUniqueDriverId(cachedDriver);
         }
         cachedDriver.setAttributes(driver.getAttributes());
     }
