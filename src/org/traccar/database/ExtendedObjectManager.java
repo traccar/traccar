@@ -37,6 +37,7 @@ public abstract class ExtendedObjectManager extends SimpleObjectManager {
 
     protected ExtendedObjectManager(DataManager dataManager, Class<? extends BaseModel> baseClass) {
         super(dataManager, baseClass);
+        refreshExtendedPermissions();
     }
 
     public final Set<Long> getGroupItems(long groupId) {

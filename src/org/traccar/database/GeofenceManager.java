@@ -27,8 +27,6 @@ public class GeofenceManager extends ExtendedObjectManager {
 
     public GeofenceManager(DataManager dataManager) {
         super(dataManager, Geofence.class);
-        refreshItems();
-        refreshExtendedPermissions();
     }
 
     @Override

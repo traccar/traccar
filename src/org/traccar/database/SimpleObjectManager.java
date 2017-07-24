@@ -33,7 +33,7 @@ public abstract class SimpleObjectManager {
 
     private final DataManager dataManager;
 
-    private final Map<Long, BaseModel> items = new ConcurrentHashMap<>();
+    private Map<Long, BaseModel> items;
     private final Map<Long, Set<Long>> userItems = new ConcurrentHashMap<>();
 
     private Class<? extends BaseModel> baseClass;
@@ -43,6 +43,7 @@ public abstract class SimpleObjectManager {
         this.dataManager = dataManager;
         this.baseClass = baseClass;
         baseClassIdName = DataManager.makeNameId(baseClass);
+        refreshItems();
     }
 
     protected final DataManager getDataManager() {
@@ -65,11 +66,7 @@ public abstract class SimpleObjectManager {
         items.clear();
     }
 
-    protected final void putItem(long itemId, BaseModel item) {
-        items.put(itemId, item);
-    }
-
-    protected final void removeCachedItem(long itemId) {
+    protected void removeCachedItem(long itemId) {
         items.remove(itemId);
     }
 
@@ -91,9 +88,23 @@ public abstract class SimpleObjectManager {
     public void refreshItems() {
         if (dataManager != null) {
             try {
-                clearItems();
-                for (BaseModel item : dataManager.getObjects(this.baseClass)) {
-                    putItem(item.getId(), item);
+                Collection<? extends BaseModel> databaseItems = dataManager.getObjects(baseClass);
+                if (items == null) {
+                    items = new ConcurrentHashMap<>(databaseItems.size());
+                }
+                Set<Long> databaseItemIds = new HashSet<>();
+                for (BaseModel item : databaseItems) {
+                    databaseItemIds.add(item.getId());
+                    if (items.containsKey(item.getId())) {
+                        updateCachedItem(item);
+                    } else {
+                        items.put(item.getId(), item);
+                    }
+                }
+                for (Long cachedItemId : items.keySet()) {
+                    if (!databaseItemIds.contains(cachedItemId)) {
+                        items.remove(cachedItemId);
+                    }
                 }
             } catch (SQLException error) {
                 Log.warning(error);
@@ -118,12 +129,16 @@ public abstract class SimpleObjectManager {
 
     public void addItem(BaseModel item) throws SQLException {
         dataManager.addObject(item);
-        putItem(item.getId(), item);
+        items.put(item.getId(), item);
+    }
+
+    protected void updateCachedItem(BaseModel item) {
+        items.put(item.getId(), item);
     }
 
     public void updateItem(BaseModel item) throws SQLException {
         dataManager.updateObject(item);
-        putItem(item.getId(), item);
+        updateCachedItem(item);
     }
 
     public void removeItem(long itemId) throws SQLException {
@@ -143,7 +158,7 @@ public abstract class SimpleObjectManager {
         return result;
     }
 
-    public final Set<Long> getAllItems() {
+    public Set<Long> getAllItems() {
         return items.keySet();
     }
 

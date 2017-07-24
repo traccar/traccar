@@ -16,8 +16,6 @@
  */
 package org.traccar.database;
 
-import java.sql.SQLException;
-
 import org.traccar.model.Attribute;
 import org.traccar.model.BaseModel;
 
@@ -25,14 +23,11 @@ public class AttributesManager extends ExtendedObjectManager {
 
     public AttributesManager(DataManager dataManager) {
         super(dataManager, Attribute.class);
-        refreshItems();
-        refreshExtendedPermissions();
     }
 
     @Override
-    public void updateItem(BaseModel item) throws SQLException {
+    public void updateCachedItem(BaseModel item) {
         Attribute attribute = (Attribute) item;
-        getDataManager().updateObject(attribute);
         Attribute cachedAttribute = (Attribute) getById(item.getId());
         cachedAttribute.setDescription(attribute.getDescription());
         cachedAttribute.setAttribute(attribute.getAttribute());

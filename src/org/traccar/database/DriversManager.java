@@ -20,7 +20,6 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.traccar.helper.Log;
 import org.traccar.model.Driver;
 import org.traccar.model.BaseModel;
 
@@ -30,24 +29,6 @@ public class DriversManager extends ExtendedObjectManager {
 
     public DriversManager(DataManager dataManager) {
         super(dataManager, Driver.class);
-        refreshItems();
-        refreshExtendedPermissions();
-    }
-
-    @Override
-    public void refreshItems() {
-        if (getDataManager() != null) {
-            try {
-                clearItems();
-                for (BaseModel item : getDataManager().getObjects(getBaseClass())) {
-                    putItem(item.getId(), item);
-                    driversByUniqueId.put(((Driver) item).getUniqueId(), (Driver) item);
-                }
-            } catch (SQLException error) {
-                Log.warning(error);
-            }
-        }
-        refreshUserItems();
     }
 
     @Override
@@ -57,9 +38,8 @@ public class DriversManager extends ExtendedObjectManager {
     }
 
     @Override
-    public void updateItem(BaseModel item) throws SQLException {
+    protected void updateCachedItem(BaseModel item) {
         Driver driver = (Driver) item;
-        getDataManager().updateObject(driver);
         Driver cachedDriver = (Driver) getById(driver.getId());
         cachedDriver.setName(driver.getName());
         if (!driver.getUniqueId().equals(cachedDriver.getUniqueId())) {
@@ -71,16 +51,13 @@ public class DriversManager extends ExtendedObjectManager {
     }
 
     @Override
-    public void removeItem(long driverId) throws SQLException {
+    protected void removeCachedItem(long driverId) {
         Driver cachedDriver = (Driver) getById(driverId);
-        getDataManager().removeObject(Driver.class, driverId);
         if (cachedDriver != null) {
             String driverUniqueId = cachedDriver.getUniqueId();
             removeCachedItem(driverId);
             driversByUniqueId.remove(driverUniqueId);
         }
-        refreshUserItems();
-        refreshExtendedPermissions();
     }
 
     public Driver getDriverByUniqueId(String uniqueId) {
