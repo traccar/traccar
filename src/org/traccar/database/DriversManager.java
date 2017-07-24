@@ -54,7 +54,7 @@ public class DriversManager extends ExtendedObjectManager {
         Driver cachedDriver = (Driver) getById(driverId);
         if (cachedDriver != null) {
             String driverUniqueId = cachedDriver.getUniqueId();
-            removeCachedItem(driverId);
+            super.removeCachedItem(driverId);
             driversByUniqueId.remove(driverUniqueId);
         }
     }
