@@ -11,6 +11,9 @@ public class CarscopProtocolDecoderTest extends ProtocolTest {
         CarscopProtocolDecoder decoder = new CarscopProtocolDecoder(new CarscopProtocol());
 
         verifyNull(decoder, text(
+                "*170724163029UB05ORANGE000000010061825V0000.0000N00000.0000E000.0040331309.62"));
+
+        verifyNull(decoder, text(
                 "*160618233129UB00HSO"));
 
         verifyNull(decoder, text(
