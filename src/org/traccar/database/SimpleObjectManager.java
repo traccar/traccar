@@ -99,7 +99,7 @@ public abstract class SimpleObjectManager {
                     if (items.containsKey(item.getId())) {
                         updateCachedItem(item);
                     } else {
-                        items.put(item.getId(), item);
+                        addNewItem(item);
                     }
                 }
                 for (Long cachedItemId : items.keySet()) {
@@ -127,9 +127,13 @@ public abstract class SimpleObjectManager {
         }
     }
 
+    protected void addNewItem(BaseModel item) {
+        items.put(item.getId(), item);
+    }
+
     public void addItem(BaseModel item) throws SQLException {
         dataManager.addObject(item);
-        items.put(item.getId(), item);
+        addNewItem(item);
     }
 
     protected void updateCachedItem(BaseModel item) {

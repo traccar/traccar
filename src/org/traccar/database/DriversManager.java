@@ -16,7 +16,6 @@
  */
 package org.traccar.database;
 
-import java.sql.SQLException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -32,8 +31,8 @@ public class DriversManager extends ExtendedObjectManager {
     }
 
     @Override
-    public void addItem(BaseModel item) throws SQLException {
-        super.addItem(item);
+    protected void addNewItem(BaseModel item) {
+        super.addNewItem(item);
         driversByUniqueId.put(((Driver) item).getUniqueId(), (Driver) item);
     }
 
