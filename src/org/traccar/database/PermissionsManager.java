@@ -115,11 +115,10 @@ public class PermissionsManager {
     public final void refreshUserPermissions() {
         userPermissions.clear();
         try {
-            for (Map<String, Long> permission : dataManager.getPermissions(User.class, User.class)) {
-                getUserPermissions(permission.get(DataManager.makeNameId(User.class)))
-                        .add(permission.get(DataManager.makeNameId(ManagedUser.class)));
+            for (Permission permission : dataManager.getPermissions(User.class, User.class)) {
+                getUserPermissions(permission.getOwnerId()).add(permission.getPropertyId());
             }
-        } catch (SQLException error) {
+        } catch (SQLException | ClassNotFoundException error) {
             Log.warning(error);
         }
     }
@@ -130,23 +129,20 @@ public class PermissionsManager {
         try {
             GroupTree groupTree = new GroupTree(Context.getDeviceManager().getAllGroups(),
                     Context.getDeviceManager().getAllDevices());
-            for (Map<String, Long> groupPermission : dataManager.getPermissions(User.class, Group.class)) {
-                Set<Long> userGroupPermissions = getGroupPermissions(groupPermission
-                        .get(DataManager.makeNameId(User.class)));
-                Set<Long> userDevicePermissions = getDevicePermissions(groupPermission
-                        .get(DataManager.makeNameId(User.class)));
-                userGroupPermissions.add(groupPermission.get(DataManager.makeNameId(Group.class)));
-                for (Group group : groupTree.getGroups(groupPermission.get(DataManager.makeNameId(Group.class)))) {
+            for (Permission groupPermission : dataManager.getPermissions(User.class, Group.class)) {
+                Set<Long> userGroupPermissions = getGroupPermissions(groupPermission.getOwnerId());
+                Set<Long> userDevicePermissions = getDevicePermissions(groupPermission.getOwnerId());
+                userGroupPermissions.add(groupPermission.getPropertyId());
+                for (Group group : groupTree.getGroups(groupPermission.getPropertyId())) {
                     userGroupPermissions.add(group.getId());
                 }
-                for (Device device : groupTree.getDevices(groupPermission.get(DataManager.makeNameId(Group.class)))) {
+                for (Device device : groupTree.getDevices(groupPermission.getPropertyId())) {
                     userDevicePermissions.add(device.getId());
                 }
             }
 
-            for (Map<String, Long> devicePermission : dataManager.getPermissions(User.class, Device.class)) {
-                getDevicePermissions(devicePermission.get(DataManager.makeNameId(User.class)))
-                        .add(devicePermission.get(DataManager.makeNameId(Device.class)));
+            for (Permission devicePermission : dataManager.getPermissions(User.class, Device.class)) {
+                getDevicePermissions(devicePermission.getOwnerId()).add(devicePermission.getPropertyId());
             }
 
             groupDevices.clear();
@@ -156,7 +152,7 @@ public class PermissionsManager {
                 }
             }
 
-        } catch (SQLException error) {
+        } catch (SQLException | ClassNotFoundException error) {
             Log.warning(error);
         }
 

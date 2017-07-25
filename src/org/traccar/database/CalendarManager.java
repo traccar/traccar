@@ -22,7 +22,6 @@ public class CalendarManager extends SimpleObjectManager {
 
     public CalendarManager(DataManager dataManager) {
         super(dataManager, Calendar.class);
-        refreshItems();
     }
 
 }

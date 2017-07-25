@@ -306,7 +306,7 @@ public class DeviceManager implements IdentityManager {
             }
             for (Long cachedGroupId : groupsById.keySet()) {
                 if (!databaseGroupsIds.contains(cachedGroupId)) {
-                    devicesById.remove(cachedGroupId);
+                    groupsById.remove(cachedGroupId);
                 }
             }
             databaseGroupsIds.clear();

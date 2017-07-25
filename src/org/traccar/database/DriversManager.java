@@ -16,71 +16,54 @@
  */
 package org.traccar.database;
 
-import java.sql.SQLException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.traccar.helper.Log;
 import org.traccar.model.Driver;
 import org.traccar.model.BaseModel;
 
 public class DriversManager extends ExtendedObjectManager {
 
-    private final Map<String, Driver> driversByUniqueId = new ConcurrentHashMap<>();
+    private Map<String, Driver> driversByUniqueId;
 
     public DriversManager(DataManager dataManager) {
         super(dataManager, Driver.class);
-        refreshItems();
-        refreshExtendedPermissions();
     }
 
-    @Override
-    public void refreshItems() {
-        if (getDataManager() != null) {
-            try {
-                clearItems();
-                for (BaseModel item : getDataManager().getObjects(getBaseClass())) {
-                    putItem(item.getId(), item);
-                    driversByUniqueId.put(((Driver) item).getUniqueId(), (Driver) item);
-                }
-            } catch (SQLException error) {
-                Log.warning(error);
-            }
+    private void putUniqueDriverId(Driver driver) {
+        if (driversByUniqueId == null) {
+            driversByUniqueId = new ConcurrentHashMap<>();
         }
-        refreshUserItems();
+        driversByUniqueId.put(driver.getUniqueId(), driver);
     }
 
     @Override
-    public void addItem(BaseModel item) throws SQLException {
-        super.addItem(item);
-        driversByUniqueId.put(((Driver) item).getUniqueId(), (Driver) item);
+    protected void addNewItem(BaseModel item) {
+        super.addNewItem(item);
+        putUniqueDriverId((Driver) item);
     }
 
     @Override
-    public void updateItem(BaseModel item) throws SQLException {
+    protected void updateCachedItem(BaseModel item) {
         Driver driver = (Driver) item;
-        getDataManager().updateObject(driver);
         Driver cachedDriver = (Driver) getById(driver.getId());
         cachedDriver.setName(driver.getName());
         if (!driver.getUniqueId().equals(cachedDriver.getUniqueId())) {
             driversByUniqueId.remove(cachedDriver.getUniqueId());
             cachedDriver.setUniqueId(driver.getUniqueId());
-            driversByUniqueId.put(cachedDriver.getUniqueId(), cachedDriver);
+            putUniqueDriverId(cachedDriver);
         }
         cachedDriver.setAttributes(driver.getAttributes());
     }
 
     @Override
-    public void removeItem(long driverId) throws SQLException {
+    protected void removeCachedItem(long driverId) {
         Driver cachedDriver = (Driver) getById(driverId);
-        getDataManager().removeObject(Driver.class, driverId);
         if (cachedDriver != null) {
             String driverUniqueId = cachedDriver.getUniqueId();
-            removeCachedItem(driverId);
+            super.removeCachedItem(driverId);
             driversByUniqueId.remove(driverUniqueId);
         }
-        refreshUserItems();
-        refreshExtendedPermissions();
     }
 
     public Driver getDriverByUniqueId(String uniqueId) {

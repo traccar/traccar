@@ -27,6 +27,7 @@ import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
+import org.traccar.model.Permission;
 import org.traccar.model.BaseModel;
 
 public abstract class ExtendedObjectManager extends SimpleObjectManager {
@@ -37,6 +38,7 @@ public abstract class ExtendedObjectManager extends SimpleObjectManager {
 
     protected ExtendedObjectManager(DataManager dataManager, Class<? extends BaseModel> baseClass) {
         super(dataManager, baseClass);
+        refreshExtendedPermissions();
     }
 
     public final Set<Long> getGroupItems(long groupId) {
@@ -78,27 +80,24 @@ public abstract class ExtendedObjectManager extends SimpleObjectManager {
         if (getDataManager() != null) {
             try {
 
-                Collection<Map<String, Long>> databaseGroupPermissions =
+                Collection<Permission> databaseGroupPermissions =
                         getDataManager().getPermissions(Group.class, getBaseClass());
 
                 clearGroupItems();
-                for (Map<String, Long> groupPermission : databaseGroupPermissions) {
-                    getGroupItems(groupPermission.get(DataManager.makeNameId(Group.class)))
-                            .add(groupPermission.get(getBaseClassIdName()));
+                for (Permission groupPermission : databaseGroupPermissions) {
+                    getGroupItems(groupPermission.getOwnerId()).add(groupPermission.getPropertyId());
                 }
 
-                Collection<Map<String, Long>> databaseDevicePermissions =
+                Collection<Permission> databaseDevicePermissions =
                         getDataManager().getPermissions(Device.class, getBaseClass());
                 Collection<Device> allDevices = Context.getDeviceManager().getAllDevices();
 
                 clearDeviceItems();
                 deviceItemsWithGroups.clear();
 
-                for (Map<String, Long> devicePermission : databaseDevicePermissions) {
-                    getDeviceItems(devicePermission.get(DataManager.makeNameId(Device.class)))
-                            .add(devicePermission.get(getBaseClassIdName()));
-                    getAllDeviceItems(devicePermission.get(DataManager.makeNameId(Device.class)))
-                            .add(devicePermission.get(getBaseClassIdName()));
+                for (Permission devicePermission : databaseDevicePermissions) {
+                    getDeviceItems(devicePermission.getOwnerId()).add(devicePermission.getPropertyId());
+                    getAllDeviceItems(devicePermission.getOwnerId()).add(devicePermission.getPropertyId());
                 }
 
                 for (Device device : allDevices) {
@@ -113,7 +112,7 @@ public abstract class ExtendedObjectManager extends SimpleObjectManager {
                     }
                 }
 
-            } catch (SQLException error) {
+            } catch (SQLException | ClassNotFoundException error) {
                 Log.warning(error);
             }
         }

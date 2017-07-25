@@ -27,13 +27,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.BaseModel;
+import org.traccar.model.Permission;
 import org.traccar.model.User;
 
 public abstract class SimpleObjectManager {
 
     private final DataManager dataManager;
 
-    private final Map<Long, BaseModel> items = new ConcurrentHashMap<>();
+    private Map<Long, BaseModel> items;
     private final Map<Long, Set<Long>> userItems = new ConcurrentHashMap<>();
 
     private Class<? extends BaseModel> baseClass;
@@ -43,6 +44,7 @@ public abstract class SimpleObjectManager {
         this.dataManager = dataManager;
         this.baseClass = baseClass;
         baseClassIdName = DataManager.makeNameId(baseClass);
+        refreshItems();
     }
 
     protected final DataManager getDataManager() {
@@ -65,14 +67,6 @@ public abstract class SimpleObjectManager {
         items.clear();
     }
 
-    protected final void putItem(long itemId, BaseModel item) {
-        items.put(itemId, item);
-    }
-
-    protected final void removeCachedItem(long itemId) {
-        items.remove(itemId);
-    }
-
     public final Set<Long> getUserItems(long userId) {
         if (!userItems.containsKey(userId)) {
             userItems.put(userId, new HashSet<Long>());
@@ -91,9 +85,23 @@ public abstract class SimpleObjectManager {
     public void refreshItems() {
         if (dataManager != null) {
             try {
-                clearItems();
-                for (BaseModel item : dataManager.getObjects(this.baseClass)) {
-                    putItem(item.getId(), item);
+                Collection<? extends BaseModel> databaseItems = dataManager.getObjects(baseClass);
+                if (items == null) {
+                    items = new ConcurrentHashMap<>(databaseItems.size());
+                }
+                Set<Long> databaseItemIds = new HashSet<>();
+                for (BaseModel item : databaseItems) {
+                    databaseItemIds.add(item.getId());
+                    if (items.containsKey(item.getId())) {
+                        updateCachedItem(item);
+                    } else {
+                        addNewItem(item);
+                    }
+                }
+                for (Long cachedItemId : items.keySet()) {
+                    if (!databaseItemIds.contains(cachedItemId)) {
+                        removeCachedItem(cachedItemId);
+                    }
                 }
             } catch (SQLException error) {
                 Log.warning(error);
@@ -106,24 +114,35 @@ public abstract class SimpleObjectManager {
         if (dataManager != null) {
             try {
                 clearUserItems();
-                for (Map<String, Long> permission : dataManager.getPermissions(User.class, baseClass)) {
-                    getUserItems(permission.get(DataManager.makeNameId(User.class)))
-                            .add(permission.get(baseClassIdName));
+                for (Permission permission : dataManager.getPermissions(User.class, baseClass)) {
+                    getUserItems(permission.getOwnerId()).add(permission.getPropertyId());
                 }
-            } catch (SQLException error) {
+            } catch (SQLException | ClassNotFoundException error) {
                 Log.warning(error);
             }
         }
     }
 
+    protected void addNewItem(BaseModel item) {
+        items.put(item.getId(), item);
+    }
+
     public void addItem(BaseModel item) throws SQLException {
         dataManager.addObject(item);
-        putItem(item.getId(), item);
+        addNewItem(item);
+    }
+
+    protected void updateCachedItem(BaseModel item) {
+        items.put(item.getId(), item);
     }
 
     public void updateItem(BaseModel item) throws SQLException {
         dataManager.updateObject(item);
-        putItem(item.getId(), item);
+        updateCachedItem(item);
+    }
+
+    protected void removeCachedItem(long itemId) {
+        items.remove(itemId);
     }
 
     public void removeItem(long itemId) throws SQLException {
