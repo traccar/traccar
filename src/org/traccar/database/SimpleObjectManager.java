@@ -67,10 +67,6 @@ public abstract class SimpleObjectManager {
         items.clear();
     }
 
-    protected void removeCachedItem(long itemId) {
-        items.remove(itemId);
-    }
-
     public final Set<Long> getUserItems(long userId) {
         if (!userItems.containsKey(userId)) {
             userItems.put(userId, new HashSet<Long>());
@@ -104,7 +100,7 @@ public abstract class SimpleObjectManager {
                 }
                 for (Long cachedItemId : items.keySet()) {
                     if (!databaseItemIds.contains(cachedItemId)) {
-                        items.remove(cachedItemId);
+                        removeCachedItem(cachedItemId);
                     }
                 }
             } catch (SQLException error) {
@@ -143,6 +139,10 @@ public abstract class SimpleObjectManager {
     public void updateItem(BaseModel item) throws SQLException {
         dataManager.updateObject(item);
         updateCachedItem(item);
+    }
+
+    protected void removeCachedItem(long itemId) {
+        items.remove(itemId);
     }
 
     public void removeItem(long itemId) throws SQLException {
