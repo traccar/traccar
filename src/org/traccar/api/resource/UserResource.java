@@ -49,13 +49,12 @@ public class UserResource extends BaseResource {
         Set<Long> result = null;
         if (Context.getPermissionsManager().isAdmin(getUserId())) {
             if (userId != 0) {
-                result = usersManager.getManagedItems(userId);
+                result = usersManager.getUserItems(userId);
             } else {
                 result = usersManager.getAllItems();
             }
         } else if (Context.getPermissionsManager().isManager(getUserId())) {
             result = usersManager.getManagedItems(getUserId());
-            result.add(getUserId());
         } else {
             throw new SecurityException("Admin or manager access required");
         }
@@ -110,12 +109,8 @@ public class UserResource extends BaseResource {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkUser(getUserId(), id);
         Context.getUsersManager().removeItem(id);
-        if (Context.getGeofenceManager() != null) {
-            Context.getGeofenceManager().refreshUserItems();
-        }
-        if (Context.getNotificationManager() != null) {
-            Context.getNotificationManager().refresh();
-        }
+        Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
+        Context.getPermissionsManager().refreshAllUsersPermissions();
         return Response.noContent().build();
     }
 

@@ -19,7 +19,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +30,7 @@ import org.traccar.BaseProtocol;
 import org.traccar.Config;
 import org.traccar.Context;
 import org.traccar.helper.Log;
+import org.traccar.model.BaseModel;
 import org.traccar.model.Command;
 import org.traccar.model.CommandType;
 import org.traccar.model.Device;
@@ -39,121 +39,42 @@ import org.traccar.model.Group;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
 
-public class DeviceManager implements IdentityManager {
+public class DeviceManager extends BaseObjectManager implements IdentityManager, ManagableObjects {
 
     public static final long DEFAULT_REFRESH_DELAY = 300;
 
     private final Config config;
-    private final DataManager dataManager;
     private final long dataRefreshDelay;
     private boolean lookupGroupsAttribute;
 
-    private Map<Long, Device> devicesById;
     private Map<String, Device> devicesByUniqueId;
     private Map<String, Device> devicesByPhone;
     private AtomicLong devicesLastUpdate = new AtomicLong();
-
-    private Map<Long, Group> groupsById;
-    private AtomicLong groupsLastUpdate = new AtomicLong();
 
     private final Map<Long, Position> positions = new ConcurrentHashMap<>();
 
     private boolean fallbackToText;
 
     public DeviceManager(DataManager dataManager) {
-        this.dataManager = dataManager;
+        super(dataManager, Device.class);
         this.config = Context.getConfig();
         dataRefreshDelay = config.getLong("database.refreshDelay", DEFAULT_REFRESH_DELAY) * 1000;
         lookupGroupsAttribute = config.getBoolean("deviceManager.lookupGroupsAttribute");
         fallbackToText = config.getBoolean("command.fallbackToSms");
-        if (dataManager != null) {
-            try {
-                updateGroupCache(true);
-                updateDeviceCache(true);
-                for (Position position : dataManager.getLatestPositions()) {
-                    positions.put(position.getDeviceId(), position);
-                }
-            } catch (SQLException error) {
-                Log.warning(error);
-            }
-        }
+        refreshLastPositions();
     }
 
     private void updateDeviceCache(boolean force) throws SQLException {
-
         long lastUpdate = devicesLastUpdate.get();
         if ((force || System.currentTimeMillis() - lastUpdate > dataRefreshDelay)
                 && devicesLastUpdate.compareAndSet(lastUpdate, System.currentTimeMillis())) {
-            GeofenceManager geofenceManager = Context.getGeofenceManager();
-            Collection<Device> databaseDevices = dataManager.getObjects(Device.class);
-            if (devicesById == null) {
-                devicesById = new ConcurrentHashMap<>(databaseDevices.size());
-            }
-            if (devicesByUniqueId == null) {
-                devicesByUniqueId = new ConcurrentHashMap<>(databaseDevices.size());
-            }
-            if (devicesByPhone == null) {
-                devicesByPhone = new ConcurrentHashMap<>(databaseDevices.size());
-            }
-            Set<Long> databaseDevicesIds = new HashSet<>();
-            Set<String> databaseDevicesUniqueIds = new HashSet<>();
-            Set<String> databaseDevicesPhones = new HashSet<>();
-            for (Device device : databaseDevices) {
-                databaseDevicesIds.add(device.getId());
-                databaseDevicesUniqueIds.add(device.getUniqueId());
-                databaseDevicesPhones.add(device.getPhone());
-                if (devicesById.containsKey(device.getId())) {
-                    Device cachedDevice = devicesById.get(device.getId());
-                    cachedDevice.setName(device.getName());
-                    cachedDevice.setGroupId(device.getGroupId());
-                    cachedDevice.setCategory(device.getCategory());
-                    cachedDevice.setContact(device.getContact());
-                    cachedDevice.setModel(device.getModel());
-                    cachedDevice.setAttributes(device.getAttributes());
-                    if (!device.getUniqueId().equals(cachedDevice.getUniqueId())) {
-                        devicesByUniqueId.put(device.getUniqueId(), cachedDevice);
-                    }
-                    cachedDevice.setUniqueId(device.getUniqueId());
-                    if (device.getPhone() != null && !device.getPhone().isEmpty()
-                            && !device.getPhone().equals(cachedDevice.getPhone())) {
-                        devicesByPhone.put(device.getPhone(), cachedDevice);
-                    }
-                    cachedDevice.setPhone(device.getPhone());
-                } else {
-                    devicesById.put(device.getId(), device);
-                    devicesByUniqueId.put(device.getUniqueId(), device);
-                    if (device.getPhone() != null && !device.getPhone().isEmpty()) {
-                        devicesByPhone.put(device.getPhone(), device);
-                    }
-                    if (geofenceManager != null) {
-                        Position lastPosition = getLastPosition(device.getId());
-                        if (lastPosition != null) {
-                            device.setGeofenceIds(geofenceManager.getCurrentDeviceGeofences(lastPosition));
-                        }
-                    }
-                }
-            }
-            for (Iterator<Long> iterator = devicesById.keySet().iterator(); iterator.hasNext();) {
-                if (!databaseDevicesIds.contains(iterator.next())) {
-                    iterator.remove();
-                }
-            }
-            for (Iterator<String> iterator = devicesByUniqueId.keySet().iterator(); iterator.hasNext();) {
-                if (!databaseDevicesUniqueIds.contains(iterator.next())) {
-                    iterator.remove();
-                }
-            }
-            for (Iterator<String> iterator = devicesByPhone.keySet().iterator(); iterator.hasNext();) {
-                if (!databaseDevicesPhones.contains(iterator.next())) {
-                    iterator.remove();
-                }
-            }
+            refreshItems();
         }
     }
 
     @Override
     public Device getDeviceById(long id) {
-        return devicesById.get(id);
+        return (Device) getById(id);
     }
 
     @Override
@@ -169,76 +90,129 @@ public class DeviceManager implements IdentityManager {
         return devicesByPhone.get(phone);
     }
 
+    @Override
+    public Set<Long> getAllItems() {
+        Set<Long> result = super.getAllItems();
+        if (result.isEmpty()) {
+            try {
+                updateDeviceCache(true);
+            } catch (SQLException e) {
+                Log.warning(e);
+            }
+            result = super.getAllItems();
+        }
+        return result;
+    }
+
     public Collection<Device> getAllDevices() {
-        boolean forceUpdate = devicesById.isEmpty();
-
-        try {
-            updateDeviceCache(forceUpdate);
-        } catch (SQLException e) {
-            Log.warning(e);
-        }
-
-        return devicesById.values();
+        return getItems(Device.class, getAllItems());
     }
 
-    public Collection<Device> getDevices(long userId) throws SQLException {
-        Collection<Device> devices = new ArrayList<>();
-        for (long id : Context.getPermissionsManager().getDevicePermissions(userId)) {
-            devices.add(devicesById.get(id));
+    @Override
+    public Set<Long> getUserItems(long userId) {
+        if (Context.getPermissionsManager() != null) {
+            return Context.getPermissionsManager().getDevicePermissions(userId);
+        } else {
+            return new HashSet<>();
         }
-        return devices;
     }
 
-    public Collection<Device> getManagedDevices(long userId) throws SQLException {
-        Collection<Device> devices = new HashSet<>();
-        devices.addAll(getDevices(userId));
-        for (long managedUserId : Context.getUsersManager().getManagedItems(userId)) {
-            devices.addAll(getDevices(managedUserId));
+    @Override
+    public Set<Long> getManagedItems(long userId) {
+        Set<Long> result = new HashSet<>();
+        result.addAll(getUserItems(userId));
+        for (long managedUserId : Context.getUsersManager().getUserItems(userId)) {
+            result.addAll(getUserItems(managedUserId));
         }
-        return devices;
+        return result;
     }
 
-    public void addDevice(Device device) throws SQLException {
-        dataManager.addObject(device);
-
-        devicesById.put(device.getId(), device);
+    private void putUniqueDeviceId(Device device) {
+        if (devicesByUniqueId == null) {
+            devicesByUniqueId = new ConcurrentHashMap<>(getAllItems().size());
+        }
         devicesByUniqueId.put(device.getUniqueId(), device);
+    }
+
+    private void putPhone(Device device) {
+        if (devicesByPhone == null) {
+            devicesByPhone = new ConcurrentHashMap<>(getAllItems().size());
+        }
+        devicesByPhone.put(device.getPhone(), device);
+    }
+
+    @Override
+    protected void addNewItem(BaseModel item) {
+        Device device = (Device) item;
+        super.addNewItem(item);
+        putUniqueDeviceId(device);
         if (device.getPhone() != null  && !device.getPhone().isEmpty()) {
-            devicesByPhone.put(device.getPhone(), device);
+            putPhone(device);
+        }
+        if (Context.getGeofenceManager() != null) {
+            Position lastPosition = getLastPosition(device.getId());
+            if (lastPosition != null) {
+                device.setGeofenceIds(Context.getGeofenceManager().getCurrentDeviceGeofences(lastPosition));
+            }
         }
     }
 
-    public void updateDevice(Device device) throws SQLException {
-        dataManager.updateObject(device);
-
-        devicesById.put(device.getId(), device);
-        devicesByUniqueId.put(device.getUniqueId(), device);
-        if (device.getPhone() != null && !device.getPhone().isEmpty()) {
-            devicesByPhone.put(device.getPhone(), device);
+    @Override
+    protected void updateCachedItem(BaseModel item) {
+        Device device = (Device) item;
+        Device cachedDevice = (Device) getById(device.getId());
+        cachedDevice.setName(device.getName());
+        cachedDevice.setGroupId(device.getGroupId());
+        cachedDevice.setCategory(device.getCategory());
+        cachedDevice.setContact(device.getContact());
+        cachedDevice.setModel(device.getModel());
+        cachedDevice.setAttributes(device.getAttributes());
+        if (!device.getUniqueId().equals(cachedDevice.getUniqueId())) {
+            devicesByUniqueId.remove(cachedDevice.getUniqueId());
+            cachedDevice.setUniqueId(device.getUniqueId());
+            putUniqueDeviceId(cachedDevice);
+        }
+        if (device.getPhone() != null && !device.getPhone().isEmpty()
+                && !device.getPhone().equals(cachedDevice.getPhone())) {
+            devicesByPhone.remove(cachedDevice.getPhone());
+            cachedDevice.setPhone(device.getPhone());
+            putPhone(cachedDevice);
         }
     }
 
-    public void updateDeviceStatus(Device device) throws SQLException {
-        dataManager.updateDeviceStatus(device);
-        if (devicesById.containsKey(device.getId())) {
-            Device cachedDevice = devicesById.get(device.getId());
-            cachedDevice.setStatus(device.getStatus());
-        }
-    }
-
-    public void removeDevice(long deviceId) throws SQLException {
-        dataManager.removeObject(Device.class, deviceId);
-
-        if (devicesById.containsKey(deviceId)) {
-            String deviceUniqueId = devicesById.get(deviceId).getUniqueId();
-            String phone = devicesById.get(deviceId).getPhone();
-            devicesById.remove(deviceId);
+    @Override
+    protected void removeCachedItem(long deviceId) {
+        Device cachedDevice = (Device) getById(deviceId);
+        if (cachedDevice != null) {
+            String deviceUniqueId = cachedDevice.getUniqueId();
+            String phone = cachedDevice.getPhone();
+            super.removeCachedItem(deviceId);
             devicesByUniqueId.remove(deviceUniqueId);
             if (phone != null && !phone.isEmpty()) {
                 devicesByPhone.remove(phone);
             }
         }
         positions.remove(deviceId);
+    }
+
+    public void updateDeviceStatus(Device device) throws SQLException {
+        getDataManager().updateDeviceStatus(device);
+        Device cachedDevice = (Device) getById(device.getId());
+        if (cachedDevice != null) {
+            cachedDevice.setStatus(device.getStatus());
+        }
+    }
+
+    private void refreshLastPositions() {
+        if (getDataManager() != null) {
+            try {
+                for (Position position : getDataManager().getLatestPositions()) {
+                    positions.put(position.getDeviceId(), position);
+                }
+            } catch (SQLException error) {
+                Log.warning(error);
+            }
+        }
     }
 
     public boolean isLatestPosition(Position position) {
@@ -250,10 +224,11 @@ public class DeviceManager implements IdentityManager {
 
         if (isLatestPosition(position)) {
 
-            dataManager.updateLatestPosition(position);
+            getDataManager().updateLatestPosition(position);
 
-            if (devicesById.containsKey(position.getDeviceId())) {
-                devicesById.get(position.getDeviceId()).setPositionId(position.getId());
+            Device device = (Device) getById(position.getDeviceId());
+            if (device != null) {
+                device.setPositionId(position.getId());
             }
 
             positions.put(position.getDeviceId(), position);
@@ -274,7 +249,7 @@ public class DeviceManager implements IdentityManager {
         List<Position> result = new LinkedList<>();
 
         if (Context.getPermissionsManager() != null) {
-            for (long deviceId : Context.getPermissionsManager().getDevicePermissions(userId)) {
+            for (long deviceId : getUserItems(userId)) {
                 if (positions.containsKey(deviceId)) {
                     result.add(positions.get(deviceId));
                 }
@@ -282,96 +257,6 @@ public class DeviceManager implements IdentityManager {
         }
 
         return result;
-    }
-
-    private void updateGroupCache(boolean force) throws SQLException {
-
-        long lastUpdate = groupsLastUpdate.get();
-        if ((force || System.currentTimeMillis() - lastUpdate > dataRefreshDelay)
-                && groupsLastUpdate.compareAndSet(lastUpdate, System.currentTimeMillis())) {
-            Collection<Group> databaseGroups = dataManager.getObjects(Group.class);
-            if (groupsById == null) {
-                groupsById = new ConcurrentHashMap<>(databaseGroups.size());
-            }
-            Set<Long> databaseGroupsIds = new HashSet<>();
-            for (Group group : databaseGroups) {
-                databaseGroupsIds.add(group.getId());
-                if (groupsById.containsKey(group.getId())) {
-                    Group cachedGroup = groupsById.get(group.getId());
-                    cachedGroup.setName(group.getName());
-                    cachedGroup.setGroupId(group.getGroupId());
-                } else {
-                    groupsById.put(group.getId(), group);
-                }
-            }
-            for (Long cachedGroupId : groupsById.keySet()) {
-                if (!databaseGroupsIds.contains(cachedGroupId)) {
-                    groupsById.remove(cachedGroupId);
-                }
-            }
-            databaseGroupsIds.clear();
-        }
-    }
-
-    public Group getGroupById(long id) {
-        return groupsById.get(id);
-    }
-
-    public Collection<Group> getAllGroups() {
-        boolean forceUpdate = groupsById.isEmpty();
-
-        try {
-            updateGroupCache(forceUpdate);
-        } catch (SQLException e) {
-            Log.warning(e);
-        }
-
-        return groupsById.values();
-    }
-
-    public Collection<Group> getGroups(long userId) throws SQLException {
-        Collection<Group> groups = new ArrayList<>();
-        for (long id : Context.getPermissionsManager().getGroupPermissions(userId)) {
-            groups.add(getGroupById(id));
-        }
-        return groups;
-    }
-
-    public Collection<Group> getManagedGroups(long userId) throws SQLException {
-        Collection<Group> groups = new ArrayList<>();
-        groups.addAll(getGroups(userId));
-        for (long managedUserId : Context.getUsersManager().getManagedItems(userId)) {
-            groups.addAll(getGroups(managedUserId));
-        }
-        return groups;
-    }
-
-    private void checkGroupCycles(Group group) {
-        Set<Long> groups = new HashSet<>();
-        while (group != null) {
-            if (groups.contains(group.getId())) {
-                throw new IllegalArgumentException("Cycle in group hierarchy");
-            }
-            groups.add(group.getId());
-            group = groupsById.get(group.getGroupId());
-        }
-    }
-
-    public void addGroup(Group group) throws SQLException {
-        checkGroupCycles(group);
-        dataManager.addObject(group);
-        groupsById.put(group.getId(), group);
-    }
-
-    public void updateGroup(Group group) throws SQLException {
-        checkGroupCycles(group);
-        dataManager.updateObject(group);
-        groupsById.put(group.getId(), group);
-    }
-
-    public void removeGroup(long groupId) throws SQLException {
-        dataManager.removeObject(Group.class, groupId);
-        groupsById.remove(groupId);
     }
 
     public boolean lookupAttributeBoolean(
@@ -426,12 +311,13 @@ public class DeviceManager implements IdentityManager {
             if (result == null && lookupGroupsAttribute) {
                 long groupId = device.getGroupId();
                 while (groupId != 0) {
-                    if (getGroupById(groupId) != null) {
-                        result = getGroupById(groupId).getString(attributeName);
+                    Group group = (Group) Context.getGroupsManager().getById(groupId);
+                    if (group != null) {
+                        result = group.getString(attributeName);
                         if (result != null) {
                             break;
                         }
-                        groupId = getGroupById(groupId).getGroupId();
+                        groupId = group.getGroupId();
                     } else {
                         groupId = 0;
                     }
@@ -453,7 +339,7 @@ public class DeviceManager implements IdentityManager {
         Position last = positions.get(deviceTotalDistance.getDeviceId());
         if (last != null) {
             last.getAttributes().put(Position.KEY_TOTAL_DISTANCE, deviceTotalDistance.getTotalDistance());
-            dataManager.addPosition(last);
+            getDataManager().addPosition(last);
             updateLatestPosition(last);
         } else {
             throw new IllegalArgumentException();
@@ -466,9 +352,9 @@ public class DeviceManager implements IdentityManager {
             Position lastPosition = getLastPosition(deviceId);
             if (lastPosition != null) {
                 BaseProtocol protocol = Context.getServerManager().getProtocol(lastPosition.getProtocol());
-                protocol.sendTextCommand(devicesById.get(deviceId).getPhone(), command);
+                protocol.sendTextCommand(((Device) getById(deviceId)).getPhone(), command);
             } else if (command.getType().equals(Command.TYPE_CUSTOM)) {
-                Context.getSmppManager().sendMessageSync(devicesById.get(deviceId).getPhone(),
+                Context.getSmppManager().sendMessageSync(((Device) getById(deviceId)).getPhone(),
                         command.getString(Command.KEY_DATA), true);
             } else {
                 throw new RuntimeException("Command " + command.getType() + " is not supported");

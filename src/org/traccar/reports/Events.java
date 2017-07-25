@@ -92,7 +92,7 @@ public final class Events {
             deviceEvents.setDeviceName(device.getName());
             sheetNames.add(WorkbookUtil.createSafeSheetName(deviceEvents.getDeviceName()));
             if (device.getGroupId() != 0) {
-                Group group = Context.getDeviceManager().getGroupById(device.getGroupId());
+                Group group = (Group) Context.getGroupsManager().getById(device.getGroupId());
                 if (group != null) {
                     deviceEvents.setGroupName(group.getName());
                 }

@@ -51,7 +51,7 @@ public class PermissionsManager {
         this.dataManager = dataManager;
         this.usersManager = usersManager;
         refreshServer();
-        refreshPermissions();
+        refreshDeviceAndGroupPermissions();
     }
 
     public User getUser(long userId) {
@@ -94,11 +94,12 @@ public class PermissionsManager {
         }
     }
 
-    public final void refreshPermissions() {
+    public final void refreshDeviceAndGroupPermissions() {
         groupPermissions.clear();
         devicePermissions.clear();
         try {
-            GroupTree groupTree = new GroupTree(Context.getDeviceManager().getAllGroups(),
+            GroupTree groupTree = new GroupTree(Context.getGroupsManager().getItems(
+                    Group.class, Context.getGroupsManager().getAllItems()),
                     Context.getDeviceManager().getAllDevices());
             for (Permission groupPermission : dataManager.getPermissions(User.class, Group.class)) {
                 Set<Long> userGroupPermissions = getGroupPermissions(groupPermission.getOwnerId());
@@ -117,9 +118,9 @@ public class PermissionsManager {
             }
 
             groupDevices.clear();
-            for (Group group : Context.getDeviceManager().getAllGroups()) {
-                for (Device device : groupTree.getDevices(group.getId())) {
-                    getGroupDevices(group.getId()).add(device.getId());
+            for (long groupId : Context.getGroupsManager().getAllItems()) {
+                for (Device device : groupTree.getDevices(groupId)) {
+                    getGroupDevices(groupId).add(device.getId());
                 }
             }
 
@@ -159,14 +160,14 @@ public class PermissionsManager {
 
     public void checkManager(long userId, long managedUserId) throws SecurityException {
         checkManager(userId);
-        if (!usersManager.getManagedItems(userId).contains(managedUserId)) {
+        if (!usersManager.getUserItems(userId).contains(managedUserId)) {
             throw new SecurityException("User access denied");
         }
     }
 
     public void checkUserLimit(long userId) throws SecurityException {
         int userLimit = getUser(userId).getUserLimit();
-        if (userLimit != -1 && usersManager.getManagedItems(userId).size() >= userLimit) {
+        if (userLimit != -1 && usersManager.getUserItems(userId).size() >= userLimit) {
             throw new SecurityException("Manager user limit reached");
         }
     }
@@ -176,9 +177,9 @@ public class PermissionsManager {
         if (deviceLimit != -1) {
             int deviceCount = 0;
             if (isManager(userId)) {
-                deviceCount = Context.getDeviceManager().getManagedDevices(userId).size();
+                deviceCount = Context.getDeviceManager().getManagedItems(userId).size();
             } else {
-                deviceCount = getDevicePermissions(userId).size();
+                deviceCount = Context.getDeviceManager().getUserItems(userId).size();
             }
             if (deviceCount >= deviceLimit) {
                 throw new SecurityException("User device limit reached");
@@ -254,7 +255,7 @@ public class PermissionsManager {
     public void checkGroup(long userId, long groupId) throws SecurityException {
         if (!getGroupPermissions(userId).contains(groupId) && !isAdmin(userId)) {
             checkManager(userId);
-            for (long managedUserId : usersManager.getManagedItems(userId)) {
+            for (long managedUserId : usersManager.getUserItems(userId)) {
                 if (getGroupPermissions(managedUserId).contains(groupId)) {
                     return;
                 }
@@ -264,10 +265,10 @@ public class PermissionsManager {
     }
 
     public void checkDevice(long userId, long deviceId) throws SecurityException {
-        if (!getDevicePermissions(userId).contains(deviceId) && !isAdmin(userId)) {
+        if (!Context.getDeviceManager().getUserItems(userId).contains(deviceId) && !isAdmin(userId)) {
             checkManager(userId);
-            for (long managedUserId : usersManager.getManagedItems(userId)) {
-                if (getDevicePermissions(managedUserId).contains(deviceId)) {
+            for (long managedUserId : usersManager.getUserItems(userId)) {
+                if (Context.getDeviceManager().getUserItems(managedUserId).contains(deviceId)) {
                     return;
                 }
             }
@@ -314,6 +315,18 @@ public class PermissionsManager {
         }
     }
 
+    public void refreshAllUsersPermissions() {
+        if (Context.getGeofenceManager() != null) {
+            Context.getGeofenceManager().refreshUserItems();
+        }
+        Context.getCalendarManager().refreshUserItems();
+        Context.getDriversManager().refreshUserItems();
+        Context.getAttributesManager().refreshUserItems();
+        if (Context.getNotificationManager() != null) {
+            Context.getNotificationManager().refresh();
+        }
+    }
+
     public void refreshAllExtendedPermissions() {
         if (Context.getGeofenceManager() != null) {
             Context.getGeofenceManager().refreshExtendedPermissions();
@@ -326,7 +339,7 @@ public class PermissionsManager {
         if (permission.getOwnerClass().equals(User.class)) {
             if (permission.getPropertyClass().equals(Device.class)
                     || permission.getPropertyClass().equals(Group.class)) {
-                refreshPermissions();
+                refreshDeviceAndGroupPermissions();
                 refreshAllExtendedPermissions();
             } else if (permission.getPropertyClass().equals(ManagedUser.class)) {
                 usersManager.refreshUserItems();

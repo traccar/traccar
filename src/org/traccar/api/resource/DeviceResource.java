@@ -17,6 +17,7 @@ package org.traccar.api.resource;
 
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
+import org.traccar.database.DeviceManager;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceTotalDistance;
 import org.traccar.model.User;
@@ -34,9 +35,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Path("devices")
 @Produces(MediaType.APPLICATION_JSON)
@@ -48,34 +50,34 @@ public class DeviceResource extends BaseResource {
             @QueryParam("all") boolean all, @QueryParam("userId") long userId,
             @QueryParam("uniqueId") List<String> uniqueIds,
             @QueryParam("id") List<Long> deviceIds) throws SQLException {
+        DeviceManager deviceManager = Context.getDeviceManager();
+        Set<Long> result = null;
         if (all) {
             if (Context.getPermissionsManager().isAdmin(getUserId())) {
-                return Context.getDeviceManager().getAllDevices();
+                result = deviceManager.getAllItems();
             } else {
                 Context.getPermissionsManager().checkManager(getUserId());
-                return Context.getDeviceManager().getManagedDevices(getUserId());
+                result = deviceManager.getManagedItems(getUserId());
             }
-        }
-        if (uniqueIds.isEmpty() && deviceIds.isEmpty()) {
+        } else if (uniqueIds.isEmpty() && deviceIds.isEmpty()) {
             if (userId == 0) {
                 userId = getUserId();
             }
             Context.getPermissionsManager().checkUser(getUserId(), userId);
-            return Context.getDeviceManager().getDevices(userId);
+            result = deviceManager.getUserItems(userId);
+        } else {
+            result = new HashSet<Long>();
+            for (String uniqueId : uniqueIds) {
+                Device device = deviceManager.getDeviceByUniqueId(uniqueId);
+                Context.getPermissionsManager().checkDevice(getUserId(), device.getId());
+                result.add(device.getId());
+            }
+            for (Long deviceId : deviceIds) {
+                Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
+                result.add(deviceId);
+            }
         }
-
-        ArrayList<Device> devices = new ArrayList<>();
-
-        for (String uniqueId : uniqueIds) {
-            Device device = Context.getDeviceManager().getDeviceByUniqueId(uniqueId);
-            Context.getPermissionsManager().checkDevice(getUserId(), device.getId());
-            devices.add(device);
-        }
-        for (Long deviceId : deviceIds) {
-            Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
-            devices.add(Context.getDeviceManager().getDeviceById(deviceId));
-        }
-        return devices;
+        return deviceManager.getItems(Device.class, result);
     }
 
     @POST
@@ -83,9 +85,9 @@ public class DeviceResource extends BaseResource {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkDeviceReadonly(getUserId());
         Context.getPermissionsManager().checkDeviceLimit(getUserId());
-        Context.getDeviceManager().addDevice(entity);
+        Context.getDeviceManager().addItem(entity);
         Context.getDataManager().linkObject(User.class, getUserId(), entity.getClass(), entity.getId(), true);
-        Context.getPermissionsManager().refreshPermissions();
+        Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
         Context.getPermissionsManager().refreshAllExtendedPermissions();
         return Response.ok(entity).build();
     }
@@ -96,8 +98,8 @@ public class DeviceResource extends BaseResource {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkDeviceReadonly(getUserId());
         Context.getPermissionsManager().checkDevice(getUserId(), entity.getId());
-        Context.getDeviceManager().updateDevice(entity);
-        Context.getPermissionsManager().refreshPermissions();
+        Context.getDeviceManager().updateItem(entity);
+        Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
         Context.getPermissionsManager().refreshAllExtendedPermissions();
         return Response.ok(entity).build();
     }
@@ -108,8 +110,8 @@ public class DeviceResource extends BaseResource {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkDeviceReadonly(getUserId());
         Context.getPermissionsManager().checkDevice(getUserId(), id);
-        Context.getDeviceManager().removeDevice(id);
-        Context.getPermissionsManager().refreshPermissions();
+        Context.getDeviceManager().removeItem(id);
+        Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
         Context.getPermissionsManager().refreshAllExtendedPermissions();
         Context.getAliasesManager().removeDevice(id);
         return Response.noContent().build();

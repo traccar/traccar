@@ -46,7 +46,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
         }
 
         try {
-            Context.getDeviceManager().addDevice(device);
+            Context.getDeviceManager().addItem(device);
 
             Log.info("Automatically registered device " + uniqueId);
 

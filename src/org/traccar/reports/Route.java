@@ -61,7 +61,7 @@ public final class Route {
             deviceRoutes.setDeviceName(device.getName());
             sheetNames.add(WorkbookUtil.createSafeSheetName(deviceRoutes.getDeviceName()));
             if (device.getGroupId() != 0) {
-                Group group = Context.getDeviceManager().getGroupById(device.getGroupId());
+                Group group = (Group) Context.getGroupsManager().getById(device.getGroupId());
                 if (group != null) {
                     deviceRoutes.setGroupName(group.getName());
                 }

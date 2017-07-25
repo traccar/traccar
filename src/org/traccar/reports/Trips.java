@@ -77,7 +77,7 @@ public final class Trips {
             deviceTrips.setDeviceName(device.getName());
             sheetNames.add(WorkbookUtil.createSafeSheetName(deviceTrips.getDeviceName()));
             if (device.getGroupId() != 0) {
-                Group group = Context.getDeviceManager().getGroupById(device.getGroupId());
+                Group group = (Group) Context.getGroupsManager().getById(device.getGroupId());
                 if (group != null) {
                     deviceTrips.setGroupName(group.getName());
                 }

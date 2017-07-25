@@ -48,19 +48,11 @@ public abstract class ExtendedObjectManager extends SimpleObjectManager {
         return groupItems.get(groupId);
     }
 
-    protected final void clearGroupItems() {
-        groupItems.clear();
-    }
-
     public final Set<Long> getDeviceItems(long deviceId) {
         if (!deviceItems.containsKey(deviceId)) {
             deviceItems.put(deviceId, new HashSet<Long>());
         }
         return deviceItems.get(deviceId);
-    }
-
-    protected final void clearDeviceItems() {
-        deviceItems.clear();
     }
 
     public Set<Long> getAllDeviceItems(long deviceId) {
@@ -83,16 +75,15 @@ public abstract class ExtendedObjectManager extends SimpleObjectManager {
                 Collection<Permission> databaseGroupPermissions =
                         getDataManager().getPermissions(Group.class, getBaseClass());
 
-                clearGroupItems();
+                groupItems.clear();
                 for (Permission groupPermission : databaseGroupPermissions) {
                     getGroupItems(groupPermission.getOwnerId()).add(groupPermission.getPropertyId());
                 }
 
                 Collection<Permission> databaseDevicePermissions =
                         getDataManager().getPermissions(Device.class, getBaseClass());
-                Collection<Device> allDevices = Context.getDeviceManager().getAllDevices();
 
-                clearDeviceItems();
+                deviceItems.clear();
                 deviceItemsWithGroups.clear();
 
                 for (Permission devicePermission : databaseDevicePermissions) {
@@ -100,12 +91,13 @@ public abstract class ExtendedObjectManager extends SimpleObjectManager {
                     getAllDeviceItems(devicePermission.getOwnerId()).add(devicePermission.getPropertyId());
                 }
 
-                for (Device device : allDevices) {
+                for (Device device : Context.getDeviceManager().getAllDevices()) {
                     long groupId = device.getGroupId();
                     while (groupId != 0) {
                         getAllDeviceItems(device.getId()).addAll(getGroupItems(groupId));
-                        if (Context.getDeviceManager().getGroupById(groupId) != null) {
-                            groupId = Context.getDeviceManager().getGroupById(groupId).getGroupId();
+                        Group group = (Group) Context.getGroupsManager().getById(groupId);
+                        if (group != null) {
+                            groupId = group.getGroupId();
                         } else {
                             groupId = 0;
                         }

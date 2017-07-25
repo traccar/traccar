@@ -37,6 +37,7 @@ import org.traccar.database.MediaManager;
 import org.traccar.database.NotificationManager;
 import org.traccar.database.PermissionsManager;
 import org.traccar.database.GeofenceManager;
+import org.traccar.database.GroupsManager;
 import org.traccar.database.StatisticsManager;
 import org.traccar.database.UsersManager;
 import org.traccar.geocoder.BingMapsGeocoder;
@@ -103,6 +104,12 @@ public final class Context {
 
     public static UsersManager getUsersManager() {
         return usersManager;
+    }
+
+    private static GroupsManager groupsManager;
+
+    public static GroupsManager getGroupsManager() {
+        return groupsManager;
     }
 
     private static DeviceManager deviceManager;
@@ -241,9 +248,7 @@ public final class Context {
 
         if (dataManager != null) {
             usersManager = new UsersManager(dataManager);
-        }
-
-        if (dataManager != null) {
+            groupsManager = new GroupsManager(dataManager);
             deviceManager = new DeviceManager(dataManager);
         }
 
