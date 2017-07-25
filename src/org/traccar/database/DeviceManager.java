@@ -192,7 +192,7 @@ public class DeviceManager implements IdentityManager {
     public Collection<Device> getManagedDevices(long userId) throws SQLException {
         Collection<Device> devices = new HashSet<>();
         devices.addAll(getDevices(userId));
-        for (long managedUserId : Context.getPermissionsManager().getUserPermissions(userId)) {
+        for (long managedUserId : Context.getUsersManager().getManagedItems(userId)) {
             devices.addAll(getDevices(managedUserId));
         }
         return devices;
@@ -340,7 +340,7 @@ public class DeviceManager implements IdentityManager {
     public Collection<Group> getManagedGroups(long userId) throws SQLException {
         Collection<Group> groups = new ArrayList<>();
         groups.addAll(getGroups(userId));
-        for (long managedUserId : Context.getPermissionsManager().getUserPermissions(userId)) {
+        for (long managedUserId : Context.getUsersManager().getManagedItems(userId)) {
             groups.addAll(getGroups(managedUserId));
         }
         return groups;

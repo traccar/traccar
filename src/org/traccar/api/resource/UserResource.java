@@ -17,6 +17,7 @@ package org.traccar.api.resource;
 
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
+import org.traccar.database.UsersManager;
 import org.traccar.model.ManagedUser;
 import org.traccar.model.User;
 
@@ -35,6 +36,7 @@ import javax.ws.rs.core.Response;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Set;
 
 @Path("users")
 @Produces(MediaType.APPLICATION_JSON)
@@ -43,17 +45,21 @@ public class UserResource extends BaseResource {
 
     @GET
     public Collection<User> get(@QueryParam("userId") long userId) throws SQLException {
+        UsersManager usersManager = Context.getUsersManager();
+        Set<Long> result = null;
         if (Context.getPermissionsManager().isAdmin(getUserId())) {
             if (userId != 0) {
-                return Context.getPermissionsManager().getUsers(userId);
+                result = usersManager.getManagedItems(userId);
             } else {
-                return Context.getPermissionsManager().getAllUsers();
+                result = usersManager.getAllItems();
             }
         } else if (Context.getPermissionsManager().isManager(getUserId())) {
-            return Context.getPermissionsManager().getManagedUsers(getUserId());
+            result = usersManager.getManagedItems(getUserId());
+            result.add(getUserId());
         } else {
             throw new SecurityException("Admin or manager access required");
         }
+        return usersManager.getItems(User.class, result);
     }
 
     @PermitAll
@@ -73,11 +79,11 @@ public class UserResource extends BaseResource {
                 }
             }
         }
-        Context.getPermissionsManager().addUser(entity);
+        Context.getUsersManager().addItem(entity);
         if (Context.getPermissionsManager().isManager(getUserId())) {
             Context.getDataManager().linkObject(User.class, getUserId(), ManagedUser.class, entity.getId(), true);
         }
-        Context.getPermissionsManager().refreshUserPermissions();
+        Context.getUsersManager().refreshUserItems();
         if (Context.getNotificationManager() != null) {
             Context.getNotificationManager().refresh();
         }
@@ -91,7 +97,7 @@ public class UserResource extends BaseResource {
         User before = Context.getPermissionsManager().getUser(entity.getId());
         Context.getPermissionsManager().checkUser(getUserId(), entity.getId());
         Context.getPermissionsManager().checkUserUpdate(getUserId(), before, entity);
-        Context.getPermissionsManager().updateUser(entity);
+        Context.getUsersManager().updateItem(entity);
         if (Context.getNotificationManager() != null) {
             Context.getNotificationManager().refresh();
         }
@@ -103,7 +109,7 @@ public class UserResource extends BaseResource {
     public Response remove(@PathParam("id") long id) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkUser(getUserId(), id);
-        Context.getPermissionsManager().removeUser(id);
+        Context.getUsersManager().removeItem(id);
         if (Context.getGeofenceManager() != null) {
             Context.getGeofenceManager().refreshUserItems();
         }
