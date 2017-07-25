@@ -30,29 +30,33 @@ import org.traccar.model.User;
 
 import java.lang.reflect.Method;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class PermissionsManager {
 
     private final DataManager dataManager;
+    private final UsersManager usersManager;
 
     private volatile Server server;
-
-    private final Map<Long, User> users = new ConcurrentHashMap<>();
-    private final Map<String, Long> usersTokens = new HashMap<>();
 
     private final Map<Long, Set<Long>> groupPermissions = new HashMap<>();
     private final Map<Long, Set<Long>> devicePermissions = new HashMap<>();
     private final Map<Long, Set<Long>> deviceUsers = new HashMap<>();
     private final Map<Long, Set<Long>> groupDevices = new HashMap<>();
 
-    private final Map<Long, Set<Long>> userPermissions = new HashMap<>();
+    public PermissionsManager(DataManager dataManager, UsersManager usersManager) {
+        this.dataManager = dataManager;
+        this.usersManager = usersManager;
+        refreshServer();
+        refreshPermissions();
+    }
+
+    public User getUser(long userId) {
+        return (User) usersManager.getById(userId);
+    }
 
     public Set<Long> getGroupPermissions(long userId) {
         if (!groupPermissions.containsKey(userId)) {
@@ -82,43 +86,10 @@ public class PermissionsManager {
         return groupDevices.get(groupId);
     }
 
-    public Set<Long> getUserPermissions(long userId) {
-        if (!userPermissions.containsKey(userId)) {
-            userPermissions.put(userId, new HashSet<Long>());
-        }
-        return userPermissions.get(userId);
-    }
-
-    public PermissionsManager(DataManager dataManager) {
-        this.dataManager = dataManager;
-        refreshUsers();
-        refreshPermissions();
-        refreshUserPermissions();
-    }
-
-    public final void refreshUsers() {
-        users.clear();
-        usersTokens.clear();
+    public void refreshServer() {
         try {
             server = dataManager.getServer();
-            for (User user : dataManager.getObjects(User.class)) {
-                users.put(user.getId(), user);
-                if (user.getToken() != null) {
-                    usersTokens.put(user.getToken(), user.getId());
-                }
-            }
         } catch (SQLException error) {
-            Log.warning(error);
-        }
-    }
-
-    public final void refreshUserPermissions() {
-        userPermissions.clear();
-        try {
-            for (Permission permission : dataManager.getPermissions(User.class, User.class)) {
-                getUserPermissions(permission.getOwnerId()).add(permission.getPropertyId());
-            }
-        } catch (SQLException | ClassNotFoundException error) {
             Log.warning(error);
         }
     }
@@ -165,7 +136,8 @@ public class PermissionsManager {
     }
 
     public boolean isAdmin(long userId) {
-        return users.containsKey(userId) && users.get(userId).getAdmin();
+        User user = getUser(userId);
+        return user != null && user.getAdmin();
     }
 
     public void checkAdmin(long userId) throws SecurityException {
@@ -175,7 +147,8 @@ public class PermissionsManager {
     }
 
     public boolean isManager(long userId) {
-        return users.containsKey(userId) && users.get(userId).getUserLimit() != 0;
+        User user = getUser(userId);
+        return user != null && user.getUserLimit() != 0;
     }
 
     public void checkManager(long userId) throws SecurityException {
@@ -186,20 +159,20 @@ public class PermissionsManager {
 
     public void checkManager(long userId, long managedUserId) throws SecurityException {
         checkManager(userId);
-        if (!getUserPermissions(userId).contains(managedUserId)) {
+        if (!usersManager.getManagedItems(userId).contains(managedUserId)) {
             throw new SecurityException("User access denied");
         }
     }
 
     public void checkUserLimit(long userId) throws SecurityException {
-        int userLimit = users.get(userId).getUserLimit();
-        if (userLimit != -1 && getUserPermissions(userId).size() >= userLimit) {
+        int userLimit = getUser(userId).getUserLimit();
+        if (userLimit != -1 && usersManager.getManagedItems(userId).size() >= userLimit) {
             throw new SecurityException("Manager user limit reached");
         }
     }
 
     public void checkDeviceLimit(long userId) throws SecurityException, SQLException {
-        int deviceLimit = users.get(userId).getDeviceLimit();
+        int deviceLimit = getUser(userId).getDeviceLimit();
         if (deviceLimit != -1) {
             int deviceCount = 0;
             if (isManager(userId)) {
@@ -214,11 +187,13 @@ public class PermissionsManager {
     }
 
     public boolean isReadonly(long userId) {
-        return users.containsKey(userId) && users.get(userId).getReadonly();
+        User user = getUser(userId);
+        return user != null && user.getReadonly();
     }
 
     public boolean isDeviceReadonly(long userId) {
-        return users.containsKey(userId) && users.get(userId).getDeviceReadonly();
+        User user = getUser(userId);
+        return user != null && user.getDeviceReadonly();
     }
 
     public void checkReadonly(long userId) throws SecurityException {
@@ -235,6 +210,9 @@ public class PermissionsManager {
 
     public void checkUserEnabled(long userId) throws SecurityException {
         User user = getUser(userId);
+        if (user == null) {
+            throw new SecurityException("Unknown account");
+        }
         if (user.getDisabled()) {
             throw new SecurityException("Account is disabled");
         }
@@ -249,9 +227,10 @@ public class PermissionsManager {
                 || before.getUserLimit() != after.getUserLimit()) {
             checkAdmin(userId);
         }
-        if (users.containsKey(userId) && users.get(userId).getExpirationTime() != null
+        User user = getUser(userId);
+        if (user != null && user.getExpirationTime() != null
                 && (after.getExpirationTime() == null
-                || users.get(userId).getExpirationTime().compareTo(after.getExpirationTime()) < 0)) {
+                || user.getExpirationTime().compareTo(after.getExpirationTime()) < 0)) {
             checkAdmin(userId);
         }
         if (before.getReadonly() != after.getReadonly()
@@ -275,7 +254,7 @@ public class PermissionsManager {
     public void checkGroup(long userId, long groupId) throws SecurityException {
         if (!getGroupPermissions(userId).contains(groupId) && !isAdmin(userId)) {
             checkManager(userId);
-            for (long managedUserId : getUserPermissions(userId)) {
+            for (long managedUserId : usersManager.getManagedItems(userId)) {
                 if (getGroupPermissions(managedUserId).contains(groupId)) {
                     return;
                 }
@@ -287,7 +266,7 @@ public class PermissionsManager {
     public void checkDevice(long userId, long deviceId) throws SecurityException {
         if (!getDevicePermissions(userId).contains(deviceId) && !isAdmin(userId)) {
             checkManager(userId);
-            for (long managedUserId : getUserPermissions(userId)) {
+            for (long managedUserId : usersManager.getManagedItems(userId)) {
                 if (getDevicePermissions(managedUserId).contains(deviceId)) {
                     return;
                 }
@@ -326,7 +305,7 @@ public class PermissionsManager {
 
         if (manager != null && !manager.checkItemPermission(userId, objectId) && !isAdmin(userId)) {
             checkManager(userId);
-            for (long managedUserId : getUserPermissions(userId)) {
+            for (long managedUserId : usersManager.getManagedItems(userId)) {
                 if (manager.checkItemPermission(managedUserId, objectId)) {
                     return;
                 }
@@ -350,7 +329,7 @@ public class PermissionsManager {
                 refreshPermissions();
                 refreshAllExtendedPermissions();
             } else if (permission.getPropertyClass().equals(ManagedUser.class)) {
-                refreshUserPermissions();
+                usersManager.refreshUserItems();
             } else if (permission.getPropertyClass().equals(Geofence.class) && Context.getGeofenceManager() != null) {
                 Context.getGeofenceManager().refreshUserItems();
             } else if (permission.getPropertyClass().equals(Driver.class)) {
@@ -380,69 +359,13 @@ public class PermissionsManager {
         this.server = server;
     }
 
-    public Collection<User> getAllUsers() {
-        return users.values();
-    }
-
-    public Collection<User> getUsers(long userId) {
-        Collection<User> result = new ArrayList<>();
-        for (long managedUserId : getUserPermissions(userId)) {
-            result.add(users.get(managedUserId));
-        }
-        return result;
-    }
-
-    public Collection<User> getManagedUsers(long userId) {
-        Collection<User> result = getUsers(userId);
-        result.add(users.get(userId));
-        return result;
-    }
-
-    public User getUser(long userId) {
-        return users.get(userId);
-    }
-
-    public void addUser(User user) throws SQLException {
-        dataManager.addObject(user);
-        users.put(user.getId(), user);
-        if (user.getToken() != null) {
-            usersTokens.put(user.getToken(), user.getId());
-        }
-        refreshPermissions();
-    }
-
-    public void updateUser(User user) throws SQLException {
-        dataManager.updateUser(user);
-        User old = users.get(user.getId());
-        users.put(user.getId(), user);
-        if (user.getToken() != null) {
-            usersTokens.put(user.getToken(), user.getId());
-        }
-        if (old.getToken() != null && !old.getToken().equals(user.getToken())) {
-            usersTokens.remove(old.getToken());
-        }
-        refreshPermissions();
-    }
-
-    public void removeUser(long userId) throws SQLException {
-        dataManager.removeObject(User.class, userId);
-        usersTokens.remove(users.get(userId).getToken());
-        users.remove(userId);
-        refreshPermissions();
-        refreshUserPermissions();
-    }
-
     public User login(String email, String password) throws SQLException {
         User user = dataManager.login(email, password);
         if (user != null) {
             checkUserEnabled(user.getId());
-            return users.get(user.getId());
+            return getUser(user.getId());
         }
         return null;
-    }
-
-    public User getUserByToken(String token) {
-        return users.get(usersTokens.get(token));
     }
 
     public Object lookupPreference(long userId, String key, Object defaultValue) {
@@ -454,7 +377,7 @@ public class PermissionsManager {
             Method method = null;
             method = User.class.getMethod(methodName, (Class<?>[]) null);
             if (method != null) {
-                userPreference = method.invoke(users.get(userId), (Object[]) null);
+                userPreference = method.invoke(getUser(userId), (Object[]) null);
             }
             method = null;
             method = Server.class.getMethod(methodName, (Class<?>[]) null);

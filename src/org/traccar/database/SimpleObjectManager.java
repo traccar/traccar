@@ -166,10 +166,10 @@ public abstract class SimpleObjectManager {
         return items.keySet();
     }
 
-    public final Set<Long> getManagedItems(long userId) {
+    public Set<Long> getManagedItems(long userId) {
         Set<Long> result = new HashSet<>();
         result.addAll(getUserItems(userId));
-        for (long managedUserId : Context.getPermissionsManager().getUserPermissions(userId)) {
+        for (long managedUserId : Context.getUsersManager().getManagedItems(userId)) {
             result.addAll(getUserItems(managedUserId));
         }
         return result;
