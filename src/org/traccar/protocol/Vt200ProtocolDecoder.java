@@ -57,7 +57,7 @@ public class Vt200ProtocolDecoder extends BaseProtocolDecoder {
         int type = buf.readUnsignedShort();
         buf.readUnsignedShort(); // length
 
-        if (type == 0x2084) {
+        if (type == 0x2084 || type == 0x2082) {
 
             Position position = new Position();
             position.setProtocol(getProtocolName());
