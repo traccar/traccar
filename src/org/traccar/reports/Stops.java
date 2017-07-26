@@ -78,7 +78,7 @@ public final class Stops {
             deviceStops.setDeviceName(device.getName());
             sheetNames.add(WorkbookUtil.createSafeSheetName(deviceStops.getDeviceName()));
             if (device.getGroupId() != 0) {
-                Group group = (Group) Context.getGroupsManager().getById(device.getGroupId());
+                Group group = Context.getGroupsManager().getById(device.getGroupId());
                 if (group != null) {
                     deviceStops.setGroupName(group.getName());
                 }

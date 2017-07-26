@@ -143,8 +143,8 @@ public class DeviceManager extends BaseObjectManager implements IdentityManager,
 
     @Override
     protected void addNewItem(BaseModel item) {
-        Device device = (Device) item;
         super.addNewItem(item);
+        Device device = (Device) item;
         putUniqueDeviceId(device);
         if (device.getPhone() != null  && !device.getPhone().isEmpty()) {
             putPhone(device);
@@ -160,7 +160,7 @@ public class DeviceManager extends BaseObjectManager implements IdentityManager,
     @Override
     protected void updateCachedItem(BaseModel item) {
         Device device = (Device) item;
-        Device cachedDevice = (Device) getById(device.getId());
+        Device cachedDevice = getDeviceById(device.getId());
         cachedDevice.setName(device.getName());
         cachedDevice.setGroupId(device.getGroupId());
         cachedDevice.setCategory(device.getCategory());
@@ -182,7 +182,7 @@ public class DeviceManager extends BaseObjectManager implements IdentityManager,
 
     @Override
     protected void removeCachedItem(long deviceId) {
-        Device cachedDevice = (Device) getById(deviceId);
+        Device cachedDevice = getDeviceById(deviceId);
         if (cachedDevice != null) {
             String deviceUniqueId = cachedDevice.getUniqueId();
             String phone = cachedDevice.getPhone();
@@ -197,7 +197,7 @@ public class DeviceManager extends BaseObjectManager implements IdentityManager,
 
     public void updateDeviceStatus(Device device) throws SQLException {
         getDataManager().updateDeviceStatus(device);
-        Device cachedDevice = (Device) getById(device.getId());
+        Device cachedDevice = getDeviceById(device.getId());
         if (cachedDevice != null) {
             cachedDevice.setStatus(device.getStatus());
         }
@@ -226,7 +226,7 @@ public class DeviceManager extends BaseObjectManager implements IdentityManager,
 
             getDataManager().updateLatestPosition(position);
 
-            Device device = (Device) getById(position.getDeviceId());
+            Device device = getDeviceById(position.getDeviceId());
             if (device != null) {
                 device.setPositionId(position.getId());
             }
@@ -311,7 +311,7 @@ public class DeviceManager extends BaseObjectManager implements IdentityManager,
             if (result == null && lookupGroupsAttribute) {
                 long groupId = device.getGroupId();
                 while (groupId != 0) {
-                    Group group = (Group) Context.getGroupsManager().getById(groupId);
+                    Group group = Context.getGroupsManager().getById(groupId);
                     if (group != null) {
                         result = group.getString(attributeName);
                         if (result != null) {
@@ -352,7 +352,7 @@ public class DeviceManager extends BaseObjectManager implements IdentityManager,
             Position lastPosition = getLastPosition(deviceId);
             if (lastPosition != null) {
                 BaseProtocol protocol = Context.getServerManager().getProtocol(lastPosition.getProtocol());
-                protocol.sendTextCommand(((Device) getById(deviceId)).getPhone(), command);
+                protocol.sendTextCommand(getDeviceById(deviceId).getPhone(), command);
             } else if (command.getType().equals(Command.TYPE_CUSTOM)) {
                 Context.getSmppManager().sendMessageSync(((Device) getById(deviceId)).getPhone(),
                         command.getString(Command.KEY_DATA), true);

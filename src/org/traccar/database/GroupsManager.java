@@ -37,6 +37,11 @@ public class GroupsManager extends BaseObjectManager implements ManagableObjects
                 DeviceManager.DEFAULT_REFRESH_DELAY) * 1000;
     }
 
+    @Override
+    public Group getById(long groupId) {
+        return (Group) super.getById(groupId);
+    }
+
     private void checkGroupCycles(BaseModel group) {
         Set<Long> groups = new HashSet<>();
         while (group != null) {

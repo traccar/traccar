@@ -32,6 +32,11 @@ public class UsersManager extends SimpleObjectManager {
         super(dataManager, User.class);
     }
 
+    @Override
+    public User getById(long userId) {
+        return (User) super.getById(userId);
+    }
+
     private void putToken(User user) {
         if (usersTokens == null) {
             usersTokens = new ConcurrentHashMap<>();
@@ -50,7 +55,7 @@ public class UsersManager extends SimpleObjectManager {
     @Override
     protected void updateCachedItem(BaseModel item) {
         User user = (User) item;
-        User cachedUser = (User) getById(item.getId());
+        User cachedUser = getById(item.getId());
         super.updateCachedItem(item);
         if (user.getToken() != null) {
             usersTokens.put(user.getToken(), user.getId());
@@ -62,7 +67,7 @@ public class UsersManager extends SimpleObjectManager {
 
     @Override
     protected void removeCachedItem(long userId) {
-        User cachedUser = (User) getById(userId);
+        User cachedUser = getById(userId);
         if (cachedUser != null) {
             String userToken = cachedUser.getToken();
             super.removeCachedItem(userId);
@@ -81,7 +86,7 @@ public class UsersManager extends SimpleObjectManager {
     }
 
     public User getUserByToken(String token) {
-        return (User) getById(usersTokens.get(token));
+        return getById(usersTokens.get(token));
     }
 
 }

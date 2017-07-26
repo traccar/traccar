@@ -26,9 +26,14 @@ public class AttributesManager extends ExtendedObjectManager {
     }
 
     @Override
+    public Attribute getById(long calendarId) {
+        return (Attribute) super.getById(calendarId);
+    }
+
+    @Override
     public void updateCachedItem(BaseModel item) {
         Attribute attribute = (Attribute) item;
-        Attribute cachedAttribute = (Attribute) getById(item.getId());
+        Attribute cachedAttribute = getById(item.getId());
         cachedAttribute.setDescription(attribute.getDescription());
         cachedAttribute.setAttribute(attribute.getAttribute());
         cachedAttribute.setExpression(attribute.getExpression());

@@ -30,6 +30,11 @@ public class DriversManager extends ExtendedObjectManager {
         super(dataManager, Driver.class);
     }
 
+    @Override
+    public Driver getById(long driverId) {
+        return (Driver) super.getById(driverId);
+    }
+
     private void putUniqueDriverId(Driver driver) {
         if (driversByUniqueId == null) {
             driversByUniqueId = new ConcurrentHashMap<>();
@@ -46,7 +51,7 @@ public class DriversManager extends ExtendedObjectManager {
     @Override
     protected void updateCachedItem(BaseModel item) {
         Driver driver = (Driver) item;
-        Driver cachedDriver = (Driver) getById(driver.getId());
+        Driver cachedDriver = getById(driver.getId());
         cachedDriver.setName(driver.getName());
         if (!driver.getUniqueId().equals(cachedDriver.getUniqueId())) {
             driversByUniqueId.remove(cachedDriver.getUniqueId());
@@ -58,7 +63,7 @@ public class DriversManager extends ExtendedObjectManager {
 
     @Override
     protected void removeCachedItem(long driverId) {
-        Driver cachedDriver = (Driver) getById(driverId);
+        Driver cachedDriver = getById(driverId);
         if (cachedDriver != null) {
             String driverUniqueId = cachedDriver.getUniqueId();
             super.removeCachedItem(driverId);

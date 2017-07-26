@@ -48,7 +48,7 @@ public class BaseObjectManager {
         return baseClass;
     }
 
-    public final BaseModel getById(long itemId) {
+    public BaseModel getById(long itemId) {
         return items.get(itemId);
     }
 

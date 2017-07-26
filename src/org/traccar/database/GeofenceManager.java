@@ -30,6 +30,11 @@ public class GeofenceManager extends ExtendedObjectManager {
     }
 
     @Override
+    public Geofence getById(long geofenceId) {
+        return (Geofence) super.getById(geofenceId);
+    }
+
+    @Override
     public final void refreshExtendedPermissions() {
         super.refreshExtendedPermissions();
         recalculateDevicesGeofences();
@@ -38,7 +43,7 @@ public class GeofenceManager extends ExtendedObjectManager {
     public List<Long> getCurrentDeviceGeofences(Position position) {
         List<Long> result = new ArrayList<>();
         for (long geofenceId : getAllDeviceItems(position.getDeviceId())) {
-            Geofence geofence = (Geofence) getById(geofenceId);
+            Geofence geofence = getById(geofenceId);
             if (geofence != null && geofence.getGeometry()
                     .containsPoint(position.getLatitude(), position.getLongitude())) {
                 result.add(geofenceId);

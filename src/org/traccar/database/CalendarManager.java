@@ -24,4 +24,9 @@ public class CalendarManager extends SimpleObjectManager {
         super(dataManager, Calendar.class);
     }
 
+    @Override
+    public Calendar getById(long calendarId) {
+        return (Calendar) super.getById(calendarId);
+    }
+
 }

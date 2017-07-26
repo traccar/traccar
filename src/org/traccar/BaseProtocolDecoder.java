@@ -51,7 +51,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
             Log.info("Automatically registered device " + uniqueId);
 
             if (defaultGroupId != 0) {
-                Context.getPermissionsManager().refreshPermissions();
+                Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
                 Context.getPermissionsManager().refreshAllExtendedPermissions();
             }
 
