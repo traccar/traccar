@@ -38,7 +38,7 @@ public final class Summary {
     private static SummaryReport calculateSummaryResult(long deviceId, Date from, Date to) throws SQLException {
         SummaryReport result = new SummaryReport();
         result.setDeviceId(deviceId);
-        result.setDeviceName(Context.getIdentityManager().getDeviceById(deviceId).getName());
+        result.setDeviceName(Context.getIdentityManager().getById(deviceId).getName());
         Collection<Position> positions = Context.getDataManager().getPositions(deviceId, from, to);
         if (positions != null && !positions.isEmpty()) {
             Position firstPosition = null;

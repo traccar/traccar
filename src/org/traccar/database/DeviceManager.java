@@ -30,7 +30,6 @@ import org.traccar.BaseProtocol;
 import org.traccar.Config;
 import org.traccar.Context;
 import org.traccar.helper.Log;
-import org.traccar.model.BaseModel;
 import org.traccar.model.Command;
 import org.traccar.model.CommandType;
 import org.traccar.model.Device;
@@ -39,7 +38,7 @@ import org.traccar.model.Group;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
 
-public class DeviceManager extends BaseObjectManager implements IdentityManager, ManagableObjects {
+public class DeviceManager extends BaseObjectManager<Device> implements IdentityManager, ManagableObjects {
 
     public static final long DEFAULT_REFRESH_DELAY = 300;
 
@@ -73,12 +72,7 @@ public class DeviceManager extends BaseObjectManager implements IdentityManager,
     }
 
     @Override
-    public Device getDeviceById(long id) {
-        return (Device) getById(id);
-    }
-
-    @Override
-    public Device getDeviceByUniqueId(String uniqueId) throws SQLException {
+    public Device getByUniqueId(String uniqueId) throws SQLException {
         boolean forceUpdate = !devicesByUniqueId.containsKey(uniqueId) && !config.getBoolean("database.ignoreUnknown");
 
         updateDeviceCache(forceUpdate);
@@ -105,7 +99,7 @@ public class DeviceManager extends BaseObjectManager implements IdentityManager,
     }
 
     public Collection<Device> getAllDevices() {
-        return getItems(Device.class, getAllItems());
+        return getItems(getAllItems());
     }
 
     @Override
@@ -142,9 +136,8 @@ public class DeviceManager extends BaseObjectManager implements IdentityManager,
     }
 
     @Override
-    protected void addNewItem(BaseModel item) {
-        super.addNewItem(item);
-        Device device = (Device) item;
+    protected void addNewItem(Device device) {
+        super.addNewItem(device);
         putUniqueDeviceId(device);
         if (device.getPhone() != null  && !device.getPhone().isEmpty()) {
             putPhone(device);
@@ -158,9 +151,8 @@ public class DeviceManager extends BaseObjectManager implements IdentityManager,
     }
 
     @Override
-    protected void updateCachedItem(BaseModel item) {
-        Device device = (Device) item;
-        Device cachedDevice = getDeviceById(device.getId());
+    protected void updateCachedItem(Device device) {
+        Device cachedDevice = getById(device.getId());
         cachedDevice.setName(device.getName());
         cachedDevice.setGroupId(device.getGroupId());
         cachedDevice.setCategory(device.getCategory());
@@ -182,7 +174,7 @@ public class DeviceManager extends BaseObjectManager implements IdentityManager,
 
     @Override
     protected void removeCachedItem(long deviceId) {
-        Device cachedDevice = getDeviceById(deviceId);
+        Device cachedDevice = getById(deviceId);
         if (cachedDevice != null) {
             String deviceUniqueId = cachedDevice.getUniqueId();
             String phone = cachedDevice.getPhone();
@@ -197,7 +189,7 @@ public class DeviceManager extends BaseObjectManager implements IdentityManager,
 
     public void updateDeviceStatus(Device device) throws SQLException {
         getDataManager().updateDeviceStatus(device);
-        Device cachedDevice = getDeviceById(device.getId());
+        Device cachedDevice = getById(device.getId());
         if (cachedDevice != null) {
             cachedDevice.setStatus(device.getStatus());
         }
@@ -226,7 +218,7 @@ public class DeviceManager extends BaseObjectManager implements IdentityManager,
 
             getDataManager().updateLatestPosition(position);
 
-            Device device = getDeviceById(position.getDeviceId());
+            Device device = getById(position.getDeviceId());
             if (device != null) {
                 device.setPositionId(position.getId());
             }
@@ -305,7 +297,7 @@ public class DeviceManager extends BaseObjectManager implements IdentityManager,
 
     private String lookupAttribute(long deviceId, String attributeName, boolean lookupConfig) {
         String result = null;
-        Device device = getDeviceById(deviceId);
+        Device device = getById(deviceId);
         if (device != null) {
             result = device.getString(attributeName);
             if (result == null && lookupGroupsAttribute) {
@@ -352,9 +344,9 @@ public class DeviceManager extends BaseObjectManager implements IdentityManager,
             Position lastPosition = getLastPosition(deviceId);
             if (lastPosition != null) {
                 BaseProtocol protocol = Context.getServerManager().getProtocol(lastPosition.getProtocol());
-                protocol.sendTextCommand(getDeviceById(deviceId).getPhone(), command);
+                protocol.sendTextCommand(getById(deviceId).getPhone(), command);
             } else if (command.getType().equals(Command.TYPE_CUSTOM)) {
-                Context.getSmppManager().sendMessageSync(((Device) getById(deviceId)).getPhone(),
+                Context.getSmppManager().sendMessageSync(getById(deviceId).getPhone(),
                         command.getString(Command.KEY_DATA), true);
             } else {
                 throw new RuntimeException("Command " + command.getType() + " is not supported");

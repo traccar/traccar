@@ -81,7 +81,7 @@ public class AttributeResource extends BaseResource {
             Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
             result.retainAll(attributesManager.getDeviceItems(deviceId));
         }
-        return attributesManager.getItems(Attribute.class, result);
+        return attributesManager.getItems(result);
 
     }
 

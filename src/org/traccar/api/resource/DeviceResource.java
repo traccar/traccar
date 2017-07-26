@@ -68,7 +68,7 @@ public class DeviceResource extends BaseResource {
         } else {
             result = new HashSet<Long>();
             for (String uniqueId : uniqueIds) {
-                Device device = deviceManager.getDeviceByUniqueId(uniqueId);
+                Device device = deviceManager.getByUniqueId(uniqueId);
                 Context.getPermissionsManager().checkDevice(getUserId(), device.getId());
                 result.add(device.getId());
             }
@@ -77,7 +77,7 @@ public class DeviceResource extends BaseResource {
                 result.add(deviceId);
             }
         }
-        return deviceManager.getItems(Device.class, result);
+        return deviceManager.getItems(result);
     }
 
     @POST

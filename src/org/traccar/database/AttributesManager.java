@@ -17,23 +17,16 @@
 package org.traccar.database;
 
 import org.traccar.model.Attribute;
-import org.traccar.model.BaseModel;
 
-public class AttributesManager extends ExtendedObjectManager {
+public class AttributesManager extends ExtendedObjectManager<Attribute> {
 
     public AttributesManager(DataManager dataManager) {
         super(dataManager, Attribute.class);
     }
 
     @Override
-    public Attribute getById(long calendarId) {
-        return (Attribute) super.getById(calendarId);
-    }
-
-    @Override
-    public void updateCachedItem(BaseModel item) {
-        Attribute attribute = (Attribute) item;
-        Attribute cachedAttribute = getById(item.getId());
+    public void updateCachedItem(Attribute attribute) {
+        Attribute cachedAttribute = getById(attribute.getId());
         cachedAttribute.setDescription(attribute.getDescription());
         cachedAttribute.setAttribute(attribute.getAttribute());
         cachedAttribute.setExpression(attribute.getExpression());

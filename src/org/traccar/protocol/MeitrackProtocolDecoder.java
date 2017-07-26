@@ -160,7 +160,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        String deviceModel = Context.getIdentityManager().getDeviceById(deviceSession.getDeviceId()).getModel();
+        String deviceModel = Context.getIdentityManager().getById(deviceSession.getDeviceId()).getModel();
         if (deviceModel == null) {
             deviceModel = "";
         }
@@ -316,7 +316,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             case "D03":
                 if (channel != null) {
                     DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
-                    String imei = Context.getIdentityManager().getDeviceById(deviceSession.getDeviceId()).getUniqueId();
+                    String imei = Context.getIdentityManager().getById(deviceSession.getDeviceId()).getUniqueId();
                     channel.write("@@O46," + imei + ",D00,camera_picture.jpg,0*00\r\n");
                 }
                 return null;

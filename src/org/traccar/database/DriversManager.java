@@ -20,37 +20,30 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.traccar.model.Driver;
-import org.traccar.model.BaseModel;
 
-public class DriversManager extends ExtendedObjectManager {
+public class DriversManager extends ExtendedObjectManager<Driver> {
 
-    private Map<String, Driver> driversByUniqueId;
+    private Map<String, Long> driversByUniqueId;
 
     public DriversManager(DataManager dataManager) {
         super(dataManager, Driver.class);
     }
 
-    @Override
-    public Driver getById(long driverId) {
-        return (Driver) super.getById(driverId);
-    }
-
     private void putUniqueDriverId(Driver driver) {
         if (driversByUniqueId == null) {
-            driversByUniqueId = new ConcurrentHashMap<>();
+            driversByUniqueId = new ConcurrentHashMap<>(getAllItems().size());
         }
-        driversByUniqueId.put(driver.getUniqueId(), driver);
+        driversByUniqueId.put(driver.getUniqueId(), driver.getId());
     }
 
     @Override
-    protected void addNewItem(BaseModel item) {
-        super.addNewItem(item);
-        putUniqueDriverId((Driver) item);
+    protected void addNewItem(Driver driver) {
+        super.addNewItem(driver);
+        putUniqueDriverId(driver);
     }
 
     @Override
-    protected void updateCachedItem(BaseModel item) {
-        Driver driver = (Driver) item;
+    protected void updateCachedItem(Driver driver) {
         Driver cachedDriver = getById(driver.getId());
         cachedDriver.setName(driver.getName());
         if (!driver.getUniqueId().equals(cachedDriver.getUniqueId())) {
@@ -72,6 +65,6 @@ public class DriversManager extends ExtendedObjectManager {
     }
 
     public Driver getDriverByUniqueId(String uniqueId) {
-        return driversByUniqueId.get(uniqueId);
+        return getById(driversByUniqueId.get(uniqueId));
     }
 }

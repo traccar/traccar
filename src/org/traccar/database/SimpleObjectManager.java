@@ -28,11 +28,12 @@ import org.traccar.model.BaseModel;
 import org.traccar.model.Permission;
 import org.traccar.model.User;
 
-public abstract class SimpleObjectManager extends BaseObjectManager implements ManagableObjects {
+public abstract class SimpleObjectManager<T extends BaseModel> extends BaseObjectManager<T>
+        implements ManagableObjects {
 
     private Map<Long, Set<Long>> userItems;
 
-    protected SimpleObjectManager(DataManager dataManager, Class<? extends BaseModel> baseClass) {
+    protected SimpleObjectManager(DataManager dataManager, Class<T> baseClass) {
         super(dataManager, baseClass);
     }
 

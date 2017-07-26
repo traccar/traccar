@@ -26,7 +26,7 @@ import org.traccar.helper.Log;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Group;
 
-public class GroupsManager extends BaseObjectManager implements ManagableObjects {
+public class GroupsManager extends BaseObjectManager<Group> implements ManagableObjects {
 
     private AtomicLong groupsLastUpdate = new AtomicLong();
     private final long dataRefreshDelay;
@@ -35,11 +35,6 @@ public class GroupsManager extends BaseObjectManager implements ManagableObjects
         super(dataManager, Group.class);
         dataRefreshDelay = Context.getConfig().getLong("database.refreshDelay",
                 DeviceManager.DEFAULT_REFRESH_DELAY) * 1000;
-    }
-
-    @Override
-    public Group getById(long groupId) {
-        return (Group) super.getById(groupId);
     }
 
     private void checkGroupCycles(BaseModel group) {
@@ -76,15 +71,15 @@ public class GroupsManager extends BaseObjectManager implements ManagableObjects
     }
 
     @Override
-    protected void addNewItem(BaseModel item) {
-        checkGroupCycles(item);
-        super.addNewItem(item);
+    protected void addNewItem(Group group) {
+        checkGroupCycles(group);
+        super.addNewItem(group);
     }
 
     @Override
-    protected void updateCachedItem(BaseModel item) {
-        checkGroupCycles(item);
-        super.updateCachedItem(item);
+    protected void updateCachedItem(Group group) {
+        checkGroupCycles(group);
+        super.updateCachedItem(group);
     }
 
     @Override

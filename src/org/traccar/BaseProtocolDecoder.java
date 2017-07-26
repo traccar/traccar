@@ -75,7 +75,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
             try {
                 for (String uniqueId : uniqueIds) {
                     if (uniqueId != null) {
-                        Device device = Context.getIdentityManager().getDeviceByUniqueId(uniqueId);
+                        Device device = Context.getIdentityManager().getByUniqueId(uniqueId);
                         if (device != null) {
                             deviceId = device.getId();
                             break;

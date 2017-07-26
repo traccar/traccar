@@ -18,15 +18,10 @@ package org.traccar.database;
 
 import org.traccar.model.Calendar;
 
-public class CalendarManager extends SimpleObjectManager {
+public class CalendarManager extends SimpleObjectManager<Calendar> {
 
     public CalendarManager(DataManager dataManager) {
         super(dataManager, Calendar.class);
-    }
-
-    @Override
-    public Calendar getById(long calendarId) {
-        return (Calendar) super.getById(calendarId);
     }
 
 }

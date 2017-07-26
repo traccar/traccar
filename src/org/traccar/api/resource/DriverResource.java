@@ -79,7 +79,7 @@ public class DriverResource extends BaseResource {
             Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
             result.retainAll(driversManager.getDeviceItems(deviceId));
         }
-        return driversManager.getItems(Driver.class, result);
+        return driversManager.getItems(result);
 
     }
 

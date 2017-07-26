@@ -58,7 +58,7 @@ public class UserResource extends BaseResource {
         } else {
             throw new SecurityException("Admin or manager access required");
         }
-        return usersManager.getItems(User.class, result);
+        return usersManager.getItems(result);
     }
 
     @PermitAll

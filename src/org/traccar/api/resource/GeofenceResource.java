@@ -78,7 +78,7 @@ public class GeofenceResource extends BaseResource {
             Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
             result.retainAll(geofenceManager.getDeviceItems(deviceId));
         }
-        return geofenceManager.getItems(Geofence.class, result);
+        return geofenceManager.getItems(result);
 
     }
 

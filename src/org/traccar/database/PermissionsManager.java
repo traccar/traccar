@@ -18,6 +18,7 @@ package org.traccar.database;
 import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Attribute;
+import org.traccar.model.BaseModel;
 import org.traccar.model.Calendar;
 import org.traccar.model.Device;
 import org.traccar.model.Driver;
@@ -99,7 +100,7 @@ public class PermissionsManager {
         devicePermissions.clear();
         try {
             GroupTree groupTree = new GroupTree(Context.getGroupsManager().getItems(
-                    Group.class, Context.getGroupsManager().getAllItems()),
+                    Context.getGroupsManager().getAllItems()),
                     Context.getDeviceManager().getAllDevices());
             for (Permission groupPermission : dataManager.getPermissions(User.class, Group.class)) {
                 Set<Long> userGroupPermissions = getGroupPermissions(groupPermission.getOwnerId());
@@ -284,7 +285,7 @@ public class PermissionsManager {
 
     public void checkPermission(Class<?> object, long userId, long objectId)
             throws SecurityException {
-        SimpleObjectManager manager = null;
+        SimpleObjectManager<? extends BaseModel> manager = null;
 
         if (object.equals(Device.class)) {
             checkDevice(userId, objectId);

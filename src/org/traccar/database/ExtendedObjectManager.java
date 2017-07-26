@@ -30,13 +30,13 @@ import org.traccar.model.Group;
 import org.traccar.model.Permission;
 import org.traccar.model.BaseModel;
 
-public abstract class ExtendedObjectManager extends SimpleObjectManager {
+public abstract class ExtendedObjectManager<T extends BaseModel> extends SimpleObjectManager<T> {
 
     private final Map<Long, Set<Long>> deviceItems = new ConcurrentHashMap<>();
     private final Map<Long, Set<Long>> deviceItemsWithGroups = new ConcurrentHashMap<>();
     private final Map<Long, Set<Long>> groupItems = new ConcurrentHashMap<>();
 
-    protected ExtendedObjectManager(DataManager dataManager, Class<? extends BaseModel> baseClass) {
+    protected ExtendedObjectManager(DataManager dataManager, Class<T> baseClass) {
         super(dataManager, baseClass);
         refreshExtendedPermissions();
     }

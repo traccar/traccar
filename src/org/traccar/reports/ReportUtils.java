@@ -176,7 +176,7 @@ public final class ReportUtils {
         long tripDuration = endTrip.getFixTime().getTime() - startTrip.getFixTime().getTime();
         long deviceId = startTrip.getDeviceId();
         trip.setDeviceId(deviceId);
-        trip.setDeviceName(Context.getIdentityManager().getDeviceById(deviceId).getName());
+        trip.setDeviceName(Context.getIdentityManager().getById(deviceId).getName());
 
         trip.setStartPositionId(startTrip.getId());
         trip.setStartLat(startTrip.getLatitude());
@@ -210,7 +210,7 @@ public final class ReportUtils {
 
         long deviceId = startStop.getDeviceId();
         stop.setDeviceId(deviceId);
-        stop.setDeviceName(Context.getIdentityManager().getDeviceById(deviceId).getName());
+        stop.setDeviceName(Context.getIdentityManager().getById(deviceId).getName());
 
         stop.setPositionId(startStop.getId());
         stop.setLatitude(startStop.getLatitude());

@@ -25,7 +25,6 @@ import org.traccar.database.GeofenceManager;
 import org.traccar.model.Calendar;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
-import org.traccar.model.Geofence;
 import org.traccar.model.Position;
 
 public class GeofenceEventHandler extends BaseEventHandler {
@@ -38,7 +37,7 @@ public class GeofenceEventHandler extends BaseEventHandler {
 
     @Override
     protected Collection<Event> analyzePosition(Position position) {
-        Device device = Context.getIdentityManager().getDeviceById(position.getDeviceId());
+        Device device = Context.getIdentityManager().getById(position.getDeviceId());
         if (device == null) {
             return null;
         }
@@ -59,8 +58,8 @@ public class GeofenceEventHandler extends BaseEventHandler {
 
         Collection<Event> events = new ArrayList<>();
         for (long geofenceId : newGeofences) {
-            long calendarId = ((Geofence) geofenceManager.getById(geofenceId)).getCalendarId();
-            Calendar calendar = calendarId != 0 ? (Calendar) Context.getCalendarManager().getById(calendarId) : null;
+            long calendarId = geofenceManager.getById(geofenceId).getCalendarId();
+            Calendar calendar = calendarId != 0 ? Context.getCalendarManager().getById(calendarId) : null;
             if (calendar == null || calendar.checkMoment(position.getFixTime())) {
                 Event event = new Event(Event.TYPE_GEOFENCE_ENTER, position.getDeviceId(), position.getId());
                 event.setGeofenceId(geofenceId);
@@ -68,8 +67,8 @@ public class GeofenceEventHandler extends BaseEventHandler {
             }
         }
         for (long geofenceId : oldGeofences) {
-            long calendarId = ((Geofence) geofenceManager.getById(geofenceId)).getCalendarId();
-            Calendar calendar = calendarId != 0 ? (Calendar) Context.getCalendarManager().getById(calendarId) : null;
+            long calendarId = geofenceManager.getById(geofenceId).getCalendarId();
+            Calendar calendar = calendarId != 0 ? Context.getCalendarManager().getById(calendarId) : null;
             if (calendar == null || calendar.checkMoment(position.getFixTime())) {
                 Event event = new Event(Event.TYPE_GEOFENCE_EXIT, position.getDeviceId(), position.getId());
                 event.setGeofenceId(geofenceId);

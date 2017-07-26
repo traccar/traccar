@@ -27,14 +27,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.traccar.helper.Log;
 import org.traccar.model.BaseModel;
 
-public class BaseObjectManager {
+public class BaseObjectManager<T extends BaseModel> {
 
     private final DataManager dataManager;
 
-    private Map<Long, BaseModel> items;
-    private Class<? extends BaseModel> baseClass;
+    private Map<Long, T> items;
+    private Class<T> baseClass;
 
-    protected BaseObjectManager(DataManager dataManager, Class<? extends BaseModel> baseClass) {
+    protected BaseObjectManager(DataManager dataManager, Class<T> baseClass) {
         this.dataManager = dataManager;
         this.baseClass = baseClass;
         refreshItems();
@@ -44,23 +44,23 @@ public class BaseObjectManager {
         return dataManager;
     }
 
-    protected final Class<? extends BaseModel> getBaseClass() {
+    protected final Class<T> getBaseClass() {
         return baseClass;
     }
 
-    public BaseModel getById(long itemId) {
+    public T getById(long itemId) {
         return items.get(itemId);
     }
 
     public void refreshItems() {
         if (dataManager != null) {
             try {
-                Collection<? extends BaseModel> databaseItems = dataManager.getObjects(baseClass);
+                Collection<T> databaseItems = dataManager.getObjects(baseClass);
                 if (items == null) {
                     items = new ConcurrentHashMap<>(databaseItems.size());
                 }
                 Set<Long> databaseItemIds = new HashSet<>();
-                for (BaseModel item : databaseItems) {
+                for (T item : databaseItems) {
                     databaseItemIds.add(item.getId());
                     if (items.containsKey(item.getId())) {
                         updateCachedItem(item);
@@ -79,20 +79,20 @@ public class BaseObjectManager {
         }
     }
 
-    protected void addNewItem(BaseModel item) {
+    protected void addNewItem(T item) {
         items.put(item.getId(), item);
     }
 
-    public void addItem(BaseModel item) throws SQLException {
+    public void addItem(T item) throws SQLException {
         dataManager.addObject(item);
         addNewItem(item);
     }
 
-    protected void updateCachedItem(BaseModel item) {
+    protected void updateCachedItem(T item) {
         items.put(item.getId(), item);
     }
 
-    public void updateItem(BaseModel item) throws SQLException {
+    public void updateItem(T item) throws SQLException {
         dataManager.updateObject(item);
         updateCachedItem(item);
     }
@@ -109,10 +109,10 @@ public class BaseObjectManager {
         }
     }
 
-    public final <T> Collection<T> getItems(Class<T> clazz, Set<Long> itemIds) {
+    public final Collection<T> getItems(Set<Long> itemIds) {
         Collection<T> result = new LinkedList<>();
         for (long itemId : itemIds) {
-            result.add((T) getById(itemId));
+            result.add(getById(itemId));
         }
         return result;
     }

@@ -60,7 +60,7 @@ public class GroupResource extends BaseResource {
             Context.getPermissionsManager().checkUser(getUserId(), userId);
             result = groupsManager.getUserItems(userId);
         }
-        return groupsManager.getItems(Group.class, result);
+        return groupsManager.getItems(result);
     }
 
     @POST

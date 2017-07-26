@@ -18,12 +18,12 @@ public class BaseTest {
             }
 
             @Override
-            public Device getDeviceById(long id) {
+            public Device getById(long id) {
                 return createDevice();
             }
 
             @Override
-            public Device getDeviceByUniqueId(String uniqueId) {
+            public Device getByUniqueId(String uniqueId) {
                 return createDevice();
             }
             

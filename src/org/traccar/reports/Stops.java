@@ -74,7 +74,7 @@ public final class Stops {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
             Collection<StopReport> stops = detectStops(deviceId, from, to);
             DeviceReport deviceStops = new DeviceReport();
-            Device device = Context.getIdentityManager().getDeviceById(deviceId);
+            Device device = Context.getIdentityManager().getById(deviceId);
             deviceStops.setDeviceName(device.getName());
             sheetNames.add(WorkbookUtil.createSafeSheetName(deviceStops.getDeviceName()));
             if (device.getGroupId() != 0) {

@@ -37,7 +37,7 @@ public class OverspeedEventHandler extends BaseEventHandler {
     @Override
     protected Collection<Event> analyzePosition(Position position) {
 
-        Device device = Context.getIdentityManager().getDeviceById(position.getDeviceId());
+        Device device = Context.getIdentityManager().getById(position.getDeviceId());
         if (device == null) {
             return null;
         }

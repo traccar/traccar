@@ -70,7 +70,7 @@ public class ConnectionManager {
     }
 
     public void updateDevice(final long deviceId, String status, Date time) {
-        Device device = Context.getIdentityManager().getDeviceById(deviceId);
+        Device device = Context.getIdentityManager().getById(deviceId);
         if (device == null) {
             return;
         }

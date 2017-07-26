@@ -87,7 +87,7 @@ public class PositionResource extends BaseResource {
             @QueryParam("deviceId") long deviceId, @QueryParam("from") String from, @QueryParam("to") String to)
             throws SQLException {
         Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
-        GpxBuilder gpx = new GpxBuilder(Context.getIdentityManager().getDeviceById(deviceId).getName());
+        GpxBuilder gpx = new GpxBuilder(Context.getIdentityManager().getById(deviceId).getName());
         gpx.addPositions(Context.getDataManager().getPositions(
                 deviceId, DateUtil.parseDate(from), DateUtil.parseDate(to)));
         return Response.ok(gpx.build()).header(HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE_GPX).build();

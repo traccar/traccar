@@ -21,20 +21,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.traccar.model.BaseModel;
 import org.traccar.model.User;
 
-public class UsersManager extends SimpleObjectManager {
+public class UsersManager extends SimpleObjectManager<User> {
 
     private Map<String, Long> usersTokens;
 
     public UsersManager(DataManager dataManager) {
         super(dataManager, User.class);
-    }
-
-    @Override
-    public User getById(long userId) {
-        return (User) super.getById(userId);
     }
 
     private void putToken(User user) {
@@ -47,16 +41,15 @@ public class UsersManager extends SimpleObjectManager {
     }
 
     @Override
-    protected void addNewItem(BaseModel item) {
-        super.addNewItem(item);
-        putToken((User) item);
+    protected void addNewItem(User user) {
+        super.addNewItem(user);
+        putToken(user);
     }
 
     @Override
-    protected void updateCachedItem(BaseModel item) {
-        User user = (User) item;
-        User cachedUser = getById(item.getId());
-        super.updateCachedItem(item);
+    protected void updateCachedItem(User user) {
+        User cachedUser = getById(user.getId());
+        super.updateCachedItem(user);
         if (user.getToken() != null) {
             usersTokens.put(user.getToken(), user.getId());
         }

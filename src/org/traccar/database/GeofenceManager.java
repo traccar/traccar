@@ -23,15 +23,10 @@ import org.traccar.model.Device;
 import org.traccar.model.Geofence;
 import org.traccar.model.Position;
 
-public class GeofenceManager extends ExtendedObjectManager {
+public class GeofenceManager extends ExtendedObjectManager<Geofence> {
 
     public GeofenceManager(DataManager dataManager) {
         super(dataManager, Geofence.class);
-    }
-
-    @Override
-    public Geofence getById(long geofenceId) {
-        return (Geofence) super.getById(geofenceId);
     }
 
     @Override

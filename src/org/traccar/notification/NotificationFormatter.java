@@ -40,7 +40,7 @@ public final class NotificationFormatter {
 
     public static VelocityContext prepareContext(long userId, Event event, Position position) {
         User user = Context.getPermissionsManager().getUser(userId);
-        Device device = Context.getIdentityManager().getDeviceById(event.getDeviceId());
+        Device device = Context.getIdentityManager().getById(event.getDeviceId());
 
         VelocityContext velocityContext = new VelocityContext();
         velocityContext.put("user", user);
