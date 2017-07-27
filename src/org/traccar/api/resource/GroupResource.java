@@ -16,22 +16,16 @@
 package org.traccar.api.resource;
 
 import org.traccar.Context;
-import org.traccar.api.BaseResource;
+import org.traccar.api.BaseObjectResource;
 import org.traccar.database.GroupsManager;
 import org.traccar.model.Group;
-import org.traccar.model.User;
 
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Set;
@@ -39,7 +33,11 @@ import java.util.Set;
 @Path("groups")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class GroupResource extends BaseResource {
+public class GroupResource extends BaseObjectResource<Group> {
+
+    public GroupResource() {
+        super(Group.class);
+    }
 
     @GET
     public Collection<Group> get(
@@ -62,37 +60,4 @@ public class GroupResource extends BaseResource {
         }
         return groupsManager.getItems(result);
     }
-
-    @POST
-    public Response add(Group entity) throws SQLException {
-        Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getGroupsManager().addItem(entity);
-        Context.getDataManager().linkObject(User.class, getUserId(), entity.getClass(), entity.getId(), true);
-        Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
-        Context.getPermissionsManager().refreshAllExtendedPermissions();
-        return Response.ok(entity).build();
-    }
-
-    @Path("{id}")
-    @PUT
-    public Response update(Group entity) throws SQLException {
-        Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getPermissionsManager().checkGroup(getUserId(), entity.getId());
-        Context.getGroupsManager().updateItem(entity);
-        Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
-        Context.getPermissionsManager().refreshAllExtendedPermissions();
-        return Response.ok(entity).build();
-    }
-
-    @Path("{id}")
-    @DELETE
-    public Response remove(@PathParam("id") long id) throws SQLException {
-        Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getPermissionsManager().checkGroup(getUserId(), id);
-        Context.getGroupsManager().removeItem(id);
-        Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
-        Context.getPermissionsManager().refreshAllExtendedPermissions();
-        return Response.noContent().build();
-    }
-
 }

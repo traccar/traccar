@@ -22,29 +22,29 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.traccar.Context;
-import org.traccar.api.BaseResource;
+import org.traccar.api.BaseObjectResource;
 import org.traccar.database.AttributesManager;
 import org.traccar.model.Attribute;
 import org.traccar.model.Position;
-import org.traccar.model.User;
 import org.traccar.processing.ComputedAttributesHandler;
 
 @Path("attributes/computed")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class AttributeResource extends BaseResource {
+public class AttributeResource extends BaseObjectResource<Attribute> {
+
+    public AttributeResource() {
+        super(Attribute.class);
+    }
 
     @GET
     public Collection<Attribute> get(
@@ -85,15 +85,11 @@ public class AttributeResource extends BaseResource {
 
     }
 
-    private Response add(Attribute entity) throws SQLException {
+    @POST
+    @Path("test")
+    public Response test(@QueryParam("deviceId") long deviceId, Attribute entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getAttributesManager().addItem(entity);
-        Context.getDataManager().linkObject(User.class, getUserId(), entity.getClass(), entity.getId(), true);
-        Context.getAttributesManager().refreshUserItems();
-        return Response.ok(entity).build();
-    }
-
-    private Response test(long deviceId, Attribute entity) {
+        Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
         Position last = Context.getIdentityManager().getLastPosition(deviceId);
         if (last != null) {
             Object result = new ComputedAttributesHandler().computeAttribute(entity, last);
@@ -112,35 +108,6 @@ public class AttributeResource extends BaseResource {
         } else {
             throw new IllegalArgumentException("Device has no last position");
         }
-    }
-
-    @POST
-    public Response post(@QueryParam("deviceId") long deviceId, Attribute entity) throws SQLException {
-        Context.getPermissionsManager().checkReadonly(getUserId());
-        if (deviceId != 0) {
-            Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
-            return test(deviceId, entity);
-        } else {
-            return add(entity);
-        }
-    }
-
-    @Path("{id}")
-    @PUT
-    public Response update(Attribute entity) throws SQLException {
-        Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getPermissionsManager().checkPermission(Attribute.class, getUserId(), entity.getId());
-        Context.getAttributesManager().updateItem(entity);
-        return Response.ok(entity).build();
-    }
-
-    @Path("{id}")
-    @DELETE
-    public Response remove(@PathParam("id") long id) throws SQLException {
-        Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getPermissionsManager().checkPermission(Attribute.class, getUserId(), id);
-        Context.getAttributesManager().removeItem(id);
-        return Response.noContent().build();
     }
 
 }

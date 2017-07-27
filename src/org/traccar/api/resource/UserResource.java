@@ -16,19 +16,16 @@
 package org.traccar.api.resource;
 
 import org.traccar.Context;
-import org.traccar.api.BaseResource;
+import org.traccar.api.BaseObjectResource;
 import org.traccar.database.UsersManager;
 import org.traccar.model.ManagedUser;
 import org.traccar.model.User;
 
 import javax.annotation.security.PermitAll;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -41,7 +38,11 @@ import java.util.Set;
 @Path("users")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class UserResource extends BaseResource {
+public class UserResource extends BaseObjectResource<User> {
+
+    public UserResource() {
+        super(User.class);
+    }
 
     @GET
     public Collection<User> get(@QueryParam("userId") long userId) throws SQLException {
@@ -61,6 +62,7 @@ public class UserResource extends BaseResource {
         return usersManager.getItems(result);
     }
 
+    @Override
     @PermitAll
     @POST
     public Response add(User entity) throws SQLException {
@@ -87,31 +89,6 @@ public class UserResource extends BaseResource {
             Context.getNotificationManager().refresh();
         }
         return Response.ok(entity).build();
-    }
-
-    @Path("{id}")
-    @PUT
-    public Response update(User entity) throws SQLException {
-        Context.getPermissionsManager().checkReadonly(getUserId());
-        User before = Context.getPermissionsManager().getUser(entity.getId());
-        Context.getPermissionsManager().checkUser(getUserId(), entity.getId());
-        Context.getPermissionsManager().checkUserUpdate(getUserId(), before, entity);
-        Context.getUsersManager().updateItem(entity);
-        if (Context.getNotificationManager() != null) {
-            Context.getNotificationManager().refresh();
-        }
-        return Response.ok(entity).build();
-    }
-
-    @Path("{id}")
-    @DELETE
-    public Response remove(@PathParam("id") long id) throws SQLException {
-        Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getPermissionsManager().checkUser(getUserId(), id);
-        Context.getUsersManager().removeItem(id);
-        Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
-        Context.getPermissionsManager().refreshAllUsersPermissions();
-        return Response.noContent().build();
     }
 
 }
