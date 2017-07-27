@@ -73,11 +73,11 @@ public final class Trips {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
             Collection<TripReport> trips = detectTrips(deviceId, from, to);
             DeviceReport deviceTrips = new DeviceReport();
-            Device device = Context.getIdentityManager().getDeviceById(deviceId);
+            Device device = Context.getIdentityManager().getById(deviceId);
             deviceTrips.setDeviceName(device.getName());
             sheetNames.add(WorkbookUtil.createSafeSheetName(deviceTrips.getDeviceName()));
             if (device.getGroupId() != 0) {
-                Group group = Context.getDeviceManager().getGroupById(device.getGroupId());
+                Group group = Context.getGroupsManager().getById(device.getGroupId());
                 if (group != null) {
                     deviceTrips.setGroupName(group.getName());
                 }

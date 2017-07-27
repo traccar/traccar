@@ -18,6 +18,7 @@ package org.traccar.api.resource;
 
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -47,20 +48,22 @@ public class CalendarResource extends BaseResource {
             @QueryParam("all") boolean all, @QueryParam("userId") long userId) throws SQLException {
 
         CalendarManager calendarManager = Context.getCalendarManager();
+        Set<Long> result = null;
         if (all) {
             if (Context.getPermissionsManager().isAdmin(getUserId())) {
-                return calendarManager.getItems(Calendar.class, calendarManager.getAllItems());
+                result = calendarManager.getAllItems();
             } else {
                 Context.getPermissionsManager().checkManager(getUserId());
-                return calendarManager.getItems(Calendar.class, calendarManager.getManagedItems(getUserId()));
+                result = calendarManager.getManagedItems(getUserId());
             }
         } else {
             if (userId == 0) {
                 userId = getUserId();
             }
             Context.getPermissionsManager().checkUser(getUserId(), userId);
-            return calendarManager.getItems(Calendar.class, calendarManager.getUserItems(userId));
+            result = calendarManager.getUserItems(userId);
         }
+        return calendarManager.getItems(result);
     }
 
     @POST

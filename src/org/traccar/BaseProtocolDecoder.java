@@ -46,12 +46,12 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
         }
 
         try {
-            Context.getDeviceManager().addDevice(device);
+            Context.getDeviceManager().addItem(device);
 
             Log.info("Automatically registered device " + uniqueId);
 
             if (defaultGroupId != 0) {
-                Context.getPermissionsManager().refreshPermissions();
+                Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
                 Context.getPermissionsManager().refreshAllExtendedPermissions();
             }
 
@@ -75,7 +75,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
             try {
                 for (String uniqueId : uniqueIds) {
                     if (uniqueId != null) {
-                        Device device = Context.getIdentityManager().getDeviceByUniqueId(uniqueId);
+                        Device device = Context.getIdentityManager().getByUniqueId(uniqueId);
                         if (device != null) {
                             deviceId = device.getId();
                             break;

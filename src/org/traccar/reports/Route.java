@@ -57,11 +57,11 @@ public final class Route {
             Collection<Position> positions = Context.getDataManager()
                     .getPositions(deviceId, from, to);
             DeviceReport deviceRoutes = new DeviceReport();
-            Device device = Context.getIdentityManager().getDeviceById(deviceId);
+            Device device = Context.getIdentityManager().getById(deviceId);
             deviceRoutes.setDeviceName(device.getName());
             sheetNames.add(WorkbookUtil.createSafeSheetName(deviceRoutes.getDeviceName()));
             if (device.getGroupId() != 0) {
-                Group group = Context.getDeviceManager().getGroupById(device.getGroupId());
+                Group group = Context.getGroupsManager().getById(device.getGroupId());
                 if (group != null) {
                     deviceRoutes.setGroupName(group.getName());
                 }

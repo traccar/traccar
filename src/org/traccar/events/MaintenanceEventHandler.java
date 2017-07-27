@@ -32,7 +32,7 @@ public class MaintenanceEventHandler extends BaseEventHandler {
 
     @Override
     protected Collection<Event> analyzePosition(Position position) {
-        Device device = Context.getIdentityManager().getDeviceById(position.getDeviceId());
+        Device device = Context.getIdentityManager().getById(position.getDeviceId());
         if (device == null || !Context.getIdentityManager().isLatestPosition(position)) {
             return null;
         }

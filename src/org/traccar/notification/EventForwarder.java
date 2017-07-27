@@ -69,7 +69,7 @@ public final class EventForwarder {
             data.put(KEY_POSITION, position);
         }
         if (event.getDeviceId() != 0) {
-            Device device = Context.getIdentityManager().getDeviceById(event.getDeviceId());
+            Device device = Context.getIdentityManager().getById(event.getDeviceId());
             if (device != null) {
                 data.put(KEY_DEVICE, device);
             }

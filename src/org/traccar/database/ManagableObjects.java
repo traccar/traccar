@@ -16,21 +16,12 @@
  */
 package org.traccar.database;
 
-import org.traccar.model.Attribute;
+import java.util.Set;
 
-public class AttributesManager extends ExtendedObjectManager<Attribute> {
+public interface ManagableObjects {
 
-    public AttributesManager(DataManager dataManager) {
-        super(dataManager, Attribute.class);
-    }
+    Set<Long> getUserItems(long userId);
 
-    @Override
-    public void updateCachedItem(Attribute attribute) {
-        Attribute cachedAttribute = getById(attribute.getId());
-        cachedAttribute.setDescription(attribute.getDescription());
-        cachedAttribute.setAttribute(attribute.getAttribute());
-        cachedAttribute.setExpression(attribute.getExpression());
-        cachedAttribute.setType(attribute.getType());
-    }
+    Set<Long> getManagedItems(long userId);
 
 }

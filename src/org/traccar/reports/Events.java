@@ -88,11 +88,11 @@ public final class Events {
                 }
             }
             DeviceReport deviceEvents = new DeviceReport();
-            Device device = Context.getIdentityManager().getDeviceById(deviceId);
+            Device device = Context.getIdentityManager().getById(deviceId);
             deviceEvents.setDeviceName(device.getName());
             sheetNames.add(WorkbookUtil.createSafeSheetName(deviceEvents.getDeviceName()));
             if (device.getGroupId() != 0) {
-                Group group = Context.getDeviceManager().getGroupById(device.getGroupId());
+                Group group = Context.getGroupsManager().getById(device.getGroupId());
                 if (group != null) {
                     deviceEvents.setGroupName(group.getName());
                 }

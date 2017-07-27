@@ -16,14 +16,14 @@
  */
 package org.traccar.database;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.traccar.model.BaseModel;
 import org.traccar.model.User;
 
-public class UsersManager extends SimpleObjectManager {
+public class UsersManager extends SimpleObjectManager<User> {
 
     private Map<String, Long> usersTokens;
 
@@ -41,16 +41,15 @@ public class UsersManager extends SimpleObjectManager {
     }
 
     @Override
-    protected void addNewItem(BaseModel item) {
-        super.addNewItem(item);
-        putToken((User) item);
+    protected void addNewItem(User user) {
+        super.addNewItem(user);
+        putToken(user);
     }
 
     @Override
-    protected void updateCachedItem(BaseModel item) {
-        User user = (User) item;
-        User cachedUser = (User) getById(item.getId());
-        super.updateCachedItem(item);
+    protected void updateCachedItem(User user) {
+        User cachedUser = getById(user.getId());
+        super.updateCachedItem(user);
         if (user.getToken() != null) {
             usersTokens.put(user.getToken(), user.getId());
         }
@@ -61,7 +60,7 @@ public class UsersManager extends SimpleObjectManager {
 
     @Override
     protected void removeCachedItem(long userId) {
-        User cachedUser = (User) getById(userId);
+        User cachedUser = getById(userId);
         if (cachedUser != null) {
             String userToken = cachedUser.getToken();
             super.removeCachedItem(userId);
@@ -73,11 +72,14 @@ public class UsersManager extends SimpleObjectManager {
 
     @Override
     public Set<Long> getManagedItems(long userId) {
-        return getUserItems(userId);
+        Set<Long> result = new HashSet<>();
+        result.addAll(getUserItems(userId));
+        result.add(userId);
+        return result;
     }
 
     public User getUserByToken(String token) {
-        return (User) getById(usersTokens.get(token));
+        return getById(usersTokens.get(token));
     }
 
 }

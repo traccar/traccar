@@ -25,12 +25,12 @@ import org.traccar.model.Device;
 public abstract class BaseProtocolEncoder extends OneToOneEncoder {
 
     protected String getUniqueId(long deviceId) {
-        return Context.getIdentityManager().getDeviceById(deviceId).getUniqueId();
+        return Context.getIdentityManager().getById(deviceId).getUniqueId();
     }
 
     protected void initDevicePassword(Command command, String defaultPassword) {
         if (!command.getAttributes().containsKey(Command.KEY_DEVICE_PASSWORD)) {
-            Device device = Context.getIdentityManager().getDeviceById(command.getDeviceId());
+            Device device = Context.getIdentityManager().getById(command.getDeviceId());
             String password = device.getString(Command.KEY_DEVICE_PASSWORD);
             if (password != null) {
                 command.set(Command.KEY_DEVICE_PASSWORD, password);

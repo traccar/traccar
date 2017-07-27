@@ -23,7 +23,7 @@ import org.traccar.model.Device;
 import org.traccar.model.Geofence;
 import org.traccar.model.Position;
 
-public class GeofenceManager extends ExtendedObjectManager {
+public class GeofenceManager extends ExtendedObjectManager<Geofence> {
 
     public GeofenceManager(DataManager dataManager) {
         super(dataManager, Geofence.class);
@@ -38,7 +38,7 @@ public class GeofenceManager extends ExtendedObjectManager {
     public List<Long> getCurrentDeviceGeofences(Position position) {
         List<Long> result = new ArrayList<>();
         for (long geofenceId : getAllDeviceItems(position.getDeviceId())) {
-            Geofence geofence = (Geofence) getById(geofenceId);
+            Geofence geofence = getById(geofenceId);
             if (geofence != null && geofence.getGeometry()
                     .containsPoint(position.getLatitude(), position.getLongitude())) {
                 result.add(geofenceId);
