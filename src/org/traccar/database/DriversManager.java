@@ -27,6 +27,9 @@ public class DriversManager extends ExtendedObjectManager<Driver> {
 
     public DriversManager(DataManager dataManager) {
         super(dataManager, Driver.class);
+        if (driversByUniqueId == null) {
+            driversByUniqueId = new ConcurrentHashMap<>();
+        }
     }
 
     private void putUniqueDriverId(Driver driver) {

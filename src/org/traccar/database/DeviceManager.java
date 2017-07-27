@@ -57,6 +57,12 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
     public DeviceManager(DataManager dataManager) {
         super(dataManager, Device.class);
         this.config = Context.getConfig();
+        if (devicesByPhone == null) {
+            devicesByPhone = new ConcurrentHashMap<>();
+        }
+        if (devicesByUniqueId == null) {
+            devicesByUniqueId = new ConcurrentHashMap<>();
+        }
         dataRefreshDelay = config.getLong("database.refreshDelay", DEFAULT_REFRESH_DELAY) * 1000;
         lookupGroupsAttribute = config.getBoolean("deviceManager.lookupGroupsAttribute");
         fallbackToText = config.getBoolean("command.fallbackToSms");

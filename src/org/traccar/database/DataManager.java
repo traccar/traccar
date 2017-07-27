@@ -37,11 +37,17 @@ import liquibase.resource.ResourceAccessor;
 
 import org.traccar.Config;
 import org.traccar.helper.Log;
+import org.traccar.model.Attribute;
 import org.traccar.model.AttributeAlias;
 import org.traccar.model.Device;
+import org.traccar.model.Driver;
 import org.traccar.model.Event;
+import org.traccar.model.Geofence;
+import org.traccar.model.Group;
+import org.traccar.model.ManagedUser;
 import org.traccar.model.Permission;
 import org.traccar.model.BaseModel;
+import org.traccar.model.Calendar;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
 import org.traccar.model.Statistics;
@@ -269,8 +275,26 @@ public class DataManager {
     }
 
     public static Class<?> getClassByName(String name) throws ClassNotFoundException {
-        return Class.forName("org.traccar.model."
-                + name.substring(0, 1).toUpperCase() + name.replace("Id", "").substring(1));
+        switch (name.toLowerCase().replace("id", "")) {
+            case "device":
+                return Device.class;
+            case "group":
+                return Group.class;
+            case "user":
+                return User.class;
+            case "manageduser":
+                return ManagedUser.class;
+            case "geofence":
+                return Geofence.class;
+            case "driver":
+                return Driver.class;
+            case "attribute":
+                return Attribute.class;
+            case "calendar":
+                return Calendar.class;
+            default:
+                throw new ClassNotFoundException();
+        }
     }
 
     public static String makeNameId(Class<?> clazz) {

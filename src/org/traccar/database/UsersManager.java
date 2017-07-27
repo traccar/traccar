@@ -29,6 +29,9 @@ public class UsersManager extends SimpleObjectManager<User> {
 
     public UsersManager(DataManager dataManager) {
         super(dataManager, User.class);
+        if (usersTokens == null) {
+            usersTokens = new ConcurrentHashMap<>();
+        }
     }
 
     private void putToken(User user) {
