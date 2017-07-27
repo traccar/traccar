@@ -23,7 +23,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.traccar.Context;
 import org.traccar.helper.Log;
-import org.traccar.model.BaseModel;
 import org.traccar.model.Group;
 
 public class GroupsManager extends BaseObjectManager<Group> implements ManagableObjects {
@@ -37,14 +36,14 @@ public class GroupsManager extends BaseObjectManager<Group> implements Managable
                 DeviceManager.DEFAULT_REFRESH_DELAY) * 1000;
     }
 
-    private void checkGroupCycles(BaseModel group) {
+    private void checkGroupCycles(Group group) {
         Set<Long> groups = new HashSet<>();
         while (group != null) {
             if (groups.contains(group.getId())) {
                 throw new IllegalArgumentException("Cycle in group hierarchy");
             }
             groups.add(group.getId());
-            group = getById(((Group) group).getGroupId());
+            group = getById(group.getGroupId());
         }
     }
 
