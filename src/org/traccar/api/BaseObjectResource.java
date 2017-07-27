@@ -34,7 +34,7 @@ import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.model.User;
 
-public class BaseObjectResource<T extends BaseModel> extends BaseResource {
+public abstract class BaseObjectResource<T extends BaseModel> extends BaseResource {
 
     private Class<T> baseClass;
 
@@ -57,8 +57,7 @@ public class BaseObjectResource<T extends BaseModel> extends BaseResource {
 
         if (manager instanceof SimpleObjectManager) {
             ((SimpleObjectManager<T>) manager).refreshUserItems();
-        }
-        if (baseClass.equals(Group.class) || baseClass.equals(Device.class)) {
+        } else if (baseClass.equals(Group.class) || baseClass.equals(Device.class)) {
             Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
             Context.getPermissionsManager().refreshAllExtendedPermissions();
         }
@@ -71,8 +70,7 @@ public class BaseObjectResource<T extends BaseModel> extends BaseResource {
         Context.getPermissionsManager().checkReadonly(getUserId());
         if (baseClass.equals(Device.class)) {
             Context.getPermissionsManager().checkDeviceReadonly(getUserId());
-        }
-        if (baseClass.equals(User.class)) {
+        } else if (baseClass.equals(User.class)) {
             User before = Context.getPermissionsManager().getUser(entity.getId());
             Context.getPermissionsManager().checkUserUpdate(getUserId(), before, (User) entity);
         }
@@ -83,8 +81,7 @@ public class BaseObjectResource<T extends BaseModel> extends BaseResource {
         if (baseClass.equals(Group.class) || baseClass.equals(Device.class)) {
             Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
             Context.getPermissionsManager().refreshAllExtendedPermissions();
-        }
-        if (baseClass.equals(User.class) && Context.getNotificationManager() != null) {
+        } else if (baseClass.equals(User.class) && Context.getNotificationManager() != null) {
             Context.getNotificationManager().refresh();
         }
         return Response.ok(entity).build();
@@ -116,7 +113,7 @@ public class BaseObjectResource<T extends BaseModel> extends BaseResource {
                 Context.getPermissionsManager().refreshAllExtendedPermissions();
             }
         }
-        // deprecated
+        // Next should be removed with Attribute Aliases
         if (baseClass.equals(Device.class)) {
             Context.getAliasesManager().removeDevice(id);
         }

@@ -378,7 +378,7 @@ public final class Context {
         identityManager = testIdentityManager;
     }
 
-    public static <T extends BaseModel> BaseObjectManager<T> getManager(Class<? extends BaseModel> clazz) {
+    public static <T extends BaseModel> BaseObjectManager<T> getManager(Class<T> clazz) {
         if (clazz.equals(Device.class)) {
             return (BaseObjectManager<T>) deviceManager;
         } else if (clazz.equals(Group.class)) {
