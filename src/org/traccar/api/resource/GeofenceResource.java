@@ -15,67 +15,21 @@
  */
 package org.traccar.api.resource;
 
-import org.traccar.Context;
-import org.traccar.api.BaseObjectResource;
-import org.traccar.database.GeofenceManager;
+import org.traccar.api.ExtendedObjectResource;
 import org.traccar.model.Geofence;
 
 import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-
-import java.sql.SQLException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 @Path("geofences")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class GeofenceResource extends BaseObjectResource<Geofence> {
+public class GeofenceResource extends ExtendedObjectResource<Geofence> {
 
     public GeofenceResource() {
         super(Geofence.class);
     }
 
-    @GET
-    public Collection<Geofence> get(
-            @QueryParam("all") boolean all, @QueryParam("userId") long userId, @QueryParam("groupId") long groupId,
-            @QueryParam("deviceId") long deviceId, @QueryParam("refresh") boolean refresh) throws SQLException {
-
-        GeofenceManager geofenceManager = Context.getGeofenceManager();
-        if (refresh) {
-            geofenceManager.refreshItems();
-        }
-
-        Set<Long> result = new HashSet<>();
-        if (all) {
-            if (Context.getPermissionsManager().isAdmin(getUserId())) {
-                result.addAll(geofenceManager.getAllItems());
-            } else {
-                Context.getPermissionsManager().checkManager(getUserId());
-                result.addAll(geofenceManager.getManagedItems(getUserId()));
-            }
-        } else {
-            if (userId == 0) {
-                userId = getUserId();
-            }
-            Context.getPermissionsManager().checkUser(getUserId(), userId);
-            result.addAll(geofenceManager.getUserItems(userId));
-        }
-
-        if (groupId != 0) {
-            Context.getPermissionsManager().checkGroup(getUserId(), groupId);
-            result.retainAll(geofenceManager.getGroupItems(groupId));
-        }
-
-        if (deviceId != 0) {
-            Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
-            result.retainAll(geofenceManager.getDeviceItems(deviceId));
-        }
-        return geofenceManager.getItems(result);
-    }
 }
