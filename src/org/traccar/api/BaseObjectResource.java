@@ -17,6 +17,7 @@
 package org.traccar.api;
 
 import java.sql.SQLException;
+import java.util.Set;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.POST;
@@ -28,6 +29,7 @@ import javax.ws.rs.core.Response;
 import org.traccar.Context;
 import org.traccar.database.BaseObjectManager;
 import org.traccar.database.ExtendedObjectManager;
+import org.traccar.database.ManagableObjects;
 import org.traccar.database.SimpleObjectManager;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
@@ -40,6 +42,29 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
 
     public BaseObjectResource(Class<T> baseClass) {
         this.baseClass = baseClass;
+    }
+
+    protected final Class<T> getBaseClass() {
+        return baseClass;
+    }
+
+    protected final Set<Long> getSimpleManagerItems(BaseObjectManager<T> manager, boolean all,  long userId) {
+        Set<Long> result = null;
+        if (all) {
+            if (Context.getPermissionsManager().isAdmin(getUserId())) {
+                result = manager.getAllItems();
+            } else {
+                Context.getPermissionsManager().checkManager(getUserId());
+                result = ((ManagableObjects) manager).getManagedItems(getUserId());
+            }
+        } else {
+            if (userId == 0) {
+                userId = getUserId();
+            }
+            Context.getPermissionsManager().checkUser(getUserId(), userId);
+            result = ((ManagableObjects) manager).getUserItems(userId);
+        }
+        return result;
     }
 
     @POST
