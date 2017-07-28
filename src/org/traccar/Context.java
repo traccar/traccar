@@ -28,6 +28,7 @@ import org.eclipse.jetty.util.URIUtil;
 import org.traccar.database.AliasesManager;
 import org.traccar.database.CalendarManager;
 import org.traccar.database.AttributesManager;
+import org.traccar.database.BaseObjectManager;
 import org.traccar.database.ConnectionManager;
 import org.traccar.database.DataManager;
 import org.traccar.database.DeviceManager;
@@ -51,6 +52,14 @@ import org.traccar.geocoder.OpenCageGeocoder;
 import org.traccar.geocoder.Geocoder;
 import org.traccar.geolocation.UnwiredGeolocationProvider;
 import org.traccar.helper.Log;
+import org.traccar.model.Attribute;
+import org.traccar.model.BaseModel;
+import org.traccar.model.Calendar;
+import org.traccar.model.Device;
+import org.traccar.model.Driver;
+import org.traccar.model.Geofence;
+import org.traccar.model.Group;
+import org.traccar.model.User;
 import org.traccar.geolocation.GoogleGeolocationProvider;
 import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.geolocation.MozillaGeolocationProvider;
@@ -367,6 +376,25 @@ public final class Context {
         config = new Config();
         objectMapper = new ObjectMapper();
         identityManager = testIdentityManager;
+    }
+
+    public static <T extends BaseModel> BaseObjectManager<T> getManager(Class<T> clazz) {
+        if (clazz.equals(Device.class)) {
+            return (BaseObjectManager<T>) deviceManager;
+        } else if (clazz.equals(Group.class)) {
+            return (BaseObjectManager<T>) groupsManager;
+        } else if (clazz.equals(User.class)) {
+            return (BaseObjectManager<T>) usersManager;
+        } else if (clazz.equals(Calendar.class)) {
+            return (BaseObjectManager<T>) calendarManager;
+        } else if (clazz.equals(Attribute.class)) {
+            return (BaseObjectManager<T>) attributesManager;
+        } else if (clazz.equals(Geofence.class)) {
+            return (BaseObjectManager<T>) geofenceManager;
+        } else if (clazz.equals(Driver.class)) {
+            return (BaseObjectManager<T>) driversManager;
+        }
+        return null;
     }
 
 }
