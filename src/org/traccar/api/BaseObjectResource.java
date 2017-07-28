@@ -101,9 +101,9 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
 
         if (manager instanceof SimpleObjectManager) {
             ((SimpleObjectManager<T>) manager).refreshUserItems();
-        }
-        if (manager instanceof ExtendedObjectManager) {
-            ((ExtendedObjectManager<T>) manager).refreshExtendedPermissions();
+            if (manager instanceof ExtendedObjectManager) {
+                ((ExtendedObjectManager<T>) manager).refreshExtendedPermissions();
+            }
         }
         if (baseClass.equals(Group.class) || baseClass.equals(Device.class) || baseClass.equals(User.class)) {
             Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
