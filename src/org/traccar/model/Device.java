@@ -18,7 +18,7 @@ package org.traccar.model;
 import java.util.Date;
 import java.util.List;
 
-import org.traccar.database.QueryAdditional;
+import org.traccar.database.QueryExtended;
 import org.traccar.database.QueryIgnore;
 
 public class Device extends ExtendedModel {
@@ -60,7 +60,7 @@ public class Device extends ExtendedModel {
 
     private Date lastUpdate;
 
-    @QueryAdditional
+    @QueryExtended
     public Date getLastUpdate() {
         if (lastUpdate != null) {
             return new Date(lastUpdate.getTime());

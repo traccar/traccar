@@ -15,6 +15,7 @@
  */
 package org.traccar.database;
 
+import java.beans.Introspector;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -124,7 +125,7 @@ public class DataManager {
         }
     }
 
-    public static String constructObjectQuery(String action, Class<?> clazz, boolean additional) {
+    public static String constructObjectQuery(String action, Class<?> clazz, boolean extended) {
         switch (action) {
             case ACTION_INSERT:
             case ACTION_UPDATE:
@@ -136,17 +137,20 @@ public class DataManager {
                 methods.removeAll(Arrays.asList(Object.class.getMethods()));
                 methods.removeAll(Arrays.asList(BaseModel.class.getMethods()));
                 for (Method method : methods) {
-                    if (method.getName().startsWith("get") && method.getParameterTypes().length == 0
-                            && (additional ? method.isAnnotationPresent(QueryAdditional.class)
-                                : !method.isAnnotationPresent(QueryIgnore.class)
-                                && !method.isAnnotationPresent(QueryAdditional.class))) {
-                        String name = method.getName().substring(3, 4).toLowerCase()
-                                + method.getName().substring(4);
+                    boolean skip;
+                    if (extended) {
+                        skip = !method.isAnnotationPresent(QueryExtended.class);
+                    } else {
+                        skip = method.isAnnotationPresent(QueryIgnore.class)
+                                || method.isAnnotationPresent(QueryExtended.class);
+                    }
+                    if (!skip && method.getName().startsWith("get") && method.getParameterTypes().length == 0) {
+                        String name = Introspector.decapitalize(method.getName().substring(3));
                         if (action.equals(ACTION_INSERT)) {
                             fields.append(name).append(", ");
                             values.append(":").append(name).append(", ");
                         } else {
-                            fields.append(name).append(" = :").append(name).append(",\n");
+                            fields.append(name).append(" = :").append(name).append(", ");
                         }
                     }
                 }
@@ -154,12 +158,12 @@ public class DataManager {
                 if (action.equals(ACTION_INSERT)) {
                     values.setLength(values.length() - 2);
                     result.append("INSERT INTO ").append(getObjectsTableName(clazz)).append(" (");
-                    result.append(fields).append(")\n");
+                    result.append(fields).append(") ");
                     result.append("VALUES (").append(values).append(")");
                 } else {
-                    result.append("UPDATE ").append(getObjectsTableName(clazz)).append(" SET\n");
+                    result.append("UPDATE ").append(getObjectsTableName(clazz)).append(" SET ");
                     result.append(fields);
-                    result.append("\nWHERE id = :id");
+                    result.append(" WHERE id = :id");
                 }
                 return result.toString();
             case ACTION_SELECT_ALL:
@@ -170,7 +174,7 @@ public class DataManager {
                 return "DELETE FROM " + getObjectsTableName(clazz) + " WHERE id = :id";
             default:
                 throw new IllegalArgumentException("Unknown action");
-            }
+        }
     }
 
     public static String constructPermissionQuery(String action, Class<?> owner, Class<?> property) {
@@ -188,7 +192,7 @@ public class DataManager {
             + " AND " + makeNameId(property) + " = :" + makeNameId(property);
         default:
             throw new IllegalArgumentException("Unknown action");
-    }
+        }
     }
 
     private String getQuery(String key) {
@@ -203,16 +207,16 @@ public class DataManager {
         return getQuery(action, clazz, false);
     }
 
-    public String getQuery(String action, Class<?> clazz, boolean additional) {
+    public String getQuery(String action, Class<?> clazz, boolean extended) {
         String queryName;
         if (action.equals(ACTION_SELECT_ALL)) {
             queryName = "database.select" + clazz.getSimpleName() + "s";
         } else {
-            queryName = "database." + action.toLowerCase() + clazz.getSimpleName();
+            queryName = "database." + action.toLowerCase() + clazz.getSimpleName() + (extended ? "Extended" : "");
         }
         String query = config.getString(queryName);
         if (query == null) {
-            query = constructObjectQuery(action, clazz, additional);
+            query = constructObjectQuery(action, clazz, extended);
             config.setString(queryName, query);
         }
 
@@ -238,18 +242,15 @@ public class DataManager {
     }
 
     private static String getPermissionsTableName(Class<?> owner, Class<?> property) {
-        String ownerName = owner.getSimpleName();
         String propertyName = property.getSimpleName();
         if (propertyName.equals("ManagedUser")) {
             propertyName = "User";
         }
-        return ownerName.substring(0, 1).toLowerCase() + ownerName.substring(1) + "_"
-            + propertyName.substring(0, 1).toLowerCase() + propertyName.substring(1);
+        return Introspector.decapitalize(owner.getSimpleName()) + "_" + Introspector.decapitalize(propertyName);
     }
 
     private static String getObjectsTableName(Class<?> clazz) {
-        String name = clazz.getSimpleName();
-        return name.substring(0, 1).toLowerCase() + name.substring(1) + "s";
+        return Introspector.decapitalize(clazz.getSimpleName()) + "s";
     }
 
     private void initDatabaseSchema() throws SQLException, LiquibaseException {
@@ -399,7 +400,7 @@ public class DataManager {
 
     public static String makeNameId(Class<?> clazz) {
         String name = clazz.getSimpleName();
-        return name.substring(0, 1).toLowerCase() + name.substring(1) + (name.indexOf("Id") == -1 ? "Id" : "");
+        return Introspector.decapitalize(name) + (name.indexOf("Id") == -1 ? "Id" : "");
     }
 
     public Collection<Permission> getPermissions(Class<? extends BaseModel> owner, Class<? extends BaseModel> property)

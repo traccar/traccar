@@ -17,7 +17,7 @@ package org.traccar.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import org.traccar.database.QueryAdditional;
+import org.traccar.database.QueryExtended;
 import org.traccar.database.QueryIgnore;
 import org.traccar.helper.Hashing;
 
@@ -247,7 +247,7 @@ public class User extends ExtendedModel {
     private String hashedPassword;
 
     @JsonIgnore
-    @QueryAdditional
+    @QueryExtended
     public String getHashedPassword() {
         return hashedPassword;
     }
@@ -259,7 +259,7 @@ public class User extends ExtendedModel {
     private String salt;
 
     @JsonIgnore
-    @QueryAdditional
+    @QueryExtended
     public String getSalt() {
         return salt;
     }
