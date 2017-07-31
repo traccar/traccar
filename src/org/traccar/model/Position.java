@@ -17,6 +17,8 @@ package org.traccar.model;
 
 import java.util.Date;
 
+import org.traccar.database.QueryIgnore;
+
 public class Position extends Message {
 
     public static final String KEY_ORIGINAL = "raw";
@@ -196,6 +198,7 @@ public class Position extends Message {
 
     private boolean outdated;
 
+    @QueryIgnore
     public boolean getOutdated() {
         return outdated;
     }
@@ -292,6 +295,12 @@ public class Position extends Message {
 
     public void setNetwork(Network network) {
         this.network = network;
+    }
+
+    @Override
+    @QueryIgnore
+    public String getType() {
+        return super.getType();
     }
 
 }

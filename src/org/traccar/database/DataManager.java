@@ -21,8 +21,11 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
@@ -57,6 +60,12 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 public class DataManager {
+
+    public static final String ACTION_SELECT_ALL = "selectAll";
+    public static final String ACTION_SELECT = "select";
+    public static final String ACTION_INSERT = "insert";
+    public static final String ACTION_UPDATE = "update";
+    public static final String ACTION_DELETE = "delete";
 
     private final Config config;
 
@@ -115,12 +124,132 @@ public class DataManager {
         }
     }
 
+    public static String constructObjectQuery(String action, Class<?> clazz, boolean additional) {
+        switch (action) {
+            case ACTION_INSERT:
+            case ACTION_UPDATE:
+                StringBuilder result = new StringBuilder();
+                StringBuilder fields = new StringBuilder();
+                StringBuilder values = new StringBuilder();
+
+                Set<Method> methods = new HashSet<>(Arrays.asList(clazz.getMethods()));
+                methods.removeAll(Arrays.asList(Object.class.getMethods()));
+                methods.removeAll(Arrays.asList(BaseModel.class.getMethods()));
+                for (Method method : methods) {
+                    if (method.getName().startsWith("get") && method.getParameterTypes().length == 0
+                            && (additional ? method.isAnnotationPresent(QueryAdditional.class)
+                                : !method.isAnnotationPresent(QueryIgnore.class)
+                                && !method.isAnnotationPresent(QueryAdditional.class))) {
+                        String name = method.getName().substring(3, 4).toLowerCase()
+                                + method.getName().substring(4);
+                        if (action.equals(ACTION_INSERT)) {
+                            fields.append(name).append(", ");
+                            values.append(":").append(name).append(", ");
+                        } else {
+                            fields.append(name).append(" = :").append(name).append(",\n");
+                        }
+                    }
+                }
+                fields.setLength(fields.length() - 2);
+                if (action.equals(ACTION_INSERT)) {
+                    values.setLength(values.length() - 2);
+                    result.append("INSERT INTO ").append(getObjectsTableName(clazz)).append(" (");
+                    result.append(fields).append(")\n");
+                    result.append("VALUES (").append(values).append(")");
+                } else {
+                    result.append("UPDATE ").append(getObjectsTableName(clazz)).append(" SET\n");
+                    result.append(fields);
+                    result.append("\nWHERE id = :id");
+                }
+                return result.toString();
+            case ACTION_SELECT_ALL:
+                return "SELECT * FROM " + getObjectsTableName(clazz);
+            case ACTION_SELECT:
+                return "SELECT * FROM " + getObjectsTableName(clazz) + " WHERE id = :id";
+            case ACTION_DELETE:
+                return "DELETE FROM " + getObjectsTableName(clazz) + " WHERE id = :id";
+            default:
+                throw new IllegalArgumentException("Unknown action");
+            }
+    }
+
+    public static String constructPermissionQuery(String action, Class<?> owner, Class<?> property) {
+        switch (action) {
+        case ACTION_SELECT_ALL:
+            return "SELECT " + makeNameId(owner) + ", " + makeNameId(property) + " FROM "
+                    + getPermissionsTableName(owner, property);
+        case ACTION_INSERT:
+            return "INSERT INTO " + getPermissionsTableName(owner, property)
+            + " (" + makeNameId(owner) + ", " + makeNameId(property) + ") VALUES (:"
+            + makeNameId(owner) + ", :" + makeNameId(property) + ")";
+        case ACTION_DELETE:
+            return "DELETE FROM " + getPermissionsTableName(owner, property)
+            + " WHERE " + makeNameId(owner) + " = :" + makeNameId(owner)
+            + " AND " + makeNameId(property) + " = :" + makeNameId(property);
+        default:
+            throw new IllegalArgumentException("Unknown action");
+    }
+    }
+
     private String getQuery(String key) {
         String query = config.getString(key);
         if (query == null) {
             Log.info("Query not provided: " + key);
         }
         return query;
+    }
+
+    public String getQuery(String action, Class<?> clazz) {
+        return getQuery(action, clazz, false);
+    }
+
+    public String getQuery(String action, Class<?> clazz, boolean additional) {
+        String queryName;
+        if (action.equals(ACTION_SELECT_ALL)) {
+            queryName = "database.select" + clazz.getSimpleName() + "s";
+        } else {
+            queryName = "database." + action.toLowerCase() + clazz.getSimpleName();
+        }
+        String query = config.getString(queryName);
+        if (query == null) {
+            query = constructObjectQuery(action, clazz, additional);
+            config.setString(queryName, query);
+        }
+
+        return query;
+    }
+
+    public String getQuery(String action, Class<?> owner, Class<?> property) {
+        String queryName;
+        if (action.equals(ACTION_SELECT_ALL)) {
+            queryName = "database.select" + owner.getSimpleName() + property.getSimpleName() + "s";
+        } else if (action.equals(ACTION_INSERT)) {
+            queryName = "database.link" + owner.getSimpleName() + property.getSimpleName();
+        } else {
+            queryName = "database.unlink" + owner.getSimpleName() + property.getSimpleName();
+        }
+        String query = config.getString(queryName);
+        if (query == null) {
+            query = constructPermissionQuery(action, owner, property.equals(User.class) ? ManagedUser.class : property);
+            config.setString(queryName, query);
+        }
+
+        return query;
+    }
+
+    private static String getPermissionsTableName(Class<?> owner, Class<?> property) {
+        String ownerName = owner.getSimpleName();
+        String propertyName = property.getSimpleName();
+        if (propertyName.equals("ManagedUser")) {
+            propertyName = "User";
+        }
+        return ownerName.substring(0, 1).toLowerCase() + ownerName.substring(1) + "_"
+            + propertyName.substring(0, 1).toLowerCase() + propertyName.substring(1);
+    }
+
+    private static String getObjectsTableName(Class<?> clazz) {
+        String name = clazz.getSimpleName();
+        return name.substring(0, 1).toLowerCase() + name.substring(1) + "s";
     }
 
     private void initDatabaseSchema() throws SQLException, LiquibaseException {
@@ -155,19 +284,8 @@ public class DataManager {
         }
     }
 
-    public void updateUser(User user) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.updateUser"))
-                .setObject(user)
-                .executeUpdate();
-        if (user.getHashedPassword() != null) {
-            QueryBuilder.create(dataSource, getQuery("database.updateUserPassword"))
-                .setObject(user)
-                .executeUpdate();
-        }
-    }
-
     public void updateDeviceStatus(Device device) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.updateDeviceStatus"))
+        QueryBuilder.create(dataSource, getQuery(ACTION_UPDATE, Device.class, true))
                 .setObject(device)
                 .executeUpdate();
     }
@@ -180,16 +298,10 @@ public class DataManager {
                 .executeQuery(Position.class);
     }
 
-    public Position getPosition(long positionId) throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectPosition"))
-                .setLong("id", positionId)
-                .executeQuerySingle(Position.class);
-    }
-
     public void addPosition(Position position) throws SQLException {
-        position.setId(QueryBuilder.create(dataSource, getQuery("database.insertPosition"), true)
-                .setDate("now", new Date())
+        position.setId(QueryBuilder.create(dataSource, getQuery(ACTION_INSERT, Position.class), true)
                 .setObject(position)
+                .setDate("serverTime", new Date())
                 .executeUpdate());
     }
 
@@ -220,14 +332,8 @@ public class DataManager {
     }
 
     public Server getServer() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectServers"))
+        return QueryBuilder.create(dataSource, getQuery(ACTION_SELECT_ALL, Server.class))
                 .executeQuerySingle(Server.class);
-    }
-
-    public Event getEvent(long eventId) throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectEvent"))
-                .setLong("id", eventId)
-                .executeQuerySingle(Event.class);
     }
 
     public Collection<Event> getEvents(long deviceId, Date from, Date to) throws SQLException {
@@ -268,12 +374,6 @@ public class DataManager {
                 .executeQuery(Statistics.class);
     }
 
-    public void addStatistics(Statistics statistics) throws SQLException {
-        statistics.setId(QueryBuilder.create(dataSource, getQuery("database.insertStatistics"), true)
-                .setObject(statistics)
-                .executeUpdate());
-    }
-
     public static Class<?> getClassByName(String name) throws ClassNotFoundException {
         switch (name.toLowerCase().replace("id", "")) {
             case "device":
@@ -302,44 +402,50 @@ public class DataManager {
         return name.substring(0, 1).toLowerCase() + name.substring(1) + (name.indexOf("Id") == -1 ? "Id" : "");
     }
 
+    public Collection<Permission> getPermissions(Class<? extends BaseModel> owner, Class<? extends BaseModel> property)
+            throws SQLException, ClassNotFoundException {
+        return QueryBuilder.create(dataSource, getQuery(ACTION_SELECT_ALL, owner, property))
+                .executePermissionsQuery();
+    }
+
     public void linkObject(Class<?> owner, long ownerId, Class<?> property, long propertyId, boolean link)
             throws SQLException {
-        String query = "database." + (link ? "link" : "unlink") + owner.getSimpleName() + property.getSimpleName();
-        QueryBuilder queryBuilder = QueryBuilder.create(dataSource, getQuery(query));
-
-        queryBuilder.setLong(makeNameId(owner), ownerId);
-        queryBuilder.setLong(makeNameId(property), propertyId);
-        queryBuilder.executeUpdate();
+        QueryBuilder.create(dataSource, getQuery(link ? ACTION_INSERT : ACTION_DELETE, owner, property))
+                .setLong(makeNameId(owner), ownerId)
+                .setLong(makeNameId(property), propertyId)
+                .executeUpdate();
     }
 
-    public <T> Collection<T> getObjects(Class<T> clazz) throws SQLException {
-        String query = "database.select" + clazz.getSimpleName() + "s";
-        return QueryBuilder.create(dataSource, getQuery(query)).executeQuery(clazz);
+    public <T extends BaseModel> T getObject(Class<T> clazz, long entityId) throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery(ACTION_SELECT, clazz))
+                .setLong("id", entityId)
+                .executeQuerySingle(clazz);
     }
 
-    public Collection<Permission> getPermissions(Class<? extends BaseModel> owner,
-            Class<? extends BaseModel> property) throws SQLException, ClassNotFoundException {
-        String query = "database.select" + owner.getSimpleName() + property.getSimpleName() + "s";
-        return QueryBuilder.create(dataSource, getQuery(query)).executePermissionsQuery();
+    public <T extends BaseModel> Collection<T> getObjects(Class<T> clazz) throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery(ACTION_SELECT_ALL, clazz))
+                .executeQuery(clazz);
     }
 
     public void addObject(BaseModel entity) throws SQLException {
-        String query = "database.insert" + entity.getClass().getSimpleName();
-        entity.setId(QueryBuilder.create(dataSource, getQuery(query), true)
+        entity.setId(QueryBuilder.create(dataSource, getQuery(ACTION_INSERT, entity.getClass()), true)
                 .setObject(entity)
                 .executeUpdate());
     }
 
     public void updateObject(BaseModel entity) throws SQLException {
-        String query = "database.update" + entity.getClass().getSimpleName();
-        QueryBuilder.create(dataSource, getQuery(query))
+        QueryBuilder.create(dataSource, getQuery(ACTION_UPDATE, entity.getClass()))
                 .setObject(entity)
                 .executeUpdate();
+        if (entity instanceof User && ((User) entity).getHashedPassword() != null) {
+            QueryBuilder.create(dataSource, getQuery(ACTION_UPDATE, User.class, true))
+                    .setObject(entity)
+                    .executeUpdate();
+        }
     }
 
     public void removeObject(Class<? extends BaseModel> clazz, long entityId) throws SQLException {
-        String query = "database.delete" + clazz.getSimpleName();
-        QueryBuilder.create(dataSource, getQuery(query))
+        QueryBuilder.create(dataSource, getQuery(ACTION_DELETE, clazz))
                 .setLong("id", entityId)
                 .executeUpdate();
     }

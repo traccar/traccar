@@ -23,7 +23,7 @@ public class EventResource extends BaseResource {
     @Path("{id}")
     @GET
     public Event get(@PathParam("id") long id) throws SQLException {
-        Event event = Context.getDataManager().getEvent(id);
+        Event event = Context.getDataManager().getObject(Event.class, id);
         Context.getPermissionsManager().checkDevice(getUserId(), event.getDeviceId());
         if (event.getGeofenceId() != 0) {
             Context.getPermissionsManager().checkPermission(Geofence.class, getUserId(), event.getGeofenceId());

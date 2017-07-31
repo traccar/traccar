@@ -61,7 +61,7 @@ public class StatisticsManager {
             statistics.setGeolocationRequests(geolocationRequests);
 
             try {
-                Context.getDataManager().addStatistics(statistics);
+                Context.getDataManager().addObject(statistics);
             } catch (SQLException e) {
                 Log.warning(e);
             }
