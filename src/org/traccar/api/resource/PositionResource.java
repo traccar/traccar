@@ -54,7 +54,7 @@ public class PositionResource extends BaseResource {
         if (!positionIds.isEmpty()) {
             ArrayList<Position> positions = new ArrayList<>();
             for (Long positionId : positionIds) {
-                Position position = Context.getDataManager().getPosition(positionId);
+                Position position = Context.getDataManager().getObject(Position.class, positionId);
                 Context.getPermissionsManager().checkDevice(getUserId(), position.getDeviceId());
                 positions.add(position);
             }

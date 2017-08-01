@@ -18,6 +18,9 @@ package org.traccar.model;
 import java.util.Date;
 import java.util.List;
 
+import org.traccar.database.QueryExtended;
+import org.traccar.database.QueryIgnore;
+
 public class Device extends ExtendedModel {
 
     private String name;
@@ -46,6 +49,7 @@ public class Device extends ExtendedModel {
 
     private String status;
 
+    @QueryIgnore
     public String getStatus() {
         return status != null ? status : STATUS_OFFLINE;
     }
@@ -56,6 +60,7 @@ public class Device extends ExtendedModel {
 
     private Date lastUpdate;
 
+    @QueryExtended
     public Date getLastUpdate() {
         if (lastUpdate != null) {
             return new Date(lastUpdate.getTime());
@@ -74,6 +79,7 @@ public class Device extends ExtendedModel {
 
     private long positionId;
 
+    @QueryIgnore
     public long getPositionId() {
         return positionId;
     }
@@ -94,6 +100,7 @@ public class Device extends ExtendedModel {
 
     private List<Long> geofenceIds;
 
+    @QueryIgnore
     public List<Long> getGeofenceIds() {
         return geofenceIds;
     }

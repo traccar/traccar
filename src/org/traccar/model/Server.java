@@ -17,10 +17,12 @@ package org.traccar.model;
 
 import java.util.TimeZone;
 
+import org.traccar.database.QueryIgnore;
 import org.traccar.helper.Log;
 
 public class Server extends ExtendedModel {
 
+    @QueryIgnore
     public String getVersion() {
         return Log.getAppVersion();
     }
