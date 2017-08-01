@@ -72,6 +72,8 @@ public class DataManager {
 
     private DataSource dataSource;
 
+    private boolean generateQueries;
+
     public DataManager(Config config) throws Exception {
         this.config = config;
 
@@ -119,6 +121,8 @@ public class DataManager {
             if (maxPoolSize != 0) {
                 hikariConfig.setMaximumPoolSize(maxPoolSize);
             }
+
+            generateQueries = config.getBoolean("database.generateQueries");
 
             dataSource = new HikariDataSource(hikariConfig);
 
@@ -218,9 +222,11 @@ public class DataManager {
             }
         }
         String query = config.getString(queryName);
-        if (query == null) {
+        if (query == null && generateQueries) {
             query = constructObjectQuery(action, clazz, extended);
             config.setString(queryName, query);
+        } else {
+            Log.info("Query not provided: " + queryName);
         }
 
         return query;
@@ -236,9 +242,11 @@ public class DataManager {
             queryName = "database.unlink" + owner.getSimpleName() + property.getSimpleName();
         }
         String query = config.getString(queryName);
-        if (query == null) {
+        if (query == null && generateQueries) {
             query = constructPermissionQuery(action, owner, property.equals(User.class) ? ManagedUser.class : property);
             config.setString(queryName, query);
+        } else {
+            Log.info("Query not provided: " + queryName);
         }
 
         return query;
