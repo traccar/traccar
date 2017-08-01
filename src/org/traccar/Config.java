@@ -97,7 +97,7 @@ public class Config {
     }
 
     public void setString(String key, String value) {
-        properties.putIfAbsent(key, value);
+        properties.put(key, value);
     }
 
 }

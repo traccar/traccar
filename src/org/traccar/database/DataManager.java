@@ -184,12 +184,12 @@ public class DataManager {
                     + getPermissionsTableName(owner, property);
         case ACTION_INSERT:
             return "INSERT INTO " + getPermissionsTableName(owner, property)
-            + " (" + makeNameId(owner) + ", " + makeNameId(property) + ") VALUES (:"
-            + makeNameId(owner) + ", :" + makeNameId(property) + ")";
+                    + " (" + makeNameId(owner) + ", " + makeNameId(property) + ") VALUES (:"
+                    + makeNameId(owner) + ", :" + makeNameId(property) + ")";
         case ACTION_DELETE:
             return "DELETE FROM " + getPermissionsTableName(owner, property)
-            + " WHERE " + makeNameId(owner) + " = :" + makeNameId(owner)
-            + " AND " + makeNameId(property) + " = :" + makeNameId(property);
+                    + " WHERE " + makeNameId(owner) + " = :" + makeNameId(owner)
+                    + " AND " + makeNameId(property) + " = :" + makeNameId(property);
         default:
             throw new IllegalArgumentException("Unknown action");
         }
@@ -212,7 +212,10 @@ public class DataManager {
         if (action.equals(ACTION_SELECT_ALL)) {
             queryName = "database.select" + clazz.getSimpleName() + "s";
         } else {
-            queryName = "database." + action.toLowerCase() + clazz.getSimpleName() + (extended ? "Extended" : "");
+            queryName = "database." + action.toLowerCase() + clazz.getSimpleName();
+            if (extended) {
+                queryName += "Extended";
+            }
         }
         String query = config.getString(queryName);
         if (query == null) {
