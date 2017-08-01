@@ -234,5 +234,6 @@
     <entry key='vt200.port'>5143</entry>
     <entry key='owntracks.port'>5144</entry>
     <entry key='vtfms.port'>5145</entry>
+    <entry key='tlv.port'>5146</entry>
 
 </properties>
