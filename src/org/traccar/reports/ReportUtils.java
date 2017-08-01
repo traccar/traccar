@@ -40,6 +40,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -47,6 +48,13 @@ import java.util.TimeZone;
 public final class ReportUtils {
 
     private ReportUtils() {
+    }
+
+    public static void checkPeriodLimit(Date from, Date to) {
+        long limit = Context.getConfig().getLong("report.periodLimit") * 1000;
+        if (limit > 0 && to.getTime() - from.getTime() > limit) {
+            throw new IllegalArgumentException("Time period exceeds the limit");
+        }
     }
 
     public static String getDistanceUnit(long userId) {
