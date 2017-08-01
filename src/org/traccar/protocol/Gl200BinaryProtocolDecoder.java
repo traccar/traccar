@@ -19,6 +19,8 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.helper.BitBuffer;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
@@ -28,6 +30,8 @@ import org.traccar.model.Position;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 public class Gl200BinaryProtocolDecoder extends BaseProtocolDecoder {
 
@@ -42,12 +46,171 @@ public class Gl200BinaryProtocolDecoder extends BaseProtocolDecoder {
         return dateBuilder.getDate();
     }
 
+    public static final int MSG_RSP_LCB = 3;
+    public static final int MSG_RSP_GEO = 8;
+    public static final int MSG_RSP_COMPRESSED = 100;
+
+    private List<Position> decodeLocation(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
+
+        List<Position> positions = new LinkedList<>();
+
+        int type = buf.readUnsignedByte();
+
+        buf.readUnsignedInt(); // mask
+        buf.readUnsignedShort(); // length
+        buf.readUnsignedByte(); // device type
+        buf.readUnsignedShort(); // protocol version
+        buf.readUnsignedShort(); // firmware version
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, String.format("%015d", buf.readLong()));
+        if (deviceSession == null) {
+            return null;
+        }
+
+        int battery = buf.readUnsignedByte();
+        int power = buf.readUnsignedShort();
+
+        if (type == MSG_RSP_GEO) {
+            buf.readUnsignedByte(); // reserved
+            buf.readUnsignedByte(); // reserved
+        }
+
+        buf.readUnsignedByte(); // motion status
+        int satellites = buf.readUnsignedByte();
+
+        if (type != MSG_RSP_COMPRESSED) {
+            buf.readUnsignedByte(); // index
+        }
+
+        if (type == MSG_RSP_LCB) {
+            buf.readUnsignedByte(); // phone length
+            for (int b = buf.readUnsignedByte();; b = buf.readUnsignedByte()) {
+                if ((b & 0xf) == 0xf || (b & 0xf0) == 0xf0) {
+                    break;
+                }
+            }
+        }
+
+        if (type == MSG_RSP_COMPRESSED) {
+
+            int count = buf.readUnsignedShort();
+
+            BitBuffer bits;
+            int speed = 0;
+            int heading = 0;
+            int latitude = 0;
+            int longitude = 0;
+            long time = 0;
+
+            for (int i = 0; i < count; i++) {
+
+                if (time > 0) {
+                    time += 1;
+                }
+
+                Position position = new Position();
+                position.setProtocol(getProtocolName());
+                position.setDeviceId(deviceSession.getDeviceId());
+
+                switch (BitUtil.from(buf.getUnsignedByte(buf.readerIndex()), 8 - 2)) {
+                    case 1:
+                        bits = new BitBuffer(buf.readBytes(3));
+                        bits.readUnsigned(2); // point attribute
+                        bits.readUnsigned(1); // fix type
+                        speed = bits.readUnsigned(12);
+                        heading = bits.readUnsigned(9);
+                        longitude = buf.readInt();
+                        latitude = buf.readInt();
+                        if (time == 0) {
+                            time = buf.readUnsignedInt();
+                        }
+                        break;
+                    case 2:
+                        bits = new BitBuffer(buf.readBytes(5));
+                        bits.readUnsigned(2); // point attribute
+                        bits.readUnsigned(1); // fix type
+                        speed += bits.readSigned(7);
+                        heading += bits.readSigned(7);
+                        longitude += bits.readSigned(12);
+                        latitude += bits.readSigned(11);
+                        break;
+                    default:
+                        buf.readUnsignedByte(); // invalid or same
+                        continue;
+                }
+
+                position.setValid(true);
+                position.setTime(new Date(time * 1000));
+                position.setSpeed(UnitsConverter.knotsFromKph(speed * 0.1));
+                position.setCourse(heading);
+                position.setLongitude(longitude * 0.000001);
+                position.setLatitude(latitude * 0.000001);
+
+                positions.add(position);
+
+            }
+
+        } else {
+
+            int count = buf.readUnsignedByte();
+
+            for (int i = 0; i < count; i++) {
+
+                Position position = new Position();
+                position.setProtocol(getProtocolName());
+                position.setDeviceId(deviceSession.getDeviceId());
+
+                position.set(Position.KEY_BATTERY_LEVEL, battery);
+                position.set(Position.KEY_POWER, power);
+                position.set(Position.KEY_SATELLITES, satellites);
+
+                int hdop = buf.readUnsignedByte();
+                position.setValid(hdop > 0);
+                position.set(Position.KEY_HDOP, hdop);
+
+                position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedMedium() * 0.1));
+                position.setCourse(buf.readUnsignedShort());
+                position.setAltitude(buf.readShort());
+                position.setLongitude(buf.readInt() * 0.000001);
+                position.setLatitude(buf.readInt() * 0.000001);
+
+                position.setTime(decodeTime(buf));
+
+                position.setNetwork(new Network(CellTower.from(
+                        buf.readUnsignedShort(), buf.readUnsignedShort(),
+                        buf.readUnsignedShort(), buf.readUnsignedShort())));
+
+                buf.readUnsignedByte(); // reserved
+
+                positions.add(position);
+
+            }
+
+        }
+
+        return positions;
+    }
+
+    public static final int MSG_EVT_BPL = 6;
+    public static final int MSG_EVT_VGN = 45;
+    public static final int MSG_EVT_VGF = 46;
+    public static final int MSG_EVT_UPD = 15;
+    public static final int MSG_EVT_IDF = 17;
+    public static final int MSG_EVT_GSS = 21;
+    public static final int MSG_EVT_GES = 26;
+    public static final int MSG_EVT_GPJ = 31;
+    public static final int MSG_EVT_RMD = 35;
+    public static final int MSG_EVT_JDS = 33;
+    public static final int MSG_EVT_CRA = 23;
+    public static final int MSG_EVT_UPC = 34;
+
     private Position decodeEvent(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
 
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        buf.readUnsignedByte(); // message type
+        int type = buf.readUnsignedByte();
+
         buf.readUnsignedInt(); // mask
         buf.readUnsignedShort(); // length
         buf.readUnsignedByte(); // device type
@@ -67,13 +230,63 @@ public class Gl200BinaryProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedByte(); // motion status
 
         position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
-        position.set(Position.KEY_INDEX, buf.readUnsignedByte());
+
+        switch (type) {
+            case MSG_EVT_BPL:
+                buf.readUnsignedShort(); // backup battery voltage
+                break;
+            case MSG_EVT_VGN:
+            case MSG_EVT_VGF:
+                buf.readUnsignedShort(); // reserved
+                buf.readUnsignedByte(); // report type
+                buf.readUnsignedInt(); // ignition duration
+                break;
+            case MSG_EVT_UPD:
+                buf.readUnsignedShort(); // code
+                buf.readUnsignedByte(); // retry
+                break;
+            case MSG_EVT_IDF:
+                buf.readUnsignedInt(); // idling duration
+                break;
+            case MSG_EVT_GSS:
+                buf.readUnsignedByte(); // gps signal status
+                buf.readUnsignedInt(); // reserved
+                break;
+            case MSG_EVT_GES:
+                buf.readUnsignedShort(); // trigger geo id
+                buf.readUnsignedByte(); // trigger geo enable
+                buf.readUnsignedByte(); // trigger mode
+                buf.readUnsignedInt(); // radius
+                buf.readUnsignedInt(); // check interval
+                break;
+            case MSG_EVT_GPJ:
+                buf.readUnsignedByte(); // cw jamming value
+                buf.readUnsignedByte(); // gps jamming state
+                break;
+            case MSG_EVT_RMD:
+                buf.readUnsignedByte(); // roaming state
+                break;
+            case MSG_EVT_JDS:
+                buf.readUnsignedByte(); // jamming state
+                break;
+            case MSG_EVT_CRA:
+                buf.readUnsignedByte(); // crash counter
+                break;
+            case MSG_EVT_UPC:
+                buf.readUnsignedByte(); // command id
+                buf.readUnsignedShort(); // result
+                break;
+            default:
+                break;
+        }
+
+        buf.readUnsignedByte(); // count
 
         int hdop = buf.readUnsignedByte();
         position.setValid(hdop > 0);
         position.set(Position.KEY_HDOP, hdop);
 
-        position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedMedium()));
+        position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedMedium() * 0.1));
         position.setCourse(buf.readUnsignedShort());
         position.setAltitude(buf.readShort());
         position.setLongitude(buf.readInt() * 0.000001);
@@ -179,6 +392,8 @@ public class Gl200BinaryProtocolDecoder extends BaseProtocolDecoder {
         ChannelBuffer buf = (ChannelBuffer) msg;
 
         switch (buf.readBytes(4).toString(StandardCharsets.US_ASCII)) {
+            case "+RSP":
+                return decodeLocation(channel, remoteAddress, buf);
             case "+INF":
                 return decodeInformation(channel, remoteAddress, buf);
             case "+EVT":

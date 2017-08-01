@@ -118,7 +118,7 @@ public class ProtocolTest extends BaseTest {
 
         Assert.assertNotNull("list is null", decodedObject);
         Assert.assertTrue("not a list", decodedObject instanceof List);
-        Assert.assertFalse("list if empty", ((List) decodedObject).isEmpty());
+        Assert.assertFalse("list is empty", ((List) decodedObject).isEmpty());
 
         for (Object item : (List) decodedObject) {
             verifyDecodedPosition(item, checkLocation, false, expected);
