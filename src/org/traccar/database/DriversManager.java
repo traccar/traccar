@@ -23,7 +23,7 @@ import org.traccar.model.Driver;
 
 public class DriversManager extends ExtendedObjectManager<Driver> {
 
-    private Map<String, Long> driversByUniqueId;
+    private Map<String, Driver> driversByUniqueId;
 
     public DriversManager(DataManager dataManager) {
         super(dataManager, Driver.class);
@@ -36,7 +36,7 @@ public class DriversManager extends ExtendedObjectManager<Driver> {
         if (driversByUniqueId == null) {
             driversByUniqueId = new ConcurrentHashMap<>(getAllItems().size());
         }
-        driversByUniqueId.put(driver.getUniqueId(), driver.getId());
+        driversByUniqueId.put(driver.getUniqueId(), driver);
     }
 
     @Override
@@ -68,6 +68,6 @@ public class DriversManager extends ExtendedObjectManager<Driver> {
     }
 
     public Driver getDriverByUniqueId(String uniqueId) {
-        return getById(driversByUniqueId.get(uniqueId));
+        return driversByUniqueId.get(uniqueId);
     }
 }
