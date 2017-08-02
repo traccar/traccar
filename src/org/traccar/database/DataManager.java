@@ -267,6 +267,7 @@ public class DataManager {
 
     private static String getObjectsTableName(Class<?> clazz) {
         String result = Introspector.decapitalize(clazz.getSimpleName());
+        // Add "s" ending if object name is not plural already
         if (!result.endsWith("s")) {
             result += "s";
         }
