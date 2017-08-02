@@ -25,7 +25,7 @@ import org.traccar.model.User;
 
 public class UsersManager extends SimpleObjectManager<User> {
 
-    private Map<String, Long> usersTokens;
+    private Map<String, User> usersTokens;
 
     public UsersManager(DataManager dataManager) {
         super(dataManager, User.class);
@@ -39,7 +39,7 @@ public class UsersManager extends SimpleObjectManager<User> {
             usersTokens = new ConcurrentHashMap<>();
         }
         if (user.getToken() != null) {
-            usersTokens.put(user.getToken(), user.getId());
+            usersTokens.put(user.getToken(), user);
         }
     }
 
@@ -53,9 +53,7 @@ public class UsersManager extends SimpleObjectManager<User> {
     protected void updateCachedItem(User user) {
         User cachedUser = getById(user.getId());
         super.updateCachedItem(user);
-        if (user.getToken() != null) {
-            usersTokens.put(user.getToken(), user.getId());
-        }
+        putToken(user);
         if (cachedUser.getToken() != null && !cachedUser.getToken().equals(user.getToken())) {
             usersTokens.remove(cachedUser.getToken());
         }
@@ -82,7 +80,7 @@ public class UsersManager extends SimpleObjectManager<User> {
     }
 
     public User getUserByToken(String token) {
-        return getById(usersTokens.get(token));
+        return usersTokens.get(token);
     }
 
 }
