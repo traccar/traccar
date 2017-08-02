@@ -222,11 +222,13 @@ public class DataManager {
             }
         }
         String query = config.getString(queryName);
-        if (query == null && generateQueries) {
-            query = constructObjectQuery(action, clazz, extended);
-            config.setString(queryName, query);
-        } else {
-            Log.info("Query not provided: " + queryName);
+        if (query == null) {
+            if (generateQueries) {
+                query = constructObjectQuery(action, clazz, extended);
+                config.setString(queryName, query);
+            } else {
+                Log.info("Query not provided: " + queryName);
+            }
         }
 
         return query;
@@ -242,11 +244,14 @@ public class DataManager {
             queryName = "database.unlink" + owner.getSimpleName() + property.getSimpleName();
         }
         String query = config.getString(queryName);
-        if (query == null && generateQueries) {
-            query = constructPermissionQuery(action, owner, property.equals(User.class) ? ManagedUser.class : property);
-            config.setString(queryName, query);
-        } else {
-            Log.info("Query not provided: " + queryName);
+        if (query == null) {
+            if (generateQueries) {
+                query = constructPermissionQuery(action, owner,
+                        property.equals(User.class) ? ManagedUser.class : property);
+                config.setString(queryName, query);
+            } else {
+                Log.info("Query not provided: " + queryName);
+            }
         }
 
         return query;
@@ -261,7 +266,11 @@ public class DataManager {
     }
 
     private static String getObjectsTableName(Class<?> clazz) {
-        return Introspector.decapitalize(clazz.getSimpleName()) + "s";
+        String result = Introspector.decapitalize(clazz.getSimpleName());
+        if (!result.endsWith("s")) {
+            result += "s";
+        }
+        return result;
     }
 
     private void initDatabaseSchema() throws SQLException, LiquibaseException {
