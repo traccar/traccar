@@ -66,7 +66,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .expression("(?:[^,]+)?,")           // device name
             .number("(xx),")                     // state
             .expression("(?:[0-9F]{20})?,")      // iccid
-            .number("d{1,2},")
+            .number("(d{1,2}),")                 // rssi
             .number("d{1,2},")
             .expression("[01],")                 // external power
             .number("([d.]+)?,")                 // odometer or external power
@@ -388,6 +388,10 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private Object decodeInf(Channel channel, SocketAddress remoteAddress, String sentence) {
+
+        org.traccar.helper.PatternUtil.MatchResult matchResult =
+                org.traccar.helper.PatternUtil.checkPattern(PATTERN_INF.pattern(), sentence);
+
         Parser parser = new Parser(PATTERN_INF, sentence);
         Position position = initPosition(parser, channel, remoteAddress);
         if (position == null) {
@@ -395,6 +399,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
 
         position.set(Position.KEY_STATUS, parser.next());
+
+        position.set(Position.KEY_RSSI, parser.nextInt());
 
         parser.next(); // odometer or external power
 
