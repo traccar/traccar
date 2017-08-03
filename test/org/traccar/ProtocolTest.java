@@ -270,14 +270,14 @@ public class ProtocolTest extends BaseTest {
 
     protected void verifyCommand(
             BaseProtocolEncoder encoder, Command command, ChannelBuffer expected) throws Exception {
-        verifyDecodedCommand(encoder.encodeCommand(command), expected);
+        verifyFrame(expected, encoder.encodeCommand(command));
     }
 
-    private void verifyDecodedCommand(Object decodedObject, ChannelBuffer expected) {
+    protected void verifyFrame(ChannelBuffer expected, Object object) {
 
-        Assert.assertNotNull("command is null", decodedObject);
-        Assert.assertTrue("not a buffer", decodedObject instanceof ChannelBuffer);
-        Assert.assertEquals(ChannelBuffers.hexDump(expected), ChannelBuffers.hexDump((ChannelBuffer) decodedObject));
+        Assert.assertNotNull("buffer is null", object);
+        Assert.assertTrue("not a buffer", object instanceof ChannelBuffer);
+        Assert.assertEquals(ChannelBuffers.hexDump(expected), ChannelBuffers.hexDump((ChannelBuffer) object));
 
     }
 
