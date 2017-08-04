@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,12 +43,16 @@ public class MotionEventHandler extends BaseEventHandler {
         if (lastPosition != null) {
             oldMotion = lastPosition.getBoolean(Position.KEY_MOTION);
         }
-        if (motion && !oldMotion) {
-            return Collections.singleton(
-                    new Event(Event.TYPE_DEVICE_MOVING, position.getDeviceId(), position.getId()));
-        } else if (!motion && oldMotion) {
-            return Collections.singleton(
-                    new Event(Event.TYPE_DEVICE_STOPPED, position.getDeviceId(), position.getId()));
+        if (Context.getMotionManager() != null) {
+            Context.getMotionManager().updateDeviceMotion(position, oldMotion);
+        } else {
+            if (motion && !oldMotion) {
+                return Collections.singleton(
+                        new Event(Event.TYPE_DEVICE_MOVING, position.getDeviceId(), position.getId()));
+            } else if (!motion && oldMotion) {
+                return Collections.singleton(
+                        new Event(Event.TYPE_DEVICE_STOPPED, position.getDeviceId(), position.getId()));
+            }
         }
         return null;
     }
