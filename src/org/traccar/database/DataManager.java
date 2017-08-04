@@ -146,7 +146,7 @@ public class DataManager {
                         skip = !method.isAnnotationPresent(QueryExtended.class);
                     } else {
                         skip = method.isAnnotationPresent(QueryIgnore.class)
-                                || method.isAnnotationPresent(QueryExtended.class);
+                                || method.isAnnotationPresent(QueryExtended.class) && !action.equals(ACTION_INSERT);
                     }
                     if (!skip && method.getName().startsWith("get") && method.getParameterTypes().length == 0) {
                         String name = Introspector.decapitalize(method.getName().substring(3));

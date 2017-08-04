@@ -26,7 +26,6 @@ public class DataManagerTest {
         Assert.assertFalse(insertDevice.contains("class"));
         Assert.assertFalse(insertDevice.contains("id"));
         Assert.assertFalse(insertDevice.contains("status"));
-        Assert.assertFalse(insertDevice.contains("lastUpdate"));
         Assert.assertFalse(insertDevice.contains("geofenceIds"));
 
         String updateDeviceStatus = DataManager.constructObjectQuery("update", Device.class, true);
