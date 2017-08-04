@@ -35,6 +35,7 @@ import org.traccar.database.DeviceManager;
 import org.traccar.database.DriversManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.database.MediaManager;
+import org.traccar.database.MotionManager;
 import org.traccar.database.NotificationManager;
 import org.traccar.database.PermissionsManager;
 import org.traccar.database.GeofenceManager;
@@ -229,6 +230,12 @@ public final class Context {
         return smppClient;
     }
 
+    private static MotionManager motionManager;
+
+    public static MotionManager getMotionManager() {
+        return motionManager;
+    }
+
     public static void init(String[] arguments) throws Exception {
 
         config = new Config();
@@ -368,6 +375,11 @@ public final class Context {
 
         if (config.getBoolean("sms.smpp.enable")) {
             smppClient = new SmppClient();
+        }
+
+        if (config.getLong("event.motion.stopDelay") > 0 || config.getLong("event.motion.motionDelay") > 0) {
+            motionManager = new MotionManager(config.getLong("event.motion.stopDelay"),
+                    config.getLong("event.motion.motionDelay"));
         }
 
     }
