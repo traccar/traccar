@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ public class CradlepointProtocolDecoder extends BaseProtocolDecoder {
             .expression("([^,]+),")              // carrier
             .expression("([^,]+)?,")             // serdis
             .number("(-?d+),")                   // rsrp
-            .number("(-?d+),")                   // dbm
+            .number("(-?d+),")                   // rssi
             .number("(-?d+),")                   // rsrq
             .expression("([^,]+)?,")             // ecio
             .expression("([^,]+)?")              // wan ip
@@ -75,7 +75,7 @@ public class CradlepointProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(parser.nextDouble(0));
         position.setCourse(parser.nextDouble(0));
 
-        parser.skip(4);
+        parser.skip(3);
 
         position.set(Position.KEY_RSSI, parser.nextDouble());
 
