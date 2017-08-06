@@ -60,7 +60,7 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
                 return encodeContent("STATUS#");
             case Command.TYPE_SOS_NUMBER:
                 String num = command.getString(Command.KEY_DATA);
-                if (!num.isEmpty()) {
+                if (num != null && !num.isEmpty()) {
                     return encodeContent("SOS,A," + num + "#");
                 } else {
                     return encodeContent("SOS,D#");
