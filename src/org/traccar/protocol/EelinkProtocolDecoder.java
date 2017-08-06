@@ -195,6 +195,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 String content = buf.readBytes(remainingbytes).toString(StandardCharsets.UTF_8);
 
                 position.set(Position.KEY_RESULT, content);
+                break;
             default:
                 position = null;
                 break;
