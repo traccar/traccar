@@ -199,7 +199,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 position = null;
                 break;
         }
-        
+
         return position;
     }
 
@@ -361,7 +361,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         }else{
             index = newIndex; // current message index
         }*/
-        
+
         // process packet data by type
         if (type == MSG_LOGIN) { // initial login packet
             DeviceSession deviceSession
