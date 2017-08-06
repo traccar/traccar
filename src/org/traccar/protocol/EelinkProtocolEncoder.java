@@ -35,7 +35,7 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
         buf.writeShort(2 + 1 + 4 + content.length()); // length
         buf.writeShort(0); // index
 
-        buf.writeByte(EelinkProtocolDecoder.MSGSIGN_COMMAND); // command
+        buf.writeByte(EelinkProtocolDecoder.MSG_SIGN_COMMAND); // command
         buf.writeInt(0); // server id
         buf.writeBytes(content.getBytes(StandardCharsets.UTF_8));
 
@@ -59,9 +59,9 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
             case Command.TYPE_GET_DEVICE_STATUS:
                 return encodeContent("STATUS#");
             case Command.TYPE_SOS_NUMBER:
-                String num = command.getString(Command.KEY_DATA);
-                if (num != null && !num.isEmpty()) {
-                    return encodeContent("SOS,A," + num + "#");
+                String phoneNumber = command.getString(Command.KEY_DATA);
+                if ( phoneNumber != null && !phoneNumber.isEmpty() ) {
+                    return encodeContent("SOS,A," + phoneNumber + "#");
                 } else {
                     return encodeContent("SOS,D#");
                 }

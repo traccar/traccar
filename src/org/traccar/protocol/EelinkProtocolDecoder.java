@@ -64,8 +64,8 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_CAMERA_INFO = 0x0E;
     public static final int MSG_CAMERA_DATA = 0x0F;
 
-    public static final int MSGSIGN_COMMAND = 0x01;
-    public static final int MSGSIGN_NEWS = 0x02;
+    public static final int MSG_SIGN_COMMAND = 0x01;
+    public static final int MSG_SIGN_NEWS = 0x02;
 
     private void sendResponse(Channel channel, int type, int index, ChannelBuffer buf) {
         if (channel != null) {
@@ -118,7 +118,6 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void decodeStatus(Position position, int status) {
-        /* 16 bits, read lowest 0 to 15 */
 
         // GPS - 0 bit
         position.setValid(BitUtil.check(status, 0));
@@ -183,7 +182,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         position.setValid(false);
 
         switch (buf.readUnsignedByte()) {
-            case MSGSIGN_COMMAND:
+            case MSG_SIGN_COMMAND:
                 buf.skipBytes(4); //server flag
 
                 String content = buf.readBytes(buf.readableBytes()).toString(StandardCharsets.UTF_8);
@@ -253,17 +252,15 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                         break;
                 }
 
-                // send back response
+
                 if (responseMessage != null && !responseMessage.isEmpty()) {
                     // pad number to 21 bytes
                     ChannelBuffer paddedPhone = ChannelBuffers.buffer(21);
                     paddedPhone.writeBytes(phone.getBytes(StandardCharsets.US_ASCII));
-                    for (int j = paddedPhone.readableBytes(); j < 21; j++) {
-                        paddedPhone.writeByte(0x00);
-                    }
+                    paddedPhone.writerIndex(paddedPhone.capacity());
 
                     ChannelBuffer response = ChannelBuffers.dynamicBuffer();
-                    response.writeBytes(paddedPhone); // phone number
+                    response.writeBytes(paddedPhone);
                     response.writeBytes(responseMessage.getBytes(StandardCharsets.UTF_8)); // message
                     sendResponse(channel, type, index, response);
                 } else {
@@ -369,7 +366,6 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 return null;
             }
 
-            /* Init position */
             Position position = new Position();
             position.setDeviceId(deviceSession.getDeviceId());
             position.setProtocol(getProtocolName());
