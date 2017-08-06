@@ -25,15 +25,23 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.helper.Log;
 
 import java.net.SocketAddress;
 import java.util.Date;
+
+import java.nio.charset.StandardCharsets;
+//import org.apache.commons.lang.StringUtils;
+//import org.apache.commons.codec.binary.Hex;
 
 public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
     public EelinkProtocolDecoder(EelinkProtocol protocol) {
         super(protocol);
     }
+
+    private static final short HEADER_KEY = 0x6767;
+    private int index = 0x0000;
 
     public static final int MSG_LOGIN = 0x01;
     public static final int MSG_GPS = 0x02;
@@ -42,6 +50,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_STATE = 0x05;
     public static final int MSG_SMS = 0x06;
     public static final int MSG_OBD = 0x07;
+    public static final int MSG_OBDFAULT = 0x09;
     public static final int MSG_DOWNLINK = 0x80;
     public static final int MSG_DATA = 0x81;
 
@@ -49,16 +58,22 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_WARNING = 0x14;
     public static final int MSG_REPORT = 0x15;
     public static final int MSG_COMMAND = 0x16;
+
     public static final int MSG_OBD_DATA = 0x17;
     public static final int MSG_OBD_BODY = 0x18;
     public static final int MSG_OBD_CODE = 0x19;
-    public static final int MSG_CAMERA_INFO = 0x1E;
-    public static final int MSG_CAMERA_DATA = 0x1F;
 
-    private void sendResponse(Channel channel, int type, int index) {
+    public static final int MSG_CAMERA_INFO = 0x0E;
+    public static final int MSG_CAMERA_DATA = 0x0F;
+
+    public static final int MSGSIGN_COMMAND = 0x01;
+    public static final int MSGSIGN_NEWS = 0x02;
+
+    private void sendAck(Channel channel, int type, int index) {
         if (channel != null) {
             ChannelBuffer response = ChannelBuffers.buffer(7);
-            response.writeByte(0x67); response.writeByte(0x67); // header
+            response.writeByte(0x67);
+            response.writeByte(0x67); // header
             response.writeByte(type);
             response.writeShort(2); // length
             response.writeShort(index);
@@ -97,29 +112,61 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void decodeStatus(Position position, int status) {
+        /**
+         * 16 bits, read lowest 0 to 15
+         */
+
+        // GPS - 0 bit
+        position.setValid(BitUtil.check(status, 0));
+
+        // ACC - 1,2 bits
         if (BitUtil.check(status, 1)) {
             position.set(Position.KEY_IGNITION, BitUtil.check(status, 2));
         }
+
+        // Alarm - 3,4 bits
         if (BitUtil.check(status, 3)) {
             position.set(Position.KEY_ARMED, BitUtil.check(status, 4));
         }
+
+        // Remote Cutout - 5,6 bits
         if (BitUtil.check(status, 5)) {
             position.set(Position.KEY_BLOCKED, !BitUtil.check(status, 6));
         }
+
+        // Charge - 7,8 bits
         if (BitUtil.check(status, 7)) {
             position.set(Position.KEY_CHARGE, BitUtil.check(status, 8));
         }
+
+        // Reserved - 9,10,11 bits
+        // Digital input 1 - 12 bit - def 0 low
+        position.set(Position.PREFIX_IN + 1, BitUtil.check(status, 12));
+
+        // Digital input 2 - 13 bit - def 1 high
+        position.set(Position.PREFIX_IN + 2, BitUtil.check(status, 13));
+
+        // Digital input 3 - 14 bit - def 0 low
+        position.set(Position.PREFIX_IN + 3, BitUtil.check(status, 14));
+
+        // Digital input 4 - 15 bit - def 1 high
+        position.set(Position.PREFIX_IN + 4, BitUtil.check(status, 15));
+
+        // log the whole status packet
         position.set(Position.KEY_STATUS, status);
     }
 
-    private Position decodeOld(DeviceSession deviceSession, ChannelBuffer buf, int type, int index) {
-
+    private Position decodeInit(DeviceSession deviceSession, ChannelBuffer buf, int type, int index) {
         Position position = new Position();
         position.setDeviceId(deviceSession.getDeviceId());
         position.setProtocol(getProtocolName());
 
         position.set(Position.KEY_INDEX, index);
 
+        return position;
+    }
+
+    private Position decodeOldLocationData(DeviceSession deviceSession, ChannelBuffer buf, Position position) {
         position.setTime(new Date(buf.readUnsignedInt() * 1000));
         position.setLatitude(buf.readInt() / 1800000.0);
         position.setLongitude(buf.readInt() / 1800000.0);
@@ -131,38 +178,119 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
         position.setValid((buf.readUnsignedByte() & 0x01) != 0);
 
-        if (type == MSG_ALARM) {
-            position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
+        return position;
+    }
+
+    private Position decodeDownlink(
+            DeviceSession deviceSession, ChannelBuffer buf, Channel channel, Position position, int type, int index) {
+
+        getLastLocation(position, new Date());
+        position.setValid(false);
+
+        switch (buf.readUnsignedByte()) {
+            case MSGSIGN_COMMAND:
+                buf.skipBytes(4); //server flag
+
+                int remainingbytes = buf.readableBytes();
+                String content = buf.readBytes(remainingbytes).toString(StandardCharsets.UTF_8);
+
+                position.set(Position.KEY_RESULT, content);
+            default:
+                position = null;
+                break;
         }
+        
+        return position;
+    }
 
-        if (buf.readableBytes() >= 2) {
-            decodeStatus(position, buf.readUnsignedShort());
-        }
+    private Position decodeOld(
+            DeviceSession deviceSession, ChannelBuffer buf, Channel channel, Position position, int type, int index) {
 
-        if (buf.readableBytes() >= 2 * 4) {
+        decodeOldLocationData(deviceSession, buf, position);
 
-            position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
+        switch (type) {
+            case MSG_ALARM:
+                position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
+                break;
+            case MSG_STATE:
+                switch (buf.readUnsignedByte()) { // type
+                    case 0x01:
+                    case 0x02:
+                    case 0x03:
+                        buf.skipBytes(2);
+                        decodeStatus(position, buf.readShort());
+                        break;
+                    default:
+                        break;
+                }
 
-            position.set(Position.KEY_RSSI, buf.readUnsignedShort());
+                break;
+            case MSG_GPS:
+                // only read remaining 10 bytes if they exist as they are optional in spec
+                if (buf.readableBytes() >= 2 * 5) {
+                    decodeStatus(position, buf.readUnsignedShort());
 
-            position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
-            position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort());
+                    position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
 
+                    position.set(Position.KEY_RSSI, buf.readUnsignedShort());
+
+                    position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
+                    position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort());
+                }
+                break;
+            case MSG_SMS:
+                String phone = buf.readBytes(21).toString(StandardCharsets.US_ASCII);
+                String realnumber = phone.replaceAll("^(.*)\\+", "+").trim();
+                int remainingbytes = buf.readableBytes();
+                String message = buf.readBytes(remainingbytes).toString(StandardCharsets.UTF_8);
+                position.set(Position.KEY_RESULT, "From: " + realnumber + "\n" + message);
+
+                String responsemessage;
+
+                switch (message.trim().toUpperCase()) {
+                    case "PING?":
+                    case "PING#":
+                        responsemessage = "PONG";
+                        break;
+                    default:
+                        responsemessage = "";
+                        break;
+                }
+
+                // pad number to 21 bytes
+                byte[] pp = phone.getBytes(StandardCharsets.US_ASCII);
+                ChannelBuffer ppp = ChannelBuffers.buffer(21);
+                ppp.writeBytes(pp);
+                for (int j = pp.length; j < 21; j++) {
+                    ppp.writeByte(0x00);
+                }
+
+                // send back with response
+                if (channel != null) {
+                    ChannelBuffer response = ChannelBuffers.dynamicBuffer();
+                    response.writeByte(0x67);
+                    response.writeByte(0x67); // header
+                    response.writeByte(type);
+                    response.writeShort(2 + 21 + responsemessage.getBytes().length); // length
+                    response.writeShort(index); // index
+                    response.writeBytes(ppp); // phone number
+                    response.writeBytes(responsemessage.getBytes(StandardCharsets.UTF_8)); // message
+                    channel.write(response);
+                    //System.out.println(response.readableBytes());
+                    //System.out.println(Hex.encodeHexString(response.readBytes(response.readableBytes()).array()));
+                }
+                break;
+            default:
+                break;
         }
 
         return position;
     }
 
-    private Position decodeNew(DeviceSession deviceSession, ChannelBuffer buf, int index) {
-
-        Position position = new Position();
-        position.setDeviceId(deviceSession.getDeviceId());
-        position.setProtocol(getProtocolName());
-
-        position.set(Position.KEY_INDEX, index);
+    private Position decodeNew(
+            DeviceSession deviceSession, ChannelBuffer buf, Position position, int type, int index) {
 
         position.setTime(new Date(buf.readUnsignedInt() * 1000));
-
         int flags = buf.readUnsignedByte();
 
         if (BitUtil.check(flags, 0)) {
@@ -209,41 +337,68 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
-        buf.skipBytes(2); // header
-        int type = buf.readUnsignedByte();
-        buf.readShort(); // length
-        int index = buf.readUnsignedShort();
-
-        if (type != MSG_GPS && type != MSG_DATA) {
-            sendResponse(channel, type, index);
+        // check that incoming protocall has correct eelink prefix
+        if (buf.readShort() != HEADER_KEY) {
+            Log.warning(new IllegalArgumentException("Invalid Header"));
+            return null;
         }
 
-        if (type == MSG_LOGIN) {
+        int type = buf.readUnsignedByte(); // protocol number
 
-            getDeviceSession(channel, remoteAddress, ChannelBuffers.hexDump(buf.readBytes(8)).substring(1));
+        short length = buf.readShort(); // length
+        if (buf.readableBytes() != length) { // check remaining length
+            Log.warning(new IllegalArgumentException("Packet length error"));
+            return null;
+        }
 
+        index = buf.readUnsignedShort();
+
+        // check if we have received an old packet
+        /*int newIndex = buf.readUnsignedShort(); // current message index
+        if(newIndex <= index){
+            System.out.println("old index " + newIndex + " - " + index);
+            return null;
+        }else{
+            index = newIndex; // current message index
+        }*/
+        
+        // process packet data by type
+        if (type == MSG_LOGIN) { // initial login packet
+            DeviceSession deviceSession
+                    = getDeviceSession(channel, remoteAddress, ChannelBuffers.hexDump(buf.readBytes(8)).substring(1));
+
+            if (deviceSession != null) {
+                sendAck(channel, type, index);
+            }
+
+            return null;
         } else {
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
             if (deviceSession == null) {
                 return null;
             }
 
+            Position position = decodeInit(deviceSession, buf, type, index);
+
             if (type == MSG_GPS || type == MSG_ALARM || type == MSG_STATE || type == MSG_SMS) {
-                return decodeOld(deviceSession, buf, type, index);
+                return decodeOld(deviceSession, buf, channel, position, type, index);
+            } else if (type == MSG_DOWNLINK) {
+                return decodeDownlink(deviceSession, buf, channel, position, type, index);
             } else if (type >= MSG_NORMAL && type <= MSG_OBD_CODE) {
-                return decodeNew(deviceSession, buf, index);
+                return decodeNew(deviceSession, buf, position, type, index);
             } else if (type == MSG_HEARTBEAT && buf.readableBytes() >= 2) {
-
-                Position position = new Position();
-                position.setDeviceId(deviceSession.getDeviceId());
-                position.setProtocol(getProtocolName());
-
                 getLastLocation(position, null);
 
                 decodeStatus(position, buf.readUnsignedShort());
 
-                return position;
+                sendAck(channel, type, index);
 
+                return position;
+            } else {
+                Log.warning(new UnsupportedOperationException());
+
+                // send default ack for unknown data just incase
+                sendAck(channel, type, index);
             }
         }
 

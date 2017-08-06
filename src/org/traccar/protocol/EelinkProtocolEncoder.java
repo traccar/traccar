@@ -35,7 +35,7 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
         buf.writeShort(2 + 1 + 4 + content.length()); // length
         buf.writeShort(0); // index
 
-        buf.writeByte(0x01); // command
+        buf.writeByte(EelinkProtocolDecoder.MSGSIGN_COMMAND); // command
         buf.writeInt(0); // server id
         buf.writeBytes(content.getBytes(StandardCharsets.UTF_8));
 
@@ -54,6 +54,17 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
                 return encodeContent("RELAY,0#");
             case Command.TYPE_REBOOT_DEVICE:
                 return encodeContent("RESET#");
+            case Command.TYPE_GET_VERSION:
+                return encodeContent("VERSION#");
+            case Command.TYPE_GET_DEVICE_STATUS:
+                return encodeContent("STATUS#");
+            case Command.TYPE_SOS_NUMBER:
+                String num = command.getString(Command.KEY_DATA);
+                if (!num.isEmpty()) {
+                    return encodeContent("SOS,A," + num + "#");
+                } else {
+                    return encodeContent("SOS,D#");
+                }
             default:
                 Log.warning(new UnsupportedOperationException(command.getType()));
                 break;
