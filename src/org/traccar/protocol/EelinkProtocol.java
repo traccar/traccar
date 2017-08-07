@@ -33,7 +33,8 @@ public class EelinkProtocol extends BaseProtocol {
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME,
                 Command.TYPE_REBOOT_DEVICE,
-                Command.TYPE_GET_VERSION);
+                Command.TYPE_GET_VERSION,
+                Command.TYPE_SEND_SMS);
     }
 
     @Override

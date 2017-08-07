@@ -29,8 +29,7 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
 
         ChannelBuffer buf = ChannelBuffers.dynamicBuffer();
 
-        buf.writeByte(0x67);
-        buf.writeByte(0x67);
+        buf.writeShort(EelinkProtocolDecoder.HEADER_KEY);
         buf.writeByte(EelinkProtocolDecoder.MSG_DOWNLINK);
         buf.writeShort(2 + 1 + 4 + content.length()); // length
         buf.writeShort(0); // index
@@ -59,12 +58,20 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
             case Command.TYPE_GET_DEVICE_STATUS:
                 return encodeContent("STATUS#");
             case Command.TYPE_SOS_NUMBER:
-                String phoneNumber = command.getString(Command.KEY_DATA);
-                if (phoneNumber != null && !phoneNumber.isEmpty()) {
-                    return encodeContent("SOS,A," + phoneNumber + "#");
+                String sosPhoneNumber = command.getString(Command.KEY_DATA);
+                if (sosPhoneNumber != null && !sosPhoneNumber.isEmpty()) {
+                    return encodeContent("SOS,A," + sosPhoneNumber + "#");
                 } else {
                     return encodeContent("SOS,D#");
                 }
+            case Command.TYPE_SEND_SMS:
+                String phoneNumber = command.getString(Command.KEY_PHONE);
+                String message = command.getString(Command.KEY_MESSAGE);
+                if (phoneNumber != null && !phoneNumber.isEmpty()
+                        && message != null && !message.isEmpty()) {
+                    return encodeContent("FW," + phoneNumber + "," + message + "#");
+                }
+                break;
             default:
                 Log.warning(new UnsupportedOperationException(command.getType()));
                 break;

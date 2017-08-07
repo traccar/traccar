@@ -38,7 +38,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final short HEADER_KEY = 0x6767;
+    public static final short HEADER_KEY = 0x6767;
 
     public static final int MSG_LOGIN = 0x01;
     public static final int MSG_GPS = 0x02;
@@ -66,17 +66,17 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_SIGN_COMMAND = 0x01;
     public static final int MSG_SIGN_NEWS = 0x02;
 
-    private void sendResponse(Channel channel, int type, int index, ChannelBuffer buf) {
+    private void sendResponse(Channel channel, int type, int index, ChannelBuffer content) {
         if (channel != null) {
             ChannelBuffer response = ChannelBuffers.dynamicBuffer();
             response.writeShort(HEADER_KEY);
             response.writeByte(type);
-            response.writeShort(2); // total packet length
+            response.writeShort(2); // initial packet length
             response.writeShort(index);
 
-            if (buf != null && buf.readableBytes() > 0) {
-                response.writeBytes(buf);
-                response.setShort(3, 2 + buf.writerIndex()); // change packet length including buf
+            if (content != null && content.readableBytes() > 0) {
+                response.writeBytes(content);
+                response.setShort(3, 2 + content.writerIndex()); // change packet length including buf
             }
 
             channel.write(response);
@@ -156,8 +156,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_STATUS, status);
     }
 
-    private Position decodeDownlink(
-            DeviceSession deviceSession, ChannelBuffer buf, Channel channel, Position position, int type, int index) {
+    private Position decodeDownlink(ChannelBuffer buf, Position position) {
 
         getLastLocation(position, new Date());
         position.setValid(false);
@@ -171,15 +170,13 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_RESULT, content);
                 break;
             default:
-                position = null;
-                break;
+                return null;
         }
 
         return position;
     }
 
-    private Position decodeOld(
-            DeviceSession deviceSession, ChannelBuffer buf, Channel channel, Position position, int type, int index) {
+    private Position decodeOld(ChannelBuffer buf, Channel channel, Position position, int type, int index) {
 
         position.setTime(new Date(buf.readUnsignedInt() * 1000));
         position.setLatitude(buf.readInt() / 1800000.0);
@@ -268,8 +265,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private Position decodeNew(
-            DeviceSession deviceSession, ChannelBuffer buf, Position position, int type, int index) {
+    private Position decodeNew(ChannelBuffer buf, Position position, int type, int index) {
 
         position.setTime(new Date(buf.readUnsignedInt() * 1000));
         int flags = buf.readUnsignedByte();
@@ -335,7 +331,6 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
         int index = buf.readUnsignedShort();
 
-        // process packet data by type
         if (type == MSG_LOGIN) {
             DeviceSession deviceSession
                     = getDeviceSession(channel, remoteAddress, ChannelBuffers.hexDump(buf.readBytes(8)).substring(1));
@@ -357,11 +352,11 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_INDEX, index);
 
             if (type == MSG_GPS || type == MSG_ALARM || type == MSG_STATE || type == MSG_SMS) {
-                return decodeOld(deviceSession, buf, channel, position, type, index);
+                return decodeOld(buf, channel, position, type, index);
             } else if (type == MSG_DOWNLINK) {
-                return decodeDownlink(deviceSession, buf, channel, position, type, index);
+                return decodeDownlink(buf, position);
             } else if (type >= MSG_NORMAL && type <= MSG_OBD_CODE) {
-                return decodeNew(deviceSession, buf, position, type, index);
+                return decodeNew(buf, position, type, index);
             } else if (type == MSG_HEARTBEAT && buf.readableBytes() >= 2) {
                 getLastLocation(position, null);
 
