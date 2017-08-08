@@ -57,6 +57,9 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
                 return encodeContent("VERSION#");
             case Command.TYPE_GET_DEVICE_STATUS:
                 return encodeContent("STATUS#");
+            case Command.TYPE_SET_TIMEZONE:
+                int tz = command.getInteger(Command.KEY_TIMEZONE);
+                return encodeContent("GMT," + (tz < 0 ? "E" : "W") + "," + (tz / 3600 / 60) + "#");
             case Command.TYPE_SOS_NUMBER:
                 String sosPhoneNumber = command.getString(Command.KEY_DATA);
                 if (sosPhoneNumber != null && !sosPhoneNumber.isEmpty()) {
