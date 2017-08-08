@@ -23,8 +23,11 @@ import org.traccar.GlobalTimer;
 import org.traccar.Protocol;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
+import org.traccar.model.DeviceState;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+import org.traccar.reports.ReportUtils;
+import org.traccar.reports.model.TripsConfig;
 
 import java.net.SocketAddress;
 import java.sql.SQLException;
@@ -41,6 +44,7 @@ public class ConnectionManager {
 
     private final long deviceTimeout;
     private final boolean enableStatusEvents;
+    private TripsConfig tripsConfig = null;
 
     private final Map<Long, ActiveDevice> activeDevices = new ConcurrentHashMap<>();
     private final Map<Long, Set<UpdateListener>> listeners = new ConcurrentHashMap<>();
@@ -49,6 +53,9 @@ public class ConnectionManager {
     public ConnectionManager() {
         deviceTimeout = Context.getConfig().getLong("status.timeout", DEFAULT_TIMEOUT) * 1000;
         enableStatusEvents = Context.getConfig().getBoolean("event.enable");
+        if (Context.getConfig().getBoolean("status.updateDeviceState")) {
+            tripsConfig = ReportUtils.initTripsConfig();
+        }
     }
 
     public void addActiveDevice(long deviceId, Protocol protocol, Channel channel, SocketAddress remoteAddress) {
@@ -80,21 +87,30 @@ public class ConnectionManager {
 
         if (enableStatusEvents && !status.equals(oldStatus)) {
             String eventType;
+            Event stateEvent = null;
             switch (status) {
                 case Device.STATUS_ONLINE:
                     eventType = Event.TYPE_DEVICE_ONLINE;
                     break;
                 case Device.STATUS_UNKNOWN:
                     eventType = Event.TYPE_DEVICE_UNKNOWN;
+                    if (tripsConfig != null) {
+                        stateEvent = updateDeviceState(deviceId);
+                    }
                     break;
                 default:
                     eventType = Event.TYPE_DEVICE_OFFLINE;
+                    if (tripsConfig != null) {
+                        stateEvent = updateDeviceState(deviceId);
+                    }
                     break;
             }
-            Event event = new Event(eventType, deviceId);
-            if (Context.getNotificationManager() != null) {
-                Context.getNotificationManager().updateEvent(event, null);
+            Set<Event> events = new HashSet<>();
+            if (stateEvent != null) {
+                events.add(stateEvent);
             }
+            events.add(new Event(eventType, deviceId));
+            Context.getNotificationManager().updateEvents(events, null);
         }
 
         Timeout timeout = timeouts.remove(deviceId);
@@ -124,6 +140,29 @@ public class ConnectionManager {
         }
 
         updateDevice(device);
+    }
+
+    public Event updateDeviceState(long deviceId) {
+        DeviceState deviceState = Context.getDeviceManager().getDeviceState(deviceId);
+        if (deviceState == null || deviceState.getMotionState() == null) {
+            return null;
+        }
+        Event result = null;
+        Boolean oldMotion = deviceState.getMotionState();
+        long currentTime = new Date().getTime();
+        boolean newMotion = !oldMotion;
+        Position potentialPosition = deviceState.getMotionPosition();
+        if (potentialPosition != null) {
+            long potentialTime = potentialPosition.getFixTime().getTime()
+                    + (newMotion ? tripsConfig.getMinimalTripDuration() : tripsConfig.getMinimalParkingDuration());
+            if (potentialTime <= currentTime) {
+                String eventType = newMotion ? Event.TYPE_DEVICE_MOVING : Event.TYPE_DEVICE_STOPPED;
+                result = new Event(eventType, potentialPosition.getDeviceId(), potentialPosition.getId());
+                deviceState.setMotionState(newMotion);
+                deviceState.setMotionPosition(null);
+            }
+        }
+        return result;
     }
 
     public synchronized void updateDevice(Device device) {
