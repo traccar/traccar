@@ -26,6 +26,7 @@ import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
 import org.traccar.helper.Log;
+import org.traccar.Context;
 
 import java.net.SocketAddress;
 import java.util.Date;
@@ -358,13 +359,24 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             } else if (type >= MSG_NORMAL && type <= MSG_OBD_CODE) {
                 return decodeNew(buf, position, type, index);
             } else if (type == MSG_HEARTBEAT && buf.readableBytes() >= 2) {
-                getLastLocation(position, null);
+                Position last = Context.getIdentityManager().getLastPosition(position.getDeviceId());
 
                 decodeStatus(position, buf.readUnsignedShort());
 
-                sendResponse(channel, type, index, null);
-
-                return position;
+                if (last != null) {
+                    if (last.getInteger(Position.KEY_STATUS) != position.getInteger(Position.KEY_STATUS)) {
+                        getLastLocation(position, null);
+                        sendResponse(channel, type, index, null);
+                        return position;
+                    } else {
+                        sendResponse(channel, type, index, null);
+                        return null;
+                    }
+                } else {
+                    getLastLocation(position, null);
+                    sendResponse(channel, type, index, null);
+                    return position;
+                }
             } else {
                 Log.warning(new UnsupportedOperationException());
                 sendResponse(channel, type, index, null);

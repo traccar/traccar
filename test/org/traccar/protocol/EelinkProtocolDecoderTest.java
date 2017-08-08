@@ -14,6 +14,10 @@ public class EelinkProtocolDecoderTest extends ProtocolTest {
         verifyNull(decoder, binary(
                 "676701000c007b03525440717505180104"));
 
+        // gps packet (0x02) with 10 bytes extra (device status/batt voltage/signal/adc1/adc2)
+        verifyPosition(decoder, binary(
+                "676702002509f65868507603a1e92e03cf90fe000000019f000117ee00111e0120631145003101510000"));
+        
         // terminal state (0x05)
         verifyPosition(decoder, binary(
                 "6767050022001F59643640000000000000000000000001CC0000249500142000015964A6C0006E"));
