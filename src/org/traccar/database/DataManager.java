@@ -419,12 +419,12 @@ public class DataManager {
         }
     }
 
-    public static String makeNameId(Class<?> clazz) {
+    private static String makeNameId(Class<?> clazz) {
         String name = clazz.getSimpleName();
-        return Introspector.decapitalize(name) + (name.indexOf("Id") == -1 ? "Id" : "");
+        return Introspector.decapitalize(name) + (!name.contains("Id") ? "Id" : "");
     }
 
-    public Collection<Permission> getPermissions(Class<? extends BaseModel> owner, Class<? extends BaseModel> property)
+    private Collection<Permission> getPermissions(Class<? extends BaseModel> owner, Class<? extends BaseModel> property)
             throws SQLException, ClassNotFoundException {
         return QueryBuilder.create(dataSource, getQuery(ACTION_SELECT_ALL, owner, property))
                 .executePermissionsQuery();
