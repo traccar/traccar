@@ -424,7 +424,7 @@ public class DataManager {
         return Introspector.decapitalize(name) + (!name.contains("Id") ? "Id" : "");
     }
 
-    private Collection<Permission> getPermissions(Class<? extends BaseModel> owner, Class<? extends BaseModel> property)
+    public Collection<Permission> getPermissions(Class<? extends BaseModel> owner, Class<? extends BaseModel> property)
             throws SQLException, ClassNotFoundException {
         return QueryBuilder.create(dataSource, getQuery(ACTION_SELECT_ALL, owner, property))
                 .executePermissionsQuery();
