@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2014 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,12 +130,13 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
                 position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(matcher.group(2))));
             }
 
-            pattern = Pattern.compile("(\\d{1,2}:\\d{2} \\w{3} \\d{1,2})");
+            pattern = Pattern.compile("(\\d{1,2}:\\d{2}(:\\d{2})? \\w{3} \\d{1,2})");
             matcher = pattern.matcher(sentence);
             if (!matcher.find()) {
                 return null;
             }
-            DateFormat dateFormat = new SimpleDateFormat("HH:mm MMM d yyyy", Locale.ENGLISH);
+            DateFormat dateFormat = new SimpleDateFormat(
+                    matcher.group(2) != null ? "HH:mm:ss MMM d yyyy" : "HH:mm MMM d yyyy", Locale.ENGLISH);
             position.setTime(DateUtil.correctYear(
                     dateFormat.parse(matcher.group(1) + " " + Calendar.getInstance().get(Calendar.YEAR))));
 
