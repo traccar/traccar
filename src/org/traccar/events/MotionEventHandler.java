@@ -77,7 +77,8 @@ public class MotionEventHandler extends BaseEventHandler {
     @Override
     protected Collection<Event> analyzePosition(Position position) {
 
-        Device device = Context.getIdentityManager().getById(position.getDeviceId());
+        long deviceId = position.getDeviceId();
+        Device device = Context.getIdentityManager().getById(deviceId);
         if (device == null) {
             return null;
         }
@@ -86,14 +87,9 @@ public class MotionEventHandler extends BaseEventHandler {
         }
 
         Event result = null;
-
-        long deviceId = position.getDeviceId();
         DeviceState deviceState = Context.getDeviceManager().getDeviceState(deviceId);
 
-        if (deviceState == null) {
-            deviceState = new DeviceState();
-            deviceState.setMotionState(position.getBoolean(Position.KEY_MOTION));
-        } else if (deviceState.getMotionState() == null) {
+        if (deviceState.getMotionState() == null) {
             deviceState.setMotionState(position.getBoolean(Position.KEY_MOTION));
         } else {
             result = updateMotionState(deviceState, position, tripsConfig);

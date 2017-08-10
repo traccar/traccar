@@ -21,6 +21,7 @@ import org.jboss.netty.util.TimerTask;
 import org.traccar.Context;
 import org.traccar.GlobalTimer;
 import org.traccar.Protocol;
+import org.traccar.events.OverspeedEventHandler;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceState;
@@ -44,7 +45,10 @@ public class ConnectionManager {
 
     private final long deviceTimeout;
     private final boolean enableStatusEvents;
+    private final boolean updateDeviceState;
     private TripsConfig tripsConfig = null;
+    private long minimalOverspeedDuration;
+    private boolean overspeedNotRepeat;
 
     private final Map<Long, ActiveDevice> activeDevices = new ConcurrentHashMap<>();
     private final Map<Long, Set<UpdateListener>> listeners = new ConcurrentHashMap<>();
@@ -53,8 +57,11 @@ public class ConnectionManager {
     public ConnectionManager() {
         deviceTimeout = Context.getConfig().getLong("status.timeout", DEFAULT_TIMEOUT) * 1000;
         enableStatusEvents = Context.getConfig().getBoolean("event.enable");
-        if (Context.getConfig().getBoolean("status.updateDeviceState")) {
+        updateDeviceState = Context.getConfig().getBoolean("status.updateDeviceState");
+        if (updateDeviceState) {
             tripsConfig = ReportUtils.initTripsConfig();
+            minimalOverspeedDuration = Context.getConfig().getLong("event.overspeed.minimalDuration") * 1000;
+            overspeedNotRepeat = Context.getConfig().getBoolean("event.overspeed.notRepeat");
         }
     }
 
@@ -87,27 +94,23 @@ public class ConnectionManager {
 
         if (enableStatusEvents && !status.equals(oldStatus)) {
             String eventType;
-            Event stateEvent = null;
+            Set<Event> events = new HashSet<>();
             switch (status) {
                 case Device.STATUS_ONLINE:
                     eventType = Event.TYPE_DEVICE_ONLINE;
                     break;
                 case Device.STATUS_UNKNOWN:
                     eventType = Event.TYPE_DEVICE_UNKNOWN;
-                    if (tripsConfig != null) {
-                        stateEvent = updateDeviceState(deviceId);
+                    if (updateDeviceState) {
+                        events.addAll(updateDeviceState(deviceId));
                     }
                     break;
                 default:
                     eventType = Event.TYPE_DEVICE_OFFLINE;
-                    if (tripsConfig != null) {
-                        stateEvent = updateDeviceState(deviceId);
+                    if (updateDeviceState) {
+                        events.addAll(updateDeviceState(deviceId));
                     }
                     break;
-            }
-            Set<Event> events = new HashSet<>();
-            if (stateEvent != null) {
-                events.add(stateEvent);
             }
             events.add(new Event(eventType, deviceId));
             Context.getNotificationManager().updateEvents(events, null);
@@ -142,26 +145,41 @@ public class ConnectionManager {
         updateDevice(device);
     }
 
-    public Event updateDeviceState(long deviceId) {
+    public Set<Event> updateDeviceState(long deviceId) {
         DeviceState deviceState = Context.getDeviceManager().getDeviceState(deviceId);
-        if (deviceState == null || deviceState.getMotionState() == null) {
-            return null;
-        }
-        Event result = null;
-        Boolean oldMotion = deviceState.getMotionState();
+        Set<Event> result = new HashSet<>();
         long currentTime = System.currentTimeMillis();
-        boolean newMotion = !oldMotion;
-        Position motionPosition = deviceState.getMotionPosition();
-        if (motionPosition != null) {
+        if (deviceState.getMotionState() != null && deviceState.getMotionPosition() != null) {
+            boolean newMotion = !deviceState.getMotionState();
+            Position motionPosition = deviceState.getMotionPosition();
             long motionTime = motionPosition.getFixTime().getTime()
                     + (newMotion ? tripsConfig.getMinimalTripDuration() : tripsConfig.getMinimalParkingDuration());
             if (motionTime <= currentTime) {
                 String eventType = newMotion ? Event.TYPE_DEVICE_MOVING : Event.TYPE_DEVICE_STOPPED;
-                result = new Event(eventType, motionPosition.getDeviceId(), motionPosition.getId());
+                result.add(new Event(eventType, motionPosition.getDeviceId(), motionPosition.getId()));
                 deviceState.setMotionState(newMotion);
                 deviceState.setMotionPosition(null);
             }
         }
+        if (deviceState.getOverspeedState() != null && !deviceState.getOverspeedState()
+                && deviceState.getOverspeedPosition() != null) {
+            double speedLimit = Context.getDeviceManager().lookupAttributeDouble(deviceId,
+                    OverspeedEventHandler.ATTRIBUTE_SPEED_LIMIT, 0, false);
+            if (speedLimit != 0) {
+                Position overspeedPosition = deviceState.getOverspeedPosition();
+                long overspeedTime = overspeedPosition.getFixTime().getTime();
+                if (overspeedTime + minimalOverspeedDuration <= currentTime) {
+                    Event event = new Event(Event.TYPE_DEVICE_OVERSPEED, overspeedPosition.getDeviceId(),
+                            overspeedPosition.getId());
+                    event.set("speed", overspeedPosition.getSpeed());
+                    event.set(OverspeedEventHandler.ATTRIBUTE_SPEED_LIMIT, speedLimit);
+                    result.add(event);
+                    deviceState.setOverspeedState(overspeedNotRepeat);
+                    deviceState.setOverspeedPosition(null);
+                }
+            }
+        }
+
         return result;
     }
 
