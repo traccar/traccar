@@ -1,5 +1,6 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +33,7 @@ public class MotionEventHandler extends BaseEventHandler {
     private TripsConfig tripsConfig;
 
     public MotionEventHandler() {
-        if (Context.getConfig() != null) {
-            tripsConfig = ReportUtils.initTripsConfig();
-        }
+        tripsConfig = ReportUtils.initTripsConfig();
     }
 
     public static Event updateMotionState(DeviceState deviceState, Position position, TripsConfig tripsConfig) {
@@ -51,22 +50,22 @@ public class MotionEventHandler extends BaseEventHandler {
             deviceState.setMotionPosition(null);
         }
 
-        Position potentialPosition = deviceState.getMotionPosition();
-        if (potentialPosition != null) {
-            long potentialTime = potentialPosition.getFixTime().getTime();
-            double distance = ReportUtils.calculateDistance(potentialPosition, position, false);
+        Position motionPosition = deviceState.getMotionPosition();
+        if (motionPosition != null) {
+            long motionTime = motionPosition.getFixTime().getTime();
+            double distance = ReportUtils.calculateDistance(motionPosition, position, false);
             if (newMotion) {
-                if (potentialTime + tripsConfig.getMinimalTripDuration() <= currentTime
+                if (motionTime + tripsConfig.getMinimalTripDuration() <= currentTime
                         || distance >= tripsConfig.getMinimalTripDistance()) {
-                    result = new Event(Event.TYPE_DEVICE_MOVING, potentialPosition.getDeviceId(),
-                            potentialPosition.getId());
+                    result = new Event(Event.TYPE_DEVICE_MOVING, motionPosition.getDeviceId(),
+                            motionPosition.getId());
                     deviceState.setMotionState(true);
                     deviceState.setMotionPosition(null);
                 }
             } else {
-                if (potentialTime + tripsConfig.getMinimalParkingDuration() <= currentTime) {
-                    result = new Event(Event.TYPE_DEVICE_STOPPED, potentialPosition.getDeviceId(),
-                            potentialPosition.getId());
+                if (motionTime + tripsConfig.getMinimalParkingDuration() <= currentTime) {
+                    result = new Event(Event.TYPE_DEVICE_STOPPED, motionPosition.getDeviceId(),
+                            motionPosition.getId());
                     deviceState.setMotionState(false);
                     deviceState.setMotionPosition(null);
                 }

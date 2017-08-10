@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,15 +149,15 @@ public class ConnectionManager {
         }
         Event result = null;
         Boolean oldMotion = deviceState.getMotionState();
-        long currentTime = new Date().getTime();
+        long currentTime = System.currentTimeMillis();
         boolean newMotion = !oldMotion;
-        Position potentialPosition = deviceState.getMotionPosition();
-        if (potentialPosition != null) {
-            long potentialTime = potentialPosition.getFixTime().getTime()
+        Position motionPosition = deviceState.getMotionPosition();
+        if (motionPosition != null) {
+            long motionTime = motionPosition.getFixTime().getTime()
                     + (newMotion ? tripsConfig.getMinimalTripDuration() : tripsConfig.getMinimalParkingDuration());
-            if (potentialTime <= currentTime) {
+            if (motionTime <= currentTime) {
                 String eventType = newMotion ? Event.TYPE_DEVICE_MOVING : Event.TYPE_DEVICE_STOPPED;
-                result = new Event(eventType, potentialPosition.getDeviceId(), potentialPosition.getId());
+                result = new Event(eventType, motionPosition.getDeviceId(), motionPosition.getId());
                 deviceState.setMotionState(newMotion);
                 deviceState.setMotionPosition(null);
             }
