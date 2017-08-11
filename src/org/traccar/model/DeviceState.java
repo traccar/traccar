@@ -38,4 +38,24 @@ public class DeviceState {
         return motionPosition;
     }
 
+    private Boolean overspeedState;
+
+    public void setOverspeedState(boolean overspeedState) {
+        this.overspeedState = overspeedState;
+    }
+
+    public Boolean getOverspeedState() {
+        return overspeedState;
+    }
+
+    private Position overspeedPosition;
+
+    public void setOverspeedPosition(Position overspeedPosition) {
+        this.overspeedPosition = overspeedPosition;
+    }
+
+    public Position getOverspeedPosition() {
+        return overspeedPosition;
+    }
+
 }

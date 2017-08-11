@@ -392,7 +392,12 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
     }
 
     public DeviceState getDeviceState(long deviceId) {
-        return deviceStates.get(deviceId);
+        DeviceState deviceState = deviceStates.get(deviceId);
+        if (deviceState == null) {
+            deviceState = new DeviceState();
+            deviceStates.put(deviceId, deviceState);
+        }
+        return deviceState;
     }
 
     public void setDeviceState(long deviceId, DeviceState deviceState) {

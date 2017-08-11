@@ -32,7 +32,6 @@ import org.traccar.model.Group;
 import org.traccar.reports.model.BaseReport;
 import org.traccar.reports.model.DeviceReport;
 import org.traccar.reports.model.TripReport;
-import org.traccar.reports.model.TripsConfig;
 
 public final class Trips {
 
@@ -42,13 +41,11 @@ public final class Trips {
     private static Collection<TripReport> detectTrips(long deviceId, Date from, Date to) throws SQLException {
         double speedThreshold = Context.getConfig().getDouble("event.motion.speedThreshold", 0.01);
 
-        TripsConfig tripsConfig = ReportUtils.initTripsConfig();
-
         boolean ignoreOdometer = Context.getDeviceManager()
                 .lookupAttributeBoolean(deviceId, "report.ignoreOdometer", false, true);
 
-        Collection<? extends BaseReport> result = ReportUtils.detectTripsAndStops(tripsConfig,
-                ignoreOdometer, speedThreshold,
+        Collection<? extends BaseReport> result = ReportUtils.detectTripsAndStops(
+                Context.getTripsConfig(), ignoreOdometer, speedThreshold,
                 Context.getDataManager().getPositions(deviceId, from, to), true);
 
         return (Collection<TripReport>) result;

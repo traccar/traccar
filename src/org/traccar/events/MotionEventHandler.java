@@ -32,11 +32,35 @@ public class MotionEventHandler extends BaseEventHandler {
 
     private TripsConfig tripsConfig;
 
-    public MotionEventHandler() {
-        tripsConfig = ReportUtils.initTripsConfig();
+    public MotionEventHandler(TripsConfig tripsConfig) {
+        this.tripsConfig = tripsConfig;
     }
 
-    public static Event updateMotionState(DeviceState deviceState, Position position, TripsConfig tripsConfig) {
+    private Event newEvent(DeviceState deviceState, boolean newMotion) {
+        String eventType = newMotion ? Event.TYPE_DEVICE_MOVING : Event.TYPE_DEVICE_STOPPED;
+        Event event = new Event(eventType, deviceState.getMotionPosition().getDeviceId(),
+                deviceState.getMotionPosition().getId());
+        deviceState.setMotionState(newMotion);
+        deviceState.setMotionPosition(null);
+        return event;
+    }
+
+    public Event updateMotionState(DeviceState deviceState) {
+        Event result = null;
+        if (deviceState.getMotionState() != null && deviceState.getMotionPosition() != null) {
+            boolean newMotion = !deviceState.getMotionState();
+            Position motionPosition = deviceState.getMotionPosition();
+            long currentTime = System.currentTimeMillis();
+            long motionTime = motionPosition.getFixTime().getTime()
+                    + (newMotion ? tripsConfig.getMinimalTripDuration() : tripsConfig.getMinimalParkingDuration());
+            if (motionTime <= currentTime) {
+                result = newEvent(deviceState, newMotion);
+            }
+        }
+        return result;
+    }
+
+    public Event updateMotionState(DeviceState deviceState, Position position) {
         Event result = null;
         Boolean oldMotion = deviceState.getMotionState();
 
@@ -57,17 +81,11 @@ public class MotionEventHandler extends BaseEventHandler {
             if (newMotion) {
                 if (motionTime + tripsConfig.getMinimalTripDuration() <= currentTime
                         || distance >= tripsConfig.getMinimalTripDistance()) {
-                    result = new Event(Event.TYPE_DEVICE_MOVING, motionPosition.getDeviceId(),
-                            motionPosition.getId());
-                    deviceState.setMotionState(true);
-                    deviceState.setMotionPosition(null);
+                    result = newEvent(deviceState, newMotion);
                 }
             } else {
                 if (motionTime + tripsConfig.getMinimalParkingDuration() <= currentTime) {
-                    result = new Event(Event.TYPE_DEVICE_STOPPED, motionPosition.getDeviceId(),
-                            motionPosition.getId());
-                    deviceState.setMotionState(false);
-                    deviceState.setMotionPosition(null);
+                    result = newEvent(deviceState, newMotion);
                 }
             }
         }
@@ -77,7 +95,8 @@ public class MotionEventHandler extends BaseEventHandler {
     @Override
     protected Collection<Event> analyzePosition(Position position) {
 
-        Device device = Context.getIdentityManager().getById(position.getDeviceId());
+        long deviceId = position.getDeviceId();
+        Device device = Context.getIdentityManager().getById(deviceId);
         if (device == null) {
             return null;
         }
@@ -86,17 +105,12 @@ public class MotionEventHandler extends BaseEventHandler {
         }
 
         Event result = null;
-
-        long deviceId = position.getDeviceId();
         DeviceState deviceState = Context.getDeviceManager().getDeviceState(deviceId);
 
-        if (deviceState == null) {
-            deviceState = new DeviceState();
-            deviceState.setMotionState(position.getBoolean(Position.KEY_MOTION));
-        } else if (deviceState.getMotionState() == null) {
+        if (deviceState.getMotionState() == null) {
             deviceState.setMotionState(position.getBoolean(Position.KEY_MOTION));
         } else {
-            result = updateMotionState(deviceState, position, tripsConfig);
+            result = updateMotionState(deviceState, position);
         }
         Context.getDeviceManager().setDeviceState(deviceId, deviceState);
         if (result != null) {

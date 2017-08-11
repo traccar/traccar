@@ -21,6 +21,7 @@ import java.util.Collections;
 import org.traccar.BaseEventHandler;
 import org.traccar.Context;
 import org.traccar.model.Device;
+import org.traccar.model.DeviceState;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -29,15 +30,69 @@ public class OverspeedEventHandler extends BaseEventHandler {
     public static final String ATTRIBUTE_SPEED_LIMIT = "speedLimit";
 
     private boolean notRepeat;
+    private long minimalDuration;
 
-    public OverspeedEventHandler() {
-        notRepeat = Context.getConfig().getBoolean("event.overspeed.notRepeat");
+    public OverspeedEventHandler(long minimalDuration, boolean notRepeat) {
+        this.notRepeat = notRepeat;
+        this.minimalDuration = minimalDuration;
+    }
+
+    private Event newEvent(DeviceState deviceState, double speedLimit) {
+        Event event = new Event(Event.TYPE_DEVICE_OVERSPEED, deviceState.getOverspeedPosition().getDeviceId(),
+                deviceState.getOverspeedPosition().getId());
+        event.set("speed", deviceState.getOverspeedPosition().getSpeed());
+        event.set(ATTRIBUTE_SPEED_LIMIT, speedLimit);
+        deviceState.setOverspeedState(notRepeat);
+        deviceState.setOverspeedPosition(null);
+        return event;
+    }
+
+    public Event updateOverspeedState(DeviceState deviceState, double speedLimit) {
+        Event result = null;
+        if (deviceState.getOverspeedState() != null && !deviceState.getOverspeedState()
+                && deviceState.getOverspeedPosition() != null && speedLimit != 0) {
+            long currentTime = System.currentTimeMillis();
+            Position overspeedPosition = deviceState.getOverspeedPosition();
+            long overspeedTime = overspeedPosition.getFixTime().getTime();
+            if (overspeedTime + minimalDuration <= currentTime) {
+                result = newEvent(deviceState, speedLimit);
+            }
+        }
+        return result;
+    }
+
+    public Event updateOverspeedState(DeviceState deviceState, Position position, double speedLimit) {
+        Event result = null;
+
+        Boolean oldOverspeed = deviceState.getOverspeedState();
+
+        long currentTime = position.getFixTime().getTime();
+        boolean newOverspeed = position.getSpeed() > speedLimit;
+        if (newOverspeed && !oldOverspeed) {
+            if (deviceState.getOverspeedPosition() == null) {
+                deviceState.setOverspeedPosition(position);
+            }
+        } else if (oldOverspeed && !newOverspeed) {
+            deviceState.setOverspeedState(false);
+            deviceState.setOverspeedPosition(null);
+        } else {
+            deviceState.setOverspeedPosition(null);
+        }
+        Position overspeedPosition = deviceState.getOverspeedPosition();
+        if (overspeedPosition != null) {
+            long overspeedTime = overspeedPosition.getFixTime().getTime();
+            if (newOverspeed && overspeedTime + minimalDuration <= currentTime) {
+                result = newEvent(deviceState, speedLimit);
+            }
+        }
+        return result;
     }
 
     @Override
     protected Collection<Event> analyzePosition(Position position) {
 
-        Device device = Context.getIdentityManager().getById(position.getDeviceId());
+        long deviceId = position.getDeviceId();
+        Device device = Context.getIdentityManager().getById(deviceId);
         if (device == null) {
             return null;
         }
@@ -45,24 +100,23 @@ public class OverspeedEventHandler extends BaseEventHandler {
             return null;
         }
 
-        double speed = position.getSpeed();
-        double speedLimit = Context.getDeviceManager()
-                .lookupAttributeDouble(device.getId(), ATTRIBUTE_SPEED_LIMIT, 0, false);
+        double speedLimit = Context.getDeviceManager().lookupAttributeDouble(deviceId, ATTRIBUTE_SPEED_LIMIT, 0, false);
         if (speedLimit == 0) {
             return null;
         }
-        double oldSpeed = 0;
-        if (notRepeat) {
-            Position lastPosition = Context.getIdentityManager().getLastPosition(position.getDeviceId());
-            if (lastPosition != null) {
-                oldSpeed = lastPosition.getSpeed();
-            }
+
+        Event result = null;
+        DeviceState deviceState = Context.getDeviceManager().getDeviceState(deviceId);
+
+        if (deviceState.getOverspeedState() == null) {
+            deviceState.setOverspeedState(position.getSpeed() > speedLimit);
+        } else {
+            result = updateOverspeedState(deviceState, position, speedLimit);
         }
-        if (speed > speedLimit && oldSpeed <= speedLimit) {
-            Event event = new Event(Event.TYPE_DEVICE_OVERSPEED, position.getDeviceId(), position.getId());
-            event.set("speed", speed);
-            event.set(ATTRIBUTE_SPEED_LIMIT, speedLimit);
-            return Collections.singleton(event);
+
+        Context.getDeviceManager().setDeviceState(deviceId, deviceState);
+        if (result != null) {
+            return Collections.singleton(result);
         }
         return null;
     }
