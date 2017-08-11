@@ -32,13 +32,22 @@ public class OverspeedEventHandler extends BaseEventHandler {
     private boolean notRepeat;
     private long minimalDuration;
 
-    public OverspeedEventHandler() {
-        notRepeat = Context.getConfig().getBoolean("event.overspeed.notRepeat");
-        minimalDuration = Context.getConfig().getLong("event.overspeed.minimalDuration") * 1000;
+    public OverspeedEventHandler(long minimalDuration, boolean notRepeat) {
+        this.notRepeat = notRepeat;
+        this.minimalDuration = minimalDuration;
     }
 
-    public static Event updateOverspeedState(DeviceState deviceState, double speedLimit,
-            long minimalDuration, boolean notRepeat) {
+    private Event newEvent(DeviceState deviceState, double speedLimit) {
+        Event event = new Event(Event.TYPE_DEVICE_OVERSPEED, deviceState.getOverspeedPosition().getDeviceId(),
+                deviceState.getOverspeedPosition().getId());
+        event.set("speed", deviceState.getOverspeedPosition().getSpeed());
+        event.set(ATTRIBUTE_SPEED_LIMIT, speedLimit);
+        deviceState.setOverspeedState(notRepeat);
+        deviceState.setOverspeedPosition(null);
+        return event;
+    }
+
+    public Event updateOverspeedState(DeviceState deviceState, double speedLimit) {
         Event result = null;
         if (deviceState.getOverspeedState() != null && !deviceState.getOverspeedState()
                 && deviceState.getOverspeedPosition() != null && speedLimit != 0) {
@@ -46,19 +55,13 @@ public class OverspeedEventHandler extends BaseEventHandler {
             Position overspeedPosition = deviceState.getOverspeedPosition();
             long overspeedTime = overspeedPosition.getFixTime().getTime();
             if (overspeedTime + minimalDuration <= currentTime) {
-                result = new Event(Event.TYPE_DEVICE_OVERSPEED, overspeedPosition.getDeviceId(),
-                        overspeedPosition.getId());
-                result.set("speed", overspeedPosition.getSpeed());
-                result.set(ATTRIBUTE_SPEED_LIMIT, speedLimit);
-                deviceState.setOverspeedState(notRepeat);
-                deviceState.setOverspeedPosition(null);
+                result = newEvent(deviceState, speedLimit);
             }
         }
         return result;
     }
 
-    public static Event updateOverspeedState(DeviceState deviceState, Position position, double speedLimit,
-            long minimalOverspeedDuration, boolean notRepeat) {
+    public Event updateOverspeedState(DeviceState deviceState, Position position, double speedLimit) {
         Event result = null;
 
         Boolean oldOverspeed = deviceState.getOverspeedState();
@@ -78,13 +81,8 @@ public class OverspeedEventHandler extends BaseEventHandler {
         Position overspeedPosition = deviceState.getOverspeedPosition();
         if (overspeedPosition != null) {
             long overspeedTime = overspeedPosition.getFixTime().getTime();
-            if (newOverspeed && overspeedTime + minimalOverspeedDuration <= currentTime) {
-                result = new Event(Event.TYPE_DEVICE_OVERSPEED, overspeedPosition.getDeviceId(),
-                        overspeedPosition.getId());
-                result.set("speed", overspeedPosition.getSpeed());
-                result.set(ATTRIBUTE_SPEED_LIMIT, speedLimit);
-                deviceState.setOverspeedState(notRepeat);
-                deviceState.setOverspeedPosition(null);
+            if (newOverspeed && overspeedTime + minimalDuration <= currentTime) {
+                result = newEvent(deviceState, speedLimit);
             }
         }
         return result;
@@ -113,7 +111,7 @@ public class OverspeedEventHandler extends BaseEventHandler {
         if (deviceState.getOverspeedState() == null) {
             deviceState.setOverspeedState(position.getSpeed() > speedLimit);
         } else {
-            result = updateOverspeedState(deviceState, position, speedLimit, minimalDuration, notRepeat);
+            result = updateOverspeedState(deviceState, position, speedLimit);
         }
 
         Context.getDeviceManager().setDeviceState(deviceId, deviceState);

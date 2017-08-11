@@ -41,6 +41,8 @@ import org.traccar.database.GeofenceManager;
 import org.traccar.database.GroupsManager;
 import org.traccar.database.StatisticsManager;
 import org.traccar.database.UsersManager;
+import org.traccar.events.MotionEventHandler;
+import org.traccar.events.OverspeedEventHandler;
 import org.traccar.geocoder.BingMapsGeocoder;
 import org.traccar.geocoder.FactualGeocoder;
 import org.traccar.geocoder.GeocodeFarmGeocoder;
@@ -65,6 +67,7 @@ import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.geolocation.MozillaGeolocationProvider;
 import org.traccar.geolocation.OpenCellIdGeolocationProvider;
 import org.traccar.notification.EventForwarder;
+import org.traccar.reports.ReportUtils;
 import org.traccar.smpp.SmppClient;
 import org.traccar.web.WebServer;
 
@@ -229,6 +232,18 @@ public final class Context {
         return smppClient;
     }
 
+    private static MotionEventHandler motionEventHandler;
+
+    public static MotionEventHandler getMotionEventHandler() {
+        return motionEventHandler;
+    }
+
+    private static OverspeedEventHandler overspeedEventHandler;
+
+    public static OverspeedEventHandler getOverspeedEventHandler() {
+        return overspeedEventHandler;
+    }
+
     public static void init(String[] arguments) throws Exception {
 
         config = new Config();
@@ -350,6 +365,11 @@ public final class Context {
 
             velocityEngine = new VelocityEngine();
             velocityEngine.init(velocityProperties);
+
+            motionEventHandler = new MotionEventHandler(ReportUtils.initTripsConfig());
+            overspeedEventHandler = new OverspeedEventHandler(
+                    Context.getConfig().getLong("event.overspeed.minimalDuration") * 1000,
+                    Context.getConfig().getBoolean("event.overspeed.notRepeat"));
         }
 
         serverManager = new ServerManager();

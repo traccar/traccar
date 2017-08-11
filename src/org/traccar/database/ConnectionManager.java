@@ -21,15 +21,12 @@ import org.jboss.netty.util.TimerTask;
 import org.traccar.Context;
 import org.traccar.GlobalTimer;
 import org.traccar.Protocol;
-import org.traccar.events.MotionEventHandler;
 import org.traccar.events.OverspeedEventHandler;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceState;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
-import org.traccar.reports.ReportUtils;
-import org.traccar.reports.model.TripsConfig;
 
 import java.net.SocketAddress;
 import java.sql.SQLException;
@@ -47,9 +44,6 @@ public class ConnectionManager {
     private final long deviceTimeout;
     private final boolean enableStatusEvents;
     private final boolean updateDeviceState;
-    private TripsConfig tripsConfig = null;
-    private long minimalOverspeedDuration;
-    private boolean overspeedNotRepeat;
 
     private final Map<Long, ActiveDevice> activeDevices = new ConcurrentHashMap<>();
     private final Map<Long, Set<UpdateListener>> listeners = new ConcurrentHashMap<>();
@@ -59,11 +53,6 @@ public class ConnectionManager {
         deviceTimeout = Context.getConfig().getLong("status.timeout", DEFAULT_TIMEOUT) * 1000;
         enableStatusEvents = Context.getConfig().getBoolean("event.enable");
         updateDeviceState = Context.getConfig().getBoolean("status.updateDeviceState");
-        if (updateDeviceState) {
-            tripsConfig = ReportUtils.initTripsConfig();
-            minimalOverspeedDuration = Context.getConfig().getLong("event.overspeed.minimalDuration") * 1000;
-            overspeedNotRepeat = Context.getConfig().getBoolean("event.overspeed.notRepeat");
-        }
     }
 
     public void addActiveDevice(long deviceId, Protocol protocol, Channel channel, SocketAddress remoteAddress) {
@@ -150,14 +139,13 @@ public class ConnectionManager {
         DeviceState deviceState = Context.getDeviceManager().getDeviceState(deviceId);
         Set<Event> result = new HashSet<>();
 
-        Event event = MotionEventHandler.updateMotionState(deviceState, tripsConfig);
+        Event event = Context.getMotionEventHandler().updateMotionState(deviceState);
         if (event != null) {
             result.add(event);
         }
 
-        event = OverspeedEventHandler.updateOverspeedState(deviceState, Context.getDeviceManager().
-                lookupAttributeDouble(deviceId, OverspeedEventHandler.ATTRIBUTE_SPEED_LIMIT, 0, false),
-                minimalOverspeedDuration, overspeedNotRepeat);
+        event = Context.getOverspeedEventHandler().updateOverspeedState(deviceState, Context.getDeviceManager().
+                lookupAttributeDouble(deviceId, OverspeedEventHandler.ATTRIBUTE_SPEED_LIMIT, 0, false));
         if (event != null) {
             result.add(event);
         }
