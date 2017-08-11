@@ -2,7 +2,6 @@ package org.traccar.events;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
@@ -26,7 +25,7 @@ public class OverspeedEventHandlerTest  extends BaseTest {
         return dateFormat.parse(time);
     }
 
-    private void testOverspeed(boolean notRepeat) throws Exception {
+    private void testOverspeedWithPosition(boolean notRepeat) throws Exception {
         Position position = new Position();
         position.setTime(date("2017-01-01 00:00:00"));
         position.setSpeed(50);
@@ -55,12 +54,12 @@ public class OverspeedEventHandlerTest  extends BaseTest {
 
         assertEquals(notRepeat, deviceState.getOverspeedState());
         assertNull(deviceState.getOverspeedPosition());
-        
+
         nextPosition.setTime(date("2017-01-01 00:00:30"));
         event = OverspeedEventHandler.updateOverspeedState(deviceState, nextPosition, 40, 15000, notRepeat);
         assertNull(event);
         assertEquals(notRepeat, deviceState.getOverspeedState());
-        
+
         if (notRepeat) {
             assertNull(deviceState.getOverspeedPosition());
         } else {
@@ -76,10 +75,29 @@ public class OverspeedEventHandlerTest  extends BaseTest {
         assertNull(deviceState.getOverspeedPosition());
     }
 
+    private void testOverspeedWithStatus(boolean notRepeat) throws Exception {
+        Position position = new Position();
+        position.setTime(new Date(System.currentTimeMillis() - 30000));
+        position.setSpeed(50);
+        DeviceState deviceState = new DeviceState();
+        deviceState.setOverspeedState(false);
+        deviceState.setOverspeedPosition(position);
+
+        Event event = OverspeedEventHandler.updateOverspeedState(deviceState, 40, 15000, notRepeat);
+
+        assertNotNull(event);
+        assertEquals(Event.TYPE_DEVICE_OVERSPEED, event.getType());
+        assertEquals(notRepeat, deviceState.getOverspeedState());
+
+    }
+
     @Test
     public void testOverspeedEventHandler() throws Exception {
-        testOverspeed(false);
-        testOverspeed(true);
+        testOverspeedWithPosition(false);
+        testOverspeedWithPosition(true);
+
+        testOverspeedWithStatus(false);
+        testOverspeedWithStatus(true);
     }
 
 }

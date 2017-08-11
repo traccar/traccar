@@ -27,7 +27,7 @@ public class MotionEventHandlerTest extends BaseTest {
     }
 
     @Test
-    public void testMotionEventHandler() throws Exception {
+    public void testMotionWithPosition() throws Exception {
         TripsConfig tripsConfig = new TripsConfig(500, 300 * 1000, 300 * 1000, false, 0);
 
         Position position = new Position();
@@ -58,6 +58,25 @@ public class MotionEventHandlerTest extends BaseTest {
         nextPosition.setTime(date("2017-01-01 00:06:00"));
         nextPosition.set(Position.KEY_TOTAL_DISTANCE, 200);
         event = MotionEventHandler.updateMotionState(deviceState, nextPosition, tripsConfig);
+        assertNotNull(event);
+        assertEquals(Event.TYPE_DEVICE_MOVING, event.getType());
+        assertTrue(deviceState.getMotionState());
+        assertNull(deviceState.getMotionPosition());
+    }
+
+    @Test
+    public void testMotionWithStatus() throws Exception {
+        TripsConfig tripsConfig = new TripsConfig(500, 300 * 1000, 300 * 1000, false, 0);
+
+        Position position = new Position();
+        position.setTime(new Date(System.currentTimeMillis() - 360000));
+        position.set(Position.KEY_MOTION, true);
+        DeviceState deviceState = new DeviceState();
+        deviceState.setMotionState(false);
+        deviceState.setMotionPosition(position);
+
+        Event event = MotionEventHandler.updateMotionState(deviceState, tripsConfig);
+
         assertNotNull(event);
         assertEquals(Event.TYPE_DEVICE_MOVING, event.getType());
         assertTrue(deviceState.getMotionState());

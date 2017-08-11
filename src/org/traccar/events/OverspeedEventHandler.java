@@ -37,6 +37,26 @@ public class OverspeedEventHandler extends BaseEventHandler {
         minimalDuration = Context.getConfig().getLong("event.overspeed.minimalDuration") * 1000;
     }
 
+    public static Event updateOverspeedState(DeviceState deviceState, double speedLimit,
+            long minimalDuration, boolean notRepeat) {
+        Event result = null;
+        if (deviceState.getOverspeedState() != null && !deviceState.getOverspeedState()
+                && deviceState.getOverspeedPosition() != null && speedLimit != 0) {
+            long currentTime = System.currentTimeMillis();
+            Position overspeedPosition = deviceState.getOverspeedPosition();
+            long overspeedTime = overspeedPosition.getFixTime().getTime();
+            if (overspeedTime + minimalDuration <= currentTime) {
+                result = new Event(Event.TYPE_DEVICE_OVERSPEED, overspeedPosition.getDeviceId(),
+                        overspeedPosition.getId());
+                result.set("speed", overspeedPosition.getSpeed());
+                result.set(ATTRIBUTE_SPEED_LIMIT, speedLimit);
+                deviceState.setOverspeedState(notRepeat);
+                deviceState.setOverspeedPosition(null);
+            }
+        }
+        return result;
+    }
+
     public static Event updateOverspeedState(DeviceState deviceState, Position position, double speedLimit,
             long minimalOverspeedDuration, boolean notRepeat) {
         Event result = null;

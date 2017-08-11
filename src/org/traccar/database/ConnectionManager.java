@@ -21,6 +21,7 @@ import org.jboss.netty.util.TimerTask;
 import org.traccar.Context;
 import org.traccar.GlobalTimer;
 import org.traccar.Protocol;
+import org.traccar.events.MotionEventHandler;
 import org.traccar.events.OverspeedEventHandler;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
@@ -148,36 +149,17 @@ public class ConnectionManager {
     public Set<Event> updateDeviceState(long deviceId) {
         DeviceState deviceState = Context.getDeviceManager().getDeviceState(deviceId);
         Set<Event> result = new HashSet<>();
-        long currentTime = System.currentTimeMillis();
-        if (deviceState.getMotionState() != null && deviceState.getMotionPosition() != null) {
-            boolean newMotion = !deviceState.getMotionState();
-            Position motionPosition = deviceState.getMotionPosition();
-            long motionTime = motionPosition.getFixTime().getTime()
-                    + (newMotion ? tripsConfig.getMinimalTripDuration() : tripsConfig.getMinimalParkingDuration());
-            if (motionTime <= currentTime) {
-                String eventType = newMotion ? Event.TYPE_DEVICE_MOVING : Event.TYPE_DEVICE_STOPPED;
-                result.add(new Event(eventType, motionPosition.getDeviceId(), motionPosition.getId()));
-                deviceState.setMotionState(newMotion);
-                deviceState.setMotionPosition(null);
-            }
+
+        Event event = MotionEventHandler.updateMotionState(deviceState, tripsConfig);
+        if (event != null) {
+            result.add(event);
         }
-        if (deviceState.getOverspeedState() != null && !deviceState.getOverspeedState()
-                && deviceState.getOverspeedPosition() != null) {
-            double speedLimit = Context.getDeviceManager().lookupAttributeDouble(deviceId,
-                    OverspeedEventHandler.ATTRIBUTE_SPEED_LIMIT, 0, false);
-            if (speedLimit != 0) {
-                Position overspeedPosition = deviceState.getOverspeedPosition();
-                long overspeedTime = overspeedPosition.getFixTime().getTime();
-                if (overspeedTime + minimalOverspeedDuration <= currentTime) {
-                    Event event = new Event(Event.TYPE_DEVICE_OVERSPEED, overspeedPosition.getDeviceId(),
-                            overspeedPosition.getId());
-                    event.set("speed", overspeedPosition.getSpeed());
-                    event.set(OverspeedEventHandler.ATTRIBUTE_SPEED_LIMIT, speedLimit);
-                    result.add(event);
-                    deviceState.setOverspeedState(overspeedNotRepeat);
-                    deviceState.setOverspeedPosition(null);
-                }
-            }
+
+        event = OverspeedEventHandler.updateOverspeedState(deviceState, Context.getDeviceManager().
+                lookupAttributeDouble(deviceId, OverspeedEventHandler.ATTRIBUTE_SPEED_LIMIT, 0, false),
+                minimalOverspeedDuration, overspeedNotRepeat);
+        if (event != null) {
+            result.add(event);
         }
 
         return result;

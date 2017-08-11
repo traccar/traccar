@@ -36,6 +36,24 @@ public class MotionEventHandler extends BaseEventHandler {
         tripsConfig = ReportUtils.initTripsConfig();
     }
 
+    public static Event updateMotionState(DeviceState deviceState, TripsConfig tripsConfig) {
+        Event result = null;
+        if (deviceState.getMotionState() != null && deviceState.getMotionPosition() != null) {
+            boolean newMotion = !deviceState.getMotionState();
+            Position motionPosition = deviceState.getMotionPosition();
+            long currentTime = System.currentTimeMillis();
+            long motionTime = motionPosition.getFixTime().getTime()
+                    + (newMotion ? tripsConfig.getMinimalTripDuration() : tripsConfig.getMinimalParkingDuration());
+            if (motionTime <= currentTime) {
+                String eventType = newMotion ? Event.TYPE_DEVICE_MOVING : Event.TYPE_DEVICE_STOPPED;
+                result = new Event(eventType, motionPosition.getDeviceId(), motionPosition.getId());
+                deviceState.setMotionState(newMotion);
+                deviceState.setMotionPosition(null);
+            }
+        }
+        return result;
+    }
+
     public static Event updateMotionState(DeviceState deviceState, Position position, TripsConfig tripsConfig) {
         Event result = null;
         Boolean oldMotion = deviceState.getMotionState();
