@@ -67,7 +67,7 @@ import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.geolocation.MozillaGeolocationProvider;
 import org.traccar.geolocation.OpenCellIdGeolocationProvider;
 import org.traccar.notification.EventForwarder;
-import org.traccar.reports.ReportUtils;
+import org.traccar.reports.model.TripsConfig;
 import org.traccar.smpp.SmppClient;
 import org.traccar.web.WebServer;
 
@@ -244,6 +244,21 @@ public final class Context {
         return overspeedEventHandler;
     }
 
+    private static TripsConfig tripsConfig;
+
+    public static TripsConfig getTripsConfig() {
+        return tripsConfig;
+    }
+
+    public static TripsConfig initTripsConfig() {
+        return new TripsConfig(
+                config.getLong("report.trip.minimalTripDistance", 500),
+                config.getLong("report.trip.minimalTripDuration", 300) * 1000,
+                config.getLong("report.trip.minimalParkingDuration", 300) * 1000,
+                config.getBoolean("report.trip.greedyParking"),
+                config.getLong("report.trip.minimalNoDataDuration", 3600) * 1000);
+    }
+
     public static void init(String[] arguments) throws Exception {
 
         config = new Config();
@@ -342,6 +357,8 @@ public final class Context {
 
         connectionManager = new ConnectionManager();
 
+        tripsConfig = initTripsConfig();
+
         if (config.getBoolean("event.enable")) {
             geofenceManager = new GeofenceManager(dataManager);
             calendarManager = new CalendarManager(dataManager);
@@ -366,7 +383,7 @@ public final class Context {
             velocityEngine = new VelocityEngine();
             velocityEngine.init(velocityProperties);
 
-            motionEventHandler = new MotionEventHandler(ReportUtils.initTripsConfig());
+            motionEventHandler = new MotionEventHandler(tripsConfig);
             overspeedEventHandler = new OverspeedEventHandler(
                     Context.getConfig().getLong("event.overspeed.minimalDuration") * 1000,
                     Context.getConfig().getBoolean("event.overspeed.notRepeat"));
