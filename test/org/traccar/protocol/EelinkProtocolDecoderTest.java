@@ -34,17 +34,17 @@ public class EelinkProtocolDecoderTest extends ProtocolTest {
         verifyAttributes(decoder, binary(
                 "67670300040028006A"));
 
-        // new proto - normal (0x12)
-        verifyPosition(decoder, binary(
-                "676712002d066c592cca6803002631a60b22127700240046005c08020d000301af000da0fd12007f11ce05820000001899c0"));
-
         // gps packet (0x02) with 10 bytes extra (device status/batt voltage/signal/adc1/adc2)
         verifyPosition(decoder, binary(
                 "676702002509f65868507603a1e92e03cf90fe000000019f000117ee00111e0120631145003101510000"));
 
         // new proto - normal (0x12)
         verifyPosition(decoder, binary(
-                "676712001e0092579714d60201f90001785003a301cd1a006a118504f2000000000000"));
+                "676712002d066c592cca6803002631a60b22127700240046005c08020d000301af000da0fd12007f11ce05820000001899c0"));
+        
+        // new proto - normal (0x12)
+        verifyAttributes(decoder, binary(
+                "676712001e0092579714d60201f90001785003a301cd1a006a118504f2000000000000"));        
 
         // new proto - normal (0x12)
         verifyPosition(decoder, binary(
@@ -54,6 +54,10 @@ public class EelinkProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, binary(
                 "676714002b00515784cc24130246479b07d05a06001800010000060195039f046100002cc52f6466b391604a49020089"));
 
+        // new proto - report (0x15)
+        verifyAttributes(decoder, binary(
+                "676715000a00f75685510b0002006a"));
+        
         // login (0x01)
         verifyNull(decoder, binary(
                 "676701000c002603541880486128290120"));
