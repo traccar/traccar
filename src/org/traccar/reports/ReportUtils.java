@@ -26,9 +26,11 @@ import org.jxls.transform.Transformer;
 import org.jxls.transform.poi.PoiTransformer;
 import org.jxls.util.TransformerFactory;
 import org.traccar.Context;
+import org.traccar.events.MotionEventHandler;
+import org.traccar.model.DeviceState;
 import org.traccar.model.Driver;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
-import org.traccar.reports.model.BaseReport;
 import org.traccar.reports.model.StopReport;
 import org.traccar.reports.model.TripReport;
 import org.traccar.reports.model.TripsConfig;
@@ -237,8 +239,11 @@ public final class ReportUtils {
 
     private static boolean isMoving(ArrayList<Position> positions, int index,
             TripsConfig tripsConfig, double speedThreshold) {
-        if (tripsConfig.getMinimalNoDataDuration() > 0 && index < positions.size() - 1
+        if (tripsConfig.getMinimalNoDataDuration() > 0 && (index < positions.size() - 1
                 && positions.get(index + 1).getFixTime().getTime() - positions.get(index).getFixTime().getTime()
+                >= tripsConfig.getMinimalNoDataDuration())
+                || index > 0
+                && positions.get(index).getFixTime().getTime() - positions.get(index - 1).getFixTime().getTime()
                 >= tripsConfig.getMinimalNoDataDuration()) {
             return false;
         }
@@ -250,100 +255,80 @@ public final class ReportUtils {
         }
     }
 
-    public static Collection<BaseReport> detectTripsAndStops(TripsConfig tripsConfig, boolean ignoreOdometer,
-            double speedThreshold, Collection<Position> positionCollection, boolean trips) {
-
-        Collection<BaseReport> result = new ArrayList<>();
+    public static Collection<TripReport> detectTrips(Collection<Position> positionCollection, TripsConfig tripsConfig,
+            boolean ignoreOdometer, double speedThreshold) {
+        Collection<TripReport> result = new ArrayList<>();
 
         ArrayList<Position> positions = new ArrayList<>(positionCollection);
         if (positions != null && !positions.isEmpty()) {
-            int previousStartParkingIndex = 0;
+            MotionEventHandler  motionHandler = new MotionEventHandler(tripsConfig);
+            DeviceState deviceState = new DeviceState();
+            deviceState.setMotionState(isMoving(positions, 0, tripsConfig, speedThreshold));
+            int startTripIndex = deviceState.getMotionState() ? 0 : -1;
             int startParkingIndex = -1;
-            int previousEndParkingIndex = 0;
-            int endParkingIndex = 0;
-
-            boolean isMoving = false;
-            boolean isLast = false;
-            boolean skipped = false;
-            boolean tripFiltered = false;
-
             for (int i = 0; i < positions.size(); i++) {
-                isMoving = isMoving(positions, i, tripsConfig, speedThreshold);
-                isLast = i == positions.size() - 1;
-
-                if ((isMoving || isLast) && startParkingIndex != -1) {
-                    if (!skipped || previousEndParkingIndex == 0) {
-                        previousEndParkingIndex = endParkingIndex;
-                    }
-                    endParkingIndex = i;
+                positions.get(i).set(Position.KEY_MOTION, isMoving(positions, i, tripsConfig, speedThreshold));
+                Event event = motionHandler.updateMotionState(deviceState, positions.get(i));
+                if (startTripIndex == -1 && !deviceState.getMotionState() && deviceState.getMotionPosition() != null) {
+                    startTripIndex = i;
+                    startParkingIndex = -1;
                 }
-                if (!isMoving && startParkingIndex == -1) {
-                    if (tripsConfig.getGreedyParking()) {
-                        long tripDuration = positions.get(i).getFixTime().getTime()
-                                - positions.get(endParkingIndex).getFixTime().getTime();
-                        double tripDistance = ReportUtils.calculateDistance(positions.get(endParkingIndex),
-                                positions.get(i), false);
-                        tripFiltered = tripDuration < tripsConfig.getMinimalTripDuration()
-                                && tripDistance < tripsConfig.getMinimalTripDistance();
-                        if (tripFiltered) {
-                            startParkingIndex = previousStartParkingIndex;
-                            endParkingIndex = previousEndParkingIndex;
-                            tripFiltered = false;
-                        } else {
-                            previousStartParkingIndex = i;
-                            startParkingIndex = i;
-                        }
-                    } else {
-                        long tripDuration = positions.get(i).getFixTime().getTime()
-                                - positions.get(previousEndParkingIndex).getFixTime().getTime();
-                        double tripDistance = ReportUtils.calculateDistance(positions.get(previousEndParkingIndex),
-                                positions.get(i), false);
-                        tripFiltered = tripDuration < tripsConfig.getMinimalTripDuration()
-                                && tripDistance < tripsConfig.getMinimalTripDistance();
+                if (deviceState.getMotionState()) {
+                    if (startParkingIndex == -1) {
                         startParkingIndex = i;
+                    } else if (deviceState.getMotionPosition() == null) {
+                        startParkingIndex = -1;
                     }
                 }
-                if (startParkingIndex != -1 && (endParkingIndex > startParkingIndex || isLast)) {
-                    long parkingDuration = positions.get(endParkingIndex).getFixTime().getTime()
-                            - positions.get(startParkingIndex).getFixTime().getTime();
-                    if ((parkingDuration >= tripsConfig.getMinimalParkingDuration() || isLast)
-                            && previousEndParkingIndex < startParkingIndex) {
-                        if (!tripFiltered) {
-                            if (trips) {
-                                result.add(calculateTrip(
-                                        positions, previousEndParkingIndex, startParkingIndex, ignoreOdometer));
-                            } else {
-                                if (result.isEmpty() && previousEndParkingIndex > previousStartParkingIndex) {
-                                    long previousParkingDuration = positions.get(previousEndParkingIndex)
-                                            .getFixTime().getTime() - positions.get(previousStartParkingIndex)
-                                            .getFixTime().getTime();
-                                    if (previousParkingDuration >= tripsConfig.getMinimalParkingDuration()) {
-                                        result.add(calculateStop(positions, previousStartParkingIndex,
-                                                previousEndParkingIndex));
-                                    }
-                                }
-                                result.add(calculateStop(positions, startParkingIndex, isLast ? i : endParkingIndex));
-                            }
-                        }
-                        previousEndParkingIndex = endParkingIndex;
-                        skipped = false;
-                    } else {
-                        skipped = true;
+                if (startTripIndex != -1 && startParkingIndex != -1 && event != null && !deviceState.getMotionState()) {
+                    result.add(calculateTrip(positions, startTripIndex, startParkingIndex, ignoreOdometer));
+                    startTripIndex = -1;
+                }
+            }
+            if (startTripIndex != -1 && startParkingIndex != -1) {
+                result.add(calculateTrip(positions, startTripIndex, startParkingIndex, ignoreOdometer));
+            }
+        }
+        return result;
+    }
+
+    public static Collection<StopReport> detectStops(Collection<Position> positionCollection, TripsConfig tripsConfig,
+            boolean ignoreOdometer, double speedThreshold) {
+        Collection<StopReport> result = new ArrayList<>();
+
+        ArrayList<Position> positions = new ArrayList<>(positionCollection);
+        if (positions != null && !positions.isEmpty()) {
+            MotionEventHandler  motionHandler = new MotionEventHandler(tripsConfig);
+            DeviceState deviceState = new DeviceState();
+            deviceState.setMotionState(isMoving(positions, 0, tripsConfig, speedThreshold));
+            int startTripIndex = -1;
+            int startParkingIndex = deviceState.getMotionState() ? -1 : 0;
+            for (int i = 0; i < positions.size(); i++) {
+                boolean isMoving = isMoving(positions, i, tripsConfig, speedThreshold);
+                positions.get(i).set(Position.KEY_MOTION, isMoving);
+                Event event = motionHandler.updateMotionState(deviceState, positions.get(i));
+                if (startParkingIndex == -1 && deviceState.getMotionState()
+                        && deviceState.getMotionPosition() != null) {
+                    startParkingIndex = i;
+                    startTripIndex = -1;
+                }
+                if (!deviceState.getMotionState()) {
+                    if (startTripIndex == -1) {
+                        startTripIndex = i;
+                    } else if (deviceState.getMotionPosition() == null) {
+                        startTripIndex = -1;
                     }
+                }
+                if (startParkingIndex != -1 && startTripIndex != -1 && event != null && deviceState.getMotionState()) {
+                    result.add(calculateStop(positions, startParkingIndex, startTripIndex));
                     startParkingIndex = -1;
                 }
             }
-            if (result.isEmpty() && !trips) {
-                int end = isMoving && !tripsConfig.getGreedyParking()
-                        ? Math.max(endParkingIndex, previousEndParkingIndex) : positions.size() - 1;
-                long parkingDuration = positions.get(end).getFixTime().getTime()
-                        - positions.get(previousStartParkingIndex).getFixTime().getTime();
-                if (parkingDuration >= tripsConfig.getMinimalParkingDuration()) {
-                    result.add(calculateStop(positions, previousStartParkingIndex, end));
-                }
+            if (startParkingIndex != -1) {
+                result.add(calculateStop(positions, startParkingIndex,
+                        startTripIndex != -1 ? startTripIndex : positions.size() - 1));
             }
         }
-
         return result;
     }
 }
