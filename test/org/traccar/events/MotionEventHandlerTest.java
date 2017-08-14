@@ -1,6 +1,7 @@
 package org.traccar.events;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -29,7 +30,7 @@ public class MotionEventHandlerTest extends BaseTest {
     @Test
     public void testMotionWithPosition() throws Exception {
         MotionEventHandler motionEventHandler = new MotionEventHandler(
-                new TripsConfig(500, 300 * 1000, 300 * 1000, false, 0));
+                new TripsConfig(500, 300 * 1000, 300 * 1000, false, 0, false));
 
         Position position = new Position();
         position.setTime(date("2017-01-01 00:00:00"));
@@ -68,7 +69,7 @@ public class MotionEventHandlerTest extends BaseTest {
     @Test
     public void testMotionWithStatus() throws Exception {
         MotionEventHandler motionEventHandler = new MotionEventHandler(
-                new TripsConfig(500, 300 * 1000, 300 * 1000, false, 0));
+                new TripsConfig(500, 300 * 1000, 300 * 1000, false, 0, false));
 
         Position position = new Position();
         position.setTime(new Date(System.currentTimeMillis() - 360000));
@@ -82,6 +83,31 @@ public class MotionEventHandlerTest extends BaseTest {
         assertNotNull(event);
         assertEquals(Event.TYPE_DEVICE_MOVING, event.getType());
         assertTrue(deviceState.getMotionState());
+        assertNull(deviceState.getMotionPosition());
+    }
+
+    @Test
+    public void testStopWithPositionIgnition() throws Exception {
+        MotionEventHandler motionEventHandler = new MotionEventHandler(
+                new TripsConfig(500, 300 * 1000, 300 * 1000, false, 0, true));
+
+        Position position = new Position();
+        position.setTime(date("2017-01-01 00:00:00"));
+        position.set(Position.KEY_MOTION, false);
+        position.set(Position.KEY_IGNITION, true);
+        DeviceState deviceState = new DeviceState();
+        deviceState.setMotionState(true);
+        deviceState.setMotionPosition(position);
+
+        Position nextPosition = new Position();
+        nextPosition.setTime(date("2017-01-01 00:02:00"));
+        nextPosition.set(Position.KEY_MOTION, false);
+        nextPosition.set(Position.KEY_IGNITION, false);
+
+        Event event = motionEventHandler.updateMotionState(deviceState, nextPosition);
+        assertNotNull(event);
+        assertEquals(Event.TYPE_DEVICE_STOPPED, event.getType());
+        assertFalse(deviceState.getMotionState());
         assertNull(deviceState.getMotionPosition());
     }
 
