@@ -167,7 +167,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
         switch (buf.readUnsignedByte()) {
             case MSG_SIGN_COMMAND:
-                buf.skipBytes(4); // server flag
+                buf.skipBytes(4); // server flag ignored
 
                 String content = buf.readBytes(buf.readableBytes()).toString(StandardCharsets.UTF_8);
 
@@ -386,7 +386,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
         short length = buf.readShort();
 
-        if (buf.readableBytes() != length) { // check remaining length
+        if (buf.readableBytes() != length) { // check remaining length matches defined packet length
             Log.warning(new IllegalArgumentException("Packet length error"));
             return null;
         }

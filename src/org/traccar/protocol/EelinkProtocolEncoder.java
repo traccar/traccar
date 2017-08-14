@@ -31,10 +31,10 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
 
         buf.writeShort(EelinkProtocolDecoder.HEADER_KEY);
         buf.writeByte(EelinkProtocolDecoder.MSG_DOWNLINK);
-        buf.writeShort(2 + 1 + 4 + content.length()); // length
+        buf.writeShort(2 + 1 + 4 + content.length()); // data length
         buf.writeShort(0); // index
 
-        buf.writeByte(EelinkProtocolDecoder.MSG_SIGN_COMMAND); // command
+        buf.writeByte(EelinkProtocolDecoder.MSG_SIGN_COMMAND);
         buf.writeInt(0); // server id
         buf.writeBytes(content.getBytes(StandardCharsets.UTF_8));
 
