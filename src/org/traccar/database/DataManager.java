@@ -297,7 +297,7 @@ public class DataManager {
 
     public User login(String email, String password) throws SQLException {
         User user = QueryBuilder.create(dataSource, getQuery("database.loginUser"))
-                .setString("email", email.trim().toLowerCase())
+                .setString("email", email.trim())
                 .executeQuerySingle(User.class);
         if (user != null && user.isPasswordValid(password)) {
             return user;
