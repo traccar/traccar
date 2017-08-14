@@ -21,13 +21,14 @@ public class TripsConfig {
     public TripsConfig() {
     }
 
-    public TripsConfig(double minimalTripDistance, long minimalTripDuration,
-            long minimalParkingDuration, boolean greedyParking, long minimalNoDataDuration) {
+    public TripsConfig(double minimalTripDistance, long minimalTripDuration, long minimalParkingDuration,
+            boolean greedyParking, long minimalNoDataDuration, boolean stopOnIgnitionOff) {
         this.minimalTripDistance = minimalTripDistance;
         this.minimalTripDuration = minimalTripDuration;
         this.minimalParkingDuration = minimalParkingDuration;
         this.greedyParking = greedyParking;
         this.minimalNoDataDuration = minimalNoDataDuration;
+        this.stopOnIgnitionOff = stopOnIgnitionOff;
     }
 
     private double minimalTripDistance;
@@ -78,6 +79,16 @@ public class TripsConfig {
 
     public void setMinimalNoDataDuration(long minimalNoDataDuration) {
         this.minimalNoDataDuration = minimalNoDataDuration;
+    }
+
+    private boolean stopOnIgnitionOff;
+
+    public boolean getStopOnIgnitionOff() {
+        return stopOnIgnitionOff;
+    }
+
+    public void setStopOnIgnitionOff(boolean stopOnIgnitionOff) {
+        this.stopOnIgnitionOff = stopOnIgnitionOff;
     }
 
 }
