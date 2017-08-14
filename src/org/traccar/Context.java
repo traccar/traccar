@@ -257,7 +257,7 @@ public final class Context {
                 config.getLong("report.trip.minimalParkingDuration", 300) * 1000,
                 config.getBoolean("report.trip.greedyParking"),
                 config.getLong("report.trip.minimalNoDataDuration", 3600) * 1000,
-                config.getBoolean("report.trip.stopOnIgnitionOff"));
+                config.getBoolean("report.trip.useIgnition"));
     }
 
     public static void init(String[] arguments) throws Exception {
