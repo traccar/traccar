@@ -59,6 +59,8 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
                 return encodeContent("STATUS#");
             case Command.TYPE_POSITION_PERIODIC:
                 return encodeContent("TIMER," + command.getInteger(Command.KEY_FREQUENCY) + ",1#");
+            case Command.TYPE_POSITION_STOP:
+                return encodeContent("TIMER,0,0#");
             case Command.TYPE_SET_TIMEZONE:
                 int tz = command.getInteger(Command.KEY_TIMEZONE);
                 return encodeContent("GMT," + (tz < 0 ? "E" : "W") + "," + (tz / 3600 / 60) + "#");
