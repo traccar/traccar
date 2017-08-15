@@ -29,6 +29,7 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.traccar.Config;
+import org.traccar.Context;
 import org.traccar.api.AsyncSocketServlet;
 import org.traccar.api.CorsResponseFilter;
 import org.traccar.api.ObjectMapperProvider;
@@ -105,7 +106,10 @@ public class WebServer {
             resourceHandler.setWelcomeFiles(new String[] {"debug.html", "index.html"});
             resourceHandler.setMinMemoryMappedContentLength(-1); // avoid locking files on Windows
         } else {
-            resourceHandler.setCacheControl("max-age=3600,public");
+            String cache = config.getString("web.cacheControl");
+            if (cache != null && !cache.isEmpty()) {
+                resourceHandler.setCacheControl(cache);
+            }
             resourceHandler.setWelcomeFiles(new String[] {"release.html", "index.html"});
         }
         handlers.addHandler(resourceHandler);
