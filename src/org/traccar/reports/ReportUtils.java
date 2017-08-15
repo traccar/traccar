@@ -304,8 +304,7 @@ public final class ReportUtils {
             int startTripIndex = -1;
             int startParkingIndex = deviceState.getMotionState() ? -1 : 0;
             for (int i = 0; i < positions.size(); i++) {
-                boolean isMoving = isMoving(positions, i, tripsConfig, speedThreshold);
-                positions.get(i).set(Position.KEY_MOTION, isMoving);
+                positions.get(i).set(Position.KEY_MOTION, isMoving(positions, i, tripsConfig, speedThreshold));
                 Event event = motionHandler.updateMotionState(deviceState, positions.get(i));
                 if (startParkingIndex == -1 && deviceState.getMotionState()
                         && deviceState.getMotionPosition() != null) {
