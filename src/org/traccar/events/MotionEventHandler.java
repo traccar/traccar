@@ -78,13 +78,19 @@ public class MotionEventHandler extends BaseEventHandler {
         if (motionPosition != null) {
             long motionTime = motionPosition.getFixTime().getTime();
             double distance = ReportUtils.calculateDistance(motionPosition, position, false);
+            Boolean ignition = null;
+            if (tripsConfig.getUseIgnition()
+                    && position.getAttributes().containsKey(Position.KEY_IGNITION)) {
+                ignition = position.getBoolean(Position.KEY_IGNITION);
+            }
             if (newMotion) {
                 if (motionTime + tripsConfig.getMinimalTripDuration() <= currentTime
                         || distance >= tripsConfig.getMinimalTripDistance()) {
                     result = newEvent(deviceState, newMotion);
                 }
             } else {
-                if (motionTime + tripsConfig.getMinimalParkingDuration() <= currentTime) {
+                if (motionTime + tripsConfig.getMinimalParkingDuration() <= currentTime
+                        || ignition != null && !ignition) {
                     result = newEvent(deviceState, newMotion);
                 }
             }
