@@ -29,7 +29,6 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.traccar.Config;
-import org.traccar.Context;
 import org.traccar.api.AsyncSocketServlet;
 import org.traccar.api.CorsResponseFilter;
 import org.traccar.api.ObjectMapperProvider;
