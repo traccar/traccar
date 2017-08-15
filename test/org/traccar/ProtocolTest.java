@@ -82,6 +82,10 @@ public class ProtocolTest extends BaseTest {
         Assert.assertNotNull(decoder.decode(null, null, object));
     }
 
+    protected void verifyNull(Object object) throws Exception {
+        Assert.assertNull(object);
+    }
+
     protected void verifyNull(BaseProtocolDecoder decoder, Object object) throws Exception {
         Assert.assertNull(decoder.decode(null, null, object));
     }
