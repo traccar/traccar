@@ -43,7 +43,7 @@ public class User extends ExtendedModel {
     }
 
     public void setEmail(String email) {
-        this.email = email;
+        this.email = email.trim();
     }
 
     private String phone;
