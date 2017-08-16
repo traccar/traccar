@@ -250,18 +250,13 @@ public final class ReportUtils {
     private static boolean isMoving(ArrayList<Position> positions, int index,
             TripsConfig tripsConfig, double speedThreshold) {
         if (tripsConfig.getMinimalNoDataDuration() > 0) {
-            long positionsDfference = 0;
-            if (index < positions.size() - 1) {
-                positionsDfference = positions.get(index + 1).getFixTime().getTime()
-                        - positions.get(index).getFixTime().getTime();
-            }
-            if (positionsDfference >= tripsConfig.getMinimalNoDataDuration()) {
-                return false;
-            } else if (index > 0) {
-                positionsDfference = positions.get(index).getFixTime().getTime()
-                        - positions.get(index - 1).getFixTime().getTime();
-            }
-            if (positionsDfference >= tripsConfig.getMinimalNoDataDuration()) {
+            boolean beforeGap = index < positions.size() - 1
+                    && positions.get(index + 1).getFixTime().getTime() - positions.get(index).getFixTime().getTime()
+                    >= tripsConfig.getMinimalNoDataDuration();
+            boolean afterGap = index > 0
+                    && positions.get(index).getFixTime().getTime() - positions.get(index - 1).getFixTime().getTime()
+                    >= tripsConfig.getMinimalNoDataDuration();
+            if (beforeGap || afterGap) {
                 return false;
             }
         }
