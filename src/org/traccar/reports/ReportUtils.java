@@ -238,16 +238,30 @@ public final class ReportUtils {
 
     }
 
+    private static <T extends BaseReport> T calculateTripOrStop(ArrayList<Position> positions, int startIndex,
+            int endIndex, boolean ignoreOdometer, Class<T> reportClass) {
+        if (reportClass.equals(TripReport.class)) {
+            return (T) calculateTrip(positions, startIndex, endIndex, ignoreOdometer);
+        } else {
+            return (T) calculateStop(positions, startIndex, endIndex);
+        }
+    }
+
     private static boolean isMoving(ArrayList<Position> positions, int index,
             TripsConfig tripsConfig, double speedThreshold) {
         if (tripsConfig.getMinimalNoDataDuration() > 0) {
-            boolean beforeGap = index < positions.size() - 1
-                    && positions.get(index + 1).getFixTime().getTime() - positions.get(index).getFixTime().getTime()
-                    >= tripsConfig.getMinimalNoDataDuration();
-            boolean afterGap = index > 0
-                    && positions.get(index).getFixTime().getTime() - positions.get(index - 1).getFixTime().getTime()
-                    >= tripsConfig.getMinimalNoDataDuration();
-            if (beforeGap || afterGap) {
+            long positionsDfference = 0;
+            if (index < positions.size() - 1) {
+                positionsDfference = positions.get(index + 1).getFixTime().getTime()
+                        - positions.get(index).getFixTime().getTime();
+            }
+            if (positionsDfference >= tripsConfig.getMinimalNoDataDuration()) {
+                return false;
+            } else if (index > 0) {
+                positionsDfference = positions.get(index).getFixTime().getTime()
+                        - positions.get(index - 1).getFixTime().getTime();
+            }
+            if (positionsDfference >= tripsConfig.getMinimalNoDataDuration()) {
                 return false;
             }
         }
@@ -269,53 +283,36 @@ public final class ReportUtils {
             MotionEventHandler  motionHandler = new MotionEventHandler(tripsConfig);
             DeviceState deviceState = new DeviceState();
             deviceState.setMotionState(isMoving(positions, 0, tripsConfig, speedThreshold));
-            int startTripIndex = trips && deviceState.getMotionState() ? 0 : -1;
-            int startParkingIndex = !trips && !deviceState.getMotionState() ? 0 : -1;
+            int startEventIndex = trips == deviceState.getMotionState() ? 0 : -1;
+            int startNoEventIndex = -1;
             for (int i = 0; i < positions.size(); i++) {
                 Event event = motionHandler.updateMotionState(deviceState, positions.get(i),
                         isMoving(positions, i, tripsConfig, speedThreshold));
-                if (deviceState.getMotionPosition() != null) {
-                    if (trips && startTripIndex == -1 && !deviceState.getMotionState()) {
-                        startTripIndex = i;
-                        startParkingIndex = -1;
-                    } else if (!trips && startParkingIndex == -1 && deviceState.getMotionState()) {
-                        startParkingIndex = i;
-                        startTripIndex = -1;
+                if (deviceState.getMotionPosition() != null && startEventIndex == -1
+                        && trips != deviceState.getMotionState()) {
+                    startEventIndex = i;
+                    startNoEventIndex = -1;
+                }
+                if (trips == deviceState.getMotionState()) {
+                    if (startNoEventIndex == -1) {
+                        startNoEventIndex = i;
+                    } else if (deviceState.getMotionPosition() == null) {
+                        startNoEventIndex = -1;
                     }
                 }
-                if (trips) {
-                    if (deviceState.getMotionState()) {
-                        if (startParkingIndex == -1) {
-                            startParkingIndex = i;
-                        } else if (deviceState.getMotionPosition() == null) {
-                            startParkingIndex = -1;
-                        }
-                    }
-                } else {
-                    if (!deviceState.getMotionState()) {
-                        if (startTripIndex == -1) {
-                            startTripIndex = i;
-                        } else if (deviceState.getMotionPosition() == null) {
-                            startTripIndex = -1;
-                        }
-                    }
-                }
-                if (startTripIndex != -1 && startParkingIndex != -1 && event != null) {
-                    if (trips && !deviceState.getMotionState()) {
-                        result.add((T) calculateTrip(positions, startTripIndex, startParkingIndex, ignoreOdometer));
-                        startTripIndex = -1;
-                    } else if (!trips && deviceState.getMotionState()) {
-                        result.add((T) calculateStop(positions, startParkingIndex, startTripIndex));
-                        startParkingIndex = -1;
-                    }
+                if (startEventIndex != -1 && startNoEventIndex != -1 && event != null
+                        && trips != deviceState.getMotionState()) {
+                    result.add(calculateTripOrStop(positions, startEventIndex, startNoEventIndex,
+                            ignoreOdometer, reportClass));
+                    startEventIndex = -1;
                 }
             }
-            if (trips && startTripIndex != -1 && startParkingIndex != -1) {
-                result.add((T) calculateTrip(positions, startTripIndex, startParkingIndex, ignoreOdometer));
-            }
-            if (!trips && startParkingIndex != -1) {
-                result.add((T) calculateStop(positions, startParkingIndex,
-                        startTripIndex != -1 ? startTripIndex : positions.size() - 1));
+            if (startEventIndex != -1) {
+                if (startNoEventIndex != -1 || !trips) {
+                    result.add(calculateTripOrStop(positions, startEventIndex,
+                            startNoEventIndex != -1 ? startNoEventIndex : positions.size() - 1,
+                            ignoreOdometer, reportClass));
+                }
             }
         }
         return result;
