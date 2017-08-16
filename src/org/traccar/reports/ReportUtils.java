@@ -302,12 +302,10 @@ public final class ReportUtils {
                     startEventIndex = -1;
                 }
             }
-            if (startEventIndex != -1) {
-                if (startNoEventIndex != -1 || !trips) {
-                    result.add(calculateTripOrStop(positions, startEventIndex,
+            if (startEventIndex != -1 && (startNoEventIndex != -1 || !trips)) {
+                result.add(calculateTripOrStop(positions, startEventIndex,
                             startNoEventIndex != -1 ? startNoEventIndex : positions.size() - 1,
                             ignoreOdometer, reportClass));
-                }
             }
         }
         return result;

@@ -48,8 +48,13 @@ public class NotificationManager {
     }
 
     public void updateEvent(Event event, Position position) {
+        Position relatedPosition = position;
         try {
             dataManager.addObject(event);
+            if (event.getPositionId() != 0 && (relatedPosition == null
+                    || event.getPositionId() != relatedPosition.getId())) {
+                relatedPosition = dataManager.getObject(Position.class, event.getPositionId());
+            }
         } catch (SQLException error) {
             Log.warning(error);
         }
@@ -64,16 +69,16 @@ public class NotificationManager {
                         Context.getConnectionManager().updateEvent(userId, event);
                     }
                     if (notification.getMail()) {
-                        NotificationMail.sendMailAsync(userId, event, position);
+                        NotificationMail.sendMailAsync(userId, event, relatedPosition);
                     }
                     if (notification.getSms()) {
-                        NotificationSms.sendSmsAsync(userId, event, position);
+                        NotificationSms.sendSmsAsync(userId, event, relatedPosition);
                     }
                 }
             }
         }
         if (Context.getEventForwarder() != null) {
-            Context.getEventForwarder().forwardEvent(event, position);
+            Context.getEventForwarder().forwardEvent(event, relatedPosition);
         }
     }
 
