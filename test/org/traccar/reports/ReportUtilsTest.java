@@ -81,7 +81,7 @@ public class ReportUtilsTest extends BaseTest {
 
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 180000, 900000, false);
 
-        Collection<TripReport> trips = ReportUtils.detectTrips(data, tripsConfig, false, 0.01);
+        Collection<TripReport> trips = ReportUtils.detectTripsAndStops(data, tripsConfig, false, 0.01, TripReport.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
@@ -95,7 +95,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(10, itemTrip.getMaxSpeed(), 0.01);
         assertEquals(3000, itemTrip.getDistance(), 0.01);
 
-        Collection<StopReport> stops = ReportUtils.detectStops(data, tripsConfig, false, 0.01);
+        Collection<StopReport> stops = ReportUtils.detectTripsAndStops(data, tripsConfig, false, 0.01, StopReport.class);
 
         assertNotNull(stops);
         assertFalse(stops.isEmpty());
@@ -129,7 +129,7 @@ public class ReportUtilsTest extends BaseTest {
 
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false);
 
-        Collection<StopReport> result = ReportUtils.detectStops(data, tripsConfig, false, 0.01);
+        Collection<StopReport> result = ReportUtils.detectTripsAndStops(data, tripsConfig, false, 0.01, StopReport.class);
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -155,7 +155,7 @@ public class ReportUtilsTest extends BaseTest {
 
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false);
 
-        Collection<StopReport> result = ReportUtils.detectStops(data, tripsConfig, false, 0.01);
+        Collection<StopReport> result = ReportUtils.detectTripsAndStops(data, tripsConfig, false, 0.01, StopReport.class);
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -181,7 +181,7 @@ public class ReportUtilsTest extends BaseTest {
 
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false);
 
-        Collection<StopReport> result = ReportUtils.detectStops(data, tripsConfig, false, 0.01);
+        Collection<StopReport> result = ReportUtils.detectTripsAndStops(data, tripsConfig, false, 0.01, StopReport.class);
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -207,7 +207,7 @@ public class ReportUtilsTest extends BaseTest {
 
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false);
 
-        Collection<StopReport> result = ReportUtils.detectStops(data, tripsConfig, false, 0.01);
+        Collection<StopReport> result = ReportUtils.detectTripsAndStops(data, tripsConfig, false, 0.01, StopReport.class);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -229,7 +229,7 @@ public class ReportUtilsTest extends BaseTest {
 
         TripsConfig tripsConfig = new TripsConfig(500, 200000, 200000, 900000, false);
 
-        Collection<TripReport> trips = ReportUtils.detectTrips(data, tripsConfig, false, 0.01);
+        Collection<TripReport> trips = ReportUtils.detectTripsAndStops(data, tripsConfig, false, 0.01, TripReport.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
@@ -243,7 +243,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(7, itemTrip.getMaxSpeed(), 0.01);
         assertEquals(600, itemTrip.getDistance(), 0.01);
 
-        Collection<StopReport> stops = ReportUtils.detectStops(data, tripsConfig, false, 0.01);
+        Collection<StopReport> stops = ReportUtils.detectTripsAndStops(data, tripsConfig, false, 0.01, StopReport.class);
 
         assertNotNull(stops);
         assertFalse(stops.isEmpty());

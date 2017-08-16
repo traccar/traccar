@@ -31,6 +31,7 @@ import org.traccar.model.DeviceState;
 import org.traccar.model.Driver;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+import org.traccar.reports.model.BaseReport;
 import org.traccar.reports.model.StopReport;
 import org.traccar.reports.model.TripReport;
 import org.traccar.reports.model.TripsConfig;
@@ -239,13 +240,16 @@ public final class ReportUtils {
 
     private static boolean isMoving(ArrayList<Position> positions, int index,
             TripsConfig tripsConfig, double speedThreshold) {
-        if (tripsConfig.getMinimalNoDataDuration() > 0 && (index < positions.size() - 1
-                && positions.get(index + 1).getFixTime().getTime() - positions.get(index).getFixTime().getTime()
-                >= tripsConfig.getMinimalNoDataDuration())
-                || index > 0
-                && positions.get(index).getFixTime().getTime() - positions.get(index - 1).getFixTime().getTime()
-                >= tripsConfig.getMinimalNoDataDuration()) {
-            return false;
+        if (tripsConfig.getMinimalNoDataDuration() > 0) {
+            boolean beforeGap = index < positions.size() - 1
+                    && positions.get(index + 1).getFixTime().getTime() - positions.get(index).getFixTime().getTime()
+                    >= tripsConfig.getMinimalNoDataDuration();
+            boolean afterGap = index > 0
+                    && positions.get(index).getFixTime().getTime() - positions.get(index - 1).getFixTime().getTime()
+                    >= tripsConfig.getMinimalNoDataDuration();
+            if (beforeGap || afterGap) {
+                return false;
+            }
         }
         if (positions.get(index).getAttributes().containsKey(Position.KEY_MOTION)
                 && positions.get(index).getAttributes().get(Position.KEY_MOTION) instanceof Boolean) {
@@ -255,76 +259,62 @@ public final class ReportUtils {
         }
     }
 
-    public static Collection<TripReport> detectTrips(Collection<Position> positionCollection, TripsConfig tripsConfig,
-            boolean ignoreOdometer, double speedThreshold) {
-        Collection<TripReport> result = new ArrayList<>();
+    public static <T extends BaseReport> Collection<T> detectTripsAndStops(Collection<Position> positionCollection,
+            TripsConfig tripsConfig, boolean ignoreOdometer, double speedThreshold, Class<T> reportClass) {
+        Collection<T> result = new ArrayList<>();
 
         ArrayList<Position> positions = new ArrayList<>(positionCollection);
         if (positions != null && !positions.isEmpty()) {
+            boolean trips = reportClass.equals(TripReport.class);
             MotionEventHandler  motionHandler = new MotionEventHandler(tripsConfig);
             DeviceState deviceState = new DeviceState();
             deviceState.setMotionState(isMoving(positions, 0, tripsConfig, speedThreshold));
-            int startTripIndex = deviceState.getMotionState() ? 0 : -1;
-            int startParkingIndex = -1;
+            int startTripIndex = trips && deviceState.getMotionState() ? 0 : -1;
+            int startParkingIndex = !trips && !deviceState.getMotionState() ? 0 : -1;
             for (int i = 0; i < positions.size(); i++) {
-                positions.get(i).set(Position.KEY_MOTION, isMoving(positions, i, tripsConfig, speedThreshold));
-                Event event = motionHandler.updateMotionState(deviceState, positions.get(i));
-                if (startTripIndex == -1 && !deviceState.getMotionState() && deviceState.getMotionPosition() != null) {
-                    startTripIndex = i;
-                    startParkingIndex = -1;
-                }
-                if (deviceState.getMotionState()) {
-                    if (startParkingIndex == -1) {
-                        startParkingIndex = i;
-                    } else if (deviceState.getMotionPosition() == null) {
-                        startParkingIndex = -1;
-                    }
-                }
-                if (startTripIndex != -1 && startParkingIndex != -1 && event != null && !deviceState.getMotionState()) {
-                    result.add(calculateTrip(positions, startTripIndex, startParkingIndex, ignoreOdometer));
-                    startTripIndex = -1;
-                }
-            }
-            if (startTripIndex != -1 && startParkingIndex != -1) {
-                result.add(calculateTrip(positions, startTripIndex, startParkingIndex, ignoreOdometer));
-            }
-        }
-        return result;
-    }
-
-    public static Collection<StopReport> detectStops(Collection<Position> positionCollection, TripsConfig tripsConfig,
-            boolean ignoreOdometer, double speedThreshold) {
-        Collection<StopReport> result = new ArrayList<>();
-
-        ArrayList<Position> positions = new ArrayList<>(positionCollection);
-        if (positions != null && !positions.isEmpty()) {
-            MotionEventHandler  motionHandler = new MotionEventHandler(tripsConfig);
-            DeviceState deviceState = new DeviceState();
-            deviceState.setMotionState(isMoving(positions, 0, tripsConfig, speedThreshold));
-            int startTripIndex = -1;
-            int startParkingIndex = deviceState.getMotionState() ? -1 : 0;
-            for (int i = 0; i < positions.size(); i++) {
-                positions.get(i).set(Position.KEY_MOTION, isMoving(positions, i, tripsConfig, speedThreshold));
-                Event event = motionHandler.updateMotionState(deviceState, positions.get(i));
-                if (startParkingIndex == -1 && deviceState.getMotionState()
-                        && deviceState.getMotionPosition() != null) {
-                    startParkingIndex = i;
-                    startTripIndex = -1;
-                }
-                if (!deviceState.getMotionState()) {
-                    if (startTripIndex == -1) {
+                Event event = motionHandler.updateMotionState(deviceState, positions.get(i),
+                        isMoving(positions, i, tripsConfig, speedThreshold));
+                if (deviceState.getMotionPosition() != null) {
+                    if (trips && startTripIndex == -1 && !deviceState.getMotionState()) {
                         startTripIndex = i;
-                    } else if (deviceState.getMotionPosition() == null) {
+                        startParkingIndex = -1;
+                    } else if (!trips && startParkingIndex == -1 && deviceState.getMotionState()) {
+                        startParkingIndex = i;
                         startTripIndex = -1;
                     }
                 }
-                if (startParkingIndex != -1 && startTripIndex != -1 && event != null && deviceState.getMotionState()) {
-                    result.add(calculateStop(positions, startParkingIndex, startTripIndex));
-                    startParkingIndex = -1;
+                if (trips) {
+                    if (deviceState.getMotionState()) {
+                        if (startParkingIndex == -1) {
+                            startParkingIndex = i;
+                        } else if (deviceState.getMotionPosition() == null) {
+                            startParkingIndex = -1;
+                        }
+                    }
+                } else {
+                    if (!deviceState.getMotionState()) {
+                        if (startTripIndex == -1) {
+                            startTripIndex = i;
+                        } else if (deviceState.getMotionPosition() == null) {
+                            startTripIndex = -1;
+                        }
+                    }
+                }
+                if (startTripIndex != -1 && startParkingIndex != -1 && event != null) {
+                    if (trips && !deviceState.getMotionState()) {
+                        result.add((T) calculateTrip(positions, startTripIndex, startParkingIndex, ignoreOdometer));
+                        startTripIndex = -1;
+                    } else if (!trips && deviceState.getMotionState()) {
+                        result.add((T) calculateStop(positions, startParkingIndex, startTripIndex));
+                        startParkingIndex = -1;
+                    }
                 }
             }
-            if (startParkingIndex != -1) {
-                result.add(calculateStop(positions, startParkingIndex,
+            if (trips && startTripIndex != -1 && startParkingIndex != -1) {
+                result.add((T) calculateTrip(positions, startTripIndex, startParkingIndex, ignoreOdometer));
+            }
+            if (!trips && startParkingIndex != -1) {
+                result.add((T) calculateStop(positions, startParkingIndex,
                         startTripIndex != -1 ? startTripIndex : positions.size() - 1));
             }
         }
