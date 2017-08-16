@@ -61,11 +61,14 @@ public class MotionEventHandler extends BaseEventHandler {
     }
 
     public Event updateMotionState(DeviceState deviceState, Position position) {
+        return updateMotionState(deviceState, position, position.getBoolean(Position.KEY_MOTION));
+    }
+
+    public Event updateMotionState(DeviceState deviceState, Position position, boolean newMotion) {
         Event result = null;
         Boolean oldMotion = deviceState.getMotionState();
 
         long currentTime = position.getFixTime().getTime();
-        boolean newMotion = position.getBoolean(Position.KEY_MOTION);
         if (newMotion != oldMotion) {
             if (deviceState.getMotionPosition() == null) {
                 deviceState.setMotionPosition(position);

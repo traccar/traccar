@@ -22,11 +22,10 @@ public class TripsConfig {
     }
 
     public TripsConfig(double minimalTripDistance, long minimalTripDuration, long minimalParkingDuration,
-            boolean greedyParking, long minimalNoDataDuration, boolean useIgnition) {
+            long minimalNoDataDuration, boolean useIgnition) {
         this.minimalTripDistance = minimalTripDistance;
         this.minimalTripDuration = minimalTripDuration;
         this.minimalParkingDuration = minimalParkingDuration;
-        this.greedyParking = greedyParking;
         this.minimalNoDataDuration = minimalNoDataDuration;
         this.useIgnition = useIgnition;
     }
@@ -59,16 +58,6 @@ public class TripsConfig {
 
     public void setMinimalParkingDuration(long minimalParkingDuration) {
         this.minimalParkingDuration = minimalParkingDuration;
-    }
-
-    private boolean greedyParking;
-
-    public boolean getGreedyParking() {
-        return greedyParking;
-    }
-
-    public void setGreedyParking(boolean greedyParking) {
-        this.greedyParking = greedyParking;
     }
 
     private long minimalNoDataDuration;
