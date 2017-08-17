@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -48,13 +49,8 @@ public class NotificationManager {
     }
 
     public void updateEvent(Event event, Position position) {
-        Position relatedPosition = position;
         try {
             dataManager.addObject(event);
-            if (event.getPositionId() != 0 && (relatedPosition == null
-                    || event.getPositionId() != relatedPosition.getId())) {
-                relatedPosition = dataManager.getObject(Position.class, event.getPositionId());
-            }
         } catch (SQLException error) {
             Log.warning(error);
         }
@@ -69,22 +65,22 @@ public class NotificationManager {
                         Context.getConnectionManager().updateEvent(userId, event);
                     }
                     if (notification.getMail()) {
-                        NotificationMail.sendMailAsync(userId, event, relatedPosition);
+                        NotificationMail.sendMailAsync(userId, event, position);
                     }
                     if (notification.getSms()) {
-                        NotificationSms.sendSmsAsync(userId, event, relatedPosition);
+                        NotificationSms.sendSmsAsync(userId, event, position);
                     }
                 }
             }
         }
         if (Context.getEventForwarder() != null) {
-            Context.getEventForwarder().forwardEvent(event, relatedPosition);
+            Context.getEventForwarder().forwardEvent(event, position);
         }
     }
 
-    public void updateEvents(Collection<Event> events, Position position) {
-        for (Event event : events) {
-            updateEvent(event, position);
+    public void updateEvents(Map<Event, Position> events) {
+        for (Entry<Event, Position> event : events.entrySet()) {
+            updateEvent(event.getKey(), event.getValue());
         }
     }
 

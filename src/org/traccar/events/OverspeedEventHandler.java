@@ -15,8 +15,8 @@
  */
 package org.traccar.events;
 
-import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 
 import org.traccar.BaseEventHandler;
 import org.traccar.Context;
@@ -37,18 +37,18 @@ public class OverspeedEventHandler extends BaseEventHandler {
         this.minimalDuration = minimalDuration;
     }
 
-    private Event newEvent(DeviceState deviceState, double speedLimit) {
-        Event event = new Event(Event.TYPE_DEVICE_OVERSPEED, deviceState.getOverspeedPosition().getDeviceId(),
-                deviceState.getOverspeedPosition().getId());
+    private Map<Event, Position> newEvent(DeviceState deviceState, double speedLimit) {
+        Position position = deviceState.getOverspeedPosition();
+        Event event = new Event(Event.TYPE_DEVICE_OVERSPEED, position.getDeviceId(), position.getId());
         event.set("speed", deviceState.getOverspeedPosition().getSpeed());
         event.set(ATTRIBUTE_SPEED_LIMIT, speedLimit);
         deviceState.setOverspeedState(notRepeat);
         deviceState.setOverspeedPosition(null);
-        return event;
+        return Collections.singletonMap(event, position);
     }
 
-    public Event updateOverspeedState(DeviceState deviceState, double speedLimit) {
-        Event result = null;
+    public Map<Event, Position> updateOverspeedState(DeviceState deviceState, double speedLimit) {
+        Map<Event, Position> result = null;
         if (deviceState.getOverspeedState() != null && !deviceState.getOverspeedState()
                 && deviceState.getOverspeedPosition() != null && speedLimit != 0) {
             long currentTime = System.currentTimeMillis();
@@ -61,8 +61,8 @@ public class OverspeedEventHandler extends BaseEventHandler {
         return result;
     }
 
-    public Event updateOverspeedState(DeviceState deviceState, Position position, double speedLimit) {
-        Event result = null;
+    public Map<Event, Position> updateOverspeedState(DeviceState deviceState, Position position, double speedLimit) {
+        Map<Event, Position> result = null;
 
         Boolean oldOverspeed = deviceState.getOverspeedState();
 
@@ -89,7 +89,7 @@ public class OverspeedEventHandler extends BaseEventHandler {
     }
 
     @Override
-    protected Collection<Event> analyzePosition(Position position) {
+    protected Map<Event, Position> analyzePosition(Position position) {
 
         long deviceId = position.getDeviceId();
         Device device = Context.getIdentityManager().getById(deviceId);
@@ -105,7 +105,7 @@ public class OverspeedEventHandler extends BaseEventHandler {
             return null;
         }
 
-        Event result = null;
+        Map<Event, Position> result = null;
         DeviceState deviceState = Context.getDeviceManager().getDeviceState(deviceId);
 
         if (deviceState.getOverspeedState() == null) {
@@ -115,10 +115,7 @@ public class OverspeedEventHandler extends BaseEventHandler {
         }
 
         Context.getDeviceManager().setDeviceState(deviceId, deviceState);
-        if (result != null) {
-            return Collections.singleton(result);
-        }
-        return null;
+        return result;
     }
 
 }

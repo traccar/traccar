@@ -46,6 +46,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 
 public final class ReportUtils {
@@ -281,7 +282,7 @@ public final class ReportUtils {
             int startEventIndex = trips == deviceState.getMotionState() ? 0 : -1;
             int startNoEventIndex = -1;
             for (int i = 0; i < positions.size(); i++) {
-                Event event = motionHandler.updateMotionState(deviceState, positions.get(i),
+                Map<Event, Position> event = motionHandler.updateMotionState(deviceState, positions.get(i),
                         isMoving(positions, i, tripsConfig, speedThreshold));
                 if (deviceState.getMotionPosition() != null && startEventIndex == -1
                         && trips != deviceState.getMotionState()) {

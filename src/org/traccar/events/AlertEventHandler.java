@@ -15,8 +15,8 @@
  */
 package org.traccar.events;
 
-import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 
 import org.traccar.BaseEventHandler;
 import org.traccar.model.Event;
@@ -25,12 +25,12 @@ import org.traccar.model.Position;
 public class AlertEventHandler extends BaseEventHandler {
 
     @Override
-    protected Collection<Event> analyzePosition(Position position) {
+    protected Map<Event, Position> analyzePosition(Position position) {
         Object alarm = position.getAttributes().get(Position.KEY_ALARM);
         if (alarm != null) {
             Event event = new Event(Event.TYPE_ALARM, position.getDeviceId(), position.getId());
             event.set(Position.KEY_ALARM, (String) alarm);
-            return Collections.singleton(event);
+            return Collections.singletonMap(event, position);
         }
         return null;
     }

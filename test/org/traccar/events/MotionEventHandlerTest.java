@@ -10,6 +10,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 import java.util.TimeZone;
 
 import org.junit.Test;
@@ -45,12 +46,13 @@ public class MotionEventHandlerTest extends BaseTest {
         nextPosition.set(Position.KEY_MOTION, true);
         nextPosition.set(Position.KEY_TOTAL_DISTANCE, 200);
 
-        Event event = motionEventHandler.updateMotionState(deviceState, nextPosition);
-        assertNull(event);
+        Map<Event, Position> events = motionEventHandler.updateMotionState(deviceState, nextPosition);
+        assertNull(events);
 
         nextPosition.set(Position.KEY_TOTAL_DISTANCE, 600);
-        event = motionEventHandler.updateMotionState(deviceState, nextPosition);        
-        assertNotNull(event);
+        events = motionEventHandler.updateMotionState(deviceState, nextPosition);        
+        assertNotNull(events);
+        Event event = events.keySet().iterator().next();
         assertEquals(Event.TYPE_DEVICE_MOVING, event.getType());
         assertTrue(deviceState.getMotionState());
         assertNull(deviceState.getMotionPosition());
@@ -59,8 +61,9 @@ public class MotionEventHandlerTest extends BaseTest {
         deviceState.setMotionPosition(position);
         nextPosition.setTime(date("2017-01-01 00:06:00"));
         nextPosition.set(Position.KEY_TOTAL_DISTANCE, 200);
-        event = motionEventHandler.updateMotionState(deviceState, nextPosition);
+        events = motionEventHandler.updateMotionState(deviceState, nextPosition);
         assertNotNull(event);
+        event = events.keySet().iterator().next();
         assertEquals(Event.TYPE_DEVICE_MOVING, event.getType());
         assertTrue(deviceState.getMotionState());
         assertNull(deviceState.getMotionPosition());
@@ -78,9 +81,10 @@ public class MotionEventHandlerTest extends BaseTest {
         deviceState.setMotionState(false);
         deviceState.setMotionPosition(position);
 
-        Event event = motionEventHandler.updateMotionState(deviceState);
+        Map<Event, Position> events = motionEventHandler.updateMotionState(deviceState);
 
-        assertNotNull(event);
+        assertNotNull(events);
+        Event event = events.keySet().iterator().next();
         assertEquals(Event.TYPE_DEVICE_MOVING, event.getType());
         assertTrue(deviceState.getMotionState());
         assertNull(deviceState.getMotionPosition());
@@ -104,8 +108,9 @@ public class MotionEventHandlerTest extends BaseTest {
         nextPosition.set(Position.KEY_MOTION, false);
         nextPosition.set(Position.KEY_IGNITION, false);
 
-        Event event = motionEventHandler.updateMotionState(deviceState, nextPosition);
-        assertNotNull(event);
+        Map<Event, Position> events = motionEventHandler.updateMotionState(deviceState, nextPosition);
+        assertNotNull(events);
+        Event event = events.keySet().iterator().next();
         assertEquals(Event.TYPE_DEVICE_STOPPED, event.getType());
         assertFalse(deviceState.getMotionState());
         assertNull(deviceState.getMotionPosition());

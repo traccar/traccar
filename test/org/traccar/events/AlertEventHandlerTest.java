@@ -3,7 +3,7 @@ package org.traccar.events;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import java.util.Collection;
+import java.util.Map;
 
 import org.junit.Test;
 import org.traccar.BaseTest;
@@ -19,9 +19,9 @@ public class AlertEventHandlerTest extends BaseTest {
         
         Position position = new Position();
         position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
-        Collection<Event> events = alertEventHandler.analyzePosition(position);
+        Map<Event, Position> events = alertEventHandler.analyzePosition(position);
         assertNotNull(events);
-        Event event = (Event) events.toArray()[0];
+        Event event = events.keySet().iterator().next();
         assertEquals(Event.TYPE_ALARM, event.getType());
     }
 
