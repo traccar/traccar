@@ -31,6 +31,7 @@ import org.traccar.model.Position;
 import java.net.SocketAddress;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -84,7 +85,7 @@ public class ConnectionManager {
 
         if (enableStatusEvents && !status.equals(oldStatus)) {
             String eventType;
-            Set<Event> events = new HashSet<>();
+            Map<Event, Position> events = new HashMap<>();
             switch (status) {
                 case Device.STATUS_ONLINE:
                     eventType = Event.TYPE_DEVICE_ONLINE;
@@ -92,18 +93,18 @@ public class ConnectionManager {
                 case Device.STATUS_UNKNOWN:
                     eventType = Event.TYPE_DEVICE_UNKNOWN;
                     if (updateDeviceState) {
-                        events.addAll(updateDeviceState(deviceId));
+                        events.putAll(updateDeviceState(deviceId));
                     }
                     break;
                 default:
                     eventType = Event.TYPE_DEVICE_OFFLINE;
                     if (updateDeviceState) {
-                        events.addAll(updateDeviceState(deviceId));
+                        events.putAll(updateDeviceState(deviceId));
                     }
                     break;
             }
-            events.add(new Event(eventType, deviceId));
-            Context.getNotificationManager().updateEvents(events, null);
+            events.put(new Event(eventType, deviceId), null);
+            Context.getNotificationManager().updateEvents(events);
         }
 
         Timeout timeout = timeouts.remove(deviceId);
@@ -135,19 +136,19 @@ public class ConnectionManager {
         updateDevice(device);
     }
 
-    public Set<Event> updateDeviceState(long deviceId) {
+    public Map<Event, Position> updateDeviceState(long deviceId) {
         DeviceState deviceState = Context.getDeviceManager().getDeviceState(deviceId);
-        Set<Event> result = new HashSet<>();
+        Map<Event, Position> result = new HashMap<>();
 
-        Event event = Context.getMotionEventHandler().updateMotionState(deviceState);
+        Map<Event, Position> event = Context.getMotionEventHandler().updateMotionState(deviceState);
         if (event != null) {
-            result.add(event);
+            result.putAll(event);
         }
 
         event = Context.getOverspeedEventHandler().updateOverspeedState(deviceState, Context.getDeviceManager().
                 lookupAttributeDouble(deviceId, OverspeedEventHandler.ATTRIBUTE_SPEED_LIMIT, 0, false));
         if (event != null) {
-            result.add(event);
+            result.putAll(event);
         }
 
         return result;

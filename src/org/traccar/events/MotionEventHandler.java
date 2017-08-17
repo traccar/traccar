@@ -16,8 +16,8 @@
  */
 package org.traccar.events;
 
-import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 
 import org.traccar.BaseEventHandler;
 import org.traccar.Context;
@@ -36,17 +36,17 @@ public class MotionEventHandler extends BaseEventHandler {
         this.tripsConfig = tripsConfig;
     }
 
-    private Event newEvent(DeviceState deviceState, boolean newMotion) {
+    private Map<Event, Position> newEvent(DeviceState deviceState, boolean newMotion) {
         String eventType = newMotion ? Event.TYPE_DEVICE_MOVING : Event.TYPE_DEVICE_STOPPED;
-        Event event = new Event(eventType, deviceState.getMotionPosition().getDeviceId(),
-                deviceState.getMotionPosition().getId());
+        Position position = deviceState.getMotionPosition();
+        Event event = new Event(eventType, position.getDeviceId(), position.getId());
         deviceState.setMotionState(newMotion);
         deviceState.setMotionPosition(null);
-        return event;
+        return Collections.singletonMap(event, position);
     }
 
-    public Event updateMotionState(DeviceState deviceState) {
-        Event result = null;
+    public Map<Event, Position> updateMotionState(DeviceState deviceState) {
+        Map<Event, Position> result = null;
         if (deviceState.getMotionState() != null && deviceState.getMotionPosition() != null) {
             boolean newMotion = !deviceState.getMotionState();
             Position motionPosition = deviceState.getMotionPosition();
@@ -60,12 +60,12 @@ public class MotionEventHandler extends BaseEventHandler {
         return result;
     }
 
-    public Event updateMotionState(DeviceState deviceState, Position position) {
+    public Map<Event, Position> updateMotionState(DeviceState deviceState, Position position) {
         return updateMotionState(deviceState, position, position.getBoolean(Position.KEY_MOTION));
     }
 
-    public Event updateMotionState(DeviceState deviceState, Position position, boolean newMotion) {
-        Event result = null;
+    public Map<Event, Position> updateMotionState(DeviceState deviceState, Position position, boolean newMotion) {
+        Map<Event, Position> result = null;
         Boolean oldMotion = deviceState.getMotionState();
 
         long currentTime = position.getFixTime().getTime();
@@ -102,7 +102,7 @@ public class MotionEventHandler extends BaseEventHandler {
     }
 
     @Override
-    protected Collection<Event> analyzePosition(Position position) {
+    protected Map<Event, Position> analyzePosition(Position position) {
 
         long deviceId = position.getDeviceId();
         Device device = Context.getIdentityManager().getById(deviceId);
@@ -113,7 +113,7 @@ public class MotionEventHandler extends BaseEventHandler {
             return null;
         }
 
-        Event result = null;
+        Map<Event, Position> result = null;
         DeviceState deviceState = Context.getDeviceManager().getDeviceState(deviceId);
 
         if (deviceState.getMotionState() == null) {
@@ -122,10 +122,7 @@ public class MotionEventHandler extends BaseEventHandler {
             result = updateMotionState(deviceState, position);
         }
         Context.getDeviceManager().setDeviceState(deviceId, deviceState);
-        if (result != null) {
-            return Collections.singleton(result);
-        }
-        return null;
+        return result;
     }
 
 }
