@@ -284,17 +284,21 @@ public final class ReportUtils {
             for (int i = 0; i < positions.size(); i++) {
                 Map<Event, Position> event = motionHandler.updateMotionState(deviceState, positions.get(i),
                         isMoving(positions, i, tripsConfig, speedThreshold));
-                if (deviceState.getMotionPosition() != null && startEventIndex == -1
-                        && trips != deviceState.getMotionState()) {
+                if (startEventIndex == -1
+                        && (trips != deviceState.getMotionState() && deviceState.getMotionPosition() != null
+                        || trips == deviceState.getMotionState() && event != null)) {
                     startEventIndex = i;
                     startNoEventIndex = -1;
+                } else if (trips != deviceState.getMotionState() && startEventIndex != -1
+                        && deviceState.getMotionPosition() == null && event == null) {
+                    startEventIndex = -1;
                 }
-                if (trips == deviceState.getMotionState()) {
-                    if (startNoEventIndex == -1) {
-                        startNoEventIndex = i;
-                    } else if (deviceState.getMotionPosition() == null) {
-                        startNoEventIndex = -1;
-                    }
+                if (startNoEventIndex == -1
+                        && (trips == deviceState.getMotionState() && deviceState.getMotionPosition() != null
+                        || trips != deviceState.getMotionState() && event != null)) {
+                    startNoEventIndex = i;
+                } else if (startNoEventIndex != -1 && deviceState.getMotionPosition() == null && event == null) {
+                    startNoEventIndex = -1;
                 }
                 if (startEventIndex != -1 && startNoEventIndex != -1 && event != null
                         && trips != deviceState.getMotionState()) {
