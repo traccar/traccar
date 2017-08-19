@@ -69,6 +69,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_GPS_LBS_STATUS_1 = 0x16;
     public static final int MSG_GPS_LBS_STATUS_2 = 0x26;
     public static final int MSG_GPS_LBS_STATUS_3 = 0x27;
+    public static final int MSG_LBS_MULTIPLE = 0x28;
     public static final int MSG_LBS_WIFI = 0x2C;
     public static final int MSG_LBS_PHONE = 0x17;
     public static final int MSG_LBS_EXTEND = 0x18;
@@ -406,7 +407,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
         position.setProtocol(getProtocolName());
 
-        if (type == MSG_LBS_EXTEND || type == MSG_LBS_WIFI) {
+        if (type == MSG_LBS_MULTIPLE || type == MSG_LBS_EXTEND || type == MSG_LBS_WIFI) {
 
             DateBuilder dateBuilder = new DateBuilder(timeZone)
                     .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
@@ -418,17 +419,23 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             int mnc = buf.readUnsignedByte();
             Network network = new Network();
             for (int i = 0; i < 7; i++) {
-                network.addCellTower(CellTower.from(
-                        mcc, mnc, buf.readUnsignedShort(), buf.readUnsignedMedium(), -buf.readUnsignedByte()));
+                int lac = buf.readUnsignedShort();
+                int cid = buf.readUnsignedMedium();
+                int rssi = -buf.readUnsignedByte();
+                if (lac > 0) {
+                    network.addCellTower(CellTower.from(mcc, mnc, lac, cid, rssi));
+                }
             }
 
             buf.readUnsignedByte(); // time leads
 
-            int wifiCount = buf.readUnsignedByte();
-            for (int i = 0; i < wifiCount; i++) {
-                String mac = ChannelBuffers.hexDump(buf.readBytes(6)).replaceAll("(..)", "$1:");
-                network.addWifiAccessPoint(WifiAccessPoint.from(
-                        mac.substring(0, mac.length() - 1), buf.readUnsignedByte()));
+            if (type != MSG_LBS_MULTIPLE) {
+                int wifiCount = buf.readUnsignedByte();
+                for (int i = 0; i < wifiCount; i++) {
+                    String mac = ChannelBuffers.hexDump(buf.readBytes(6)).replaceAll("(..)", "$1:");
+                    network.addWifiAccessPoint(WifiAccessPoint.from(
+                            mac.substring(0, mac.length() - 1), buf.readUnsignedByte()));
+                }
             }
 
             position.setNetwork(network);
