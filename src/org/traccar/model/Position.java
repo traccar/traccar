@@ -75,6 +75,7 @@ public class Position extends Message {
     public static final String KEY_OPERATOR = "operator";
     public static final String KEY_COMMAND = "command";
     public static final String KEY_BLOCKED = "blocked";
+    public static final String KEY_DOOR = "door";
 
     public static final String KEY_DTCS = "dtcs";
     public static final String KEY_OBD_SPEED = "obdSpeed"; // knots

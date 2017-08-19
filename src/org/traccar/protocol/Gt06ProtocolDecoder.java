@@ -531,7 +531,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             } else if (subType == 0x05) {
 
                 int flags = buf.readUnsignedByte();
-                position.set("door", BitUtil.check(flags, 0));
+                position.set(Position.KEY_DOOR, BitUtil.check(flags, 0));
                 position.set(Position.PREFIX_IO + 1, BitUtil.check(flags, 2));
                 return position;
 

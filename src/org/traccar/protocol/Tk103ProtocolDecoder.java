@@ -50,7 +50,14 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d)(?:d*,)?")            // speed
             .number("(dd)(dd)(dd),?")            // time (hhmmss)
             .number("(d+.?d{1,2}),?")            // course
-            .number("(?:([01]{8})|(x{8}))?,?")   // state
+            .groupBegin()
+            .number("([01])")                    // charge
+            .number("([01])")                    // ignition
+            .number("(x)")                       // io
+            .number("(x)")                       // io
+            .number("(x)")                       // io
+            .number("(xxx),?")                   // fuel
+            .groupEnd("?")
             .number("(?:L(x+))?")                // odometer
             .any()
             .number("([+-]ddd.d)?")              // temperature
@@ -260,15 +267,36 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
         position.setCourse(parser.nextDouble(0));
 
-        String status = parser.next();
-        if (status != null) {
-            position.set(Position.KEY_STATUS, status); // binary status
+        if (parser.hasNext(6)) {
+            position.set(Position.KEY_CHARGE, parser.nextInt() == 0);
+            position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
 
-            int value = Integer.parseInt(new StringBuilder(status).reverse().toString(), 2);
-            position.set(Position.KEY_CHARGE, !BitUtil.check(value, 0));
-            position.set(Position.KEY_IGNITION, BitUtil.check(value, 1));
+            int mask1 = parser.nextHexInt();
+            position.set(Position.PREFIX_IN + 2, BitUtil.check(mask1, 0));
+            position.set(Position.PREFIX_OUT + 2, BitUtil.check(mask1, 2));
+            if (BitUtil.check(mask1, 3)) {
+                position.set(Position.KEY_BLOCKED, true);
+            }
+
+            int mask2 = parser.nextHexInt();
+            for (int i = 0; i < 3; i++) {
+                if (BitUtil.check(mask2, i)) {
+                    position.set("hs" + (3 - i), true);
+                }
+            }
+            if (BitUtil.check(mask2, 3)) {
+                position.set(Position.KEY_DOOR, true);
+            }
+
+            int mask3 = parser.nextHexInt();
+            for (int i = 1; i <= 3; i++) {
+                if (BitUtil.check(mask3, i)) {
+                    position.set("hs" + (3 - i + 1), true);
+                }
+            }
+
+            position.set(Position.KEY_FUEL_LEVEL, parser.nextHexInt());
         }
-        position.set(Position.KEY_STATUS, parser.next()); // hex status
 
         if (parser.hasNext()) {
             position.set(Position.KEY_ODOMETER, parser.nextLong(16, 0));
