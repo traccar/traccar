@@ -32,16 +32,32 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
     private int protocolType;
     private boolean hbm;
+    private boolean includeAdc;
+    private boolean includeTemp;
 
     public SuntechProtocolDecoder(SuntechProtocol protocol) {
         super(protocol);
 
         protocolType = Context.getConfig().getInteger(getProtocolName() + ".protocolType");
         hbm = Context.getConfig().getBoolean(getProtocolName() + ".hbm");
+        includeAdc = Context.getConfig().getBoolean(getProtocolName() + ".includeAdc");
+        includeTemp = Context.getConfig().getBoolean(getProtocolName() + ".includeTemp");
     }
 
     public void setProtocolType(int protocolType) {
         this.protocolType = protocolType;
+    }
+
+    public void setHbm(boolean hbm) {
+        this.hbm = hbm;
+    }
+
+    public void setIncludeAdc(boolean includeAdc) {
+        this.includeAdc = includeAdc;
+    }
+
+    public void setIncludeTemp(boolean includeTemp) {
+        this.includeTemp = includeTemp;
     }
 
     private Position decode9(
@@ -87,7 +103,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         position.setValid(values[index++].equals("1"));
 
         if (protocolType == 1) {
-            position.set(Position.KEY_ODOMETER, Integer.parseInt(values[index]));
+            position.set(Position.KEY_ODOMETER, Integer.parseInt(values[index++]));
         }
 
         return position;
@@ -155,7 +171,37 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (index < values.length) {
-                position.set(Position.KEY_BATTERY, Double.parseDouble(values[index]));
+                position.set(Position.KEY_BATTERY, Double.parseDouble(values[index++]));
+            }
+
+            if (index < values.length) {
+                if (values[index++].equals("0")) {
+                    position.set(Position.KEY_ARCHIVE, true);
+                }
+            }
+
+            if (includeAdc) {
+                position.set(Position.PREFIX_ADC + 1, Double.parseDouble(values[index++]));
+                position.set(Position.PREFIX_ADC + 2, Double.parseDouble(values[index++]));
+                position.set(Position.PREFIX_ADC + 3, Double.parseDouble(values[index++]));
+            }
+
+            if (values.length - index >= 2) {
+                String driverUniqueId = values[index++];
+                if (values[index++].equals("1") && !driverUniqueId.isEmpty()) {
+                    position.set(Position.KEY_DRIVER_UNIQUE_ID, driverUniqueId);
+                }
+            }
+
+            if (includeTemp) {
+                for (int i = 1; i <= 3; i++) {
+                    String temperature = values[index++];
+                    String value = temperature.substring(temperature.indexOf(':') + 1);
+                    if (!value.isEmpty()) {
+                        position.set(Position.PREFIX_TEMP + i, Double.parseDouble(value));
+                    }
+                }
+
             }
 
         }
