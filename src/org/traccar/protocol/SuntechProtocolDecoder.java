@@ -109,7 +109,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private Position decode23(
+    private Position decode235(
             Channel channel, SocketAddress remoteAddress, String protocol, String[] values) throws ParseException {
         int index = 0;
 
@@ -132,7 +132,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(deviceSession.getDeviceId());
 
-        if (protocol.equals("ST300")) {
+        if (protocol.equals("ST300") || protocol.equals("ST500")) {
             index += 1; // model
         }
 
@@ -142,7 +142,9 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         position.setTime(dateFormat.parse(values[index++] + values[index++]));
 
-        index += 1; // cell
+        if (!protocol.equals("ST500")) {
+            index += 1; // cell
+        }
 
         position.setLatitude(Double.parseDouble(values[index++]));
         position.setLongitude(Double.parseDouble(values[index++]));
@@ -220,7 +222,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         if (protocol.equals("ST910")) {
             return decode9(channel, remoteAddress, values);
         } else {
-            return decode23(channel, remoteAddress, protocol, values);
+            return decode235(channel, remoteAddress, protocol, values);
         }
     }
 
