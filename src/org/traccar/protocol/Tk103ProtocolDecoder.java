@@ -295,7 +295,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             int mask3 = parser.nextHexInt();
             for (int i = 1; i <= 3; i++) {
                 if (decodeLow || BitUtil.check(mask3, i)) {
-                    position.set("hs" + (3 - i + 1), BitUtil.check(mask3, i) ? 1 : 0);
+                    position.set("ls" + (3 - i + 1), BitUtil.check(mask3, i) ? 1 : 0);
                 }
             }
 
