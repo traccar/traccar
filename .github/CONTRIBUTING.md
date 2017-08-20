@@ -9,16 +9,16 @@ Before asking anything, please search for an answer in:
 - Relevant repositories (see below)
 - [Google Search](https://www.google.com/)
 
-GitHub issues should be used ONLY for feature requests and bug reports. For general discussions please use [Traccar forums](https://www.traccar.org/forums/).
+GitHub issues should be used ONLY for feature requests, code discussions and bug reports. For general discussions please use [Traccar forums](https://www.traccar.org/forums/).
 
 There are multiple Traccar projects. If you create a new issue you MUST do it in the relevant repository:
 
-- [Traccar Server](https://github.com/tananaev/traccar)
-- [Traccar Web Interface](https://github.com/tananaev/traccar-web)
-- [Traccar Client for Android](https://github.com/tananaev/traccar-client-android)
-- [Traccar Client for iOS](https://github.com/tananaev/traccar-client-ios)
-- [Traccar Manager for Android](https://github.com/tananaev/traccar-manager-android)
-- [Traccar Manager for iOS](https://github.com/tananaev/traccar-manager-ios)
+- [Traccar Server](https://github.com/tananaev/traccar/issues)
+- [Traccar Web Interface](https://github.com/tananaev/traccar-web/issues)
+- [Traccar Client for Android](https://github.com/tananaev/traccar-client-android/issues)
+- [Traccar Client for iOS](https://github.com/tananaev/traccar-client-ios/issues)
+- [Traccar Manager for Android](https://github.com/tananaev/traccar-manager-android/issues)
+- [Traccar Manager for iOS](https://github.com/tananaev/traccar-manager-ios/issues)
 
 If you are not sure where your issue belongs to, please use Traccar Server main repository.
 
