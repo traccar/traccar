@@ -33,8 +33,11 @@ import java.util.regex.Pattern;
 
 public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
+    private boolean decodeLow;
+
     public Tk103ProtocolDecoder(Tk103Protocol protocol) {
         super(protocol);
+        decodeLow = Context.getConfig().getBoolean(getProtocolName() + ".decodeLow");
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
@@ -272,26 +275,27 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
 
             int mask1 = parser.nextHexInt();
-            position.set(Position.PREFIX_IN + 2, BitUtil.check(mask1, 0));
-            position.set(Position.PREFIX_OUT + 2, BitUtil.check(mask1, 2));
-            if (BitUtil.check(mask1, 3)) {
-                position.set(Position.KEY_BLOCKED, true);
+            position.set(Position.PREFIX_IN + 2, BitUtil.check(mask1, 0) ? 1 : 0);
+            position.set("panic", BitUtil.check(mask1, 1) ? 1 : 0);
+            position.set(Position.PREFIX_OUT + 2, BitUtil.check(mask1, 2) ? 1 : 0);
+            if (decodeLow || BitUtil.check(mask1, 3)) {
+                position.set(Position.KEY_BLOCKED, BitUtil.check(mask1, 3) ? 1 : 0);
             }
 
             int mask2 = parser.nextHexInt();
             for (int i = 0; i < 3; i++) {
-                if (BitUtil.check(mask2, i)) {
-                    position.set("hs" + (3 - i), true);
+                if (decodeLow || BitUtil.check(mask2, i)) {
+                    position.set("hs" + (3 - i), BitUtil.check(mask2, i) ? 1 : 0);
                 }
             }
-            if (BitUtil.check(mask2, 3)) {
-                position.set(Position.KEY_DOOR, true);
+            if (decodeLow || BitUtil.check(mask2, 3)) {
+                position.set(Position.KEY_DOOR, BitUtil.check(mask2, 3) ? 1 : 0);
             }
 
             int mask3 = parser.nextHexInt();
             for (int i = 1; i <= 3; i++) {
-                if (BitUtil.check(mask3, i)) {
-                    position.set("hs" + (3 - i + 1), true);
+                if (decodeLow || BitUtil.check(mask3, i)) {
+                    position.set("hs" + (3 - i + 1), BitUtil.check(mask3, i) ? 1 : 0);
                 }
             }
 
