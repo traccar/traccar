@@ -40,8 +40,8 @@ public class EskyProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)").text("+")            // satellites
             .number("(dd)(dd)(dd)")              // date
             .number("(dd)(dd)(dd)").text("+")    // time
-            .number("(d+.d+)").text("+")         // latitude
-            .number("(d+.d+)").text("+")         // longitude
+            .number("(-?d+.d+)").text("+")       // latitude
+            .number("(-?d+.d+)").text("+")       // longitude
             .number("(d+.d+)").text("+")         // speed
             .number("(d+)").text("+")            // course
             .text("0x").number("(d+)").text("+") // input
