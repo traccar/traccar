@@ -55,7 +55,7 @@
     </entry>
 
     <entry key='database.deletePositions'>
-        DELETE FROM positions WHERE serverTime &lt; :serverTime AND id NOT IN (SELECT positionId FROM devices)
+        DELETE FROM positions WHERE serverTime &lt; :serverTime AND id NOT IN (SELECT positionId FROM devices WHERE positionId IS NOT NULL)
     </entry>
 
     <entry key='database.deleteEvents'>
