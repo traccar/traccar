@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,13 @@ import java.util.Date;
 public class Event extends Message {
 
     public Event(String type, long deviceId, long positionId) {
-        this.setType(type);
-        this.setDeviceId(deviceId);
-        this.setPositionId(positionId);
-        this.serverTime = new Date();
+        this(type, deviceId);
+        setPositionId(positionId);
     }
 
     public Event(String type, long deviceId) {
-        this.setType(type);
-        this.setDeviceId(deviceId);
+        setType(type);
+        setDeviceId(deviceId);
         this.serverTime = new Date();
     }
 
