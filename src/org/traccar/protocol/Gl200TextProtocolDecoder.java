@@ -614,7 +614,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                 for (int i = 1; i <= deviceCount; i++) {
                     index++; // id
                     index++; // type
-                    position.set(Position.PREFIX_TEMP + i, Short.parseShort(data[index++], 16) * 0.0625);
+                    position.set(Position.PREFIX_TEMP + i, (short) Integer.parseInt(data[index++], 16) * 0.0625);
                 }
             }
         }
