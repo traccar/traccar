@@ -16,17 +16,7 @@
  */
 package org.traccar.model;
 
-public class AttributeAlias {
-
-    private long id;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
+public class AttributeAlias extends BaseModel {
 
     private long deviceId;
 

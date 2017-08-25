@@ -100,6 +100,9 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
         int event = 0;
 
         for (int i = 0; i < Math.min(data.length, dataTags.length); i++) {
+            if (data[i].isEmpty()) {
+                continue;
+            }
             switch (dataTags[i]) {
                 case "#EDT#":
                     position.setDeviceTime(dateFormat.parse(data[i]));
@@ -180,12 +183,20 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
+        if (position.getFixTime() == null) {
+            getLastLocation(position, null);
+        }
+
         if (lac != null && cid != null) {
             position.setNetwork(new Network(CellTower.fromLacCid(lac, cid)));
         }
 
         if (event == 20) {
-            position.set(Position.KEY_RFID, data[data.length - 1]);
+            String rfid = data[data.length - 1];
+            if (rfid.matches("0+")) {
+                rfid = data[data.length - 2];
+            }
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, rfid);
         }
 
         return position;

@@ -227,7 +227,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         dateBuilder.setDateReverse(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
         position.setTime(dateBuilder.getDate());
 
-        position.set(Position.KEY_HDOP, parser.next());
+        position.set(Position.KEY_HDOP, parser.nextDouble());
 
         if (parser.hasNext()) {
             position.setAltitude(parser.nextDouble(0));
@@ -253,7 +253,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (parser.hasNext()) {
-            position.set(Position.KEY_RFID, parser.nextHexInt(0));
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(parser.nextHexInt(0)));
         }
 
         return position;
@@ -282,21 +282,21 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
         getLastLocation(position, null);
 
-        position.set(Position.KEY_BATTERY, parser.nextDouble(0));
-        position.set(Position.KEY_RPM, parser.nextInt(0));
-        position.set(Position.KEY_OBD_SPEED, parser.nextInt(0));
-        position.set(Position.KEY_THROTTLE, parser.nextDouble(0));
-        position.set("engineLoad", parser.nextDouble(0));
-        position.set(Position.PREFIX_TEMP + 1, parser.nextInt(0));
-        position.set(Position.KEY_FUEL_CONSUMPTION, parser.nextDouble(0));
-        position.set("averageFuelConsumption", parser.nextDouble(0));
-        position.set("drivingRange", parser.nextDouble(0));
-        position.set(Position.KEY_ODOMETER, parser.nextDouble(0));
-        position.set("singleFuelConsumption", parser.nextDouble(0));
-        position.set("totalFuelConsumption", parser.nextDouble(0));
-        position.set(Position.KEY_DTCS, parser.nextInt(0));
-        position.set("harshAcelerationNo", parser.nextInt(0));
-        position.set("harshBreakerNo", parser.nextInt(0));
+        position.set(Position.KEY_BATTERY, parser.nextDouble());
+        position.set(Position.KEY_RPM, parser.nextInt());
+        position.set(Position.KEY_OBD_SPEED, parser.nextInt());
+        position.set(Position.KEY_THROTTLE, parser.nextDouble());
+        position.set(Position.KEY_ENGINE_LOAD, parser.nextDouble());
+        position.set(Position.KEY_COOLANT_TEMP, parser.nextInt());
+        position.set(Position.KEY_FUEL_CONSUMPTION, parser.nextDouble());
+        position.set("averageFuelConsumption", parser.nextDouble());
+        position.set("drivingRange", parser.nextDouble());
+        position.set(Position.KEY_ODOMETER, parser.nextDouble());
+        position.set("singleFuelConsumption", parser.nextDouble());
+        position.set("totalFuelConsumption", parser.nextDouble());
+        position.set(Position.KEY_DTCS, parser.nextInt());
+        position.set("harshAcelerationNo", parser.nextInt());
+        position.set("harshBreakerNo", parser.nextInt());
 
         return position;
     }
@@ -370,7 +370,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
                 if (rfid != 0) {
                     String card = String.format("%010d", rfid);
                     position.set("card" + (i + 1), card);
-                    position.set(Position.KEY_RFID, card);
+                    position.set(Position.KEY_DRIVER_UNIQUE_ID, card);
                 }
             }
         }

@@ -263,7 +263,8 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if ((selector & 0x0200) != 0) {
-            position.set(Position.KEY_RFID, (((long) buf.readUnsignedShort()) << 32) + buf.readUnsignedInt());
+            position.set(Position.KEY_DRIVER_UNIQUE_ID,
+                    String.valueOf(((long) buf.readUnsignedShort()) << 32) + buf.readUnsignedInt());
         }
 
         if ((selector & 0x0400) != 0) {
@@ -349,6 +350,32 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
 
         if ((selector & 0x0800) != 0) {
             position.set(Position.KEY_VIN, buf.readBytes(18).toString(StandardCharsets.US_ASCII).trim());
+        }
+
+        if ((selector & 0x2000) != 0) {
+            buf.readUnsignedByte(); // card 1 type
+            buf.readUnsignedByte(); // card 1 country code
+            String card = buf.readBytes(20).toString(StandardCharsets.US_ASCII).trim();
+            if (!card.isEmpty()) {
+                position.set("card1", card);
+            }
+        }
+
+        if ((selector & 0x4000) != 0) {
+            buf.readUnsignedByte(); // card 2 type
+            buf.readUnsignedByte(); // card 2 country code
+            String card = buf.readBytes(20).toString(StandardCharsets.US_ASCII).trim();
+            if (!card.isEmpty()) {
+                position.set("card2", card);
+            }
+        }
+
+        if ((selector & 0x10000) != 0) {
+            int count = buf.readUnsignedByte();
+            for (int i = 1; i <= count; i++) {
+                position.set("driver" + i, buf.readBytes(22).toString(StandardCharsets.US_ASCII).trim());
+                position.set("driverTime" + i, buf.readUnsignedInt());
+            }
         }
     }
 

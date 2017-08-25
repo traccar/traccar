@@ -15,6 +15,9 @@
  */
 package org.traccar.database;
 
+import com.ning.http.client.Request;
+import com.ning.http.client.RequestBuilder;
+import org.joda.time.format.ISODateTimeFormat;
 import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Statistics;
@@ -58,9 +61,30 @@ public class StatisticsManager {
             statistics.setGeolocationRequests(geolocationRequests);
 
             try {
-                Context.getDataManager().addStatistics(statistics);
+                Context.getDataManager().addObject(statistics);
             } catch (SQLException e) {
                 Log.warning(e);
+            }
+
+            String url = Context.getConfig().getString("server.statistics");
+            if (url != null) {
+                String time = ISODateTimeFormat.dateTime().print(statistics.getCaptureTime().getTime());
+                Request request = new RequestBuilder("POST")
+                        .setUrl(url)
+                        .addHeader("Content-Type", "application/x-www-form-urlencoded")
+                        .addFormParam("version", Log.getAppVersion())
+                        .addFormParam("captureTime", time)
+                        .addFormParam("activeUsers", String.valueOf(statistics.getActiveUsers()))
+                        .addFormParam("activeDevices", String.valueOf(statistics.getActiveDevices()))
+                        .addFormParam("requests", String.valueOf(statistics.getRequests()))
+                        .addFormParam("messagesReceived", String.valueOf(statistics.getMessagesReceived()))
+                        .addFormParam("messagesStored", String.valueOf(statistics.getMessagesStored()))
+                        .addFormParam("mailSent", String.valueOf(statistics.getMailSent()))
+                        .addFormParam("smsSent", String.valueOf(statistics.getSmsSent()))
+                        .addFormParam("geocoderRequests", String.valueOf(statistics.getGeocoderRequests()))
+                        .addFormParam("geolocationRequests", String.valueOf(statistics.getGeolocationRequests()))
+                        .build();
+                Context.getAsyncHttpClient().prepareRequest(request).execute();
             }
 
             users.clear();

@@ -165,7 +165,12 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
                     position.setCourse(Double.parseDouble(value));
                     break;
                 case 'N':
-                    position.set(Position.KEY_BATTERY, value);
+                    if (value.endsWith("mV")) {
+                        position.set(Position.KEY_BATTERY,
+                                Integer.parseInt(value.substring(0, value.length() - 2)) / 1000.0);
+                    } else {
+                        position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(value));
+                    }
                     break;
                 default:
                     // Unsupported
@@ -220,7 +225,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(parser.nextDouble(0));
 
         position.set(Position.KEY_SATELLITES, parser.nextInt(0));
-        position.set(Position.KEY_HDOP, parser.next());
+        position.set(Position.KEY_HDOP, parser.nextDouble());
 
         return position;
     }

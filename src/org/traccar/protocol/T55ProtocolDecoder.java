@@ -127,7 +127,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(dateBuilder.getDate());
 
         if (parser.hasNext(5)) {
-            position.set(Position.KEY_SATELLITES, parser.next());
+            position.set(Position.KEY_SATELLITES, parser.nextInt());
 
             deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
             if (deviceSession == null) {
@@ -137,7 +137,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Position.KEY_IGNITION, parser.hasNext() && parser.next().equals("1"));
             position.set(Position.KEY_FUEL_LEVEL, parser.nextInt(0));
-            position.set(Position.KEY_BATTERY, parser.nextInt(0));
+            position.set(Position.KEY_BATTERY, parser.nextInt());
         }
 
         if (parser.hasNext()) {
@@ -219,7 +219,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(parser.nextDouble(0));
         position.setAltitude(parser.nextDouble(0));
 
-        position.set(Position.KEY_BATTERY, parser.next());
+        position.set(Position.KEY_BATTERY, parser.nextDouble(0));
 
         return position;
     }

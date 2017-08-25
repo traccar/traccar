@@ -19,6 +19,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.MiscFormatter;
+import org.traccar.model.Permission;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -35,6 +36,7 @@ import java.sql.Types;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -485,6 +487,30 @@ public final class QueryBuilder {
             }
         }
         return 0;
+    }
+
+    public Collection<Permission> executePermissionsQuery() throws SQLException, ClassNotFoundException {
+        List<Permission> result = new LinkedList<>();
+        if (query != null) {
+            try {
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    ResultSetMetaData resultMetaData = resultSet.getMetaData();
+                    while (resultSet.next()) {
+                        LinkedHashMap<String, Long> map = new LinkedHashMap<>();
+                        for (int i = 1; i <= resultMetaData.getColumnCount(); i++) {
+                            String label = resultMetaData.getColumnLabel(i);
+                            map.put(label, resultSet.getLong(label));
+                        }
+                        result.add(new Permission(map));
+                    }
+                }
+            } finally {
+                statement.close();
+                connection.close();
+            }
+        }
+
+        return result;
     }
 
 }

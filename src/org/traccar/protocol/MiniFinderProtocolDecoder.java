@@ -79,7 +79,10 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
 
     private void decodeFlags(Position position, int flags) {
 
-        position.setValid(BitUtil.check(flags, 0));
+        position.setValid(BitUtil.to(flags, 2) > 0);
+        if (BitUtil.check(flags, 1)) {
+            position.set(Position.KEY_APPROXIMATE, true);
+        }
 
         if (BitUtil.check(flags, 2)) {
             position.set(Position.KEY_ALARM, Position.ALARM_FAULT);
@@ -103,7 +106,7 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_ALARM, Position.ALARM_MOVEMENT);
         }
 
-        position.set(Position.KEY_RSSI, BitUtil.between(flags, 16, 20));
+        position.set(Position.KEY_RSSI, BitUtil.between(flags, 16, 21));
         position.set(Position.KEY_CHARGE, BitUtil.check(flags, 22));
     }
 

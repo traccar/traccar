@@ -440,7 +440,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
 
             }
 
-        } else if (version == 4) {
+        } else if (version == 3 || version == 4) {
 
             return decodeSc(channel, remoteAddress, buf, version, id, type, deviceSession);
 

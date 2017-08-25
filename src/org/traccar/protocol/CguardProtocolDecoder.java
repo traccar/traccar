@@ -102,7 +102,7 @@ public class CguardProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_SATELLITES, Integer.parseInt(value));
                     break;
                 case "BAT1":
-                    position.set(Position.KEY_BATTERY, Integer.parseInt(value) + "%");
+                    position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(value));
                     break;
                 case "PWR1":
                     position.set(Position.KEY_POWER, Double.parseDouble(value));

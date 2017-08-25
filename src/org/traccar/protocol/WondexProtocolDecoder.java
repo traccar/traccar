@@ -36,7 +36,7 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .number("[^d]*")                     // deader
+            .number("[^d]*")                     // header
             .number("(d+),")                     // device identifier
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
             .number("(dd)(dd)(dd),")             // time (hhmmss)
@@ -69,7 +69,8 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
 
             return null;
         } else if (buf.toString(StandardCharsets.US_ASCII).startsWith("$OK:")
-                || buf.toString(StandardCharsets.US_ASCII).startsWith("$ERR:")) {
+                || buf.toString(StandardCharsets.US_ASCII).startsWith("$ERR:")
+                  || buf.toString(StandardCharsets.US_ASCII).startsWith("$MSG:")) {
 
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
 
@@ -77,7 +78,6 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
             position.setProtocol(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
             getLastLocation(position, new Date());
-            position.setValid(false);
             position.set(Position.KEY_RESULT, buf.toString(StandardCharsets.US_ASCII));
 
             return position;
@@ -106,11 +106,11 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
             position.setAltitude(parser.nextDouble(0));
 
             int satellites = parser.nextInt(0);
-            position.setValid(satellites >= 3);
+            position.setValid(satellites != 0);
             position.set(Position.KEY_SATELLITES, satellites);
 
             position.set(Position.KEY_EVENT, parser.next());
-            position.set(Position.KEY_BATTERY, parser.next());
+            position.set(Position.KEY_BATTERY, parser.nextDouble());
             if (parser.hasNext()) {
                 position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1000);
             }

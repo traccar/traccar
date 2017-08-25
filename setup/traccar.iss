@@ -1,6 +1,6 @@
 [Setup]
 AppName=Traccar
-AppVersion=3.11
+AppVersion=3.12
 DefaultDirName={pf}\Traccar
 AlwaysRestart=yes
 OutputBaseFilename=traccar-setup

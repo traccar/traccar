@@ -118,21 +118,9 @@ package_unix () {
   find out -type f \( -name \*.sh -o -name \*.vm \) -print0 | xargs -0 dos2unix
   copy_files
 
-  makeself out traccar.run "traccar" "\
-if which java &>/dev/null ; \
-then \
-if [ \$(java -version 2>&1 | grep -i version | sed 's/.*version \"\(.*\)\.\(.*\)\..*\"/\1\2/; 1q') -lt 17 ] ; \
-then \
-echo 'Java 7 or higher required' ; \
-else \
-mkdir -p /opt/traccar ; \
-cp -r * /opt/traccar ; \
-chmod -R go+rX /opt/traccar ; \
-/opt/traccar/bin/installDaemon.sh ; \
-fi ; \
-else \
-echo 'Java runtime is required' ; \
-fi"
+  cp java-test/test.jar out
+  cp setup.sh out
+  makeself --notemp out traccar.run "traccar" ./setup.sh
 
   zip -j traccar-linux-$VERSION.zip traccar.run README.txt
   cp traccar-linux-$VERSION.zip traccar-macos-$VERSION.zip

@@ -4,14 +4,14 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.traccar</groupId>
     <artifactId>traccar</artifactId>
-    <version>3.11-SNAPSHOT</version>
+    <version>3.12-SNAPSHOT</version>
 
     <name>traccar</name>
     <url>https://www.traccar.org</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jetty.version>9.2.21.v20170120</jetty.version> <!-- Jetty 9.3+ requires Java 8 -->
+        <jetty.version>9.2.22.v20170606</jetty.version> <!-- Jetty 9.3+ requires Java 8 -->
         <jersey.version>2.25.1</jersey.version>
     </properties>
 
@@ -35,22 +35,22 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>1.4.194</version>
+            <version>1.4.196</version>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.41</version> <!-- Version 6 required Java 8 -->
+            <version>5.1.42</version> <!-- Version 6 required Java 8 -->
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.0.0.jre7</version>
+            <version>42.1.1.jre7</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
-            <version>6.1.0.jre7</version>
+            <version>6.2.0.jre7</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.microsoft.azure</groupId>
@@ -61,7 +61,7 @@
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP-java7</artifactId>
-            <version>2.4.11</version> <!-- Version 2.6 requires Java 8 -->
+            <version>2.4.12</version> <!-- Version 2.6 requires Java 8 -->
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>
@@ -193,7 +193,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>3.0.1</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -307,7 +307,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-pmd-plugin</artifactId>
-                <version>3.7</version>
+                <version>3.8</version>
             </plugin>
         </plugins>
     </reporting>

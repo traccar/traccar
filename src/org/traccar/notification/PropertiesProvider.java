@@ -16,27 +16,27 @@
 package org.traccar.notification;
 
 import org.traccar.Config;
-import org.traccar.model.Extensible;
+import org.traccar.model.ExtendedModel;
 
 public class PropertiesProvider {
 
     private Config config;
 
-    private Extensible extensible;
+    private ExtendedModel extendedModel;
 
     public PropertiesProvider(Config config) {
         this.config = config;
     }
 
-    public PropertiesProvider(Extensible extensible) {
-        this.extensible = extensible;
+    public PropertiesProvider(ExtendedModel extendedModel) {
+        this.extendedModel = extendedModel;
     }
 
     public String getString(String key) {
         if (config != null) {
             return config.getString(key);
         } else {
-            return extensible.getString(key);
+            return extendedModel.getString(key);
         }
     }
 

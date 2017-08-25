@@ -44,7 +44,7 @@ public final class Main {
             @Override
             public void run() {
                 try {
-                    Context.getDataManager().clearPositionsHistory();
+                    Context.getDataManager().clearHistory();
                 } catch (SQLException error) {
                     Log.warning(error);
                 }

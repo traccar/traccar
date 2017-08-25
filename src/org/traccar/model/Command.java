@@ -47,6 +47,8 @@ public class Command extends Message {
     public static final String TYPE_FIRMWARE_UPDATE = "firmwareUpdate";
     public static final String TYPE_SET_CONNECTION = "setConnection";
     public static final String TYPE_SET_ODOMETER = "setOdometer";
+    public static final String TYPE_GET_MODEM_STATUS = "getModemStatus";
+    public static final String TYPE_GET_DEVICE_STATUS = "getDeviceStatus";
 
     public static final String TYPE_MODE_POWER_SAVING = "modePowerSaving";
     public static final String TYPE_MODE_DEEP_SLEEP = "modeDeepSleep";

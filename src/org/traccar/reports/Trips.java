@@ -29,7 +29,6 @@ import org.apache.poi.ss.util.WorkbookUtil;
 import org.traccar.Context;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
-import org.traccar.model.Position;
 import org.traccar.reports.model.DeviceReport;
 import org.traccar.reports.model.TripReport;
 
@@ -38,142 +37,22 @@ public final class Trips {
     private Trips() {
     }
 
-    private static TripReport calculateTrip(
-            ArrayList<Position> positions, int startIndex, int endIndex, boolean ignoreOdometer) {
-        Position startTrip = positions.get(startIndex);
-        Position endTrip = positions.get(endIndex);
-
-        double speedMax = 0.0;
-        double speedSum = 0.0;
-        for (int i = startIndex; i <= endIndex; i++) {
-            double speed = positions.get(i).getSpeed();
-            speedSum += speed;
-            if (speed > speedMax) {
-                speedMax = speed;
-            }
-        }
-
-        TripReport trip = new TripReport();
-
-        long tripDuration = endTrip.getFixTime().getTime() - positions.get(startIndex).getFixTime().getTime();
-        long deviceId = startTrip.getDeviceId();
-        trip.setDeviceId(deviceId);
-        trip.setDeviceName(Context.getIdentityManager().getDeviceById(deviceId).getName());
-
-        trip.setStartPositionId(startTrip.getId());
-        trip.setStartLat(startTrip.getLatitude());
-        trip.setStartLon(startTrip.getLongitude());
-        trip.setStartTime(startTrip.getFixTime());
-        trip.setStartAddress(startTrip.getAddress());
-
-        trip.setEndPositionId(endTrip.getId());
-        trip.setEndLat(endTrip.getLatitude());
-        trip.setEndLon(endTrip.getLongitude());
-        trip.setEndTime(endTrip.getFixTime());
-        trip.setEndAddress(endTrip.getAddress());
-
-        trip.setDistance(ReportUtils.calculateDistance(startTrip, endTrip, !ignoreOdometer));
-        trip.setDuration(tripDuration);
-        trip.setAverageSpeed(speedSum / (endIndex - startIndex));
-        trip.setMaxSpeed(speedMax);
-        trip.setSpentFuel(ReportUtils.calculateFuel(startTrip, endTrip));
-
-        return trip;
-    }
-
-    protected static Collection<TripReport> detectTrips(
-            double speedThreshold, double minimalTripDistance,
-            long minimalTripDuration, long minimalParkingDuration, boolean greedyParking, boolean ignoreOdometer,
-            Collection<Position> positionCollection) {
-
-        Collection<TripReport> result = new ArrayList<>();
-
-        ArrayList<Position> positions = new ArrayList<>(positionCollection);
-        if (positions != null && !positions.isEmpty()) {
-            int previousStartParkingIndex = 0;
-            int startParkingIndex = -1;
-            int previousEndParkingIndex = 0;
-            int endParkingIndex = 0;
-
-            boolean isMoving = false;
-            boolean isLast = false;
-            boolean skipped = false;
-            boolean tripFiltered = false;
-
-            for (int i = 0; i < positions.size(); i++) {
-                isMoving = positions.get(i).getSpeed() > speedThreshold;
-                isLast = i == positions.size() - 1;
-
-                if ((isMoving || isLast) && startParkingIndex != -1) {
-                    if (!skipped || previousEndParkingIndex == 0) {
-                        previousEndParkingIndex = endParkingIndex;
-                    }
-                    endParkingIndex = i;
-                }
-                if (!isMoving && startParkingIndex == -1) {
-                    if (greedyParking) {
-                        long tripDuration = positions.get(i).getFixTime().getTime()
-                                - positions.get(endParkingIndex).getFixTime().getTime();
-                        double tripDistance = ReportUtils.calculateDistance(positions.get(endParkingIndex),
-                                positions.get(i), false);
-                        tripFiltered = tripDuration < minimalTripDuration && tripDistance < minimalTripDistance;
-                        if (tripFiltered) {
-                            startParkingIndex = previousStartParkingIndex;
-                            endParkingIndex = previousEndParkingIndex;
-                            tripFiltered = false;
-                        } else {
-                            previousStartParkingIndex = i;
-                            startParkingIndex = i;
-                        }
-                    } else {
-                        long tripDuration = positions.get(i).getFixTime().getTime()
-                                - positions.get(previousEndParkingIndex).getFixTime().getTime();
-                        double tripDistance = ReportUtils.calculateDistance(positions.get(previousEndParkingIndex),
-                                positions.get(i), false);
-                        tripFiltered = tripDuration < minimalTripDuration && tripDistance < minimalTripDistance;
-                        startParkingIndex = i;
-                    }
-                }
-                if (startParkingIndex != -1 && (endParkingIndex > startParkingIndex || isLast)) {
-                    long parkingDuration = positions.get(endParkingIndex).getFixTime().getTime()
-                            - positions.get(startParkingIndex).getFixTime().getTime();
-                    if ((parkingDuration >= minimalParkingDuration || isLast)
-                            && previousEndParkingIndex < startParkingIndex) {
-                        if (!tripFiltered) {
-                            result.add(calculateTrip(
-                                    positions, previousEndParkingIndex, startParkingIndex, ignoreOdometer));
-                        }
-                        previousEndParkingIndex = endParkingIndex;
-                        skipped = false;
-                    } else {
-                        skipped = true;
-                    }
-                    startParkingIndex = -1;
-                }
-            }
-        }
-
-        return result;
-    }
-
     private static Collection<TripReport> detectTrips(long deviceId, Date from, Date to) throws SQLException {
         double speedThreshold = Context.getConfig().getDouble("event.motion.speedThreshold", 0.01);
-        long minimalTripDuration = Context.getConfig().getLong("report.trip.minimalTripDuration", 300) * 1000;
-        double minimalTripDistance = Context.getConfig().getLong("report.trip.minimalTripDistance", 500);
-        long minimalParkingDuration = Context.getConfig().getLong("report.trip.minimalParkingDuration", 300) * 1000;
-        boolean greedyParking = Context.getConfig().getBoolean("report.trip.greedyParking");
 
         boolean ignoreOdometer = Context.getDeviceManager()
                 .lookupAttributeBoolean(deviceId, "report.ignoreOdometer", false, true);
 
-        return detectTrips(
-                speedThreshold, minimalTripDistance, minimalTripDuration,
-                minimalParkingDuration, greedyParking, ignoreOdometer,
-                Context.getDataManager().getPositions(deviceId, from, to));
+        Collection<TripReport> result = ReportUtils.detectTripsAndStops(
+                Context.getDataManager().getPositions(deviceId, from, to),
+                Context.getTripsConfig(), ignoreOdometer, speedThreshold, TripReport.class);
+
+        return result;
     }
 
     public static Collection<TripReport> getObjects(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws SQLException {
+        ReportUtils.checkPeriodLimit(from, to);
         ArrayList<TripReport> result = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
@@ -185,17 +64,18 @@ public final class Trips {
     public static void getExcel(OutputStream outputStream,
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws SQLException, IOException {
+        ReportUtils.checkPeriodLimit(from, to);
         ArrayList<DeviceReport> devicesTrips = new ArrayList<>();
         ArrayList<String> sheetNames = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
             Collection<TripReport> trips = detectTrips(deviceId, from, to);
             DeviceReport deviceTrips = new DeviceReport();
-            Device device = Context.getIdentityManager().getDeviceById(deviceId);
+            Device device = Context.getIdentityManager().getById(deviceId);
             deviceTrips.setDeviceName(device.getName());
             sheetNames.add(WorkbookUtil.createSafeSheetName(deviceTrips.getDeviceName()));
             if (device.getGroupId() != 0) {
-                Group group = Context.getDeviceManager().getGroupById(device.getGroupId());
+                Group group = Context.getGroupsManager().getById(device.getGroupId());
                 if (group != null) {
                     deviceTrips.setGroupName(group.getName());
                 }

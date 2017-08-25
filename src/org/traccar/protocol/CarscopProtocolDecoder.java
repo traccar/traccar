@@ -44,8 +44,10 @@ public class CarscopProtocolDecoder extends BaseProtocolDecoder {
             .number("(ddd.d)")                   // speed
             .number("(dd)(dd)(dd)")              // date (yymmdd)
             .number("(ddd.dd)")                  // course
+            .groupBegin()
             .number("(d{8})")                    // state
             .number("L(d{6})")                   // odometer
+            .groupEnd("?")
             .compile();
 
     @Override
@@ -88,8 +90,10 @@ public class CarscopProtocolDecoder extends BaseProtocolDecoder {
 
         position.setCourse(parser.nextDouble(0));
 
-        position.set(Position.KEY_STATUS, parser.next());
-        position.set(Position.KEY_ODOMETER, parser.nextInt(0));
+        if (parser.hasNext(2)) {
+            position.set(Position.KEY_STATUS, parser.next());
+            position.set(Position.KEY_ODOMETER, parser.nextInt(0));
+        }
 
         return position;
     }

@@ -96,6 +96,22 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private void decodeStatus(Position position, int status) {
+        if (BitUtil.check(status, 1)) {
+            position.set(Position.KEY_IGNITION, BitUtil.check(status, 2));
+        }
+        if (BitUtil.check(status, 3)) {
+            position.set(Position.KEY_ARMED, BitUtil.check(status, 4));
+        }
+        if (BitUtil.check(status, 5)) {
+            position.set(Position.KEY_BLOCKED, !BitUtil.check(status, 6));
+        }
+        if (BitUtil.check(status, 7)) {
+            position.set(Position.KEY_CHARGE, BitUtil.check(status, 8));
+        }
+        position.set(Position.KEY_STATUS, status);
+    }
+
     private Position decodeOld(DeviceSession deviceSession, ChannelBuffer buf, int type, int index) {
 
         Position position = new Position();
@@ -119,16 +135,11 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
         }
 
-        if (buf.readableBytes() >= 2 * 5) {
+        if (buf.readableBytes() >= 2) {
+            decodeStatus(position, buf.readUnsignedShort());
+        }
 
-            int status = buf.readUnsignedShort();
-            if (BitUtil.check(status, 1)) {
-                position.set(Position.KEY_IGNITION, BitUtil.check(status, 2));
-            }
-            if (BitUtil.check(status, 7)) {
-                position.set(Position.KEY_CHARGE, BitUtil.check(status, 8));
-            }
-            position.set(Position.KEY_STATUS, status);
+        if (buf.readableBytes() >= 2 * 4) {
 
             position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
 
@@ -221,6 +232,18 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 return decodeOld(deviceSession, buf, type, index);
             } else if (type >= MSG_NORMAL && type <= MSG_OBD_CODE) {
                 return decodeNew(deviceSession, buf, index);
+            } else if (type == MSG_HEARTBEAT && buf.readableBytes() >= 2) {
+
+                Position position = new Position();
+                position.setDeviceId(deviceSession.getDeviceId());
+                position.setProtocol(getProtocolName());
+
+                getLastLocation(position, null);
+
+                decodeStatus(position, buf.readUnsignedShort());
+
+                return position;
+
             }
         }
 

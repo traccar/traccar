@@ -38,7 +38,7 @@ public final class Summary {
     private static SummaryReport calculateSummaryResult(long deviceId, Date from, Date to) throws SQLException {
         SummaryReport result = new SummaryReport();
         result.setDeviceId(deviceId);
-        result.setDeviceName(Context.getIdentityManager().getDeviceById(deviceId).getName());
+        result.setDeviceName(Context.getIdentityManager().getById(deviceId).getName());
         Collection<Position> positions = Context.getDataManager().getPositions(deviceId, from, to);
         if (positions != null && !positions.isEmpty()) {
             Position firstPosition = null;
@@ -68,6 +68,7 @@ public final class Summary {
 
     public static Collection<SummaryReport> getObjects(long userId, Collection<Long> deviceIds,
             Collection<Long> groupIds, Date from, Date to) throws SQLException {
+        ReportUtils.checkPeriodLimit(from, to);
         ArrayList<SummaryReport> result = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
@@ -79,6 +80,7 @@ public final class Summary {
     public static void getExcel(OutputStream outputStream,
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws SQLException, IOException {
+        ReportUtils.checkPeriodLimit(from, to);
         Collection<SummaryReport> summaries = getObjects(userId, deviceIds, groupIds, from, to);
         String templatePath = Context.getConfig().getString("report.templatesPath",
                 "templates/export/");

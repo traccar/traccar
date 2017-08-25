@@ -39,14 +39,14 @@ public class TeltonikaProtocol extends BaseProtocol {
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new TeltonikaFrameDecoder());
                 pipeline.addLast("objectEncoder", new TeltonikaProtocolEncoder());
-                pipeline.addLast("objectDecoder", new TeltonikaProtocolDecoder(TeltonikaProtocol.this));
+                pipeline.addLast("objectDecoder", new TeltonikaProtocolDecoder(TeltonikaProtocol.this, false));
             }
         });
         serverList.add(new TrackerServer(new ConnectionlessBootstrap(), getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("objectEncoder", new TeltonikaProtocolEncoder());
-                pipeline.addLast("objectDecoder", new TeltonikaProtocolDecoder(TeltonikaProtocol.this));
+                pipeline.addLast("objectDecoder", new TeltonikaProtocolDecoder(TeltonikaProtocol.this, true));
             }
         });
     }

@@ -25,6 +25,7 @@ import org.traccar.model.Position;
 
 import javax.xml.bind.DatatypeConverter;
 import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -77,8 +78,6 @@ public class Xt2400ProtocolDecoder extends BaseProtocolDecoder {
         for (int i : l4) {
             TAG_LENGTH_MAP.put(i, 4);
         }
-        TAG_LENGTH_MAP.put(0x65, 17);
-        TAG_LENGTH_MAP.put(0x73, 16);
         TAG_LENGTH_MAP.put(0x95, 24);
     }
 
@@ -163,11 +162,23 @@ public class Xt2400ProtocolDecoder extends BaseProtocolDecoder {
                 case 0x13:
                     position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                     break;
+                case 0x14:
+                    position.set(Position.KEY_RSSI, buf.readShort());
+                    break;
                 case 0x16:
                     position.set(Position.KEY_BATTERY, buf.readUnsignedByte() * 0.1);
                     break;
                 case 0x17:
                     position.set(Position.KEY_POWER, buf.readUnsignedByte() * 0.1);
+                    break;
+                case 0x57:
+                    position.set(Position.KEY_OBD_SPEED, UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
+                    break;
+                case 0x65:
+                    position.set(Position.KEY_VIN, buf.readBytes(17).toString(StandardCharsets.US_ASCII));
+                    break;
+                case 0x73:
+                    position.set(Position.KEY_VERSION_FW, buf.readBytes(16).toString(StandardCharsets.US_ASCII).trim());
                     break;
                 default:
                     buf.skipBytes(getTagLength(tag));

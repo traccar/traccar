@@ -42,6 +42,7 @@ public final class Events {
 
     public static Collection<Event> getObjects(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Collection<String> types, Date from, Date to) throws SQLException {
+        ReportUtils.checkPeriodLimit(from, to);
         ArrayList<Event> result = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
@@ -50,7 +51,7 @@ public final class Events {
             for (Event event : events) {
                 if (all || types.contains(event.getType())) {
                     long geofenceId = event.getGeofenceId();
-                    if (geofenceId == 0 || Context.getGeofenceManager().checkGeofence(userId, geofenceId)) {
+                    if (geofenceId == 0 || Context.getGeofenceManager().checkItemPermission(userId, geofenceId)) {
                        result.add(event);
                     }
                 }
@@ -62,6 +63,7 @@ public final class Events {
     public static void getExcel(OutputStream outputStream,
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Collection<String> types, Date from, Date to) throws SQLException, IOException {
+        ReportUtils.checkPeriodLimit(from, to);
         ArrayList<DeviceReport> devicesEvents = new ArrayList<>();
         ArrayList<String> sheetNames = new ArrayList<>();
         HashMap<Long, String> geofenceNames = new HashMap<>();
@@ -74,8 +76,8 @@ public final class Events {
                 if (all || types.contains(event.getType())) {
                     long geofenceId = event.getGeofenceId();
                     if (geofenceId != 0) {
-                        if (Context.getGeofenceManager().checkGeofence(userId, geofenceId)) {
-                            Geofence geofence = Context.getGeofenceManager().getGeofence(geofenceId);
+                        if (Context.getGeofenceManager().checkItemPermission(userId, geofenceId)) {
+                            Geofence geofence = (Geofence) Context.getGeofenceManager().getById(geofenceId);
                             if (geofence != null) {
                                 geofenceNames.put(geofenceId, geofence.getName());
                             }
@@ -88,11 +90,11 @@ public final class Events {
                 }
             }
             DeviceReport deviceEvents = new DeviceReport();
-            Device device = Context.getIdentityManager().getDeviceById(deviceId);
+            Device device = Context.getIdentityManager().getById(deviceId);
             deviceEvents.setDeviceName(device.getName());
             sheetNames.add(WorkbookUtil.createSafeSheetName(deviceEvents.getDeviceName()));
             if (device.getGroupId() != 0) {
-                Group group = Context.getDeviceManager().getGroupById(device.getGroupId());
+                Group group = Context.getGroupsManager().getById(device.getGroupId());
                 if (group != null) {
                     deviceEvents.setGroupName(group.getName());
                 }

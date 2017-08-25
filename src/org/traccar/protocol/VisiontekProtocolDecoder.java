@@ -108,18 +108,18 @@ public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext(9)) {
             position.setAltitude(parser.nextDouble(0));
-            position.set(Position.KEY_SATELLITES, parser.next());
+            position.set(Position.KEY_SATELLITES, parser.nextInt());
             position.set(Position.KEY_ODOMETER, parser.nextInt(0) * 1000);
             position.set(Position.KEY_IGNITION, parser.next().equals("1"));
             position.set(Position.PREFIX_IO + 1, parser.next());
             position.set(Position.PREFIX_IO + 2, parser.next());
             position.set("immobilizer", parser.next());
-            position.set(Position.KEY_POWER, parser.next());
-            position.set(Position.KEY_RSSI, parser.next());
+            position.set(Position.KEY_CHARGE, parser.next().equals("1"));
+            position.set(Position.KEY_RSSI, parser.nextDouble());
         }
 
         if (parser.hasNext(7)) {
-            position.set(Position.KEY_HDOP, parser.next());
+            position.set(Position.KEY_HDOP, parser.nextDouble());
             position.setAltitude(parser.nextDouble(0));
             position.set(Position.KEY_ODOMETER, parser.nextInt(0) * 1000);
             position.set(Position.KEY_INPUT, parser.next());
@@ -130,7 +130,7 @@ public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
 
         position.setValid(parser.next().equals("A"));
 
-        position.set(Position.KEY_RFID, parser.next());
+        position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
 
         return position;
     }

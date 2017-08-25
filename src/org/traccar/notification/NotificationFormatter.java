@@ -30,6 +30,7 @@ import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+import org.traccar.model.User;
 import org.traccar.reports.ReportUtils;
 
 public final class NotificationFormatter {
@@ -38,9 +39,11 @@ public final class NotificationFormatter {
     }
 
     public static VelocityContext prepareContext(long userId, Event event, Position position) {
-        Device device = Context.getIdentityManager().getDeviceById(event.getDeviceId());
+        User user = Context.getPermissionsManager().getUser(userId);
+        Device device = Context.getIdentityManager().getById(event.getDeviceId());
 
         VelocityContext velocityContext = new VelocityContext();
+        velocityContext.put("user", user);
         velocityContext.put("device", device);
         velocityContext.put("event", event);
         if (position != null) {
@@ -48,7 +51,11 @@ public final class NotificationFormatter {
             velocityContext.put("speedUnits", ReportUtils.getSpeedUnit(userId));
         }
         if (event.getGeofenceId() != 0) {
-            velocityContext.put("geofence", Context.getGeofenceManager().getGeofence(event.getGeofenceId()));
+            velocityContext.put("geofence", Context.getGeofenceManager().getById(event.getGeofenceId()));
+        }
+        String driverUniqueId = event.getString(Position.KEY_DRIVER_UNIQUE_ID);
+        if (driverUniqueId != null) {
+            velocityContext.put("driver", Context.getDriversManager().getDriverByUniqueId(driverUniqueId));
         }
         velocityContext.put("webUrl", Context.getVelocityEngine().getProperty("web.url"));
         velocityContext.put("dateTool", new DateTool());

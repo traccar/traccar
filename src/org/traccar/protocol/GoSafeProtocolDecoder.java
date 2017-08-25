@@ -146,7 +146,7 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_EVENT, parser.next());
 
         position.setValid(parser.next().equals("A"));
-        position.set(Position.KEY_SATELLITES, parser.next());
+        position.set(Position.KEY_SATELLITES, parser.nextInt());
 
         position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG));
         position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG));
@@ -164,8 +164,8 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
         if (parser.hasNext()) {
             position.set(Position.KEY_ODOMETER, parser.nextInt(0));
         }
-        position.set(Position.KEY_POWER, parser.next());
-        position.set(Position.KEY_BATTERY, parser.next());
+        position.set(Position.KEY_POWER, parser.nextDouble());
+        position.set(Position.KEY_BATTERY, parser.nextDouble());
 
         if (parser.hasNext(6)) {
             long status = parser.nextLong(16, 0);

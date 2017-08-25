@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,14 +33,17 @@ import java.util.regex.Pattern;
 
 public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
+    private boolean decodeLow;
+
     public Tk103ProtocolDecoder(Tk103Protocol protocol) {
         super(protocol);
+        decodeLow = Context.getConfig().getBoolean(getProtocolName() + ".decodeLow");
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
             .number("(d+)(,)?")                  // device id
-            .expression(".{4},?")                // command
-            .number("d*")                        // imei?
+            .expression("(.{4}),?")              // command
+            .number("(d*)")
             .number("(dd)(dd)(dd),?")            // date (mmddyy if comma-delimited, otherwise yyddmm)
             .expression("([AV]),?")              // validity
             .number("(d+)(dd.d+)")               // latitude
@@ -50,7 +53,14 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d)(?:d*,)?")            // speed
             .number("(dd)(dd)(dd),?")            // time (hhmmss)
             .number("(d+.?d{1,2}),?")            // course
-            .number("(?:([01]{8})|(x{8}))?,?")   // state
+            .groupBegin()
+            .number("([01])")                    // charge
+            .number("([01])")                    // ignition
+            .number("(x)")                       // io
+            .number("(x)")                       // io
+            .number("(x)")                       // io
+            .number("(xxx),?")                   // fuel
+            .groupEnd("?")
             .number("(?:L(x+))?")                // odometer
             .any()
             .number("([+-]ddd.d)?")              // temperature
@@ -97,79 +107,45 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    @Override
-    protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
-
-        String sentence = (String) msg;
-
-        // Find message start
-        int beginIndex = sentence.indexOf('(');
-        if (beginIndex != -1) {
-            sentence = sentence.substring(beginIndex + 1);
+    private void decodeType(Position position, String type, String data) {
+        switch (type) {
+            case "BO01":
+                position.set(Position.KEY_ALARM, decodeAlarm(data.charAt(0) - '0'));
+                break;
+            case "ZC11":
+                position.set(Position.KEY_ALARM, Position.ALARM_MOVEMENT);
+                break;
+            case "ZC12":
+                position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                break;
+            case "ZC13":
+                position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
+                break;
+            case "ZC15":
+                position.set(Position.KEY_IGNITION, true);
+                break;
+            case "ZC16":
+                position.set(Position.KEY_IGNITION, false);
+                break;
+            case "ZC17":
+                position.set(Position.KEY_ALARM, Position.ALARM_REMOVING);
+                break;
+            case "ZC25":
+                position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+                break;
+            case "ZC26":
+                position.set(Position.KEY_ALARM, Position.ALARM_TAMPERING);
+                break;
+            case "ZC27":
+                position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
+                break;
+            default:
+                break;
         }
+    }
 
-        // Send response
-        if (channel != null) {
-            String id = sentence.substring(0, 12);
-            String type = sentence.substring(12, 16);
-            if (type.equals("BP00") || type.equals("BP05")) {
-                String content = sentence.substring(16);
-                if (content.length() >= 15) {
-                    getDeviceSession(channel, remoteAddress, content.substring(0, 15));
-                }
-                if (type.equals("BP00")) {
-                    channel.write("(" + id + "AP01HSO)");
-                    return null;
-                } else if (type.equals("BP05")) {
-                    channel.write("(" + id + "AP05)");
-                }
-            }
-        }
-
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
-
+    private Position decodeBattery(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_BATTERY, sentence);
-        if (parser.matches()) {
-            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
-            if (deviceSession == null) {
-                return null;
-            }
-            position.setDeviceId(deviceSession.getDeviceId());
-
-            getLastLocation(position, parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
-
-            int battery = parser.nextInt(0);
-            if (battery != 65535) {
-                position.set(Position.KEY_BATTERY, battery * 0.01);
-            }
-
-            int power = parser.nextInt(0);
-            if (power != 65535) {
-                position.set(Position.KEY_POWER, power * 0.1);
-            }
-
-            return position;
-        }
-
-        parser = new Parser(PATTERN_NETWORK, sentence);
-        if (parser.matches()) {
-            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
-            if (deviceSession == null) {
-                return null;
-            }
-            position.setDeviceId(deviceSession.getDeviceId());
-
-            getLastLocation(position, null);
-
-            position.setNetwork(new Network(CellTower.from(
-                    parser.nextInt(0), parser.nextInt(0), parser.nextHexInt(0), parser.nextHexInt(0))));
-
-            return position;
-        }
-
-        parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
             return null;
         }
@@ -178,18 +154,99 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         if (deviceSession == null) {
             return null;
         }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        int alarm = sentence.indexOf("BO01");
-        if (alarm != -1) {
-            position.set(Position.KEY_ALARM, decodeAlarm(Integer.parseInt(sentence.substring(alarm + 4, alarm + 5))));
+        getLastLocation(position, parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
+
+        int battery = parser.nextInt(0);
+        if (battery != 65535) {
+            position.set(Position.KEY_BATTERY, battery * 0.01);
         }
 
+        int power = parser.nextInt(0);
+        if (power != 65535) {
+            position.set(Position.KEY_POWER, power * 0.1);
+        }
+
+        return position;
+    }
+
+    private Position decodeNetwork(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN_NETWORK, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, null);
+
+        position.setNetwork(new Network(CellTower.from(
+                parser.nextInt(0), parser.nextInt(0), parser.nextHexInt(0), parser.nextHexInt(0))));
+
+        return position;
+    }
+    @Override
+    protected Object decode(
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+
+        String sentence = (String) msg;
+
+        int beginIndex = sentence.indexOf('(');
+        if (beginIndex != -1) {
+            sentence = sentence.substring(beginIndex + 1);
+        }
+
+        if (channel != null) {
+            String id = sentence.substring(0, 12);
+            String type = sentence.substring(12, 16);
+            if (type.equals("BP00")) {
+                channel.write("(" + id + "AP01HSO)");
+                return null;
+            } else if (type.equals("BP05")) {
+                channel.write("(" + id + "AP05)");
+            }
+        }
+
+        if (sentence.contains("ZC20")) {
+            return decodeBattery(channel, remoteAddress, sentence);
+        } else if (sentence.contains("BZ00")) {
+            return decodeNetwork(channel, remoteAddress, sentence);
+        }
+
+        Parser parser = new Parser(PATTERN, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        boolean alternative = parser.next() != null;
+
+        decodeType(position, parser.next(), parser.next());
+
         DateBuilder dateBuilder = new DateBuilder();
-        if (parser.next() == null) {
-            dateBuilder.setDate(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
-        } else {
+        if (alternative) {
             dateBuilder.setDateReverse(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
+        } else {
+            dateBuilder.setDate(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
         }
 
         position.setValid(parser.next().equals("A"));
@@ -213,15 +270,37 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
         position.setCourse(parser.nextDouble(0));
 
-        String status = parser.next();
-        if (status != null) {
-            position.set(Position.KEY_STATUS, status); // binary status
+        if (parser.hasNext(6)) {
+            position.set(Position.KEY_CHARGE, parser.nextInt() == 0);
+            position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
 
-            int value = Integer.parseInt(new StringBuilder(status).reverse().toString(), 2);
-            position.set(Position.KEY_CHARGE, !BitUtil.check(value, 0));
-            position.set(Position.KEY_IGNITION, BitUtil.check(value, 1));
+            int mask1 = parser.nextHexInt();
+            position.set(Position.PREFIX_IN + 2, BitUtil.check(mask1, 0) ? 1 : 0);
+            position.set("panic", BitUtil.check(mask1, 1) ? 1 : 0);
+            position.set(Position.PREFIX_OUT + 2, BitUtil.check(mask1, 2) ? 1 : 0);
+            if (decodeLow || BitUtil.check(mask1, 3)) {
+                position.set(Position.KEY_BLOCKED, BitUtil.check(mask1, 3) ? 1 : 0);
+            }
+
+            int mask2 = parser.nextHexInt();
+            for (int i = 0; i < 3; i++) {
+                if (decodeLow || BitUtil.check(mask2, i)) {
+                    position.set("hs" + (3 - i), BitUtil.check(mask2, i) ? 1 : 0);
+                }
+            }
+            if (decodeLow || BitUtil.check(mask2, 3)) {
+                position.set(Position.KEY_DOOR, BitUtil.check(mask2, 3) ? 1 : 0);
+            }
+
+            int mask3 = parser.nextHexInt();
+            for (int i = 1; i <= 3; i++) {
+                if (decodeLow || BitUtil.check(mask3, i)) {
+                    position.set("ls" + (3 - i + 1), BitUtil.check(mask3, i) ? 1 : 0);
+                }
+            }
+
+            position.set(Position.KEY_FUEL_LEVEL, parser.nextHexInt());
         }
-        position.set(Position.KEY_STATUS, parser.next()); // hex status
 
         if (parser.hasNext()) {
             position.set(Position.KEY_ODOMETER, parser.nextLong(16, 0));

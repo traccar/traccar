@@ -47,7 +47,7 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // speed
             .number("(d+),")                     // course
             .groupBegin()
-            .number("([-+]ddd)([-+]ddd)([-+]ddd),")       // x,y,z
+            .number("([-+]ddd)([-+]ddd)([-+]ddd),") // x,y,z
             .or()
             .number("(d+),")                     // accel
             .groupEnd()
@@ -55,7 +55,7 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // csq
             .number("(d),")                      // jamming
             .number("(d+),")                     // hdop
-            .expression("([CG]),?")                // clock type
+            .expression("([CG]),?")              // clock type
             .number("(dd)(dd)(dd),")             // date (ddmmyy)
             .number("(dd)(dd)(dd),")             // time (hhmmss)
             .number("(d),")                      // block
@@ -81,7 +81,6 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         Parser parser = new Parser(PATTERN, (String) msg);
-
         if (!parser.matches()) {
             return null;
         }

@@ -98,7 +98,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_SATELLITES, satellites);
         }
 
-        position.set(Position.KEY_HDOP, parser.next());
+        position.set(Position.KEY_HDOP, parser.nextDouble());
         position.set(Position.KEY_INPUT, parser.next());
         position.set(Position.KEY_OUTPUT, parser.next());
 
@@ -109,7 +109,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        position.set(Position.KEY_RFID, parser.next());
+        position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
 
         if (parser.hasNext()) {
             String[] values = parser.next().split(",");
@@ -166,6 +166,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             for (String message : messages) {
                 Position position = decodePosition(channel, remoteAddress, message);
                 if (position != null) {
+                    position.set(Position.KEY_ARCHIVE, true);
                     positions.add(position);
                 }
             }

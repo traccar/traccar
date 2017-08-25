@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;
+import org.traccar.helper.Parser;
+import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
@@ -30,8 +32,11 @@ import org.traccar.model.Position;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
@@ -40,6 +45,8 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
     private boolean longDate;
     private boolean custom;
     private String form;
+
+    private final Map<Integer, String> alarmMap = new HashMap<>();
 
     public AtrackProtocolDecoder(AtrackProtocol protocol) {
         super(protocol);
@@ -50,6 +57,13 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         form = Context.getConfig().getString(getProtocolName() + ".form");
         if (form != null) {
             custom = true;
+        }
+
+        for (String pair : Context.getConfig().getString(getProtocolName() + ".alarmMap", "").split(",")) {
+            if (!pair.isEmpty()) {
+                alarmMap.put(
+                        Integer.parseInt(pair.substring(0, pair.indexOf('='))), pair.substring(pair.indexOf('=') + 1));
+            }
         }
     }
 
@@ -184,6 +198,64 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private static final Pattern PATTERN_INFO = new PatternBuilder()
+            .text("$INFO=")
+            .number("(d+),")                     // unit id
+            .expression("([^,]+),")              // model
+            .expression("([^,]+),")              // firmware version
+            .number("d+,")                       // imei
+            .number("d+,")                       // imsi
+            .number("d+,")                       // sim card id
+            .number("(d+),")                     // power
+            .number("(d+),")                     // battery
+            .number("(d+),")                     // satellites
+            .number("d+,")                       // gsm status
+            .number("(d+),")                     // rssi
+            .number("d+,")                       // connection status
+            .number("d+")                        // antenna status
+            .any()
+            .compile();
+
+    private Position decodeString(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
+
+        getLastLocation(position, null);
+
+        DeviceSession deviceSession;
+
+        if (sentence.startsWith("$INFO")) {
+
+            Parser parser = new Parser(PATTERN_INFO, sentence);
+            if (!parser.matches()) {
+                return null;
+            }
+
+            deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+
+            position.set("model", parser.next());
+            position.set(Position.KEY_VERSION_FW, parser.next());
+            position.set(Position.KEY_POWER, parser.nextInt() * 0.1);
+            position.set(Position.KEY_BATTERY, parser.nextInt() * 0.1);
+            position.set(Position.KEY_SATELLITES, parser.nextInt());
+            position.set(Position.KEY_RSSI, parser.nextInt());
+
+        } else {
+
+            deviceSession = getDeviceSession(channel, remoteAddress);
+
+            position.set(Position.KEY_RESULT, sentence);
+
+        }
+
+        if (deviceSession == null) {
+            return null;
+        } else {
+            position.setDeviceId(deviceSession.getDeviceId());
+            return position;
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -195,6 +267,8 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                 channel.write(buf, remoteAddress); // keep-alive message
             }
             return null;
+        } else if (buf.getByte(buf.readerIndex()) == '$') {
+            return decodeString(channel, remoteAddress, buf.toString(StandardCharsets.US_ASCII).trim());
         }
 
         buf.skipBytes(2); // prefix
@@ -240,7 +314,10 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             position.setLatitude(buf.readInt() * 0.000001);
             position.setCourse(buf.readUnsignedShort());
 
-            position.set(Position.KEY_TYPE, buf.readUnsignedByte());
+            int type = buf.readUnsignedByte();
+            position.set(Position.KEY_TYPE, type);
+            position.set(Position.KEY_ALARM, alarmMap.get(type));
+
             position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 100);
             position.set(Position.KEY_HDOP, buf.readUnsignedShort() * 0.1);
             position.set(Position.KEY_INPUT, buf.readUnsignedByte());
@@ -250,7 +327,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_OUTPUT, buf.readUnsignedByte());
             position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort() * 0.001);
 
-            position.set("driver", readString(buf));
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, readString(buf));
 
             position.set(Position.PREFIX_TEMP + 1, buf.readShort() * 0.1);
             position.set(Position.PREFIX_TEMP + 2, buf.readShort() * 0.1);

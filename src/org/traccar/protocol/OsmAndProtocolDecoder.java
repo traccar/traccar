@@ -126,7 +126,10 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_HDOP, Double.parseDouble(value));
                     break;
                 case "batt":
-                    position.set(Position.KEY_BATTERY, value);
+                    position.set(Position.KEY_BATTERY_LEVEL, Double.parseDouble(value));
+                    break;
+                case "driverUniqueId":
+                    position.set(Position.KEY_DRIVER_UNIQUE_ID, value);
                     break;
                 default:
                     try {

@@ -26,6 +26,11 @@ public class AplicomFrameDecoder extends FrameDecoder {
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
 
+        // Skip Alive message
+        while (buf.readable() && Character.isDigit(buf.getByte(buf.readerIndex()))) {
+            buf.readByte();
+        }
+
         // Check minimum length
         if (buf.readableBytes() < 11) {
             return null;

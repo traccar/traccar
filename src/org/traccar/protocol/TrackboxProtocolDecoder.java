@@ -87,7 +87,7 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
 
-        position.set(Position.KEY_HDOP, parser.next());
+        position.set(Position.KEY_HDOP, parser.nextDouble());
 
         position.setAltitude(parser.nextDouble(0));
 
@@ -101,7 +101,7 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
         dateBuilder.setDateReverse(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
         position.setTime(dateBuilder.getDate());
 
-        position.set(Position.KEY_SATELLITES, parser.next());
+        position.set(Position.KEY_SATELLITES, parser.nextInt());
 
         return position;
     }

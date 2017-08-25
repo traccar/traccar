@@ -16,107 +16,12 @@
  */
 package org.traccar.database;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.traccar.Context;
-import org.traccar.helper.Log;
 import org.traccar.model.Calendar;
-import org.traccar.model.CalendarPermission;
 
-public class CalendarManager {
-
-    private final DataManager dataManager;
-
-    private final Map<Long, Calendar> calendars = new ConcurrentHashMap<>();
-    private final Map<Long, Set<Long>> userCalendars = new ConcurrentHashMap<>();
+public class CalendarManager extends SimpleObjectManager<Calendar> {
 
     public CalendarManager(DataManager dataManager) {
-        this.dataManager = dataManager;
-        refreshCalendars();
+        super(dataManager, Calendar.class);
     }
 
-    public final void refreshCalendars() {
-        if (dataManager != null) {
-            try {
-                calendars.clear();
-                for (Calendar calendar : dataManager.getCalendars()) {
-                    calendars.put(calendar.getId(), calendar);
-                }
-            } catch (SQLException error) {
-                Log.warning(error);
-            }
-        }
-        refreshUserCalendars();
-    }
-
-    private Set<Long> getUserCalendarIds(long userId) {
-        if (!userCalendars.containsKey(userId)) {
-            userCalendars.put(userId, new HashSet<Long>());
-        }
-        return userCalendars.get(userId);
-    }
-
-    public Collection<Calendar> getUserCalendars(long userId) {
-        ArrayList<Calendar> result = new ArrayList<>();
-        for (long calendarId : getUserCalendarIds(userId)) {
-            result.add(calendars.get(calendarId));
-        }
-        return result;
-    }
-
-    public Collection<Calendar> getManagedCalendars(long userId) {
-        ArrayList<Calendar> result = new ArrayList<>();
-        result.addAll(getUserCalendars(userId));
-        for (long managedUserId : Context.getPermissionsManager().getUserPermissions(userId)) {
-            result.addAll(getUserCalendars(managedUserId));
-        }
-        return result;
-    }
-
-    public final void refreshUserCalendars() {
-        if (dataManager != null) {
-            try {
-                userCalendars.clear();
-                for (CalendarPermission calendarsPermission : dataManager.getCalendarPermissions()) {
-                    getUserCalendarIds(calendarsPermission.getUserId()).add(calendarsPermission.getCalendarId());
-                }
-            } catch (SQLException error) {
-                Log.warning(error);
-            }
-        }
-    }
-
-    public Calendar getCalendar(long calendarId) {
-        return calendars.get(calendarId);
-    }
-
-    public final void addCalendar(Calendar calendar) throws SQLException {
-        dataManager.addCalendar(calendar);
-        calendars.put(calendar.getId(), calendar);
-    }
-
-    public final void updateCalendar(Calendar calendar) throws SQLException {
-        dataManager.updateCalendar(calendar);
-        calendars.put(calendar.getId(), calendar);
-    }
-
-    public final void removeCalendar(long calendarId) throws SQLException {
-        dataManager.removeCalendar(calendarId);
-        calendars.remove(calendarId);
-        refreshUserCalendars();
-    }
-
-    public Collection<Calendar> getAllCalendars() {
-        return calendars.values();
-    }
-
-    public boolean checkCalendar(long userId, long calendarId) {
-        return getUserCalendarIds(userId).contains(calendarId);
-    }
 }

@@ -15,7 +15,7 @@
  */
 package org.traccar.model;
 
-public class Notification extends Extensible {
+public class Notification extends ExtendedModel {
 
     private long userId;
 

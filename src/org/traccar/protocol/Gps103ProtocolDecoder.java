@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,10 +90,10 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // odometer
             .number("(d+.d+)?,")                 // fuel instant
             .number("(d+.d+)?,")                 // fuel average
-            .number("(d+),")                     // hours
+            .number("(d+)?,")                    // hours
             .number("(d+),")                     // speed
-            .number("d+.?d*%,")                  // power load
-            .number("(d+),")                     // temperature
+            .number("(d+.?d*%),")                // power load
+            .number("(?:([-+]?d+)|[-+]?),")      // temperature
             .number("(d+.?d*%),")                // throttle
             .number("(d+),")                     // rpm
             .number("(d+.d+),")                  // battery
@@ -209,9 +209,10 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_ODOMETER, parser.nextInt(0));
             parser.nextDouble(0); // instant fuel consumption
             position.set(Position.KEY_FUEL_CONSUMPTION, parser.nextDouble(0));
-            position.set(Position.KEY_HOURS, parser.nextInt(0));
+            position.set(Position.KEY_HOURS, parser.nextInt());
             position.set(Position.KEY_OBD_SPEED, parser.nextInt(0));
-            position.set(Position.PREFIX_TEMP + 1, parser.nextInt(0));
+            position.set(Position.KEY_ENGINE_LOAD, parser.next());
+            position.set(Position.KEY_COOLANT_TEMP, parser.nextInt());
             position.set(Position.KEY_THROTTLE, parser.next());
             position.set(Position.KEY_RPM, parser.nextInt(0));
             position.set(Position.KEY_BATTERY, parser.nextDouble(0));
@@ -247,6 +248,8 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.PREFIX_TEMP + 1, alarm.substring(2));
         } else if (alarm.startsWith("oil ")) {
             position.set("oil", alarm.substring(4));
+        } else if (!position.getAttributes().containsKey(Position.KEY_ALARM) && !alarm.equals("tracker")) {
+            position.set(Position.KEY_EVENT, alarm);
         }
 
         DateBuilder dateBuilder = new DateBuilder()
@@ -257,7 +260,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
         String rfid = parser.next();
         if (alarm.equals("rfid")) {
-            position.set(Position.KEY_RFID, rfid);
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, rfid);
         }
 
         String utcHours = parser.next();

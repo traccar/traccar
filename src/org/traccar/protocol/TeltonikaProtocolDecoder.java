@@ -18,8 +18,8 @@ package org.traccar.protocol;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.socket.DatagramChannel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
@@ -35,8 +35,17 @@ import java.util.List;
 
 public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
-    public TeltonikaProtocolDecoder(TeltonikaProtocol protocol) {
+    private boolean connectionless;
+    private boolean extended;
+
+    public void setExtended(boolean extended) {
+        this.extended = extended;
+    }
+
+    public TeltonikaProtocolDecoder(TeltonikaProtocol protocol, boolean connectionless) {
         super(protocol);
+        this.connectionless = connectionless;
+        this.extended = Context.getConfig().getBoolean(getProtocolName() + ".extended");
     }
 
     private DeviceSession parseIdentification(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
@@ -114,7 +123,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.PREFIX_TEMP + 3, readValue(buf, length, true) * 0.1);
                 break;
             case 78:
-                position.set(Position.KEY_RFID, readValue(buf, length, false));
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(readValue(buf, length, false)));
                 break;
             case 182:
                 position.set(Position.KEY_HDOP, readValue(buf, length, false) * 0.1);
@@ -243,13 +252,21 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
+        // Read 16 byte data
+        if (extended) {
+            int cnt = buf.readUnsignedByte();
+            for (int j = 0; j < cnt; j++) {
+                position.set(Position.PREFIX_IO + buf.readUnsignedByte(), ChannelBuffers.hexDump(buf.readBytes(16)));
+            }
+        }
+
     }
 
     private List<Position> parseData(
             Channel channel, SocketAddress remoteAddress, ChannelBuffer buf, int locationPacketId, String... imei) {
         List<Position> positions = new LinkedList<>();
 
-        if (!(channel instanceof DatagramChannel)) {
+        if (!connectionless) {
             buf.readUnsignedInt(); // data length
         }
 
@@ -278,7 +295,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (channel != null) {
-            if (channel instanceof DatagramChannel) {
+            if (connectionless) {
                 ChannelBuffer response = ChannelBuffers.dynamicBuffer();
                 response.writeShort(5);
                 response.writeShort(0);
@@ -301,7 +318,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
-        if (channel instanceof DatagramChannel) {
+        if (connectionless) {
             return decodeUdp(channel, remoteAddress, buf);
         } else {
             return decodeTcp(channel, remoteAddress, buf);

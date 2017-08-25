@@ -104,7 +104,7 @@ public class Stl060ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_CHARGE, parser.nextInt(0) == 1);
             position.set(Position.KEY_IGNITION, parser.nextInt(0) == 1);
             position.set(Position.KEY_INPUT, parser.nextInt(0));
-            position.set(Position.KEY_RFID, parser.next());
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
             position.set(Position.KEY_ODOMETER, parser.nextInt(0));
             position.set(Position.PREFIX_TEMP + 1, parser.nextInt(0));
             position.set(Position.KEY_FUEL_LEVEL, parser.nextInt(0));

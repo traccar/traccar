@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -49,7 +50,7 @@ public class NotificationManager {
 
     public void updateEvent(Event event, Position position) {
         try {
-            dataManager.addEvent(event);
+            dataManager.addObject(event);
         } catch (SQLException error) {
             Log.warning(error);
         }
@@ -57,7 +58,7 @@ public class NotificationManager {
         Set<Long> users = Context.getPermissionsManager().getDeviceUsers(event.getDeviceId());
         for (long userId : users) {
             if (event.getGeofenceId() == 0 || Context.getGeofenceManager() != null
-                    && Context.getGeofenceManager().checkGeofence(userId, event.getGeofenceId())) {
+                    && Context.getGeofenceManager().checkItemPermission(userId, event.getGeofenceId())) {
                 Notification notification = getUserNotificationByType(userId, event.getType());
                 if (notification != null) {
                     if (notification.getWeb()) {
@@ -77,9 +78,9 @@ public class NotificationManager {
         }
     }
 
-    public void updateEvents(Collection<Event> events, Position position) {
-        for (Event event : events) {
-            updateEvent(event, position);
+    public void updateEvents(Map<Event, Position> events) {
+        for (Entry<Event, Position> event : events.entrySet()) {
+            updateEvent(event.getKey(), event.getValue());
         }
     }
 
@@ -105,7 +106,7 @@ public class NotificationManager {
                 notificationsLock.writeLock().lock();
                 try {
                     userNotifications.clear();
-                    for (Notification notification : dataManager.getNotifications()) {
+                    for (Notification notification : dataManager.getObjects(Notification.class)) {
                         getUserNotificationsUnsafe(notification.getUserId()).add(notification);
                     }
                 } finally {
@@ -139,7 +140,7 @@ public class NotificationManager {
                     || cachedNotification.getSms() != notification.getSms()) {
                 if (!notification.getWeb() && !notification.getMail() && !notification.getSms()) {
                     try {
-                        dataManager.removeNotification(cachedNotification);
+                        dataManager.removeObject(Notification.class, cachedNotification.getId());
                     } catch (SQLException error) {
                         Log.warning(error);
                     }
@@ -160,7 +161,7 @@ public class NotificationManager {
                         notificationsLock.writeLock().unlock();
                     }
                     try {
-                        dataManager.updateNotification(cachedNotification);
+                        dataManager.updateObject(cachedNotification);
                     } catch (SQLException error) {
                         Log.warning(error);
                     }
@@ -170,7 +171,7 @@ public class NotificationManager {
             }
         } else if (notification.getWeb() || notification.getMail() || notification.getSms()) {
             try {
-                dataManager.addNotification(notification);
+                dataManager.addObject(notification);
             } catch (SQLException error) {
                 Log.warning(error);
             }

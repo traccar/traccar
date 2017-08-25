@@ -10,6 +10,11 @@ public class Xt2400ProtocolDecoderTest extends ProtocolTest {
 
         Xt2400ProtocolDecoder decoder = new Xt2400ProtocolDecoder(new Xt2400Protocol());
 
+        decoder.setConfig("\n:wycfg pcr[0] 001001030406070809570a13121714100565\n");
+
+        verifyPosition(decoder, binary(
+                "000a344f1f0259766ae002074289f8f1c4b200e80000026712068000130000029300883559464255524845364650323433343235"));
+
         decoder.setConfig("\n:wycfg pcr[0] 000f01030406070809570a131217141005\n");
 
         verifyPosition(decoder, binary(

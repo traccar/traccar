@@ -16,8 +16,8 @@
  */
 package org.traccar.events;
 
-import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 
 import org.traccar.BaseEventHandler;
 import org.traccar.Context;
@@ -31,8 +31,8 @@ public class MaintenanceEventHandler extends BaseEventHandler {
     public static final String ATTRIBUTE_MAINTENANCE_INTERVAL = "maintenance.interval";
 
     @Override
-    protected Collection<Event> analyzePosition(Position position) {
-        Device device = Context.getIdentityManager().getDeviceById(position.getDeviceId());
+    protected Map<Event, Position> analyzePosition(Position position) {
+        Device device = Context.getIdentityManager().getById(position.getDeviceId());
         if (device == null || !Context.getIdentityManager().isLatestPosition(position)) {
             return null;
         }
@@ -60,7 +60,7 @@ public class MaintenanceEventHandler extends BaseEventHandler {
         if ((long) (oldTotalDistance / maintenanceInterval) < (long) (newTotalDistance / maintenanceInterval)) {
             Event event = new Event(Event.TYPE_MAINTENANCE, position.getDeviceId(), position.getId());
             event.set(Position.KEY_TOTAL_DISTANCE, newTotalDistance);
-            return Collections.singleton(event);
+            return Collections.singletonMap(event, position);
         }
 
         return null;

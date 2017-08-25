@@ -17,6 +17,7 @@ package org.traccar;
 
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.socket.DatagramChannel;
+import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
@@ -45,15 +46,13 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
         }
 
         try {
-            Context.getDeviceManager().addDevice(device);
+            Context.getDeviceManager().addItem(device);
 
             Log.info("Automatically registered device " + uniqueId);
 
             if (defaultGroupId != 0) {
-                Context.getPermissionsManager().refreshPermissions();
-                if (Context.getGeofenceManager() != null) {
-                    Context.getGeofenceManager().refresh();
-                }
+                Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
+                Context.getPermissionsManager().refreshAllExtendedPermissions();
             }
 
             return device.getId();
@@ -76,7 +75,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
             try {
                 for (String uniqueId : uniqueIds) {
                     if (uniqueId != null) {
-                        Device device = Context.getIdentityManager().getDeviceByUniqueId(uniqueId);
+                        Device device = Context.getIdentityManager().getByUniqueId(uniqueId);
                         if (device != null) {
                             deviceId = device.getId();
                             break;
@@ -105,7 +104,8 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     }
 
     public DeviceSession getDeviceSession(Channel channel, SocketAddress remoteAddress, String... uniqueIds) {
-        if (Context.getConfig().getBoolean("decoder.ignoreSessionCache")) {
+        if (channel != null && channel.getPipeline().get(HttpRequestDecoder.class) != null
+                || Context.getConfig().getBoolean("decoder.ignoreSessionCache")) {
             long deviceId = findDeviceId(remoteAddress, uniqueIds);
             if (deviceId != 0) {
                 if (Context.getConnectionManager() != null) {

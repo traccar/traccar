@@ -20,9 +20,9 @@ import org.traccar.model.Position;
 
 public interface IdentityManager {
 
-    Device getDeviceById(long id);
+    Device getById(long id);
 
-    Device getDeviceByUniqueId(String uniqueId) throws Exception;
+    Device getByUniqueId(String uniqueId) throws Exception;
 
     Position getLastPosition(long deviceId);
 

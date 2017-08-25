@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,13 @@ package org.traccar.protocol;
 
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
+import org.traccar.helper.UnitsConverter;
 
 import java.net.SocketAddress;
 import java.util.regex.Pattern;
@@ -64,16 +66,25 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
-    private String decodeAlarm(String value) {
+    private String decodeStatus(Position position, String value) {
         if (value != null) {
-            switch (value) {
+            switch (value.toLowerCase()) {
+                case "acc on":
+                    position.set(Position.KEY_IGNITION, true);
+                    break;
+                case "acc off":
+                    position.set(Position.KEY_IGNITION, false);
+                    break;
                 case "help me!":
-                    return Position.ALARM_SOS;
+                    position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+                    break;
                 case "low battery":
-                    return Position.ALARM_LOW_BATTERY;
+                    position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                    break;
                 case "move!":
                 case "moved!":
-                    return Position.ALARM_MOVEMENT;
+                    position.set(Position.KEY_ALARM, Position.ALARM_MOVEMENT);
+                    break;
                 default:
                     break;
             }
@@ -109,14 +120,24 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
         position.setValid(parser.next().equals("A"));
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
-        position.setSpeed(parser.nextDouble(0));
+
+        switch (Context.getConfig().getString(getProtocolName() + ".speed", "kn")) {
+            case "kmh":
+                position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
+                break;
+            default:
+                position.setSpeed(parser.nextDouble(0));
+                break;
+        }
+
         position.setCourse(parser.nextDouble(0));
 
         dateBuilder.setDateReverse(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
         position.setTime(dateBuilder.getDate());
 
         position.set("signal", parser.next());
-        position.set(Position.KEY_ALARM, decodeAlarm(parser.next()));
+
+        decodeStatus(position, parser.next());
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
@@ -125,7 +146,7 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         if (full) {
-            position.set(Position.KEY_SATELLITES, parser.next().replaceFirst("^0*(?![\\.$])", ""));
+            position.set(Position.KEY_SATELLITES, parser.nextInt());
 
             position.setAltitude(parser.nextDouble(0));
 

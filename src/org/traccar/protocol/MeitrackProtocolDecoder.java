@@ -136,13 +136,13 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
         position.setValid(parser.next().equals("A"));
 
-        position.set(Position.KEY_SATELLITES, parser.next());
+        position.set(Position.KEY_SATELLITES, parser.nextInt());
         int rssi = parser.nextInt(0);
 
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
         position.setCourse(parser.nextDouble(0));
 
-        position.set(Position.KEY_HDOP, parser.next());
+        position.set(Position.KEY_HDOP, parser.nextDouble());
 
         position.setAltitude(parser.nextDouble(0));
 
@@ -160,7 +160,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        String deviceModel = Context.getIdentityManager().getDeviceById(deviceSession.getDeviceId()).getModel();
+        String deviceModel = Context.getIdentityManager().getById(deviceSession.getDeviceId()).getModel();
         if (deviceModel == null) {
             deviceModel = "";
         }
@@ -201,7 +201,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         if (eventData != null && !eventData.isEmpty()) {
             switch (event) {
                 case 37:
-                    position.set(Position.KEY_RFID, eventData);
+                    position.set(Position.KEY_DRIVER_UNIQUE_ID, eventData);
                     break;
                 default:
                     position.set("eventData", eventData);
@@ -218,7 +218,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         if (parser.hasNext()) {
             for (String temp : parser.next().split("\\|")) {
                 int index = Integer.valueOf(temp.substring(0, 2), 16);
-                int value = Integer.valueOf(temp.substring(2), 16);
+                double value = Byte.valueOf(temp.substring(2, 4), 16);
+                value += (value < 0 ? -0.01 : 0.01) * Integer.valueOf(temp.substring(4), 16);
                 position.set(Position.PREFIX_TEMP + index, value);
             }
         }
@@ -315,7 +316,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             case "D03":
                 if (channel != null) {
                     DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
-                    String imei = Context.getIdentityManager().getDeviceById(deviceSession.getDeviceId()).getUniqueId();
+                    String imei = Context.getIdentityManager().getById(deviceSession.getDeviceId()).getUniqueId();
                     channel.write("@@O46," + imei + ",D00,camera_picture.jpg,0*00\r\n");
                 }
                 return null;

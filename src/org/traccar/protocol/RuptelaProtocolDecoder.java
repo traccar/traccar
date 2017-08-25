@@ -74,6 +74,43 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private long readValue(ChannelBuffer buf, int length, boolean signed) {
+        switch (length) {
+            case 1:
+                return signed ? buf.readByte() : buf.readUnsignedByte();
+            case 2:
+                return signed ? buf.readShort() : buf.readUnsignedShort();
+            case 4:
+                return signed ? buf.readInt() : buf.readUnsignedInt();
+            default:
+                return buf.readLong();
+        }
+    }
+
+    private void decodeParameter(Position position, int id, ChannelBuffer buf, int length) {
+        switch (id) {
+            case 2:
+            case 3:
+            case 4:
+                position.set("di" + (id - 1), readValue(buf, length, false));
+                break;
+            case 5:
+                position.set(Position.KEY_IGNITION, readValue(buf, length, false) == 1);
+                break;
+            case 74:
+                position.set(Position.PREFIX_TEMP + 3, readValue(buf, length, true) * 0.1);
+                break;
+            case 78:
+            case 79:
+            case 80:
+                position.set(Position.PREFIX_TEMP + (id - 78), readValue(buf, length, true) * 0.1);
+                break;
+            default:
+                position.set(Position.PREFIX_IO + id, readValue(buf, length, false));
+                break;
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -133,28 +170,28 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                 int cnt = buf.readUnsignedByte();
                 for (int j = 0; j < cnt; j++) {
                     int id = type == MSG_EXTENDED_RECORDS ? buf.readUnsignedShort() : buf.readUnsignedByte();
-                    position.set(Position.PREFIX_IO + id, buf.readUnsignedByte());
+                    decodeParameter(position, id, buf, 1);
                 }
 
                 // Read 2 byte data
                 cnt = buf.readUnsignedByte();
                 for (int j = 0; j < cnt; j++) {
                     int id = type == MSG_EXTENDED_RECORDS ? buf.readUnsignedShort() : buf.readUnsignedByte();
-                    position.set(Position.PREFIX_IO + id, buf.readUnsignedShort());
+                    decodeParameter(position, id, buf, 2);
                 }
 
                 // Read 4 byte data
                 cnt = buf.readUnsignedByte();
                 for (int j = 0; j < cnt; j++) {
                     int id = type == MSG_EXTENDED_RECORDS ? buf.readUnsignedShort() : buf.readUnsignedByte();
-                    position.set(Position.PREFIX_IO + id, buf.readUnsignedInt());
+                    decodeParameter(position, id, buf, 4);
                 }
 
                 // Read 8 byte data
                 cnt = buf.readUnsignedByte();
                 for (int j = 0; j < cnt; j++) {
                     int id = type == MSG_EXTENDED_RECORDS ? buf.readUnsignedShort() : buf.readUnsignedByte();
-                    position.set(Position.PREFIX_IO + id, buf.readLong());
+                    decodeParameter(position, id, buf, 8);
                 }
 
                 positions.add(position);

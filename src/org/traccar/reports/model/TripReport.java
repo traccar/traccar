@@ -146,14 +146,23 @@ public class TripReport extends BaseReport {
         this.duration = duration;
     }
 
-    private String spentFuel;
+    private String driverUniqueId;
 
-    public String getSpentFuel() {
-        return spentFuel;
+    public String getDriverUniqueId() {
+        return driverUniqueId;
     }
 
-    public void setSpentFuel(String spentFuel) {
-        this.spentFuel = spentFuel;
+    public void setDriverUniqueId(String driverUniqueId) {
+        this.driverUniqueId = driverUniqueId;
     }
 
+    private String driverName;
+
+    public String getDriverName() {
+        return driverName;
+    }
+
+    public void setDriverName(String driverName) {
+        this.driverName = driverName;
+    }
 }

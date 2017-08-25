@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2014 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,27 +18,46 @@ package org.traccar.protocol;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
+import org.jboss.netty.handler.codec.frame.FrameDecoder;
+import org.traccar.helper.StringFinder;
 
-public class AtrackFrameDecoder extends LengthFieldBasedFrameDecoder {
+public class AtrackFrameDecoder extends FrameDecoder {
 
     private static final int KEEPALIVE_LENGTH = 12;
-
-    public AtrackFrameDecoder() {
-        super(1024, 4, 2);
-    }
 
     @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
 
-        // Keep alive message
-        if (buf.readableBytes() >= KEEPALIVE_LENGTH
-                && buf.getUnsignedShort(buf.readerIndex()) == 0xfe02) {
-            return buf.readBytes(KEEPALIVE_LENGTH);
+        if (buf.readableBytes() >= 2) {
+
+            if (buf.getUnsignedShort(buf.readerIndex()) == 0xfe02) {
+
+                if (buf.readableBytes() >= KEEPALIVE_LENGTH) {
+                    return buf.readBytes(KEEPALIVE_LENGTH);
+                }
+
+            } else if (buf.getUnsignedShort(buf.readerIndex()) == 0x4050) {
+
+                if (buf.readableBytes() > 6) {
+                    int length = buf.getUnsignedShort(buf.readerIndex() + 4) + 4 + 2;
+                    if (buf.readableBytes() >= length) {
+                        return buf.readBytes(length);
+                    }
+                }
+
+            } else {
+
+                int endIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), new StringFinder("\r\n"));
+                if (endIndex > 0) {
+                    return buf.readBytes(endIndex - buf.readerIndex() + 2);
+                }
+
+            }
+
         }
 
-        return super.decode(ctx, channel, buf);
+        return null;
     }
 
 }

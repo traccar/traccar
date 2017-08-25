@@ -17,7 +17,7 @@ package org.traccar.model;
 
 import java.util.Date;
 
-public class Statistics extends Extensible {
+public class Statistics extends ExtendedModel {
 
     private Date captureTime;
 
@@ -116,6 +116,7 @@ public class Statistics extends Extensible {
     public void setGeocoderRequests(int geocoderRequests) {
         this.geocoderRequests = geocoderRequests;
     }
+
     private int geolocationRequests;
 
     public int getGeolocationRequests() {

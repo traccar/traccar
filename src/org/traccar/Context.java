@@ -27,14 +27,22 @@ import org.apache.velocity.app.VelocityEngine;
 import org.eclipse.jetty.util.URIUtil;
 import org.traccar.database.AliasesManager;
 import org.traccar.database.CalendarManager;
+import org.traccar.database.AttributesManager;
+import org.traccar.database.BaseObjectManager;
 import org.traccar.database.ConnectionManager;
 import org.traccar.database.DataManager;
 import org.traccar.database.DeviceManager;
+import org.traccar.database.DriversManager;
 import org.traccar.database.IdentityManager;
+import org.traccar.database.MediaManager;
 import org.traccar.database.NotificationManager;
 import org.traccar.database.PermissionsManager;
 import org.traccar.database.GeofenceManager;
+import org.traccar.database.GroupsManager;
 import org.traccar.database.StatisticsManager;
+import org.traccar.database.UsersManager;
+import org.traccar.events.MotionEventHandler;
+import org.traccar.events.OverspeedEventHandler;
 import org.traccar.geocoder.BingMapsGeocoder;
 import org.traccar.geocoder.FactualGeocoder;
 import org.traccar.geocoder.GeocodeFarmGeocoder;
@@ -46,11 +54,20 @@ import org.traccar.geocoder.OpenCageGeocoder;
 import org.traccar.geocoder.Geocoder;
 import org.traccar.geolocation.UnwiredGeolocationProvider;
 import org.traccar.helper.Log;
+import org.traccar.model.Attribute;
+import org.traccar.model.BaseModel;
+import org.traccar.model.Calendar;
+import org.traccar.model.Device;
+import org.traccar.model.Driver;
+import org.traccar.model.Geofence;
+import org.traccar.model.Group;
+import org.traccar.model.User;
 import org.traccar.geolocation.GoogleGeolocationProvider;
 import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.geolocation.MozillaGeolocationProvider;
 import org.traccar.geolocation.OpenCellIdGeolocationProvider;
 import org.traccar.notification.EventForwarder;
+import org.traccar.reports.model.TripsConfig;
 import org.traccar.smpp.SmppClient;
 import org.traccar.web.WebServer;
 
@@ -87,6 +104,24 @@ public final class Context {
 
     public static DataManager getDataManager() {
         return dataManager;
+    }
+
+    private static MediaManager mediaManager;
+
+    public static MediaManager getMediaManager() {
+        return mediaManager;
+    }
+
+    private static UsersManager usersManager;
+
+    public static UsersManager getUsersManager() {
+        return usersManager;
+    }
+
+    private static GroupsManager groupsManager;
+
+    public static GroupsManager getGroupsManager() {
+        return groupsManager;
     }
 
     private static DeviceManager deviceManager;
@@ -173,6 +208,18 @@ public final class Context {
         return aliasesManager;
     }
 
+    private static AttributesManager attributesManager;
+
+    public static AttributesManager getAttributesManager() {
+        return attributesManager;
+    }
+
+    private static DriversManager driversManager;
+
+    public static DriversManager getDriversManager() {
+        return driversManager;
+    }
+
     private static StatisticsManager statisticsManager;
 
     public static StatisticsManager getStatisticsManager() {
@@ -183,6 +230,33 @@ public final class Context {
 
     public static SmppClient getSmppManager() {
         return smppClient;
+    }
+
+    private static MotionEventHandler motionEventHandler;
+
+    public static MotionEventHandler getMotionEventHandler() {
+        return motionEventHandler;
+    }
+
+    private static OverspeedEventHandler overspeedEventHandler;
+
+    public static OverspeedEventHandler getOverspeedEventHandler() {
+        return overspeedEventHandler;
+    }
+
+    private static TripsConfig tripsConfig;
+
+    public static TripsConfig getTripsConfig() {
+        return tripsConfig;
+    }
+
+    public static TripsConfig initTripsConfig() {
+        return new TripsConfig(
+                config.getLong("report.trip.minimalTripDistance", 500),
+                config.getLong("report.trip.minimalTripDuration", 300) * 1000,
+                config.getLong("report.trip.minimalParkingDuration", 300) * 1000,
+                config.getLong("report.trip.minimalNoDataDuration", 3600) * 1000,
+                config.getBoolean("report.trip.useIgnition"));
     }
 
     public static void init(String[] arguments) throws Exception {
@@ -207,7 +281,13 @@ public final class Context {
             dataManager = new DataManager(config);
         }
 
+        if (config.hasKey("media.path")) {
+            mediaManager = new MediaManager(config);
+        }
+
         if (dataManager != null) {
+            usersManager = new UsersManager(dataManager);
+            groupsManager = new GroupsManager(dataManager);
             deviceManager = new DeviceManager(dataManager);
         }
 
@@ -273,9 +353,11 @@ public final class Context {
             webServer = new WebServer(config, dataManager.getDataSource());
         }
 
-        permissionsManager = new PermissionsManager(dataManager);
+        permissionsManager = new PermissionsManager(dataManager, usersManager);
 
         connectionManager = new ConnectionManager();
+
+        tripsConfig = initTripsConfig();
 
         if (config.getBoolean("event.enable")) {
             geofenceManager = new GeofenceManager(dataManager);
@@ -300,6 +382,11 @@ public final class Context {
 
             velocityEngine = new VelocityEngine();
             velocityEngine.init(velocityProperties);
+
+            motionEventHandler = new MotionEventHandler(tripsConfig);
+            overspeedEventHandler = new OverspeedEventHandler(
+                    Context.getConfig().getLong("event.overspeed.minimalDuration") * 1000,
+                    Context.getConfig().getBoolean("event.overspeed.notRepeat"));
         }
 
         serverManager = new ServerManager();
@@ -309,6 +396,10 @@ public final class Context {
         }
 
         aliasesManager = new AliasesManager(dataManager);
+
+        attributesManager = new AttributesManager(dataManager);
+
+        driversManager = new DriversManager(dataManager);
 
         statisticsManager = new StatisticsManager();
 
@@ -322,6 +413,25 @@ public final class Context {
         config = new Config();
         objectMapper = new ObjectMapper();
         identityManager = testIdentityManager;
+    }
+
+    public static <T extends BaseModel> BaseObjectManager<T> getManager(Class<T> clazz) {
+        if (clazz.equals(Device.class)) {
+            return (BaseObjectManager<T>) deviceManager;
+        } else if (clazz.equals(Group.class)) {
+            return (BaseObjectManager<T>) groupsManager;
+        } else if (clazz.equals(User.class)) {
+            return (BaseObjectManager<T>) usersManager;
+        } else if (clazz.equals(Calendar.class)) {
+            return (BaseObjectManager<T>) calendarManager;
+        } else if (clazz.equals(Attribute.class)) {
+            return (BaseObjectManager<T>) attributesManager;
+        } else if (clazz.equals(Geofence.class)) {
+            return (BaseObjectManager<T>) geofenceManager;
+        } else if (clazz.equals(Driver.class)) {
+            return (BaseObjectManager<T>) driversManager;
+        }
+        return null;
     }
 
 }

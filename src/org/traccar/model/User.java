@@ -16,12 +16,15 @@
 package org.traccar.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import org.traccar.database.QueryExtended;
+import org.traccar.database.QueryIgnore;
 import org.traccar.helper.Hashing;
 
 import java.util.Date;
 import java.util.TimeZone;
 
-public class User extends Extensible {
+public class User extends ExtendedModel {
 
     private String name;
 
@@ -40,7 +43,7 @@ public class User extends Extensible {
     }
 
     public void setEmail(String email) {
-        this.email = email;
+        this.email = email.trim();
     }
 
     private String phone;
@@ -228,6 +231,7 @@ public class User extends Extensible {
         }
     }
 
+    @QueryIgnore
     public String getPassword() {
         return null;
     }
@@ -243,6 +247,7 @@ public class User extends Extensible {
     private String hashedPassword;
 
     @JsonIgnore
+    @QueryExtended
     public String getHashedPassword() {
         return hashedPassword;
     }
@@ -254,6 +259,7 @@ public class User extends Extensible {
     private String salt;
 
     @JsonIgnore
+    @QueryExtended
     public String getSalt() {
         return salt;
     }

@@ -63,13 +63,13 @@ public class RaveonProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
-
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
             return null;
         }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN));

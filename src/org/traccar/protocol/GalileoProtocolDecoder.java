@@ -208,6 +208,13 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
             case 0xd4:
                 position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
                 break;
+            case 0xe0:
+                position.set(Position.KEY_INDEX, buf.readUnsignedInt());
+                break;
+            case 0xe1:
+                position.set(Position.KEY_RESULT,
+                        buf.readBytes(buf.readUnsignedByte()).toString(StandardCharsets.US_ASCII));
+                break;
             case 0xe2:
             case 0xe3:
             case 0xe4:
@@ -272,6 +279,9 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (hasLocation && position.getFixTime() != null) {
+            positions.add(position);
+        } else if (position.getAttributes().containsKey(Position.KEY_RESULT)) {
+            getLastLocation(position, null);
             positions.add(position);
         }
 
