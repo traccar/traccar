@@ -182,6 +182,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (length > 0) {
+            if (length > 12) {
+                length = 12;
+            }
             buf.skipBytes(length - 12); // skip reserved
         }
 
@@ -202,7 +205,11 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedShort(), buf.readUnsignedByte(), buf.readUnsignedShort(), buf.readUnsignedMedium())));
 
         if (length > 0) {
-            buf.skipBytes(length - 8);
+            if (hasLength) {
+                buf.skipBytes(length - 9);
+            } else {
+                buf.skipBytes(length - 8);
+            }
         }
 
         return true;
