@@ -194,10 +194,16 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_MOVEMENT;
             case 0x13:
                 return Position.ALARM_GEOFENCE_ENTER;
+            case 0x14:
+                return Position.ALARM_ACCIDENT;
             case 0x50:
                 return Position.ALARM_POWER_OFF;
             case 0x53:
                 return Position.ALARM_GPS_ANTENNA_CUT;
+            case 0x72:
+                return Position.ALARM_BREAKING;
+            case 0x73:
+                return Position.ALARM_ACCELERATION;
             default:
                 return null;
         }
