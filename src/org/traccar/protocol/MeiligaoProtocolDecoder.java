@@ -359,7 +359,13 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         position.setProtocol(getProtocolName());
 
         if (command == MSG_ALARM) {
-            position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
+            short alarmCode = buf.readUnsignedByte();
+            position.set(Position.KEY_ALARM, decodeAlarm(alarmCode));
+            if (alarmCode >= 0x02 && alarmCode <= 0x05) {
+                position.set(Position.PREFIX_IN + alarmCode, 1);
+            } else if (alarmCode >= 0x32 && alarmCode <= 0x35) {
+                position.set(Position.PREFIX_IN + (alarmCode - 0x30), 0);
+            }
         } else if (command == MSG_POSITION_LOGGED) {
             buf.skipBytes(6);
         }
