@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -92,7 +93,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
             position.setLongitude(parser.nextHexInt(0) / 600000.0);
         }
 
-        position.setSpeed(parser.nextHexInt(0) / 100.0);
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextHexInt(0) / 100.0));
         position.setCourse(parser.nextHexInt(0) / 100.0);
 
         position.set(Position.KEY_STATUS, parser.next());
