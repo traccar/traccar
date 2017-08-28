@@ -562,6 +562,10 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
 
         decodeDeviceTime(position, parser);
+        if (ignoreFixTime) {
+            positions.clear();
+            positions.add(position);
+        }
 
         return positions;
     }
@@ -620,6 +624,10 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
 
         decodeDeviceTime(position, parser);
+        if (ignoreFixTime) {
+            positions.clear();
+            positions.add(position);
+        }
 
         return positions;
     }
