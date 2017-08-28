@@ -131,22 +131,37 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
         position.setValid((buf.readUnsignedByte() & 0x01) != 0);
 
-        if (type == MSG_ALARM) {
+        if (type == MSG_GPS) {
+
+            if (buf.readableBytes() >= 2) {
+                decodeStatus(position, buf.readUnsignedShort());
+            }
+
+            if (buf.readableBytes() >= 2 * 4) {
+
+                position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
+
+                position.set(Position.KEY_RSSI, buf.readUnsignedShort());
+
+                position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
+                position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort());
+
+            }
+
+        } else if (type == MSG_ALARM) {
+
             position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
-        }
 
-        if (buf.readableBytes() >= 2) {
-            decodeStatus(position, buf.readUnsignedShort());
-        }
+        } else if (type == MSG_STATE) {
 
-        if (buf.readableBytes() >= 2 * 4) {
+            int statusType = buf.readUnsignedByte();
 
-            position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
+            position.set(Position.KEY_EVENT, statusType);
 
-            position.set(Position.KEY_RSSI, buf.readUnsignedShort());
-
-            position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
-            position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort());
+            if (statusType == 0x01 || statusType == 0x02 || statusType == 0x03) {
+                buf.readUnsignedInt(); // device time
+                decodeStatus(position, buf.readUnsignedShort());
+            }
 
         }
 
