@@ -30,6 +30,7 @@ public class FilterHandler extends BaseDataHandler {
     private int filterDistance;
     private int filterMaxSpeed;
     private long filterLimit;
+    private boolean allowAlarms;
 
     public void setFilterInvalid(boolean filterInvalid) {
         this.filterInvalid = filterInvalid;
@@ -67,6 +68,10 @@ public class FilterHandler extends BaseDataHandler {
         this.filterLimit = filterLimit;
     }
 
+    public void setAllowAlarms(boolean allowAlarms) {
+        this.allowAlarms = allowAlarms;
+    }
+
     public FilterHandler() {
         Config config = Context.getConfig();
         if (config != null) {
@@ -79,6 +84,7 @@ public class FilterHandler extends BaseDataHandler {
             filterDistance = config.getInteger("filter.distance");
             filterMaxSpeed = config.getInteger("filter.maxSpeed");
             filterLimit = config.getLong("filter.limit") * 1000;
+            allowAlarms = config.getBoolean("filter.allowAlarms");
         }
     }
 
@@ -127,7 +133,7 @@ public class FilterHandler extends BaseDataHandler {
         if (filterMaxSpeed != 0 && last != null) {
             double distance = position.getDouble(Position.KEY_DISTANCE);
             long time = position.getFixTime().getTime() - last.getFixTime().getTime();
-            return UnitsConverter.knotsFromMps(distance / (time / 1000)) > filterMaxSpeed;
+            return UnitsConverter.knotsFromMps(distance / (time / 1000.0)) > filterMaxSpeed;
         }
         return false;
     }
@@ -145,6 +151,10 @@ public class FilterHandler extends BaseDataHandler {
     }
 
     private boolean filter(Position position) {
+
+        if (allowAlarms && position.getAttributes().containsKey(Position.KEY_ALARM)) {
+            return false;
+        }
 
         StringBuilder filterType = new StringBuilder();
 
