@@ -147,10 +147,6 @@ public class FilterHandler extends BaseDataHandler {
 
     private boolean filter(Position position) {
 
-        if (keepAlarms && position.getAttributes().containsKey(Position.KEY_ALARM)) {
-            return false;
-        }
-
         StringBuilder filterType = new StringBuilder();
 
         Position last = null;
@@ -158,9 +154,10 @@ public class FilterHandler extends BaseDataHandler {
             last = Context.getIdentityManager().getLastPosition(position.getDeviceId());
         }
 
-        if (filterLimit(position, last)) {
-            filterType.append("Limit ");
+        if (filterLimit(position, last) || keepAlarms && position.getAttributes().containsKey(Position.KEY_ALARM)) {
+            return false;
         }
+
         if (filterInvalid(position)) {
             filterType.append("Invalid ");
         }
