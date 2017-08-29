@@ -181,13 +181,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_IGNITION, BitUtil.check(flags, 15));
         }
 
-        if (length > 0) {
-            if (length > 12) {
-                length = 12;
-            }
-            buf.skipBytes(length - 12); // skip reserved
-        }
-
         return true;
     }
 
@@ -578,7 +571,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (decodeLbs(position, buf, true)) {
-                buf.skipBytes(1); //Extended data
+                position.set(Position.KEY_RSSI, buf.readUnsignedByte());
             }
 
             buf.skipBytes(buf.readUnsignedByte()); // additional cell towers
