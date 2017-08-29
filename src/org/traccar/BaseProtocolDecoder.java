@@ -19,6 +19,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.socket.DatagramChannel;
 import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.traccar.helper.Log;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 
@@ -64,6 +65,20 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
 
     public String getProtocolName() {
         return protocol.getName();
+    }
+
+    protected double convertSpeed(double value, String defaultUnits) {
+        switch (Context.getConfig().getString(getProtocolName() + ".speed", defaultUnits)) {
+            case "kmh":
+                return UnitsConverter.knotsFromKph(value);
+            case "mps":
+                return UnitsConverter.knotsFromMps(value);
+            case "mph":
+                return UnitsConverter.knotsFromMph(value);
+            case "kn":
+            default:
+                return value;
+        }
     }
 
     private DeviceSession channelDeviceSession; // connection-based protocols

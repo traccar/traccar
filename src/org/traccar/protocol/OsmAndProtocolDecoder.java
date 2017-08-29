@@ -25,9 +25,7 @@ import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import org.joda.time.format.ISODateTimeFormat;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
 import org.traccar.DeviceSession;
-import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -40,11 +38,8 @@ import java.util.Map;
 
 public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
 
-    private String speedUnits;
-
     public OsmAndProtocolDecoder(OsmAndProtocol protocol) {
         super(protocol);
-        speedUnits = Context.getConfig().getString("osmand.speedUnits", "kn");
     }
 
     private void sendResponse(Channel channel, HttpResponseStatus status) {
@@ -115,19 +110,7 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
                     position.setLongitude(Double.parseDouble(location[1]));
                     break;
                 case "speed":
-                    switch (speedUnits) {
-                        case "kph":
-                            position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(value)));
-                            break;
-                        case "mps":
-                            position.setSpeed(UnitsConverter.knotsFromMps(Double.parseDouble(value)));
-                            break;
-                        case "mph":
-                            position.setSpeed(UnitsConverter.knotsFromMph(Double.parseDouble(value)));
-                            break;
-                        default:
-                            position.setSpeed(Double.parseDouble(value));
-                    }
+                    position.setSpeed(convertSpeed(Double.parseDouble(value), "kn"));
                     break;
                 case "bearing":
                 case "heading":

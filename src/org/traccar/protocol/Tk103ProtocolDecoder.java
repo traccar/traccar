@@ -23,7 +23,6 @@ import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
@@ -253,17 +252,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
 
-        switch (Context.getConfig().getString(getProtocolName() + ".speed", "kmh")) {
-            case "kn":
-                position.setSpeed(parser.nextDouble(0));
-                break;
-            case "mph":
-                position.setSpeed(UnitsConverter.knotsFromMph(parser.nextDouble(0)));
-                break;
-            default:
-                position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
-                break;
-        }
+        position.setSpeed(convertSpeed(parser.nextDouble(0), "kmh"));
 
         dateBuilder.setTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
         position.setTime(dateBuilder.getDate());
