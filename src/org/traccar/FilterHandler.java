@@ -138,11 +138,15 @@ public class FilterHandler extends BaseDataHandler {
         return false;
     }
 
-    private boolean filterLimit(Position position, Position last) {
+    private boolean skipLimit(Position position, Position last) {
         if (filterLimit != 0 && last != null) {
             return (position.getFixTime().getTime() - last.getFixTime().getTime()) > filterLimit;
         }
         return false;
+    }
+
+    private boolean skipAlarms(Position position) {
+        return keepAlarms && position.getAttributes().containsKey(Position.KEY_ALARM);
     }
 
     private boolean filter(Position position) {
@@ -154,7 +158,7 @@ public class FilterHandler extends BaseDataHandler {
             last = Context.getIdentityManager().getLastPosition(position.getDeviceId());
         }
 
-        if (filterLimit(position, last) || keepAlarms && position.getAttributes().containsKey(Position.KEY_ALARM)) {
+        if (skipLimit(position, last) || skipAlarms(position)) {
             return false;
         }
 
