@@ -29,7 +29,8 @@ public class FilterHandler extends BaseDataHandler {
     private boolean filterStatic;
     private int filterDistance;
     private int filterMaxSpeed;
-    private long filterLimit;
+    private long skipLimit;
+    private boolean skipAlarms;
 
     public void setFilterInvalid(boolean filterInvalid) {
         this.filterInvalid = filterInvalid;
@@ -63,8 +64,12 @@ public class FilterHandler extends BaseDataHandler {
         this.filterMaxSpeed = filterMaxSpeed;
     }
 
-    public void setFilterLimit(long filterLimit) {
-        this.filterLimit = filterLimit;
+    public void setSkipLimit(long skipLimit) {
+        this.skipLimit = skipLimit;
+    }
+
+    public void setSkipAlarms(boolean skipAlarms) {
+        this.skipAlarms = skipAlarms;
     }
 
     public FilterHandler() {
@@ -78,7 +83,8 @@ public class FilterHandler extends BaseDataHandler {
             filterStatic = config.getBoolean("filter.static");
             filterDistance = config.getInteger("filter.distance");
             filterMaxSpeed = config.getInteger("filter.maxSpeed");
-            filterLimit = config.getLong("filter.limit") * 1000;
+            skipLimit = config.getLong("filter.skipLimit") * 1000;
+            skipAlarms = config.getBoolean("filter.skipAlarms");
         }
     }
 
@@ -126,22 +132,21 @@ public class FilterHandler extends BaseDataHandler {
     private boolean filterMaxSpeed(Position position, Position last) {
         if (filterMaxSpeed != 0 && last != null) {
             double distance = position.getDouble(Position.KEY_DISTANCE);
-            long time = position.getFixTime().getTime() - last.getFixTime().getTime();
+            double time = position.getFixTime().getTime() - last.getFixTime().getTime();
             return UnitsConverter.knotsFromMps(distance / (time / 1000)) > filterMaxSpeed;
         }
         return false;
     }
 
-    private boolean filterLimit(Position position, Position last) {
-        if (filterLimit != 0) {
-            if (last != null) {
-                return (position.getFixTime().getTime() - last.getFixTime().getTime()) > filterLimit;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
+    private boolean skipLimit(Position position, Position last) {
+        if (skipLimit != 0 && last != null) {
+            return (position.getFixTime().getTime() - last.getFixTime().getTime()) > skipLimit;
         }
+        return false;
+    }
+
+    private boolean skipAlarms(Position position) {
+        return skipAlarms && position.getAttributes().containsKey(Position.KEY_ALARM);
     }
 
     private boolean filter(Position position) {
@@ -151,6 +156,10 @@ public class FilterHandler extends BaseDataHandler {
         Position last = null;
         if (Context.getIdentityManager() != null) {
             last = Context.getIdentityManager().getLastPosition(position.getDeviceId());
+        }
+
+        if (skipLimit(position, last) || skipAlarms(position)) {
+            return false;
         }
 
         if (filterInvalid(position)) {
@@ -178,7 +187,7 @@ public class FilterHandler extends BaseDataHandler {
             filterType.append("MaxSpeed ");
         }
 
-        if (filterType.length() > 0 && !filterLimit(position, last)) {
+        if (filterType.length() > 0) {
 
             StringBuilder message = new StringBuilder();
             message.append("Position filtered by ");
