@@ -77,7 +77,7 @@ public class FilterHandlerTest extends BaseTest {
         assertNotNull(passingHandler.decode(null, null, position));
 
         position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
-        filtingHandler.setAllowAlarms(true);
+        filtingHandler.setKeepAlarms(true);
         assertNotNull(filtingHandler.decode(null, null, position));
     }
 
