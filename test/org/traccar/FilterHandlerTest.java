@@ -27,7 +27,7 @@ public class FilterHandlerTest extends BaseTest {
         filtingHandler.setFilterStatic(true);
         filtingHandler.setFilterDistance(10);
         filtingHandler.setFilterMaxSpeed(500);
-        filtingHandler.setFilterLimit(10);
+        filtingHandler.setSkipLimit(10);
     }
 
     @After
@@ -77,7 +77,7 @@ public class FilterHandlerTest extends BaseTest {
         assertNotNull(passingHandler.decode(null, null, position));
 
         position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
-        filtingHandler.setKeepAlarms(true);
+        filtingHandler.setSkipAlarms(true);
         assertNotNull(filtingHandler.decode(null, null, position));
     }
 

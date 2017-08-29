@@ -29,8 +29,8 @@ public class FilterHandler extends BaseDataHandler {
     private boolean filterStatic;
     private int filterDistance;
     private int filterMaxSpeed;
-    private long filterLimit;
-    private boolean keepAlarms;
+    private long skipLimit;
+    private boolean skipAlarms;
 
     public void setFilterInvalid(boolean filterInvalid) {
         this.filterInvalid = filterInvalid;
@@ -64,12 +64,12 @@ public class FilterHandler extends BaseDataHandler {
         this.filterMaxSpeed = filterMaxSpeed;
     }
 
-    public void setFilterLimit(long filterLimit) {
-        this.filterLimit = filterLimit;
+    public void setSkipLimit(long skipLimit) {
+        this.skipLimit = skipLimit;
     }
 
-    public void setKeepAlarms(boolean keepAlarms) {
-        this.keepAlarms = keepAlarms;
+    public void setSkipAlarms(boolean skipAlarms) {
+        this.skipAlarms = skipAlarms;
     }
 
     public FilterHandler() {
@@ -83,8 +83,8 @@ public class FilterHandler extends BaseDataHandler {
             filterStatic = config.getBoolean("filter.static");
             filterDistance = config.getInteger("filter.distance");
             filterMaxSpeed = config.getInteger("filter.maxSpeed");
-            filterLimit = config.getLong("filter.limit") * 1000;
-            keepAlarms = config.getBoolean("filter.keepAlarms");
+            skipLimit = config.getLong("filter.skipLimit") * 1000;
+            skipAlarms = config.getBoolean("filter.skipAlarms");
         }
     }
 
@@ -139,14 +139,14 @@ public class FilterHandler extends BaseDataHandler {
     }
 
     private boolean skipLimit(Position position, Position last) {
-        if (filterLimit != 0 && last != null) {
-            return (position.getFixTime().getTime() - last.getFixTime().getTime()) > filterLimit;
+        if (skipLimit != 0 && last != null) {
+            return (position.getFixTime().getTime() - last.getFixTime().getTime()) > skipLimit;
         }
         return false;
     }
 
     private boolean skipAlarms(Position position) {
-        return keepAlarms && position.getAttributes().containsKey(Position.KEY_ALARM);
+        return skipAlarms && position.getAttributes().containsKey(Position.KEY_ALARM);
     }
 
     private boolean filter(Position position) {
