@@ -191,7 +191,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         return true;
     }
 
-    private boolean decodeLbs(Position position, ChannelBuffer buf, boolean hasLength, boolean isExtended) {
+    private boolean decodeLbs(Position position, ChannelBuffer buf, boolean hasLength) {
 
         int length = 0;
         if (hasLength) {
@@ -205,11 +205,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedShort(), buf.readUnsignedByte(), buf.readUnsignedShort(), buf.readUnsignedMedium())));
 
         if (length > 0) {
-            if (hasLength && !isExtended) {
-                buf.skipBytes(length - 9);
-            } else {
-                buf.skipBytes(length - 8);
-            }
+            buf.skipBytes(length - (hasLength ? 9 : 8));
         }
 
         return true;
@@ -468,7 +464,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (hasLbs(type)) {
-                decodeLbs(position, buf, hasStatus(type), false);
+                decodeLbs(position, buf, hasStatus(type));
+                buf.skipBytes(-1);
             }
 
             if (hasStatus(type)) {
@@ -580,7 +577,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 getLastLocation(position, position.getDeviceTime());
             }
 
-            decodeLbs(position, buf, true, true);
+            if (decodeLbs(position, buf, true)) {
+                buf.skipBytes(1); //Extended data
+            }
 
             buf.skipBytes(buf.readUnsignedByte()); // additional cell towers
             buf.skipBytes(buf.readUnsignedByte()); // wifi access point
