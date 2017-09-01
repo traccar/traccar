@@ -154,6 +154,11 @@
             <version>2.0</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId> <!-- Required by Velocity -->
+            <version>4.1</version>
+        </dependency>
+        <dependency>
             <groupId>org.mnode.ical4j</groupId>
             <artifactId>ical4j</artifactId>
             <version>2.0.4</version>
