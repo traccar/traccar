@@ -15,7 +15,10 @@
  */
 package org.traccar.web;
 
+import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
+import org.eclipse.jetty.proxy.AsyncProxyServlet;
+import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.SessionManager;
 import org.eclipse.jetty.server.handler.ErrorHandler;
@@ -29,6 +32,7 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.traccar.Config;
+import org.traccar.Context;
 import org.traccar.api.AsyncSocketServlet;
 import org.traccar.api.CorsResponseFilter;
 import org.traccar.api.ObjectMapperProvider;
@@ -38,7 +42,9 @@ import org.traccar.api.resource.ServerResource;
 import org.traccar.helper.Log;
 
 import javax.naming.InitialContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.Writer;
@@ -86,6 +92,7 @@ public class WebServer {
                 initWebApp();
                 break;
         }
+        initClientProxy();
         server.setHandler(handlers);
 
         server.addBean(new ErrorHandler() {
@@ -96,6 +103,26 @@ public class WebServer {
                         + code + " - " + HttpStatus.getMessage(code) + "</body></html>");
             }
         }, false);
+    }
+
+    private void initClientProxy() {
+        int port = Context.getConfig().getInteger("osmand.port");
+        if (port != 0) {
+            ServletContextHandler servletHandler = new ServletContextHandler() {
+                @Override
+                public void doScope(
+                        String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
+                        throws IOException, ServletException {
+                    if (target.equals("/") && request.getMethod().equals(HttpMethod.POST.asString())) {
+                        super.doScope(target, baseRequest, request, response);
+                    }
+                }
+            };
+            ServletHolder servletHolder = new ServletHolder(new AsyncProxyServlet.Transparent());
+            servletHolder.setInitParameter("proxyTo", "http://localhost:" + port);
+            servletHandler.addServlet(servletHolder, "/");
+            handlers.addHandler(servletHandler);
+        }
     }
 
     private void initWebApp() {
