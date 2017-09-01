@@ -176,10 +176,8 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_BATTERY, Double.parseDouble(values[index++]));
             }
 
-            if (index < values.length) {
-                if (values[index++].equals("0")) {
-                    position.set(Position.KEY_ARCHIVE, true);
-                }
+            if (index < values.length && values[index++].equals("0")) {
+                position.set(Position.KEY_ARCHIVE, true);
             }
 
             if (includeAdc) {

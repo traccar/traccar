@@ -155,9 +155,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             return false;
         }
 
-        int length = buf.readUnsignedByte();
-        position.set(Position.KEY_SATELLITES, BitUtil.to(length, 4));
-        length = BitUtil.from(length, 4);
+        position.set(Position.KEY_SATELLITES, BitUtil.to(buf.readUnsignedByte(), 4));
 
         double latitude = buf.readUnsignedInt() / 60.0 / 30000.0;
         double longitude = buf.readUnsignedInt() / 60.0 / 30000.0;
