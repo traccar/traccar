@@ -27,11 +27,11 @@ import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.filter.Filter;
 import net.fortuna.ical4j.filter.PeriodRule;
-import net.fortuna.ical4j.filter.Rule;
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.Dur;
 import net.fortuna.ical4j.model.Period;
 import net.fortuna.ical4j.model.component.CalendarComponent;
+import org.apache.commons.collections4.Predicate;
 import org.traccar.database.QueryIgnore;
 
 public class Calendar extends ExtendedModel {
@@ -69,8 +69,8 @@ public class Calendar extends ExtendedModel {
     public boolean checkMoment(Date date) {
         if (calendar != null) {
             Period period = new Period(new DateTime(date), new Dur(0, 0, 0, 0));
-            Rule<CalendarComponent> periodRule = new PeriodRule<>(period);
-            Filter<CalendarComponent> filter = new Filter<>(new Rule[] {periodRule}, Filter.MATCH_ANY);
+            Predicate<CalendarComponent> periodRule = new PeriodRule<>(period);
+            Filter<CalendarComponent> filter = new Filter<>(new Predicate[] {periodRule}, Filter.MATCH_ANY);
             Collection<CalendarComponent> events = filter.filter(calendar.getComponents(CalendarComponent.VEVENT));
             if (events != null && !events.isEmpty()) {
                 return true;
