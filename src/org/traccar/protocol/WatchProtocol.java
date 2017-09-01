@@ -41,7 +41,8 @@ public class WatchProtocol extends BaseProtocol {
                 Command.TYPE_SET_PHONEBOOK,
                 Command.TYPE_VOICE_MESSAGE,
                 Command.TYPE_SET_TIMEZONE,
-                Command.TYPE_SET_INDICATOR);
+                Command.TYPE_SET_INDICATOR,
+                Command.TYPE_CUSTOM);
     }
 
     @Override
