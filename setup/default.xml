@@ -237,5 +237,6 @@
     <entry key='vtfms.port'>5145</entry>
     <entry key='tlv.port'>5146</entry>
     <entry key='esky.port'>5147</entry>
+    <entry key='genx.port'>5148</entry>
 
 </properties>
