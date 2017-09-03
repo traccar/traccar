@@ -80,7 +80,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("d{14},")                    // last fix time
             .groupBegin()
             .number("(d+),")                     // battery percentage
-            .expression("[01]?,")                // flash type
+            .number("[d.]*,")                    // flash type / power
             .number("(-?[d.]+)?,,,")             // temperature
             .or()
             .expression("(?:[01])?,").optional() // pin15 mode
@@ -394,7 +394,21 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        position.set(Position.KEY_STATUS, parser.next());
+        String status = parser.next();
+
+        if (status.charAt(0) == '2') {
+            position.set(Position.KEY_IGNITION, true);
+        } else if (status.charAt(0) == '4') {
+            position.set(Position.KEY_IGNITION, false);
+        }
+
+        if (status.charAt(1) == '1') {
+            position.set(Position.KEY_MOTION, false);
+        } else if (status.charAt(1) == '2') {
+            position.set(Position.KEY_MOTION, true);
+        }
+
+        position.set(Position.KEY_STATUS, status);
 
         position.set(Position.KEY_RSSI, parser.nextInt());
 
