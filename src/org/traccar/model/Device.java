@@ -142,4 +142,13 @@ public class Device extends Extensible {
         this.category = category;
     }
 
+    private String truckRegistrationNumber;
+
+    public String getTruckRegistrationNumber() {
+        return truckRegistrationNumber;
+    }
+
+    public void setTruckRegistrationNumber(String truckRegistrationNumber) {
+        this.truckRegistrationNumber = truckRegistrationNumber;
+    }
 }

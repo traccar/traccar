@@ -22,7 +22,7 @@
         <constraints nullable="false" />
       </column>
       <column name="email" type="VARCHAR(128)">
-        <constraints nullable="false" />
+        <constraints nullable="true" />
       </column>
       <column name="hashedpassword" type="VARCHAR(128)">
         <constraints nullable="false" />

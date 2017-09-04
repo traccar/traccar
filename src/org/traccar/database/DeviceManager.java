@@ -110,6 +110,7 @@ public class DeviceManager implements IdentityManager {
                     cachedDevice.setContact(device.getContact());
                     cachedDevice.setModel(device.getModel());
                     cachedDevice.setAttributes(device.getAttributes());
+                    cachedDevice.setTruckRegistrationNumber(device.getTruckRegistrationNumber());
                     if (!device.getUniqueId().equals(cachedDevice.getUniqueId())) {
                         devicesByUniqueId.put(device.getUniqueId(), cachedDevice);
                     }
