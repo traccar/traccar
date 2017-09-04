@@ -25,7 +25,7 @@ public class Jt600ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testSetTimezone() throws Exception {
         command.setType(Command.TYPE_SET_TIMEZONE);
-        command.set(Command.KEY_TIMEZONE, 240 * 60);
+        command.set(Command.KEY_TIMEZONE, "GMT+4");
         assertEquals("(S09,1,240)", encoder.encodeCommand(command));
     }
 

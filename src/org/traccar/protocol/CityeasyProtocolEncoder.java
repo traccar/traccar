@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 package org.traccar.protocol;
+
+import java.util.TimeZone;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -56,13 +58,13 @@ public class CityeasyProtocolEncoder extends BaseProtocolEncoder {
                 content.writeShort(0);
                 return encodeContent(CityeasyProtocolDecoder.MSG_LOCATION_INTERVAL, content);
             case Command.TYPE_SET_TIMEZONE:
-                int timezone = command.getInteger(Command.KEY_TIMEZONE);
+                int timezone = TimeZone.getTimeZone(command.getString(Command.KEY_TIMEZONE)).getRawOffset() / 60000;
                 if (timezone < 0) {
                     content.writeByte(1);
                 } else {
                     content.writeByte(0);
                 }
-                content.writeShort(Math.abs(timezone) / 60);
+                content.writeShort(Math.abs(timezone));
                 return encodeContent(CityeasyProtocolDecoder.MSG_TIMEZONE, content);
             default:
                 Log.warning(new UnsupportedOperationException(command.getType()));
