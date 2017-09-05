@@ -69,7 +69,7 @@ public class GenxProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        return position;
+        return position.getDeviceId() != 0 ? position : null;
     }
 
 }
