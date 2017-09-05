@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,27 @@
  */
 package org.traccar.protocol;
 
+import java.util.TimeZone;
+
 import org.traccar.StringProtocolEncoder;
 import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
-public class Pt502ProtocolEncoder extends StringProtocolEncoder {
+public class Pt502ProtocolEncoder extends StringProtocolEncoder implements StringProtocolEncoder.ValueFormatter {
+
+    @Override
+    public String formatValue(String key, Object value) {
+        if (key.equals(Command.KEY_TIMEZONE)) {
+            return String.valueOf(TimeZone.getTimeZone((String) value).getRawOffset() / 3600000);
+        }
+
+        return null;
+    }
+
+    @Override
+    protected String formatCommand(Command command, String format, String... keys) {
+        return formatCommand(command, format, this, keys);
+    }
 
     @Override
     protected Object encodeCommand(Command command) {
