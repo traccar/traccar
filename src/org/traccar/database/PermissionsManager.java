@@ -408,8 +408,8 @@ public class PermissionsManager {
         refreshUserPermissions();
     }
 
-    public User login(String email, String password) throws SQLException {
-        User user = dataManager.login(email, password);
+    public User login(String phone, String password) throws SQLException {
+        User user = dataManager.login(phone, password);
         if (user != null) {
             checkUserEnabled(user.getId());
             return users.get(user.getId());
