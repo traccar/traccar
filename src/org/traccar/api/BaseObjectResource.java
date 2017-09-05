@@ -138,10 +138,6 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
                 Context.getPermissionsManager().refreshAllExtendedPermissions();
             }
         }
-        // Next should be removed with Attribute Aliases
-        if (baseClass.equals(Device.class)) {
-            Context.getAliasesManager().removeDevice(id);
-        }
         return Response.noContent().build();
     }
 

@@ -25,7 +25,6 @@ import java.util.Properties;
 
 import org.apache.velocity.app.VelocityEngine;
 import org.eclipse.jetty.util.URIUtil;
-import org.traccar.database.AliasesManager;
 import org.traccar.database.CalendarManager;
 import org.traccar.database.AttributesManager;
 import org.traccar.database.BaseObjectManager;
@@ -200,12 +199,6 @@ public final class Context {
 
     public static EventForwarder getEventForwarder() {
         return eventForwarder;
-    }
-
-    private static AliasesManager aliasesManager;
-
-    public static AliasesManager getAliasesManager() {
-        return aliasesManager;
     }
 
     private static AttributesManager attributesManager;
@@ -394,8 +387,6 @@ public final class Context {
         if (config.getBoolean("event.forward.enable")) {
             eventForwarder = new EventForwarder();
         }
-
-        aliasesManager = new AliasesManager(dataManager);
 
         attributesManager = new AttributesManager(dataManager);
 

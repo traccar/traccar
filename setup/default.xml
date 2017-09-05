@@ -62,27 +62,6 @@
         DELETE FROM events WHERE serverTime &lt; :serverTime
     </entry>
 
-    <entry key='database.selectAttributeAliases'>
-        SELECT * FROM attribute_aliases
-    </entry>
-
-    <entry key='database.insertAttributeAlias'>
-        INSERT INTO attribute_aliases (deviceId, attribute, alias)
-        VALUES (:deviceId, :attribute, :alias)
-    </entry>
-
-    <entry key='database.updateAttributeAlias'>
-        UPDATE attribute_aliases SET
-        deviceId = :deviceId,
-        attribute = :attribute,
-        alias = :alias
-        WHERE id = :id
-    </entry>
-
-    <entry key='database.deleteAttributeAlias'>
-        DELETE FROM attribute_aliases WHERE id = :id
-    </entry>
-
     <entry key='database.selectStatistics'>
         SELECT * FROM statistics WHERE captureTime BETWEEN :from AND :to ORDER BY captureTime
     </entry>
