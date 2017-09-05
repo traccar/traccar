@@ -33,7 +33,7 @@ public class WatchProtocolEncoder extends StringProtocolEncoder implements Strin
     @Override
     public String formatValue(String key, Object value) {
         if (key.equals(Command.KEY_TIMEZONE)) {
-            double offset = TimeZone.getTimeZone(value.toString()).getRawOffset() / 3600000.0;
+            double offset = TimeZone.getTimeZone((String) value).getRawOffset() / 3600000.0;
             DecimalFormat fmt = new DecimalFormat("+#.##;-#.##", DecimalFormatSymbols.getInstance(Locale.US));
             return fmt.format(offset);
         }
@@ -44,7 +44,7 @@ public class WatchProtocolEncoder extends StringProtocolEncoder implements Strin
 
     @Override
     protected String formatCommand(Command command, String format, String... keys) {
-        String content = super.formatCommand(command, format, this, keys);
+        String content = formatCommand(command, format, this, keys);
         return String.format("[CS*%s*%04x*%s]",
                 getUniqueId(command.getDeviceId()), content.length(), content);
     }

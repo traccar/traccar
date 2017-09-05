@@ -26,7 +26,7 @@ public class Pt502ProtocolEncoder extends StringProtocolEncoder implements Strin
     @Override
     public String formatValue(String key, Object value) {
         if (key.equals(Command.KEY_TIMEZONE)) {
-            return String.valueOf(TimeZone.getTimeZone(value.toString()).getRawOffset() / 3600000);
+            return String.valueOf(TimeZone.getTimeZone((String) value).getRawOffset() / 3600000);
         }
 
         return null;
@@ -34,7 +34,7 @@ public class Pt502ProtocolEncoder extends StringProtocolEncoder implements Strin
 
     @Override
     protected String formatCommand(Command command, String format, String... keys) {
-        return super.formatCommand(command, format, this, keys);
+        return formatCommand(command, format, this, keys);
     }
 
     @Override

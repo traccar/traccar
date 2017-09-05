@@ -29,7 +29,7 @@ public class MiniFinderProtocolEncoder extends StringProtocolEncoder implements 
         if (key.equals(Command.KEY_ENABLE)) {
             return (Boolean) value ? "1" : "0";
         } else if (key.equals(Command.KEY_TIMEZONE)) {
-            return String.format("%+03d", TimeZone.getTimeZone(value.toString()).getRawOffset() / 3600000);
+            return String.format("%+03d", TimeZone.getTimeZone((String) value).getRawOffset() / 3600000);
         } else if (key.equals(Command.KEY_INDEX)) {
             switch (((Number) value).intValue()) {
                 case 0:
