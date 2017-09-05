@@ -456,7 +456,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             if (hasLbs(type)) {
                 decodeLbs(position, buf, hasStatus(type));
-                buf.skipBytes(-1);
             }
 
             if (hasStatus(type)) {
