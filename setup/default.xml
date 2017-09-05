@@ -58,11 +58,6 @@
 
     <entry key='database.loginUser'>
         SELECT * FROM users
-        WHERE phone = :phone
-    </entry>
-
-    <entry key='database.loginAdminUser'>
-        SELECT * FROM users
         WHERE email = :email
     </entry>
 

@@ -58,7 +58,7 @@
 
     <entry key='database.loginUser'>
         SELECT * FROM users
-        WHERE phone = :phone
+        WHERE email = :email
     </entry>
 
     <entry key='database.selectUsersAll'>
