@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+  logicalFilePath="changelog-3.15">
+
+  <changeSet author="author" id="changelog-3.15">
+      
+    <dropForeignKeyConstraint baseTableName="attribute_aliases" constraintName="fk_attribute_aliases_deviceid" />
+    <dropUniqueConstraint tableName="attribute_aliases" constraintName="uk_deviceid_attribute" />
+
+    <dropTable tableName="attribute_aliases" />
+
+    <dropColumn tableName="servers" columnName="timezone" />
+    <dropColumn tableName="servers" columnName="speedunit" />
+    <dropColumn tableName="servers" columnName="distanceunit" />
+
+    <dropColumn tableName="users" columnName="timezone" />
+    <dropColumn tableName="users" columnName="speedunit" />
+    <dropColumn tableName="users" columnName="distanceunit" />
+
+  </changeSet>
+</databaseChangeLog>

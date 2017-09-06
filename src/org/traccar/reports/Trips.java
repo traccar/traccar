@@ -29,10 +29,8 @@ import org.apache.poi.ss.util.WorkbookUtil;
 import org.traccar.Context;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
-import org.traccar.reports.model.BaseReport;
 import org.traccar.reports.model.DeviceReport;
 import org.traccar.reports.model.TripReport;
-import org.traccar.reports.model.TripsConfig;
 
 public final class Trips {
 
@@ -42,16 +40,14 @@ public final class Trips {
     private static Collection<TripReport> detectTrips(long deviceId, Date from, Date to) throws SQLException {
         double speedThreshold = Context.getConfig().getDouble("event.motion.speedThreshold", 0.01);
 
-        TripsConfig tripsConfig = ReportUtils.initTripsConfig();
-
         boolean ignoreOdometer = Context.getDeviceManager()
                 .lookupAttributeBoolean(deviceId, "report.ignoreOdometer", false, true);
 
-        Collection<? extends BaseReport> result = ReportUtils.detectTripsAndStops(tripsConfig,
-                ignoreOdometer, speedThreshold,
-                Context.getDataManager().getPositions(deviceId, from, to), true);
+        Collection<TripReport> result = ReportUtils.detectTripsAndStops(
+                Context.getDataManager().getPositions(deviceId, from, to),
+                Context.getTripsConfig(), ignoreOdometer, speedThreshold, TripReport.class);
 
-        return (Collection<TripReport>) result;
+        return result;
     }
 
     public static Collection<TripReport> getObjects(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,

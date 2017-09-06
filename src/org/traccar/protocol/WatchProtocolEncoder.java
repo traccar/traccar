@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,13 +26,14 @@ import java.text.DecimalFormatSymbols;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 public class WatchProtocolEncoder extends StringProtocolEncoder implements StringProtocolEncoder.ValueFormatter {
 
     @Override
     public String formatValue(String key, Object value) {
         if (key.equals(Command.KEY_TIMEZONE)) {
-            double offset = ((Number) value).longValue() / 3600.0;
+            double offset = TimeZone.getTimeZone((String) value).getRawOffset() / 3600000.0;
             DecimalFormat fmt = new DecimalFormat("+#.##;-#.##", DecimalFormatSymbols.getInstance(Locale.US));
             return fmt.format(offset);
         }
@@ -41,8 +42,9 @@ public class WatchProtocolEncoder extends StringProtocolEncoder implements Strin
     }
 
 
+    @Override
     protected String formatCommand(Command command, String format, String... keys) {
-        String content = super.formatCommand(command, format, this, keys);
+        String content = formatCommand(command, format, this, keys);
         return String.format("[CS*%s*%04x*%s]",
                 getUniqueId(command.getDeviceId()), content.length(), content);
     }
@@ -97,6 +99,8 @@ public class WatchProtocolEncoder extends StringProtocolEncoder implements Strin
     protected Object encodeCommand(Command command) {
 
         switch (command.getType()) {
+            case Command.TYPE_CUSTOM:
+                return formatCommand(command, command.getString(Command.KEY_DATA));
             case Command.TYPE_POSITION_SINGLE:
                 return formatCommand(command, "RG");
             case Command.TYPE_SOS_NUMBER:

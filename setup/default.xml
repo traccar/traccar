@@ -9,6 +9,7 @@
     <entry key='web.enable'>true</entry>
     <entry key='web.port'>8082</entry>
     <entry key='web.path'>./web</entry>
+    <entry key='web.cacheControl'>max-age=3600,public</entry>
 
     <entry key='geocoder.enable'>true</entry>
     <entry key='geocoder.type'>google</entry>
@@ -54,32 +55,11 @@
     </entry>
 
     <entry key='database.deletePositions'>
-        DELETE FROM positions WHERE serverTime &lt; :serverTime AND id NOT IN (SELECT positionId FROM devices)
+        DELETE FROM positions WHERE serverTime &lt; :serverTime AND id NOT IN (SELECT positionId FROM devices WHERE positionId IS NOT NULL)
     </entry>
 
     <entry key='database.deleteEvents'>
         DELETE FROM events WHERE serverTime &lt; :serverTime
-    </entry>
-
-    <entry key='database.selectAttributeAliases'>
-        SELECT * FROM attribute_aliases
-    </entry>
-
-    <entry key='database.insertAttributeAlias'>
-        INSERT INTO attribute_aliases (deviceId, attribute, alias)
-        VALUES (:deviceId, :attribute, :alias)
-    </entry>
-
-    <entry key='database.updateAttributeAlias'>
-        UPDATE attribute_aliases SET
-        deviceId = :deviceId,
-        attribute = :attribute,
-        alias = :alias
-        WHERE id = :id
-    </entry>
-
-    <entry key='database.deleteAttributeAlias'>
-        DELETE FROM attribute_aliases WHERE id = :id
     </entry>
 
     <entry key='database.selectStatistics'>
@@ -235,5 +215,7 @@
     <entry key='owntracks.port'>5144</entry>
     <entry key='vtfms.port'>5145</entry>
     <entry key='tlv.port'>5146</entry>
+    <entry key='esky.port'>5147</entry>
+    <entry key='genx.port'>5148</entry>
 
 </properties>

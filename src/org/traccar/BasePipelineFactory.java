@@ -51,6 +51,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
     private FilterHandler filterHandler;
     private DistanceHandler distanceHandler;
+    private RemoteAddressHandler remoteAddressHandler;
     private MotionHandler motionHandler;
     private GeocoderHandler geocoderHandler;
     private GeolocationHandler geolocationHandler;
@@ -132,6 +133,10 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
                 Context.getConfig().getInteger("coordinates.minError"),
                 Context.getConfig().getInteger("coordinates.maxError"));
 
+        if (Context.getConfig().getBoolean("processing.remoteAddress.enable")) {
+            remoteAddressHandler = new RemoteAddressHandler();
+        }
+
         if (Context.getConfig().getBoolean("filter.enable")) {
             filterHandler = new FilterHandler();
         }
@@ -165,9 +170,9 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
         if (Context.getConfig().getBoolean("event.enable")) {
             commandResultEventHandler = new CommandResultEventHandler();
-            overspeedEventHandler = new OverspeedEventHandler();
+            overspeedEventHandler = Context.getOverspeedEventHandler();
             fuelDropEventHandler = new FuelDropEventHandler();
-            motionEventHandler = new MotionEventHandler();
+            motionEventHandler = Context.getMotionEventHandler();
             geofenceEventHandler = new GeofenceEventHandler();
             alertEventHandler = new AlertEventHandler();
             ignitionEventHandler = new IgnitionEventHandler();
@@ -202,7 +207,9 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             pipeline.addLast("distance", distanceHandler);
         }
 
-        pipeline.addLast("remoteAddress", new RemoteAddressHandler());
+        if (remoteAddressHandler != null) {
+            pipeline.addLast("remoteAddress", remoteAddressHandler);
+        }
 
         addDynamicHandlers(pipeline);
 

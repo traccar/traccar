@@ -194,10 +194,16 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_MOVEMENT;
             case 0x13:
                 return Position.ALARM_GEOFENCE_ENTER;
+            case 0x14:
+                return Position.ALARM_ACCIDENT;
             case 0x50:
                 return Position.ALARM_POWER_OFF;
             case 0x53:
                 return Position.ALARM_GPS_ANTENNA_CUT;
+            case 0x72:
+                return Position.ALARM_BREAKING;
+            case 0x73:
+                return Position.ALARM_ACCELERATION;
             default:
                 return null;
         }
@@ -353,7 +359,13 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         position.setProtocol(getProtocolName());
 
         if (command == MSG_ALARM) {
-            position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
+            short alarmCode = buf.readUnsignedByte();
+            position.set(Position.KEY_ALARM, decodeAlarm(alarmCode));
+            if (alarmCode >= 0x02 && alarmCode <= 0x05) {
+                position.set(Position.PREFIX_IN + alarmCode, 1);
+            } else if (alarmCode >= 0x32 && alarmCode <= 0x35) {
+                position.set(Position.PREFIX_IN + (alarmCode - 0x30), 0);
+            }
         } else if (command == MSG_POSITION_LOGGED) {
             buf.skipBytes(6);
         }

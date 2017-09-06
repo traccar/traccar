@@ -42,7 +42,6 @@ import liquibase.resource.ResourceAccessor;
 import org.traccar.Config;
 import org.traccar.helper.Log;
 import org.traccar.model.Attribute;
-import org.traccar.model.AttributeAlias;
 import org.traccar.model.Device;
 import org.traccar.model.Driver;
 import org.traccar.model.Event;
@@ -297,7 +296,7 @@ public class DataManager {
 
     public User login(String email, String password) throws SQLException {
         User user = QueryBuilder.create(dataSource, getQuery("database.loginUser"))
-                .setString("email", email)
+                .setString("email", email.trim())
                 .executeQuerySingle(User.class);
         if (user != null && user.isPasswordValid(password)) {
             return user;
@@ -366,29 +365,6 @@ public class DataManager {
                 .executeQuery(Event.class);
     }
 
-    public Collection<AttributeAlias> getAttributeAliases() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectAttributeAliases"))
-                .executeQuery(AttributeAlias.class);
-    }
-
-    public void addAttributeAlias(AttributeAlias attributeAlias) throws SQLException {
-        attributeAlias.setId(QueryBuilder.create(dataSource, getQuery("database.insertAttributeAlias"), true)
-                .setObject(attributeAlias)
-                .executeUpdate());
-    }
-
-    public void updateAttributeAlias(AttributeAlias attributeAlias) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.updateAttributeAlias"))
-                .setObject(attributeAlias)
-                .executeUpdate();
-    }
-
-    public void removeAttributeAlias(long attributeAliasId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.deleteAttributeAlias"))
-                .setLong("id", attributeAliasId)
-                .executeUpdate();
-    }
-
     public Collection<Statistics> getStatistics(Date from, Date to) throws SQLException {
         return QueryBuilder.create(dataSource, getQuery("database.selectStatistics"))
                 .setDate("from", from)
@@ -419,9 +395,9 @@ public class DataManager {
         }
     }
 
-    public static String makeNameId(Class<?> clazz) {
+    private static String makeNameId(Class<?> clazz) {
         String name = clazz.getSimpleName();
-        return Introspector.decapitalize(name) + (name.indexOf("Id") == -1 ? "Id" : "");
+        return Introspector.decapitalize(name) + (!name.contains("Id") ? "Id" : "");
     }
 
     public Collection<Permission> getPermissions(Class<? extends BaseModel> owner, Class<? extends BaseModel> property)

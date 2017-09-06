@@ -84,11 +84,14 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
         String type = sentence.substring(id.length(), id.length() + 4);
 
         if (channel != null) {
+            String responseHeader = id + (char) (type.charAt(0) + 1) + type.substring(1);
             if (type.equals("AP00") && id.equals("IW")) {
                 String time = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-                channel.write(id + (char) (type.charAt(0) + 1) + type.substring(1) + "," + time + ",0#");
+                channel.write(responseHeader + "," + time + ",0#");
+            } else if (type.equals("AP14")) {
+                channel.write(responseHeader + ",0.000,0.000#");
             } else {
-                channel.write(id + (char) (type.charAt(0) + 1) + type.substring(1) + "#");
+                channel.write(responseHeader + "#");
             }
         }
 

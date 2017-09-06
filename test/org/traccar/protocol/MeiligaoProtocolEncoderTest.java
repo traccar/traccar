@@ -10,7 +10,7 @@ public class MeiligaoProtocolEncoderTest extends ProtocolTest {
     public void testEncode() throws Exception {
 
         MeiligaoProtocolEncoder encoder = new MeiligaoProtocolEncoder();
-        
+
         Command command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_POSITION_SINGLE);
@@ -23,7 +23,7 @@ public class MeiligaoProtocolEncoderTest extends ProtocolTest {
         verifyCommand(encoder, command, binary("40400013123456789012344102000a2f4f0d0a"));
 
         command.setType(Command.TYPE_SET_TIMEZONE);
-        command.set(Command.KEY_TIMEZONE, 480 * 60);
+        command.set(Command.KEY_TIMEZONE, "GMT+8");
 
         verifyCommand(encoder, command, binary("4040001412345678901234413234383030ad0d0a"));
 

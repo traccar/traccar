@@ -48,7 +48,9 @@ public final class NotificationFormatter {
         velocityContext.put("event", event);
         if (position != null) {
             velocityContext.put("position", position);
-            velocityContext.put("speedUnits", ReportUtils.getSpeedUnit(userId));
+            velocityContext.put("speedUnit", ReportUtils.getSpeedUnit(userId));
+            velocityContext.put("distanceUnit", ReportUtils.getDistanceUnit(userId));
+            velocityContext.put("volumeUnit", ReportUtils.getVolumeUnit(userId));
         }
         if (event.getGeofenceId() != 0) {
             velocityContext.put("geofence", Context.getGeofenceManager().getById(event.getGeofenceId()));

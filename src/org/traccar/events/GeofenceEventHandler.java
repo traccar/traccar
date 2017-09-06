@@ -16,8 +16,9 @@
 package org.traccar.events;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.traccar.BaseEventHandler;
 import org.traccar.Context;
@@ -36,7 +37,7 @@ public class GeofenceEventHandler extends BaseEventHandler {
     }
 
     @Override
-    protected Collection<Event> analyzePosition(Position position) {
+    protected Map<Event, Position> analyzePosition(Position position) {
         Device device = Context.getIdentityManager().getById(position.getDeviceId());
         if (device == null) {
             return null;
@@ -56,14 +57,14 @@ public class GeofenceEventHandler extends BaseEventHandler {
 
         device.setGeofenceIds(currentGeofences);
 
-        Collection<Event> events = new ArrayList<>();
+        Map<Event, Position> events = new HashMap<>();
         for (long geofenceId : newGeofences) {
             long calendarId = geofenceManager.getById(geofenceId).getCalendarId();
             Calendar calendar = calendarId != 0 ? Context.getCalendarManager().getById(calendarId) : null;
             if (calendar == null || calendar.checkMoment(position.getFixTime())) {
                 Event event = new Event(Event.TYPE_GEOFENCE_ENTER, position.getDeviceId(), position.getId());
                 event.setGeofenceId(geofenceId);
-                events.add(event);
+                events.put(event, position);
             }
         }
         for (long geofenceId : oldGeofences) {
@@ -72,7 +73,7 @@ public class GeofenceEventHandler extends BaseEventHandler {
             if (calendar == null || calendar.checkMoment(position.getFixTime())) {
                 Event event = new Event(Event.TYPE_GEOFENCE_EXIT, position.getDeviceId(), position.getId());
                 event.setGeofenceId(geofenceId);
-                events.add(event);
+                events.put(event, position);
             }
         }
         return events;

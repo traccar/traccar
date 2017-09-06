@@ -25,7 +25,6 @@ import java.util.Properties;
 
 import org.apache.velocity.app.VelocityEngine;
 import org.eclipse.jetty.util.URIUtil;
-import org.traccar.database.AliasesManager;
 import org.traccar.database.CalendarManager;
 import org.traccar.database.AttributesManager;
 import org.traccar.database.BaseObjectManager;
@@ -41,6 +40,8 @@ import org.traccar.database.GeofenceManager;
 import org.traccar.database.GroupsManager;
 import org.traccar.database.StatisticsManager;
 import org.traccar.database.UsersManager;
+import org.traccar.events.MotionEventHandler;
+import org.traccar.events.OverspeedEventHandler;
 import org.traccar.geocoder.BingMapsGeocoder;
 import org.traccar.geocoder.FactualGeocoder;
 import org.traccar.geocoder.GeocodeFarmGeocoder;
@@ -65,6 +66,7 @@ import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.geolocation.MozillaGeolocationProvider;
 import org.traccar.geolocation.OpenCellIdGeolocationProvider;
 import org.traccar.notification.EventForwarder;
+import org.traccar.reports.model.TripsConfig;
 import org.traccar.smpp.SmppClient;
 import org.traccar.web.WebServer;
 
@@ -199,12 +201,6 @@ public final class Context {
         return eventForwarder;
     }
 
-    private static AliasesManager aliasesManager;
-
-    public static AliasesManager getAliasesManager() {
-        return aliasesManager;
-    }
-
     private static AttributesManager attributesManager;
 
     public static AttributesManager getAttributesManager() {
@@ -227,6 +223,33 @@ public final class Context {
 
     public static SmppClient getSmppManager() {
         return smppClient;
+    }
+
+    private static MotionEventHandler motionEventHandler;
+
+    public static MotionEventHandler getMotionEventHandler() {
+        return motionEventHandler;
+    }
+
+    private static OverspeedEventHandler overspeedEventHandler;
+
+    public static OverspeedEventHandler getOverspeedEventHandler() {
+        return overspeedEventHandler;
+    }
+
+    private static TripsConfig tripsConfig;
+
+    public static TripsConfig getTripsConfig() {
+        return tripsConfig;
+    }
+
+    public static TripsConfig initTripsConfig() {
+        return new TripsConfig(
+                config.getLong("report.trip.minimalTripDistance", 500),
+                config.getLong("report.trip.minimalTripDuration", 300) * 1000,
+                config.getLong("report.trip.minimalParkingDuration", 300) * 1000,
+                config.getLong("report.trip.minimalNoDataDuration", 3600) * 1000,
+                config.getBoolean("report.trip.useIgnition"));
     }
 
     public static void init(String[] arguments) throws Exception {
@@ -327,6 +350,8 @@ public final class Context {
 
         connectionManager = new ConnectionManager();
 
+        tripsConfig = initTripsConfig();
+
         if (config.getBoolean("event.enable")) {
             geofenceManager = new GeofenceManager(dataManager);
             calendarManager = new CalendarManager(dataManager);
@@ -350,6 +375,11 @@ public final class Context {
 
             velocityEngine = new VelocityEngine();
             velocityEngine.init(velocityProperties);
+
+            motionEventHandler = new MotionEventHandler(tripsConfig);
+            overspeedEventHandler = new OverspeedEventHandler(
+                    Context.getConfig().getLong("event.overspeed.minimalDuration") * 1000,
+                    Context.getConfig().getBoolean("event.overspeed.notRepeat"));
         }
 
         serverManager = new ServerManager();
@@ -357,8 +387,6 @@ public final class Context {
         if (config.getBoolean("event.forward.enable")) {
             eventForwarder = new EventForwarder();
         }
-
-        aliasesManager = new AliasesManager(dataManager);
 
         attributesManager = new AttributesManager(dataManager);
 

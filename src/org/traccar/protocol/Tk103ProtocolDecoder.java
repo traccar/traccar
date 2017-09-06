@@ -23,7 +23,6 @@ import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
@@ -33,8 +32,11 @@ import java.util.regex.Pattern;
 
 public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
+    private boolean decodeLow;
+
     public Tk103ProtocolDecoder(Tk103Protocol protocol) {
         super(protocol);
+        decodeLow = Context.getConfig().getBoolean(getProtocolName() + ".decodeLow");
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
@@ -50,7 +52,14 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d)(?:d*,)?")            // speed
             .number("(dd)(dd)(dd),?")            // time (hhmmss)
             .number("(d+.?d{1,2}),?")            // course
-            .number("(?:([01]{8})|(x{8}))?,?")   // state
+            .groupBegin()
+            .number("([01])")                    // charge
+            .number("([01])")                    // ignition
+            .number("(x)")                       // io
+            .number("(x)")                       // io
+            .number("(x)")                       // io
+            .number("(xxx),?")                   // fuel
+            .groupEnd("?")
             .number("(?:L(x+))?")                // odometer
             .any()
             .number("([+-]ddd.d)?")              // temperature
@@ -243,32 +252,44 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
 
-        switch (Context.getConfig().getString(getProtocolName() + ".speed", "kmh")) {
-            case "kn":
-                position.setSpeed(parser.nextDouble(0));
-                break;
-            case "mph":
-                position.setSpeed(UnitsConverter.knotsFromMph(parser.nextDouble(0)));
-                break;
-            default:
-                position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
-                break;
-        }
+        position.setSpeed(convertSpeed(parser.nextDouble(0), "kmh"));
 
         dateBuilder.setTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
         position.setTime(dateBuilder.getDate());
 
         position.setCourse(parser.nextDouble(0));
 
-        String status = parser.next();
-        if (status != null) {
-            position.set(Position.KEY_STATUS, status); // binary status
+        if (parser.hasNext(6)) {
+            position.set(Position.KEY_CHARGE, parser.nextInt() == 0);
+            position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
 
-            int value = Integer.parseInt(new StringBuilder(status).reverse().toString(), 2);
-            position.set(Position.KEY_CHARGE, !BitUtil.check(value, 0));
-            position.set(Position.KEY_IGNITION, BitUtil.check(value, 1));
+            int mask1 = parser.nextHexInt();
+            position.set(Position.PREFIX_IN + 2, BitUtil.check(mask1, 0) ? 1 : 0);
+            position.set("panic", BitUtil.check(mask1, 1) ? 1 : 0);
+            position.set(Position.PREFIX_OUT + 2, BitUtil.check(mask1, 2) ? 1 : 0);
+            if (decodeLow || BitUtil.check(mask1, 3)) {
+                position.set(Position.KEY_BLOCKED, BitUtil.check(mask1, 3) ? 1 : 0);
+            }
+
+            int mask2 = parser.nextHexInt();
+            for (int i = 0; i < 3; i++) {
+                if (decodeLow || BitUtil.check(mask2, i)) {
+                    position.set("hs" + (3 - i), BitUtil.check(mask2, i) ? 1 : 0);
+                }
+            }
+            if (decodeLow || BitUtil.check(mask2, 3)) {
+                position.set(Position.KEY_DOOR, BitUtil.check(mask2, 3) ? 1 : 0);
+            }
+
+            int mask3 = parser.nextHexInt();
+            for (int i = 1; i <= 3; i++) {
+                if (decodeLow || BitUtil.check(mask3, i)) {
+                    position.set("ls" + (3 - i + 1), BitUtil.check(mask3, i) ? 1 : 0);
+                }
+            }
+
+            position.set(Position.KEY_FUEL_LEVEL, parser.nextHexInt());
         }
-        position.set(Position.KEY_STATUS, parser.next()); // hex status
 
         if (parser.hasNext()) {
             position.set(Position.KEY_ODOMETER, parser.nextLong(16, 0));

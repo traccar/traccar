@@ -76,11 +76,11 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("(?:d),")                    // led
             .number("(?:d)?,")                   // gps on need
             .number("(?:d)?,")                   // gps antenna type
-            .number("(?:d),").optional()         // gps antenna state
+            .number("(?:d)?,").optional()        // gps antenna state
             .number("d{14},")                    // last fix time
             .groupBegin()
             .number("(d+),")                     // battery percentage
-            .expression("[01]?,")                // flash type
+            .number("[d.]*,")                    // flash type / power
             .number("(-?[d.]+)?,,,")             // temperature
             .or()
             .expression("(?:[01])?,").optional() // pin15 mode
@@ -388,17 +388,27 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private Object decodeInf(Channel channel, SocketAddress remoteAddress, String sentence) {
-
-        org.traccar.helper.PatternUtil.MatchResult matchResult =
-                org.traccar.helper.PatternUtil.checkPattern(PATTERN_INF.pattern(), sentence);
-
         Parser parser = new Parser(PATTERN_INF, sentence);
         Position position = initPosition(parser, channel, remoteAddress);
         if (position == null) {
             return null;
         }
 
-        position.set(Position.KEY_STATUS, parser.next());
+        String status = parser.next();
+
+        if (status.charAt(0) == '2') {
+            position.set(Position.KEY_IGNITION, true);
+        } else if (status.charAt(0) == '4') {
+            position.set(Position.KEY_IGNITION, false);
+        }
+
+        if (status.charAt(1) == '1') {
+            position.set(Position.KEY_MOTION, false);
+        } else if (status.charAt(1) == '2') {
+            position.set(Position.KEY_MOTION, true);
+        }
+
+        position.set(Position.KEY_STATUS, status);
 
         position.set(Position.KEY_RSSI, parser.nextInt());
 
@@ -566,6 +576,10 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
 
         decodeDeviceTime(position, parser);
+        if (ignoreFixTime) {
+            positions.clear();
+            positions.add(position);
+        }
 
         return positions;
     }
@@ -618,12 +632,16 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                 for (int i = 1; i <= deviceCount; i++) {
                     index++; // id
                     index++; // type
-                    position.set(Position.PREFIX_TEMP + i, Short.parseShort(data[index++], 16) * 0.0625);
+                    position.set(Position.PREFIX_TEMP + i, (short) Integer.parseInt(data[index++], 16) * 0.0625);
                 }
             }
         }
 
         decodeDeviceTime(position, parser);
+        if (ignoreFixTime) {
+            positions.clear();
+            positions.add(position);
+        }
 
         return positions;
     }

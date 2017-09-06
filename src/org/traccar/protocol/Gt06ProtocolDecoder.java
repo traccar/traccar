@@ -69,6 +69,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_GPS_LBS_STATUS_1 = 0x16;
     public static final int MSG_GPS_LBS_STATUS_2 = 0x26;
     public static final int MSG_GPS_LBS_STATUS_3 = 0x27;
+    public static final int MSG_LBS_MULTIPLE = 0x28;
     public static final int MSG_LBS_WIFI = 0x2C;
     public static final int MSG_LBS_PHONE = 0x17;
     public static final int MSG_LBS_EXTEND = 0x18;
@@ -154,9 +155,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             return false;
         }
 
-        int length = buf.readUnsignedByte();
-        position.set(Position.KEY_SATELLITES, BitUtil.to(length, 4));
-        length = BitUtil.from(length, 4);
+        position.set(Position.KEY_SATELLITES, BitUtil.to(buf.readUnsignedByte(), 4));
 
         double latitude = buf.readUnsignedInt() / 60.0 / 30000.0;
         double longitude = buf.readUnsignedInt() / 60.0 / 30000.0;
@@ -180,10 +179,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_IGNITION, BitUtil.check(flags, 15));
         }
 
-        if (length > 0) {
-            buf.skipBytes(length - 12); // skip reserved
-        }
-
         return true;
     }
 
@@ -201,7 +196,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedShort(), buf.readUnsignedByte(), buf.readUnsignedShort(), buf.readUnsignedMedium())));
 
         if (length > 0) {
-            buf.skipBytes(length - 8);
+            buf.skipBytes(length - (hasLength ? 9 : 8));
         }
 
         return true;
@@ -406,7 +401,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
         position.setProtocol(getProtocolName());
 
-        if (type == MSG_LBS_EXTEND || type == MSG_LBS_WIFI) {
+        if (type == MSG_LBS_MULTIPLE || type == MSG_LBS_EXTEND || type == MSG_LBS_WIFI) {
 
             DateBuilder dateBuilder = new DateBuilder(timeZone)
                     .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
@@ -418,17 +413,23 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             int mnc = buf.readUnsignedByte();
             Network network = new Network();
             for (int i = 0; i < 7; i++) {
-                network.addCellTower(CellTower.from(
-                        mcc, mnc, buf.readUnsignedShort(), buf.readUnsignedMedium(), -buf.readUnsignedByte()));
+                int lac = buf.readUnsignedShort();
+                int cid = buf.readUnsignedMedium();
+                int rssi = -buf.readUnsignedByte();
+                if (lac > 0) {
+                    network.addCellTower(CellTower.from(mcc, mnc, lac, cid, rssi));
+                }
             }
 
             buf.readUnsignedByte(); // time leads
 
-            int wifiCount = buf.readUnsignedByte();
-            for (int i = 0; i < wifiCount; i++) {
-                String mac = ChannelBuffers.hexDump(buf.readBytes(6)).replaceAll("(..)", "$1:");
-                network.addWifiAccessPoint(WifiAccessPoint.from(
-                        mac.substring(0, mac.length() - 1), buf.readUnsignedByte()));
+            if (type != MSG_LBS_MULTIPLE) {
+                int wifiCount = buf.readUnsignedByte();
+                for (int i = 0; i < wifiCount; i++) {
+                    String mac = ChannelBuffers.hexDump(buf.readBytes(6)).replaceAll("(..)", "$1:");
+                    network.addWifiAccessPoint(WifiAccessPoint.from(
+                            mac.substring(0, mac.length() - 1), buf.readUnsignedByte()));
+                }
             }
 
             position.setNetwork(network);
@@ -531,7 +532,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             } else if (subType == 0x05) {
 
                 int flags = buf.readUnsignedByte();
-                position.set("door", BitUtil.check(flags, 0));
+                position.set(Position.KEY_DOOR, BitUtil.check(flags, 0));
                 position.set(Position.PREFIX_IO + 1, BitUtil.check(flags, 2));
                 return position;
 
@@ -566,7 +567,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 getLastLocation(position, position.getDeviceTime());
             }
 
-            decodeLbs(position, buf, true);
+            if (decodeLbs(position, buf, true)) {
+                position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+            }
 
             buf.skipBytes(buf.readUnsignedByte()); // additional cell towers
             buf.skipBytes(buf.readUnsignedByte()); // wifi access point

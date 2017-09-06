@@ -15,8 +15,8 @@
  */
 package org.traccar.events;
 
-import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 
 import org.traccar.BaseEventHandler;
 import org.traccar.model.Event;
@@ -25,12 +25,12 @@ import org.traccar.model.Position;
 public class CommandResultEventHandler extends BaseEventHandler {
 
     @Override
-    protected Collection<Event> analyzePosition(Position position) {
+    protected Map<Event, Position> analyzePosition(Position position) {
         Object commandResult = position.getAttributes().get(Position.KEY_RESULT);
         if (commandResult != null) {
             Event event = new Event(Event.TYPE_COMMAND_RESULT, position.getDeviceId(), position.getId());
             event.set(Position.KEY_RESULT, (String) commandResult);
-            return Collections.singleton(event);
+            return Collections.singletonMap(event, position);
         }
         return null;
     }

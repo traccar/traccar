@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -77,9 +78,9 @@ public class NotificationManager {
         }
     }
 
-    public void updateEvents(Collection<Event> events, Position position) {
-        for (Event event : events) {
-            updateEvent(event, position);
+    public void updateEvents(Map<Event, Position> events) {
+        for (Entry<Event, Position> event : events.entrySet()) {
+            updateEvent(event.getKey(), event.getValue());
         }
     }
 

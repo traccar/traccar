@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "version": "3.10",
+        "version": "3.14",
         "title": "traccar"
     },
     "host": "demo.traccar.org",
@@ -861,6 +861,45 @@
                 }
             }
         },
+        "/reports/stops": {
+            "get": {
+                "summary": "Fetch a list of ReportStops within the time period for the Devices or Groups",
+                "description": "At least one _deviceId_ or one _groupId_ must be passed",
+                "consumes": [
+                    "application/json",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                ],
+                "produces": [
+                    "application/json",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/deviceIdArray"
+                    },
+                    {
+                        "$ref": "#/parameters/groupIdArray"
+                    },
+                    {
+                        "$ref": "#/parameters/fromTime"
+                    },
+                    {
+                        "$ref": "#/parameters/toTime"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ReportStops"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/statistics": {
             "get": {
                 "summary": "Fetch server Statistics",
@@ -881,78 +920,6 @@
                                 "$ref": "#/definitions/Statistics"
                             }
                         }
-                    }
-                }
-            }
-        },
-        "/attributes/aliases": {
-            "get": {
-                "summary": "Fetch a list of AttributeAlias",
-                "description": "Without params, it returns a list of AttributeAlias from all the user's Devices",
-                "parameters": [
-                    {
-                        "$ref": "#/parameters/deviceId"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/AttributeAlias"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "summary": "Set an AttributeAlias",
-                "parameters": [
-                    {
-                        "$ref": "#/parameters/AttributeAlias"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/AttributeAlias"
-                        }
-                    }
-                }
-            }
-        },
-        "/attributes/aliases/{id}": {
-            "put": {
-                "summary": "Update an AttributeAlias",
-                "parameters": [
-                    {
-                        "$ref": "#/parameters/entityId"
-                    },
-                    {
-                        "$ref": "#/parameters/AttributeAlias"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/AttributeAlias"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "summary": "Delete an AttributeAlias",
-                "parameters": [
-                    {
-                        "$ref": "#/parameters/entityId"
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
                     }
                 }
             }
@@ -1714,22 +1681,6 @@
                 }
             }
         },
-        "AttributeAlias": {
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "deviceId": {
-                    "type": "integer"
-                },
-                "attribute": {
-                    "type": "string"
-                },
-                "alias": {
-                    "type": "string"
-                }
-            }
-        },
         "DeviceTotalDistance": {
             "properties": {
                 "deviceId": {
@@ -1866,14 +1817,6 @@
             "required": true,
             "schema": {
                 "$ref": "#/definitions/Geofence"
-            }
-        },
-        "AttributeAlias": {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-                "$ref": "#/definitions/AttributeAlias"
             }
         },
         "Calendar": {

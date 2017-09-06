@@ -33,6 +33,7 @@ import org.traccar.helper.Log;
 import org.traccar.model.Command;
 import org.traccar.model.CommandType;
 import org.traccar.model.Device;
+import org.traccar.model.DeviceState;
 import org.traccar.model.DeviceTotalDistance;
 import org.traccar.model.Group;
 import org.traccar.model.Position;
@@ -51,6 +52,8 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
     private AtomicLong devicesLastUpdate = new AtomicLong();
 
     private final Map<Long, Position> positions = new ConcurrentHashMap<>();
+
+    private final Map<Long, DeviceState> deviceStates = new ConcurrentHashMap<>();
 
     private boolean fallbackToText;
 
@@ -387,4 +390,18 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         }
         return result;
     }
+
+    public DeviceState getDeviceState(long deviceId) {
+        DeviceState deviceState = deviceStates.get(deviceId);
+        if (deviceState == null) {
+            deviceState = new DeviceState();
+            deviceStates.put(deviceId, deviceState);
+        }
+        return deviceState;
+    }
+
+    public void setDeviceState(long deviceId, DeviceState deviceState) {
+        deviceStates.put(deviceId, deviceState);
+    }
+
 }
