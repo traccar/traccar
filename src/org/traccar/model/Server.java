@@ -15,8 +15,6 @@
  */
 package org.traccar.model;
 
-import java.util.TimeZone;
-
 import org.traccar.database.QueryIgnore;
 import org.traccar.helper.Log;
 
@@ -90,26 +88,6 @@ public class Server extends ExtendedModel {
         this.mapUrl = mapUrl;
     }
 
-    private String distanceUnit;
-
-    public String getDistanceUnit() {
-        return distanceUnit;
-    }
-
-    public void setDistanceUnit(String distanceUnit) {
-        this.distanceUnit = distanceUnit;
-    }
-
-    private String speedUnit;
-
-    public String getSpeedUnit() {
-        return speedUnit;
-    }
-
-    public void setSpeedUnit(String speedUnit) {
-        this.speedUnit = speedUnit;
-    }
-
     private double latitude;
 
     public double getLatitude() {
@@ -168,15 +146,5 @@ public class Server extends ExtendedModel {
 
     public void setCoordinateFormat(String coordinateFormat) {
         this.coordinateFormat = coordinateFormat;
-    }
-
-    private String timezone;
-
-    public void setTimezone(String timezone) {
-        this.timezone = timezone != null ? TimeZone.getTimeZone(timezone).getID() : null;
-    }
-
-    public String getTimezone() {
-        return timezone;
     }
 }

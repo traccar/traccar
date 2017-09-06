@@ -13,5 +13,13 @@
 
     <dropTable tableName="attribute_aliases" />
 
+    <dropColumn tableName="servers" columnName="timezone" />
+    <dropColumn tableName="servers" columnName="speedunit" />
+    <dropColumn tableName="servers" columnName="distanceunit" />
+
+    <dropColumn tableName="users" columnName="timezone" />
+    <dropColumn tableName="users" columnName="speedunit" />
+    <dropColumn tableName="users" columnName="distanceunit" />
+
   </changeSet>
 </databaseChangeLog>

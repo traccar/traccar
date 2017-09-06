@@ -22,7 +22,6 @@ import org.traccar.database.QueryIgnore;
 import org.traccar.helper.Hashing;
 
 import java.util.Date;
-import java.util.TimeZone;
 
 public class User extends ExtendedModel {
 
@@ -84,26 +83,6 @@ public class User extends ExtendedModel {
 
     public void setMap(String map) {
         this.map = map;
-    }
-
-    private String distanceUnit;
-
-    public String getDistanceUnit() {
-        return distanceUnit;
-    }
-
-    public void setDistanceUnit(String distanceUnit) {
-        this.distanceUnit = distanceUnit;
-    }
-
-    private String speedUnit;
-
-    public String getSpeedUnit() {
-        return speedUnit;
-    }
-
-    public void setSpeedUnit(String speedUnit) {
-        this.speedUnit = speedUnit;
     }
 
     private double latitude;
@@ -272,13 +251,4 @@ public class User extends ExtendedModel {
         return Hashing.validatePassword(password, hashedPassword, salt);
     }
 
-    private String timezone;
-
-    public void setTimezone(String timezone) {
-        this.timezone = timezone != null ? TimeZone.getTimeZone(timezone).getID() : null;
-    }
-
-    public String getTimezone() {
-        return timezone;
-    }
 }
