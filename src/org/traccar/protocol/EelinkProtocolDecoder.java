@@ -116,26 +116,21 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void decodeStatus(Position position, int status) {
-
-        // GPS - 0 bit
+        
         position.setValid(BitUtil.check(status, 0));
-
-        // ACC - 1,2 bits
+        
         if (BitUtil.check(status, 1)) {
             position.set(Position.KEY_IGNITION, BitUtil.check(status, 2));
         }
-
-        // Alarm - 3,4 bits
+        
         if (BitUtil.check(status, 3)) {
             position.set(Position.KEY_ARMED, BitUtil.check(status, 4));
         }
-
-        // Remote Cutout - 5,6 bits
+        
         if (BitUtil.check(status, 5)) {
             position.set(Position.KEY_BLOCKED, !BitUtil.check(status, 6));
         }
-
-        // Charge - 7,8 bits
+        
         if (BitUtil.check(status, 7)) {
             position.set(Position.KEY_CHARGE, BitUtil.check(status, 8));
         }
@@ -144,19 +139,18 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         // Bit 10 - GPS 1-Running/0-NotRunning
         // Bit 11 - OBD 1-Running/0-NotRunning
 
-        // Digital input 1 - 12 bit - def 0 low
+        // Digital input 1 - def 0 low
         position.set(Position.PREFIX_IN + 1, BitUtil.check(status, 12));
 
-        // Digital input 2 - 13 bit - def 1 high
+        // Digital input 2 - def 1 high
         position.set(Position.PREFIX_IN + 2, BitUtil.check(status, 13));
 
-        // Digital input 3 - 14 bit - def 0 low
+        // Digital input 3 - def 0 low
         position.set(Position.PREFIX_IN + 3, BitUtil.check(status, 14));
 
-        // Digital input 4 - 15 bit - def 1 high
+        // Digital input 4 - def 1 high
         position.set(Position.PREFIX_IN + 4, BitUtil.check(status, 15));
-
-        // log the whole status packet
+        
         position.set(Position.KEY_STATUS, status);
     }
 
@@ -199,7 +193,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 sendResponse(channel, type, index, null);
                 break;
             case MSG_STATE:
-                switch (buf.readUnsignedByte()) { // status type
+                switch (buf.readUnsignedByte()) {
                     case 0x01: // ACC on
                     case 0x02: // ACC off
                     case 0x03: // DINx changed
@@ -247,7 +241,6 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 }
 
                 if (responseMessage != null && !responseMessage.isEmpty()) {
-                    // pad number to 21 bytes
                     ChannelBuffer paddedPhone = ChannelBuffers.buffer(21);
                     paddedPhone.writeBytes(phone.getBytes(StandardCharsets.US_ASCII));
                     paddedPhone.writerIndex(paddedPhone.capacity());
