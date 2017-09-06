@@ -116,21 +116,21 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void decodeStatus(Position position, int status) {
-        
+
         position.setValid(BitUtil.check(status, 0));
-        
+
         if (BitUtil.check(status, 1)) {
             position.set(Position.KEY_IGNITION, BitUtil.check(status, 2));
         }
-        
+
         if (BitUtil.check(status, 3)) {
             position.set(Position.KEY_ARMED, BitUtil.check(status, 4));
         }
-        
+
         if (BitUtil.check(status, 5)) {
             position.set(Position.KEY_BLOCKED, !BitUtil.check(status, 6));
         }
-        
+
         if (BitUtil.check(status, 7)) {
             position.set(Position.KEY_CHARGE, BitUtil.check(status, 8));
         }
@@ -150,7 +150,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
         // Digital input 4 - def 1 high
         position.set(Position.PREFIX_IN + 4, BitUtil.check(status, 15));
-        
+
         position.set(Position.KEY_STATUS, status);
     }
 
