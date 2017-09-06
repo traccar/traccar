@@ -62,15 +62,19 @@ public final class ReportUtils {
     }
 
     public static String getDistanceUnit(long userId) {
-        return (String) Context.getPermissionsManager().lookupPreference(userId, "distanceUnit", "km");
+        return (String) Context.getPermissionsManager().lookupAttribute(userId, "distanceUnit", "km");
     }
 
     public static String getSpeedUnit(long userId) {
-        return (String) Context.getPermissionsManager().lookupPreference(userId, "speedUnit", "kn");
+        return (String) Context.getPermissionsManager().lookupAttribute(userId, "speedUnit", "kn");
+    }
+
+    public static String getVolumeUnit(long userId) {
+        return (String) Context.getPermissionsManager().lookupAttribute(userId, "volumeUnit", "ltr");
     }
 
     public static TimeZone getTimezone(long userId) {
-        String timezone = (String) Context.getPermissionsManager().lookupPreference(userId, "timezone", null);
+        String timezone = (String) Context.getPermissionsManager().lookupAttribute(userId, "timezone", null);
         return timezone != null ? TimeZone.getTimeZone(timezone) : TimeZone.getDefault();
     }
 
@@ -137,6 +141,7 @@ public final class ReportUtils {
         org.jxls.common.Context jxlsContext = PoiTransformer.createInitialContext();
         jxlsContext.putVar("distanceUnit", getDistanceUnit(userId));
         jxlsContext.putVar("speedUnit", getSpeedUnit(userId));
+        jxlsContext.putVar("volumeUnit", getVolumeUnit(userId));
         jxlsContext.putVar("webUrl", Context.getVelocityEngine().getProperty("web.url"));
         jxlsContext.putVar("dateTool", new DateTool());
         jxlsContext.putVar("numberTool", new NumberTool());
