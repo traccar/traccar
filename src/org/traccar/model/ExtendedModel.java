@@ -100,7 +100,7 @@ public class ExtendedModel extends BaseModel {
 
     public boolean getBoolean(String key) {
         if (attributes.containsKey(key)) {
-            return Boolean.parseBoolean(attributes.get(key).toString());
+            return (Boolean) attributes.get(key);
         } else {
             return false;
         }

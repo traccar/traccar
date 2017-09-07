@@ -43,7 +43,7 @@ public final class NotificationMail {
         if (host != null) {
             properties.put("mail.transport.protocol", provider.getString("mail.transport.protocol", "smtp"));
             properties.put("mail.smtp.host", host);
-            properties.put("mail.smtp.port", provider.getString("mail.smtp.port", "25"));
+            properties.put("mail.smtp.port", String.valueOf(provider.getInteger("mail.smtp.port", 25)));
 
             String starttlsEnable = provider.getString("mail.smtp.starttls.enable");
             if (starttlsEnable != null) {
