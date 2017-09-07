@@ -150,9 +150,20 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .text("*")
             .expression("..,")                   // manufacturer
             .number("(d+),")                     // imei
-            .expression("[^,]+,")
+            .groupBegin()
+            .text("VP1,")
+            .expression("[ABV],")
+            .or()
+            .groupBegin()
+            .text("V1,")
+            .or()
+            .text("V4,")
             .any()
+            .or()
+            .text("V19,")
+            .groupEnd()
             .number("(?:(dd)(dd)(dd))?,")        // time (hhmmss)
+            .groupEnd()
             .expression("([AV])?,")              // validity
             .groupBegin()
             .number("-(d+)-(d+.d+),")            // latitude
@@ -169,25 +180,28 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.?d*),")                 // speed
             .number("(d+.?d*)?,")                // course
             .number("(?:(dd)(dd)(dd))?")         // date (ddmmyy)
-            .any()
-            .number(",(x{8})")                   // status
+            .groupBegin()
+            .expression(",[^,]*,")
+            .expression("[^,]*,")
+            .expression("[^,]*")                 // sim info
+            .groupEnd("?")
+            .groupBegin()
+            .number(",(x{8})")
             .groupBegin()
             .number(",(d+),")                    // odometer
             .number("(-?d+),")                   // temperature
             .number("(d+.d+),")                  // fuel
             .number("(-?d+),")                   // altitude
             .number("(x+),")                     // lac
-            .number("(x+)#")                     // cid
+            .number("(x+)")                      // cid
             .or()
-            .number(",(d+),")
-            .number("(d+),")
-            .number("(d+),")
-            .number("(d+)#")
+            .text(",")
+            .expression("(.*)")                  // data
             .or()
-            .expression(",.*")
-            .or()
-            .text("#")
             .groupEnd()
+            .or()
+            .groupEnd()
+            .text("#")
             .compile();
 
     private static final Pattern PATTERN_NBR = new PatternBuilder()
@@ -289,7 +303,9 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(new Date());
         }
 
-        processStatus(position, parser.nextLong(16, 0));
+        if (parser.hasNext()) {
+            processStatus(position, parser.nextLong(16, 0));
+        }
 
         if (parser.hasNext(6)) {
             position.set(Position.KEY_ODOMETER, parser.nextInt(0));
@@ -302,8 +318,9 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (parser.hasNext(4)) {
-            for (int i = 1; i <= 4; i++) {
-                position.set(Position.PREFIX_IO + i, parser.nextInt(0));
+            String[] values = parser.next().split(",");
+            for (int i = 0; i < values.length; i++) {
+                position.set(Position.PREFIX_IO + (i + 1), values[i].trim());
             }
         }
 
