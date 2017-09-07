@@ -222,6 +222,24 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
+    private static final Pattern PATTERN_V3 = new PatternBuilder()
+            .text("*")
+            .expression("..,")                   // manufacturer
+            .number("(d+),")                     // imei
+            .text("V3,")
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
+            .number("(ddd)")                     // mcc
+            .number("(d+),")                     // mnc
+            .number("(d+),")                     // count
+            .expression("(.*),")                 // cell info
+            .number("(x{4}),")                   // battery
+            .number("d+,")                       // reboot info
+            .text("X,")
+            .number("(dd)(dd)(dd),")             // date (ddmmyy)
+            .number("(x{8})")                    // status
+            .text("#").optional()
+            .compile();
+
     private Position decodeText(String sentence, Channel channel, SocketAddress remoteAddress) {
 
         Parser parser = new Parser(PATTERN, sentence);
@@ -366,6 +384,48 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private Position decodeV3(String sentence, Channel channel, SocketAddress remoteAddress) {
+
+        Parser parser = new Parser(PATTERN_V3, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        DateBuilder dateBuilder = new DateBuilder()
+                .setTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
+
+        int mcc = parser.nextInt();
+        int mnc = parser.nextInt();
+
+        int count = parser.nextInt();
+        Network network = new Network();
+        String[] values = parser.next().split(",");
+        for (int i = 0; i < count; i++) {
+            network.addCellTower(CellTower.from(
+                    mcc, mnc, Integer.parseInt(values[i * 4]), Integer.parseInt(values[i * 4 + 1])));
+        }
+        position.setNetwork(network);
+
+        position.set(Position.KEY_BATTERY, parser.nextHexInt());
+
+        dateBuilder.setDateReverse(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
+
+        getLastLocation(position, dateBuilder.getDate());
+
+        processStatus(position, parser.nextLong(16, 0));
+
+        return position;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -385,6 +445,8 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
                             return decodeLbs(sentence, channel, remoteAddress);
                         case "LINK":
                             return decodeLink(sentence, channel, remoteAddress);
+                        case "V3":
+                            return decodeV3(sentence, channel, remoteAddress);
                         default:
                             return decodeText(sentence, channel, remoteAddress);
                     }
