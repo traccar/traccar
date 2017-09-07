@@ -160,7 +160,9 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
             if (statusType == 0x01 || statusType == 0x02 || statusType == 0x03) {
                 buf.readUnsignedInt(); // device time
-                decodeStatus(position, buf.readUnsignedShort());
+                if (buf.readableBytes() >= 2) {
+                    decodeStatus(position, buf.readUnsignedShort());
+                }
             }
 
         }
