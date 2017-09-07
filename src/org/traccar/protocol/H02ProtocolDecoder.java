@@ -158,7 +158,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .text("V1,")
             .or()
             .text("V4,")
-            .any()
+            .expression("(.*),")                 // response
             .or()
             .text("V19,")
             .groupEnd()
@@ -269,6 +269,10 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
+
+        if (parser.hasNext()) {
+            position.set(Position.KEY_RESULT, parser.next());
+        }
 
         DateBuilder dateBuilder = new DateBuilder();
         if (parser.hasNext(3)) {
