@@ -262,59 +262,56 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
 
     public boolean lookupAttributeBoolean(
             long deviceId, String attributeName, boolean defaultValue, boolean lookupConfig) {
-        String result = lookupAttribute(deviceId, attributeName, lookupConfig);
+        Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
         if (result != null) {
-            return Boolean.parseBoolean(result);
+            return result instanceof String ? Boolean.parseBoolean((String) result) : (Boolean) result;
         }
         return defaultValue;
     }
 
     public String lookupAttributeString(
             long deviceId, String attributeName, String defaultValue, boolean lookupConfig) {
-        String result = lookupAttribute(deviceId, attributeName, lookupConfig);
-        if (result != null) {
-            return result;
-        }
-        return defaultValue;
+        Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
+        return result != null ? (String) result : defaultValue;
     }
 
     public int lookupAttributeInteger(long deviceId, String attributeName, int defaultValue, boolean lookupConfig) {
-        String result = lookupAttribute(deviceId, attributeName, lookupConfig);
+        Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
         if (result != null) {
-            return Integer.parseInt(result);
+            return result instanceof String ? Integer.parseInt((String) result) : ((Number) result).intValue();
         }
         return defaultValue;
     }
 
     public long lookupAttributeLong(
             long deviceId, String attributeName, long defaultValue, boolean lookupConfig) {
-        String result = lookupAttribute(deviceId, attributeName, lookupConfig);
+        Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
         if (result != null) {
-            return Long.parseLong(result);
+            return result instanceof String ? Long.parseLong((String) result) : ((Number) result).longValue();
         }
         return defaultValue;
     }
 
     public double lookupAttributeDouble(
             long deviceId, String attributeName, double defaultValue, boolean lookupConfig) {
-        String result = lookupAttribute(deviceId, attributeName, lookupConfig);
+        Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
         if (result != null) {
-            return Double.parseDouble(result);
+            return result instanceof String ? Double.parseDouble((String) result) : ((Number) result).doubleValue();
         }
         return defaultValue;
     }
 
-    private String lookupAttribute(long deviceId, String attributeName, boolean lookupConfig) {
-        String result = null;
+    private Object lookupAttribute(long deviceId, String attributeName, boolean lookupConfig) {
+        Object result = null;
         Device device = getById(deviceId);
         if (device != null) {
-            result = device.getString(attributeName);
+            result = device.getAttributes().get(attributeName);
             if (result == null && lookupGroupsAttribute) {
                 long groupId = device.getGroupId();
                 while (groupId != 0) {
                     Group group = Context.getGroupsManager().getById(groupId);
                     if (group != null) {
-                        result = group.getString(attributeName);
+                        result = group.getAttributes().get(attributeName);
                         if (result != null) {
                             break;
                         }
@@ -329,7 +326,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
                     result = Context.getConfig().getString(attributeName);
                 } else {
                     Server server = Context.getPermissionsManager().getServer();
-                    result = server.getString(attributeName);
+                    result = server.getAttributes().get(attributeName);
                 }
             }
         }
