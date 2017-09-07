@@ -51,10 +51,13 @@ public class PropertiesProvider {
     public int getInteger(String key, int defaultValue) {
         if (config != null) {
             return config.getInteger(key, defaultValue);
-        } else if (extendedModel.getAttributes().containsKey(key)) {
-            return Integer.parseInt(extendedModel.getAttributes().get(key).toString());
         } else {
-            return defaultValue;
+            Object result = extendedModel.getAttributes().get(key);
+            if (result != null) {
+                return result instanceof String ? Integer.parseInt((String) result) : (Integer) result;
+            } else {
+                return defaultValue;
+            }
         }
     }
 

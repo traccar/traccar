@@ -263,30 +263,42 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
     public boolean lookupAttributeBoolean(
             long deviceId, String attributeName, boolean defaultValue, boolean lookupConfig) {
         Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
-        return result != null ? Boolean.parseBoolean(result.toString()) : defaultValue;
+        if (result != null) {
+            return result instanceof String ? Boolean.parseBoolean((String) result) : (Boolean) result;
+        }
+        return defaultValue;
     }
 
     public String lookupAttributeString(
             long deviceId, String attributeName, String defaultValue, boolean lookupConfig) {
         Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
-        return result != null ? result.toString() : defaultValue;
+        return result != null ? (String) result : defaultValue;
     }
 
     public int lookupAttributeInteger(long deviceId, String attributeName, int defaultValue, boolean lookupConfig) {
         Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
-        return result != null ? Integer.parseInt(result.toString()) : defaultValue;
+        if (result != null) {
+            return result instanceof String ? Integer.parseInt((String) result) : ((Number) result).intValue();
+        }
+        return defaultValue;
     }
 
     public long lookupAttributeLong(
             long deviceId, String attributeName, long defaultValue, boolean lookupConfig) {
         Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
-        return result != null ? Long.parseLong(result.toString()) : defaultValue;
+        if (result != null) {
+            return result instanceof String ? Long.parseLong((String) result) : ((Number) result).longValue();
+        }
+        return defaultValue;
     }
 
     public double lookupAttributeDouble(
             long deviceId, String attributeName, double defaultValue, boolean lookupConfig) {
         Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
-        return result != null ? Double.parseDouble(result.toString()) : defaultValue;
+        if (result != null) {
+            return result instanceof String ? Double.parseDouble((String) result) : ((Number) result).doubleValue();
+        }
+        return defaultValue;
     }
 
     private Object lookupAttribute(long deviceId, String attributeName, boolean lookupConfig) {
