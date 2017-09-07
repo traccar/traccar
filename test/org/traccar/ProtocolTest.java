@@ -241,6 +241,10 @@ public class ProtocolTest extends BaseTest {
             Assert.assertTrue(attributes.get(Position.KEY_CHARGE) instanceof Boolean);
         }
 
+        if (attributes.containsKey(Position.KEY_IGNITION)) {
+            Assert.assertTrue(attributes.get(Position.KEY_IGNITION) instanceof Boolean);
+        }
+
         if (attributes.containsKey(Position.KEY_MOTION)) {
             Assert.assertTrue(attributes.get(Position.KEY_MOTION) instanceof Boolean);
         }

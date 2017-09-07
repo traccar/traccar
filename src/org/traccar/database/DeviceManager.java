@@ -262,59 +262,44 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
 
     public boolean lookupAttributeBoolean(
             long deviceId, String attributeName, boolean defaultValue, boolean lookupConfig) {
-        String result = lookupAttribute(deviceId, attributeName, lookupConfig);
-        if (result != null) {
-            return Boolean.parseBoolean(result);
-        }
-        return defaultValue;
+        Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
+        return result != null ? Boolean.parseBoolean(result.toString()) : defaultValue;
     }
 
     public String lookupAttributeString(
             long deviceId, String attributeName, String defaultValue, boolean lookupConfig) {
-        String result = lookupAttribute(deviceId, attributeName, lookupConfig);
-        if (result != null) {
-            return result;
-        }
-        return defaultValue;
+        Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
+        return result != null ? result.toString() : defaultValue;
     }
 
     public int lookupAttributeInteger(long deviceId, String attributeName, int defaultValue, boolean lookupConfig) {
-        String result = lookupAttribute(deviceId, attributeName, lookupConfig);
-        if (result != null) {
-            return Integer.parseInt(result);
-        }
-        return defaultValue;
+        Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
+        return result != null ? Integer.parseInt(result.toString()) : defaultValue;
     }
 
     public long lookupAttributeLong(
             long deviceId, String attributeName, long defaultValue, boolean lookupConfig) {
-        String result = lookupAttribute(deviceId, attributeName, lookupConfig);
-        if (result != null) {
-            return Long.parseLong(result);
-        }
-        return defaultValue;
+        Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
+        return result != null ? Long.parseLong(result.toString()) : defaultValue;
     }
 
     public double lookupAttributeDouble(
             long deviceId, String attributeName, double defaultValue, boolean lookupConfig) {
-        String result = lookupAttribute(deviceId, attributeName, lookupConfig);
-        if (result != null) {
-            return Double.parseDouble(result);
-        }
-        return defaultValue;
+        Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
+        return result != null ? Double.parseDouble(result.toString()) : defaultValue;
     }
 
-    private String lookupAttribute(long deviceId, String attributeName, boolean lookupConfig) {
-        String result = null;
+    private Object lookupAttribute(long deviceId, String attributeName, boolean lookupConfig) {
+        Object result = null;
         Device device = getById(deviceId);
         if (device != null) {
-            result = device.getString(attributeName);
+            result = device.getAttributes().get(attributeName);
             if (result == null && lookupGroupsAttribute) {
                 long groupId = device.getGroupId();
                 while (groupId != 0) {
                     Group group = Context.getGroupsManager().getById(groupId);
                     if (group != null) {
-                        result = group.getString(attributeName);
+                        result = group.getAttributes().get(attributeName);
                         if (result != null) {
                             break;
                         }
@@ -329,7 +314,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
                     result = Context.getConfig().getString(attributeName);
                 } else {
                     Server server = Context.getPermissionsManager().getServer();
-                    result = server.getString(attributeName);
+                    result = server.getAttributes().get(attributeName);
                 }
             }
         }
