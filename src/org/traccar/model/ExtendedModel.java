@@ -31,7 +31,9 @@ public class ExtendedModel extends BaseModel {
     }
 
     public void set(String key, Boolean value) {
-        attributes.put(key, value);
+        if (value != null) {
+            attributes.put(key, value);
+        }
     }
 
     public void set(String key, Byte value) {

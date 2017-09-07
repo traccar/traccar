@@ -53,8 +53,8 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
             .number("(ddd)")                     // satellites
             .number("(ddd)")                     // battery
             .number("(d)")                       // acc
-            .number("dd")                        // arm status
-            .number("dd,")                       // working mode
+            .number("(dd)")                      // arm status
+            .number("(dd),")                     // working mode
             .number("(d+),")                     // mcc
             .number("(d+),")                     // mnc
             .number("(d+),")                     // lac
@@ -71,8 +71,40 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
             .number("(d)")                       // acc
             .number("(dd)")                      // arm status
             .number("(dd)")                      // working mode
+            .groupBegin()
+            .number("(ddd)")                     // interval
+            .number("d")                         // vibration alarm
+            .number("ddd")                       // vibration sensitivity
+            .number("d")                         // automatic arm
+            .number("dddd")                      // automatic arm time
+            .number("(d)")                       // blocked
+            .number("(d)")                       // power status
+            .number("(d)")                       // movement status
+            .groupEnd("?")
             .any()
             .compile();
+
+    private Boolean decodeOptionalValue(Parser parser, int activeValue) {
+        int value = parser.nextInt();
+        if (value != 0) {
+            return value == activeValue;
+        }
+        return null;
+    }
+
+    private void decodeCommon(Position position, Parser parser) {
+
+        position.set(Position.KEY_RSSI, parser.nextInt());
+        position.set(Position.KEY_SATELLITES, parser.nextInt());
+        position.set(Position.KEY_BATTERY, parser.nextInt());
+        position.set(Position.KEY_IGNITION, decodeOptionalValue(parser, 1));
+        position.set(Position.KEY_ARMED, decodeOptionalValue(parser, 1));
+
+        int mode = parser.nextInt();
+        if (mode != 0) {
+            position.set("mode", mode);
+        }
+    }
 
     @Override
     protected Object decode(
@@ -118,13 +150,13 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, null);
 
-            position.set(Position.KEY_RSSI, parser.nextInt(0));
-            position.set(Position.KEY_SATELLITES, parser.nextInt(0));
-            position.set(Position.KEY_BATTERY, parser.nextInt(0));
-            position.set(Position.KEY_IGNITION, parser.nextInt(0) != 0);
+            decodeCommon(position, parser);
 
-            position.set("arm", parser.nextInt(0));
-            position.set("mode", parser.nextInt(0));
+            if (parser.hasNext(3)) {
+                position.set(Position.KEY_BLOCKED, decodeOptionalValue(parser, 2));
+                position.set(Position.KEY_CHARGE, decodeOptionalValue(parser, 1));
+                position.set(Position.KEY_MOTION, decodeOptionalValue(parser, 1));
+            }
 
             return position;
 
@@ -140,31 +172,25 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceId(deviceSession.getDeviceId());
 
             DateBuilder dateBuilder = new DateBuilder()
-                    .setDate(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
+                    .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt());
 
             position.setValid(parser.next().equals("A"));
             position.setLatitude(parser.nextCoordinate());
             position.setLongitude(parser.nextCoordinate());
-            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
+            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
 
-            dateBuilder.setTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
+            dateBuilder.setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
             position.setTime(dateBuilder.getDate());
 
-            position.setCourse(parser.nextDouble(0));
+            position.setCourse(parser.nextDouble());
 
-            int rssi = parser.nextInt(0);
-            position.set(Position.KEY_SATELLITES, parser.nextInt(0));
-            position.set(Position.KEY_BATTERY, parser.nextInt(0));
-
-            int acc = parser.nextInt(0);
-            if (acc != 0) {
-                position.set(Position.KEY_IGNITION, acc == 1);
-            }
+            decodeCommon(position, parser);
 
             position.setNetwork(new Network(CellTower.from(
-                    parser.nextInt(0), parser.nextInt(0), parser.nextInt(0), parser.nextInt(0), rssi)));
+                    parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextInt())));
 
             return position;
+
         }
 
         return null;
