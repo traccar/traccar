@@ -29,13 +29,12 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
 
         ChannelBuffer buf = ChannelBuffers.dynamicBuffer();
 
-        buf.writeByte(0x67);
-        buf.writeByte(0x67);
+        buf.writeShort(EelinkProtocolDecoder.HEADER_KEY);
         buf.writeByte(EelinkProtocolDecoder.MSG_DOWNLINK);
-        buf.writeShort(2 + 1 + 4 + content.length()); // length
+        buf.writeShort(2 + 1 + 4 + content.length()); // data length
         buf.writeShort(0); // index
 
-        buf.writeByte(0x01); // command
+        buf.writeByte(EelinkProtocolDecoder.MSG_SIGN_COMMAND);
         buf.writeInt(0); // server id
         buf.writeBytes(content.getBytes(StandardCharsets.UTF_8));
 
@@ -54,6 +53,32 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
                 return encodeContent("RELAY,0#");
             case Command.TYPE_REBOOT_DEVICE:
                 return encodeContent("RESET#");
+            case Command.TYPE_GET_VERSION:
+                return encodeContent("VERSION#");
+            case Command.TYPE_GET_DEVICE_STATUS:
+                return encodeContent("STATUS#");
+            case Command.TYPE_POSITION_PERIODIC:
+                return encodeContent("TIMER," + command.getInteger(Command.KEY_FREQUENCY) + ",1#");
+            case Command.TYPE_POSITION_STOP:
+                return encodeContent("TIMER,0,0#");
+            case Command.TYPE_SET_TIMEZONE:
+                int tz = command.getInteger(Command.KEY_TIMEZONE);
+                return encodeContent("GMT," + (tz < 0 ? "E" : "W") + "," + (tz / 3600 / 60) + "#");
+            case Command.TYPE_SOS_NUMBER:
+                String sosPhoneNumber = command.getString(Command.KEY_DATA);
+                if (sosPhoneNumber != null && !sosPhoneNumber.isEmpty()) {
+                    return encodeContent("SOS,A," + sosPhoneNumber + "#");
+                } else {
+                    return encodeContent("SOS,D#");
+                }
+            case Command.TYPE_SEND_SMS:
+                String phoneNumber = command.getString(Command.KEY_PHONE);
+                String message = command.getString(Command.KEY_MESSAGE);
+                if (phoneNumber != null && !phoneNumber.isEmpty()
+                        && message != null && !message.isEmpty()) {
+                    return encodeContent("FW," + phoneNumber + "," + message + "#");
+                }
+                break;
             default:
                 Log.warning(new UnsupportedOperationException(command.getType()));
                 break;
