@@ -30,7 +30,7 @@ public class FilterHandler extends BaseDataHandler {
     private int filterDistance;
     private int filterMaxSpeed;
     private long skipLimit;
-    private boolean skipAlarms;
+    private boolean skipAttributes;
 
     public void setFilterInvalid(boolean filterInvalid) {
         this.filterInvalid = filterInvalid;
@@ -68,8 +68,8 @@ public class FilterHandler extends BaseDataHandler {
         this.skipLimit = skipLimit;
     }
 
-    public void setSkipAlarms(boolean skipAlarms) {
-        this.skipAlarms = skipAlarms;
+    public void setSkipAttributes(boolean skipAttributes) {
+        this.skipAttributes = skipAttributes;
     }
 
     public FilterHandler() {
@@ -84,7 +84,7 @@ public class FilterHandler extends BaseDataHandler {
             filterDistance = config.getInteger("filter.distance");
             filterMaxSpeed = config.getInteger("filter.maxSpeed");
             skipLimit = config.getLong("filter.skipLimit") * 1000;
-            skipAlarms = config.getBoolean("filter.skipAlarms");
+            skipAttributes = config.getBoolean("filter.skipAttributes.enable");
         }
     }
 
@@ -145,8 +145,17 @@ public class FilterHandler extends BaseDataHandler {
         return false;
     }
 
-    private boolean skipAlarms(Position position) {
-        return skipAlarms && position.getAttributes().containsKey(Position.KEY_ALARM);
+    private boolean skipAttributes(Position position) {
+        if (skipAttributes) {
+            String attributesString = Context.getIdentityManager().lookupAttributeString(
+                    position.getDeviceId(), "filter.skipAttributes", "", true);
+            for (String attribute : attributesString.split("[ ,]")) {
+                if (position.getAttributes().containsKey(attribute)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private boolean filter(Position position) {
@@ -158,7 +167,7 @@ public class FilterHandler extends BaseDataHandler {
             last = Context.getIdentityManager().getLastPosition(position.getDeviceId());
         }
 
-        if (skipLimit(position, last) || skipAlarms(position)) {
+        if (skipLimit(position, last) || skipAttributes(position)) {
             return false;
         }
 
