@@ -38,11 +38,6 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_PHOTO = 0x0A;
     public static final int MSG_ADM5 = 0x01;
 
-    private DeviceSession parseIdentification(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
-        String imei = buf.readBytes(15).toString(StandardCharsets.UTF_8);
-        return getDeviceSession(channel, remoteAddress, imei);
-    }
-
     private Position parseData(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf, int type) {
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
         if (deviceSession == null) {
@@ -59,10 +54,7 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
 
             int status = buf.readUnsignedShort();
             position.set(Position.KEY_STATUS, status);
-
-            boolean isValid = !BitUtil.check(status, 5);
-            position.setValid(isValid);
-
+            position.setValid(!BitUtil.check(status, 5));
             position.setLatitude(buf.readFloat());
             position.setLongitude(buf.readFloat());
             position.setCourse(buf.readUnsignedShort() * 0.1);
@@ -150,7 +142,7 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
         if (size != CMD_RESPONSE_SIZE) {
             int type = buf.readUnsignedByte();
             if (type == MSG_IMEI) {
-                parseIdentification(channel, remoteAddress, buf);
+                getDeviceSession(channel, remoteAddress, buf.readBytes(15).toString(StandardCharsets.UTF_8));
             } else {
                 return parseData(channel, remoteAddress, buf, type);
             }
