@@ -20,6 +20,7 @@ import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.TrackerServer;
+import org.traccar.model.Command;
 
 import java.nio.ByteOrder;
 import java.util.List;
@@ -28,6 +29,9 @@ public class AdmProtocol extends BaseProtocol {
 
     public AdmProtocol() {
         super("adm");
+        setSupportedDataCommands(
+                Command.TYPE_GET_DEVICE_STATUS,
+                Command.TYPE_CUSTOM);
     }
 
     @Override
@@ -36,6 +40,7 @@ public class AdmProtocol extends BaseProtocol {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 2, 1, -3, 0));
+                pipeline.addLast("objectEncoder", new AdmProtocolEncoder());
                 pipeline.addLast("objectDecoder", new AdmProtocolDecoder(AdmProtocol.this));
             }
         };
