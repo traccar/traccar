@@ -38,7 +38,7 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_PHOTO = 0x0A;
     public static final int MSG_ADM5 = 0x01;
 
-    private Position parseData(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf, int type) {
+    private Position decodeData(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf, int type) {
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
         if (deviceSession == null) {
             return null;
@@ -144,7 +144,7 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
             if (type == MSG_IMEI) {
                 getDeviceSession(channel, remoteAddress, buf.readBytes(15).toString(StandardCharsets.UTF_8));
             } else {
-                return parseData(channel, remoteAddress, buf, type);
+                return decodeData(channel, remoteAddress, buf, type);
             }
         } else {
             return parseCommandResponse(channel, remoteAddress, buf);
