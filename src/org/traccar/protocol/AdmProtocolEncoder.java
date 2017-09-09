@@ -16,32 +16,21 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.traccar.BaseProtocolEncoder;
+import org.traccar.StringProtocolEncoder;
 import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
-import java.nio.charset.StandardCharsets;
-
-public class AdmProtocolEncoder extends BaseProtocolEncoder {
-
-    private ChannelBuffer encodeContent(String data) {
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(data, StandardCharsets.UTF_8);
-        buf.writeByte(0x0D);
-        buf.writeByte(0x0A);
-        return buf;
-    }
+public class AdmProtocolEncoder extends StringProtocolEncoder {
 
     @Override
     protected Object encodeCommand(Command command) {
 
         switch (command.getType()) {
             case Command.TYPE_GET_DEVICE_STATUS:
-                return encodeContent("STATUS");
+                return formatCommand(command, "STATUS\r\n");
 
             case Command.TYPE_CUSTOM:
-                return encodeContent(command.getString(Command.KEY_DATA));
+                return formatCommand(command, "{%s}\r\n", Command.KEY_DATA);
 
             default:
                 Log.warning(new UnsupportedOperationException(command.getType()));
