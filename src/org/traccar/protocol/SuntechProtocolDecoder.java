@@ -109,6 +109,24 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private String decodeEmergency(int value) {
+        switch (value) {
+            case 1:
+                return Position.ALARM_SOS;
+            case 3:
+                return Position.ALARM_POWER_CUT;
+            case 5:
+            case 6:
+                return Position.ALARM_DOOR;
+            case 7:
+                return Position.ALARM_MOVEMENT;
+            case 8:
+                return Position.ALARM_SHOCK;
+            default:
+                return null;
+        }
+    }
+
     private Position decode235(
             Channel channel, SocketAddress remoteAddress, String protocol, String[] values) throws ParseException {
         int index = 0;
@@ -121,10 +139,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position();
         position.setProtocol(getProtocolName());
-
-        if (type.equals("EMG") || type.equals("ALT")) {
-            position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
-        }
+        position.set(Position.KEY_TYPE, type);
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, values[index++]);
         if (deviceSession == null) {
@@ -160,10 +175,20 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.PREFIX_IO + 1, values[index++]);
 
-        index += 1; // mode
-
-        if (type.equals("STT")) {
-            position.set(Position.KEY_INDEX, Integer.parseInt(values[index++]));
+        switch (type) {
+            case "STT":
+                index += 1; // mode
+                position.set(Position.KEY_INDEX, Integer.parseInt(values[index++]));
+                break;
+            case "EMG":
+                position.set(Position.KEY_ALARM, decodeEmergency(Integer.parseInt(values[index++])));
+                break;
+            case "EVT":
+            case "ALT":
+                position.set(Position.KEY_EVENT, Integer.parseInt(values[index++]));
+                break;
+            default:
+                break;
         }
 
         if (hbm) {
