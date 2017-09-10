@@ -127,7 +127,11 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
 
         getLastLocation(position, null);
 
-        position.set(Position.KEY_RESULT, buf.readBytes(129).toString(StandardCharsets.UTF_8));
+        int responseTextLength = buf.bytesBefore((byte) 0);
+        if (responseTextLength < 0) {
+            responseTextLength = CMD_RESPONSE_SIZE - 3;
+        }
+        position.set(Position.KEY_RESULT, buf.readBytes(responseTextLength).toString(StandardCharsets.UTF_8));
 
         return position;
     }
