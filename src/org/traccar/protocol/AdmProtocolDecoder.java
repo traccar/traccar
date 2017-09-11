@@ -39,6 +39,7 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_ADM5 = 0x01;
 
     private Position decodeData(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf, int type) {
+
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
         if (deviceSession == null) {
             return null;
@@ -71,32 +72,34 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
 
             if (BitUtil.check(type, 2)) {
-                buf.skipBytes(2); // vib, vib_count
+                buf.readUnsignedByte(); // vib
+                buf.readUnsignedByte(); // vib_count
 
                 int out = buf.readUnsignedByte();
-                for (int i = 0; i <= 3; ++i) {
+                for (int i = 0; i <= 3; i++) {
                     position.set(Position.PREFIX_OUT + (i + 1), BitUtil.check(out, i) ? 1 : 0);
                 }
 
-                buf.skipBytes(1); // in_alarm
+                buf.readUnsignedByte(); // in_alarm
             }
 
             if (BitUtil.check(type, 3)) {
-                for (int i = 1; i <= 6; ++i) {
+                for (int i = 1; i <= 6; i++) {
                     position.set(Position.PREFIX_ADC + i, buf.readUnsignedShort() * 0.001);
                 }
             }
 
             if (BitUtil.check(type, 4)) {
-                for (int i = 1; i <= 2; ++i) {
+                for (int i = 1; i <= 2; i++) {
                     position.set(Position.PREFIX_COUNT + i, buf.readUnsignedInt());
                 }
             }
 
             if (BitUtil.check(type, 5)) {
-                buf.skipBytes(6); // fuel level 0..2
-
-                for (int i = 1; i <= 3; ++i) {
+                for (int i = 1; i <= 3; i++) {
+                    buf.readUnsignedShort(); // fuel level
+                }
+                for (int i = 1; i <= 3; i++) {
                     position.set(Position.PREFIX_TEMP + i, buf.readUnsignedByte());
                 }
             }
@@ -156,4 +159,5 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
 
         return null;
     }
+
 }
