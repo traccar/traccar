@@ -104,6 +104,15 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             case 9:
                 position.set(Position.PREFIX_ADC + 1, readValue(buf, length, false));
                 break;
+            case 17:
+                position.set("axisX", readValue(buf, length, true));
+                break;
+            case 18:
+                position.set("axisY", readValue(buf, length, true));
+                break;
+            case 19:
+                position.set("axisZ", readValue(buf, length, true));
+                break;
             case 66:
                 position.set(Position.KEY_POWER, readValue(buf, length, false) * 0.001);
                 break;
