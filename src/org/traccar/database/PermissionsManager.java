@@ -20,6 +20,7 @@ import org.traccar.helper.Log;
 import org.traccar.model.Attribute;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Calendar;
+import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.model.Driver;
 import org.traccar.model.Geofence;
@@ -197,6 +198,11 @@ public class PermissionsManager {
         return user != null && user.getDeviceReadonly();
     }
 
+    public boolean isLimitCommands(long userId) {
+        User user = getUser(userId);
+        return user != null && user.getLimitCommands();
+    }
+
     public void checkReadonly(long userId) throws SecurityException {
         if (!isAdmin(userId) && (server.getReadonly() || isReadonly(userId))) {
             throw new SecurityException("Account is readonly");
@@ -206,6 +212,18 @@ public class PermissionsManager {
     public void checkDeviceReadonly(long userId) throws SecurityException {
         if (!isAdmin(userId) && (server.getDeviceReadonly() || isDeviceReadonly(userId))) {
             throw new SecurityException("Account is device readonly");
+        }
+    }
+
+    public void checkLimitCommands(long userId) throws SecurityException {
+        if (!isAdmin(userId) && (server.getLimitCommands() || isLimitCommands(userId))) {
+            throw new SecurityException("Account has limit sending commands");
+        }
+    }
+
+    public void checkUserDeviceCommand(long userId, long deviceId, long commandId) throws SecurityException {
+        if (!isAdmin(userId) && Context.getCommandsManager().checkDeviceCommand(deviceId, commandId)) {
+            throw new SecurityException("Command can not be sent to this device");
         }
     }
 
@@ -300,6 +318,8 @@ public class PermissionsManager {
             manager = Context.getDriversManager();
         } else if (object.equals(Calendar.class)) {
             manager = Context.getCalendarManager();
+        } else if (object.equals(Command.class)) {
+            manager = Context.getCommandsManager();
         } else {
             throw new IllegalArgumentException("Unknown object type");
         }
@@ -322,6 +342,7 @@ public class PermissionsManager {
         Context.getCalendarManager().refreshUserItems();
         Context.getDriversManager().refreshUserItems();
         Context.getAttributesManager().refreshUserItems();
+        Context.getCommandsManager().refreshUserItems();
         if (Context.getNotificationManager() != null) {
             Context.getNotificationManager().refresh();
         }
@@ -333,6 +354,7 @@ public class PermissionsManager {
         }
         Context.getDriversManager().refreshExtendedPermissions();
         Context.getAttributesManager().refreshExtendedPermissions();
+        Context.getCommandsManager().refreshExtendedPermissions();
     }
 
     public void refreshPermissions(Permission permission) {
@@ -351,6 +373,8 @@ public class PermissionsManager {
                 Context.getAttributesManager().refreshUserItems();
             } else if (permission.getPropertyClass().equals(Calendar.class)) {
                 Context.getCalendarManager().refreshUserItems();
+            } else if (permission.getPropertyClass().equals(Command.class)) {
+                Context.getCommandsManager().refreshUserItems();
             }
         } else if (permission.getOwnerClass().equals(Device.class) || permission.getOwnerClass().equals(Group.class)) {
             if (permission.getPropertyClass().equals(Geofence.class) && Context.getGeofenceManager() != null) {
@@ -359,6 +383,8 @@ public class PermissionsManager {
                 Context.getDriversManager().refreshExtendedPermissions();
             } else if (permission.getPropertyClass().equals(Attribute.class)) {
                 Context.getAttributesManager().refreshExtendedPermissions();
+            } else if (permission.getPropertyClass().equals(Command.class)) {
+                Context.getCommandsManager().refreshExtendedPermissions();
             }
         }
     }
