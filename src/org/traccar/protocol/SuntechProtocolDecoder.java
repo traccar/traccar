@@ -173,7 +173,15 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_ODOMETER, Integer.parseInt(values[index++]));
         position.set(Position.KEY_POWER, Double.parseDouble(values[index++]));
 
-        position.set(Position.PREFIX_IO + 1, values[index++]);
+        String io = values[index++];
+        if (io.length() == 6) {
+            position.set(Position.KEY_IGNITION, io.charAt(0) == '1');
+            position.set(Position.PREFIX_IN + 1, io.charAt(1) == '1');
+            position.set(Position.PREFIX_IN + 2, io.charAt(2) == '1');
+            position.set(Position.PREFIX_IN + 3, io.charAt(3) == '1');
+            position.set(Position.PREFIX_OUT + 1, io.charAt(4) == '1');
+            position.set(Position.PREFIX_OUT + 2, io.charAt(5) == '1');
+        }
 
         switch (type) {
             case "STT":
