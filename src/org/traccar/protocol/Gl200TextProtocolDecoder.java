@@ -65,7 +65,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .expression("(?:[0-9A-Z]{17},)?")    // vin
             .expression("(?:[^,]+)?,")           // device name
             .number("(xx),")                     // state
-            .expression("(?:[0-9F]{20})?,")      // iccid
+            .expression("(?:[0-9Ff]{20})?,")     // iccid
             .number("(d{1,2}),")                 // rssi
             .number("d{1,2},")
             .expression("[01],")                 // external power
