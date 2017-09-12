@@ -36,8 +36,12 @@ public class CommandTypeResource extends BaseResource {
     @GET
     public Collection<CommandType> get(@QueryParam("deviceId") long deviceId,
             @QueryParam("textChannel") boolean textChannel) {
-        Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
-        return Context.getDeviceManager().getCommandTypes(deviceId, textChannel);
+        if (deviceId != 0) {
+            Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
+            return Context.getCommandsManager().getCommandTypes(deviceId, textChannel);
+        } else {
+            return Context.getCommandsManager().getAllCommandTypes();
+        }
     }
 
 }

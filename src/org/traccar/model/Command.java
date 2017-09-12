@@ -15,6 +15,8 @@
  */
 package org.traccar.model;
 
+import org.traccar.database.QueryIgnore;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -83,6 +85,22 @@ public class Command extends Message {
 
     public void setTextChannel(boolean textChannel) {
         this.textChannel = textChannel;
+    }
+
+    @QueryIgnore
+    @Override
+    public long getDeviceId() {
+        return super.getDeviceId();
+    }
+
+    private String description;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
 }

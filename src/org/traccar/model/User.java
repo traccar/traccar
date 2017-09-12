@@ -210,6 +210,16 @@ public class User extends ExtendedModel {
         }
     }
 
+    private boolean limitCommands;
+
+    public boolean getLimitCommands() {
+        return limitCommands;
+    }
+
+    public void setLimitCommands(boolean limitCommands) {
+        this.limitCommands = limitCommands;
+    }
+
     @QueryIgnore
     public String getPassword() {
         return null;
