@@ -49,9 +49,8 @@ public class CommandResource extends ExtendedObjectResource<Command> {
             @QueryParam("textChannel") boolean textChannel) throws SQLException {
         Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
         CommandsManager commandsManager = Context.getCommandsManager();
-        Set<Long> result = null;
-        result = new HashSet<>(commandsManager.getUserItems(getUserId()));
-        result.retainAll(commandsManager.getProperCommands(deviceId, textChannel));
+        Set<Long> result = new HashSet<>(commandsManager.getUserItems(getUserId()));
+        result.retainAll(commandsManager.getSupportedCommands(deviceId, textChannel));
         return commandsManager.getItems(result);
     }
 
@@ -59,9 +58,8 @@ public class CommandResource extends ExtendedObjectResource<Command> {
     @Path("send")
     public Response send(Command entity) throws Exception {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Command command = entity;
-        long deviceId = command.getDeviceId();
-        long id = command.getId();
+        long deviceId = entity.getDeviceId();
+        long id = entity.getId();
         if (deviceId != 0 && id != 0) {
             Context.getPermissionsManager().checkPermission(Command.class, getUserId(), id);
             Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
@@ -70,7 +68,7 @@ public class CommandResource extends ExtendedObjectResource<Command> {
         } else {
             Context.getPermissionsManager().checkLimitCommands(getUserId());
             Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
-            Context.getCommandsManager().sendCommand(command);
+            Context.getCommandsManager().sendCommand(entity);
         }
         return Response.ok(entity).build();
     }

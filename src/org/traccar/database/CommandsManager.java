@@ -81,7 +81,7 @@ public class CommandsManager  extends ExtendedObjectManager<Command> {
         }
     }
 
-    public Collection<Long> getProperCommands(long deviceId, boolean textChannel) {
+    public Collection<Long> getSupportedCommands(long deviceId, boolean textChannel) {
         List<Long> result = new ArrayList<>();
         Position lastPosition = Context.getIdentityManager().getLastPosition(deviceId);
         for (long commandId : getAllDeviceItems(deviceId)) {
