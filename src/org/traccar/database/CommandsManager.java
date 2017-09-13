@@ -39,7 +39,7 @@ public class CommandsManager  extends ExtendedObjectManager<Command> {
     }
 
     public boolean checkDeviceCommand(long deviceId, long commandId) {
-        return getAllDeviceItems(deviceId).contains(commandId);
+        return !getAllDeviceItems(deviceId).contains(commandId);
     }
 
     public void sendCommand(Command command) throws Exception {
