@@ -52,7 +52,7 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
     protected final Set<Long> getSimpleManagerItems(BaseObjectManager<T> manager, boolean all,  long userId) {
         Set<Long> result = null;
         if (all) {
-            if (Context.getPermissionsManager().isAdmin(getUserId())) {
+            if (Context.getPermissionsManager().getUserAdmin(getUserId())) {
                 result = manager.getAllItems();
             } else {
                 Context.getPermissionsManager().checkManager(getUserId());
