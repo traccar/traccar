@@ -45,12 +45,11 @@ public class CommandResource extends ExtendedObjectResource<Command> {
 
     @GET
     @Path("send")
-    public Collection<Command> get(@QueryParam("deviceId") long deviceId,
-            @QueryParam("textChannel") boolean textChannel) throws SQLException {
+    public Collection<Command> get(@QueryParam("deviceId") long deviceId) throws SQLException {
         Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
         CommandsManager commandsManager = Context.getCommandsManager();
         Set<Long> result = new HashSet<>(commandsManager.getUserItems(getUserId()));
-        result.retainAll(commandsManager.getSupportedCommands(deviceId, textChannel));
+        result.retainAll(commandsManager.getSupportedCommands(deviceId));
         return commandsManager.getItems(result);
     }
 

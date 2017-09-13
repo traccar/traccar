@@ -81,17 +81,17 @@ public class CommandsManager  extends ExtendedObjectManager<Command> {
         }
     }
 
-    public Collection<Long> getSupportedCommands(long deviceId, boolean textChannel) {
+    public Collection<Long> getSupportedCommands(long deviceId) {
         List<Long> result = new ArrayList<>();
         Position lastPosition = Context.getIdentityManager().getLastPosition(deviceId);
+        boolean online = Context.getConnectionManager().getActiveDevice(deviceId) != null;
         for (long commandId : getAllDeviceItems(deviceId)) {
             Command command = getById(commandId);
-            if (command.getTextChannel() == textChannel) {
+            if (command.getTextChannel() || online) {
                 if (lastPosition != null) {
                     BaseProtocol protocol = Context.getServerManager().getProtocol(lastPosition.getProtocol());
-                    Collection<String> protocolCommands =
-                            textChannel ? protocol.getSupportedTextCommands() : protocol.getSupportedDataCommands();
-                    if (protocolCommands.contains(command.getType())) {
+                    if (protocol.getSupportedTextCommands().contains(command.getType())
+                            || online && protocol.getSupportedDataCommands().contains(command.getType())) {
                         result.add(commandId);
                     }
                 } else if (command.getType().equals(Command.TYPE_CUSTOM)) {
