@@ -26,6 +26,7 @@ import java.util.Properties;
 import org.apache.velocity.app.VelocityEngine;
 import org.eclipse.jetty.util.URIUtil;
 import org.traccar.database.CalendarManager;
+import org.traccar.database.CommandsManager;
 import org.traccar.database.AttributesManager;
 import org.traccar.database.BaseObjectManager;
 import org.traccar.database.ConnectionManager;
@@ -56,6 +57,7 @@ import org.traccar.helper.Log;
 import org.traccar.model.Attribute;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Calendar;
+import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.model.Driver;
 import org.traccar.model.Geofence;
@@ -211,6 +213,12 @@ public final class Context {
 
     public static DriversManager getDriversManager() {
         return driversManager;
+    }
+
+    private static CommandsManager commandsManager;
+
+    public static CommandsManager getCommandsManager() {
+        return commandsManager;
     }
 
     private static StatisticsManager statisticsManager;
@@ -392,6 +400,8 @@ public final class Context {
 
         driversManager = new DriversManager(dataManager);
 
+        commandsManager = new CommandsManager(dataManager);
+
         statisticsManager = new StatisticsManager();
 
         if (config.getBoolean("sms.smpp.enable")) {
@@ -421,6 +431,8 @@ public final class Context {
             return (BaseObjectManager<T>) geofenceManager;
         } else if (clazz.equals(Driver.class)) {
             return (BaseObjectManager<T>) driversManager;
+        } else if (clazz.equals(Command.class)) {
+            return (BaseObjectManager<T>) commandsManager;
         }
         return null;
     }

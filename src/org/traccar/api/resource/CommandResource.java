@@ -16,26 +16,59 @@
 package org.traccar.api.resource;
 
 import org.traccar.Context;
-import org.traccar.api.BaseResource;
+import org.traccar.api.ExtendedObjectResource;
+import org.traccar.database.CommandsManager;
 import org.traccar.model.Command;
 
+import java.sql.SQLException;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 @Path("commands")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class CommandResource extends BaseResource {
+public class CommandResource extends ExtendedObjectResource<Command> {
+
+    public CommandResource() {
+        super(Command.class);
+    }
+
+    @GET
+    @Path("send")
+    public Collection<Command> get(@QueryParam("deviceId") long deviceId) throws SQLException {
+        Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
+        CommandsManager commandsManager = Context.getCommandsManager();
+        Set<Long> result = new HashSet<>(commandsManager.getUserItems(getUserId()));
+        result.retainAll(commandsManager.getSupportedCommands(deviceId));
+        return commandsManager.getItems(result);
+    }
 
     @POST
-    public Response add(Command entity) throws Exception {
+    @Path("send")
+    public Response send(Command entity) throws Exception {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getPermissionsManager().checkDevice(getUserId(), entity.getDeviceId());
-        Context.getDeviceManager().sendCommand(entity);
+        long deviceId = entity.getDeviceId();
+        long id = entity.getId();
+        if (deviceId != 0 && id != 0) {
+            Context.getPermissionsManager().checkPermission(Command.class, getUserId(), id);
+            Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
+            Context.getPermissionsManager().checkUserDeviceCommand(getUserId(), deviceId, id);
+            Context.getCommandsManager().sendCommand(id, deviceId);
+        } else {
+            Context.getPermissionsManager().checkLimitCommands(getUserId());
+            Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
+            Context.getCommandsManager().sendCommand(entity);
+        }
         return Response.ok(entity).build();
     }
 

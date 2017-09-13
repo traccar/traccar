@@ -53,7 +53,7 @@ public class DeviceResource extends BaseObjectResource<Device> {
         DeviceManager deviceManager = Context.getDeviceManager();
         Set<Long> result = null;
         if (all) {
-            if (Context.getPermissionsManager().isAdmin(getUserId())) {
+            if (Context.getPermissionsManager().getUserAdmin(getUserId())) {
                 result = deviceManager.getAllItems();
             } else {
                 Context.getPermissionsManager().checkManager(getUserId());
