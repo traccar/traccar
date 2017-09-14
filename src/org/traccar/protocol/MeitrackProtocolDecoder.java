@@ -69,7 +69,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             .number("(x+)?|")                    // adc2
             .number("(x+)?|")                    // adc3
             .number("(x+)|")                     // battery
-            .number("(x+),")                     // power
+            .number("(x+)?,")                    // power
             .groupBegin()
             .expression("([^,]+)?,")             // event specific
             .expression("[^,]*,")                // reserved
