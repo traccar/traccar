@@ -35,7 +35,7 @@ public class TelicProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN = new PatternBuilder()
             .number("dddd")
             .number("(d{6}|d{15})")              // device id
-            .number("(dd),")                     // type
+            .number("(d{1,2}),")                 // type
             .number("d{12},")                    // event time
             .number("d+,")
             .number("(dd)(dd)(dd)")              // date (ddmmyy)
