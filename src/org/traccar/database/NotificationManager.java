@@ -62,26 +62,26 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
         for (long userId : users) {
             if (event.getGeofenceId() == 0 || Context.getGeofenceManager() != null
                     && Context.getGeofenceManager().checkItemPermission(userId, event.getGeofenceId())) {
-                boolean webSent = false;
-                boolean mailSent = false;
-                boolean smsSent = Context.getSmppManager() == null;
+                boolean sentWeb = false;
+                boolean sentMail = false;
+                boolean sentSms = Context.getSmppManager() == null;
                 for (long notificationId : getEffectiveNotifications(userId, deviceId)) {
                     Notification notification = getById(notificationId);
                     if (getById(notificationId).getType().equals(event.getType())) {
-                        if (!webSent && notification.getWeb()) {
+                        if (!sentWeb && notification.getWeb()) {
                             Context.getConnectionManager().updateEvent(userId, event);
-                            webSent = true;
+                            sentWeb = true;
                         }
-                        if (!mailSent && notification.getMail()) {
+                        if (!sentMail && notification.getMail()) {
                             NotificationMail.sendMailAsync(userId, event, position);
-                            mailSent = true;
+                            sentMail = true;
                         }
-                        if (!smsSent && notification.getSms()) {
+                        if (!sentSms && notification.getSms()) {
                             NotificationSms.sendSmsAsync(userId, event, position);
-                            smsSent = true;
+                            sentSms = true;
                         }
                     }
-                    if (webSent && mailSent && smsSent) {
+                    if (sentWeb && sentMail && sentSms) {
                         break;
                     }
                 }
