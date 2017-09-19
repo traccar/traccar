@@ -111,8 +111,6 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         if (baseClass.equals(Group.class) || baseClass.equals(Device.class)) {
             Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
             Context.getPermissionsManager().refreshAllExtendedPermissions();
-        } else if (baseClass.equals(User.class) && Context.getNotificationManager() != null) {
-            Context.getNotificationManager().refresh();
         }
         return Response.ok(entity).build();
     }

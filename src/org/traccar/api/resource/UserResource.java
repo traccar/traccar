@@ -85,9 +85,6 @@ public class UserResource extends BaseObjectResource<User> {
             Context.getDataManager().linkObject(User.class, getUserId(), ManagedUser.class, entity.getId(), true);
         }
         Context.getUsersManager().refreshUserItems();
-        if (Context.getNotificationManager() != null) {
-            Context.getNotificationManager().refresh();
-        }
         return Response.ok(entity).build();
     }
 
