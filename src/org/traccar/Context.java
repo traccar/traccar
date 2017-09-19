@@ -62,6 +62,7 @@ import org.traccar.model.Device;
 import org.traccar.model.Driver;
 import org.traccar.model.Geofence;
 import org.traccar.model.Group;
+import org.traccar.model.Notification;
 import org.traccar.model.User;
 import org.traccar.geolocation.GoogleGeolocationProvider;
 import org.traccar.geolocation.GeolocationProvider;
@@ -433,6 +434,8 @@ public final class Context {
             return (BaseObjectManager<T>) driversManager;
         } else if (clazz.equals(Command.class)) {
             return (BaseObjectManager<T>) commandsManager;
+        } else if (clazz.equals(Notification.class)) {
+            return (BaseObjectManager<T>) notificationManager;
         }
         return null;
     }

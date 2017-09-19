@@ -627,19 +627,25 @@
                 }
             }
         },
-        "/users/notifications": {
+        "/notifications": {
             "get": {
-                "summary": "Fetch a list of Notification types",
-                "description": "Without params, it returns a list of the user's enabled Notifications",
+                "summary": "Fetch a list of Notifications",
+                "description": "Without params, it returns a list of Notifications the user has access to",
                 "parameters": [
                     {
-                        "name": "all",
-                        "in": "query",
-                        "description": "To fetch a list of all available Notifications",
-                        "type": "boolean"
+                        "$ref": "#/parameters/all"
                     },
                     {
                         "$ref": "#/parameters/userId"
+                    },
+                    {
+                        "$ref": "#/parameters/deviceId"
+                    },
+                    {
+                        "$ref": "#/parameters/groupId"
+                    },
+                    {
+                        "$ref": "#/parameters/refresh"
                     }
                 ],
                 "responses": {
@@ -655,15 +661,10 @@
                 }
             },
             "post": {
-                "summary": "Set or unset a Notification",
+                "summary": "Create a Notification",
                 "parameters": [
                     {
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Notification"
-                        }
+                        "$ref": "#/parameters/Notification"
                     }
                 ],
                 "responses": {
@@ -672,6 +673,71 @@
                         "schema": {
                             "$ref": "#/definitions/Notification"
                         }
+                    }
+                }
+            }
+        },
+        "/notifications/{id}": {
+            "put": {
+                "summary": "Update a Notification",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/entityId"
+                    },
+                    {
+                        "$ref": "#/parameters/Notification"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Notification"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete a Notification",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/entityId"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/notifications/types": {
+            "get": {
+                "summary": "Fetch a list of available Notification types",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/NotificationType"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/notifications/test": {
+            "post": {
+                "summary": "Send test notification to current user via Email and SMS",
+                "parameters": [],
+                "responses": {
+                    "204": {
+                        "description": "Successful sending"
+                    },
+                    "400": {
+                        "description": "Could happen if sending has failed"
                     }
                 }
             }
@@ -1604,8 +1670,8 @@
                 "type": {
                     "type": "string"
                 },
-                "userId": {
-                    "type": "integer"
+                "always": {
+                    "type": "boolean"
                 },
                 "web": {
                     "type": "boolean"
@@ -1613,7 +1679,17 @@
                 "mail": {
                     "type": "boolean"
                 },
+                "sms": {
+                    "type": "boolean"
+                },
                 "attributes": {}
+            }
+        },
+        "NotificationType": {
+            "properties": {
+                "type": {
+                    "type": "string"
+                }
             }
         },
         "Event": {
@@ -1964,6 +2040,14 @@
             "required": true,
             "schema": {
                 "$ref": "#/definitions/Command"
+            }
+        },
+        "Notification": {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+                "$ref": "#/definitions/Notification"
             }
         },
         "deviceIdArray": {

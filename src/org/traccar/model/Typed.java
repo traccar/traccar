@@ -15,11 +15,11 @@
  */
 package org.traccar.model;
 
-public class CommandType {
+public class Typed {
 
     private String type;
 
-    public CommandType(String type) {
+    public Typed(String type) {
         this.type = type;
     }
 
