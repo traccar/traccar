@@ -30,7 +30,11 @@ public class GenxProtocolDecoder extends BaseProtocolDecoder {
 
     public GenxProtocolDecoder(GenxProtocol protocol) {
         super(protocol);
-        String[] columns = Context.getConfig().getString(getProtocolName() + ".reportColumns", "1,2,3,4").split(",");
+        setReportColumns(Context.getConfig().getString(getProtocolName() + ".reportColumns", "1,2,3,4"));
+    }
+
+    public void setReportColumns(String format) {
+        String[] columns = format.split(",");
         reportColumns = new int[columns.length];
         for (int i = 0; i < columns.length; i++) {
             reportColumns[i] = Integer.parseInt(columns[i]);
