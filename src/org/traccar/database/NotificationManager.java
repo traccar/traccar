@@ -1,5 +1,6 @@
 /*
  * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,57 +19,70 @@ package org.traccar.database;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Event;
 import org.traccar.model.Notification;
 import org.traccar.model.Position;
+import org.traccar.model.Typed;
 import org.traccar.notification.NotificationMail;
 import org.traccar.notification.NotificationSms;
 
-public class NotificationManager {
-
-    private final DataManager dataManager;
-
-    private final Map<Long, Set<Notification>> userNotifications = new HashMap<>();
-
-    private final ReadWriteLock notificationsLock = new ReentrantReadWriteLock();
+public class NotificationManager extends ExtendedObjectManager<Notification> {
 
     public NotificationManager(DataManager dataManager) {
-        this.dataManager = dataManager;
-        refresh();
+        super(dataManager, Notification.class);
+    }
+
+    private Set<Long> getEffectiveNotifications(long userId, long deviceId) {
+        Set<Long> result = new HashSet<>();
+        Set<Long> deviceNotifications = getAllDeviceItems(deviceId);
+        for (long itemId : getUserItems(userId)) {
+            if (getById(itemId).getAlways() || deviceNotifications.contains(itemId)) {
+                result.add(itemId);
+            }
+        }
+        return result;
     }
 
     public void updateEvent(Event event, Position position) {
         try {
-            dataManager.addObject(event);
+            getDataManager().addObject(event);
         } catch (SQLException error) {
             Log.warning(error);
         }
 
-        Set<Long> users = Context.getPermissionsManager().getDeviceUsers(event.getDeviceId());
+        long deviceId = event.getDeviceId();
+        Set<Long> users = Context.getPermissionsManager().getDeviceUsers(deviceId);
         for (long userId : users) {
             if (event.getGeofenceId() == 0 || Context.getGeofenceManager() != null
                     && Context.getGeofenceManager().checkItemPermission(userId, event.getGeofenceId())) {
-                Notification notification = getUserNotificationByType(userId, event.getType());
-                if (notification != null) {
-                    if (notification.getWeb()) {
-                        Context.getConnectionManager().updateEvent(userId, event);
+                boolean sentWeb = false;
+                boolean sentMail = false;
+                boolean sentSms = Context.getSmppManager() == null;
+                for (long notificationId : getEffectiveNotifications(userId, deviceId)) {
+                    Notification notification = getById(notificationId);
+                    if (getById(notificationId).getType().equals(event.getType())) {
+                        if (!sentWeb && notification.getWeb()) {
+                            Context.getConnectionManager().updateEvent(userId, event);
+                            sentWeb = true;
+                        }
+                        if (!sentMail && notification.getMail()) {
+                            NotificationMail.sendMailAsync(userId, event, position);
+                            sentMail = true;
+                        }
+                        if (!sentSms && notification.getSms()) {
+                            NotificationSms.sendSmsAsync(userId, event, position);
+                            sentSms = true;
+                        }
                     }
-                    if (notification.getMail()) {
-                        NotificationMail.sendMailAsync(userId, event, position);
-                    }
-                    if (notification.getSms()) {
-                        NotificationSms.sendSmsAsync(userId, event, position);
+                    if (sentWeb && sentMail && sentSms) {
+                        break;
                     }
                 }
             }
@@ -84,135 +98,18 @@ public class NotificationManager {
         }
     }
 
-    private Set<Notification> getUserNotificationsUnsafe(long userId) {
-        if (!userNotifications.containsKey(userId)) {
-            userNotifications.put(userId, new HashSet<Notification>());
-        }
-        return userNotifications.get(userId);
-    }
-
-    public Set<Notification> getUserNotifications(long userId) {
-        notificationsLock.readLock().lock();
-        try {
-            return getUserNotificationsUnsafe(userId);
-        } finally {
-            notificationsLock.readLock().unlock();
-        }
-    }
-
-    public final void refresh() {
-        if (dataManager != null) {
-            try {
-                notificationsLock.writeLock().lock();
-                try {
-                    userNotifications.clear();
-                    for (Notification notification : dataManager.getObjects(Notification.class)) {
-                        getUserNotificationsUnsafe(notification.getUserId()).add(notification);
-                    }
-                } finally {
-                    notificationsLock.writeLock().unlock();
-                }
-            } catch (SQLException error) {
-                Log.warning(error);
-            }
-        }
-    }
-
-    public Notification getUserNotificationByType(long userId, String type) {
-        notificationsLock.readLock().lock();
-        try {
-            for (Notification notification : getUserNotificationsUnsafe(userId)) {
-                if (notification.getType().equals(type)) {
-                    return notification;
-                }
-            }
-        } finally {
-            notificationsLock.readLock().unlock();
-        }
-        return null;
-    }
-
-    public void updateNotification(Notification notification) {
-        Notification cachedNotification = getUserNotificationByType(notification.getUserId(), notification.getType());
-        if (cachedNotification != null) {
-            if (cachedNotification.getWeb() != notification.getWeb()
-                    || cachedNotification.getMail() != notification.getMail()
-                    || cachedNotification.getSms() != notification.getSms()) {
-                if (!notification.getWeb() && !notification.getMail() && !notification.getSms()) {
-                    try {
-                        dataManager.removeObject(Notification.class, cachedNotification.getId());
-                    } catch (SQLException error) {
-                        Log.warning(error);
-                    }
-                    notificationsLock.writeLock().lock();
-                    try {
-                        getUserNotificationsUnsafe(notification.getUserId()).remove(cachedNotification);
-                    } finally {
-                        notificationsLock.writeLock().unlock();
-                    }
-                } else {
-                    notificationsLock.writeLock().lock();
-                    try {
-                        cachedNotification.setWeb(notification.getWeb());
-                        cachedNotification.setMail(notification.getMail());
-                        cachedNotification.setSms(notification.getSms());
-                        cachedNotification.setAttributes(notification.getAttributes());
-                    } finally {
-                        notificationsLock.writeLock().unlock();
-                    }
-                    try {
-                        dataManager.updateObject(cachedNotification);
-                    } catch (SQLException error) {
-                        Log.warning(error);
-                    }
-                }
-            } else {
-                notification.setId(cachedNotification.getId());
-            }
-        } else if (notification.getWeb() || notification.getMail() || notification.getSms()) {
-            try {
-                dataManager.addObject(notification);
-            } catch (SQLException error) {
-                Log.warning(error);
-            }
-            notificationsLock.writeLock().lock();
-            try {
-                getUserNotificationsUnsafe(notification.getUserId()).add(notification);
-            } finally {
-                notificationsLock.writeLock().unlock();
-            }
-        }
-    }
-
-    public Set<Notification> getAllNotifications() {
-        Set<Notification> notifications = new HashSet<>();
-        long id = 1;
+    public Set<Typed> getAllNotificationTypes() {
+        Set<Typed> types = new HashSet<>();
         Field[] fields = Event.class.getDeclaredFields();
         for (Field field : fields) {
             if (Modifier.isStatic(field.getModifiers()) && field.getName().startsWith("TYPE_")) {
                 try {
-                    Notification notification = new Notification();
-                    notification.setType(field.get(null).toString());
-                    notification.setId(id++);
-                    notifications.add(notification);
+                    types.add(new Typed(field.get(null).toString()));
                 } catch (IllegalArgumentException | IllegalAccessException error) {
                     Log.warning(error);
                 }
             }
         }
-        return notifications;
+        return types;
     }
-
-    public Collection<Notification> getAllUserNotifications(long userId) {
-        Map<String, Notification> notifications = new HashMap<>();
-        for (Notification notification : getAllNotifications()) {
-            notification.setUserId(userId);
-            notifications.put(notification.getType(), notification);
-        }
-        for (Notification notification : getUserNotifications(userId)) {
-            notifications.put(notification.getType(), notification);
-        }
-        return notifications.values();
-    }
-
 }

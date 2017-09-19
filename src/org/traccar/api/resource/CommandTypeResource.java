@@ -18,7 +18,7 @@ package org.traccar.api.resource;
 
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
-import org.traccar.model.CommandType;
+import org.traccar.model.Typed;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -34,7 +34,7 @@ import java.util.Collection;
 public class CommandTypeResource extends BaseResource {
 
     @GET
-    public Collection<CommandType> get(@QueryParam("deviceId") long deviceId,
+    public Collection<Typed> get(@QueryParam("deviceId") long deviceId,
             @QueryParam("textChannel") boolean textChannel) {
         if (deviceId != 0) {
             Context.getPermissionsManager().checkDevice(getUserId(), deviceId);

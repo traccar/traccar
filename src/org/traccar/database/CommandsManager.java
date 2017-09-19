@@ -26,7 +26,7 @@ import org.traccar.BaseProtocol;
 import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Command;
-import org.traccar.model.CommandType;
+import org.traccar.model.Typed;
 import org.traccar.model.Position;
 
 public class CommandsManager  extends ExtendedObjectManager<Command> {
@@ -102,29 +102,29 @@ public class CommandsManager  extends ExtendedObjectManager<Command> {
         return result;
     }
 
-    public Collection<CommandType> getCommandTypes(long deviceId, boolean textChannel) {
-        List<CommandType> result = new ArrayList<>();
+    public Collection<Typed> getCommandTypes(long deviceId, boolean textChannel) {
+        List<Typed> result = new ArrayList<>();
         Position lastPosition = Context.getIdentityManager().getLastPosition(deviceId);
         if (lastPosition != null) {
             BaseProtocol protocol = Context.getServerManager().getProtocol(lastPosition.getProtocol());
             Collection<String> commands;
             commands = textChannel ? protocol.getSupportedTextCommands() : protocol.getSupportedDataCommands();
             for (String commandKey : commands) {
-                result.add(new CommandType(commandKey));
+                result.add(new Typed(commandKey));
             }
         } else {
-            result.add(new CommandType(Command.TYPE_CUSTOM));
+            result.add(new Typed(Command.TYPE_CUSTOM));
         }
         return result;
     }
 
-    public Collection<CommandType> getAllCommandTypes() {
-        List<CommandType> result = new ArrayList<>();
+    public Collection<Typed> getAllCommandTypes() {
+        List<Typed> result = new ArrayList<>();
         Field[] fields = Command.class.getDeclaredFields();
         for (Field field : fields) {
             if (Modifier.isStatic(field.getModifiers()) && field.getName().startsWith("TYPE_")) {
                 try {
-                    result.add(new CommandType(field.get(null).toString()));
+                    result.add(new Typed(field.get(null).toString()));
                 } catch (IllegalArgumentException | IllegalAccessException error) {
                     Log.warning(error);
                 }

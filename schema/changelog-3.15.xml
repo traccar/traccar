@@ -83,5 +83,55 @@
       <column name="limitcommands" type="BOOLEAN" defaultValueBoolean="false" />
     </addColumn>
 
+    <addColumn tableName="notifications">
+      <column name="always" type="BOOLEAN" defaultValueBoolean="false" valueBoolean="true">
+        <constraints nullable="false" />
+      </column>
+    </addColumn>
+
+    <createTable tableName="user_notification">
+      <column name="userid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="notificationid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="user_notification" baseColumnNames="userid" constraintName="fk_user_notification_userid" referencedTableName="users" referencedColumnNames="id" onDelete="CASCADE" />
+
+    <sql>
+      INSERT INTO user_notification (notificationid, userid) SELECT id AS notificationid, userid FROM notifications;
+    </sql>
+
+    <dropForeignKeyConstraint baseTableName="notifications" constraintName="fk_notifications_userid"/>
+    <dropColumn tableName="notifications" columnName="userid" />
+
+    <addForeignKeyConstraint baseTableName="user_notification" baseColumnNames="notificationid" constraintName="fk_user_notification_notificationid" referencedTableName="notifications" referencedColumnNames="id" onDelete="CASCADE" />
+
+    <createTable tableName="group_notification">
+      <column name="groupid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="notificationid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="group_notification" baseColumnNames="groupid" constraintName="fk_group_notification_groupid" referencedTableName="groups" referencedColumnNames="id" onDelete="CASCADE" />
+    <addForeignKeyConstraint baseTableName="group_notification" baseColumnNames="notificationid" constraintName="fk_group_notification_notificationid" referencedTableName="notifications" referencedColumnNames="id" onDelete="CASCADE" />
+
+    <createTable tableName="device_notification">
+      <column name="deviceid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="notificationid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="device_notification" baseColumnNames="deviceid" constraintName="fk_device_notification_deviceid" referencedTableName="devices" referencedColumnNames="id" onDelete="CASCADE" />
+    <addForeignKeyConstraint baseTableName="device_notification" baseColumnNames="notificationid" constraintName="fk_device_notification_notificationid" referencedTableName="notifications" referencedColumnNames="id" onDelete="CASCADE" />
+
   </changeSet>
 </databaseChangeLog>

@@ -17,14 +17,14 @@ package org.traccar.model;
 
 public class Notification extends ExtendedModel {
 
-    private long userId;
+    private boolean always;
 
-    public long getUserId() {
-        return userId;
+    public boolean getAlways() {
+        return always;
     }
 
-    public void setUserId(long userId) {
-        this.userId = userId;
+    public void setAlways(boolean always) {
+        this.always = always;
     }
 
     private String type;
