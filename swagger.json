@@ -155,6 +155,37 @@
                 }
             }
         },
+        "/commands/types": {
+            "get": {
+                "summary": "Fetch a list of available Commands for the Device or all possible Commands if Device ommited",
+                "parameters": [
+                    {
+                        "name": "deviceId",
+                        "in": "query",
+                        "type": "integer"
+                    },
+                    {
+                        "name": "textChannel",
+                        "in": "query",
+                        "type": "boolean"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/CommandType"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Could happen when trying to fetch from a device the user does not have permission"
+                    }
+                }
+            }
+        },
         "/devices": {
             "get": {
                 "summary": "Fetch a list of Devices",
@@ -738,37 +769,6 @@
                     },
                     "400": {
                         "description": "Could happen if sending has failed"
-                    }
-                }
-            }
-        },
-        "/commandtypes": {
-            "get": {
-                "summary": "Fetch a list of available Commands for the Device or all possible Commands if Device ommited",
-                "parameters": [
-                    {
-                        "name": "deviceId",
-                        "in": "query",
-                        "type": "integer"
-                    },
-                    {
-                        "name": "textChannel",
-                        "in": "query",
-                        "type": "boolean"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/CommandType"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Could happen when trying to fetch from a device the user does not have permission"
                     }
                 }
             }
