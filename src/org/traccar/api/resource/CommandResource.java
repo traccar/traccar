@@ -1,5 +1,7 @@
 /*
  * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 Gabor Somogyi (gabor.g.somogyi@gmail.com)
+ * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +21,7 @@ import org.traccar.Context;
 import org.traccar.api.ExtendedObjectResource;
 import org.traccar.database.CommandsManager;
 import org.traccar.model.Command;
+import org.traccar.model.Typed;
 
 import java.sql.SQLException;
 import java.util.Collection;
@@ -72,4 +75,15 @@ public class CommandResource extends ExtendedObjectResource<Command> {
         return Response.ok(entity).build();
     }
 
+    @GET
+    @Path("types")
+    public Collection<Typed> get(@QueryParam("deviceId") long deviceId,
+            @QueryParam("textChannel") boolean textChannel) {
+        if (deviceId != 0) {
+            Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
+            return Context.getCommandsManager().getCommandTypes(deviceId, textChannel);
+        } else {
+            return Context.getCommandsManager().getAllCommandTypes();
+        }
+    }
 }
