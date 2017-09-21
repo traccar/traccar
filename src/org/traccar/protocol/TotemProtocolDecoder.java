@@ -171,6 +171,8 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_LOW_BATTERY;
             case 0x11:
                 return Position.ALARM_OVERSPEED;
+            case 0x30:
+                return Position.ALARM_PARKING;
             case 0x42:
                 return Position.ALARM_GEOFENCE_EXIT;
             case 0x43:
