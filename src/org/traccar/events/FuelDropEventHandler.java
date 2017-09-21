@@ -35,7 +35,7 @@ public class FuelDropEventHandler extends BaseEventHandler {
         if (device == null) {
             return null;
         }
-        if (!Context.getIdentityManager().isLatestPosition(position) || !position.getValid()) {
+        if (!Context.getIdentityManager().isLatestPosition(position)) {
             return null;
         }
 
