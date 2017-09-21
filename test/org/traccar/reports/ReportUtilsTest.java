@@ -80,7 +80,7 @@ public class ReportUtilsTest extends BaseTest {
                 position("2016-01-01 00:06:00.000", 0, 3000),
                 position("2016-01-01 00:07:00.000", 0, 3000));
 
-        TripsConfig tripsConfig = new TripsConfig(500, 300000, 180000, 900000, false);
+        TripsConfig tripsConfig = new TripsConfig(500, 300000, 180000, 900000, false, false);
 
         Collection<TripReport> trips = ReportUtils.detectTripsAndStops(data, tripsConfig, false, 0.01, TripReport.class);
 
@@ -132,7 +132,7 @@ public class ReportUtilsTest extends BaseTest {
 
         data.get(5).set(Position.KEY_IGNITION, false);
 
-        TripsConfig tripsConfig = new TripsConfig(500, 300000, 180000, 900000, true);
+        TripsConfig tripsConfig = new TripsConfig(500, 300000, 180000, 900000, true, false);
 
         Collection<TripReport> trips = ReportUtils.detectTripsAndStops(data, tripsConfig, false, 0.01, TripReport.class);
 
@@ -200,7 +200,7 @@ public class ReportUtilsTest extends BaseTest {
                 position("2016-01-01 00:10:00.000", 0, 7000),
                 position("2016-01-01 00:11:00.000", 0, 7000));
 
-        TripsConfig tripsConfig = new TripsConfig(500, 300000, 180000, 900000, false);
+        TripsConfig tripsConfig = new TripsConfig(500, 300000, 180000, 900000, false, false);
 
         Collection<TripReport> trips = ReportUtils.detectTripsAndStops(data, tripsConfig, false, 0.01, TripReport.class);
 
@@ -248,7 +248,7 @@ public class ReportUtilsTest extends BaseTest {
                 position("2016-01-01 00:04:00.000", 1, 0),
                 position("2016-01-01 00:05:00.000", 0, 0));
 
-        TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false);
+        TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false, false);
 
         Collection<StopReport> result = ReportUtils.detectTripsAndStops(data, tripsConfig, false, 0.01, StopReport.class);
 
@@ -274,7 +274,7 @@ public class ReportUtilsTest extends BaseTest {
                 position("2016-01-01 00:04:00.000", 1, 0),
                 position("2016-01-01 00:05:00.000", 2, 0));
 
-        TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false);
+        TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false, false);
 
         Collection<StopReport> result = ReportUtils.detectTripsAndStops(data, tripsConfig, false, 0.01, StopReport.class);
 
@@ -300,7 +300,7 @@ public class ReportUtilsTest extends BaseTest {
                 position("2016-01-01 00:04:00.000", 0, 0),
                 position("2016-01-01 00:05:00.000", 0, 0));
 
-        TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false);
+        TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false, false);
 
         Collection<StopReport> result = ReportUtils.detectTripsAndStops(data, tripsConfig, false, 0.01, StopReport.class);
 
@@ -326,7 +326,7 @@ public class ReportUtilsTest extends BaseTest {
                 position("2016-01-01 00:04:00.000", 5, 0),
                 position("2016-01-01 00:05:00.000", 5, 0));
 
-        TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false);
+        TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false, false);
 
         Collection<StopReport> result = ReportUtils.detectTripsAndStops(data, tripsConfig, false, 0.01, StopReport.class);
 
@@ -348,7 +348,7 @@ public class ReportUtilsTest extends BaseTest {
                 position("2016-01-01 00:24:00.000", 5, 800),
                 position("2016-01-01 00:25:00.000", 5, 900));
 
-        TripsConfig tripsConfig = new TripsConfig(500, 200000, 200000, 900000, false);
+        TripsConfig tripsConfig = new TripsConfig(500, 200000, 200000, 900000, false, false);
 
         Collection<TripReport> trips = ReportUtils.detectTripsAndStops(data, tripsConfig, false, 0.01, TripReport.class);
 

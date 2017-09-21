@@ -22,12 +22,13 @@ public class TripsConfig {
     }
 
     public TripsConfig(double minimalTripDistance, long minimalTripDuration, long minimalParkingDuration,
-            long minimalNoDataDuration, boolean useIgnition) {
+            long minimalNoDataDuration, boolean useIgnition, boolean processInvalidPositions) {
         this.minimalTripDistance = minimalTripDistance;
         this.minimalTripDuration = minimalTripDuration;
         this.minimalParkingDuration = minimalParkingDuration;
         this.minimalNoDataDuration = minimalNoDataDuration;
         this.useIgnition = useIgnition;
+        this.processInvalidPositions = processInvalidPositions;
     }
 
     private double minimalTripDistance;
@@ -78,6 +79,16 @@ public class TripsConfig {
 
     public void setUseIgnition(boolean useIgnition) {
         this.useIgnition = useIgnition;
+    }
+
+    private boolean processInvalidPositions;
+
+    public boolean getProcessInvalidPositions() {
+        return processInvalidPositions;
+    }
+
+    public void setProcessInvalidPositions(boolean processInvalidPositions) {
+        this.processInvalidPositions = processInvalidPositions;
     }
 
 }
