@@ -153,7 +153,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
                     Context.getConfig().getBoolean("geolocation.processInvalidPositions"));
         }
 
-        motionHandler = new MotionHandler(Context.getConfig().getDouble("event.motion.speedThreshold", 0.01));
+        motionHandler = new MotionHandler(Context.getTripsConfig().getSpeedThreshold());
 
         if (Context.getConfig().hasKey("location.latitudeHemisphere")
                 || Context.getConfig().hasKey("location.longitudeHemisphere")) {
