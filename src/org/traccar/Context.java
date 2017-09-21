@@ -259,7 +259,8 @@ public final class Context {
                 config.getLong("report.trip.minimalParkingDuration", 300) * 1000,
                 config.getLong("report.trip.minimalNoDataDuration", 3600) * 1000,
                 config.getBoolean("report.trip.useIgnition"),
-                config.getBoolean("event.motion.processInvalidPositions"));
+                config.getBoolean("event.motion.processInvalidPositions"),
+                config.getDouble("event.motion.speedThreshold", 0.01));
     }
 
     public static void init(String[] arguments) throws Exception {
