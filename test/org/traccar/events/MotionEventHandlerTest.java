@@ -31,7 +31,7 @@ public class MotionEventHandlerTest extends BaseTest {
     @Test
     public void testMotionWithPosition() throws Exception {
         MotionEventHandler motionEventHandler = new MotionEventHandler(
-                new TripsConfig(500, 300 * 1000, 300 * 1000, 0, false));
+                new TripsConfig(500, 300 * 1000, 300 * 1000, 0, false, false, 0.01));
 
         Position position = new Position();
         position.setTime(date("2017-01-01 00:00:00"));
@@ -72,7 +72,7 @@ public class MotionEventHandlerTest extends BaseTest {
     @Test
     public void testMotionWithStatus() throws Exception {
         MotionEventHandler motionEventHandler = new MotionEventHandler(
-                new TripsConfig(500, 300 * 1000, 300 * 1000, 0, false));
+                new TripsConfig(500, 300 * 1000, 300 * 1000, 0, false, false, 0.01));
 
         Position position = new Position();
         position.setTime(new Date(System.currentTimeMillis() - 360000));
@@ -93,7 +93,7 @@ public class MotionEventHandlerTest extends BaseTest {
     @Test
     public void testStopWithPositionIgnition() throws Exception {
         MotionEventHandler motionEventHandler = new MotionEventHandler(
-                new TripsConfig(500, 300 * 1000, 300 * 1000, 0, true));
+                new TripsConfig(500, 300 * 1000, 300 * 1000, 0, true, false, 0.01));
 
         Position position = new Position();
         position.setTime(date("2017-01-01 00:00:00"));

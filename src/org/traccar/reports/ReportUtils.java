@@ -253,8 +253,7 @@ public final class ReportUtils {
         }
     }
 
-    private static boolean isMoving(ArrayList<Position> positions, int index,
-            TripsConfig tripsConfig, double speedThreshold) {
+    private static boolean isMoving(ArrayList<Position> positions, int index, TripsConfig tripsConfig) {
         if (tripsConfig.getMinimalNoDataDuration() > 0) {
             boolean beforeGap = index < positions.size() - 1
                     && positions.get(index + 1).getFixTime().getTime() - positions.get(index).getFixTime().getTime()
@@ -270,12 +269,12 @@ public final class ReportUtils {
                 && positions.get(index).getAttributes().get(Position.KEY_MOTION) instanceof Boolean) {
             return positions.get(index).getBoolean(Position.KEY_MOTION);
         } else {
-            return positions.get(index).getSpeed() > speedThreshold;
+            return positions.get(index).getSpeed() > tripsConfig.getSpeedThreshold();
         }
     }
 
     public static <T extends BaseReport> Collection<T> detectTripsAndStops(Collection<Position> positionCollection,
-            TripsConfig tripsConfig, boolean ignoreOdometer, double speedThreshold, Class<T> reportClass) {
+            TripsConfig tripsConfig, boolean ignoreOdometer, Class<T> reportClass) {
         Collection<T> result = new ArrayList<>();
 
         ArrayList<Position> positions = new ArrayList<>(positionCollection);
@@ -283,12 +282,12 @@ public final class ReportUtils {
             boolean trips = reportClass.equals(TripReport.class);
             MotionEventHandler  motionHandler = new MotionEventHandler(tripsConfig);
             DeviceState deviceState = new DeviceState();
-            deviceState.setMotionState(isMoving(positions, 0, tripsConfig, speedThreshold));
+            deviceState.setMotionState(isMoving(positions, 0, tripsConfig));
             int startEventIndex = trips == deviceState.getMotionState() ? 0 : -1;
             int startNoEventIndex = -1;
             for (int i = 0; i < positions.size(); i++) {
                 Map<Event, Position> event = motionHandler.updateMotionState(deviceState, positions.get(i),
-                        isMoving(positions, i, tripsConfig, speedThreshold));
+                        isMoving(positions, i, tripsConfig));
                 if (startEventIndex == -1
                         && (trips != deviceState.getMotionState() && deviceState.getMotionPosition() != null
                         || trips == deviceState.getMotionState() && event != null)) {
