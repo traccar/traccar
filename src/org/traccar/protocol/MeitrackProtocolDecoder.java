@@ -73,12 +73,11 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             .groupBegin()
             .expression("([^,]+)?,")             // event specific
             .expression("[^,]*,")                // reserved
-            .number("d*,")                       // protocol
+            .number("(d+)?,")                    // protocol
             .number("(x{4})?")                   // fuel
             .number("(?:,(x{6}(?:|x{6})*))?")    // temperature
-            .or()
+            .groupEnd("?")
             .any()
-            .groupEnd()
             .text("*")
             .number("xx")
             .text("\r\n").optional()
@@ -209,6 +208,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
+        int protocol = parser.nextInt(0);
+
         if (parser.hasNext()) {
             String fuel = parser.next();
             position.set(Position.KEY_FUEL_LEVEL,
@@ -218,9 +219,14 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         if (parser.hasNext()) {
             for (String temp : parser.next().split("\\|")) {
                 int index = Integer.valueOf(temp.substring(0, 2), 16);
-                double value = Byte.valueOf(temp.substring(2, 4), 16);
-                value += (value < 0 ? -0.01 : 0.01) * Integer.valueOf(temp.substring(4), 16);
-                position.set(Position.PREFIX_TEMP + index, value);
+                if (protocol >= 3) {
+                    double value = Short.valueOf(temp.substring(2), 16);
+                    position.set(Position.PREFIX_TEMP + index, value * 0.01);
+                } else {
+                    double value = Byte.valueOf(temp.substring(2, 4), 16);
+                    value += (value < 0 ? -0.01 : 0.01) * Integer.valueOf(temp.substring(4), 16);
+                    position.set(Position.PREFIX_TEMP + index, value);
+                }
             }
         }
 
