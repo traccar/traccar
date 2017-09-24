@@ -14,6 +14,9 @@ public class EelinkProtocolDecoderTest extends ProtocolTest {
                 "676701000c007b03525440717505180104"));
 
         verifyPosition(decoder, binary(
+                "6767120048000559c1829213059a7400008e277d000c000000000800cc00080d2a000034df3cf0b429dd82cad3048910320000000000007b7320d005ba0000000019a000000000000000000000"));
+
+        verifyPosition(decoder, binary(
                 "6767050020213b59c6aecdff41dce70b8b977d00000001fe000a36e30078fe010159c6aecd"));
 
         verifyPosition(decoder, binary(
