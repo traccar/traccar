@@ -205,7 +205,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_RSSI, parser.nextInt(0));
             position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt(0));
 
-            position.set("steps", parser.nextInt(0));
+            position.set(Position.KEY_STEPS, parser.nextInt(0));
 
             int status = parser.nextHexInt(0);
             position.set(Position.KEY_ALARM, decodeAlarm(status));

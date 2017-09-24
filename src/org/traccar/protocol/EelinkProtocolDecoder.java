@@ -386,6 +386,45 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 break;
         }
 
+        if (buf.readableBytes() >= 2) {
+            int status = buf.readUnsignedShort();
+            position.setValid(BitUtil.check(status, 0));
+            if (BitUtil.check(status, 1)) {
+                position.set(Position.KEY_IGNITION, BitUtil.check(status, 2));
+            }
+            position.set(Position.KEY_STATUS, status);
+        }
+
+        if (buf.readableBytes() >= 2) {
+            position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
+        }
+
+        if (buf.readableBytes() >= 4) {
+            position.set(Position.PREFIX_ADC + 0, buf.readUnsignedShort());
+            position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
+        }
+
+        if (buf.readableBytes() >= 4) {
+            position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+        }
+
+        if (buf.readableBytes() >= 4) {
+            buf.readUnsignedShort(); // gsm counter
+            buf.readUnsignedShort(); // gps counter
+        }
+
+        if (buf.readableBytes() >= 4) {
+            position.set(Position.KEY_STEPS, buf.readUnsignedShort());
+            buf.readUnsignedShort(); // walking time
+        }
+
+        if (buf.readableBytes() >= 12) {
+            position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedShort() / 256.0);
+            position.set("humidity", buf.readUnsignedShort() * 0.1);
+            position.set("illuminance", buf.readUnsignedInt() / 256.0);
+            position.set("co2", buf.readUnsignedInt());
+        }
+
         return position;
     }
 
@@ -433,6 +472,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
             return null;
         } else {
+
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
             if (deviceSession == null) {
                 return null;
@@ -469,6 +509,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 Log.warning(new UnsupportedOperationException());
                 sendResponse(channel, type, index, null);
             }
+
         }
 
         return null;
