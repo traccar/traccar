@@ -154,12 +154,10 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .text("VP1,")
             .or()
             .groupBegin()
-            .text("V1,")
-            .or()
             .text("V4,")
             .expression("(.*),")                 // response
             .or()
-            .text("V19,")
+            .expression("V[^,]*,")
             .groupEnd()
             .number("(?:(dd)(dd)(dd))?,")        // time (hhmmss)
             .groupEnd()
