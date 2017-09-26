@@ -93,7 +93,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private void decodeParameter(Position position, int id, ChannelBuffer buf, int length) {
+    private void decodeOtherParameter(Position position, int id, ChannelBuffer buf, int length) {
         switch (id) {
             case 1:
             case 2:
@@ -199,11 +199,19 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_MOTION, readValue(buf, length, false) == 1);
                 break;
             case 244:
-                position.set("roaming", readValue(buf, length, false) == 1);
+                position.set(Position.KEY_ROAMING, readValue(buf, length, false) == 1);
                 break;
             default:
                 position.set(Position.PREFIX_IO + id, readValue(buf, length, false));
                 break;
+        }
+    }
+
+    private void decodeParameter(Position position, int id, ChannelBuffer buf, int length, int codec) {
+        if (codec == CODEC_GH3000) {
+            decodeGh3000Parameter(position, id, buf, length);
+        } else {
+            decodeOtherParameter(position, id, buf, length);
         }
     }
 
@@ -315,11 +323,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(globalMask, 1)) {
             int cnt = buf.readUnsignedByte();
             for (int j = 0; j < cnt; j++) {
-                if (codec == CODEC_GH3000) {
-                    decodeGh3000Parameter(position, buf.readUnsignedByte(), buf, 1);
-                } else {
-                    decodeParameter(position, buf.readUnsignedByte(), buf, 1);
-                }
+                decodeParameter(position, buf.readUnsignedByte(), buf, 1, codec);
             }
         }
 
@@ -327,11 +331,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(globalMask, 2)) {
             int cnt = buf.readUnsignedByte();
             for (int j = 0; j < cnt; j++) {
-                if (codec == CODEC_GH3000) {
-                    decodeGh3000Parameter(position, buf.readUnsignedByte(), buf, 2);
-                } else {
-                    decodeParameter(position, buf.readUnsignedByte(), buf, 2);
-                }
+                decodeParameter(position, buf.readUnsignedByte(), buf, 2, codec);
             }
         }
 
@@ -339,11 +339,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(globalMask, 3)) {
             int cnt = buf.readUnsignedByte();
             for (int j = 0; j < cnt; j++) {
-                if (codec == CODEC_GH3000) {
-                    decodeGh3000Parameter(position, buf.readUnsignedByte(), buf, 4);
-                } else {
-                    decodeParameter(position, buf.readUnsignedByte(), buf, 4);
-                }
+                decodeParameter(position, buf.readUnsignedByte(), buf, 4, codec);
             }
         }
 
@@ -351,7 +347,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         if (codec == CODEC_FM4X00) {
             int cnt = buf.readUnsignedByte();
             for (int j = 0; j < cnt; j++) {
-                decodeParameter(position, buf.readUnsignedByte(), buf, 8);
+                decodeOtherParameter(position, buf.readUnsignedByte(), buf, 8);
             }
         }
 

@@ -261,6 +261,10 @@ public class ProtocolTest extends BaseTest {
             Assert.assertTrue(attributes.get(Position.KEY_STEPS) instanceof Number);
         }
 
+        if (attributes.containsKey(Position.KEY_ROAMING)) {
+            Assert.assertTrue(attributes.get(Position.KEY_ROAMING) instanceof Boolean);
+        }
+
         if (position.getNetwork() != null && position.getNetwork().getCellTowers() != null) {
             for (CellTower cellTower : position.getNetwork().getCellTowers()) {
                 checkInteger(cellTower.getMobileCountryCode(), 0, 999);
