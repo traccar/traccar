@@ -114,7 +114,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set("axisZ", readValue(buf, length, true));
                 break;
             case 21:
-                position.set("gsmLevel", readValue(buf, length, false));
+                position.set(Position.KEY_RSSI, readValue(buf, length, false));
                 break;
             case 66:
                 position.set(Position.KEY_POWER, readValue(buf, length, false) * 0.001);
