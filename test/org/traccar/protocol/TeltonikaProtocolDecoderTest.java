@@ -59,6 +59,12 @@ public class TeltonikaProtocolDecoderTest extends ProtocolTest {
         verifyPositions(decoder, binary(
                 "00000000000000a608010000013f14a1d1ce000f0eb790209a778000ab010c0500000000000000000100003390"));
 
+        verifyPositions(decoder, binary(
+                "000000000000004508010000015eb70a86d00024089d4d21dee3860137005f12005f000e06ef01f00150011503c800450108b5000bb6000642382718005fcd057ace19d3430f57440000000001000002bf"));
+
+        verifyPositions(decoder, binary(
+                "000000000000004a08010000015ebc1da508002411926621f15246010b00b913005e000f06ef01f00150011505c800450108b5000bb6000642381b18005ecd0318ce19cd430f5844000001f1000061a900010000c8e1"));
+
         decoder.setExtended(true);
 
         verifyPositions(decoder, false, binary(
