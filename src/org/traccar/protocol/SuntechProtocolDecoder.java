@@ -114,6 +114,8 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         switch (value) {
             case 1:
                 return Position.ALARM_SOS;
+            case 2:
+                return Position.ALARM_PARKING;
             case 3:
                 return Position.ALARM_POWER_CUT;
             case 5:
@@ -123,6 +125,33 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_MOVEMENT;
             case 8:
                 return Position.ALARM_SHOCK;
+            default:
+                return null;
+        }
+    }
+
+    private String decodeAlert(int value) {
+        switch (value) {
+            case 1:
+                return Position.ALARM_OVERSPEED;
+            case 5:
+                return Position.ALARM_GEOFENCE_EXIT;
+            case 6:
+                return Position.ALARM_GEOFENCE_ENTER;
+            case 14:
+                return Position.ALARM_LOW_BATTERY;
+            case 15:
+                return Position.ALARM_SHOCK;
+            case 16:
+                return Position.ALARM_ACCIDENT;
+            case 46:
+                return Position.ALARM_ACCELERATION;
+            case 47:
+                return Position.ALARM_BREAKING;
+            case 48:
+                return Position.ALARM_ACCIDENT;
+            case 50:
+                return Position.ALARM_JAMMING;
             default:
                 return null;
         }
@@ -193,8 +222,10 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_ALARM, decodeEmergency(Integer.parseInt(values[index++])));
                 break;
             case "EVT":
-            case "ALT":
                 position.set(Position.KEY_EVENT, Integer.parseInt(values[index++]));
+                break;
+            case "ALT":
+                position.set(Position.KEY_ALARM, decodeAlert(Integer.parseInt(values[index++])));
                 break;
             default:
                 break;
