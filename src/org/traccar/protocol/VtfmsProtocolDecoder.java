@@ -84,7 +84,7 @@ public class VtfmsProtocolDecoder extends BaseProtocolDecoder {
             case 15:
                 return Position.ALARM_POWER_RESTORED;
             case 32:
-                return Position.ALARM_BREAKING;
+                return Position.ALARM_BRAKING;
             case 33:
                 return Position.ALARM_ACCELERATION;
             default:

@@ -124,7 +124,7 @@ public class Vt200ProtocolDecoder extends BaseProtocolDecoder {
             position.set("maxRpm", buf.readUnsignedShort());
             position.set("maxTemp", buf.readUnsignedByte() - 40);
             position.set("hardAccelerationCount", buf.readUnsignedByte());
-            position.set("hardBreakingCount", buf.readUnsignedByte());
+            position.set("hardBrakingCount", buf.readUnsignedByte());
 
             for (String speedType : Arrays.asList("over", "high", "normal", "low")) {
                 position.set(speedType + "SpeedTime", buf.readUnsignedShort());

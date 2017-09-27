@@ -124,7 +124,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
                     break;
                 case 23:
-                    position.set(Position.KEY_ALARM, Position.ALARM_BREAKING);
+                    position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
                     break;
                 case 24:
                     position.set(Position.KEY_ALARM, Position.ALARM_ACCIDENT);

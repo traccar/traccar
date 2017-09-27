@@ -147,7 +147,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             case 46:
                 return Position.ALARM_ACCELERATION;
             case 47:
-                return Position.ALARM_BREAKING;
+                return Position.ALARM_BRAKING;
             case 48:
                 return Position.ALARM_ACCIDENT;
             case 50:
