@@ -161,7 +161,11 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .groupEnd()
             .number("(?:(dd)(dd)(dd))?,")        // time (hhmmss)
             .groupEnd()
+            .groupBegin()
             .expression("([ABV])?,")             // validity
+            .or()
+            .number("(d+),")                     // coding scheme
+            .groupEnd()
             .groupBegin()
             .number("-(d+)-(d+.d+),")            // latitude
             .or()
@@ -278,6 +282,10 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext()) {
             position.setValid(parser.next().equals("A"));
+        }
+        if (parser.hasNext()) {
+            parser.nextInt(); // coding scheme
+            position.setValid(true);
         }
 
         if (parser.hasNext(2)) {
