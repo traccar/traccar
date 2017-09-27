@@ -94,8 +94,8 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d+),")                  // single fuel consumption
             .number("(d+.d+),")                  // total fuel consumption
             .number("(d+),")                     // error code count
-            .number("(d+),")                     // harsh acceleration count
-            .number("(d+)")                      // harsh break count
+            .number("(d+),")                     // hard acceleration count
+            .number("(d+)")                      // hard brake count
             .compile();
 
     private static final Pattern PATTERN_OBDA = new PatternBuilder()
@@ -106,8 +106,8 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // average speed
             .number("(d+),")                     // history highest speed
             .number("(d+),")                     // history highest rpm
-            .number("(d+),")                     // total harsh acceleration
-            .number("(d+)")                      // total harsh break n0
+            .number("(d+),")                     // total hard acceleration
+            .number("(d+)")                      // total hard brake
             .compile();
 
     public static final int MSG_HEARTBEAT = 0x0001;
@@ -201,7 +201,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             case 0x53:
                 return Position.ALARM_GPS_ANTENNA_CUT;
             case 0x72:
-                return Position.ALARM_BREAKING;
+                return Position.ALARM_BRAKING;
             case 0x73:
                 return Position.ALARM_ACCELERATION;
             default:
@@ -301,8 +301,8 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         position.set("singleFuelConsumption", parser.nextDouble());
         position.set("totalFuelConsumption", parser.nextDouble());
         position.set(Position.KEY_DTCS, parser.nextInt());
-        position.set("harshAcelerationNo", parser.nextInt());
-        position.set("harshBreakerNo", parser.nextInt());
+        position.set("hardAccelerationCount", parser.nextInt());
+        position.set("hardBrakingCount", parser.nextInt());
 
         return position;
     }

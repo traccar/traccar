@@ -43,7 +43,7 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
             case 0x11:
                 return Position.ALARM_OVERSPEED;
             case 0x14:
-                return Position.ALARM_BREAKING;
+                return Position.ALARM_BRAKING;
             case 0x15:
                 return Position.ALARM_ACCELERATION;
             case 0x30:

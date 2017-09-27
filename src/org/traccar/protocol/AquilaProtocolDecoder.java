@@ -81,7 +81,7 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
             .number("[01],")                     // corner packet
             .number("(?:d+,){6}")                // reserved
             .number("[01],")                     // hard acceleration
-            .number("[01],")                     // hard breaking
+            .number("[01],")                     // hard braking
             .number("[01],[01],[01],[01],")      // course bits
             .number("(d+),")                     // external voltage
             .number("(d+),")                     // internal voltage
@@ -115,7 +115,7 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
             .number("[01],")                     // do 1
             .number("[01],")                     // reserved
             .number("[01],")                     // hard acceleration
-            .number("[01],")                     // hard breaking
+            .number("[01],")                     // hard braking
             .number("(?:[01],){4}")              // reserved
             .number("(d+),")                     // external voltage
             .number("(d+),")                     // internal voltage

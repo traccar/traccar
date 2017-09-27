@@ -568,7 +568,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_OBD_SPEED, buf.readUnsignedByte());
             position.set("speedMax", buf.readUnsignedByte());
             position.set("speedMin", buf.readUnsignedByte());
-            position.set("hardBreaking", buf.readUnsignedByte());
+            position.set("hardBraking", buf.readUnsignedByte());
         }
 
         if ((selector & 0x0200) != 0) {
