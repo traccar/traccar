@@ -394,21 +394,34 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        String status = parser.next();
-
-        if (status.charAt(0) == '2') {
-            position.set(Position.KEY_IGNITION, true);
-        } else if (status.charAt(0) == '4') {
-            position.set(Position.KEY_IGNITION, false);
+        switch (parser.nextHexInt()) {
+            case 0x16:
+            case 0x1A:
+            case 0x12:
+                position.set(Position.KEY_IGNITION, false);
+                position.set(Position.KEY_MOTION, true);
+                break;
+            case 0x11:
+                position.set(Position.KEY_IGNITION, false);
+                position.set(Position.KEY_MOTION, false);
+                break;
+            case 0x21:
+                position.set(Position.KEY_IGNITION, true);
+                position.set(Position.KEY_MOTION, false);
+                break;
+            case 0x22:
+                position.set(Position.KEY_IGNITION, true);
+                position.set(Position.KEY_MOTION, true);
+                break;
+            case 0x41:
+                position.set(Position.KEY_MOTION, false);
+                break;
+            case 0x42:
+                position.set(Position.KEY_MOTION, true);
+                break;
+            default:
+                break;
         }
-
-        if (status.charAt(1) == '1') {
-            position.set(Position.KEY_MOTION, false);
-        } else if (status.charAt(1) == '2') {
-            position.set(Position.KEY_MOTION, true);
-        }
-
-        position.set(Position.KEY_STATUS, status);
 
         position.set(Position.KEY_RSSI, parser.nextInt());
 
