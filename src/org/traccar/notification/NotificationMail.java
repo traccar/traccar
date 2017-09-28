@@ -87,13 +87,16 @@ public final class NotificationMail {
     public static void sendMailSync(long userId, Event event, Position position) throws MessagingException {
         User user = Context.getPermissionsManager().getUser(userId);
 
-        Properties properties = getProperties(new PropertiesProvider(Context.getConfig()));
-        if (!properties.containsKey("mail.smtp.host")) {
+        Properties properties = null;
+        if (!Context.getConfig().getBoolean("mail.smtp.ignoreUserConfig")) {
             properties = getProperties(new PropertiesProvider(user));
-            if (!properties.containsKey("mail.smtp.host")) {
-                Log.warning("No SMTP configuration found");
-                return;
-            }
+        }
+        if (properties == null || !properties.containsKey("mail.smtp.host")) {
+            properties = getProperties(new PropertiesProvider(Context.getConfig()));
+        }
+        if (!properties.containsKey("mail.smtp.host")) {
+            Log.warning("No SMTP configuration found");
+            return;
         }
 
         Session session = Session.getInstance(properties);
