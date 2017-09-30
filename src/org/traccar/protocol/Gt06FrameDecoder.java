@@ -38,16 +38,17 @@ public class Gt06FrameDecoder extends FrameDecoder {
             length += 2 + buf.getUnsignedShort(buf.readerIndex() + 2);
         }
 
-        if (buf.readableBytes() >= length) {
-            if (buf.getUnsignedShort(buf.readerIndex() + length - 2) == 0x0d0a) {
-                return buf.readBytes(length);
-            } else {
-                int endIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) 0x0d);
-                if (endIndex > 0 && buf.writerIndex() > endIndex + 1 && buf.getByte(endIndex + 1) == 0x0a) {
-                    return buf.readBytes(endIndex + 2 - buf.readerIndex());
-                }
-            }
+        if (buf.readableBytes() >= length && buf.getUnsignedShort(buf.readerIndex() + length - 2) == 0x0d0a) {
+            return buf.readBytes(length);
         }
+
+        int endIndex = buf.readerIndex() - 1;
+        do {
+            endIndex = buf.indexOf(endIndex + 1, buf.writerIndex(), (byte) 0x0d);
+            if (endIndex > 0 && buf.writerIndex() > endIndex + 1 && buf.getByte(endIndex + 1) == 0x0a) {
+                return buf.readBytes(endIndex + 2 - buf.readerIndex());
+            }
+        } while (endIndex > 0);
 
         return null;
     }
