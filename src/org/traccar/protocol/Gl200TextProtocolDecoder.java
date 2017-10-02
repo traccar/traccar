@@ -234,8 +234,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .expression("[^,]*,")                // device name
             .number("d+,")                       // ignition off duration
             .expression(PATTERN_LOCATION.pattern())
-            .number("(d{5}:dd:dd)?,")            // hour meter
             .number("(d{1,7}.d)?,")              // odometer
+            .number("(d{5}:dd:dd)?,")            // hour meter
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
             .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
             .text(",")
