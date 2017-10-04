@@ -40,11 +40,11 @@ public class CradlepointProtocolDecoder extends BaseProtocolDecoder {
             .expression("([EW]),")
             .number("(d+.d+)?,")                 // speed
             .number("(d+.d+)?,")                 // course
-            .expression("([^,]+),")              // carrier
+            .expression("([^,]+)?,")             // carrier
             .expression("([^,]+)?,")             // serdis
-            .number("(-?d+),")                   // rsrp
-            .number("(-?d+),")                   // rssi
-            .number("(-?d+),")                   // rsrq
+            .number("(-?d+)?,")                  // rsrp
+            .number("(-?d+)?,")                  // rssi
+            .number("(-?d+)?,")                  // rsrq
             .expression("([^,]+)?,")             // ecio
             .expression("([^,]+)?")              // wan ip
             .compile();
