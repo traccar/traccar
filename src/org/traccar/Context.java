@@ -21,6 +21,9 @@ import com.ning.http.client.AsyncHttpClient;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.velocity.app.VelocityEngine;
@@ -43,6 +46,7 @@ import org.traccar.database.StatisticsManager;
 import org.traccar.database.UsersManager;
 import org.traccar.events.MotionEventHandler;
 import org.traccar.events.OverspeedEventHandler;
+import org.traccar.flespi.FlespiClient;
 import org.traccar.geocoder.BingMapsGeocoder;
 import org.traccar.geocoder.FactualGeocoder;
 import org.traccar.geocoder.GeocodeFarmGeocoder;
@@ -263,6 +267,12 @@ public final class Context {
                 config.getDouble("event.motion.speedThreshold", 0.01));
     }
 
+    private final static List<FlespiClient> flespiClients = new ArrayList<>();
+
+    public static List<FlespiClient> getFlespiClients() {
+        return flespiClients;
+    }
+
     public static void init(String[] arguments) throws Exception {
 
         config = new Config();
@@ -411,6 +421,17 @@ public final class Context {
             smppClient = new SmppClient();
         }
 
+        if (config.getBoolean("flespi.enable")) {
+            String uri = config.getString("flespi.url");
+            String token = config.getString("flespi.token");
+            String channelIds = config.getString("flespi.channel.ids");
+            List<String> ids = Arrays.asList(channelIds.split(","));
+            if (uri != null && token != null) {
+                for (String channelId : ids) {
+                    flespiClients.add(new FlespiClient(uri, token, channelId));
+                }
+            }
+        }
     }
 
     public static void init(IdentityManager testIdentityManager) {
