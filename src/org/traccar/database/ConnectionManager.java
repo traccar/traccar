@@ -46,7 +46,7 @@ public class ConnectionManager {
     private final Map<Long, Set<UpdateListener>> listeners = new ConcurrentHashMap<>();
     private final Map<Long, Timeout> timeouts = new ConcurrentHashMap<>();
 
-    //TODO: saurako - set status.timeout in debug.xml so get offline updates earlier.
+    //saurako - set status.timeout in debug.xml so get offline updates earlier.
     public ConnectionManager() {
         deviceTimeout = Context.getConfig().getLong("status.timeout", DEFAULT_TIMEOUT) * 1000;
         enableStatusEvents = Context.getConfig().getBoolean("event.enable");
