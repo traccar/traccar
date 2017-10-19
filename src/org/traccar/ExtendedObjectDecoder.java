@@ -29,6 +29,9 @@ import javax.xml.bind.DatatypeConverter;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 public abstract class ExtendedObjectDecoder implements ChannelUpstreamHandler {
 
@@ -68,6 +71,16 @@ public abstract class ExtendedObjectDecoder implements ChannelUpstreamHandler {
                     for (Object o : (Collection) decodedMessage) {
                         saveOriginal(o, originalMessage);
                         Channels.fireMessageReceived(ctx, o, e.getRemoteAddress());
+                    }
+                } else if (decodedMessage instanceof Map) {
+                    Iterator it = ((Map) decodedMessage).entrySet().iterator();
+                    while (it.hasNext()) {
+                        Map.Entry pair = (Map.Entry) it.next();
+                        List<Position> positions = (List<Position>) pair.getValue();
+                        for (Position position : positions) {
+                            saveOriginal(position, originalMessage);
+                            Channels.fireMessageReceived(ctx, position, e.getRemoteAddress());
+                        }
                     }
                 } else {
                     saveOriginal(decodedMessage, originalMessage);

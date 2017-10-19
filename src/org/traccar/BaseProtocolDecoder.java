@@ -29,6 +29,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.Iterator;
 import java.sql.SQLException;
 
 public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
@@ -204,6 +206,13 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
                 Collection positions = (Collection) decodedMessage;
                 if (!positions.isEmpty()) {
                     position = (Position) positions.iterator().next();
+                }
+            } else if (decodedMessage instanceof  Map) {
+                Set<Long> deviceIds = ((HashMap) decodedMessage).keySet();
+                Iterator<Long> deviceIdsIterator = deviceIds.iterator();
+                while (deviceIdsIterator.hasNext()) {
+                    Context.getConnectionManager().updateDevice(
+                            deviceIdsIterator.next(), Device.STATUS_ONLINE, new Date());
                 }
             }
         }
