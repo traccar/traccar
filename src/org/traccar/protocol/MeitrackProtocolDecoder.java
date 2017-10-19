@@ -20,6 +20,7 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
+import org.traccar.helper.Checksum;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -313,7 +314,6 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
-        // Find type
         int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ',');
         index = buf.indexOf(index + 1, buf.writerIndex(), (byte) ',');
 
@@ -323,7 +323,11 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                 if (channel != null) {
                     DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
                     String imei = Context.getIdentityManager().getById(deviceSession.getDeviceId()).getUniqueId();
-                    channel.write("@@O46," + imei + ",D00,camera_picture.jpg,0*00\r\n");
+                    String content = "D00,camera_picture.jpg,0";
+                    int length = 1 + imei.length() + 1 + content.length() + 5;
+                    String response = String.format("@@O%02d,%s,%s*", length, imei, content);
+                    response += Checksum.sum(response) + "\r\n";
+                    channel.write(response);
                 }
                 return null;
             case "CCC":
