@@ -15,11 +15,9 @@
  */
 package org.traccar;
 
-import org.traccar.flespi.FlespiClient;
 import org.traccar.helper.Log;
 
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Locale;
@@ -58,10 +56,6 @@ public final class Main {
             public void run() {
                 Log.info("Shutting down server...");
 
-                List<FlespiClient> flespiClients = Context.getFlespiClients();
-                for (FlespiClient flespiClient : flespiClients) {
-                    flespiClient.stopPullTask();
-                }
                 if (Context.getWebServer() != null) {
                     Context.getWebServer().stop();
                 }

@@ -218,10 +218,4 @@
     <entry key='esky.port'>5147</entry>
     <entry key='genx.port'>5148</entry>
 
-    <!-- flespi config -->
-    <entry key="flespi.enable">true</entry>
-    <entry key='flespi.url'>https://flespi.io</entry>
-    <entry key='flespi.token'></entry>
-    <entry key='flespi.channel.ids'></entry>
-
 </properties>
