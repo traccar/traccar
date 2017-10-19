@@ -108,11 +108,11 @@
         "/commands/send": {
             "get": {
                 "summary": "Fetch a list of Saved Commands supported by Device at the moment",
-                "description": "Return a list of saved commands linked to Device and its groups, filtered by current Device state and protocol support",
+                "description": "Return a list of saved commands linked to Device and its groups, filtered by current Device protocol support",
                 "parameters": [
                     {
                         "$ref": "#/parameters/deviceId"
-                    },
+                    }
                 ],
                 "responses": {
                     "200": {
@@ -144,13 +144,19 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Command sent",
+                        "schema": {
+                            "$ref": "#/definitions/Command"
+                        }
+                    },
+                    "202": {
+                        "description": "Command queued",
                         "schema": {
                             "$ref": "#/definitions/Command"
                         }
                     },
                     "400": {
-                        "description": "Could happen when dispatching to a device that is offline, the user doesn't have permission or an incorrect command _type_ for the device"
+                        "description": "Could happen when the user doesn't have permission or an incorrect command _type_ for the device"
                     }
                 }
             }

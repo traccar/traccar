@@ -57,7 +57,9 @@ public class ConnectionManager {
     }
 
     public void addActiveDevice(long deviceId, Protocol protocol, Channel channel, SocketAddress remoteAddress) {
-        activeDevices.put(deviceId, new ActiveDevice(deviceId, protocol, channel, remoteAddress));
+        ActiveDevice activeDevice = new ActiveDevice(deviceId, protocol, channel, remoteAddress);
+        activeDevices.put(deviceId, activeDevice);
+        Context.getCommandsManager().sendQueuedCommands(activeDevice);
     }
 
     public void removeActiveDevice(Channel channel) {
@@ -122,6 +124,7 @@ public class ConnectionManager {
                 public void run(Timeout timeout) throws Exception {
                     if (!timeout.isCancelled()) {
                         updateDevice(deviceId, Device.STATUS_UNKNOWN, null);
+                        activeDevices.remove(deviceId);
                     }
                 }
             }, deviceTimeout, TimeUnit.MILLISECONDS));
