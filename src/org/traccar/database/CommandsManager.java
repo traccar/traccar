@@ -22,9 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.traccar.BaseProtocol;
 import org.traccar.Context;
@@ -35,7 +33,7 @@ import org.traccar.model.Position;
 
 public class CommandsManager  extends ExtendedObjectManager<Command> {
 
-    private final Map<Long, Queue<Command>> deviceQueues = new ConcurrentHashMap<>();
+    private final Map<Long, List<Command>> deviceQueues = new ConcurrentHashMap<>();
 
     public CommandsManager(DataManager dataManager) {
         super(dataManager, Command.class);
@@ -127,20 +125,18 @@ public class CommandsManager  extends ExtendedObjectManager<Command> {
         return result;
     }
 
-    private Queue<Command> getDeviceQueue(long deviceId) {
+    private List<Command> getDeviceQueue(long deviceId) {
         if (!deviceQueues.containsKey(deviceId)) {
-            deviceQueues.put(deviceId, new ConcurrentLinkedQueue<Command>());
+            deviceQueues.put(deviceId, new ArrayList<Command>());
         }
         return deviceQueues.get(deviceId);
     }
 
     public void sendQueuedCommands(ActiveDevice activeDevice) {
-        Queue<Command> deviceQueue = deviceQueues.get(activeDevice.getDeviceId());
+        List<Command> deviceQueue = deviceQueues.get(activeDevice.getDeviceId());
         if (deviceQueue != null) {
-            Command command = deviceQueue.poll();
-            while (command != null) {
+            for (Command command : deviceQueue) {
                 activeDevice.sendCommand(command);
-                command = deviceQueue.poll();
             }
         }
     }
