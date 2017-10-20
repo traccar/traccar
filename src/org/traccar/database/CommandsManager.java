@@ -21,6 +21,10 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.traccar.BaseProtocol;
 import org.traccar.Context;
@@ -31,26 +35,22 @@ import org.traccar.model.Position;
 
 public class CommandsManager  extends ExtendedObjectManager<Command> {
 
-    private boolean fallbackToText;
+    private final Map<Long, Queue<Command>> deviceQueues = new ConcurrentHashMap<>();
 
     public CommandsManager(DataManager dataManager) {
         super(dataManager, Command.class);
-        fallbackToText = Context.getConfig().getBoolean("command.fallbackToSms");
     }
 
     public boolean checkDeviceCommand(long deviceId, long commandId) {
         return !getAllDeviceItems(deviceId).contains(commandId);
     }
 
-    public void sendCommand(Command command) throws Exception {
-        sendCommand(command, command.getDeviceId(), fallbackToText);
+    public boolean sendCommand(long commandId, long deviceId) throws Exception {
+        return sendCommand(getById(commandId), deviceId);
     }
 
-    public void sendCommand(long commandId, long deviceId) throws Exception {
-        sendCommand(getById(commandId), deviceId, false);
-    }
-
-    public void sendCommand(Command command, long deviceId, boolean fallbackToText) throws Exception {
+    public boolean sendCommand(Command command, long deviceId) throws Exception {
+        boolean sent = true;
         if (command.getTextChannel()) {
             Position lastPosition = Context.getIdentityManager().getLastPosition(deviceId);
             String phone = Context.getIdentityManager().getById(deviceId).getPhone();
@@ -71,32 +71,26 @@ public class CommandsManager  extends ExtendedObjectManager<Command> {
             if (activeDevice != null) {
                 activeDevice.sendCommand(command);
             } else {
-                if (fallbackToText) {
-                    command.setTextChannel(true);
-                    sendCommand(command, deviceId, false);
-                } else {
-                    throw new RuntimeException("Device is not online");
-                }
+                sent = !getDeviceQueue(deviceId).add(command);
             }
         }
+        return sent;
     }
 
     public Collection<Long> getSupportedCommands(long deviceId) {
         List<Long> result = new ArrayList<>();
         Position lastPosition = Context.getIdentityManager().getLastPosition(deviceId);
-        boolean online = Context.getConnectionManager().getActiveDevice(deviceId) != null;
         for (long commandId : getAllDeviceItems(deviceId)) {
             Command command = getById(commandId);
-            if (command.getTextChannel() || online) {
-                if (lastPosition != null) {
-                    BaseProtocol protocol = Context.getServerManager().getProtocol(lastPosition.getProtocol());
-                    if (protocol.getSupportedTextCommands().contains(command.getType())
-                            || online && protocol.getSupportedDataCommands().contains(command.getType())) {
-                        result.add(commandId);
-                    }
-                } else if (command.getType().equals(Command.TYPE_CUSTOM)) {
+            if (lastPosition != null) {
+                BaseProtocol protocol = Context.getServerManager().getProtocol(lastPosition.getProtocol());
+                if (command.getTextChannel() && protocol.getSupportedTextCommands().contains(command.getType())
+                        || !command.getTextChannel()
+                        && protocol.getSupportedDataCommands().contains(command.getType())) {
                     result.add(commandId);
                 }
+            } else if (command.getType().equals(Command.TYPE_CUSTOM)) {
+                result.add(commandId);
             }
         }
         return result;
@@ -131,6 +125,24 @@ public class CommandsManager  extends ExtendedObjectManager<Command> {
             }
         }
         return result;
+    }
+
+    private Queue<Command> getDeviceQueue(long deviceId) {
+        if (!deviceQueues.containsKey(deviceId)) {
+            deviceQueues.put(deviceId, new ConcurrentLinkedQueue<Command>());
+        }
+        return deviceQueues.get(deviceId);
+    }
+
+    public void sendQueuedCommands(ActiveDevice activeDevice) {
+        Queue<Command> deviceQueue = deviceQueues.get(activeDevice.getDeviceId());
+        if (deviceQueue != null) {
+            Command command = deviceQueue.poll();
+            while (command != null) {
+                activeDevice.sendCommand(command);
+                command = deviceQueue.poll();
+            }
+        }
     }
 
 }
