@@ -98,6 +98,10 @@ public class ProtocolTest extends BaseTest {
         verifyDecodedPosition(decoder.decode(null, null, object), false, true, null);
     }
 
+    protected void verifyAttributesList(BaseProtocolDecoder decoder, Object object) throws Exception {
+        verifyDecodedList(decoder.decode(null, null, object), false,  true, null);
+    }
+
     protected void verifyPosition(BaseProtocolDecoder decoder, Object object) throws Exception {
         verifyDecodedPosition(decoder.decode(null, null, object), true, false, null);
     }
@@ -107,25 +111,25 @@ public class ProtocolTest extends BaseTest {
     }
 
     protected void verifyPositions(BaseProtocolDecoder decoder, Object object) throws Exception {
-        verifyDecodedList(decoder.decode(null, null, object), true, null);
+        verifyDecodedList(decoder.decode(null, null, object), true, false, null);
     }
 
     protected void verifyPositions(BaseProtocolDecoder decoder, boolean checkLocation, Object object) throws Exception {
-        verifyDecodedList(decoder.decode(null, null, object), checkLocation, null);
+        verifyDecodedList(decoder.decode(null, null, object), checkLocation, false, null);
     }
 
     protected void verifyPositions(BaseProtocolDecoder decoder, Object object, Position position) throws Exception {
-        verifyDecodedList(decoder.decode(null, null, object), true, position);
+        verifyDecodedList(decoder.decode(null, null, object), true,  false, position);
     }
 
-    private void verifyDecodedList(Object decodedObject, boolean checkLocation, Position expected) {
+    private void verifyDecodedList(Object decodedObject, boolean checkLocation, boolean checkAttributes, Position expected) {
 
         Assert.assertNotNull("list is null", decodedObject);
         Assert.assertTrue("not a list", decodedObject instanceof List);
         Assert.assertFalse("list is empty", ((List) decodedObject).isEmpty());
 
         for (Object item : (List) decodedObject) {
-            verifyDecodedPosition(item, checkLocation, false, expected);
+            verifyDecodedPosition(item, checkLocation, checkAttributes, expected);
         }
 
     }
