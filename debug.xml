@@ -21,4 +21,8 @@
 
     <entry key='intellitrac.port'>6037</entry>
 
+    <entry key='arnavibin.port'>5127</entry>
+    <entry key='arnavibin.resetDelay'>60</entry>
+    
+
 </properties>
