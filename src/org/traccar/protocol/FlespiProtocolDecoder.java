@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpRequest;
@@ -23,10 +22,8 @@ import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
-import org.jboss.netty.util.CharsetUtil;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
-import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
 import javax.json.Json;
@@ -42,8 +39,11 @@ import java.util.Date;
 
 public class FlespiProtocolDecoder extends BaseProtocolDecoder {
 
+    private final String protocolName;
+
     public FlespiProtocolDecoder(FlespiProtocol protocol) {
         super(protocol);
+        protocolName = protocol.getName();
     }
 
     @Override
@@ -54,7 +54,6 @@ public class FlespiProtocolDecoder extends BaseProtocolDecoder {
         JsonArray result = Json.createReader(new StringReader(request.getContent().toString(StandardCharsets.UTF_8)))
                 .readArray();
         List<Position> positions = new LinkedList<>();
-        Log.debug(String.format("messages received msgs_count=%d", result.size()));
         for (int i = 0; i < result.size(); i++) {
             JsonObject message = result.getJsonObject(i);
             String ident = message.getString("ident");
@@ -78,38 +77,34 @@ public class FlespiProtocolDecoder extends BaseProtocolDecoder {
     private void sendResponse(Channel channel, HttpResponseStatus status) {
         if (channel != null) {
             HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, status);
-            response.headers().add(HttpHeaders.Names.CONTENT_LENGTH, 10);
-            response.setContent(ChannelBuffers.copiedBuffer("Hello namo", CharsetUtil.US_ASCII));
+            response.headers().add(HttpHeaders.Names.CONTENT_LENGTH, 0);
             channel.write(response);
         }
     }
 
-    private void decodePosition(JsonObject msg, Position position) {
-        position.setProtocol("flespi");
+    private void decodePosition(JsonObject object, Position position) {
+        position.setProtocol(protocolName);
 
-        position.setTime(new Date((long) msg.getJsonNumber("timestamp").doubleValue() * 1000));
-        JsonNumber lat = msg.getJsonNumber("position.latitude");
-        JsonNumber lon = msg.getJsonNumber("position.longitude");
-        position.setLatitude((lat != null && lon != null) ? lat.doubleValue() : 0);
-        position.setLongitude((lat != null && lon != null) ? lon.doubleValue() : 0);
+        position.setTime(new Date((long) object.getJsonNumber("timestamp").doubleValue() * 1000));
+        JsonNumber lat = object.getJsonNumber("position.latitude");
+        JsonNumber lon = object.getJsonNumber("position.longitude");
+        position.setLatitude(lat != null ? lat.doubleValue() : 0);
+        position.setLongitude(lon != null ? lon.doubleValue() : 0);
 
-        JsonNumber speed = msg.getJsonNumber("position.speed");
+        JsonNumber speed = object.getJsonNumber("position.speed");
         position.setSpeed(speed != null ? speed.doubleValue() : 0);
-        if (position.getSpeed() == 111) {
-            position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
-        }
 
-        JsonNumber course = msg.getJsonNumber("position.direction");
+        JsonNumber course = object.getJsonNumber("position.direction");
         position.setCourse(course != null ? course.doubleValue() : 0);
 
-        JsonNumber altitude = msg.getJsonNumber("position.altitude");
+        JsonNumber altitude = object.getJsonNumber("position.altitude");
         position.setAltitude(altitude != null ? altitude.doubleValue() : 0);
 
-        int satellites = msg.getInt("position.satellites", 0);
-        position.setValid(position.getLatitude() != 0 && position.getLongitude() != 0 && satellites >= 3);
+        int satellites = object.getInt("position.satellites", 0);
+        position.setValid(object.getBoolean("position.valid", true));
         position.set(Position.KEY_SATELLITES, satellites);
 
-        if (msg.getBoolean("alarm.event.trigger", false)) {
+        if (object.getBoolean("alarm.event.trigger", false)) {
             position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
         }
     }
