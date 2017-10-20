@@ -88,21 +88,25 @@ public class FlespiProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(new Date((long) object.getJsonNumber("timestamp").doubleValue() * 1000));
         JsonNumber lat = object.getJsonNumber("position.latitude");
         JsonNumber lon = object.getJsonNumber("position.longitude");
-        position.setLatitude(lat != null ? lat.doubleValue() : 0);
-        position.setLongitude(lon != null ? lon.doubleValue() : 0);
-
+        if (lat != null && lon != null) {
+            position.setLatitude(lat.doubleValue());
+            position.setLongitude(lon.doubleValue());
+        }
         JsonNumber speed = object.getJsonNumber("position.speed");
-        position.setSpeed(speed != null ? speed.doubleValue() : 0);
-
+        if (speed != null) {
+            position.setSpeed(speed.doubleValue());
+        }
         JsonNumber course = object.getJsonNumber("position.direction");
-        position.setCourse(course != null ? course.doubleValue() : 0);
-
+        if (course != null) {
+            position.setCourse(course.doubleValue());
+        }
         JsonNumber altitude = object.getJsonNumber("position.altitude");
-        position.setAltitude(altitude != null ? altitude.doubleValue() : 0);
+        if (altitude != null) {
+            position.setAltitude(altitude.doubleValue());
+        }
 
-        int satellites = object.getInt("position.satellites", 0);
         position.setValid(object.getBoolean("position.valid", true));
-        position.set(Position.KEY_SATELLITES, satellites);
+        position.set(Position.KEY_SATELLITES, object.getInt("position.satellites", 0));
 
         if (object.getBoolean("alarm.event.trigger", false)) {
             position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
