@@ -82,9 +82,9 @@ public class CommandsManager  extends ExtendedObjectManager<Command> {
             Command command = getById(commandId);
             if (lastPosition != null) {
                 BaseProtocol protocol = Context.getServerManager().getProtocol(lastPosition.getProtocol());
-                if ((command.getTextChannel()
-                        ? protocol.getSupportedTextCommands() : protocol.getSupportedDataCommands())
-                        .contains(command.getType())) {
+                if (command.getTextChannel() && protocol.getSupportedTextCommands().contains(command.getType())
+                        || !command.getTextChannel()
+                        && protocol.getSupportedDataCommands().contains(command.getType())) {
                     result.add(commandId);
                 }
             } else if (command.getType().equals(Command.TYPE_CUSTOM)) {
