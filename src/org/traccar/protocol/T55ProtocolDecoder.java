@@ -31,11 +31,8 @@ import java.util.regex.Pattern;
 
 public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
-    private final boolean ack;
-
     public T55ProtocolDecoder(T55Protocol protocol) {
         super(protocol);
-        ack = Context.getConfig().getBoolean(getProtocolName() + ".ack");
     }
 
     private static final Pattern PATTERN_GPRMC = new PatternBuilder()
@@ -102,8 +99,11 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
     private Position decodeGprmc(
             DeviceSession deviceSession, String sentence, SocketAddress remoteAddress, Channel channel) {
 
-        if (ack && channel != null && !(channel instanceof DatagramChannel)) {
-            channel.write("OK1\r\n");
+        if (deviceSession != null && channel != null && !(channel instanceof DatagramChannel)) {
+            if (Context.getIdentityManager().lookupAttributeBoolean(
+                    deviceSession.getDeviceId(), getProtocolName() + ".ack", false, true)) {
+                channel.write("OK1\r\n");
+            }
         }
 
         Parser parser = new Parser(PATTERN_GPRMC, sentence);
