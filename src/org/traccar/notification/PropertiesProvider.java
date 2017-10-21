@@ -48,4 +48,17 @@ public class PropertiesProvider {
         return value;
     }
 
+    public int getInteger(String key, int defaultValue) {
+        if (config != null) {
+            return config.getInteger(key, defaultValue);
+        } else {
+            Object result = extendedModel.getAttributes().get(key);
+            if (result != null) {
+                return result instanceof String ? Integer.parseInt((String) result) : (Integer) result;
+            } else {
+                return defaultValue;
+            }
+        }
+    }
+
 }

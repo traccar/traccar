@@ -150,10 +150,22 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .text("*")
             .expression("..,")                   // manufacturer
             .number("(d+),")                     // imei
-            .expression("[^,]+,")
-            .any()
+            .groupBegin()
+            .text("VP1,")
+            .or()
+            .groupBegin()
+            .text("V4,")
+            .expression("(.*),")                 // response
+            .or()
+            .expression("V[^,]*,")
+            .groupEnd()
             .number("(?:(dd)(dd)(dd))?,")        // time (hhmmss)
-            .expression("([AV])?,")              // validity
+            .groupEnd()
+            .groupBegin()
+            .expression("([ABV])?,")             // validity
+            .or()
+            .number("(d+),")                     // coding scheme
+            .groupEnd()
             .groupBegin()
             .number("-(d+)-(d+.d+),")            // latitude
             .or()
@@ -169,25 +181,28 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.?d*),")                 // speed
             .number("(d+.?d*)?,")                // course
             .number("(?:(dd)(dd)(dd))?")         // date (ddmmyy)
-            .any()
-            .number(",(x{8})")                   // status
+            .groupBegin()
+            .expression(",[^,]*,")
+            .expression("[^,]*,")
+            .expression("[^,]*")                 // sim info
+            .groupEnd("?")
+            .groupBegin()
+            .number(",(x{8})")
             .groupBegin()
             .number(",(d+),")                    // odometer
             .number("(-?d+),")                   // temperature
             .number("(d+.d+),")                  // fuel
             .number("(-?d+),")                   // altitude
             .number("(x+),")                     // lac
-            .number("(x+)#")                     // cid
+            .number("(x+)")                      // cid
             .or()
-            .number(",(d+),")
-            .number("(d+),")
-            .number("(d+),")
-            .number("(d+)#")
+            .text(",")
+            .expression("(.*)")                  // data
             .or()
-            .expression(",.*")
-            .or()
-            .text("#")
             .groupEnd()
+            .or()
+            .groupEnd()
+            .text("#")
             .compile();
 
     private static final Pattern PATTERN_NBR = new PatternBuilder()
@@ -222,6 +237,24 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
+    private static final Pattern PATTERN_V3 = new PatternBuilder()
+            .text("*")
+            .expression("..,")                   // manufacturer
+            .number("(d+),")                     // imei
+            .text("V3,")
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
+            .number("(ddd)")                     // mcc
+            .number("(d+),")                     // mnc
+            .number("(d+),")                     // count
+            .expression("(.*),")                 // cell info
+            .number("(x{4}),")                   // battery
+            .number("d+,")                       // reboot info
+            .text("X,")
+            .number("(dd)(dd)(dd),")             // date (ddmmyy)
+            .number("(x{8})")                    // status
+            .text("#").optional()
+            .compile();
+
     private Position decodeText(String sentence, Channel channel, SocketAddress remoteAddress) {
 
         Parser parser = new Parser(PATTERN, sentence);
@@ -238,6 +271,10 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
+        if (parser.hasNext()) {
+            position.set(Position.KEY_RESULT, parser.next());
+        }
+
         DateBuilder dateBuilder = new DateBuilder();
         if (parser.hasNext(3)) {
             dateBuilder.setTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
@@ -245,6 +282,10 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext()) {
             position.setValid(parser.next().equals("A"));
+        }
+        if (parser.hasNext()) {
+            parser.nextInt(); // coding scheme
+            position.setValid(true);
         }
 
         if (parser.hasNext(2)) {
@@ -271,7 +312,9 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(new Date());
         }
 
-        processStatus(position, parser.nextLong(16, 0));
+        if (parser.hasNext()) {
+            processStatus(position, parser.nextLong(16, 0));
+        }
 
         if (parser.hasNext(6)) {
             position.set(Position.KEY_ODOMETER, parser.nextInt(0));
@@ -284,8 +327,9 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (parser.hasNext(4)) {
-            for (int i = 1; i <= 4; i++) {
-                position.set(Position.PREFIX_IO + i, parser.nextInt(0));
+            String[] values = parser.next().split(",");
+            for (int i = 0; i < values.length; i++) {
+                position.set(Position.PREFIX_IO + (i + 1), values[i].trim());
             }
         }
 
@@ -354,8 +398,50 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_RSSI, parser.nextInt());
         position.set(Position.KEY_SATELLITES, parser.nextInt());
         position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
-        position.set("steps", parser.nextInt());
+        position.set(Position.KEY_STEPS, parser.nextInt());
         position.set("turnovers", parser.nextInt());
+
+        dateBuilder.setDateReverse(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
+
+        getLastLocation(position, dateBuilder.getDate());
+
+        processStatus(position, parser.nextLong(16, 0));
+
+        return position;
+    }
+
+    private Position decodeV3(String sentence, Channel channel, SocketAddress remoteAddress) {
+
+        Parser parser = new Parser(PATTERN_V3, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        DateBuilder dateBuilder = new DateBuilder()
+                .setTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
+
+        int mcc = parser.nextInt();
+        int mnc = parser.nextInt();
+
+        int count = parser.nextInt();
+        Network network = new Network();
+        String[] values = parser.next().split(",");
+        for (int i = 0; i < count; i++) {
+            network.addCellTower(CellTower.from(
+                    mcc, mnc, Integer.parseInt(values[i * 4]), Integer.parseInt(values[i * 4 + 1])));
+        }
+        position.setNetwork(network);
+
+        position.set(Position.KEY_BATTERY, parser.nextHexInt());
 
         dateBuilder.setDateReverse(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
 
@@ -385,6 +471,8 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
                             return decodeLbs(sentence, channel, remoteAddress);
                         case "LINK":
                             return decodeLink(sentence, channel, remoteAddress);
+                        case "V3":
+                            return decodeV3(sentence, channel, remoteAddress);
                         default:
                             return decodeText(sentence, channel, remoteAddress);
                     }

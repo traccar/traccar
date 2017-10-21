@@ -18,11 +18,13 @@ package org.traccar.protocol;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.util.Date;
 import java.util.regex.Pattern;
 
 public class CradlepointProtocolDecoder extends BaseProtocolDecoder {
@@ -33,18 +35,18 @@ public class CradlepointProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN = new PatternBuilder()
             .expression("([^,]+),")              // id
-            .number("(dd)(dd)(dd),")             // time (hhmmss)
+            .number("(d{1,6}),")                 // time (hhmmss)
             .number("(d+)(dd.d+),")              // latitude
             .expression("([NS]),")
             .number("(d+)(dd.d+),")              // longitude
             .expression("([EW]),")
             .number("(d+.d+)?,")                 // speed
             .number("(d+.d+)?,")                 // course
-            .expression("([^,]+),")              // carrier
+            .expression("([^,]+)?,")             // carrier
             .expression("([^,]+)?,")             // serdis
-            .number("(-?d+),")                   // rsrp
-            .number("(-?d+),")                   // rssi
-            .number("(-?d+),")                   // rsrq
+            .number("(-?d+)?,")                  // rsrp
+            .number("(-?d+)?,")                  // rssi
+            .number("(-?d+)?,")                  // rsrq
             .expression("([^,]+)?,")             // ecio
             .expression("([^,]+)?")              // wan ip
             .compile();
@@ -58,16 +60,21 @@ public class CradlepointProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
-
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
             return null;
         }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS));
+        int time = parser.nextInt();
+        DateBuilder dateBuilder = new DateBuilder(new Date());
+        dateBuilder.setHour(time / 100 / 100);
+        dateBuilder.setMinute(time / 100 % 100);
+        dateBuilder.setSecond(time % 100);
+        position.setTime(dateBuilder.getDate());
 
         position.setValid(true);
         position.setLatitude(parser.nextCoordinate());
@@ -75,9 +82,12 @@ public class CradlepointProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(parser.nextDouble(0));
         position.setCourse(parser.nextDouble(0));
 
-        parser.skip(3);
-
-        position.set(Position.KEY_RSSI, parser.nextDouble());
+        position.set("carrid", parser.next());
+        position.set("serdis", parser.next());
+        position.set("rsrp", parser.next());
+        position.set("dbm", parser.next());
+        position.set("rsrq", parser.next());
+        position.set("ecio", parser.next());
 
         return position;
     }

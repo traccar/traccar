@@ -48,13 +48,13 @@ public class UserResource extends BaseObjectResource<User> {
     public Collection<User> get(@QueryParam("userId") long userId) throws SQLException {
         UsersManager usersManager = Context.getUsersManager();
         Set<Long> result = null;
-        if (Context.getPermissionsManager().isAdmin(getUserId())) {
+        if (Context.getPermissionsManager().getUserAdmin(getUserId())) {
             if (userId != 0) {
                 result = usersManager.getUserItems(userId);
             } else {
                 result = usersManager.getAllItems();
             }
-        } else if (Context.getPermissionsManager().isManager(getUserId())) {
+        } else if (Context.getPermissionsManager().getUserManager(getUserId())) {
             result = usersManager.getManagedItems(getUserId());
         } else {
             throw new SecurityException("Admin or manager access required");
@@ -66,9 +66,9 @@ public class UserResource extends BaseObjectResource<User> {
     @PermitAll
     @POST
     public Response add(User entity) throws SQLException {
-        if (!Context.getPermissionsManager().isAdmin(getUserId())) {
+        if (!Context.getPermissionsManager().getUserAdmin(getUserId())) {
             Context.getPermissionsManager().checkUserUpdate(getUserId(), new User(), entity);
-            if (Context.getPermissionsManager().isManager(getUserId())) {
+            if (Context.getPermissionsManager().getUserManager(getUserId())) {
                 Context.getPermissionsManager().checkUserLimit(getUserId());
             } else {
                 Context.getPermissionsManager().checkRegistration(getUserId());
@@ -81,13 +81,10 @@ public class UserResource extends BaseObjectResource<User> {
             }
         }
         Context.getUsersManager().addItem(entity);
-        if (Context.getPermissionsManager().isManager(getUserId())) {
+        if (Context.getPermissionsManager().getUserManager(getUserId())) {
             Context.getDataManager().linkObject(User.class, getUserId(), ManagedUser.class, entity.getId(), true);
         }
         Context.getUsersManager().refreshUserItems();
-        if (Context.getNotificationManager() != null) {
-            Context.getNotificationManager().refresh();
-        }
         return Response.ok(entity).build();
     }
 

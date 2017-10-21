@@ -267,7 +267,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             .or().text(" ")
             .groupEnd("?").text(",")
             .number("(d+)?,")                    // rfid
-            .number("d*,")
+            .expression("[^,]*,")
             .number("(d+)?,")                    // battery
             .expression("([^,]*);")              // alert
             .any()
@@ -280,13 +280,13 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
-
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
             return null;
         }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         if (parser.next().equals("S")) {

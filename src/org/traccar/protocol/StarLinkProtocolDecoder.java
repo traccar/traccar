@@ -69,6 +69,29 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
         return value.charAt(0) == '+' ? result : -result;
     }
 
+    private String decodeAlarm(int event) {
+        switch (event) {
+            case 6:
+                return Position.ALARM_OVERSPEED;
+            case 7:
+                return Position.ALARM_GEOFENCE_ENTER;
+            case 8:
+                return Position.ALARM_GEOFENCE_EXIT;
+            case 9:
+                return Position.ALARM_POWER_CUT;
+            case 11:
+                return Position.ALARM_LOW_BATTERY;
+            case 26:
+                return Position.ALARM_TOW;
+            case 36:
+                return Position.ALARM_SOS;
+            case 42:
+                return Position.ALARM_JAMMING;
+            default:
+                return null;
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -109,6 +132,7 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case "#EID#":
                     event = Integer.parseInt(data[i]);
+                    position.set(Position.KEY_ALARM, decodeAlarm(event));
                     position.set(Position.KEY_EVENT, event);
                     break;
                 case "#PDT#":

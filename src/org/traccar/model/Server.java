@@ -147,4 +147,14 @@ public class Server extends ExtendedModel {
     public void setCoordinateFormat(String coordinateFormat) {
         this.coordinateFormat = coordinateFormat;
     }
+
+    private boolean limitCommands;
+
+    public boolean getLimitCommands() {
+        return limitCommands;
+    }
+
+    public void setLimitCommands(boolean limitCommands) {
+        this.limitCommands = limitCommands;
+    }
 }

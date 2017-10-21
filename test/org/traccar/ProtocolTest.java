@@ -241,6 +241,10 @@ public class ProtocolTest extends BaseTest {
             Assert.assertTrue(attributes.get(Position.KEY_CHARGE) instanceof Boolean);
         }
 
+        if (attributes.containsKey(Position.KEY_IGNITION)) {
+            Assert.assertTrue(attributes.get(Position.KEY_IGNITION) instanceof Boolean);
+        }
+
         if (attributes.containsKey(Position.KEY_MOTION)) {
             Assert.assertTrue(attributes.get(Position.KEY_MOTION) instanceof Boolean);
         }
@@ -251,6 +255,14 @@ public class ProtocolTest extends BaseTest {
 
         if (attributes.containsKey(Position.KEY_DRIVER_UNIQUE_ID)) {
             Assert.assertTrue(attributes.get(Position.KEY_DRIVER_UNIQUE_ID) instanceof String);
+        }
+
+        if (attributes.containsKey(Position.KEY_STEPS)) {
+            Assert.assertTrue(attributes.get(Position.KEY_STEPS) instanceof Number);
+        }
+
+        if (attributes.containsKey(Position.KEY_ROAMING)) {
+            Assert.assertTrue(attributes.get(Position.KEY_ROAMING) instanceof Boolean);
         }
 
         if (position.getNetwork() != null && position.getNetwork().getCellTowers() != null) {

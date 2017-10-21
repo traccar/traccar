@@ -32,6 +32,7 @@ import org.traccar.database.ExtendedObjectManager;
 import org.traccar.database.ManagableObjects;
 import org.traccar.database.SimpleObjectManager;
 import org.traccar.model.BaseModel;
+import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.model.User;
@@ -51,7 +52,7 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
     protected final Set<Long> getSimpleManagerItems(BaseObjectManager<T> manager, boolean all,  long userId) {
         Set<Long> result = null;
         if (all) {
-            if (Context.getPermissionsManager().isAdmin(getUserId())) {
+            if (Context.getPermissionsManager().getUserAdmin(getUserId())) {
                 result = manager.getAllItems();
             } else {
                 Context.getPermissionsManager().checkManager(getUserId());
@@ -73,6 +74,8 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         if (baseClass.equals(Device.class)) {
             Context.getPermissionsManager().checkDeviceReadonly(getUserId());
             Context.getPermissionsManager().checkDeviceLimit(getUserId());
+        } else if (baseClass.equals(Command.class)) {
+            Context.getPermissionsManager().checkLimitCommands(getUserId());
         }
 
         BaseObjectManager<T> manager = Context.getManager(baseClass);
@@ -98,6 +101,8 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         } else if (baseClass.equals(User.class)) {
             User before = Context.getPermissionsManager().getUser(entity.getId());
             Context.getPermissionsManager().checkUserUpdate(getUserId(), before, (User) entity);
+        } else if (baseClass.equals(Command.class)) {
+            Context.getPermissionsManager().checkLimitCommands(getUserId());
         }
         Context.getPermissionsManager().checkPermission(baseClass, getUserId(), entity.getId());
 
@@ -106,8 +111,6 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         if (baseClass.equals(Group.class) || baseClass.equals(Device.class)) {
             Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
             Context.getPermissionsManager().refreshAllExtendedPermissions();
-        } else if (baseClass.equals(User.class) && Context.getNotificationManager() != null) {
-            Context.getNotificationManager().refresh();
         }
         return Response.ok(entity).build();
     }
@@ -118,6 +121,8 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         Context.getPermissionsManager().checkReadonly(getUserId());
         if (baseClass.equals(Device.class)) {
             Context.getPermissionsManager().checkDeviceReadonly(getUserId());
+        } else if (baseClass.equals(Command.class)) {
+            Context.getPermissionsManager().checkLimitCommands(getUserId());
         }
         Context.getPermissionsManager().checkPermission(baseClass, getUserId(), id);
 

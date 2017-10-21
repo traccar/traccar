@@ -22,8 +22,116 @@
     ],
     "paths": {
         "/commands": {
+            "get": {
+                "summary": "Fetch a list of Saved Commands",
+                "description": "Without params, it returns a list of Drivers the user has access to",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/all"
+                    },
+                    {
+                        "$ref": "#/parameters/userId"
+                    },
+                    {
+                        "$ref": "#/parameters/deviceId"
+                    },
+                    {
+                        "$ref": "#/parameters/groupId"
+                    },
+                    {
+                        "$ref": "#/parameters/refresh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Command"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create a Saved Command",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/Command"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Command"
+                        }
+                    }
+                }
+            }
+        },
+        "/commands/{id}": {
+            "put": {
+                "summary": "Update a Saved Command",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/entityId"
+                    },
+                    {
+                        "$ref": "#/parameters/Command"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Command"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete a Saved Command",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/entityId"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/commands/send": {
+            "get": {
+                "summary": "Fetch a list of Saved Commands supported by Device at the moment",
+                "description": "Return a list of saved commands linked to Device and its groups, filtered by current Device protocol support",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/deviceId"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Command"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Could happen when the user doesn't have permission for the device"
+                    }
+                }
+            },
             "post": {
                 "summary": "Dispatch commands to device",
+                "description": "Dispatch a new command or Saved Command if _body.id_ set",
                 "parameters": [
                     {
                         "name": "body",
@@ -36,13 +144,50 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Command sent",
+                        "schema": {
+                            "$ref": "#/definitions/Command"
+                        }
+                    },
+                    "202": {
+                        "description": "Command queued",
                         "schema": {
                             "$ref": "#/definitions/Command"
                         }
                     },
                     "400": {
-                        "description": "Could happen when dispatching to a device that is offline, the user doesn't have permission or an incorrect command _type_ for the device"
+                        "description": "Could happen when the user doesn't have permission or an incorrect command _type_ for the device"
+                    }
+                }
+            }
+        },
+        "/commands/types": {
+            "get": {
+                "summary": "Fetch a list of available Commands for the Device or all possible Commands if Device ommited",
+                "parameters": [
+                    {
+                        "name": "deviceId",
+                        "in": "query",
+                        "type": "integer"
+                    },
+                    {
+                        "name": "textChannel",
+                        "in": "query",
+                        "type": "boolean"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/CommandType"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Could happen when trying to fetch from a device the user does not have permission"
                     }
                 }
             }
@@ -519,19 +664,25 @@
                 }
             }
         },
-        "/users/notifications": {
+        "/notifications": {
             "get": {
-                "summary": "Fetch a list of Notification types",
-                "description": "Without params, it returns a list of the user's enabled Notifications",
+                "summary": "Fetch a list of Notifications",
+                "description": "Without params, it returns a list of Notifications the user has access to",
                 "parameters": [
                     {
-                        "name": "all",
-                        "in": "query",
-                        "description": "To fetch a list of all available Notifications",
-                        "type": "boolean"
+                        "$ref": "#/parameters/all"
                     },
                     {
                         "$ref": "#/parameters/userId"
+                    },
+                    {
+                        "$ref": "#/parameters/deviceId"
+                    },
+                    {
+                        "$ref": "#/parameters/groupId"
+                    },
+                    {
+                        "$ref": "#/parameters/refresh"
                     }
                 ],
                 "responses": {
@@ -547,15 +698,10 @@
                 }
             },
             "post": {
-                "summary": "Set or unset a Notification",
+                "summary": "Create a Notification",
                 "parameters": [
                     {
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Notification"
-                        }
+                        "$ref": "#/parameters/Notification"
                     }
                 ],
                 "responses": {
@@ -568,29 +714,67 @@
                 }
             }
         },
-        "/commandtypes": {
-            "get": {
-                "summary": "Fetch a list of available Commands for the Device",
+        "/notifications/{id}": {
+            "put": {
+                "summary": "Update a Notification",
                 "parameters": [
                     {
-                        "name": "deviceId",
-                        "in": "query",
-                        "required": true,
-                        "type": "integer"
+                        "$ref": "#/parameters/entityId"
+                    },
+                    {
+                        "$ref": "#/parameters/Notification"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
+                            "$ref": "#/definitions/Notification"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete a Notification",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/entityId"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/notifications/types": {
+            "get": {
+                "summary": "Fetch a list of available Notification types",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/CommandType"
+                                "$ref": "#/definitions/NotificationType"
                             }
                         }
+                    }
+                }
+            }
+        },
+        "/notifications/test": {
+            "post": {
+                "summary": "Send test notification to current user via Email and SMS",
+                "parameters": [],
+                "responses": {
+                    "204": {
+                        "description": "Successful sending"
                     },
                     "400": {
-                        "description": "Could happen when trying to fetch from an offline device or the user does not have permission"
+                        "description": "Could happen if sending has failed"
                     }
                 }
             }
@@ -1249,12 +1433,6 @@
                 "map": {
                     "type": "string"
                 },
-                "distanceUnit": {
-                    "type": "string"
-                },
-                "speedUnit": {
-                    "type": "string"
-                },
                 "latitude": {
                     "type": "number"
                 },
@@ -1290,6 +1468,9 @@
                 "deviceReadonly": {
                     "type": "boolean"
                 },
+                "limitCommands": {
+                    "type": "boolean"
+                },
                 "token": {
                     "type": "string"
                 },
@@ -1307,6 +1488,12 @@
                 "readonly": {
                     "type": "boolean"
                 },
+                "deviceReadonly": {
+                    "type": "boolean"
+                },
+                "limitCommands": {
+                    "type": "boolean"
+                },
                 "map": {
                     "type": "string"
                 },
@@ -1314,12 +1501,6 @@
                     "type": "string"
                 },
                 "mapUrl": {
-                    "type": "string"
-                },
-                "distanceUnit": {
-                    "type": "string"
-                },
-                "speedUnit": {
                     "type": "string"
                 },
                 "latitude": {
@@ -1348,8 +1529,14 @@
         },
         "Command": {
             "properties": {
+                "id": {
+                    "type": "integer"
+                },
                 "deviceId": {
                     "type": "integer"
+                },
+                "description": {
+                    "type": "string"
                 },
                 "type": {
                     "type": "string"
@@ -1489,8 +1676,8 @@
                 "type": {
                     "type": "string"
                 },
-                "userId": {
-                    "type": "integer"
+                "always": {
+                    "type": "boolean"
                 },
                 "web": {
                     "type": "boolean"
@@ -1498,7 +1685,17 @@
                 "mail": {
                     "type": "boolean"
                 },
+                "sms": {
+                    "type": "boolean"
+                },
                 "attributes": {}
+            }
+        },
+        "NotificationType": {
+            "properties": {
+                "type": {
+                    "type": "string"
+                }
             }
         },
         "Event": {
@@ -1841,6 +2038,22 @@
             "required": true,
             "schema": {
                 "$ref": "#/definitions/Driver"
+            }
+        },
+        "Command": {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+                "$ref": "#/definitions/Command"
+            }
+        },
+        "Notification": {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+                "$ref": "#/definitions/Notification"
             }
         },
         "deviceIdArray": {

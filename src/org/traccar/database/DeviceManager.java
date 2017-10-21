@@ -16,7 +16,6 @@
 package org.traccar.database;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -26,12 +25,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.traccar.BaseProtocol;
 import org.traccar.Config;
 import org.traccar.Context;
 import org.traccar.helper.Log;
-import org.traccar.model.Command;
-import org.traccar.model.CommandType;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceState;
 import org.traccar.model.DeviceTotalDistance;
@@ -55,8 +51,6 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
 
     private final Map<Long, DeviceState> deviceStates = new ConcurrentHashMap<>();
 
-    private boolean fallbackToText;
-
     public DeviceManager(DataManager dataManager) {
         super(dataManager, Device.class);
         this.config = Context.getConfig();
@@ -68,7 +62,6 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         }
         dataRefreshDelay = config.getLong("database.refreshDelay", DEFAULT_REFRESH_DELAY) * 1000;
         lookupGroupsAttribute = config.getBoolean("deviceManager.lookupGroupsAttribute");
-        fallbackToText = config.getBoolean("command.fallbackToSms");
         refreshLastPositions();
     }
 
@@ -262,59 +255,56 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
 
     public boolean lookupAttributeBoolean(
             long deviceId, String attributeName, boolean defaultValue, boolean lookupConfig) {
-        String result = lookupAttribute(deviceId, attributeName, lookupConfig);
+        Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
         if (result != null) {
-            return Boolean.parseBoolean(result);
+            return result instanceof String ? Boolean.parseBoolean((String) result) : (Boolean) result;
         }
         return defaultValue;
     }
 
     public String lookupAttributeString(
             long deviceId, String attributeName, String defaultValue, boolean lookupConfig) {
-        String result = lookupAttribute(deviceId, attributeName, lookupConfig);
-        if (result != null) {
-            return result;
-        }
-        return defaultValue;
+        Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
+        return result != null ? (String) result : defaultValue;
     }
 
     public int lookupAttributeInteger(long deviceId, String attributeName, int defaultValue, boolean lookupConfig) {
-        String result = lookupAttribute(deviceId, attributeName, lookupConfig);
+        Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
         if (result != null) {
-            return Integer.parseInt(result);
+            return result instanceof String ? Integer.parseInt((String) result) : ((Number) result).intValue();
         }
         return defaultValue;
     }
 
     public long lookupAttributeLong(
             long deviceId, String attributeName, long defaultValue, boolean lookupConfig) {
-        String result = lookupAttribute(deviceId, attributeName, lookupConfig);
+        Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
         if (result != null) {
-            return Long.parseLong(result);
+            return result instanceof String ? Long.parseLong((String) result) : ((Number) result).longValue();
         }
         return defaultValue;
     }
 
     public double lookupAttributeDouble(
             long deviceId, String attributeName, double defaultValue, boolean lookupConfig) {
-        String result = lookupAttribute(deviceId, attributeName, lookupConfig);
+        Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
         if (result != null) {
-            return Double.parseDouble(result);
+            return result instanceof String ? Double.parseDouble((String) result) : ((Number) result).doubleValue();
         }
         return defaultValue;
     }
 
-    private String lookupAttribute(long deviceId, String attributeName, boolean lookupConfig) {
-        String result = null;
+    private Object lookupAttribute(long deviceId, String attributeName, boolean lookupConfig) {
+        Object result = null;
         Device device = getById(deviceId);
         if (device != null) {
-            result = device.getString(attributeName);
+            result = device.getAttributes().get(attributeName);
             if (result == null && lookupGroupsAttribute) {
                 long groupId = device.getGroupId();
                 while (groupId != 0) {
                     Group group = Context.getGroupsManager().getById(groupId);
                     if (group != null) {
-                        result = group.getString(attributeName);
+                        result = group.getAttributes().get(attributeName);
                         if (result != null) {
                             break;
                         }
@@ -329,7 +319,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
                     result = Context.getConfig().getString(attributeName);
                 } else {
                     Server server = Context.getPermissionsManager().getServer();
-                    result = server.getString(attributeName);
+                    result = server.getAttributes().get(attributeName);
                 }
             }
         }
@@ -345,50 +335,6 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         } else {
             throw new IllegalArgumentException();
         }
-    }
-
-    public void sendCommand(Command command) throws Exception {
-        long deviceId = command.getDeviceId();
-        if (command.getTextChannel()) {
-            Position lastPosition = getLastPosition(deviceId);
-            if (lastPosition != null) {
-                BaseProtocol protocol = Context.getServerManager().getProtocol(lastPosition.getProtocol());
-                protocol.sendTextCommand(getById(deviceId).getPhone(), command);
-            } else if (command.getType().equals(Command.TYPE_CUSTOM)) {
-                Context.getSmppManager().sendMessageSync(getById(deviceId).getPhone(),
-                        command.getString(Command.KEY_DATA), true);
-            } else {
-                throw new RuntimeException("Command " + command.getType() + " is not supported");
-            }
-        } else {
-            ActiveDevice activeDevice = Context.getConnectionManager().getActiveDevice(deviceId);
-            if (activeDevice != null) {
-                activeDevice.sendCommand(command);
-            } else {
-                if (fallbackToText) {
-                    command.setTextChannel(true);
-                    sendCommand(command);
-                } else {
-                    throw new RuntimeException("Device is not online");
-                }
-            }
-        }
-    }
-
-    public Collection<CommandType> getCommandTypes(long deviceId, boolean textChannel) {
-        List<CommandType> result = new ArrayList<>();
-        Position lastPosition = Context.getDeviceManager().getLastPosition(deviceId);
-        if (lastPosition != null) {
-            BaseProtocol protocol = Context.getServerManager().getProtocol(lastPosition.getProtocol());
-            Collection<String> commands;
-            commands = textChannel ? protocol.getSupportedTextCommands() : protocol.getSupportedDataCommands();
-            for (String commandKey : commands) {
-                result.add(new CommandType(commandKey));
-            }
-        } else {
-            result.add(new CommandType(Command.TYPE_CUSTOM));
-        }
-        return result;
     }
 
     public DeviceState getDeviceState(long deviceId) {

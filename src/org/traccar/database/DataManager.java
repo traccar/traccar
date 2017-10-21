@@ -48,9 +48,11 @@ import org.traccar.model.Event;
 import org.traccar.model.Geofence;
 import org.traccar.model.Group;
 import org.traccar.model.ManagedUser;
+import org.traccar.model.Notification;
 import org.traccar.model.Permission;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Calendar;
+import org.traccar.model.Command;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
 import org.traccar.model.Statistics;
@@ -390,6 +392,10 @@ public class DataManager {
                 return Attribute.class;
             case "calendar":
                 return Calendar.class;
+            case "command":
+                return Command.class;
+            case "notification":
+                return Notification.class;
             default:
                 throw new ClassNotFoundException();
         }

@@ -39,14 +39,12 @@ public final class Stops {
     }
 
     private static Collection<StopReport> detectStops(long deviceId, Date from, Date to) throws SQLException {
-        double speedThreshold = Context.getConfig().getDouble("event.motion.speedThreshold", 0.01);
-
         boolean ignoreOdometer = Context.getDeviceManager()
                 .lookupAttributeBoolean(deviceId, "report.ignoreOdometer", false, true);
 
         Collection<StopReport> result = ReportUtils.detectTripsAndStops(
                 Context.getDataManager().getPositions(deviceId, from, to),
-                Context.getTripsConfig(), ignoreOdometer, speedThreshold, StopReport.class);
+                Context.getTripsConfig(), ignoreOdometer, StopReport.class);
 
         return result;
     }

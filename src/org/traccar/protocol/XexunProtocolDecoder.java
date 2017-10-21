@@ -68,9 +68,11 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
         if (value != null) {
             switch (value.toLowerCase()) {
                 case "acc on":
+                case "accstart":
                     position.set(Position.KEY_IGNITION, true);
                     break;
                 case "acc off":
+                case "accstop":
                     position.set(Position.KEY_IGNITION, false);
                     break;
                 case "help me!":
