@@ -40,7 +40,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    int previousIndex;
+    private int previousIndex;
 
     public static final short HEADER_KEY = 0x6767;
 
@@ -349,11 +349,11 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 if (buf.readableBytes() >= 2) {
                     decodeStatus(position, buf.readUnsignedShort());
                 }
-                
+
                 if (buf.readableBytes() >= 2) {
                     position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
                 }
-                
+
                 if (buf.readableBytes() >= 4) {
                     position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
                     position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort());
@@ -384,45 +384,6 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 break;
         }
 
-        if (buf.readableBytes() >= 2) {
-            int status = buf.readUnsignedShort();
-            position.setValid(BitUtil.check(status, 0));
-            if (BitUtil.check(status, 1)) {
-                position.set(Position.KEY_IGNITION, BitUtil.check(status, 2));
-            }
-            position.set(Position.KEY_STATUS, status);
-        }
-
-        if (buf.readableBytes() >= 2) {
-            position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
-        }
-
-        if (buf.readableBytes() >= 4) {
-            position.set(Position.PREFIX_ADC + 0, buf.readUnsignedShort());
-            position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
-        }
-
-        if (buf.readableBytes() >= 4) {
-            position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
-        }
-
-        if (buf.readableBytes() >= 4) {
-            buf.readUnsignedShort(); // gsm counter
-            buf.readUnsignedShort(); // gps counter
-        }
-
-        if (buf.readableBytes() >= 4) {
-            position.set(Position.KEY_STEPS, buf.readUnsignedShort());
-            buf.readUnsignedShort(); // walking time
-        }
-
-        if (buf.readableBytes() >= 12) {
-            position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedShort() / 256.0);
-            position.set("humidity", buf.readUnsignedShort() * 0.1);
-            position.set("illuminance", buf.readUnsignedInt() / 256.0);
-            position.set("co2", buf.readUnsignedInt());
-        }
-
         return position;
     }
 
@@ -449,14 +410,6 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
         int index = buf.readUnsignedShort();
 
-        // check if we have received a packet out of sequence
-        if(previousIndex > 0 && index <= previousIndex){
-            Log.warning(new IllegalArgumentException("packet received out of order - Previous:" + previousIndex + " Received:" + index));
-            return null;
-        }else{
-            previousIndex = index;
-        }
-
         if (type == MSG_LOGIN) {
             DeviceSession deviceSession
                     = getDeviceSession(channel, remoteAddress, ChannelBuffers.hexDump(buf.readBytes(8)).substring(1));
@@ -474,6 +427,18 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
             if (deviceSession == null) {
                 return null;
+            }
+
+            // check if we have received a packet out of sequence
+            if (!Context.getIdentityManager().lookupAttributeBoolean(
+                     deviceSession.getDeviceId(), "ignorePacketOrder", false, true)) {
+                if (previousIndex > 0 && index <= previousIndex) {
+                    Log.warning(new IllegalArgumentException(
+                            "packet received out of order - Previous:" + previousIndex + " Received:" + index));
+                    return null;
+                } else {
+                    previousIndex = index;
+                }
             }
 
             Position position = new Position();
