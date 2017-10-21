@@ -40,6 +40,8 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
+    int previousIndex;
+
     public static final short HEADER_KEY = 0x6767;
 
     public static final int MSG_LOGIN = 0x01;
@@ -203,9 +205,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                     default:
                         break;
                 }
-
                 sendResponse(channel, type, index, null);
-
                 break;
             case MSG_GPS:
                 // only read remaining 10 bytes if they exist as they are optional in spec
@@ -291,7 +291,6 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                     buf.readUnsignedShort(), buf.readUnsignedShort(),
                     buf.readUnsignedShort(), buf.readUnsignedInt(), buf.readUnsignedByte());
             network.addCellTower(primaryCellTower);
-
             position.set(Position.KEY_RSSI, primaryCellTower.getSignalStrength());
         }
 
@@ -320,12 +319,12 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                     WifiAccessPoint.from(ChannelBuffers.hexDump(buf.readBytes(6)), buf.getUnsignedByte(1)));
         }
 
-        if (BitUtil.check(flags, 5)) { // bss1
+        if (BitUtil.check(flags, 5)) { // bss2
             network.addWifiAccessPoint(
                     WifiAccessPoint.from(ChannelBuffers.hexDump(buf.readBytes(6)), buf.getUnsignedByte(1)));
         }
 
-        if (BitUtil.check(flags, 6)) { // bss1
+        if (BitUtil.check(flags, 6)) { // bss3
             network.addWifiAccessPoint(
                     WifiAccessPoint.from(ChannelBuffers.hexDump(buf.readBytes(6)), buf.getUnsignedByte(1)));
         }
@@ -382,6 +381,8 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                     position.set("illuminance", buf.readUnsignedInt() / 256.0);
                     position.set("co2", buf.readUnsignedInt());
                 }
+
+                sendResponse(channel, type, index, null);
                 break;
         }
 
@@ -410,6 +411,14 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         }
 
         int index = buf.readUnsignedShort();
+
+        // check if we have received a packet out of sequence
+        if(previousIndex > 0 && index <= previousIndex){
+            Log.warning(new IllegalArgumentException("packet received out of order - Previous:" + previousIndex + " Received:" + index));
+            return null;
+        }else{
+            previousIndex = index;
+        }
 
         if (type == MSG_LOGIN) {
             DeviceSession deviceSession
@@ -450,9 +459,6 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                         getLastLocation(position, null);
                         sendResponse(channel, type, index, null);
                         return position;
-                    } else {
-                        sendResponse(channel, type, index, null);
-                        return null;
                     }
                 } else {
                     getLastLocation(position, null);

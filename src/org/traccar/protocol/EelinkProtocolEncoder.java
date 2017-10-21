@@ -65,7 +65,6 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
                 Integer port = command.getInteger(Command.KEY_INDEX);
                 Boolean value = command.getBoolean(Command.KEY_DATA);
                 if(port < 1 || port > 9) return null;
-                
                 StringBuilder state = new StringBuilder("0000");
                 StringBuilder mask = new StringBuilder("0000");
                 mask.setCharAt(port-1, '1');

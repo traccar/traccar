@@ -121,7 +121,7 @@ public class ExtendedModel extends BaseModel {
             return 0;
         }
     }
-
+    
     public void remove(String key) {
         if (attributes.containsKey(key)) {
             attributes.remove(key);
