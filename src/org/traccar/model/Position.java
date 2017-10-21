@@ -36,7 +36,7 @@ public class Position extends Message {
     public static final String KEY_ODOMETER = "odometer"; // meters
     public static final String KEY_ODOMETER_SERVICE = "serviceOdometer"; // meters
     public static final String KEY_ODOMETER_TRIP = "tripOdometer"; // meters
-    public static final String KEY_HOURS = "hours";   
+    public static final String KEY_HOURS = "hours";
     public static final String KEY_STEPS = "steps";
     public static final String KEY_INPUT = "input";
     public static final String KEY_OUTPUT = "output";
