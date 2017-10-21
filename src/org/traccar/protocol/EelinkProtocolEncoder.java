@@ -61,6 +61,16 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
                 return encodeContent("TIMER," + command.getInteger(Command.KEY_FREQUENCY) + ",1#");
             case Command.TYPE_POSITION_STOP:
                 return encodeContent("TIMER,0,0#");
+            case Command.TYPE_OUTPUT_CONTROL:
+                Integer port = command.getInteger(Command.KEY_INDEX);
+                Boolean value = command.getBoolean(Command.KEY_DATA);
+                if(port < 1 || port > 9) return null;
+                
+                StringBuilder state = new StringBuilder("0000");
+                StringBuilder mask = new StringBuilder("0000");
+                mask.setCharAt(port-1, '1');
+                state.setCharAt(port-1, (value?'1':'0'));
+                return encodeContent("PORT," + state + "," + mask + "#");
             case Command.TYPE_SET_TIMEZONE:
                 int tz = command.getInteger(Command.KEY_TIMEZONE);
                 return encodeContent("GMT," + (tz < 0 ? "E" : "W") + "," + (tz / 3600 / 60) + "#");

@@ -38,7 +38,8 @@ public class EelinkProtocol extends BaseProtocol {
                 Command.TYPE_POSITION_PERIODIC,
                 Command.TYPE_POSITION_STOP,
                 Command.TYPE_SET_TIMEZONE,
-                Command.TYPE_SOS_NUMBER);
+                Command.TYPE_SOS_NUMBER,
+                Command.TYPE_OUTPUT_CONTROL);
     }
 
     @Override

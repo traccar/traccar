@@ -333,6 +333,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         switch (type) {
             case MSG_WARNING:
                 position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
+                decodeStatus(position, buf.readUnsignedShort());
                 sendResponse(channel, type, index, null);
                 break;
             case MSG_REPORT:
@@ -348,16 +349,40 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 sendResponse(channel, type, index, null);
                 break;
             default:
+                if (buf.readableBytes() >= 2) {
+                    decodeStatus(position, buf.readUnsignedShort());
+                }
+                
+                if (buf.readableBytes() >= 2) {
+                    position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
+                }
+                
+                if (buf.readableBytes() >= 4) {
+                    position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
+                    position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort());
+                }
+
+                if (buf.readableBytes() >= 4) {
+                    position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+                }
+
+                if (buf.readableBytes() >= 4) {
+                    buf.readUnsignedShort(); // gsm counter
+                    buf.readUnsignedShort(); // gps counter
+                }
+
+                if (buf.readableBytes() >= 4) {
+                    position.set(Position.KEY_STEPS, buf.readUnsignedShort());
+                    buf.readUnsignedShort(); // walking time
+                }
+
+                if (buf.readableBytes() >= 12) {
+                    position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedShort() / 256.0);
+                    position.set("humidity", buf.readUnsignedShort() * 0.1);
+                    position.set("illuminance", buf.readUnsignedInt() / 256.0);
+                    position.set("co2", buf.readUnsignedInt());
+                }
                 break;
-        }
-
-        if (buf.readableBytes() >= 2 * 4) {
-            decodeStatus(position, buf.readUnsignedShort());
-
-            position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
-
-            position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
-            position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort());
         }
 
         return position;
