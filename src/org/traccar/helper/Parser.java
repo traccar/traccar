@@ -212,6 +212,7 @@ public class Parser {
     }
 
     public enum DateTimeFormat {
+        HMSno0,
         HMS,
         SMH,
         HMS_YMD,
@@ -226,9 +227,16 @@ public class Parser {
 
     public Date nextDateTime(DateTimeFormat format, String timeZone) {
         int year = 0, month = 0, day = 0;
-        int hour = 0, minute = 0, second = 0, millisecond = 0;
+        int hour, minute, second, millisecond = 0;
+        int time;
 
         switch (format) {
+            case HMSno0:  // d{1-6} with no leading zeros
+                time = nextInt(0);
+                hour = time / 100 / 100;
+                minute = time / 100 % 100;
+                second = time % 100;
+                break;
             case HMS:
                 hour = nextInt(0);
                 minute = nextInt(0);

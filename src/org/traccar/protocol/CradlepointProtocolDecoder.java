@@ -18,13 +18,11 @@ package org.traccar.protocol;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
-import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.util.Date;
 import java.util.regex.Pattern;
 
 public class CradlepointProtocolDecoder extends BaseProtocolDecoder {
@@ -35,7 +33,7 @@ public class CradlepointProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN = new PatternBuilder()
             .expression("([^,]+),")              // id
-            .number("(d{1,6}),")                 // time (hhmmss)
+            .number("(d{1,6}),")                 // time (hhmmss), no leading zeros
             .number("(d+)(dd.d+),")              // latitude
             .expression("([NS]),")
             .number("(d+)(dd.d+),")              // longitude
@@ -69,12 +67,7 @@ public class CradlepointProtocolDecoder extends BaseProtocolDecoder {
         position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        int time = parser.nextInt();
-        DateBuilder dateBuilder = new DateBuilder(new Date());
-        dateBuilder.setHour(time / 100 / 100);
-        dateBuilder.setMinute(time / 100 % 100);
-        dateBuilder.setSecond(time % 100);
-        position.setTime(dateBuilder.getDate());
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMSno0));
 
         position.setValid(true);
         position.setLatitude(parser.nextCoordinate());
