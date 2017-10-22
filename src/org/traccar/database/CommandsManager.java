@@ -45,11 +45,15 @@ public class CommandsManager  extends ExtendedObjectManager<Command> {
         return !getAllDeviceItems(deviceId).contains(commandId);
     }
 
-    public boolean sendCommand(long commandId, long deviceId) throws Exception {
-        return sendCommand(getById(commandId), deviceId);
-    }
-
-    public boolean sendCommand(Command command, long deviceId) throws Exception {
+    public boolean sendCommand(Command command) throws Exception {
+        long deviceId = command.getDeviceId();
+        if (command.getId() != 0) {
+            Command savedCommand = getById(command.getId());
+            command.setTextChannel(savedCommand.getTextChannel());
+            command.setType(savedCommand.getType());
+            command.setAttributes(savedCommand.getAttributes());
+            command.setDescription(savedCommand.getDescription());
+        }
         boolean sent = true;
         if (command.getTextChannel()) {
             Position lastPosition = Context.getIdentityManager().getLastPosition(deviceId);
