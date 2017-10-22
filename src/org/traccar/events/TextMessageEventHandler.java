@@ -25,10 +25,23 @@ public final class TextMessageEventHandler {
     private TextMessageEventHandler() {
     }
 
+    public static void handleDeviceTextMessage(Long deviceId, String message, String phone) {
+        Device device = Context.getDeviceManager().getById(deviceId);
+        if (device != null && Context.getNotificationManager() != null) {
+            Event event = new Event(Event.TYPE_TEXT_MESSAGE, device.getId());
+            event.set("phone_number", phone);
+            event.set("raw_message", message);
+            event.set("message", "From: " + phone + ", Message: " + message);
+            Context.getNotificationManager().updateEvent(event, null);
+        }
+    }
+
     public static void handleTextMessage(String phone, String message) {
         Device device = Context.getDeviceManager().getDeviceByPhone(phone);
         if (device != null && Context.getNotificationManager() != null) {
             Event event = new Event(Event.TYPE_TEXT_MESSAGE, device.getId());
+            event.set("phone_number", phone);
+            event.set("raw_message", message);
             event.set("message", message);
             Context.getNotificationManager().updateEvent(event, null);
         }

@@ -130,4 +130,8 @@ public class ExtendedModel extends BaseModel {
         }
     }
 
+    public boolean exists(String key) {
+        return attributes.containsKey(key);
+    }
+
 }

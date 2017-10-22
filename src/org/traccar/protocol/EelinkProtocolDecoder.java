@@ -20,6 +20,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.events.TextMessageEventHandler;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
@@ -176,6 +177,42 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private ChannelBuffer decodeSMS(Position position, ChannelBuffer buf) {
+        String phone = buf.readBytes(21).toString(StandardCharsets.US_ASCII);
+        String sanitizedPhone = phone.substring(phone.indexOf("+")).trim();
+        int remainingbytes = buf.readableBytes();
+        String message = buf.readBytes(remainingbytes).toString(StandardCharsets.UTF_8);
+        position.set(Position.KEY_PHONE_NUMBER, sanitizedPhone);
+        position.set(Position.KEY_MESSAGE, message.trim());
+
+        String responseMessage;
+
+        switch (message.trim().toUpperCase()) {
+            case "PING?":
+            case "PING#":
+                responseMessage = "PONG";
+                break;
+            default:
+                Log.debug("Unhandled Device SMS Received: " + message.trim() + ", PhoneNum: " + sanitizedPhone);
+                TextMessageEventHandler.handleDeviceTextMessage(position.getDeviceId(), message.trim(), sanitizedPhone);
+                responseMessage = null;
+                break;
+        }
+
+        if (responseMessage != null && !responseMessage.isEmpty()) {
+            ChannelBuffer paddedPhone = ChannelBuffers.buffer(21);
+            paddedPhone.writeBytes(phone.getBytes(StandardCharsets.US_ASCII));
+            paddedPhone.writerIndex(paddedPhone.capacity());
+
+            ChannelBuffer response = ChannelBuffers.dynamicBuffer();
+            response.writeBytes(paddedPhone);
+            response.writeBytes(responseMessage.getBytes(StandardCharsets.UTF_8));
+            return response;
+        }
+
+        return null;
+    }
+
     private Position decodeOld(ChannelBuffer buf, Channel channel, Position position, int type, int index) {
 
         position.setTime(new Date(buf.readUnsignedInt() * 1000));
@@ -219,38 +256,12 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 }
                 break;
             case MSG_SMS:
-                String phone = buf.readBytes(21).toString(StandardCharsets.US_ASCII);
-                String sanitizedPhone = phone.substring(phone.indexOf("+")).trim();
-                int remainingbytes = buf.readableBytes();
-                String message = buf.readBytes(remainingbytes).toString(StandardCharsets.UTF_8);
-                position.set("phone_no", sanitizedPhone);
-                position.set(Position.KEY_RESULT, message);
-
-                String responseMessage;
-
-                switch (message.trim().toUpperCase()) {
-                    case "PING?":
-                    case "PING#":
-                        responseMessage = "PONG";
-                        break;
-                    default:
-                        responseMessage = null;
-                        break;
-                }
-
-                if (responseMessage != null && !responseMessage.isEmpty()) {
-                    ChannelBuffer paddedPhone = ChannelBuffers.buffer(21);
-                    paddedPhone.writeBytes(phone.getBytes(StandardCharsets.US_ASCII));
-                    paddedPhone.writerIndex(paddedPhone.capacity());
-
-                    ChannelBuffer response = ChannelBuffers.dynamicBuffer();
-                    response.writeBytes(paddedPhone);
-                    response.writeBytes(responseMessage.getBytes(StandardCharsets.UTF_8));
+                ChannelBuffer response = decodeSMS(position, buf);
+                if (response != null) {
                     sendResponse(channel, type, index, response);
                 } else {
                     sendResponse(channel, type, index, null);
                 }
-
                 break;
             default:
                 sendResponse(channel, type, index, null);
@@ -344,6 +355,14 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                         break;
                 }
                 sendResponse(channel, type, index, null);
+                break;
+            case MSG_COMMAND:
+                ChannelBuffer response = decodeSMS(position, buf);
+                if (response != null) {
+                    sendResponse(channel, type, index, response);
+                } else {
+                    sendResponse(channel, type, index, null);
+                }
                 break;
             default:
                 if (buf.readableBytes() >= 2) {
