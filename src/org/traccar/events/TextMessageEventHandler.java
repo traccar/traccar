@@ -19,20 +19,21 @@ package org.traccar.events;
 import org.traccar.Context;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
+import org.traccar.model.Position;
 
 public final class TextMessageEventHandler {
 
     private TextMessageEventHandler() {
     }
 
-    public static void handleDeviceTextMessage(Long deviceId, String message, String phone) {
+    public static void handleDeviceTextMessage(Long deviceId, String message, String phone, Position position) {
         Device device = Context.getDeviceManager().getById(deviceId);
         if (device != null && Context.getNotificationManager() != null) {
             Event event = new Event(Event.TYPE_TEXT_MESSAGE, device.getId());
             event.set("phone_number", phone);
             event.set("raw_message", message);
             event.set("message", "From: " + phone + ", Message: " + message);
-            Context.getNotificationManager().updateEvent(event, null);
+            Context.getNotificationManager().updateEvent(event, position);
         }
     }
 

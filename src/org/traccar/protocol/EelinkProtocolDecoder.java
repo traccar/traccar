@@ -194,7 +194,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 break;
             default:
                 Log.debug("Unhandled Device SMS Received: " + message.trim() + ", PhoneNum: " + sanitizedPhone);
-                TextMessageEventHandler.handleDeviceTextMessage(position.getDeviceId(), message.trim(), sanitizedPhone);
+                TextMessageEventHandler.handleDeviceTextMessage(position.getDeviceId(), message.trim(), sanitizedPhone, position);
                 responseMessage = null;
                 break;
         }
@@ -430,13 +430,24 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         int index = buf.readUnsignedShort();
 
         if (type == MSG_LOGIN) {
-            DeviceSession deviceSession
-                    = getDeviceSession(channel, remoteAddress, ChannelBuffers.hexDump(buf.readBytes(8)).substring(1));
+            int version = 1;
+            if(buf.readableBytes() > 10){
+                version = 2;
+            }
+            
+            String uniqueId = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, uniqueId);
 
             if (deviceSession != null) {
                 ChannelBuffer response = ChannelBuffers.dynamicBuffer();
-                response.writeLong(new Date().getTime() / 1000);
-                response.writeByte(1);
+                if (version == 1) {
+                    response.writeBytes(uniqueId.getBytes());
+                    response.writeByte(1);
+                    response.writeByte(0);
+                } else if (version == 2) {
+                    response.writeLong(new Date().getTime() / 1000);
+                    response.writeByte(2);
+                }
                 sendResponse(channel, type, index, response);
             }
 
@@ -451,12 +462,13 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             // check if we have received a packet out of sequence
             if (!Context.getIdentityManager().lookupAttributeBoolean(
                      deviceSession.getDeviceId(), "ignorePacketOrder", false, true)) {
-                if (previousIndex > 0 && index <= previousIndex) {
+                if (previousIndex >= 0 && index <= previousIndex) {
                     Log.warning(new IllegalArgumentException(
                             "packet received out of order - Previous:" + previousIndex + " Received:" + index));
                     return null;
                 } else {
                     previousIndex = index;
+                    if(index == 65535) previousIndex = 0; // rollover
                 }
             }
 
@@ -481,6 +493,9 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                         getLastLocation(position, null);
                         sendResponse(channel, type, index, null);
                         return position;
+                    } else {
+                        sendResponse(channel, type, index, null);
+                        return null;
                     }
                 } else {
                     getLastLocation(position, null);
