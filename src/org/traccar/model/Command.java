@@ -79,7 +79,7 @@ public class Command extends Message implements Cloneable {
 
     @Override
     public Command clone() throws CloneNotSupportedException {
-      return (Command) super.clone();
+        return (Command) super.clone();
     }
 
     private boolean textChannel;
