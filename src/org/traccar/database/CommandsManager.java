@@ -48,13 +48,9 @@ public class CommandsManager  extends ExtendedObjectManager<Command> {
     public boolean sendCommand(Command command) throws Exception {
         long deviceId = command.getDeviceId();
         if (command.getId() != 0) {
-            Command savedCommand = getById(command.getId());
-            command.setTextChannel(savedCommand.getTextChannel());
-            command.setType(savedCommand.getType());
-            command.setAttributes(savedCommand.getAttributes());
-            command.setDescription(savedCommand.getDescription());
+            command = getById(command.getId()).clone();
+            command.setDeviceId(deviceId);
         }
-        boolean sent = true;
         if (command.getTextChannel()) {
             Position lastPosition = Context.getIdentityManager().getLastPosition(deviceId);
             String phone = Context.getIdentityManager().getById(deviceId).getPhone();
@@ -75,10 +71,11 @@ public class CommandsManager  extends ExtendedObjectManager<Command> {
             if (activeDevice != null) {
                 activeDevice.sendCommand(command);
             } else {
-                sent = !getDeviceQueue(deviceId).add(command);
+                getDeviceQueue(deviceId).add(command);
+                return false;
             }
         }
-        return sent;
+        return true;
     }
 
     public Collection<Long> getSupportedCommands(long deviceId) {

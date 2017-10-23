@@ -69,8 +69,7 @@ public class CommandResource extends ExtendedObjectResource<Command> {
         } else {
             Context.getPermissionsManager().checkLimitCommands(getUserId());
         }
-        boolean sent = Context.getCommandsManager().sendCommand(entity);
-        if (!sent) {
+        if (!Context.getCommandsManager().sendCommand(entity)) {
             return Response.accepted(entity).build();
         }
         return Response.ok(entity).build();
