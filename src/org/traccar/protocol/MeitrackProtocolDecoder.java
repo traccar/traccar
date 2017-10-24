@@ -219,13 +219,13 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext()) {
             for (String temp : parser.next().split("\\|")) {
-                int index = Integer.valueOf(temp.substring(0, 2), 16);
+                int index = Integer.parseInt(temp.substring(0, 2), 16);
                 if (protocol >= 3) {
-                    double value = Short.valueOf(temp.substring(2), 16);
+                    double value = (short) Integer.parseInt(temp.substring(2), 16);
                     position.set(Position.PREFIX_TEMP + index, value * 0.01);
                 } else {
-                    double value = Byte.valueOf(temp.substring(2, 4), 16);
-                    value += (value < 0 ? -0.01 : 0.01) * Integer.valueOf(temp.substring(4), 16);
+                    double value = Byte.parseByte(temp.substring(2, 4), 16);
+                    value += (value < 0 ? -0.01 : 0.01) * Integer.parseInt(temp.substring(4), 16);
                     position.set(Position.PREFIX_TEMP + index, value);
                 }
             }
