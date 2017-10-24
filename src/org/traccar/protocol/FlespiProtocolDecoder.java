@@ -30,6 +30,7 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
+import javax.json.JsonString;
 import java.io.StringReader;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -56,11 +57,11 @@ public class FlespiProtocolDecoder extends BaseProtocolDecoder {
         List<Position> positions = new LinkedList<>();
         for (int i = 0; i < result.size(); i++) {
             JsonObject message = result.getJsonObject(i);
-            String ident = message.getString("ident");
+            JsonString ident = message.getJsonString("ident");
             if (ident == null) {
                 continue;
             }
-            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, ident);
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, ident.getString());
             if (deviceSession == null) {
                 continue;
             }
@@ -85,12 +86,15 @@ public class FlespiProtocolDecoder extends BaseProtocolDecoder {
     private void decodePosition(JsonObject object, Position position) {
         position.setProtocol(protocolName);
 
-        position.setTime(new Date((long) object.getJsonNumber("timestamp").doubleValue() * 1000));
+        Date deviceTime = new Date((long) object.getJsonNumber("timestamp").doubleValue() * 1000);
+        position.setTime(deviceTime);
         JsonNumber lat = object.getJsonNumber("position.latitude");
         JsonNumber lon = object.getJsonNumber("position.longitude");
         if (lat != null && lon != null) {
             position.setLatitude(lat.doubleValue());
             position.setLongitude(lon.doubleValue());
+        } else {
+            getLastLocation(position, deviceTime);
         }
         JsonNumber speed = object.getJsonNumber("position.speed");
         if (speed != null) {
