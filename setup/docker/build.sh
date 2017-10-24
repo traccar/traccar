@@ -8,7 +8,7 @@ mvn package || { echo >&2 "Maven package has failed. Aborting."; exit 1; }
 export company=${1:-"tananaev"}
 export software=${2:-"traccar"}
 export _version=$(head -n 10 ./pom.xml |grep version|cut -d ">" -f2|cut -d"<" -f1)
-export version=${3:-_version}
+export version=${3:-$_version}
 
 tmp="./setup/docker/tmp"
 

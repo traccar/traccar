@@ -17,6 +17,8 @@ package org.traccar.model;
 
 import java.util.Date;
 
+import org.traccar.database.QueryIgnore;
+
 public class Position extends Message {
 
     public static final String KEY_ORIGINAL = "raw";
@@ -28,6 +30,7 @@ public class Position extends Message {
     public static final String KEY_SATELLITES_VISIBLE = "satVisible";
     public static final String KEY_RSSI = "rssi";
     public static final String KEY_GPS = "gps";
+    public static final String KEY_ROAMING = "roaming";
     public static final String KEY_EVENT = "event";
     public static final String KEY_ALARM = "alarm";
     public static final String KEY_STATUS = "status";
@@ -35,6 +38,7 @@ public class Position extends Message {
     public static final String KEY_ODOMETER_SERVICE = "serviceOdometer"; // meters
     public static final String KEY_ODOMETER_TRIP = "tripOdometer"; // meters
     public static final String KEY_HOURS = "hours";
+    public static final String KEY_STEPS = "steps";
     public static final String KEY_INPUT = "input";
     public static final String KEY_OUTPUT = "output";
     public static final String KEY_IMAGE = "image";
@@ -49,7 +53,6 @@ public class Position extends Message {
     public static final String KEY_FUEL_LEVEL = "fuel"; // liters
     public static final String KEY_FUEL_CONSUMPTION = "fuelConsumption"; // liters/hour
 
-    public static final String KEY_RFID = "rfid";
     public static final String KEY_VERSION_FW = "versionFw";
     public static final String KEY_VERSION_HW = "versionHw";
     public static final String KEY_TYPE = "type";
@@ -74,12 +77,15 @@ public class Position extends Message {
     public static final String KEY_OPERATOR = "operator";
     public static final String KEY_COMMAND = "command";
     public static final String KEY_BLOCKED = "blocked";
+    public static final String KEY_DOOR = "door";
 
     public static final String KEY_DTCS = "dtcs";
     public static final String KEY_OBD_SPEED = "obdSpeed"; // knots
     public static final String KEY_OBD_ODOMETER = "obdOdometer"; // meters
 
     public static final String KEY_RESULT = "result";
+
+    public static final String KEY_DRIVER_UNIQUE_ID = "driverUniqueId";
 
     // Start with 1 not 0
     public static final String PREFIX_TEMP = "temp";
@@ -109,7 +115,8 @@ public class Position extends Message {
     public static final String ALARM_ACCIDENT = "accident";
     public static final String ALARM_TOW = "tow";
     public static final String ALARM_ACCELERATION = "hardAcceleration";
-    public static final String ALARM_BREAKING = "hardBreaking";
+    public static final String ALARM_BRAKING = "hardBraking";
+    public static final String ALARM_CORNERING = "hardCornering";
     public static final String ALARM_FATIGUE_DRIVING = "fatigueDriving";
     public static final String ALARM_POWER_CUT = "powerCut";
     public static final String ALARM_POWER_RESTORED = "powerRestored";
@@ -194,6 +201,7 @@ public class Position extends Message {
 
     private boolean outdated;
 
+    @QueryIgnore
     public boolean getOutdated() {
         return outdated;
     }
@@ -290,6 +298,12 @@ public class Position extends Message {
 
     public void setNetwork(Network network) {
         this.network = network;
+    }
+
+    @Override
+    @QueryIgnore
+    public String getType() {
+        return super.getType();
     }
 
 }

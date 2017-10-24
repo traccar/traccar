@@ -105,7 +105,7 @@ public class AstraProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedByte(); // geofence events
 
             if (BitUtil.check(status, 8)) {
-                position.set(Position.KEY_RFID, buf.readBytes(7).toString(StandardCharsets.US_ASCII));
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, buf.readBytes(7).toString(StandardCharsets.US_ASCII));
                 position.set(Position.KEY_ODOMETER, buf.readUnsignedMedium() * 1000);
                 position.set(Position.KEY_HOURS, buf.readUnsignedShort());
             }

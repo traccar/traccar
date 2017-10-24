@@ -130,7 +130,7 @@ public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
 
         position.setValid(parser.next().equals("A"));
 
-        position.set(Position.KEY_RFID, parser.next());
+        position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
 
         return position;
     }

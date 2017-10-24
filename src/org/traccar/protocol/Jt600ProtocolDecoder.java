@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.BcdUtil;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -31,6 +32,8 @@ import org.traccar.model.Position;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
@@ -45,10 +48,9 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         return degrees + minutes / 60;
     }
 
-    private Position decodeBinary(ChannelBuffer buf, Channel channel, SocketAddress remoteAddress) {
+    private List<Position> decodeBinary(ChannelBuffer buf, Channel channel, SocketAddress remoteAddress) {
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        List<Position> positions = new LinkedList<>();
 
         buf.readByte(); // header
 
@@ -59,97 +61,106 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         if (deviceSession == null) {
             return null;
         }
-        position.setDeviceId(deviceSession.getDeviceId());
 
         if (longFormat) {
             buf.readUnsignedByte(); // protocol
         }
 
-        int version = buf.readUnsignedByte() >> 4;
+        int version = BitUtil.from(buf.readUnsignedByte(), 4);
         buf.readUnsignedShort(); // length
 
-        DateBuilder dateBuilder = new DateBuilder()
-                .setDay(BcdUtil.readInteger(buf, 2))
-                .setMonth(BcdUtil.readInteger(buf, 2))
-                .setYear(BcdUtil.readInteger(buf, 2))
-                .setHour(BcdUtil.readInteger(buf, 2))
-                .setMinute(BcdUtil.readInteger(buf, 2))
-                .setSecond(BcdUtil.readInteger(buf, 2));
-        position.setTime(dateBuilder.getDate());
+        while (buf.readableBytes() > 1) {
 
-        double latitude = convertCoordinate(BcdUtil.readInteger(buf, 8));
-        double longitude = convertCoordinate(BcdUtil.readInteger(buf, 9));
+            Position position = new Position();
+            position.setProtocol(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
 
-        byte flags = buf.readByte();
-        position.setValid((flags & 0x1) == 0x1);
-        if ((flags & 0x2) == 0) {
-            latitude = -latitude;
-        }
-        position.setLatitude(latitude);
-        if ((flags & 0x4) == 0) {
-            longitude = -longitude;
-        }
-        position.setLongitude(longitude);
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setDay(BcdUtil.readInteger(buf, 2))
+                    .setMonth(BcdUtil.readInteger(buf, 2))
+                    .setYear(BcdUtil.readInteger(buf, 2))
+                    .setHour(BcdUtil.readInteger(buf, 2))
+                    .setMinute(BcdUtil.readInteger(buf, 2))
+                    .setSecond(BcdUtil.readInteger(buf, 2));
+            position.setTime(dateBuilder.getDate());
 
-        position.setSpeed(BcdUtil.readInteger(buf, 2));
-        position.setCourse(buf.readUnsignedByte() * 2.0);
+            double latitude = convertCoordinate(BcdUtil.readInteger(buf, 8));
+            double longitude = convertCoordinate(BcdUtil.readInteger(buf, 9));
 
-        if (longFormat) {
-
-            position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 1000);
-            position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
-
-            buf.readUnsignedInt(); // vehicle id combined
-
-            position.set(Position.KEY_STATUS, buf.readUnsignedShort());
-
-            int battery = buf.readUnsignedByte();
-            if (battery == 0xff) {
-                position.set(Position.KEY_CHARGE, true);
-            } else {
-                position.set(Position.KEY_BATTERY_LEVEL, battery);
+            byte flags = buf.readByte();
+            position.setValid((flags & 0x1) == 0x1);
+            if ((flags & 0x2) == 0) {
+                latitude = -latitude;
             }
+            position.setLatitude(latitude);
+            if ((flags & 0x4) == 0) {
+                longitude = -longitude;
+            }
+            position.setLongitude(longitude);
 
-            CellTower cellTower = CellTower.fromCidLac(buf.readUnsignedShort(), buf.readUnsignedShort());
-            cellTower.setSignalStrength((int) buf.readUnsignedByte());
-            position.setNetwork(new Network(cellTower));
+            position.setSpeed(BcdUtil.readInteger(buf, 2));
+            position.setCourse(buf.readUnsignedByte() * 2.0);
 
-            position.set(Position.KEY_INDEX, buf.readUnsignedByte());
+            if (longFormat) {
 
-        } else if (version == 1) {
+                position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 1000);
+                position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
 
-            position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
-            position.set(Position.KEY_POWER, buf.readUnsignedByte());
+                buf.readUnsignedInt(); // vehicle id combined
 
-            buf.readByte(); // other flags and sensors
+                position.set(Position.KEY_STATUS, buf.readUnsignedShort());
 
-            position.setAltitude(buf.readUnsignedShort());
+                int battery = buf.readUnsignedByte();
+                if (battery == 0xff) {
+                    position.set(Position.KEY_CHARGE, true);
+                } else {
+                    position.set(Position.KEY_BATTERY_LEVEL, battery);
+                }
 
-            int cid  = buf.readUnsignedShort();
-            int lac  = buf.readUnsignedShort();
-            int rssi = buf.readUnsignedByte();
-
-            if (cid != 0 && lac != 0) {
-                CellTower cellTower = CellTower.fromCidLac(cid, lac);
-                cellTower.setSignalStrength(rssi);
+                CellTower cellTower = CellTower.fromCidLac(buf.readUnsignedShort(), buf.readUnsignedShort());
+                cellTower.setSignalStrength((int) buf.readUnsignedByte());
                 position.setNetwork(new Network(cellTower));
-            } else {
-                position.set(Position.KEY_RSSI, rssi);
+
+            } else if (version == 1) {
+
+                position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+                position.set(Position.KEY_POWER, buf.readUnsignedByte());
+
+                buf.readByte(); // other flags and sensors
+
+                position.setAltitude(buf.readUnsignedShort());
+
+                int cid = buf.readUnsignedShort();
+                int lac = buf.readUnsignedShort();
+                int rssi = buf.readUnsignedByte();
+
+                if (cid != 0 && lac != 0) {
+                    CellTower cellTower = CellTower.fromCidLac(cid, lac);
+                    cellTower.setSignalStrength(rssi);
+                    position.setNetwork(new Network(cellTower));
+                } else {
+                    position.set(Position.KEY_RSSI, rssi);
+                }
+
+            } else if (version == 2) {
+
+                int fuel = buf.readUnsignedByte() << 8;
+
+                position.set(Position.KEY_STATUS, buf.readUnsignedInt());
+                position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 1000);
+
+                fuel += buf.readUnsignedByte();
+                position.set(Position.KEY_FUEL_LEVEL, fuel);
+
             }
 
-        } else if (version == 2) {
-
-            int fuel = buf.readUnsignedByte() << 8;
-
-            position.set(Position.KEY_STATUS, buf.readUnsignedInt());
-            position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 1000);
-
-            fuel += buf.readUnsignedByte();
-            position.set(Position.KEY_FUEL_LEVEL, fuel);
+            positions.add(position);
 
         }
 
-        return position;
+        buf.readUnsignedByte(); // index
+
+        return positions;
     }
 
     private static final Pattern PATTERN_W01 = new PatternBuilder()

@@ -31,19 +31,33 @@ import org.traccar.BaseDataHandler;
 import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Attribute;
+import org.traccar.model.Device;
 import org.traccar.model.Position;
 
 public class ComputedAttributesHandler extends BaseDataHandler {
 
     private JexlEngine engine;
 
+    private boolean mapDeviceAttributes;
+
     public ComputedAttributesHandler() {
         engine = new JexlEngine();
         engine.setStrict(true);
+        if (Context.getConfig() != null) {
+            mapDeviceAttributes = Context.getConfig().getBoolean("processing.computedAttributes.deviceAttributes");
+        }
     }
 
     private MapContext prepareContext(Position position) {
         MapContext result = new MapContext();
+        if (mapDeviceAttributes) {
+            Device device = Context.getIdentityManager().getById(position.getDeviceId());
+            if (device != null) {
+                for (Object key : device.getAttributes().keySet()) {
+                    result.set((String) key, device.getAttributes().get(key));
+                }
+            }
+        }
         Set<Method> methods = new HashSet<>(Arrays.asList(position.getClass().getMethods()));
         methods.removeAll(Arrays.asList(Object.class.getMethods()));
         for (Method method : methods) {
@@ -72,8 +86,8 @@ public class ComputedAttributesHandler extends BaseDataHandler {
 
     @Override
     protected Position handlePosition(Position position) {
-        Collection<Attribute> attributes = Context.getAttributesManager().getAttributes(
-                Context.getAttributesManager().getAllDeviceAttributes(position.getDeviceId()));
+        Collection<Attribute> attributes = Context.getAttributesManager().getItems(
+                Context.getAttributesManager().getAllDeviceItems(position.getDeviceId()));
         for (Attribute attribute : attributes) {
             if (attribute.getAttribute() != null) {
                 Object result = null;

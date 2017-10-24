@@ -37,6 +37,9 @@ public class OsmAndProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, request(
                 "/?id=123456&timestamp=1377177267&location=60.0,30.0"));
 
+        verifyPosition(decoder, request(
+                "/?id=123456789012345&timestamp=1504763810&lat=40.7232948571&lon=-74.0061408571&bearing=7.19889788244&speed=40&ignition=true&rpm=933&fuel=24"));
+
     }
 
 }

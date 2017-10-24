@@ -16,12 +16,14 @@
 package org.traccar.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import org.traccar.database.QueryExtended;
+import org.traccar.database.QueryIgnore;
 import org.traccar.helper.Hashing;
 
 import java.util.Date;
-import java.util.TimeZone;
 
-public class User extends Extensible {
+public class User extends ExtendedModel {
 
     private String name;
 
@@ -40,7 +42,7 @@ public class User extends Extensible {
     }
 
     public void setEmail(String email) {
-        this.email = email;
+        this.email = email.trim();
     }
 
     private String phone;
@@ -81,26 +83,6 @@ public class User extends Extensible {
 
     public void setMap(String map) {
         this.map = map;
-    }
-
-    private String distanceUnit;
-
-    public String getDistanceUnit() {
-        return distanceUnit;
-    }
-
-    public void setDistanceUnit(String distanceUnit) {
-        this.distanceUnit = distanceUnit;
-    }
-
-    private String speedUnit;
-
-    public String getSpeedUnit() {
-        return speedUnit;
-    }
-
-    public void setSpeedUnit(String speedUnit) {
-        this.speedUnit = speedUnit;
     }
 
     private double latitude;
@@ -228,6 +210,17 @@ public class User extends Extensible {
         }
     }
 
+    private boolean limitCommands;
+
+    public boolean getLimitCommands() {
+        return limitCommands;
+    }
+
+    public void setLimitCommands(boolean limitCommands) {
+        this.limitCommands = limitCommands;
+    }
+
+    @QueryIgnore
     public String getPassword() {
         return null;
     }
@@ -243,6 +236,7 @@ public class User extends Extensible {
     private String hashedPassword;
 
     @JsonIgnore
+    @QueryExtended
     public String getHashedPassword() {
         return hashedPassword;
     }
@@ -254,6 +248,7 @@ public class User extends Extensible {
     private String salt;
 
     @JsonIgnore
+    @QueryExtended
     public String getSalt() {
         return salt;
     }
@@ -266,13 +261,4 @@ public class User extends Extensible {
         return Hashing.validatePassword(password, hashedPassword, salt);
     }
 
-    private String timezone;
-
-    public void setTimezone(String timezone) {
-        this.timezone = timezone != null ? TimeZone.getTimeZone(timezone).getID() : null;
-    }
-
-    public String getTimezone() {
-        return timezone;
-    }
 }

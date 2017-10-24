@@ -1,0 +1,10 @@
+#set($subject = "$device.name: driver has changed")
+<!DOCTYPE html>
+<html>
+<body>
+Device: $device.name<br>
+Time: $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.serverTime, $locale, $timezone)<br>
+Point: <a href="$webUrl?eventId=$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
+Driver: #{if}($driver)$driver.name#{else}$event.getString("driverUniqueId")#{end}
+</body>
+</html>  

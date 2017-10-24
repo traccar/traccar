@@ -15,7 +15,7 @@
  */
 package org.traccar.model;
 
-public class Message extends Extensible {
+public class Message extends ExtendedModel {
 
     private long deviceId;
 

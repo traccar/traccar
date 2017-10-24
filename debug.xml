@@ -4,7 +4,7 @@
 
 <properties>
 
-    <entry key="config.default">./setup/default.xml</entry>
+    <entry key='config.default'>./setup/default.xml</entry>
 
     <entry key='web.path'>./traccar-web/web</entry>
     <entry key='web.debug'>true</entry>

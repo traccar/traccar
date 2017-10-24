@@ -67,7 +67,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
             case "HDA":
                 return Position.ALARM_ACCELERATION;
             case "HDB":
-                return Position.ALARM_BREAKING;
+                return Position.ALARM_BRAKING;
             case "FDA":
                 return Position.ALARM_FATIGUE_DRIVING;
             case "SKA":
@@ -129,7 +129,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         position.set(Position.KEY_ODOMETER, parser.nextInt(0));
-        position.set(Position.KEY_RFID, parser.next());
+        position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
 
         if (parser.hasNext()) {
             int value = parser.nextHexInt(0);

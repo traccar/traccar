@@ -263,7 +263,8 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if ((selector & 0x0200) != 0) {
-            position.set(Position.KEY_RFID, (((long) buf.readUnsignedShort()) << 32) + buf.readUnsignedInt());
+            position.set(Position.KEY_DRIVER_UNIQUE_ID,
+                    String.valueOf(((long) buf.readUnsignedShort()) << 32) + buf.readUnsignedInt());
         }
 
         if ((selector & 0x0400) != 0) {
@@ -351,15 +352,28 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_VIN, buf.readBytes(18).toString(StandardCharsets.US_ASCII).trim());
         }
 
+        if ((selector & 0x2000) != 0) {
+            buf.readUnsignedByte(); // card 1 type
+            buf.readUnsignedByte(); // card 1 country code
+            String card = buf.readBytes(20).toString(StandardCharsets.US_ASCII).trim();
+            if (!card.isEmpty()) {
+                position.set("card1", card);
+            }
+        }
+
+        if ((selector & 0x4000) != 0) {
+            buf.readUnsignedByte(); // card 2 type
+            buf.readUnsignedByte(); // card 2 country code
+            String card = buf.readBytes(20).toString(StandardCharsets.US_ASCII).trim();
+            if (!card.isEmpty()) {
+                position.set("card2", card);
+            }
+        }
+
         if ((selector & 0x10000) != 0) {
             int count = buf.readUnsignedByte();
             for (int i = 1; i <= count; i++) {
-                ChannelBuffer driver = buf.readBytes(22);
-                int endIndex = driver.indexOf(0, driver.writerIndex(), (byte) 0);
-                if (endIndex < 0) {
-                    endIndex = driver.writerIndex();
-                }
-                position.set("driver" + i, driver.toString(0, endIndex, StandardCharsets.US_ASCII).trim());
+                position.set("driver" + i, buf.readBytes(22).toString(StandardCharsets.US_ASCII).trim());
                 position.set("driverTime" + i, buf.readUnsignedInt());
             }
         }
@@ -456,59 +470,59 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedShort(); // length
 
         while (buf.readableBytes() > 0) {
-            position.set("towedPosition", buf.readUnsignedByte());
+            buf.readUnsignedByte(); // towed position
             int type = buf.readUnsignedByte();
             int length = buf.readUnsignedByte();
+            int end = buf.readerIndex() + length;
 
-            if (type == 0x01) {
-                position.set("brakeFlags", ChannelBuffers.hexDump(buf.readBytes(length)));
-            } else if (type == 0x02) {
-                position.set("wheelSpeed", buf.readUnsignedShort() / 256.0);
-                position.set("wheelSpeedDifference", buf.readUnsignedShort() / 256.0 - 125.0);
-                position.set("lateralAcceleration", buf.readUnsignedByte() / 10.0 - 12.5);
-                position.set("vehicleSpeed", buf.readUnsignedShort() / 256.0);
-            } else if (type == 0x03) {
-                position.set("axleLoadSum", buf.readUnsignedShort() * 2);
-            } else if (type == 0x04) {
-                position.set("tyrePressure", buf.readUnsignedByte() * 10);
-                position.set("pneumaticPressure", buf.readUnsignedByte() * 5);
-            } else if (type == 0x05) {
-                position.set("brakeLining", buf.readUnsignedByte() * 0.4);
-                position.set("brakeTemperature", buf.readUnsignedByte() * 10);
-            } else if (type == 0x06) {
-                position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 5);
-                position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedInt() * 5);
-                position.set(Position.KEY_ODOMETER_SERVICE, (buf.readUnsignedInt() - 2105540607) * 5);
-            } else if (type == 0x0A) {
-                ChannelBuffer brakeData = buf.readBytes(length);
-                position.set("absStatusCounter", brakeData.readUnsignedShort());
-                position.set("atvbStatusCounter", brakeData.readUnsignedShort());
-                position.set("vdcActiveCounter", brakeData.readUnsignedShort());
-            } else if (type == 0x0B) {
-                position.set("brakeMinMaxData", ChannelBuffers.hexDump(buf.readBytes(length)));
-            } else if (type == 0x0C) {
-                position.set("missingPgn", ChannelBuffers.hexDump(buf.readBytes(length)));
-            } else if (type == 0x0D) {
-                switch (buf.readUnsignedByte()) {
-                    case 1:
-                        position.set("brakeManufacturer", "Wabco");
-                        break;
-                    case 2:
-                        position.set("brakeManufacturer", "Knorr");
-                        break;
-                    case 3:
-                        position.set("brakeManufacturer", "Haldex");
-                        break;
-                    default:
-                        position.set("brakeManufacturer", "Unknown");
-                        break;
-                }
-                buf.readUnsignedByte();
-                position.set(Position.KEY_VIN, buf.readBytes(17).toString(StandardCharsets.US_ASCII));
-                position.set("towedDetectionStatus", buf.readUnsignedByte());
-            } else if (type == 0x0E) {
-                buf.skipBytes(length);
+            switch (type) {
+                case 0x01:
+                    position.set("brakeFlags", ChannelBuffers.hexDump(buf.readBytes(length)));
+                    break;
+                case 0x02:
+                    position.set("wheelSpeed", buf.readUnsignedShort() / 256.0);
+                    position.set("wheelSpeedDifference", buf.readUnsignedShort() / 256.0 - 125.0);
+                    position.set("lateralAcceleration", buf.readUnsignedByte() / 10.0 - 12.5);
+                    position.set("vehicleSpeed", buf.readUnsignedShort() / 256.0);
+                    break;
+                case 0x03:
+                    position.set("axleLoadSum", buf.readUnsignedShort() * 2);
+                    break;
+                case 0x04:
+                    position.set("tyrePressure", buf.readUnsignedByte() * 10);
+                    position.set("pneumaticPressure", buf.readUnsignedByte() * 5);
+                    break;
+                case 0x05:
+                    position.set("brakeLining", buf.readUnsignedByte() * 0.4);
+                    position.set("brakeTemperature", buf.readUnsignedByte() * 10);
+                    break;
+                case 0x06:
+                    position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 5L);
+                    position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedInt() * 5L);
+                    position.set(Position.KEY_ODOMETER_SERVICE, (buf.readUnsignedInt() - 2105540607) * 5L);
+                    break;
+                case 0x0A:
+                    position.set("absStatusCounter", buf.readUnsignedShort());
+                    position.set("atvbStatusCounter", buf.readUnsignedShort());
+                    position.set("vdcActiveCounter", buf.readUnsignedShort());
+                    break;
+                case 0x0B:
+                    position.set("brakeMinMaxData", ChannelBuffers.hexDump(buf.readBytes(length)));
+                    break;
+                case 0x0C:
+                    position.set("missingPgn", ChannelBuffers.hexDump(buf.readBytes(length)));
+                    break;
+                case 0x0D:
+                    buf.readUnsignedByte();
+                    position.set("towedDetectionStatus", buf.readUnsignedInt());
+                    buf.skipBytes(17); // vin
+                    break;
+                case 0x0E:
+                default:
+                    break;
             }
+
+            buf.readerIndex(end);
         }
     }
 
@@ -554,7 +568,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_OBD_SPEED, buf.readUnsignedByte());
             position.set("speedMax", buf.readUnsignedByte());
             position.set("speedMin", buf.readUnsignedByte());
-            position.set("hardBreaking", buf.readUnsignedByte());
+            position.set("hardBraking", buf.readUnsignedByte());
         }
 
         if ((selector & 0x0200) != 0) {

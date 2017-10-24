@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,7 +110,7 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
                     position.setLongitude(Double.parseDouble(location[1]));
                     break;
                 case "speed":
-                    position.setSpeed(Double.parseDouble(value));
+                    position.setSpeed(convertSpeed(Double.parseDouble(value), "kn"));
                     break;
                 case "bearing":
                 case "heading":
@@ -128,11 +128,24 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
                 case "batt":
                     position.set(Position.KEY_BATTERY_LEVEL, Double.parseDouble(value));
                     break;
+                case "driverUniqueId":
+                    position.set(Position.KEY_DRIVER_UNIQUE_ID, value);
+                    break;
                 default:
                     try {
                         position.set(entry.getKey(), Double.parseDouble(value));
                     } catch (NumberFormatException e) {
-                        position.set(entry.getKey(), value);
+                        switch (value) {
+                            case "true":
+                                position.set(entry.getKey(), true);
+                                break;
+                            case "false":
+                                position.set(entry.getKey(), false);
+                                break;
+                            default:
+                                position.set(entry.getKey(), value);
+                                break;
+                        }
                     }
                     break;
             }

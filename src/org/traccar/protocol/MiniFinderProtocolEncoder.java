@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 package org.traccar.protocol;
 
+import java.util.TimeZone;
+
 import org.traccar.StringProtocolEncoder;
 import org.traccar.helper.Log;
 import org.traccar.model.Command;
@@ -27,7 +29,7 @@ public class MiniFinderProtocolEncoder extends StringProtocolEncoder implements 
         if (key.equals(Command.KEY_ENABLE)) {
             return (Boolean) value ? "1" : "0";
         } else if (key.equals(Command.KEY_TIMEZONE)) {
-            return String.format("%+03d", ((Number) value).longValue() / 3600);
+            return String.format("%+03d", TimeZone.getTimeZone((String) value).getRawOffset() / 3600000);
         } else if (key.equals(Command.KEY_INDEX)) {
             switch (((Number) value).intValue()) {
                 case 0:

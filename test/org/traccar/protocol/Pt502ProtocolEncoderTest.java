@@ -30,7 +30,7 @@ public class Pt502ProtocolEncoderTest extends ProtocolTest {
         Command command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_SET_TIMEZONE);
-        command.set(Command.KEY_TIMEZONE, 8);
+        command.set(Command.KEY_TIMEZONE, "GMT+8");
 
         Assert.assertEquals("#TMZ8\r\n", encoder.encodeCommand(command));
 

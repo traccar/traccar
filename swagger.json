@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "version": "3.10",
+        "version": "3.14",
         "title": "traccar"
     },
     "host": "demo.traccar.org",
@@ -22,8 +22,116 @@
     ],
     "paths": {
         "/commands": {
+            "get": {
+                "summary": "Fetch a list of Saved Commands",
+                "description": "Without params, it returns a list of Drivers the user has access to",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/all"
+                    },
+                    {
+                        "$ref": "#/parameters/userId"
+                    },
+                    {
+                        "$ref": "#/parameters/deviceId"
+                    },
+                    {
+                        "$ref": "#/parameters/groupId"
+                    },
+                    {
+                        "$ref": "#/parameters/refresh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Command"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create a Saved Command",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/Command"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Command"
+                        }
+                    }
+                }
+            }
+        },
+        "/commands/{id}": {
+            "put": {
+                "summary": "Update a Saved Command",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/entityId"
+                    },
+                    {
+                        "$ref": "#/parameters/Command"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Command"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete a Saved Command",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/entityId"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/commands/send": {
+            "get": {
+                "summary": "Fetch a list of Saved Commands supported by Device at the moment",
+                "description": "Return a list of saved commands linked to Device and its groups, filtered by current Device protocol support",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/deviceId"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Command"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Could happen when the user doesn't have permission for the device"
+                    }
+                }
+            },
             "post": {
                 "summary": "Dispatch commands to device",
+                "description": "Dispatch a new command or Saved Command if _body.id_ set",
                 "parameters": [
                     {
                         "name": "body",
@@ -36,13 +144,50 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Command sent",
+                        "schema": {
+                            "$ref": "#/definitions/Command"
+                        }
+                    },
+                    "202": {
+                        "description": "Command queued",
                         "schema": {
                             "$ref": "#/definitions/Command"
                         }
                     },
                     "400": {
-                        "description": "Could happen when dispatching to a device that is offline, the user doesn't have permission or an incorrect command _type_ for the device"
+                        "description": "Could happen when the user doesn't have permission or an incorrect command _type_ for the device"
+                    }
+                }
+            }
+        },
+        "/commands/types": {
+            "get": {
+                "summary": "Fetch a list of available Commands for the Device or all possible Commands if Device ommited",
+                "parameters": [
+                    {
+                        "name": "deviceId",
+                        "in": "query",
+                        "type": "integer"
+                    },
+                    {
+                        "name": "textChannel",
+                        "in": "query",
+                        "type": "boolean"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/CommandType"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Could happen when trying to fetch from a device the user does not have permission"
                     }
                 }
             }
@@ -64,6 +209,14 @@
                         "description" : "To fetch one or more devices. Multiple params can be passed like `id=31&id=42`",
                         "required" : false,
                         "type" : "integer",
+                        "collectionFormat" : "multi"
+                    },
+                    {
+                        "name" : "uniqueId",
+                        "in" : "query",
+                        "description" : "To fetch one or more devices. Multiple params can be passed like `uniqueId=333331&uniqieId=44442`",
+                        "required" : false,
+                        "type" : "string",
                         "collectionFormat" : "multi"
                     }
                 ],
@@ -156,37 +309,6 @@
                 }
             }
         },
-        "/devices/geofences": {
-            "post": {
-                "summary": "Link a Geofence to a Device",
-                "parameters": [
-                    {
-                        "$ref": "#/parameters/DeviceGeofence"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/DeviceGeofence"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "summary": "Remove a Geofence from a Device",
-                "parameters": [
-                    {
-                        "$ref": "#/parameters/DeviceGeofence"
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    }
-                }
-            }
-        },
         "/groups": {
             "get": {
                 "summary": "Fetch a list of Groups",
@@ -265,50 +387,19 @@
                 }
             }
         },
-        "/groups/geofences": {
+        "/permissions": {
             "post": {
-                "summary": "Link a Geofence to a Group",
+                "summary": "Link an Object to another Object",
                 "parameters": [
                     {
-                        "$ref": "#/parameters/GroupGeofence"
+                        "$ref": "#/parameters/Permission"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/GroupGeofence"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "summary": "Remove a Geofence from a Group",
-                "parameters": [
-                    {
-                        "$ref": "#/parameters/GroupGeofence"
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    }
-                }
-            }
-        },
-        "/permissions/devices": {
-            "post": {
-                "summary": "Link a Device to a User",
-                "parameters": [
-                    {
-                        "$ref": "#/parameters/DevicePermission"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/DevicePermission"
+                            "$ref": "#/definitions/Permission"
                         }
                     },
                     "400": {
@@ -317,134 +408,10 @@
                 }
             },
             "delete": {
-                "summary": "Remove a Device from a User",
+                "summary": "Unlink an Object from another Object",
                 "parameters": [
                     {
-                        "$ref": "#/parameters/DevicePermission"
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    }
-                }
-            }
-        },
-        "/permissions/groups": {
-            "post": {
-                "summary": "Link a Group to a User",
-                "parameters": [
-                    {
-                        "$ref": "#/parameters/GroupPermission"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/GroupPermission"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "summary": "Remove a Group from a User",
-                "parameters": [
-                    {
-                        "$ref": "#/parameters/GroupPermission"
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    }
-                }
-            }
-        },
-        "/permissions/geofences": {
-            "post": {
-                "summary": "Link a Geofence to a User",
-                "parameters": [
-                    {
-                        "$ref": "#/parameters/GeofencePermission"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/GeofencePermission"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "summary": "Remove a Geofence from a User",
-                "parameters": [
-                    {
-                        "$ref": "#/parameters/GeofencePermission"
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    }
-                }
-            }
-        },
-        "/permissions/calendars": {
-            "post": {
-                "summary": "Link a Calendar to a User",
-                "parameters": [
-                    {
-                        "$ref": "#/parameters/CalendarPermission"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/CalendarPermission"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "summary": "Remove a Calendar from a User",
-                "parameters": [
-                    {
-                        "$ref": "#/parameters/CalendarPermission"
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    }
-                }
-            }
-        },
-        "/permissions/users": {
-            "post": {
-                "summary": "Link a User to a manager User",
-                "parameters": [
-                    {
-                        "$ref": "#/parameters/UserPermission"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/UserPermission"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "summary": "Remove a User from a manager User",
-                "parameters": [
-                    {
-                        "$ref": "#/parameters/UserPermission"
+                        "$ref": "#/parameters/Permission"
                     }
                 ],
                 "responses": {
@@ -697,19 +664,25 @@
                 }
             }
         },
-        "/users/notifications": {
+        "/notifications": {
             "get": {
-                "summary": "Fetch a list of Notification types",
-                "description": "Without params, it returns a list of the user's enabled Notifications",
+                "summary": "Fetch a list of Notifications",
+                "description": "Without params, it returns a list of Notifications the user has access to",
                 "parameters": [
                     {
-                        "name": "all",
-                        "in": "query",
-                        "description": "To fetch a list of all available Notifications",
-                        "type": "boolean"
+                        "$ref": "#/parameters/all"
                     },
                     {
                         "$ref": "#/parameters/userId"
+                    },
+                    {
+                        "$ref": "#/parameters/deviceId"
+                    },
+                    {
+                        "$ref": "#/parameters/groupId"
+                    },
+                    {
+                        "$ref": "#/parameters/refresh"
                     }
                 ],
                 "responses": {
@@ -725,15 +698,10 @@
                 }
             },
             "post": {
-                "summary": "Set or unset a Notification",
+                "summary": "Create a Notification",
                 "parameters": [
                     {
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Notification"
-                        }
+                        "$ref": "#/parameters/Notification"
                     }
                 ],
                 "responses": {
@@ -746,29 +714,67 @@
                 }
             }
         },
-        "/commandtypes": {
-            "get": {
-                "summary": "Fetch a list of available Commands for the Device",
+        "/notifications/{id}": {
+            "put": {
+                "summary": "Update a Notification",
                 "parameters": [
                     {
-                        "name": "deviceId",
-                        "in": "query",
-                        "required": true,
-                        "type": "integer"
+                        "$ref": "#/parameters/entityId"
+                    },
+                    {
+                        "$ref": "#/parameters/Notification"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
+                            "$ref": "#/definitions/Notification"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete a Notification",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/entityId"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/notifications/types": {
+            "get": {
+                "summary": "Fetch a list of available Notification types",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/CommandType"
+                                "$ref": "#/definitions/NotificationType"
                             }
                         }
+                    }
+                }
+            }
+        },
+        "/notifications/test": {
+            "post": {
+                "summary": "Send test notification to current user via Email and SMS",
+                "parameters": [],
+                "responses": {
+                    "204": {
+                        "description": "Successful sending"
                     },
                     "400": {
-                        "description": "Could happen when trying to fetch from an offline device or the user does not have permission"
+                        "description": "Could happen if sending has failed"
                     }
                 }
             }
@@ -785,18 +791,13 @@
                         "$ref": "#/parameters/userId"
                     },
                     {
-                        "name": "groupId",
-                        "in": "query",
-                        "type": "integer"
-                    },
-                    {
                         "$ref": "#/parameters/deviceId"
                     },
                     {
-                        "name": "refresh",
-                        "in": "query",
-                        "required": false,
-                        "type": "boolean"
+                        "$ref": "#/parameters/groupId"
+                    },
+                    {
+                        "$ref": "#/parameters/refresh"
                     }
                 ],
                 "responses": {
@@ -1044,6 +1045,45 @@
                 }
             }
         },
+        "/reports/stops": {
+            "get": {
+                "summary": "Fetch a list of ReportStops within the time period for the Devices or Groups",
+                "description": "At least one _deviceId_ or one _groupId_ must be passed",
+                "consumes": [
+                    "application/json",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                ],
+                "produces": [
+                    "application/json",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/deviceIdArray"
+                    },
+                    {
+                        "$ref": "#/parameters/groupIdArray"
+                    },
+                    {
+                        "$ref": "#/parameters/fromTime"
+                    },
+                    {
+                        "$ref": "#/parameters/toTime"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ReportStops"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/statistics": {
             "get": {
                 "summary": "Fetch server Statistics",
@@ -1064,78 +1104,6 @@
                                 "$ref": "#/definitions/Statistics"
                             }
                         }
-                    }
-                }
-            }
-        },
-        "/attributes/aliases": {
-            "get": {
-                "summary": "Fetch a list of AttributeAlias",
-                "description": "Without params, it returns a list of AttributeAlias from all the user's Devices",
-                "parameters": [
-                    {
-                        "$ref": "#/parameters/deviceId"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/AttributeAlias"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "summary": "Set an AttributeAlias",
-                "parameters": [
-                    {
-                        "$ref": "#/parameters/AttributeAlias"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/AttributeAlias"
-                        }
-                    }
-                }
-            }
-        },
-        "/attributes/aliases/{id}": {
-            "put": {
-                "summary": "Update an AttributeAlias",
-                "parameters": [
-                    {
-                        "$ref": "#/parameters/entityId"
-                    },
-                    {
-                        "$ref": "#/parameters/AttributeAlias"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/AttributeAlias"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "summary": "Delete an AttributeAlias",
-                "parameters": [
-                    {
-                        "$ref": "#/parameters/entityId"
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
                     }
                 }
             }
@@ -1203,6 +1171,174 @@
             },
             "delete": {
                 "summary": "Delete a Calendar",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/entityId"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/attributes/computed": {
+            "get": {
+                "summary": "Fetch a list of Attributes",
+                "description": "Without params, it returns a list of Attributes the user has access to",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/all"
+                    },
+                    {
+                        "$ref": "#/parameters/userId"
+                    },
+                    {
+                        "$ref": "#/parameters/deviceId"
+                    },
+                    {
+                        "$ref": "#/parameters/groupId"
+                    },
+                    {
+                        "$ref": "#/parameters/refresh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Attribute"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create an Attribute",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/Attribute"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Attribute"
+                        }
+                    }
+                }
+            }
+        },
+        "/attributes/computed/{id}": {
+            "put": {
+                "summary": "Update an Attribute",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/entityId"
+                    },
+                    {
+                        "$ref": "#/parameters/Attribute"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Attribute"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete an Attribute",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/entityId"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/drivers": {
+            "get": {
+                "summary": "Fetch a list of Drivers",
+                "description": "Without params, it returns a list of Drivers the user has access to",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/all"
+                    },
+                    {
+                        "$ref": "#/parameters/userId"
+                    },
+                    {
+                        "$ref": "#/parameters/deviceId"
+                    },
+                    {
+                        "$ref": "#/parameters/groupId"
+                    },
+                    {
+                        "$ref": "#/parameters/refresh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Driver"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create a Driver",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/Driver"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Driver"
+                        }
+                    }
+                }
+            }
+        },
+        "/drivers/{id}": {
+            "put": {
+                "summary": "Update a Driver",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/entityId"
+                    },
+                    {
+                        "$ref": "#/parameters/Driver"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Driver"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete a Driver",
                 "parameters": [
                     {
                         "$ref": "#/parameters/entityId"
@@ -1297,12 +1433,6 @@
                 "map": {
                     "type": "string"
                 },
-                "distanceUnit": {
-                    "type": "string"
-                },
-                "speedUnit": {
-                    "type": "string"
-                },
                 "latitude": {
                     "type": "number"
                 },
@@ -1338,6 +1468,9 @@
                 "deviceReadonly": {
                     "type": "boolean"
                 },
+                "limitCommands": {
+                    "type": "boolean"
+                },
                 "token": {
                     "type": "string"
                 },
@@ -1355,6 +1488,12 @@
                 "readonly": {
                     "type": "boolean"
                 },
+                "deviceReadonly": {
+                    "type": "boolean"
+                },
+                "limitCommands": {
+                    "type": "boolean"
+                },
                 "map": {
                     "type": "string"
                 },
@@ -1362,12 +1501,6 @@
                     "type": "string"
                 },
                 "mapUrl": {
-                    "type": "string"
-                },
-                "distanceUnit": {
-                    "type": "string"
-                },
-                "speedUnit": {
                     "type": "string"
                 },
                 "latitude": {
@@ -1396,8 +1529,14 @@
         },
         "Command": {
             "properties": {
+                "id": {
+                    "type": "integer"
+                },
                 "deviceId": {
                     "type": "integer"
+                },
+                "description": {
+                    "type": "string"
                 },
                 "type": {
                     "type": "string"
@@ -1465,72 +1604,39 @@
                 "attributes": {}
             }
         },
-        "DevicePermission": {
+        "Permission": {
+            "description": "This is a permission map that contain two object indexes. It is used to link/unlink objects. Order is important. Example: { deviceId:8, geofenceId: 16 }",
             "properties": {
                 "userId": {
+                    "description": "User Id, can be only first parameter",
                     "type": "integer"
                 },
                 "deviceId": {
-                    "type": "integer"
-                }
-            }
-        },
-        "GroupPermission": {
-            "properties": {
-                "userId": {
+                    "description": "Device Id, can be first parameter or second only in combination with userId",
                     "type": "integer"
                 },
                 "groupId": {
-                    "type": "integer"
-                }
-            }
-        },
-        "GeofencePermission": {
-            "properties": {
-                "userId": {
+                    "description": "Group Id, can be first parameter or second only in combination with userId",
                     "type": "integer"
                 },
                 "geofenceId": {
-                    "type": "integer"
-                }
-            }
-        },
-        "CalendarPermission": {
-            "properties": {
-                "userId": {
+                    "description": "Geofence Id, can be second parameter only",
                     "type": "integer"
                 },
                 "calendarId": {
+                    "description": "Geofence Id, can be second parameter only and only in combination with userId",
                     "type": "integer"
-                }
-            }
-        },
-        "UserPermission": {
-            "properties": {
-                "userId": {
+                },
+                "attributeId": {
+                    "description": "Computed Attribute Id, can be second parameter only",
+                    "type": "integer"
+                },
+                "driverId": {
+                    "description": "Driver Id, can be second parameter only",
                     "type": "integer"
                 },
                 "managedUserId": {
-                    "type": "integer"
-                }
-            }
-        },
-        "GroupGeofence": {
-            "properties": {
-                "groupId": {
-                    "type": "integer"
-                },
-                "geofenceId": {
-                    "type": "integer"
-                }
-            }
-        },
-        "DeviceGeofence": {
-            "properties": {
-                "deviceId": {
-                    "type": "integer"
-                },
-                "geofenceId": {
+                    "description": "User Id, can be second parameter only and only in combination with userId",
                     "type": "integer"
                 }
             }
@@ -1570,8 +1676,8 @@
                 "type": {
                     "type": "string"
                 },
-                "userId": {
-                    "type": "integer"
+                "always": {
+                    "type": "boolean"
                 },
                 "web": {
                     "type": "boolean"
@@ -1579,7 +1685,17 @@
                 "mail": {
                     "type": "boolean"
                 },
+                "sms": {
+                    "type": "boolean"
+                },
                 "attributes": {}
+            }
+        },
+        "NotificationType": {
+            "properties": {
+                "type": {
+                    "type": "string"
+                }
             }
         },
         "Event": {
@@ -1627,6 +1743,10 @@
                     "type": "number",
                     "description": "in meters"
                 },
+                "spentFuel": {
+                    "type": "number",
+                    "description": "in liters"
+                },
                 "engineHours": {
                     "type": "integer"
                 }
@@ -1651,6 +1771,10 @@
                 "distance": {
                     "type": "number",
                     "description": "in meters"
+                },
+                "spentFuel": {
+                    "type": "number",
+                    "description": "in liters"
                 },
                 "duration": {
                     "type": "integer"
@@ -1682,6 +1806,51 @@
                 },
                 "endLon": {
                     "type": "number"
+                },
+                "driverUniqueId": {
+                    "type": "integer"
+                },
+                "driverName": {
+                    "type": "string"
+                }
+            }
+        },
+        "ReportStops": {
+            "properties": {
+                "deviceId": {
+                    "type": "integer"
+                },
+                "deviceName": {
+                    "type": "string"
+                },
+                "duration": {
+                    "type": "integer"
+                },
+                "startTime": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "in IS0 8601 format. eg. `1963-11-22T18:30:00Z`"
+                },
+                "address": {
+                    "type": "string"
+                },
+                "lat": {
+                    "type": "number"
+                },
+                "lon": {
+                    "type": "number"
+                },
+                "endTime": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "in IS0 8601 format. eg. `1963-11-22T18:30:00Z`"
+                },
+                "spentFuel": {
+                    "type": "number",
+                    "description": "in liters"
+                },
+                "engineHours": {
+                    "type": "integer"
                 }
             }
         },
@@ -1706,22 +1875,6 @@
                 },
                 "messagesStored": {
                     "type": "integer"
-                }
-            }
-        },
-        "AttributeAlias": {
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "deviceId": {
-                    "type": "integer"
-                },
-                "attribute": {
-                    "type": "string"
-                },
-                "alias": {
-                    "type": "string"
                 }
             }
         },
@@ -1750,6 +1903,40 @@
                 },
                 "atributes": {}
             }
+        },
+        "Attribute": {
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "attribute": {
+                    "type": "string"
+                },
+                "expression": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string",
+                    "description": "String|Number|Boolean"
+                }
+            }
+        },
+        "Driver": {
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "uniqueId": {
+                    "type": "string"
+                },
+                "atributes": {}
+            }
         }
     },
     "parameters": {
@@ -1765,6 +1952,12 @@
             "description": "Can only be used by admins or managers to fetch all entities",
             "type": "boolean"
         },
+        "refresh": {
+            "name": "refresh",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+        },
         "userId": {
             "name": "userId",
             "in": "query",
@@ -1777,6 +1970,12 @@
             "description": "Standard users can use this only with _deviceId_s, they have access to",
             "type": "integer"
         },
+        "groupId": {
+            "name": "groupId",
+            "in": "query",
+            "description": "Standard users can use this only with _groupId_s, they have access to",
+            "type": "integer"
+        },
         "Device": {
             "name": "body",
             "in": "body",
@@ -1785,12 +1984,12 @@
                 "$ref": "#/definitions/Device"
             }
         },
-        "DeviceGeofence": {
+        "Permission": {
             "name": "body",
             "in": "body",
             "required": true,
             "schema": {
-                "$ref": "#/definitions/DeviceGeofence"
+                "$ref": "#/definitions/Permission"
             }
         },
         "Group": {
@@ -1799,54 +1998,6 @@
             "required": true,
             "schema": {
                 "$ref": "#/definitions/Group"
-            }
-        },
-        "GroupGeofence": {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-                "$ref": "#/definitions/GroupGeofence"
-            }
-        },
-        "DevicePermission": {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-                "$ref": "#/definitions/DevicePermission"
-            }
-        },
-        "GroupPermission": {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-                "$ref": "#/definitions/GroupPermission"
-            }
-        },
-        "GeofencePermission": {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-                "$ref": "#/definitions/GeofencePermission"
-            }
-        },
-        "CalendarPermission": {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-                "$ref": "#/definitions/CalendarPermission"
-            }
-        },
-        "UserPermission": {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-                "$ref": "#/definitions/UserPermission"
             }
         },
         "User": {
@@ -1865,20 +2016,44 @@
                 "$ref": "#/definitions/Geofence"
             }
         },
-        "AttributeAlias": {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-                "$ref": "#/definitions/AttributeAlias"
-            }
-        },
         "Calendar": {
             "name": "body",
             "in": "body",
             "required": true,
             "schema": {
                 "$ref": "#/definitions/Calendar"
+            }
+        },
+        "Attribute": {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+                "$ref": "#/definitions/Attribute"
+            }
+        },
+        "Driver": {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+                "$ref": "#/definitions/Driver"
+            }
+        },
+        "Command": {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+                "$ref": "#/definitions/Command"
+            }
+        },
+        "Notification": {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+                "$ref": "#/definitions/Notification"
             }
         },
         "deviceIdArray": {

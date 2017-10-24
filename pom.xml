@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.traccar</groupId>
     <artifactId>traccar</artifactId>
-    <version>3.12-SNAPSHOT</version>
+    <version>3.14-SNAPSHOT</version>
 
     <name>traccar</name>
     <url>https://www.traccar.org</url>
@@ -40,17 +40,17 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.42</version> <!-- Version 6 required Java 8 -->
+            <version>5.1.44</version> <!-- Version 6 required Java 8 -->
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.1.1.jre7</version>
+            <version>42.1.4.jre7</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
-            <version>6.2.0.jre7</version>
+            <version>6.2.1.jre7</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.microsoft.azure</groupId>
@@ -104,6 +104,11 @@
             <version>${jetty.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-proxy</artifactId>
+            <version>${jetty.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.jetty.websocket</groupId>
             <artifactId>websocket-server</artifactId>
             <version>${jetty.version}</version>
@@ -131,12 +136,12 @@
         <dependency>
             <groupId>org.jxls</groupId>
             <artifactId>jxls</artifactId>
-            <version>2.4.0</version>
+            <version>2.4.2</version>
         </dependency>
         <dependency>
             <groupId>org.jxls</groupId>
             <artifactId>jxls-poi</artifactId>
-            <version>1.0.12</version>
+            <version>1.0.13</version>
         </dependency>
         <dependency>
             <groupId>org.apache.velocity</groupId>
@@ -149,9 +154,14 @@
             <version>2.0</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId> <!-- Required by Velocity -->
+            <version>4.1</version>
+        </dependency>
+        <dependency>
             <groupId>org.mnode.ical4j</groupId>
             <artifactId>ical4j</artifactId>
-            <version>2.0.0</version>
+            <version>2.0.4</version>
         </dependency>
         <dependency>
             <groupId>com.fizzed</groupId>
@@ -224,7 +234,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.6.1</version>
+                <version>3.6.2</version>
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
@@ -233,7 +243,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>3.1.0</version>
                 <configuration>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
@@ -303,7 +313,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>findbugs-maven-plugin</artifactId>
-                <version>3.0.4</version>
+                <version>3.0.5</version>
             </plugin>
             <plugin>
                 <artifactId>maven-pmd-plugin</artifactId>

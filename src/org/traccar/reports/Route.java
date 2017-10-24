@@ -39,6 +39,7 @@ public final class Route {
 
     public static Collection<Position> getObjects(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws SQLException {
+        ReportUtils.checkPeriodLimit(from, to);
         ArrayList<Position> result = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
@@ -50,6 +51,7 @@ public final class Route {
     public static void getExcel(OutputStream outputStream,
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws SQLException, IOException {
+        ReportUtils.checkPeriodLimit(from, to);
         ArrayList<DeviceReport> devicesRoutes = new ArrayList<>();
         ArrayList<String> sheetNames = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
@@ -57,11 +59,11 @@ public final class Route {
             Collection<Position> positions = Context.getDataManager()
                     .getPositions(deviceId, from, to);
             DeviceReport deviceRoutes = new DeviceReport();
-            Device device = Context.getIdentityManager().getDeviceById(deviceId);
+            Device device = Context.getIdentityManager().getById(deviceId);
             deviceRoutes.setDeviceName(device.getName());
             sheetNames.add(WorkbookUtil.createSafeSheetName(deviceRoutes.getDeviceName()));
             if (device.getGroupId() != 0) {
-                Group group = Context.getDeviceManager().getGroupById(device.getGroupId());
+                Group group = Context.getGroupsManager().getById(device.getGroupId());
                 if (group != null) {
                     deviceRoutes.setGroupName(group.getName());
                 }

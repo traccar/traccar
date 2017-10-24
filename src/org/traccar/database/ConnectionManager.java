@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,17 @@ import org.jboss.netty.util.TimerTask;
 import org.traccar.Context;
 import org.traccar.GlobalTimer;
 import org.traccar.Protocol;
+import org.traccar.events.OverspeedEventHandler;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
+import org.traccar.model.DeviceState;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -41,6 +44,7 @@ public class ConnectionManager {
 
     private final long deviceTimeout;
     private final boolean enableStatusEvents;
+    private final boolean updateDeviceState;
 
     private final Map<Long, ActiveDevice> activeDevices = new ConcurrentHashMap<>();
     private final Map<Long, Set<UpdateListener>> listeners = new ConcurrentHashMap<>();
@@ -49,10 +53,13 @@ public class ConnectionManager {
     public ConnectionManager() {
         deviceTimeout = Context.getConfig().getLong("status.timeout", DEFAULT_TIMEOUT) * 1000;
         enableStatusEvents = Context.getConfig().getBoolean("event.enable");
+        updateDeviceState = Context.getConfig().getBoolean("status.updateDeviceState");
     }
 
     public void addActiveDevice(long deviceId, Protocol protocol, Channel channel, SocketAddress remoteAddress) {
-        activeDevices.put(deviceId, new ActiveDevice(deviceId, protocol, channel, remoteAddress));
+        ActiveDevice activeDevice = new ActiveDevice(deviceId, protocol, channel, remoteAddress);
+        activeDevices.put(deviceId, activeDevice);
+        Context.getCommandsManager().sendQueuedCommands(activeDevice);
     }
 
     public void removeActiveDevice(Channel channel) {
@@ -70,7 +77,7 @@ public class ConnectionManager {
     }
 
     public void updateDevice(final long deviceId, String status, Date time) {
-        Device device = Context.getIdentityManager().getDeviceById(deviceId);
+        Device device = Context.getIdentityManager().getById(deviceId);
         if (device == null) {
             return;
         }
@@ -80,21 +87,26 @@ public class ConnectionManager {
 
         if (enableStatusEvents && !status.equals(oldStatus)) {
             String eventType;
+            Map<Event, Position> events = new HashMap<>();
             switch (status) {
                 case Device.STATUS_ONLINE:
                     eventType = Event.TYPE_DEVICE_ONLINE;
                     break;
                 case Device.STATUS_UNKNOWN:
                     eventType = Event.TYPE_DEVICE_UNKNOWN;
+                    if (updateDeviceState) {
+                        events.putAll(updateDeviceState(deviceId));
+                    }
                     break;
                 default:
                     eventType = Event.TYPE_DEVICE_OFFLINE;
+                    if (updateDeviceState) {
+                        events.putAll(updateDeviceState(deviceId));
+                    }
                     break;
             }
-            Event event = new Event(eventType, deviceId);
-            if (Context.getNotificationManager() != null) {
-                Context.getNotificationManager().updateEvent(event, null);
-            }
+            events.put(new Event(eventType, deviceId), null);
+            Context.getNotificationManager().updateEvents(events);
         }
 
         Timeout timeout = timeouts.remove(deviceId);
@@ -112,6 +124,7 @@ public class ConnectionManager {
                 public void run(Timeout timeout) throws Exception {
                     if (!timeout.isCancelled()) {
                         updateDevice(deviceId, Device.STATUS_UNKNOWN, null);
+                        activeDevices.remove(deviceId);
                     }
                 }
             }, deviceTimeout, TimeUnit.MILLISECONDS));
@@ -124,6 +137,24 @@ public class ConnectionManager {
         }
 
         updateDevice(device);
+    }
+
+    public Map<Event, Position> updateDeviceState(long deviceId) {
+        DeviceState deviceState = Context.getDeviceManager().getDeviceState(deviceId);
+        Map<Event, Position> result = new HashMap<>();
+
+        Map<Event, Position> event = Context.getMotionEventHandler().updateMotionState(deviceState);
+        if (event != null) {
+            result.putAll(event);
+        }
+
+        event = Context.getOverspeedEventHandler().updateOverspeedState(deviceState, Context.getDeviceManager().
+                lookupAttributeDouble(deviceId, OverspeedEventHandler.ATTRIBUTE_SPEED_LIMIT, 0, false));
+        if (event != null) {
+            result.putAll(event);
+        }
+
+        return result;
     }
 
     public synchronized void updateDevice(Device device) {

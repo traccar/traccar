@@ -94,8 +94,8 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d+),")                  // single fuel consumption
             .number("(d+.d+),")                  // total fuel consumption
             .number("(d+),")                     // error code count
-            .number("(d+),")                     // harsh acceleration count
-            .number("(d+)")                      // harsh break count
+            .number("(d+),")                     // hard acceleration count
+            .number("(d+)")                      // hard brake count
             .compile();
 
     private static final Pattern PATTERN_OBDA = new PatternBuilder()
@@ -106,8 +106,8 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // average speed
             .number("(d+),")                     // history highest speed
             .number("(d+),")                     // history highest rpm
-            .number("(d+),")                     // total harsh acceleration
-            .number("(d+)")                      // total harsh break n0
+            .number("(d+),")                     // total hard acceleration
+            .number("(d+)")                      // total hard brake
             .compile();
 
     public static final int MSG_HEARTBEAT = 0x0001;
@@ -194,10 +194,16 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_MOVEMENT;
             case 0x13:
                 return Position.ALARM_GEOFENCE_ENTER;
+            case 0x14:
+                return Position.ALARM_ACCIDENT;
             case 0x50:
                 return Position.ALARM_POWER_OFF;
             case 0x53:
                 return Position.ALARM_GPS_ANTENNA_CUT;
+            case 0x72:
+                return Position.ALARM_BRAKING;
+            case 0x73:
+                return Position.ALARM_ACCELERATION;
             default:
                 return null;
         }
@@ -253,7 +259,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (parser.hasNext()) {
-            position.set(Position.KEY_RFID, parser.nextHexInt(0));
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(parser.nextHexInt(0)));
         }
 
         return position;
@@ -295,8 +301,8 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         position.set("singleFuelConsumption", parser.nextDouble());
         position.set("totalFuelConsumption", parser.nextDouble());
         position.set(Position.KEY_DTCS, parser.nextInt());
-        position.set("harshAcelerationNo", parser.nextInt());
-        position.set("harshBreakerNo", parser.nextInt());
+        position.set("hardAccelerationCount", parser.nextInt());
+        position.set("hardBrakingCount", parser.nextInt());
 
         return position;
     }
@@ -353,7 +359,13 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         position.setProtocol(getProtocolName());
 
         if (command == MSG_ALARM) {
-            position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
+            short alarmCode = buf.readUnsignedByte();
+            position.set(Position.KEY_ALARM, decodeAlarm(alarmCode));
+            if (alarmCode >= 0x02 && alarmCode <= 0x05) {
+                position.set(Position.PREFIX_IN + alarmCode, 1);
+            } else if (alarmCode >= 0x32 && alarmCode <= 0x35) {
+                position.set(Position.PREFIX_IN + (alarmCode - 0x30), 0);
+            }
         } else if (command == MSG_POSITION_LOGGED) {
             buf.skipBytes(6);
         }
@@ -370,7 +382,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
                 if (rfid != 0) {
                     String card = String.format("%010d", rfid);
                     position.set("card" + (i + 1), card);
-                    position.set(Position.KEY_RFID, card);
+                    position.set(Position.KEY_DRIVER_UNIQUE_ID, card);
                 }
             }
         }

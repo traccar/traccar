@@ -75,7 +75,7 @@ public class WebDataHandler extends BaseDataHandler {
 
     public String formatRequest(Position position) {
 
-        Device device = Context.getIdentityManager().getDeviceById(position.getDeviceId());
+        Device device = Context.getIdentityManager().getById(position.getDeviceId());
 
         String request = url
                 .replace("{name}", device.getName())

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.traccar.helper;
 
+import java.lang.management.ManagementFactory;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -48,6 +49,10 @@ public final class PatternUtil {
     }
 
     public static MatchResult checkPattern(String pattern, String input) {
+
+        if (!ManagementFactory.getRuntimeMXBean().getInputArguments().toString().contains("-agentlib:jdwp")) {
+            throw new RuntimeException("PatternUtil usage detected");
+        }
 
         MatchResult result = new MatchResult();
 

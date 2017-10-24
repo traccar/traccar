@@ -144,7 +144,7 @@ public class TmgProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.PREFIX_ADC + 1, parser.nextDouble(0));
         position.set(Position.PREFIX_ADC + 2, parser.nextDouble(0));
         position.set(Position.KEY_VERSION_FW, parser.next());
-        position.set(Position.KEY_RFID, parser.next());
+        position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
 
         return position;
     }

@@ -12,8 +12,20 @@ public class Gt06FrameDecoderTest extends ProtocolTest {
         Gt06FrameDecoder decoder = new Gt06FrameDecoder();
 
         Assert.assertEquals(
-                binary("78781f1210020e140613cc04770690003e3f2e3414b20000000000000000044c446a0d0a"),
-                decoder.decode(null, null, binary("78781f1210020e140613cc04770690003e3f2e3414b20000000000000000044c446a0d0a")));
+                binary("78780d0103563140414198583c0d0a"),
+                decoder.decode(null, null, binary("78780d0103563140414198583c0d0a")));
+
+        Assert.assertEquals(
+                binary("787800691709261259400700cc0400d376714600d37a3d5000d37a3c5000d393505a00d3765d5a00d376735a00d32e6b640d0a"),
+                decoder.decode(null, null, binary("787800691709261259400700cc0400d376714600d37a3d5000d37a3c5000d393505a00d3765d5a00d376735a00d32e6b640d0a")));
+
+        Assert.assertEquals(
+                binary("7878121011091c0b1e2e98058507f80097a6ac03344a0d0a"),
+                decoder.decode(null, null, binary("7878121011091c0b1e2e98058507f80097a6ac03344a0d0a")));
+
+        Assert.assertEquals(
+                binary("787808171709281135331491827b75594dc8d719a9708452cad719a9708550cad719a97086521491827b75574cac9e17b308085dc8d71939633947cad71939633a480700cc0400d37a3d5a00d37a3d5a00d37a3d5a00d37a3d5a00d37a3d5a00d37a3d5a00d37a3d5a0d0a"),
+                decoder.decode(null, null, binary("787808171709281135331491827b75594dc8d719a9708452cad719a9708550cad719a97086521491827b75574cac9e17b308085dc8d71939633947cad71939633a480700cc0400d37a3d5a00d37a3d5a00d37a3d5a00d37a3d5a00d37a3d5a00d37a3d5a00d37a3d5a0d0a")));
 
         Assert.assertEquals(
                 binary("787808134606020002044dc5050d0a"),

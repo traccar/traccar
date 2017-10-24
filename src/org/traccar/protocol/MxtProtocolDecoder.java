@@ -159,7 +159,7 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (BitUtil.check(infoGroups, 7)) {
-                position.set(Position.KEY_RFID, buf.readUnsignedInt());
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(buf.readUnsignedInt()));
             }
 
             buf.readerIndex(buf.writerIndex() - 3);

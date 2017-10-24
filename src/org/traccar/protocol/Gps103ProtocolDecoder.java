@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -248,6 +248,8 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.PREFIX_TEMP + 1, alarm.substring(2));
         } else if (alarm.startsWith("oil ")) {
             position.set("oil", alarm.substring(4));
+        } else if (!position.getAttributes().containsKey(Position.KEY_ALARM) && !alarm.equals("tracker")) {
+            position.set(Position.KEY_EVENT, alarm);
         }
 
         DateBuilder dateBuilder = new DateBuilder()
@@ -258,7 +260,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
         String rfid = parser.next();
         if (alarm.equals("rfid")) {
-            position.set(Position.KEY_RFID, rfid);
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, rfid);
         }
 
         String utcHours = parser.next();

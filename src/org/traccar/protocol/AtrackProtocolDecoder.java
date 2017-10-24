@@ -327,7 +327,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_OUTPUT, buf.readUnsignedByte());
             position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort() * 0.001);
 
-            position.set("driver", readString(buf));
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, readString(buf));
 
             position.set(Position.PREFIX_TEMP + 1, buf.readShort() * 0.1);
             position.set(Position.PREFIX_TEMP + 2, buf.readShort() * 0.1);

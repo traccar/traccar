@@ -109,7 +109,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        position.set(Position.KEY_RFID, parser.next());
+        position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
 
         if (parser.hasNext()) {
             String[] values = parser.next().split(",");

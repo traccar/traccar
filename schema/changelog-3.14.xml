@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+  logicalFilePath="changelog-3.14">
+
+  <changeSet author="author" id="changelog-3.14">
+
+    <createTable tableName="drivers">
+      <column name="id" type="INT" autoIncrement="true">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="name" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="uniqueid" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="attributes" type="VARCHAR(4000)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+    
+    <addUniqueConstraint tableName="drivers" columnNames="uniqueid" constraintName="uk_driver_uniqueid" />
+    
+    <createTable tableName="user_driver">
+      <column name="userid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="driverid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="user_driver" baseColumnNames="userid" constraintName="fk_user_driver_userid" referencedTableName="users" referencedColumnNames="id" onDelete="CASCADE" />
+    <addForeignKeyConstraint baseTableName="user_driver" baseColumnNames="driverid" constraintName="fk_user_driver_driverid" referencedTableName="drivers" referencedColumnNames="id" onDelete="CASCADE" />
+
+    <createTable tableName="group_driver">
+      <column name="groupid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="driverid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="group_driver" baseColumnNames="groupid" constraintName="fk_group_driver_groupid" referencedTableName="groups" referencedColumnNames="id" onDelete="CASCADE" />
+    <addForeignKeyConstraint baseTableName="group_driver" baseColumnNames="driverid" constraintName="fk_group_driver_driverid" referencedTableName="drivers" referencedColumnNames="id" onDelete="CASCADE" />
+
+    <createTable tableName="device_driver">
+      <column name="deviceid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="driverid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="device_driver" baseColumnNames="deviceid" constraintName="fk_device_driver_deviceid" referencedTableName="devices" referencedColumnNames="id" onDelete="CASCADE" />
+    <addForeignKeyConstraint baseTableName="device_driver" baseColumnNames="driverid" constraintName="fk_device_driver_driverid" referencedTableName="drivers" referencedColumnNames="id" onDelete="CASCADE" />
+
+    <renameTable oldTableName="server" newTableName="servers" />
+
+  </changeSet>
+</databaseChangeLog>

@@ -308,7 +308,8 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
                     break;
 
                 case DATA_RFID:
-                    position.set(Position.KEY_RFID, buf.readBytes(length - 1).toString(StandardCharsets.US_ASCII));
+                    position.set(Position.KEY_DRIVER_UNIQUE_ID,
+                            buf.readBytes(length - 1).toString(StandardCharsets.US_ASCII));
                     position.set("authorized", buf.readUnsignedByte() != 0);
                     break;
 

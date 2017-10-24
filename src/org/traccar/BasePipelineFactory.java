@@ -30,6 +30,7 @@ import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.handler.logging.LoggingHandler;
 import org.jboss.netty.handler.timeout.IdleStateHandler;
 import org.traccar.events.CommandResultEventHandler;
+import org.traccar.events.DriverEventHandler;
 import org.traccar.events.FuelDropEventHandler;
 import org.traccar.events.GeofenceEventHandler;
 import org.traccar.events.IgnitionEventHandler;
@@ -50,6 +51,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
     private FilterHandler filterHandler;
     private DistanceHandler distanceHandler;
+    private RemoteAddressHandler remoteAddressHandler;
     private MotionHandler motionHandler;
     private GeocoderHandler geocoderHandler;
     private GeolocationHandler geolocationHandler;
@@ -65,6 +67,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
     private AlertEventHandler alertEventHandler;
     private IgnitionEventHandler ignitionEventHandler;
     private MaintenanceEventHandler maintenanceEventHandler;
+    private DriverEventHandler driverEventHandler;
 
     private static final class OpenChannelHandler extends SimpleChannelHandler {
 
@@ -125,9 +128,14 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             }
         }
 
-        distanceHandler = new DistanceHandler(Context.getConfig().getBoolean("coordinates.filter"),
+        distanceHandler = new DistanceHandler(
+                Context.getConfig().getBoolean("coordinates.filter"),
                 Context.getConfig().getInteger("coordinates.minError"),
                 Context.getConfig().getInteger("coordinates.maxError"));
+
+        if (Context.getConfig().getBoolean("processing.remoteAddress.enable")) {
+            remoteAddressHandler = new RemoteAddressHandler();
+        }
 
         if (Context.getConfig().getBoolean("filter.enable")) {
             filterHandler = new FilterHandler();
@@ -145,7 +153,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
                     Context.getConfig().getBoolean("geolocation.processInvalidPositions"));
         }
 
-        motionHandler = new MotionHandler(Context.getConfig().getDouble("event.motion.speedThreshold", 0.01));
+        motionHandler = new MotionHandler(Context.getTripsConfig().getSpeedThreshold());
 
         if (Context.getConfig().hasKey("location.latitudeHemisphere")
                 || Context.getConfig().hasKey("location.longitudeHemisphere")) {
@@ -162,13 +170,14 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
         if (Context.getConfig().getBoolean("event.enable")) {
             commandResultEventHandler = new CommandResultEventHandler();
-            overspeedEventHandler = new OverspeedEventHandler();
+            overspeedEventHandler = Context.getOverspeedEventHandler();
             fuelDropEventHandler = new FuelDropEventHandler();
-            motionEventHandler = new MotionEventHandler();
+            motionEventHandler = Context.getMotionEventHandler();
             geofenceEventHandler = new GeofenceEventHandler();
             alertEventHandler = new AlertEventHandler();
             ignitionEventHandler = new IgnitionEventHandler();
             maintenanceEventHandler = new MaintenanceEventHandler();
+            driverEventHandler = new DriverEventHandler();
         }
     }
 
@@ -198,7 +207,9 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             pipeline.addLast("distance", distanceHandler);
         }
 
-        pipeline.addLast("remoteAddress", new RemoteAddressHandler());
+        if (remoteAddressHandler != null) {
+            pipeline.addLast("remoteAddress", remoteAddressHandler);
+        }
 
         addDynamicHandlers(pipeline);
 
@@ -260,6 +271,10 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
         if (maintenanceEventHandler != null) {
             pipeline.addLast("MaintenanceEventHandler", maintenanceEventHandler);
+        }
+
+        if (driverEventHandler != null) {
+            pipeline.addLast("DriverEventHandler", driverEventHandler);
         }
 
         pipeline.addLast("mainHandler", new MainEventHandler());

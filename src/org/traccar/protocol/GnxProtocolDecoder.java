@@ -102,7 +102,7 @@ public class GnxProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
 
         if (type.equals("MIF")) {
-            position.set(Position.KEY_RFID, parser.next());
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
         }
 
         return position;
