@@ -30,7 +30,6 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
-import javax.json.JsonString;
 import java.io.StringReader;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -57,11 +56,11 @@ public class FlespiProtocolDecoder extends BaseProtocolDecoder {
         List<Position> positions = new LinkedList<>();
         for (int i = 0; i < result.size(); i++) {
             JsonObject message = result.getJsonObject(i);
-            JsonString ident = message.getJsonString("ident");
+            String ident = message.getString("ident");
             if (ident == null) {
                 continue;
             }
-            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, ident.getString());
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, ident);
             if (deviceSession == null) {
                 continue;
             }
