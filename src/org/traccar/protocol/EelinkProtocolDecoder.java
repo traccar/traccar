@@ -194,7 +194,8 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 break;
             default:
                 Log.debug("Unhandled Device SMS Received: " + message.trim() + ", PhoneNum: " + sanitizedPhone);
-                TextMessageEventHandler.handleDeviceTextMessage(position.getDeviceId(), message.trim(), sanitizedPhone, position);
+                TextMessageEventHandler.handleDeviceTextMessage(
+                        position.getDeviceId(), message.trim(), sanitizedPhone, position);
                 responseMessage = null;
                 break;
         }
@@ -431,10 +432,10 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
         if (type == MSG_LOGIN) {
             int version = 1;
-            if(buf.readableBytes() > 10){
+            if (buf.readableBytes() > 10) {
                 version = 2;
             }
-            
+
             String uniqueId = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, uniqueId);
 
@@ -468,7 +469,9 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                     return null;
                 } else {
                     previousIndex = index;
-                    if(index == 65535) previousIndex = 0; // rollover
+                    if (index == 65535) {
+                        previousIndex = 0; // rollover
+                    }
                 }
             }
 
