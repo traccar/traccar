@@ -20,7 +20,7 @@ import org.traccar.database.QueryIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Command extends Message {
+public class Command extends Message implements Cloneable {
 
     public static final String TYPE_CUSTOM = "custom";
     public static final String TYPE_IDENTIFICATION = "deviceIdentification";
@@ -76,6 +76,11 @@ public class Command extends Message {
     public static final String KEY_PHONE = "phone";
     public static final String KEY_SERVER = "server";
     public static final String KEY_PORT = "port";
+
+    @Override
+    public Command clone() throws CloneNotSupportedException {
+        return (Command) super.clone();
+    }
 
     private boolean textChannel;
 
