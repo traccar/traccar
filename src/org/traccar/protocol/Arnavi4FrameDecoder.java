@@ -22,53 +22,50 @@ import org.jboss.netty.handler.codec.frame.FrameDecoder;
 
 public class Arnavi4FrameDecoder extends FrameDecoder {
 
-    private static final int PACKET_MINIMUM_LENGTH = 4;
-    private static final int RECORD_MINIMUM_LENGTH = 8;
-
-    static final byte HEADER_START_SIGN = (byte) 0xff;
-    static final byte HEADER_VERSION_1 = 0x22;
-    static final byte HEADER_VERSION_2 = 0x23;
+    private static final int MIN_LENGTH = 4;
     private static final int HEADER_LENGTH = 10;
-
-    private static final byte PACKAGE_START_SIGN = 0x5b;
+    private static final int PACKET_WRAPPER_LENGTH = 8;
+    private static final int COMMAND_ANSWER_PACKET_LENGTH = 4;
+    private static final int COMMAND_ANSWER_PARCEL_NUMBER = 0xfd;
     private static final byte PACKAGE_END_SIGN = 0x5d;
-    private static final int PACKAGE_MIN_PARCEL_NUMBER = 0x01;
-    private static final int PACKAGE_MAX_PARCEL_NUMBER = 0xfb;
+
+    private boolean firstPacket = true;
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx,
-            Channel channel,
-            ChannelBuffer buf) throws Exception {
+            ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
 
-        if (buf.readableBytes() < PACKET_MINIMUM_LENGTH) {
+        if (buf.readableBytes() < MIN_LENGTH) {
             return null;
         }
 
-        if (buf.getByte(0) == HEADER_START_SIGN
-                && buf.readableBytes() == HEADER_LENGTH
-                && (buf.getByte(1) == HEADER_VERSION_1 || buf.getByte(1) == HEADER_VERSION_2)) {
+        int length;
+        if (firstPacket) {
+            firstPacket = false;
+            length = HEADER_LENGTH;
+        } else {
+            int index = buf.getUnsignedByte(1); // parcel number
+            if (index == COMMAND_ANSWER_PARCEL_NUMBER) {
+                length = COMMAND_ANSWER_PACKET_LENGTH;
+            } else {
+                int pos = 2; // start sign + parcel number
+                while (pos + PACKET_WRAPPER_LENGTH < buf.readableBytes()
+                        && buf.getByte(pos) != PACKAGE_END_SIGN) {
 
-            return buf.readBytes(HEADER_LENGTH);
+                    int dataLength = buf.getUnsignedShort(pos + 1);
+                    pos += PACKET_WRAPPER_LENGTH + dataLength; // packet type + data length + unixtime + data + crc
+                }
+
+                if (buf.getByte(pos) != PACKAGE_END_SIGN) { // end sign
+                    return null;
+                }
+
+                length = pos + 1;
+            }
         }
 
-        int index = buf.getUnsignedByte(1); // parcel number
-        if (buf.getByte(0) == PACKAGE_START_SIGN
-                && index >= PACKAGE_MIN_PARCEL_NUMBER && index <= PACKAGE_MAX_PARCEL_NUMBER) {
-
-            int bufferPosition = 2; // start sign + parcel number
-            while (bufferPosition + RECORD_MINIMUM_LENGTH < buf.readableBytes()
-                    && buf.getByte(bufferPosition) != PACKAGE_END_SIGN) {
-
-                int dataLength = buf.getUnsignedShort(bufferPosition + 1);
-                bufferPosition += RECORD_MINIMUM_LENGTH + dataLength; // type + data length + unixtime + data + crc
-            }
-
-            if (bufferPosition < buf.readableBytes()
-                    && buf.getByte(bufferPosition) == PACKAGE_END_SIGN) {
-
-                return buf.readBytes(bufferPosition + 1); // end sign
-            }
+        if (buf.readableBytes() >= length) {
+            return buf.readBytes(length);
         }
 
         return null;

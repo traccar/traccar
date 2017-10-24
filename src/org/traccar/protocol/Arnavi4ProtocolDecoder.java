@@ -30,11 +30,11 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-import static org.traccar.protocol.Arnavi4FrameDecoder.HEADER_START_SIGN;
-import static org.traccar.protocol.Arnavi4FrameDecoder.HEADER_VERSION_1;
-import static org.traccar.protocol.Arnavi4FrameDecoder.HEADER_VERSION_2;
-
 public class Arnavi4ProtocolDecoder extends BaseProtocolDecoder {
+
+    private static final byte HEADER_START_SIGN = (byte) 0xff;
+    private static final byte HEADER_VERSION_1 = 0x22;
+    private static final byte HEADER_VERSION_2 = 0x23;
 
     private static final byte RECORD_PING = 0x00;
     private static final byte RECORD_DATA = 0x01;

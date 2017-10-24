@@ -579,6 +579,9 @@
     <entry key='vt200.port'>5143</entry>
     <entry key='owntracks.port'>5144</entry>
     <entry key='vtfms.port'>5145</entry>
-    <entry key='arnavi4.port'>5146</entry>
+    <entry key='tlv.port'>5146</entry>
+    <entry key='esky.port'>5147</entry>
+    <entry key='genx.port'>5148</entry>
+    <entry key='arnavi4.port'>5149</entry>
 
 </properties>
