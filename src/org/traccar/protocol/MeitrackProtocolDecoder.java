@@ -112,7 +112,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private Position decodeRegularMessage(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
+    private Position decodeRegular(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
 
         Parser parser = new Parser(PATTERN, buf.toString(StandardCharsets.US_ASCII));
         if (!parser.matches()) {
@@ -237,7 +237,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private List<Position> decodeBinaryMessage(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
+    private List<Position> decodeBinaryC(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
         List<Position> positions = new LinkedList<>();
 
         String flag = buf.toString(2, 1, StandardCharsets.US_ASCII);
@@ -311,6 +311,98 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         return positions;
     }
 
+    private List<Position> decodeBinaryE(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
+        List<Position> positions = new LinkedList<>();
+
+        buf.readerIndex(buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ',') + 1);
+        String imei = buf.readBytes(15).toString(StandardCharsets.US_ASCII);
+        buf.skipBytes(1 + 3 + 1);
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
+        if (deviceSession == null) {
+            return null;
+        }
+
+        buf.readUnsignedInt(); // remaining cache
+        int count = buf.readUnsignedShort();
+
+        for (int i = 0; i < count; i++) {
+            Position position = new Position();
+            position.setProtocol(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            buf.readUnsignedShort(); // length
+            buf.readUnsignedShort(); // index
+
+            int paramCount = buf.readUnsignedByte();
+            for (int j = 0; j < paramCount; j++) {
+                int id = buf.readUnsignedByte();
+                switch (id) {
+                    case 0x01:
+                        position.set(Position.KEY_EVENT, buf.readUnsignedByte());
+                        break;
+                    case 0x05:
+                        position.setValid(buf.readUnsignedByte() > 0);
+                        break;
+                    case 0x06:
+                        position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+                        break;
+                    default:
+                        buf.readUnsignedByte();
+                        break;
+                }
+            }
+
+            paramCount = buf.readUnsignedByte();
+            for (int j = 0; j < paramCount; j++) {
+                int id = buf.readUnsignedByte();
+                switch (id) {
+                    case 0x08:
+                        position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
+                        break;
+                    case 0x09:
+                        position.setCourse(buf.readUnsignedShort() * 0.1);
+                        break;
+                    case 0x0B:
+                        position.setAltitude(buf.readShort());
+                        break;
+                    default:
+                        buf.readUnsignedShort();
+                        break;
+                }
+            }
+
+            paramCount = buf.readUnsignedByte();
+            for (int j = 0; j < paramCount; j++) {
+                int id = buf.readUnsignedByte();
+                switch (id) {
+                    case 0x02:
+                        position.setLatitude(buf.readInt() * 0.000001);
+                        break;
+                    case 0x03:
+                        position.setLongitude(buf.readInt() * 0.000001);
+                        break;
+                    case 0x04:
+                        position.setTime(new Date((946684800 + buf.readUnsignedInt()) * 1000)); // 2000-01-01
+                        break;
+                    default:
+                        buf.readUnsignedInt();
+                        break;
+                }
+            }
+
+            paramCount = buf.readUnsignedByte();
+            for (int j = 0; j < paramCount; j++) {
+                buf.readUnsignedByte(); // id
+                buf.skipBytes(buf.readUnsignedByte()); // value
+            }
+
+            positions.add(position);
+        }
+
+        return positions;
+    }
+
     private void requestPhotoPacket(Channel channel, String imei, int index) {
         if (channel != null) {
             String content = "D00,camera_picture.jpg," + index;
@@ -366,9 +458,11 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                 requestPhotoPacket(channel, imei, 0);
                 return null;
             case "CCC":
-                return decodeBinaryMessage(channel, remoteAddress, buf);
+                return decodeBinaryC(channel, remoteAddress, buf);
+            case "CCE":
+                return decodeBinaryE(channel, remoteAddress, buf);
             default:
-                return decodeRegularMessage(channel, remoteAddress, buf);
+                return decodeRegular(channel, remoteAddress, buf);
         }
     }
 
