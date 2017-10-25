@@ -131,7 +131,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN4 = new PatternBuilder()
             .text("$$")                          // header
             .number("dddd")                      // length
-            .text("AA")                          // type
+            .expression("A[ABC]")                // type
             .number("(d+)|")                     // imei
             .number("(x{8})")                    // status
             .number("(dd)(dd)(dd)")              // date (yymmdd)
@@ -313,7 +313,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
 
         String sentence = (String) msg;
         Pattern pattern = PATTERN3;
-        if (sentence.indexOf("AA") == 6) {
+        if (sentence.indexOf("A") == 6) {
             pattern = PATTERN4;
         } else if (sentence.contains("$GPRMC")) {
             pattern = PATTERN1;
