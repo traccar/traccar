@@ -40,11 +40,8 @@ import java.util.Date;
 
 public class FlespiProtocolDecoder extends BaseProtocolDecoder {
 
-    private final String protocolName;
-
     public FlespiProtocolDecoder(FlespiProtocol protocol) {
         super(protocol);
-        protocolName = protocol.getName();
     }
 
     @Override
@@ -84,7 +81,7 @@ public class FlespiProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void decodePosition(JsonObject object, Position position) {
-        position.setProtocol(protocolName);
+        position.setProtocol(getProtocolName());
 
         Date deviceTime = new Date((long) object.getJsonNumber("timestamp").doubleValue() * 1000);
         position.setTime(deviceTime);
