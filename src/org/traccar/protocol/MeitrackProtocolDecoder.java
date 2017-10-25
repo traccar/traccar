@@ -16,6 +16,7 @@
 package org.traccar.protocol;
 
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
@@ -36,6 +37,8 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
+
+    private ChannelBuffer photo;
 
     public MeitrackProtocolDecoder(MeitrackProtocol protocol) {
         super(protocol);
@@ -308,6 +311,16 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         return positions;
     }
 
+    private void requestPhotoPacket(Channel channel, String imei, int index) {
+        if (channel != null) {
+            String content = "D00,camera_picture.jpg," + index;
+            int length = 1 + imei.length() + 1 + content.length() + 5;
+            String response = String.format("@@O%02d,%s,%s*", length, imei, content);
+            response += Checksum.sum(response) + "\r\n";
+            channel.write(response);
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -315,20 +328,42 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         ChannelBuffer buf = (ChannelBuffer) msg;
 
         int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ',');
+        String imei = buf.toString(index + 1, 15, StandardCharsets.US_ASCII);
         index = buf.indexOf(index + 1, buf.writerIndex(), (byte) ',');
-
         String type = buf.toString(index + 1, 3, StandardCharsets.US_ASCII);
+
         switch (type) {
-            case "D03":
-                if (channel != null) {
-                    DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
-                    String imei = Context.getIdentityManager().getById(deviceSession.getDeviceId()).getUniqueId();
-                    String content = "D00,camera_picture.jpg,0";
-                    int length = 1 + imei.length() + 1 + content.length() + 5;
-                    String response = String.format("@@O%02d,%s,%s*", length, imei, content);
-                    response += Checksum.sum(response) + "\r\n";
-                    channel.write(response);
+            case "D00":
+                index = buf.indexOf(index + 1 + type.length() + 1, buf.writerIndex(), (byte) ',') + 1;
+                int endIndex =  buf.indexOf(index, buf.writerIndex(), (byte) ',');
+                int total = Integer.parseInt(buf.toString(index, endIndex - index, StandardCharsets.US_ASCII));
+                index = endIndex + 1;
+                endIndex = buf.indexOf(index, buf.writerIndex(), (byte) ',');
+                int current = Integer.parseInt(buf.toString(index, endIndex - index, StandardCharsets.US_ASCII));
+
+                buf.readerIndex(endIndex + 1);
+                photo.writeBytes(buf.readBytes(buf.readableBytes() - 1 - 2 - 2));
+
+                if (current == total - 1) {
+                    Position position = new Position();
+                    position.setProtocol(getProtocolName());
+                    position.setDeviceId(getDeviceSession(channel, remoteAddress, imei).getDeviceId());
+
+                    getLastLocation(position, null);
+
+                    position.set(Position.KEY_IMAGE, Context.getMediaManager().writeFile(imei, photo, "jpg"));
+                    photo = null;
+
+                    return position;
+                } else {
+                    if ((current + 1) % 8 == 0) {
+                        requestPhotoPacket(channel, imei, current + 1);
+                    }
+                    return null;
                 }
+            case "D03":
+                photo = ChannelBuffers.dynamicBuffer();
+                requestPhotoPacket(channel, imei, 0);
                 return null;
             case "CCC":
                 return decodeBinaryMessage(channel, remoteAddress, buf);
