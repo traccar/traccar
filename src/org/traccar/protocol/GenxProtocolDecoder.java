@@ -19,6 +19,7 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -67,6 +68,24 @@ public class GenxProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case 4:
                     position.setLongitude(Double.parseDouble(values[i]));
+                    break;
+                case 11:
+                    position.set(Position.KEY_IGNITION, values[i].equals("ON"));
+                    break;
+                case 13:
+                    position.setSpeed(UnitsConverter.knotsFromKph(Integer.parseInt(values[i])));
+                    break;
+                case 17:
+                    position.setCourse(Integer.parseInt(values[i]));
+                    break;
+                case 23:
+                    position.set(Position.KEY_ODOMETER, Double.parseDouble(values[i]) * 1000);
+                    break;
+                case 27:
+                    position.setAltitude(UnitsConverter.metersFromFeet(Integer.parseInt(values[i])));
+                    break;
+                case 46:
+                    position.set(Position.KEY_SATELLITES, Integer.parseInt(values[i]));
                     break;
                 default:
                     break;
