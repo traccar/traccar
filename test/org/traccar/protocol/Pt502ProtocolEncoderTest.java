@@ -8,6 +8,20 @@ import org.traccar.model.Command;
 public class Pt502ProtocolEncoderTest extends ProtocolTest {
 
     @Test
+    public void testEncodeCustom() throws Exception {
+
+        Pt502ProtocolEncoder encoder = new Pt502ProtocolEncoder();
+
+        Command command = new Command();
+        command.setDeviceId(1);
+        command.setType(Command.TYPE_CUSTOM);
+        command.set(Command.KEY_DATA, "#PTI300");
+
+        Assert.assertEquals("#PTI300\r\n", encoder.encodeCommand(command));
+
+    }
+
+    @Test
     public void testEncodeOutputControl() throws Exception {
 
         Pt502ProtocolEncoder encoder = new Pt502ProtocolEncoder();

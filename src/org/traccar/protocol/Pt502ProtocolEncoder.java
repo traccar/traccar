@@ -41,6 +41,8 @@ public class Pt502ProtocolEncoder extends StringProtocolEncoder implements Strin
     protected Object encodeCommand(Command command) {
 
         switch (command.getType()) {
+            case Command.TYPE_CUSTOM:
+                return formatCommand(command, "{%s}\r\n", Command.KEY_DATA);
             case Command.TYPE_OUTPUT_CONTROL:
                 return formatCommand(command, "#OPC{%s},{%s}\r\n", Command.KEY_INDEX, Command.KEY_DATA);
             case Command.TYPE_SET_TIMEZONE:
