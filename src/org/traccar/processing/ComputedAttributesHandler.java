@@ -103,7 +103,7 @@ public class ComputedAttributesHandler extends BaseDataHandler {
                             case "number":
                                 if (attribute.getAttribute().equals(false)) {
                                     position.getAttributes().remove(attribute.getAttribute());
-                                }else{
+                                } else {
                                     position.getAttributes().put(attribute.getAttribute(), (Number) result);
                                 }
                                 break;
@@ -113,14 +113,14 @@ public class ComputedAttributesHandler extends BaseDataHandler {
                             default:
                                 if (attribute.getAttribute().equals(false)) {
                                     position.getAttributes().remove(attribute.getAttribute());
-                                }else{
+                                } else {
                                     position.getAttributes().put(attribute.getAttribute(), result.toString());
                                 }
                         }
                     } catch (ClassCastException error) {
                         Log.warning(error);
                     }
-                }else{
+                } else {
                     position.getAttributes().remove(attribute.getAttribute());
                 }
             }
