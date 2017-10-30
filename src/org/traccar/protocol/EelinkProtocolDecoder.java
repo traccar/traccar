@@ -160,7 +160,6 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
     private Position decodeDownlink(ChannelBuffer buf, Position position) {
 
         getLastLocation(position, new Date());
-        position.setValid(false);
 
         switch (buf.readUnsignedByte()) {
             case MSG_SIGN_COMMAND:
@@ -288,7 +287,6 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(deviceTime);
         } else {
             getLastLocation(position, deviceTime);
-            position.setValid(Boolean.FALSE);
         }
 
         Network network = new Network();
