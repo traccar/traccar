@@ -96,21 +96,32 @@ public class ComputedAttributesHandler extends BaseDataHandler {
                 } catch (JexlException error) {
                     Log.warning(error);
                 }
+
                 if (result != null) {
                     try {
                         switch (attribute.getType()) {
                             case "number":
-                                position.getAttributes().put(attribute.getAttribute(), (Number) result);
+                                if (attribute.getAttribute().equals(false)) {
+                                    position.getAttributes().remove(attribute.getAttribute());
+                                }else{
+                                    position.getAttributes().put(attribute.getAttribute(), (Number) result);
+                                }
                                 break;
                             case "boolean":
                                 position.getAttributes().put(attribute.getAttribute(), (Boolean) result);
                                 break;
                             default:
-                                position.getAttributes().put(attribute.getAttribute(), result.toString());
+                                if (attribute.getAttribute().equals(false)) {
+                                    position.getAttributes().remove(attribute.getAttribute());
+                                }else{
+                                    position.getAttributes().put(attribute.getAttribute(), result.toString());
+                                }
                         }
                     } catch (ClassCastException error) {
                         Log.warning(error);
                     }
+                }else{
+                    position.getAttributes().remove(attribute.getAttribute());
                 }
             }
         }
