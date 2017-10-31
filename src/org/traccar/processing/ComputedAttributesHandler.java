@@ -95,14 +95,15 @@ public class ComputedAttributesHandler extends BaseDataHandler {
                     result = computeAttribute(attribute, position);
                 } catch (JexlException error) {
                     Log.warning(error);
+                    return position;
                 }
 
                 if (result != null) {
                     try {
                         switch (attribute.getType()) {
                             case "number":
-                                if (attribute.getAttribute().equals(false)) {
-                                    position.getAttributes().remove(attribute.getAttribute());
+                                if (attribute.getAttribute().equals(false) || attribute.getAttribute().equals(true)) {
+                                    throw new IllegalArgumentException("Number Attribute Type was returned Boolean instead of Number");
                                 } else {
                                     position.getAttributes().put(attribute.getAttribute(), (Number) result);
                                 }
@@ -111,13 +112,13 @@ public class ComputedAttributesHandler extends BaseDataHandler {
                                 position.getAttributes().put(attribute.getAttribute(), (Boolean) result);
                                 break;
                             default:
-                                if (attribute.getAttribute().equals(false)) {
-                                    position.getAttributes().remove(attribute.getAttribute());
+                                if (attribute.getAttribute().equals(false) || attribute.getAttribute().equals(true)) {
+                                    throw new IllegalArgumentException("Default Attribute Type was returned Boolean instead of String");
                                 } else {
                                     position.getAttributes().put(attribute.getAttribute(), result.toString());
                                 }
                         }
-                    } catch (ClassCastException error) {
+                    } catch (ClassCastException | IllegalArgumentException error) {
                         Log.warning(error);
                     }
                 } else {
