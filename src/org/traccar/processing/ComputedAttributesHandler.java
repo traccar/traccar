@@ -103,7 +103,8 @@ public class ComputedAttributesHandler extends BaseDataHandler {
                         switch (attribute.getType()) {
                             case "number":
                                 if (attribute.getAttribute().equals(false) || attribute.getAttribute().equals(true)) {
-                                    throw new IllegalArgumentException("Number Attribute Type was returned Boolean instead of Number");
+                                    throw new IllegalArgumentException(
+                                            "Number Attribute Type was returned Boolean instead of Number");
                                 } else {
                                     position.getAttributes().put(attribute.getAttribute(), (Number) result);
                                 }
@@ -113,7 +114,8 @@ public class ComputedAttributesHandler extends BaseDataHandler {
                                 break;
                             default:
                                 if (attribute.getAttribute().equals(false) || attribute.getAttribute().equals(true)) {
-                                    throw new IllegalArgumentException("Default Attribute Type was returned Boolean instead of String");
+                                    throw new IllegalArgumentException(
+                                            "Default Attribute Type was returned Boolean instead of String");
                                 } else {
                                     position.getAttributes().put(attribute.getAttribute(), result.toString());
                                 }
