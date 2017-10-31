@@ -19,6 +19,7 @@ package org.traccar.processing;
 import org.traccar.BaseDataHandler;
 import org.traccar.Context;
 import org.traccar.model.Position;
+import org.apache.commons.lang3.StringUtils;
 
 public class CopyAttributesHandler extends BaseDataHandler {
 
@@ -41,8 +42,7 @@ public class CopyAttributesHandler extends BaseDataHandler {
                 attributesString = Position.KEY_DRIVER_UNIQUE_ID;
             } else {
                 if (attributesString.isEmpty()) {
-                    position.setAttributes(last.getAttributes());
-                    return position;
+                    attributesString = StringUtils.join(last.getAttributes(), ",");
                 } else {
                     attributesString += "," + Position.KEY_DRIVER_UNIQUE_ID;
                 }
