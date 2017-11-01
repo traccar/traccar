@@ -57,11 +57,19 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             .number("|(xxxx)?")                  // state
             .groupBegin()
             .number("|(xxxx),(xxxx)")            // adc
-            .number("(?:,(xxxx),(xxxx),(xxxx),(xxxx),(xxxx),(xxxx))?")
+            .number(",(xxxx)").optional()
+            .number(",(xxxx)").optional()
+            .number(",(xxxx)").optional()
+            .number(",(xxxx)").optional()
+            .number(",(xxxx)").optional()
+            .number(",(xxxx)").optional()
             .groupBegin()
-            .number("|x{16}")                    // cell
-            .number("|(xx)")                     // gsm
+            .number("|x{16,20}")                 // cell
+            .number("|(xx)")                     // rssi
             .number("|(x{8})")                   // odometer
+            .groupBegin()
+            .number("|(xx)")                     // satellites
+            .groupEnd("?")
             .or()
             .number("|(x{9})")                   // odometer
             .groupBegin()
@@ -245,25 +253,14 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_STATUS, parser.next());
 
         for (int i = 1; i <= 8; i++) {
-            if (parser.hasNext()) {
-                position.set(Position.PREFIX_ADC + i, parser.nextHexInt(0));
-            }
+            position.set(Position.PREFIX_ADC + i, parser.nextHexInt());
         }
 
-        if (parser.hasNext()) {
-            position.set(Position.KEY_RSSI, parser.nextHexInt(0));
-        }
-
-        if (parser.hasNext()) {
-            position.set(Position.KEY_ODOMETER, parser.nextLong(16, 0));
-        }
-        if (parser.hasNext()) {
-            position.set(Position.KEY_ODOMETER, parser.nextLong(16, 0));
-        }
-
-        if (parser.hasNext()) {
-            position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(parser.nextHexInt(0)));
-        }
+        position.set(Position.KEY_RSSI, parser.nextHexInt());
+        position.set(Position.KEY_ODOMETER, parser.nextHexLong());
+        position.set(Position.KEY_SATELLITES, parser.nextHexInt());
+        position.set(Position.KEY_ODOMETER, parser.nextHexLong());
+        position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
 
         return position;
     }
