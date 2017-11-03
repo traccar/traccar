@@ -42,15 +42,16 @@ public class DwayProtocolDecoder extends BaseProtocolDecoder {
             .number("(-?d+.d+),")                // latitude
             .number("(-?d+.d+),")                // longitude
             .number("(-?d+),")                   // altitude
-            .number("(d+.d+),")                  // speed
+            .number(" ?(d+.d+),")                // speed
             .number("(d+),")                     // course
             .number("([01]{4}),")                // input
             .number("([01]{4}),")                // output
-            .number("([01])([01])([01])([01]),") // flags
+            .number("([01]+),")                  // flags
             .number("(d+),")                     // battery
             .number("(d+),")                     // adc1
             .number("(d+),")                     // adc2
             .number("(d+)")                      // driver
+            .any()
             .compile();
 
     @Override
@@ -79,6 +80,7 @@ public class DwayProtocolDecoder extends BaseProtocolDecoder {
         position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
+        position.setValid(true);
         position.setTime(parser.nextDateTime());
         position.setLatitude(parser.nextDouble());
         position.setLongitude(parser.nextDouble());
@@ -88,15 +90,6 @@ public class DwayProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_INPUT, parser.nextBinInt());
         position.set(Position.KEY_OUTPUT, parser.nextBinInt());
-
-        position.setValid(parser.next().equals("1"));
-
-        position.set(Position.KEY_IGNITION, parser.next().equals("1"));
-        position.set(Position.KEY_CHARGE, parser.next().equals("1"));
-
-        if (parser.next().equals("1")) {
-            position.set(Position.KEY_ALARM, Position.ALARM_SHOCK);
-        }
 
         position.set(Position.KEY_BATTERY, parser.nextInt() * 0.001);
         position.set(Position.PREFIX_ADC + 1, parser.nextInt() * 0.001);

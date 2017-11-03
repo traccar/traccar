@@ -16,13 +16,31 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
         verifyNull(decoder, binary(
                 "78780D01086471700328358100093F040D0A"));
 
+        verifyNotNull(decoder, binary(
+                "787803691604130318491475905BD30E25001E10BBF7635D14759006E626560501CC0028660F213228660F1F2828660EA81E286610731428660F20140D0A"));
+
+        verifyNotNull(decoder, binary(
+                "787800691710231108500200cc080c4e2fa5640c4e2fa66e0d0a"));
+
+        verifyNotNull(decoder, binary(
+                "787800171710231108290200cc080c4e2fa5640c4e2fa5640d0a"));
+
+        verifyNotNull(decoder, binary(
+                "787800691710231109200400cc080c4e2fa55a0c4ec0025a0c4e2fa6640c583918640d0a"));
+
+        verifyNotNull(decoder, binary(
+                "787800691710231111210700cc080c4e2fa55a0c4ec0025a0c4e39295a0c583918640c4e2fa6640c4e2fa4640c4ec854640d0a"));
+
+        verifyNotNull(decoder, binary(
+                "787800171710231112510600cc080c4e2fa55a0c4e2fa55a0c4e2fa55a0c4e2fa55a0c4e2fa55a0c4e2fa55a0d0a"));
+
         verifyPosition(decoder, binary(
                 "7878121011091c0b1b2999058508040097a89e0034520d0a"));
 
-        verifyNull(decoder, binary(
+        verifyNotNull(decoder, binary(
                 "78780869170928113413ac9e17b30808514494fcf6e148596cb0ce2c67bd4a6eb0ce2c67bd4b0018e7d4333e55ec086be7f2df5fe48d8c94fc6657e48d8cb8f378510600cc0400d37a3d4600d37a3c5000d37a3b6400d376716400d305ac6400d393506e0d0a"));
 
-        verifyNull(decoder, binary(
+        verifyNotNull(decoder, binary(
                 "787808171709281135331491827b75594dc8d719a9708452cad719a9708550cad719a97086521491827b75574cac9e17b308085dc8d71939633947cad71939633a480700cc0400d37a3d5a00d37a3d5a00d37a3d5a00d37a3d5a00d37a3d5a00d37a3d5a00d37a3d5a0d0a"));
 
         verifyNotNull(decoder, binary(
@@ -179,7 +197,7 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
         verifyNull(decoder, binary(
                 "78780d010359339075005244340d0a"));
 
-        verifyNull(decoder, binary(
+        verifyNotNull(decoder, binary(
                 "787800691709261259400700cc0400d376714600d37a3d5000d37a3c5000d393505a00d3765d5a00d376735a00d32e6b640d0a"));
 
         verifyNull(decoder, binary(

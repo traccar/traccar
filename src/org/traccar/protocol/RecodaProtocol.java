@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,25 +17,17 @@ package org.traccar.protocol;
 
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.handler.codec.string.StringDecoder;
-import org.jboss.netty.handler.codec.string.StringEncoder;
+import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.TrackerServer;
-import org.traccar.model.Command;
 
 import java.nio.ByteOrder;
 import java.util.List;
 
-public class Pt502Protocol extends BaseProtocol {
+public class RecodaProtocol extends BaseProtocol {
 
-    public Pt502Protocol() {
-        super("pt502");
-        setSupportedDataCommands(
-                Command.TYPE_CUSTOM,
-                Command.TYPE_SET_TIMEZONE,
-                Command.TYPE_ALARM_SPEED,
-                Command.TYPE_OUTPUT_CONTROL,
-                Command.TYPE_REQUEST_PHOTO);
+    public RecodaProtocol() {
+        super("recoda");
     }
 
     @Override
@@ -43,11 +35,8 @@ public class Pt502Protocol extends BaseProtocol {
         TrackerServer server = new TrackerServer(new ServerBootstrap(), getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                pipeline.addLast("frameDecoder", new Pt502FrameDecoder());
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectEncoder", new Pt502ProtocolEncoder());
-                pipeline.addLast("objectDecoder", new Pt502ProtocolDecoder(Pt502Protocol.this));
+                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 4, 4, -8, 0));
+                pipeline.addLast("objectDecoder", new RecodaProtocolDecoder(RecodaProtocol.this));
             }
         };
         server.setEndianness(ByteOrder.LITTLE_ENDIAN);

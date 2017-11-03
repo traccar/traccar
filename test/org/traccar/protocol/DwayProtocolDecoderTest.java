@@ -10,13 +10,13 @@ public class DwayProtocolDecoderTest extends ProtocolTest {
 
         DwayProtocolDecoder decoder = new DwayProtocolDecoder(new DwayProtocol());
 
-        verifyNull(decoder, text(
+        verifyPosition(decoder, text(
                 "AA55,36,10024,1,171025,161055,36.0294,-79.7881,201, 2.5,111,1000,0000,00000,3578,0,0,0,D"));
 
-        verifyNull(decoder, text(
+        verifyPosition(decoder, text(
                 "AA55,115,318,1,171024,195059,28.0153,-82.4761,3, 1.0,319,1000,0000,00000,4244,0,0,0,D"));
 
-        verifyNull(decoder, text(
+        verifyPosition(decoder, text(
                 "AA55,117,318,1,171025,153758,28.0152,-82.4759,19, 0.6,319,1000,0000,10000,4242,0,0,0,D"));
 
         verifyPosition(decoder, text(

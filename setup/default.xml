@@ -219,7 +219,8 @@
     <entry key='genx.port'>5148</entry>
     <entry key='flespi.port'>5149</entry>
     <entry key='dway.port'>5150</entry>
-    <entry key='arnavi4.port'>5151</entry>
-
+    <entry key='recoda.port'>5151</entry>
+    <entry key='arnavi4.port'>5152</entry>
+  
 
 </properties>
