@@ -15,8 +15,12 @@
  */
 package org.traccar.notification;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
@@ -24,18 +28,28 @@ import org.traccar.model.Event;
 import org.traccar.model.Geofence;
 import org.traccar.model.Position;
 
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
+import com.ning.http.client.FluentCaseInsensitiveStringsMap;
 
 public final class EventForwarder {
 
     private String url;
     private String header;
+    private boolean payloadAsParamMode;
+    private String payloadParamName;
+    private String additionalParams;
+    private ObjectWriter internalObjectWriter;
 
     public EventForwarder() {
         url = Context.getConfig().getString("event.forward.url", "http://localhost/");
         header = Context.getConfig().getString("event.forward.header", "");
+        payloadAsParamMode = Context.getConfig().getBoolean("event.forward.payloadAsParamMode");
+        payloadParamName = Context.getConfig().getString("event.forward.paramMode.payloadParamName", "payload");
+        additionalParams = Context.getConfig().getString("event.forward.paramMode.additionalParams", "");
+
+        internalObjectWriter = initInternalObjectWriter();
     }
 
     private static final String KEY_POSITION = "position";
@@ -46,23 +60,59 @@ public final class EventForwarder {
     public void forwardEvent(Event event, Position position) {
 
         BoundRequestBuilder requestBuilder = Context.getAsyncHttpClient().preparePost(url);
+        requestBuilder.setBodyEncoding(StandardCharsets.UTF_8.name());
 
-        requestBuilder.addHeader("Content-Type", "application/json; charset=utf-8");
+        setContentTypeFromMode(requestBuilder);
+
         if (!header.equals("")) {
-            String[] headerLines = header.split("\\r?\\n");
-            for (String headerLine: headerLines) {
-                String[] splitedLine = headerLine.split(":", 2);
-                if (splitedLine.length == 2) {
-                    requestBuilder.setHeader(splitedLine[0].trim(), splitedLine[1].trim());
-                }
-            }
+            FluentCaseInsensitiveStringsMap params = new FluentCaseInsensitiveStringsMap();
+            params.putAll(splitParams(header, ":"));
+            requestBuilder.setHeaders(params);
         }
 
-        requestBuilder.setBody(preparePayload(event, position));
+        setContent(requestBuilder, preparePayload(event, position));
+
         requestBuilder.execute();
     }
 
-    private byte[] preparePayload(Event event, Position position) {
+    private void setContent(BoundRequestBuilder requestBuilder, String payload) {
+
+        if (payloadAsParamMode) {
+
+            if (!additionalParams.equals("")) {
+                requestBuilder.setFormParams(splitParams(additionalParams, "="));
+            }
+            requestBuilder.addFormParam(payloadParamName, payload);
+
+        } else {
+            requestBuilder.setBody(payload);
+        }
+    }
+
+    private Map<String, List<String>> splitParams(String params, String separator) {
+
+        String[] splitedLine;
+        Map<String, List<String>> paramsMap = new HashMap<>();
+        String[] paramsLines = params.split("\\r?\\n");
+
+        for (String paramLine: paramsLines) {
+            splitedLine = paramLine.split(separator, 2);
+            if (splitedLine.length == 2) {
+                paramsMap.put(splitedLine[0].trim(), Arrays.asList(splitedLine[1].trim()));
+            }
+        }
+        return paramsMap;
+    }
+
+    private void setContentTypeFromMode(BoundRequestBuilder requestBuilder) {
+        if (payloadAsParamMode) {
+            requestBuilder.addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+        } else {
+            requestBuilder.addHeader("Content-Type", "application/json; charset=utf-8");
+        }
+    }
+
+    private String preparePayload(Event event, Position position) {
         Map<String, Object> data = new HashMap<>();
         data.put(KEY_EVENT, event);
         if (position != null) {
@@ -81,11 +131,17 @@ public final class EventForwarder {
             }
         }
         try {
-            return Context.getObjectMapper().writeValueAsString(data).getBytes(StandardCharsets.UTF_8);
+            return internalObjectWriter.writeValueAsString(data);
         } catch (JsonProcessingException e) {
             Log.warning(e);
             return null;
         }
+    }
+
+    private ObjectWriter initInternalObjectWriter() {
+        return Context.getConfig().getBoolean("event.forward.prettyPrintedPayload")
+            ? Context.getObjectMapper().writerWithDefaultPrettyPrinter()
+            : Context.getObjectMapper().writer();
     }
 
 }
