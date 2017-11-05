@@ -348,7 +348,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_GEOFENCE_EXIT;
             }
         }
-        switch (value.toLowerCase()) {
+        switch (value) {
             case "poweron":
                 return Position.ALARM_POWER_ON;
             case "poweroff":
