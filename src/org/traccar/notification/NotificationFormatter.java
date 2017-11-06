@@ -111,7 +111,10 @@ public final class NotificationFormatter {
     private static String formatterLogic(VelocityContext vc, Long userId, Event event, Position position,
             String templatePath) {
 
-        VelocityContext velocityContext = vc != null ? vc : prepareContext(userId, event, position);
+        VelocityContext velocityContext = vc;
+        if (velocityContext == null) {
+            velocityContext = prepareContext(userId, event, position);
+        }
         StringWriter writer = new StringWriter();
         getTemplate(event, templatePath).merge(velocityContext, writer);
 
