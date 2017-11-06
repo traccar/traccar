@@ -108,7 +108,22 @@ public class ComputedAttributesHandler extends BaseDataHandler {
                                 position.getAttributes().put(attribute.getAttribute(), (Boolean) result);
                                 break;
                             default:
-                                position.getAttributes().put(attribute.getAttribute(), result.toString());
+                                String attributeValue = null;
+                                String attributeName = attribute.getAttribute();
+                                if (attributeName.equals("alarm")
+                                        || attributeName.equals("event")) {
+                                    Object temp = position.getAttributes().
+                                                get(attribute.getAttribute());
+                                    if (temp != null) {
+                                        attributeValue = temp.toString();
+                                    }
+                                }
+                                if (attributeValue != null) {
+                                    attributeValue += "," + result.toString();
+                                } else {
+                                    attributeValue = result.toString();
+                                }
+                                position.getAttributes().put(attribute.getAttribute(), attributeValue);
                         }
                     } catch (ClassCastException error) {
                         Log.warning(error);

@@ -15,7 +15,7 @@
  */
 package org.traccar.events;
 
-import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.traccar.BaseEventHandler;
@@ -26,11 +26,16 @@ public class AlertEventHandler extends BaseEventHandler {
 
     @Override
     protected Map<Event, Position> analyzePosition(Position position) {
-        Object alarm = position.getAttributes().get(Position.KEY_ALARM);
-        if (alarm != null) {
-            Event event = new Event(Event.TYPE_ALARM, position.getDeviceId(), position.getId());
-            event.set(Position.KEY_ALARM, (String) alarm);
-            return Collections.singletonMap(event, position);
+        Object alarms = position.getAttributes().get(Position.KEY_ALARM);
+        Map<Event, Position> eventMap = new LinkedHashMap<>();
+        if (alarms != null) {
+            String[] alarmList = alarms.toString().split(",");
+            for (String alarm : alarmList) {
+                Event event = new Event(Event.TYPE_ALARM, position.getDeviceId(), position.getId());
+                event.set(Position.KEY_ALARM, alarm);
+                eventMap.put(event, position);
+            }
+            return eventMap;
         }
         return null;
     }
