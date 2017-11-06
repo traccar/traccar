@@ -55,6 +55,7 @@ public class GenxProtocolDecoder extends BaseProtocolDecoder {
         for (int i = 0; i < Math.min(values.length, reportColumns.length); i++) {
             switch (reportColumns[i]) {
                 case 1:
+                case 28:
                     DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, values[i]);
                     if (deviceSession != null) {
                         position.setDeviceId(deviceSession.getDeviceId());
