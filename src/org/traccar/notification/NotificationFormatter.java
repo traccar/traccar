@@ -18,6 +18,7 @@ package org.traccar.notification;
 
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.Locale;
 
 import org.apache.velocity.Template;
@@ -38,7 +39,11 @@ public final class NotificationFormatter {
     private NotificationFormatter() {
     }
 
-    public static VelocityContext prepareContext(long userId, Event event, Position position) {
+    public static VelocityContext prepareContext(Long userIdreq, Event event, Position position) {
+
+        long userId = userIdreq != null ? userIdreq : (Long) Context.getPermissionsManager()
+                .getDeviceUsers(event.getDeviceId()).toArray()[0];
+
         User user = Context.getPermissionsManager().getUser(userId);
         Device device = Context.getIdentityManager().getById(event.getDeviceId());
 
@@ -68,31 +73,49 @@ public final class NotificationFormatter {
     }
 
     public static Template getTemplate(Event event, String path) {
+
+        String templateFilePath;
         Template template;
+
         try {
-            template = Context.getVelocityEngine().getTemplate(path + event.getType() + ".vm",
-                    StandardCharsets.UTF_8.name());
+            templateFilePath = Paths.get(path, event.getType() + ".vm").toString();
+            template = Context.getVelocityEngine().getTemplate(templateFilePath, StandardCharsets.UTF_8.name());
         } catch (ResourceNotFoundException error) {
             Log.warning(error);
-            template = Context.getVelocityEngine().getTemplate(path + "unknown.vm",
-                    StandardCharsets.UTF_8.name());
+            templateFilePath = Paths.get(path, "unknown.vm").toString();
+            template = Context.getVelocityEngine().getTemplate(templateFilePath, StandardCharsets.UTF_8.name());
         }
         return template;
     }
 
     public static MailMessage formatMailMessage(long userId, Event event, Position position) {
+        String templatePath = Context.getConfig().getString("mail.templatesPath", "mail");
         VelocityContext velocityContext = prepareContext(userId, event, position);
-        StringWriter writer = new StringWriter();
-        getTemplate(event, Context.getConfig().getString("mail.templatesPath", "mail") + "/")
-                .merge(velocityContext, writer);
-        return new MailMessage((String) velocityContext.get("subject"), writer.toString());
+        String formattedMessage = formatterLogic(velocityContext, userId, event, position, templatePath);
+
+        return new MailMessage((String) velocityContext.get("subject"), formattedMessage);
     }
 
     public static String formatSmsMessage(long userId, Event event, Position position) {
-        VelocityContext velocityContext = prepareContext(userId, event, position);
+        String templatePath = Context.getConfig().getString("sms.templatesPath", "sms");
+
+        return formatterLogic(null, userId, event, position, templatePath);
+    }
+
+    public static String formatForwarderMessage(Event event, Position position) {
+        String templatePath = Context.getConfig().getString("forwarder.templatesPath", "forwarder");
+
+        return formatterLogic(null, null, event, position, templatePath);
+    }
+
+    private static String formatterLogic(VelocityContext vc, Long userId, Event event, Position position,
+            String templatePath) {
+
+        VelocityContext velocityContext = vc != null ? vc : prepareContext(userId, event, position);
         StringWriter writer = new StringWriter();
-        getTemplate(event, Context.getConfig().getString("sms.templatesPath", "sms") + "/")
-                .merge(velocityContext, writer);
+        getTemplate(event, templatePath).merge(velocityContext, writer);
+
         return writer.toString();
     }
+
 }

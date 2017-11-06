@@ -40,7 +40,7 @@ public final class EventForwarder {
     private boolean payloadAsParamMode;
     private String payloadParamName;
     private String additionalParams;
-    private ObjectWriter internalObjectWriter;
+    private boolean prettyPrinted;
 
     public EventForwarder() {
         url = Context.getConfig().getString("event.forward.url", "http://localhost/");
@@ -48,8 +48,7 @@ public final class EventForwarder {
         payloadAsParamMode = Context.getConfig().getBoolean("event.forward.payloadAsParamMode");
         payloadParamName = Context.getConfig().getString("event.forward.paramMode.payloadParamName", "payload");
         additionalParams = Context.getConfig().getString("event.forward.paramMode.additionalParams", "");
-
-        internalObjectWriter = initInternalObjectWriter();
+        prettyPrinted = Context.getConfig().getBoolean("event.forward.prettyPrintedPayload");
     }
 
     private static final String KEY_POSITION = "position";
@@ -70,23 +69,25 @@ public final class EventForwarder {
             requestBuilder.setHeaders(params);
         }
 
-        setContent(requestBuilder, preparePayload(event, position));
+        if (payloadAsParamMode) {
+            setParamsPayload(event, position, requestBuilder);
+        } else {
+            setJsonPayload(event, position, requestBuilder);
+        }
 
         requestBuilder.execute();
     }
 
-    private void setContent(BoundRequestBuilder requestBuilder, String payload) {
+    private void setJsonPayload(Event event, Position position, BoundRequestBuilder requestBuilder) {
+        requestBuilder.setBody(preparePayload(event, position));
+    }
 
-        if (payloadAsParamMode) {
-
-            if (!additionalParams.equals("")) {
-                requestBuilder.setFormParams(splitParams(additionalParams, "="));
-            }
-            requestBuilder.addFormParam(payloadParamName, payload);
-
-        } else {
-            requestBuilder.setBody(payload);
+    private void setParamsPayload(Event event, Position position, BoundRequestBuilder requestBuilder) {
+        if (!additionalParams.equals("")) {
+            requestBuilder.setFormParams(splitParams(additionalParams, "="));
         }
+        requestBuilder.addFormParam(payloadParamName,
+                NotificationFormatter.formatForwarderMessage(event, position));
     }
 
     private Map<String, List<String>> splitParams(String params, String separator) {
@@ -131,16 +132,16 @@ public final class EventForwarder {
             }
         }
         try {
-            return internalObjectWriter.writeValueAsString(data);
+            return getObjectWriter().writeValueAsString(data);
         } catch (JsonProcessingException e) {
             Log.warning(e);
             return null;
         }
     }
 
-    private ObjectWriter initInternalObjectWriter() {
-        return Context.getConfig().getBoolean("event.forward.prettyPrintedPayload")
-            ? Context.getObjectMapper().writerWithDefaultPrettyPrinter()
+    private ObjectWriter getObjectWriter() {
+        return prettyPrinted
+            ? Context.getObjectWriterPrettyPrinter()
             : Context.getObjectMapper().writer();
     }
 
