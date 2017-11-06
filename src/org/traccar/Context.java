@@ -16,6 +16,7 @@
 package org.traccar;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.ning.http.client.AsyncHttpClient;
 
@@ -94,6 +95,12 @@ public final class Context {
 
     public static ObjectMapper getObjectMapper() {
         return objectMapper;
+    }
+
+    private static ObjectWriter objectWriterPrettyPrinter;
+
+    public static ObjectWriter getObjectWriterPrettyPrinter() {
+        return objectWriterPrettyPrinter;
     }
 
     private static IdentityManager identityManager;
@@ -280,6 +287,7 @@ public final class Context {
         objectMapper = new ObjectMapper();
         objectMapper.setConfig(
                 objectMapper.getSerializationConfig().without(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS));
+        objectWriterPrettyPrinter = objectMapper.writerWithDefaultPrettyPrinter();
 
         if (config.hasKey("database.url")) {
             dataManager = new DataManager(config);
@@ -416,6 +424,7 @@ public final class Context {
     public static void init(IdentityManager testIdentityManager) {
         config = new Config();
         objectMapper = new ObjectMapper();
+        objectWriterPrettyPrinter = objectMapper.writerWithDefaultPrettyPrinter();
         identityManager = testIdentityManager;
     }
 
