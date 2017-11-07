@@ -59,9 +59,9 @@ public class DwayProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         String sentence = (String) msg;
-        if (sentence.startsWith(">H")) {
+        if (sentence.equals("AA55,HB")) {
             if (channel != null) {
-                channel.write(">ALIVE\r\n");
+                channel.write("55AA,HB,OK\r\n");
             }
             return null;
         }
