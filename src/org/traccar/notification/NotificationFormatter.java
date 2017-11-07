@@ -39,16 +39,16 @@ public final class NotificationFormatter {
     private NotificationFormatter() {
     }
 
-    public static VelocityContext prepareContext(Long userIdreq, Event event, Position position) {
-
-        long userId = userIdreq != null ? userIdreq : (Long) Context.getPermissionsManager()
-                .getDeviceUsers(event.getDeviceId()).toArray()[0];
+    public static VelocityContext prepareContext(Long userId, Event event, Position position) {
 
         User user = Context.getPermissionsManager().getUser(userId);
         Device device = Context.getIdentityManager().getById(event.getDeviceId());
 
         VelocityContext velocityContext = new VelocityContext();
-        velocityContext.put("user", user);
+
+        if (user != null) {
+            velocityContext.put("user", user);
+        }
         velocityContext.put("device", device);
         velocityContext.put("event", event);
         if (position != null) {

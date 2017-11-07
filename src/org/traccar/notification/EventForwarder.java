@@ -33,19 +33,17 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
 import com.ning.http.client.FluentCaseInsensitiveStringsMap;
 
-public final class EventForwarder {
+public abstract class EventForwarder {
 
     private String url;
     private String header;
-    private boolean payloadAsParamMode;
-    private String payloadParamName;
-    private String additionalParams;
-    private boolean prettyPrinted;
+    private final String payloadParamName;
+    private final String additionalParams;
+    private final boolean prettyPrinted;
 
     public EventForwarder() {
         url = Context.getConfig().getString("event.forward.url", "http://localhost/");
         header = Context.getConfig().getString("event.forward.header", "");
-        payloadAsParamMode = Context.getConfig().getBoolean("event.forward.payloadAsParamMode");
         payloadParamName = Context.getConfig().getString("event.forward.paramMode.payloadParamName", "payload");
         additionalParams = Context.getConfig().getString("event.forward.paramMode.additionalParams", "");
         prettyPrinted = Context.getConfig().getBoolean("event.forward.prettyPrintedPayload");
@@ -56,12 +54,12 @@ public final class EventForwarder {
     private static final String KEY_GEOFENCE = "geofence";
     private static final String KEY_DEVICE = "device";
 
-    public void forwardEvent(Event event, Position position) {
+    public final void forwardEvent(Event event, Position position) {
 
         BoundRequestBuilder requestBuilder = Context.getAsyncHttpClient().preparePost(url);
         requestBuilder.setBodyEncoding(StandardCharsets.UTF_8.name());
 
-        setContentTypeFromMode(requestBuilder);
+        requestBuilder.addHeader("Content-Type", getContentType());
 
         if (!header.equals("")) {
             FluentCaseInsensitiveStringsMap params = new FluentCaseInsensitiveStringsMap();
@@ -69,28 +67,11 @@ public final class EventForwarder {
             requestBuilder.setHeaders(params);
         }
 
-        if (payloadAsParamMode) {
-            setParamsPayload(event, position, requestBuilder);
-        } else {
-            setJsonPayload(event, position, requestBuilder);
-        }
-
+        setContent(event, position, requestBuilder);
         requestBuilder.execute();
     }
 
-    private void setJsonPayload(Event event, Position position, BoundRequestBuilder requestBuilder) {
-        requestBuilder.setBody(preparePayload(event, position));
-    }
-
-    private void setParamsPayload(Event event, Position position, BoundRequestBuilder requestBuilder) {
-        if (!additionalParams.equals("")) {
-            requestBuilder.setFormParams(splitParams(additionalParams, "="));
-        }
-        requestBuilder.addFormParam(payloadParamName,
-                NotificationFormatter.formatForwarderMessage(event, position));
-    }
-
-    private Map<String, List<String>> splitParams(String params, String separator) {
+    protected Map<String, List<String>> splitParams(String params, String separator) {
 
         String[] splitedLine;
         Map<String, List<String>> paramsMap = new HashMap<>();
@@ -105,15 +86,7 @@ public final class EventForwarder {
         return paramsMap;
     }
 
-    private void setContentTypeFromMode(BoundRequestBuilder requestBuilder) {
-        if (payloadAsParamMode) {
-            requestBuilder.addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-        } else {
-            requestBuilder.addHeader("Content-Type", "application/json; charset=utf-8");
-        }
-    }
-
-    private String preparePayload(Event event, Position position) {
+    protected String prepareJsonPayload(Event event, Position position) {
         Map<String, Object> data = new HashMap<>();
         data.put(KEY_EVENT, event);
         if (position != null) {
@@ -139,10 +112,26 @@ public final class EventForwarder {
         }
     }
 
-    private ObjectWriter getObjectWriter() {
+    protected ObjectWriter getObjectWriter() {
         return prettyPrinted
             ? Context.getObjectWriterPrettyPrinter()
             : Context.getObjectMapper().writer();
     }
+
+
+    protected String getPayloadParamName() {
+        return payloadParamName;
+    }
+    protected String getAdditionalParams() {
+        return additionalParams;
+    }
+    protected boolean isPrettyPrinted() {
+        return prettyPrinted;
+    }
+
+
+    protected abstract String getContentType();
+
+    protected abstract void setContent(Event event, Position position, BoundRequestBuilder requestBuilder);
 
 }
