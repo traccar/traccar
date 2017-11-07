@@ -70,6 +70,8 @@ import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.geolocation.MozillaGeolocationProvider;
 import org.traccar.geolocation.OpenCellIdGeolocationProvider;
 import org.traccar.notification.EventForwarder;
+import org.traccar.notification.FormTypeEventForwarder;
+import org.traccar.notification.JsonTypeEventForwarder;
 import org.traccar.reports.model.TripsConfig;
 import org.traccar.smpp.SmppClient;
 import org.traccar.web.WebServer;
@@ -404,7 +406,7 @@ public final class Context {
         serverManager = new ServerManager();
 
         if (config.getBoolean("event.forward.enable")) {
-            eventForwarder = new EventForwarder();
+            eventForwarder = getConfiguredEventForwarder();
         }
 
         attributesManager = new AttributesManager(dataManager);
@@ -419,6 +421,13 @@ public final class Context {
             smppClient = new SmppClient();
         }
 
+    }
+
+    private static EventForwarder getConfiguredEventForwarder() {
+        if (Context.getConfig().getBoolean("event.forward.payloadAsParamMode")) {
+            return new FormTypeEventForwarder();
+        }
+        return new JsonTypeEventForwarder();
     }
 
     public static void init(IdentityManager testIdentityManager) {
