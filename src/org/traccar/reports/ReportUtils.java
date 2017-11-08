@@ -190,13 +190,21 @@ public final class ReportUtils {
         trip.setStartLat(startTrip.getLatitude());
         trip.setStartLon(startTrip.getLongitude());
         trip.setStartTime(startTrip.getFixTime());
-        trip.setStartAddress(startTrip.getAddress());
+        String startAddress = startTrip.getAddress();
+        if (startAddress == null && Context.getConfig().getBoolean("report.retryGeocoding")) {
+            startAddress = Context.getGeocoder().getAddress(startTrip.getLatitude(), startTrip.getLongitude());
+        }
+        trip.setStartAddress(startAddress);
 
         trip.setEndPositionId(endTrip.getId());
         trip.setEndLat(endTrip.getLatitude());
         trip.setEndLon(endTrip.getLongitude());
         trip.setEndTime(endTrip.getFixTime());
-        trip.setEndAddress(endTrip.getAddress());
+        String endAddress = endTrip.getAddress();
+        if (endAddress == null && Context.getConfig().getBoolean("report.retryGeocoding")) {
+            endAddress = Context.getGeocoder().getAddress(startTrip.getLatitude(), startTrip.getLongitude());
+        }
+        trip.setEndAddress(endAddress);
 
         trip.setDistance(calculateDistance(startTrip, endTrip, !ignoreOdometer));
         trip.setDuration(tripDuration);
@@ -224,7 +232,12 @@ public final class ReportUtils {
         stop.setLatitude(startStop.getLatitude());
         stop.setLongitude(startStop.getLongitude());
         stop.setStartTime(startStop.getFixTime());
-        stop.setAddress(startStop.getAddress());
+        String address = startStop.getAddress();
+        if (address == null && Context.getConfig().getBoolean("report.retryGeocoding")) {
+            address = Context.getGeocoder().getAddress(stop.getLatitude(), stop.getLongitude());
+        }
+        stop.setAddress(address);
+
         stop.setEndTime(endStop.getFixTime());
 
         long stopDuration = endStop.getFixTime().getTime() - startStop.getFixTime().getTime();

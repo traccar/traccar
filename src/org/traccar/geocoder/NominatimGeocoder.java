@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2014 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,8 @@ public class NominatimGeocoder extends JsonGeocoder {
         return url;
     }
 
-    public NominatimGeocoder(String url, String key, String language, int cacheSize) {
-        super(formatUrl(url, key, language), cacheSize);
+    public NominatimGeocoder(String url, String key, String language, int cacheSize, AddressFormat addressFormat) {
+        super(formatUrl(url, key, language), cacheSize, addressFormat);
     }
 
     @Override

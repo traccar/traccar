@@ -20,7 +20,6 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelUpstreamHandler;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.MessageEvent;
-import org.traccar.geocoder.AddressFormat;
 import org.traccar.geocoder.Geocoder;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
@@ -29,19 +28,11 @@ public class GeocoderHandler implements ChannelUpstreamHandler {
 
     private final Geocoder geocoder;
     private final boolean processInvalidPositions;
-    private final AddressFormat addressFormat;
     private final int geocoderReuseDistance;
 
     public GeocoderHandler(Geocoder geocoder, boolean processInvalidPositions) {
         this.geocoder = geocoder;
         this.processInvalidPositions = processInvalidPositions;
-
-        String formatString = Context.getConfig().getString("geocoder.format");
-        if (formatString != null) {
-            addressFormat = new AddressFormat(formatString);
-        } else {
-            addressFormat = new AddressFormat();
-        }
 
         geocoderReuseDistance = Context.getConfig().getInteger("geocoder.reuseDistance", 0);
     }
@@ -70,7 +61,7 @@ public class GeocoderHandler implements ChannelUpstreamHandler {
 
                 Context.getStatisticsManager().registerGeocoderRequest();
 
-                geocoder.getAddress(addressFormat, position.getLatitude(), position.getLongitude(),
+                geocoder.getAddress(position.getLatitude(), position.getLongitude(),
                         new Geocoder.ReverseGeocoderCallback() {
                     @Override
                     public void onSuccess(String address) {
