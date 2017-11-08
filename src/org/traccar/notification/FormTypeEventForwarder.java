@@ -17,8 +17,12 @@ public class FormTypeEventForwarder extends EventForwarder {
         if (!getAdditionalParams().equals("")) {
             requestBuilder.setFormParams(splitParams(getAdditionalParams(), "="));
         }
-        requestBuilder.addFormParam(getPayloadParamName(),
-                NotificationFormatter.formatForwarderMessage(event, position));
+
+        String payload = isUseTemplatesForPayload()
+                ? NotificationFormatter.formatForwarderMessage(event, position)
+                : prepareJsonPayload(event, position);
+
+        requestBuilder.addFormParam(getPayloadParamName(), payload);
     }
 
 }
