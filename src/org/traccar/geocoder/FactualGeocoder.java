@@ -1,5 +1,6 @@
 /*
  * Copyright 2014 - 2015 Stefaan Van Dooren (stefaan.vandooren@gmail.com)
+ * Copyright 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +20,8 @@ import javax.json.JsonObject;
 
 public class FactualGeocoder extends JsonGeocoder {
 
-    public FactualGeocoder(String url, String key, int cacheSize) {
-        super(url + "?latitude=%f&longitude=%f&KEY=" + key, cacheSize);
+    public FactualGeocoder(String url, String key, int cacheSize, AddressFormat addressFormat) {
+        super(url + "?latitude=%f&longitude=%f&KEY=" + key, cacheSize, addressFormat);
     }
 
     @Override

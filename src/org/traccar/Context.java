@@ -43,6 +43,7 @@ import org.traccar.database.StatisticsManager;
 import org.traccar.database.UsersManager;
 import org.traccar.events.MotionEventHandler;
 import org.traccar.events.OverspeedEventHandler;
+import org.traccar.geocoder.AddressFormat;
 import org.traccar.geocoder.BingMapsGeocoder;
 import org.traccar.geocoder.FactualGeocoder;
 import org.traccar.geocoder.GeocodeFarmGeocoder;
@@ -263,6 +264,41 @@ public final class Context {
                 config.getDouble("event.motion.speedThreshold", 0.01));
     }
 
+    public static Geocoder initGeocoder() {
+        String type = config.getString("geocoder.type", "google");
+        String url = config.getString("geocoder.url");
+        String key = config.getString("geocoder.key");
+        String language = config.getString("geocoder.language");
+
+        String formatString = config.getString("geocoder.format");
+        AddressFormat addressFormat;
+        if (formatString != null) {
+            addressFormat = new AddressFormat(formatString);
+        } else {
+            addressFormat = new AddressFormat();
+        }
+
+        int cacheSize = config.getInteger("geocoder.cacheSize");
+        switch (type) {
+            case "nominatim":
+                return new NominatimGeocoder(url, key, language, cacheSize, addressFormat);
+            case "gisgraphy":
+                return new GisgraphyGeocoder(url, cacheSize, addressFormat);
+            case "mapquest":
+                return new MapQuestGeocoder(url, key, cacheSize, addressFormat);
+            case "opencage":
+                return new OpenCageGeocoder(url, key, cacheSize, addressFormat);
+            case "bingmaps":
+                return new BingMapsGeocoder(url, key, cacheSize, addressFormat);
+            case "factual":
+                return new FactualGeocoder(url, key, cacheSize, addressFormat);
+            case "geocodefarm":
+                return new GeocodeFarmGeocoder(key, language, cacheSize, addressFormat);
+            default:
+                return new GoogleGeocoder(key, language, cacheSize, addressFormat);
+        }
+    }
+
     public static void init(String[] arguments) throws Exception {
 
         config = new Config();
@@ -298,38 +334,7 @@ public final class Context {
         identityManager = deviceManager;
 
         if (config.getBoolean("geocoder.enable")) {
-            String type = config.getString("geocoder.type", "google");
-            String url = config.getString("geocoder.url");
-            String key = config.getString("geocoder.key");
-            String language = config.getString("geocoder.language");
-
-            int cacheSize = config.getInteger("geocoder.cacheSize");
-            switch (type) {
-                case "nominatim":
-                    geocoder = new NominatimGeocoder(url, key, language, cacheSize);
-                    break;
-                case "gisgraphy":
-                    geocoder = new GisgraphyGeocoder(url, cacheSize);
-                    break;
-                case "mapquest":
-                    geocoder = new MapQuestGeocoder(url, key, cacheSize);
-                    break;
-                case "opencage":
-                    geocoder = new OpenCageGeocoder(url, key, cacheSize);
-                    break;
-                case "bingmaps":
-                    geocoder = new BingMapsGeocoder(url, key, cacheSize);
-                    break;
-                case "factual":
-                    geocoder = new FactualGeocoder(url, key, cacheSize);
-                    break;
-                case "geocodefarm":
-                    geocoder = new GeocodeFarmGeocoder(key, language, cacheSize);
-                    break;
-                default:
-                    geocoder = new GoogleGeocoder(key, language, cacheSize);
-                    break;
-            }
+            geocoder = initGeocoder();
         }
 
         if (config.getBoolean("geolocation.enable")) {
