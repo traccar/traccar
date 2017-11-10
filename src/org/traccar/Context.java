@@ -333,7 +333,7 @@ public final class Context {
 
         identityManager = deviceManager;
 
-        if (config.getBoolean("geocoder.enable") || config.getBoolean("report.retryGeocoding")) {
+        if (config.getBoolean("geocoder.enable")) {
             geocoder = initGeocoder();
         }
 

@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
@@ -52,70 +51,64 @@ public abstract class JsonGeocoder implements Geocoder {
         }
     }
 
+    private String handleResponse(double latitude, double longitude, Response response,
+            ReverseGeocoderCallback callback) throws IOException {
+        try (JsonReader reader = Json.createReader(response.getResponseBodyAsStream())) {
+            Address address = parseAddress(reader.readObject());
+            if (address != null) {
+                String formattedAddress = addressFormat.format(address);
+                if (cache != null) {
+                    cache.put(new AbstractMap.SimpleImmutableEntry<>(latitude, longitude), formattedAddress);
+                }
+                if (callback != null) {
+                    callback.onSuccess(formattedAddress);
+                }
+                return formattedAddress;
+            } else {
+                if (callback != null) {
+                    callback.onFailure(new GeocoderException("Empty address"));
+                }
+                Log.warning("Empty address");
+            }
+        }
+        return null;
+    }
+
     @Override
-    public void getAddress(
+    public String getAddress(
             final double latitude, final double longitude, final ReverseGeocoderCallback callback) {
 
         if (cache != null) {
             String cachedAddress = cache.get(new AbstractMap.SimpleImmutableEntry<>(latitude, longitude));
             if (cachedAddress != null) {
-                callback.onSuccess(cachedAddress);
-                return;
-            }
-        }
-
-        Context.getAsyncHttpClient().prepareGet(String.format(Locale.US, url, latitude, longitude))
-                .execute(new AsyncCompletionHandler() {
-            @Override
-            public Object onCompleted(Response response) throws Exception {
-                try (JsonReader reader = Json.createReader(response.getResponseBodyAsStream())) {
-                    Address address = parseAddress(reader.readObject());
-                    if (address != null) {
-                        String formattedAddress = addressFormat.format(address);
-                        if (cache != null) {
-                            cache.put(new AbstractMap.SimpleImmutableEntry<>(latitude, longitude), formattedAddress);
-                        }
-                        callback.onSuccess(formattedAddress);
-                    } else {
-                        callback.onFailure(new GeocoderException("Empty address"));
-                    }
+                if (callback != null) {
+                    callback.onSuccess(cachedAddress);
                 }
-                return null;
-            }
-
-            @Override
-            public void onThrowable(Throwable t) {
-                callback.onFailure(t);
-            }
-        });
-    }
-
-    @Override
-    public String getAddress(final double latitude, final double longitude) {
-        if (cache != null) {
-            String cachedAddress = cache.get(new AbstractMap.SimpleImmutableEntry<>(latitude, longitude));
-            if (cachedAddress != null) {
                 return cachedAddress;
             }
         }
 
-        try {
-            Response response = Context.getAsyncHttpClient()
-                    .prepareGet(String.format(Locale.US, url, latitude, longitude)).execute().get();
-            try (JsonReader reader = Json.createReader(response.getResponseBodyAsStream())) {
-                Address address = parseAddress(reader.readObject());
-                if (address != null) {
-                    String formattedAddress = addressFormat.format(address);
-                    if (cache != null) {
-                        cache.put(new AbstractMap.SimpleImmutableEntry<>(latitude, longitude), formattedAddress);
-                    }
-                    return formattedAddress;
-                } else {
-                    Log.warning("Empty address");
+        if (callback != null) {
+            Context.getAsyncHttpClient().prepareGet(String.format(url, latitude, longitude))
+                    .execute(new AsyncCompletionHandler() {
+                @Override
+                public Object onCompleted(Response response) throws Exception {
+                    return handleResponse(latitude, longitude, response, callback);
                 }
+
+                @Override
+                public void onThrowable(Throwable t) {
+                    callback.onFailure(t);
+                }
+            });
+        } else {
+            try {
+                Response response = Context.getAsyncHttpClient()
+                        .prepareGet(String.format(url, latitude, longitude)).execute().get();
+                return handleResponse(latitude, longitude, response, null);
+            } catch (InterruptedException | ExecutionException | IOException error) {
+                Log.warning("Geocoding failed", error);
             }
-        } catch (InterruptedException | ExecutionException | IOException error) {
-            Log.warning("Geocoding failed", error);
         }
         return null;
     }

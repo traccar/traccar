@@ -25,8 +25,6 @@ public interface Geocoder {
 
     }
 
-    void getAddress(double latitude, double longitude, ReverseGeocoderCallback callback);
-
-    String getAddress(double latitude, double longitude);
+    String getAddress(double latitude, double longitude, ReverseGeocoderCallback callback);
 
 }

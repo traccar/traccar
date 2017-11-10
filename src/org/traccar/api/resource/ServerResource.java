@@ -48,10 +48,10 @@ public class ServerResource extends BaseResource {
         return Response.ok(entity).build();
     }
 
-    @Path("geocoding")
+    @Path("geocode")
     @GET
     public String geocode(@QueryParam("latitude") double latitude, @QueryParam("longitude") double longitude) {
-        return Context.getGeocoder().getAddress(latitude, longitude);
+        return Context.getGeocoder().getAddress(latitude, longitude, null);
     }
 
 }
