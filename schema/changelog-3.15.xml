@@ -133,5 +133,12 @@
     <addForeignKeyConstraint baseTableName="device_notification" baseColumnNames="deviceid" constraintName="fk_device_notification_deviceid" referencedTableName="devices" referencedColumnNames="id" onDelete="CASCADE" />
     <addForeignKeyConstraint baseTableName="device_notification" baseColumnNames="notificationid" constraintName="fk_device_notification_notificationid" referencedTableName="notifications" referencedColumnNames="id" onDelete="CASCADE" />
 
+    <dropNotNullConstraint tableName="users" columnName="hashedpassword" columnDataType="VARCHAR(128)" />
+    <dropNotNullConstraint tableName="users" columnName="salt" columnDataType="VARCHAR(128)" />
+
+    <addColumn tableName="users">
+      <column name="login" type="VARCHAR(128)" />
+    </addColumn>
+
   </changeSet>
 </databaseChangeLog>

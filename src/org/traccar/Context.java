@@ -34,6 +34,7 @@ import org.traccar.database.DataManager;
 import org.traccar.database.DeviceManager;
 import org.traccar.database.DriversManager;
 import org.traccar.database.IdentityManager;
+import org.traccar.database.LdapProvider;
 import org.traccar.database.MediaManager;
 import org.traccar.database.NotificationManager;
 import org.traccar.database.PermissionsManager;
@@ -107,6 +108,12 @@ public final class Context {
 
     public static DataManager getDataManager() {
         return dataManager;
+    }
+
+    private static LdapProvider ldapProvider;
+
+    public static LdapProvider getLdapProvider() {
+        return ldapProvider;
     }
 
     private static MediaManager mediaManager;
@@ -319,6 +326,10 @@ public final class Context {
 
         if (config.hasKey("database.url")) {
             dataManager = new DataManager(config);
+        }
+
+        if (config.getBoolean("ldap.enable")) {
+            ldapProvider = new LdapProvider(config.getString("ldap.url"), config.getString("ldap.context"));
         }
 
         if (config.hasKey("media.path")) {
