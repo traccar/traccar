@@ -216,7 +216,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("(d{1,7}.d)?,")              // odometer
             .number("(d{5}:dd:dd)?,")            // hour meter
             .number("(x+)?,")                    // adc 1
-            .number("(x+)?,")                    // adc 2
+            .number("(x+)?,").optional()         // adc 2
             .number("(d{1,3})?,")                // battery
             .number("(?:(xx)(xx)(xx))?,")        // device status
             .expression("(.*)")                  // additional data
