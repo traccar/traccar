@@ -39,7 +39,6 @@ public abstract class EventForwarder {
     private String header;
     private final String payloadParamName;
     private final String additionalParams;
-    private final boolean useTemplatesForPayload;
     private final boolean prettyPrinted;
 
     public EventForwarder() {
@@ -47,7 +46,6 @@ public abstract class EventForwarder {
         header = Context.getConfig().getString("event.forward.header", "");
         payloadParamName = Context.getConfig().getString("event.forward.paramMode.payloadParamName", "payload");
         additionalParams = Context.getConfig().getString("event.forward.paramMode.additionalParams", "");
-        useTemplatesForPayload = Context.getConfig().getBoolean("event.forward.paramMode.useTemplatesForPayload");
         prettyPrinted = Context.getConfig().getBoolean("event.forward.prettyPrintedPayload");
     }
 
@@ -126,9 +124,6 @@ public abstract class EventForwarder {
     }
     protected String getAdditionalParams() {
         return additionalParams;
-    }
-    protected boolean isUseTemplatesForPayload() {
-        return useTemplatesForPayload;
     }
     protected boolean isPrettyPrinted() {
         return prettyPrinted;
