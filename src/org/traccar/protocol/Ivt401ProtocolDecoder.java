@@ -26,9 +26,9 @@ import org.traccar.model.Position;
 import java.net.SocketAddress;
 import java.util.regex.Pattern;
 
-public class Avt401ProtocolDecoder extends BaseProtocolDecoder {
+public class Ivt401ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Avt401ProtocolDecoder(Avt401Protocol protocol) {
+    public Ivt401ProtocolDecoder(Ivt401Protocol protocol) {
         super(protocol);
     }
 

@@ -3,12 +3,12 @@ package org.traccar.protocol;
 import org.junit.Test;
 import org.traccar.ProtocolTest;
 
-public class Avt401ProtocolDecoderTest extends ProtocolTest {
+public class Ivt401ProtocolDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        Avt401ProtocolDecoder decoder = new Avt401ProtocolDecoder(new Avt401Protocol());
+        Ivt401ProtocolDecoder decoder = new Ivt401ProtocolDecoder(new Ivt401Protocol());
 
         verifyPosition(decoder, text(
                 "(TLN,356917050291991,090315,133525,+12.990582,+77.589080,0,0,944,13,1,5,000,00,0.00,10.88,6.31,29.55,0.00,0,0.99,66,0,0,88,95)"));

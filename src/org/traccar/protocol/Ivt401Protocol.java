@@ -24,10 +24,10 @@ import org.traccar.TrackerServer;
 
 import java.util.List;
 
-public class Avt401Protocol extends BaseProtocol {
+public class Ivt401Protocol extends BaseProtocol {
 
-    public Avt401Protocol() {
-        super("avt401");
+    public Ivt401Protocol() {
+        super("ivt401");
     }
 
     @Override
@@ -37,7 +37,7 @@ public class Avt401Protocol extends BaseProtocol {
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, ';'));
                 pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectDecoder", new Avt401ProtocolDecoder(Avt401Protocol.this));
+                pipeline.addLast("objectDecoder", new Ivt401ProtocolDecoder(Ivt401Protocol.this));
             }
         });
     }
