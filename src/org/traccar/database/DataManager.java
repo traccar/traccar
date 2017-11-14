@@ -76,8 +76,12 @@ public class DataManager {
 
     private boolean generateQueries;
 
+    private boolean forceLdap;
+
     public DataManager(Config config) throws Exception {
         this.config = config;
+
+        forceLdap = config.getBoolean("ldap.force");
 
         initDatabase();
         initDatabaseSchema();
@@ -304,15 +308,12 @@ public class DataManager {
         LdapProvider ldapProvider = Context.getLdapProvider();
         if (user != null) {
             if (ldapProvider != null && ldapProvider.login(user.getLogin(), password)
-                    || user.isPasswordValid(password)) {
+                    || !forceLdap && user.isPasswordValid(password)) {
                 return user;
             }
         } else {
             if (ldapProvider != null && ldapProvider.login(email, password)) {
-                user = new User();
-                user.setName(email);
-                user.setEmail(email);
-                user.setLogin(email);
+                user = ldapProvider.getUser(email);
                 Context.getUsersManager().addItem(user);
                 return user;
             }

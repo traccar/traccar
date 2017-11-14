@@ -35,7 +35,7 @@
  
     <entry key='database.loginUser'>
         SELECT * FROM users
-        WHERE email = :email
+        WHERE email = :email OR login = :email
     </entry>
 
     <entry key='database.selectPositions'>
