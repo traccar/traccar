@@ -329,7 +329,7 @@ public final class Context {
         }
 
         if (config.getBoolean("ldap.enable")) {
-            ldapProvider = new LdapProvider(config.getString("ldap.url"), config.getString("ldap.context"));
+            ldapProvider = new LdapProvider(config);
         }
 
         if (config.hasKey("media.path")) {
