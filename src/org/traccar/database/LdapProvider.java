@@ -78,7 +78,7 @@ public class LdapProvider {
         if (this.adminFilter != null) {
             try {
                 InitialDirContext context = initContext();
-                String searchString = new String(adminFilter).replace(":login", accountName);
+                String searchString = adminFilter.replace(":login", accountName);
                 SearchControls searchControls = new SearchControls();
                 searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
                 NamingEnumeration<SearchResult> results = context.search(searchBase, searchString, searchControls);
@@ -104,7 +104,7 @@ public class LdapProvider {
     private SearchResult lookupUser(String accountName) throws NamingException {
         InitialDirContext context = initContext();
 
-        String searchString = new String(searchFilter).replace(":login", accountName);
+        String searchString = searchFilter.replace(":login", accountName);
 
         SearchControls searchControls = new SearchControls();
         String[] attributeFilter = {idAttribute, nameAttribute, mailAttribute};

@@ -35,8 +35,11 @@ import org.traccar.notification.NotificationSms;
 
 public class NotificationManager extends ExtendedObjectManager<Notification> {
 
+    private boolean geocodeOnRequest;
+
     public NotificationManager(DataManager dataManager) {
         super(dataManager, Notification.class);
+        geocodeOnRequest = Context.getConfig().getBoolean("geocoder.onRequest");
     }
 
     private Set<Long> getEffectiveNotifications(long userId, long deviceId) {
@@ -55,6 +58,11 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
             getDataManager().addObject(event);
         } catch (SQLException error) {
             Log.warning(error);
+        }
+
+        if (position != null && geocodeOnRequest && Context.getGeocoder() != null && position.getAddress() == null) {
+            position.setAddress(Context.getGeocoder()
+                    .getAddress(position.getLatitude(), position.getLongitude(), null));
         }
 
         long deviceId = event.getDeviceId();
