@@ -169,6 +169,9 @@ public class Tk103ProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "(013632651491,ZC07,040613,A,2234.0297N,11405.9101E,000.0,040137,178.48)"));
 
+        verifyAttributes(decoder, text(
+                "(013632651491,ZC20,040613,040137,6,42,112,0"));
+
     }
 
 }

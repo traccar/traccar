@@ -75,7 +75,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .text("ZC20,")
             .number("(dd)(dd)(dd),")             // date (ddmmyy)
             .number("(dd)(dd)(dd),")             // time (hhmmss)
-            .number("d+,")                       // battery level
+            .number("(d+),")                     // battery level
             .number("(d+),")                     // battery voltage
             .number("(d+),")                     // power voltage
             .number("d+")                        // installed
@@ -147,6 +147,23 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private Integer decodeBattery(int value) {
+        switch (value) {
+            case 6:
+                return 100;
+            case 5:
+                return 80;
+            case 4:
+                return 60;
+            case 3:
+                return 20;
+            case 2:
+                return 10;
+            default:
+                return null;
+        }
+    }
+
     private Position decodeBattery(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_BATTERY, sentence);
         if (!parser.matches()) {
@@ -163,6 +180,11 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         getLastLocation(position, parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
+
+        int batterylevel = parser.nextInt(0);
+        if (batterylevel != 255) {
+            position.set(Position.KEY_BATTERY_LEVEL, decodeBattery(batterylevel));
+        }
 
         int battery = parser.nextInt(0);
         if (battery != 65535) {
