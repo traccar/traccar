@@ -63,6 +63,10 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .number("(?:L(x+))?")                // odometer
             .any()
             .number("([+-]ddd.d)?")              // temperature
+            .groupBegin()
+            .number("([+-]?d+.d{1,2}),").optional() // altitude
+            .number("(d+)$").optional()         // number of visible satellites
+            .groupEnd("?")
             .text(")").optional()
             .compile();
 
@@ -297,6 +301,15 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext()) {
             position.set(Position.PREFIX_TEMP + 1, parser.nextDouble(0));
+        }
+
+        if (parser.hasNext()) {
+            position.setAltitude(parser.nextDouble(0));
+        }
+
+        if (parser.hasNext()) {
+            // Store amount of visible satellites as RSSI
+            position.set(Position.KEY_RSSI, parser.nextInt(0));
         }
 
         return position;
