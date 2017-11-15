@@ -35,14 +35,14 @@ public class OkoProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN = new PatternBuilder()
             .text("{")
             .number("(d{15}),").optional()       // imei
-            .number("(dd)(dd)(dd).(ddd),")       // time
+            .number("(dd)(dd)(dd).d+,")          // time
             .expression("([AV]),")               // validity
             .number("(dd)(dd.d+),")              // latitude
             .expression("([NS]),")
             .number("(ddd)(dd.d+),")             // longitude
             .expression("([EW]),")
-            .number("(d+.?d*),")                 // speed
-            .number("(d+.?d*),")                 // course
+            .number("(d+.?d*)?,")                // speed
+            .number("(d+.?d*)?,")                // course
             .number("(dd)(dd)(dd),")             // date (ddmmyy)
             .number("(d+),")                     // satellites
             .number("(d+.d+),")                  // adc
@@ -77,13 +77,13 @@ public class OkoProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         DateBuilder dateBuilder = new DateBuilder()
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextInt());
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
 
         position.setValid(parser.next().equals("A"));
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
-        position.setSpeed(parser.nextDouble());
-        position.setCourse(parser.nextDouble());
+        position.setSpeed(parser.nextDouble(0));
+        position.setCourse(parser.nextDouble(0));
 
         dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
         position.setTime(dateBuilder.getDate());
