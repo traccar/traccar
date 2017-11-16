@@ -38,8 +38,8 @@ public class Ivt401ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // imei
             .number("(dd)(dd)(dd),")             // date (ddmmyy)
             .number("(dd)(dd)(dd),")             // time (hhmmss)
-            .number("([-+]d+.d+),")              // longitude
             .number("([-+]d+.d+),")              // latitude
+            .number("([-+]d+.d+),")              // longitude
             .number("(d+),")                     // speed
             .number("(d+),")                     // course
             .number("(-?d+.?d*),")               // altitude
@@ -74,8 +74,8 @@ public class Ivt401ProtocolDecoder extends BaseProtocolDecoder {
 
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
 
-        position.setLongitude(parser.nextDouble());
         position.setLatitude(parser.nextDouble());
+        position.setLongitude(parser.nextDouble());
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt()));
         position.setCourse(parser.nextInt());
         position.setAltitude(parser.nextDouble());
