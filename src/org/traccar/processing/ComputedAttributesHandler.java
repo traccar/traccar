@@ -110,12 +110,11 @@ public class ComputedAttributesHandler extends BaseDataHandler {
                             default:
                                 String attributeValue = null;
                                 String attributeName = attribute.getAttribute();
-                                if (attributeName.equals("alarm")
-                                        || attributeName.equals("event")) {
-                                    Object temp = position.getAttributes().
+                                if (attributeName.equals(Position.KEY_ALARM)) {
+                                    if (position.getAttributes().
+                                                get(attribute.getAttribute()) != null) {
+                                        attributeValue = (String) position.getAttributes().
                                                 get(attribute.getAttribute());
-                                    if (temp != null) {
-                                        attributeValue = temp.toString();
                                     }
                                 }
                                 if (attributeValue != null) {
