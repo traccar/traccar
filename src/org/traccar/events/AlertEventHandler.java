@@ -27,8 +27,8 @@ public class AlertEventHandler extends BaseEventHandler {
     @Override
     protected Map<Event, Position> analyzePosition(Position position) {
         Object alarms = position.getAttributes().get(Position.KEY_ALARM);
-        Map<Event, Position> eventMap = new LinkedHashMap<>();
         if (alarms != null) {
+            Map<Event, Position> eventMap = new LinkedHashMap<>();
             String[] alarmList = alarms.toString().split(",");
             for (String alarm : alarmList) {
                 Event event = new Event(Event.TYPE_ALARM, position.getDeviceId(), position.getId());
