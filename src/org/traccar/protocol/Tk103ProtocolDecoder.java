@@ -26,6 +26,7 @@ import org.traccar.helper.PatternBuilder;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.model.WifiAccessPoint;
 
 import java.net.SocketAddress;
 import java.util.regex.Pattern;
@@ -88,6 +89,20 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // mnc
             .number("(x+),")                     // lac
             .number("(x+),")                     // cid
+            .any()
+            .compile();
+
+    private static final Pattern PATTERN_LBSWIFI = new PatternBuilder()
+            .number("(d+),")                     // device id
+            .expression("(.{4}),")               // command
+            .number("(d+),")                     // mcc
+            .number("(d+),")                     // mnc
+            .number("(d+),")                     // lac
+            .number("(d+),")                     // cid
+            .number("(d+),")                     // number of wifi macs
+            .expression("((?:(?:[0-9A-Fa-f]{2}:){5}(?:[0-9A-Fa-f]{2})\\*[-+]?\\d{1,2}\\*\\d{1,2},)*)")
+            .number("(dd)(dd)(dd),")             // date (ddmmyy)
+            .number("(dd)(dd)(dd)")              // time (hhmmss)
             .any()
             .compile();
 
@@ -221,6 +236,64 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
         return position;
     }
+
+    private Position decodeLbsWifi(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN_LBSWIFI, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        decodeType(position, parser.next(), "0");
+
+        getLastLocation(position, null);
+
+        Network network = new Network();
+
+        // Parse LBS
+        network.addCellTower(CellTower.from(
+                parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextInt()));
+
+        // Parse WiFi macs number and mac addresses itself.
+        int wifiCount = parser.nextInt();
+        if (parser.hasNext()) {
+            String[] wifimacs = parser.next().split(",");
+            if (wifimacs.length == wifiCount) {
+                for (int i = 0; i < wifiCount; i++) {
+                    // Sample wifi string: “00:80:E1:7F:86:97*-55*6” (mac*rssi*channel_number)
+                    String[] wifiinfo = wifimacs[i].split("\\*");
+                    network.addWifiAccessPoint(WifiAccessPoint.from(
+                            wifiinfo[0], Integer.parseInt(wifiinfo[1]), Integer.parseInt(wifiinfo[2])));
+                }
+            }
+        }
+
+        if (network.getCellTowers() != null || network.getWifiAccessPoints() != null) {
+            position.setNetwork(network);
+        }
+
+        // Parse date-time
+        DateBuilder dateBuilder = new DateBuilder()
+                .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        // Set both DeviceTime and FixTime here, as some alarm messages like SOS at device start may be
+        //  sent without valid LBS/WiFi position, so FixTime from getLastLocation will be used as time
+        //  for this SOS alarm, which can be very old. And traccar UI only display FixTime.
+        // Valid flag will be "false" anyway, so it is possible to check should the position and fixTime
+        //   be trusted or not.
+        position.setTime(dateBuilder.getDate());
+
+        return position;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -247,6 +320,11 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             return decodeBattery(channel, remoteAddress, sentence);
         } else if (sentence.contains("BZ00")) {
             return decodeNetwork(channel, remoteAddress, sentence);
+        }
+
+        Position positionWifi = decodeLbsWifi(channel, remoteAddress, sentence);
+        if (positionWifi != null) {
+            return positionWifi;
         }
 
         Parser parser = new Parser(PATTERN, sentence);

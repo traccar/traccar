@@ -172,6 +172,18 @@ public class Tk103ProtocolDecoderTest extends ProtocolTest {
         verifyAttributes(decoder, text(
                 "(013632651491,ZC20,040613,040137,6,42,112,0"));
 
+        verifyNotNull(decoder, text(
+                "(864555555555555,DW51,200,1,3215,43370,2,58:F3:BB:3B:AA:82*-65*1,1C:6A:BB:AA:81:95*-78*1,151117,154419"));
+
+        verifyNotNull(decoder, text(
+                "(864555555555555,DW5B,210,6,5995,47701,5,30:EE:CC:E7:86:DD*-59*11,4C:60:CC:EA:BB:EE*-68*1,42:AA:DE:EA:BB:00*-69*1,32:CD:BB:C3:4F:CC*-86*3,10:00:43:BA:22:15*-88*1,151117,163722"));
+
+        verifyNotNull(decoder, text(
+                "(013632651491,DW50,460,0,0,6,2,aa:bb:cc:dd:ee:ff*-8*0,aa:bb:cc:dd:ee:ff*-8*0,040613,040137"));
+
+        verifyNotNull(decoder, text(
+                "(013632651491,DW50,460,0,0,6,0,040613,040137"));
+
     }
 
 }
