@@ -22,6 +22,11 @@ import org.traccar.model.Command;
 
 public class Tk103ProtocolEncoder extends StringProtocolEncoder {
 
+    protected String t580WFormatCommand(Command command, String format, String... keys) {
+        String content = super.formatCommand(command, format, keys);
+        return String.format("[begin]sms2,%s,[end]", content);
+    }
+
     @Override
     protected Object encodeCommand(Command command) {
 
@@ -43,6 +48,35 @@ public class Tk103ProtocolEncoder extends StringProtocolEncoder {
                 return formatCommand(command, "({%s}AV011)", Command.KEY_UNIQUE_ID);
             case Command.TYPE_ENGINE_RESUME:
                 return formatCommand(command, "({%s}AV010)", Command.KEY_UNIQUE_ID);
+            //T580W commands:
+            case "T580W_positionSingle":
+                return t580WFormatCommand(command, "*getposl*");
+            case "T580W_positionRealtime":
+                return t580WFormatCommand(command, "*routetrack*99*");
+            case "T580W_positionRealtimeStop":
+                return t580WFormatCommand(command, "*routetrackoff*");
+            case "T580W_modeDeepSleepInterval1Hour":
+                return t580WFormatCommand(command, "*sleep*1*");
+            case "T580W_modeDeepSleepInterval2Hour":
+                return t580WFormatCommand(command, "*sleep*2*");
+            case "T580W_modeDeepSleepInterval3Hour":
+                return t580WFormatCommand(command, "*sleep*3*");
+            case "T580W_modeDeepSleepInterval4Hour":
+                return t580WFormatCommand(command, "*sleep*4*");
+            case "T580W_modeDeepSleepMotion":
+                return t580WFormatCommand(command, "*sleepv*");
+            case "T580W_modeDeepSleepOff":
+                return t580WFormatCommand(command, "*sleepoff*");
+            case "T580W_alarmSosOn":
+                return t580WFormatCommand(command, "*soson*");
+            case "T580W_alarmSosOff":
+                return t580WFormatCommand(command, "*sosoff*");
+            case "T580W_multiControllerOn":
+                return t580WFormatCommand(command, "*multiquery*");
+            case "T580W_multiControllerOff":
+                return t580WFormatCommand(command, "*multiqueryoff*");
+            case "T580W_rebootDevice":
+                return t580WFormatCommand(command, "88888888");
             default:
                 Log.warning(new UnsupportedOperationException(command.getType()));
                 break;

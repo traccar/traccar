@@ -99,4 +99,56 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
 
     }
 
+    @Test
+    public void testEncodeT580WRebootDevice() throws Exception {
+
+        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder();
+
+        Command command = new Command();
+        command.setDeviceId(1);
+        command.setType("T580W_rebootDevice");
+
+        Assert.assertEquals("[begin]sms2,88888888,[end]", encoder.encodeCommand(command));
+
+    }
+
+    @Test
+    public void testEncodeT580WSosOn() throws Exception {
+
+        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder();
+
+        Command command = new Command();
+        command.setDeviceId(1);
+        command.setType("T580W_alarmSosOn");
+
+        Assert.assertEquals("[begin]sms2,*soson*,[end]", encoder.encodeCommand(command));
+
+    }
+
+    @Test
+    public void testEncodeT580WSosOff() throws Exception {
+
+        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder();
+
+        Command command = new Command();
+        command.setDeviceId(1);
+        command.setType("T580W_alarmSosOff");
+
+        Assert.assertEquals("[begin]sms2,*sosoff*,[end]", encoder.encodeCommand(command));
+
+    }
+
+    @Test
+    public void testEncodeT580WRouteTrack() throws Exception {
+
+        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder();
+
+        Command command = new Command();
+        command.setDeviceId(1);
+        command.setType("T580W_positionRealtime");
+
+        Assert.assertEquals("[begin]sms2,*routetrack*99*,[end]", encoder.encodeCommand(command));
+
+    }
+
 }

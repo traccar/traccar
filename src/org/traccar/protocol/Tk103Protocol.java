@@ -40,7 +40,22 @@ public class Tk103Protocol extends BaseProtocol {
                 Command.TYPE_REBOOT_DEVICE,
                 Command.TYPE_SET_ODOMETER,
                 Command.TYPE_ENGINE_STOP,
-                Command.TYPE_ENGINE_RESUME);
+                Command.TYPE_ENGINE_RESUME,
+                //T580W commands:
+                "T580W_positionSingle",
+                "T580W_positionRealtime",
+                "T580W_positionRealtimeStop",
+                "T580W_modeDeepSleepInterval1Hour",
+                "T580W_modeDeepSleepInterval2Hour",
+                "T580W_modeDeepSleepInterval3Hour",
+                "T580W_modeDeepSleepInterval4Hour",
+                "T580W_modeDeepSleepMotion",
+                "T580W_modeDeepSleepOff",
+                "T580W_alarmSosOn",
+                "T580W_alarmSosOff",
+                "T580W_multiControllerOn",
+                "T580W_multiControllerOff",
+                "T580W_rebootDevice");
     }
 
     @Override
