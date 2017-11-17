@@ -130,32 +130,89 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             case "BO01":
                 position.set(Position.KEY_ALARM, decodeAlarm(data.charAt(0) - '0'));
                 break;
+            // Motion Alert with Location
             case "ZC11":
+            case "DW31":
+            case "DW51":
                 position.set(Position.KEY_ALARM, Position.ALARM_MOVEMENT);
                 break;
+            // Low Battery Alert with Location
             case "ZC12":
+            case "DW32":
+            case "DW52":
                 position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
                 break;
+            // Power Cut Alert with Location
             case "ZC13":
+            case "DW33":
+            case "DW53":
                 position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
                 break;
+            // ACC On Alert with Location
             case "ZC15":
+            case "DW35":
+            case "DW55":
                 position.set(Position.KEY_IGNITION, true);
                 break;
+            // ACC Off Alert with Location
             case "ZC16":
+            case "DW36":
+            case "DW56":
                 position.set(Position.KEY_IGNITION, false);
                 break;
+            // Ignition Alert with Location
+            case "ZC29":
+            case "DW42":
+            case "DW62":
+                position.set(Position.KEY_IGNITION, true);
+                break;
+            // Dismounting Alert with Location
             case "ZC17":
+            case "DW37":
+            case "DW57":
                 position.set(Position.KEY_ALARM, Position.ALARM_REMOVING);
                 break;
+            // SOS Alert with Location
             case "ZC25":
+            case "DW3E":
+            case "DW5E":
                 position.set(Position.KEY_ALARM, Position.ALARM_SOS);
                 break;
+            // Tampering Alert with Location:
             case "ZC26":
+            case "DW3F":
+            case "DW5F":
                 position.set(Position.KEY_ALARM, Position.ALARM_TAMPERING);
                 break;
+            // Low Power Alert with Location
             case "ZC27":
+            case "DW40":
+            case "DW60":
                 position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
+                break;
+            // Bad Battery Alert with Location
+            case "ZC28":
+            case "DW41":
+            case "DW61":
+                position.set(Position.KEY_ALARM, "badBattery");
+                break;
+            // Fuel Cut On with Location
+            case "ZC2A":
+            case "DW43":
+            case "DW63":
+                position.set(Position.KEY_FUEL_LEVEL, 0.0);
+                break;
+            // Fuel Cut Off with Location:
+            case "ZC2B":
+            case "DW44":
+            case "DW64":
+                position.set(Position.KEY_FUEL_LEVEL, 1.0);
+                break;
+            // Fuel Cut Alert with Location:
+            case "ZC2C":
+            case "DW45":
+            case "DW65":
+                position.set(Position.KEY_ALARM, "fuelCut");
                 break;
             default:
                 break;
