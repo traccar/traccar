@@ -45,10 +45,7 @@ public final class NotificationFormatter {
         Device device = Context.getIdentityManager().getById(event.getDeviceId());
 
         VelocityContext velocityContext = new VelocityContext();
-
-        if (user != null) {
-            velocityContext.put("user", user);
-        }
+        velocityContext.put("user", user);
         velocityContext.put("device", device);
         velocityContext.put("event", event);
         if (position != null) {
