@@ -61,19 +61,19 @@ public final class ReportUtils {
         }
     }
 
-    public static String getDistanceUnit(Long userId) {
+    public static String getDistanceUnit(long userId) {
         return (String) Context.getPermissionsManager().lookupAttribute(userId, "distanceUnit", "km");
     }
 
-    public static String getSpeedUnit(Long userId) {
+    public static String getSpeedUnit(long userId) {
         return (String) Context.getPermissionsManager().lookupAttribute(userId, "speedUnit", "kn");
     }
 
-    public static String getVolumeUnit(Long userId) {
+    public static String getVolumeUnit(long userId) {
         return (String) Context.getPermissionsManager().lookupAttribute(userId, "volumeUnit", "ltr");
     }
 
-    public static TimeZone getTimezone(Long userId) {
+    public static TimeZone getTimezone(long userId) {
         String timezone = (String) Context.getPermissionsManager().lookupAttribute(userId, "timezone", null);
         return timezone != null ? TimeZone.getTimeZone(timezone) : TimeZone.getDefault();
     }
@@ -137,7 +137,7 @@ public final class ReportUtils {
         return null;
     }
 
-    public static org.jxls.common.Context initializeContext(Long userId) {
+    public static org.jxls.common.Context initializeContext(long userId) {
         org.jxls.common.Context jxlsContext = PoiTransformer.createInitialContext();
         jxlsContext.putVar("distanceUnit", getDistanceUnit(userId));
         jxlsContext.putVar("speedUnit", getSpeedUnit(userId));
