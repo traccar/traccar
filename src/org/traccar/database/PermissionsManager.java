@@ -56,8 +56,8 @@ public class PermissionsManager {
         refreshDeviceAndGroupPermissions();
     }
 
-    public User getUser(Long userId) {
-        return userId != null ? (User) usersManager.getById(userId) : null;
+    public User getUser(long userId) {
+        return (User) usersManager.getById(userId);
     }
 
     public Set<Long> getGroupPermissions(long userId) {
@@ -416,15 +416,10 @@ public class PermissionsManager {
         return null;
     }
 
-    public Object lookupAttribute(Long userId, String key, Object defaultValue) {
+    public Object lookupAttribute(long userId, String key, Object defaultValue) {
         Object preference;
-        Object userPreference = null;
         Object serverPreference = server.getAttributes().get(key);
-
-        if (userId != null) {
-            userPreference = getUser(userId).getAttributes().get(key);
-        }
-
+        Object userPreference = getUser(userId).getAttributes().get(key);
         if (server.getForceSettings()) {
             preference = serverPreference != null ? serverPreference : userPreference;
         } else {
