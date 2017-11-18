@@ -102,12 +102,6 @@ public final class NotificationFormatter {
         return formatterLogic(null, userId, event, position, templatePath);
     }
 
-    public static String formatForwarderMessage(Event event, Position position) {
-        String templatePath = Context.getConfig().getString("forwarder.templatesPath", "forwarder");
-
-        return formatterLogic(null, null, event, position, templatePath);
-    }
-
     private static String formatterLogic(VelocityContext vc, Long userId, Event event, Position position,
             String templatePath) {
 
