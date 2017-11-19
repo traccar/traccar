@@ -26,45 +26,37 @@ import org.traccar.model.Position;
 import java.net.SocketAddress;
 import java.util.regex.Pattern;
 
-public class DwayProtocolDecoder extends BaseProtocolDecoder {
+public class Ivt401ProtocolDecoder extends BaseProtocolDecoder {
 
-    public DwayProtocolDecoder(DwayProtocol protocol) {
+    public Ivt401ProtocolDecoder(Ivt401Protocol protocol) {
         super(protocol);
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .text("AA55,")
-            .number("d+,")                       // index
+            .text("(")
+            .expression("TL[ABLN],")             // header
             .number("(d+),")                     // imei
-            .number("d+,")                       // type
-            .number("(dd)(dd)(dd),")             // date (yymmdd)
+            .number("(dd)(dd)(dd),")             // date (ddmmyy)
             .number("(dd)(dd)(dd),")             // time (hhmmss)
-            .number("(-?d+.d+),")                // latitude
-            .number("(-?d+.d+),")                // longitude
-            .number("(-?d+),")                   // altitude
-            .number(" ?(d+.d+),")                // speed
+            .number("([-+]d+.d+),")              // latitude
+            .number("([-+]d+.d+),")              // longitude
+            .number("(d+),")                     // speed
             .number("(d+),")                     // course
-            .number("([01]{4}),")                // input
-            .number("([01]{4}),")                // output
-            .number("([01]+),")                  // flags
-            .number("(d+),")                     // battery
-            .number("(d+),")                     // adc1
-            .number("(d+),")                     // adc2
-            .number("(d+)")                      // driver
+            .number("(-?d+.?d*),")               // altitude
+            .number("(d+),")                     // satellites
+            .number("(d),")                      // gps status
+            .number("(d+),")                     // rssi
+            .number("(d+),")                     // input
+            .number("(d+),")                     // output
+            .number("(d+.d+),")                  // adc
+            .number("(d+.d+),")                  // power
+            .number("(d+.d+),")                  // battery
             .any()
             .compile();
 
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
-
-        String sentence = (String) msg;
-        if (sentence.equals("AA55,HB")) {
-            if (channel != null) {
-                channel.write("55AA,HB,OK\r\n");
-            }
-            return null;
-        }
 
         Parser parser = new Parser(PATTERN, (String) msg);
         if (!parser.matches()) {
@@ -80,21 +72,24 @@ public class DwayProtocolDecoder extends BaseProtocolDecoder {
         position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.setValid(true);
-        position.setTime(parser.nextDateTime());
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
+
         position.setLatitude(parser.nextDouble());
         position.setLongitude(parser.nextDouble());
-        position.setAltitude(parser.nextDouble(0));
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
-        position.setCourse(parser.nextDouble(0));
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt()));
+        position.setCourse(parser.nextInt());
+        position.setAltitude(parser.nextDouble());
 
+        position.set(Position.KEY_SATELLITES, parser.nextInt());
+
+        position.setValid(parser.nextInt() > 0);
+
+        position.set(Position.KEY_RSSI, parser.nextInt());
         position.set(Position.KEY_INPUT, parser.nextBinInt());
         position.set(Position.KEY_OUTPUT, parser.nextBinInt());
-
-        position.set(Position.KEY_BATTERY, parser.nextInt() * 0.001);
-        position.set(Position.PREFIX_ADC + 1, parser.nextInt() * 0.001);
-        position.set(Position.PREFIX_ADC + 2, parser.nextInt() * 0.001);
-        position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
+        position.set(Position.PREFIX_ADC + 1, parser.nextDouble());
+        position.set(Position.KEY_POWER, parser.nextDouble());
+        position.set(Position.KEY_BATTERY, parser.nextDouble());
 
         return position;
     }

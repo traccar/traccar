@@ -35,6 +35,16 @@ public class User extends ExtendedModel {
         this.name = name;
     }
 
+    private String login;
+
+    public String getLogin() {
+        return login;
+    }
+
+    public void setLogin(String login) {
+        this.login = login;
+    }
+
     private String email;
 
     public String getEmail() {

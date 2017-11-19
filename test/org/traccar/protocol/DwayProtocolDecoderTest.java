@@ -23,7 +23,7 @@ public class DwayProtocolDecoderTest extends ProtocolTest {
                 "AA55,1,123456,1,140101,101132,22.5500,113.6770,75,70.5,320,1100,0011,1110,3950,33000,24000,12345678"));
 
         verifyNull(decoder, text(
-                ">H12345678"));
+                "AA55,HB"));
 
     }
 

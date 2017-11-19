@@ -141,7 +141,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             filterHandler = new FilterHandler();
         }
 
-        if (Context.getGeocoder() != null) {
+        if (Context.getGeocoder() != null && !Context.getConfig().getBoolean("geocoder.ignorePositions")) {
             geocoderHandler = new GeocoderHandler(
                     Context.getGeocoder(),
                     Context.getConfig().getBoolean("geocoder.processInvalidPositions"));

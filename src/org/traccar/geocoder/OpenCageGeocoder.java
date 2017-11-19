@@ -1,6 +1,6 @@
 /*
  * Copyright 2014 - 2015 Stefaan Van Dooren (stefaan.vandooren@gmail.com)
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import javax.json.JsonObject;
 
 public class OpenCageGeocoder extends JsonGeocoder {
 
-    public OpenCageGeocoder(String url, String key, int cacheSize) {
-        super(url + "/json?q=%f,%f&key=" + key, cacheSize);
+    public OpenCageGeocoder(String url, String key, int cacheSize, AddressFormat addressFormat) {
+        super(url + "/json?q=%f,%f&key=" + key, cacheSize, addressFormat);
     }
 
     @Override

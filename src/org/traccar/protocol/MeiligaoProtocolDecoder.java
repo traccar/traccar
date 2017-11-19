@@ -69,6 +69,8 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             .number("|(x{8})")                   // odometer
             .groupBegin()
             .number("|(xx)")                     // satellites
+            .text("|")
+            .expression("(.*)")                  // driver
             .groupEnd("?")
             .or()
             .number("|(x{9})")                   // odometer
@@ -259,6 +261,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_RSSI, parser.nextHexInt());
         position.set(Position.KEY_ODOMETER, parser.nextHexLong());
         position.set(Position.KEY_SATELLITES, parser.nextHexInt());
+        position.set("driverLicense", parser.next());
         position.set(Position.KEY_ODOMETER, parser.nextHexLong());
         position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
 
