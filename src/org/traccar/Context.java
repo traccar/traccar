@@ -16,7 +16,6 @@
 package org.traccar;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.ning.http.client.AsyncHttpClient;
 
@@ -97,12 +96,6 @@ public final class Context {
 
     public static ObjectMapper getObjectMapper() {
         return objectMapper;
-    }
-
-    private static ObjectWriter objectWriterPrettyPrinter;
-
-    public static ObjectWriter getObjectWriterPrettyPrinter() {
-        return objectWriterPrettyPrinter;
     }
 
     private static IdentityManager identityManager;
@@ -289,7 +282,9 @@ public final class Context {
         objectMapper = new ObjectMapper();
         objectMapper.setConfig(
                 objectMapper.getSerializationConfig().without(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS));
-        objectWriterPrettyPrinter = objectMapper.writerWithDefaultPrettyPrinter();
+        if (Context.getConfig().getBoolean("config.mapper.prettyPrintedJson")) {
+            objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        }
 
         if (config.hasKey("database.url")) {
             dataManager = new DataManager(config);
@@ -308,59 +303,11 @@ public final class Context {
         identityManager = deviceManager;
 
         if (config.getBoolean("geocoder.enable")) {
-            String type = config.getString("geocoder.type", "google");
-            String url = config.getString("geocoder.url");
-            String key = config.getString("geocoder.key");
-            String language = config.getString("geocoder.language");
-
-            int cacheSize = config.getInteger("geocoder.cacheSize");
-            switch (type) {
-                case "nominatim":
-                    geocoder = new NominatimGeocoder(url, key, language, cacheSize);
-                    break;
-                case "gisgraphy":
-                    geocoder = new GisgraphyGeocoder(url, cacheSize);
-                    break;
-                case "mapquest":
-                    geocoder = new MapQuestGeocoder(url, key, cacheSize);
-                    break;
-                case "opencage":
-                    geocoder = new OpenCageGeocoder(url, key, cacheSize);
-                    break;
-                case "bingmaps":
-                    geocoder = new BingMapsGeocoder(url, key, cacheSize);
-                    break;
-                case "factual":
-                    geocoder = new FactualGeocoder(url, key, cacheSize);
-                    break;
-                case "geocodefarm":
-                    geocoder = new GeocodeFarmGeocoder(key, language, cacheSize);
-                    break;
-                default:
-                    geocoder = new GoogleGeocoder(key, language, cacheSize);
-                    break;
-            }
+            initReverseGeocoder();
         }
 
         if (config.getBoolean("geolocation.enable")) {
-            String type = config.getString("geolocation.type", "mozilla");
-            String url = config.getString("geolocation.url");
-            String key = config.getString("geolocation.key");
-
-            switch (type) {
-                case "google":
-                    geolocationProvider = new GoogleGeolocationProvider(key);
-                    break;
-                case "opencellid":
-                    geolocationProvider = new OpenCellIdGeolocationProvider(key);
-                    break;
-                case "unwired":
-                    geolocationProvider = new UnwiredGeolocationProvider(url, key);
-                    break;
-                default:
-                    geolocationProvider = new MozillaGeolocationProvider(key);
-                    break;
-            }
+            initLocationResolutionSystem();
         }
 
         if (config.getBoolean("web.enable")) {
@@ -374,39 +321,17 @@ public final class Context {
         tripsConfig = initTripsConfig();
 
         if (config.getBoolean("event.enable")) {
-            geofenceManager = new GeofenceManager(dataManager);
-            calendarManager = new CalendarManager(dataManager);
-            notificationManager = new NotificationManager(dataManager);
-            Properties velocityProperties = new Properties();
-            velocityProperties.setProperty("file.resource.loader.path",
-                    Context.getConfig().getString("templates.rootPath", "templates") + "/");
-            velocityProperties.setProperty("runtime.log.logsystem.class",
-                    "org.apache.velocity.runtime.log.NullLogChute");
-
-            String address;
-            try {
-                address = config.getString("web.address", InetAddress.getLocalHost().getHostAddress());
-            } catch (UnknownHostException e) {
-                address = "localhost";
-            }
-
-            String webUrl = URIUtil.newURI("http", address, config.getInteger("web.port", 8082), "", "");
-            webUrl = Context.getConfig().getString("web.url", webUrl);
-            velocityProperties.setProperty("web.url", webUrl);
-
-            velocityEngine = new VelocityEngine();
-            velocityEngine.init(velocityProperties);
-
-            motionEventHandler = new MotionEventHandler(tripsConfig);
-            overspeedEventHandler = new OverspeedEventHandler(
-                    Context.getConfig().getLong("event.overspeed.minimalDuration") * 1000,
-                    Context.getConfig().getBoolean("event.overspeed.notRepeat"));
+            initEventsSubsystem();
         }
 
         serverManager = new ServerManager();
 
         if (config.getBoolean("event.forward.enable")) {
-            eventForwarder = getConfiguredEventForwarder();
+            if (Context.getConfig().getBoolean("event.forward.payloadAsParamMode")) {
+                eventForwarder = new FormTypeEventForwarder();
+            } else {
+                eventForwarder = new JsonTypeEventForwarder();
+            }
         }
 
         attributesManager = new AttributesManager(dataManager);
@@ -423,17 +348,98 @@ public final class Context {
 
     }
 
-    private static EventForwarder getConfiguredEventForwarder() {
-        if (Context.getConfig().getBoolean("event.forward.payloadAsParamMode")) {
-            return new FormTypeEventForwarder();
+    private static void initLocationResolutionSystem() {
+
+        String type = config.getString("geolocation.type", "mozilla");
+        String url = config.getString("geolocation.url");
+        String key = config.getString("geolocation.key");
+
+        switch (type) {
+            case "google":
+                geolocationProvider = new GoogleGeolocationProvider(key);
+                break;
+            case "opencellid":
+                geolocationProvider = new OpenCellIdGeolocationProvider(key);
+                break;
+            case "unwired":
+                geolocationProvider = new UnwiredGeolocationProvider(url, key);
+                break;
+            default:
+                geolocationProvider = new MozillaGeolocationProvider(key);
+                break;
         }
-        return new JsonTypeEventForwarder();
+    }
+
+    private static void initEventsSubsystem() {
+
+        geofenceManager = new GeofenceManager(dataManager);
+        calendarManager = new CalendarManager(dataManager);
+        notificationManager = new NotificationManager(dataManager);
+        Properties velocityProperties = new Properties();
+        velocityProperties.setProperty("file.resource.loader.path",
+                Context.getConfig().getString("templates.rootPath", "templates") + "/");
+        velocityProperties.setProperty("runtime.log.logsystem.class",
+                "org.apache.velocity.runtime.log.NullLogChute");
+
+        String address;
+        try {
+            address = config.getString("web.address", InetAddress.getLocalHost().getHostAddress());
+        } catch (UnknownHostException e) {
+            address = "localhost";
+        }
+
+        String webUrl = URIUtil.newURI("http", address, config.getInteger("web.port", 8082), "", "");
+        webUrl = Context.getConfig().getString("web.url", webUrl);
+        velocityProperties.setProperty("web.url", webUrl);
+
+        velocityEngine = new VelocityEngine();
+        velocityEngine.init(velocityProperties);
+
+        motionEventHandler = new MotionEventHandler(tripsConfig);
+        overspeedEventHandler = new OverspeedEventHandler(
+                Context.getConfig().getLong("event.overspeed.minimalDuration") * 1000,
+                Context.getConfig().getBoolean("event.overspeed.notRepeat"));
+    }
+
+    private static void initReverseGeocoder() {
+
+        String type = config.getString("geocoder.type", "google");
+        String url = config.getString("geocoder.url");
+        String key = config.getString("geocoder.key");
+        String language = config.getString("geocoder.language");
+
+        int cacheSize = config.getInteger("geocoder.cacheSize");
+        switch (type) {
+            case "nominatim":
+                geocoder = new NominatimGeocoder(url, key, language, cacheSize);
+                break;
+            case "gisgraphy":
+                geocoder = new GisgraphyGeocoder(url, cacheSize);
+                break;
+            case "mapquest":
+                geocoder = new MapQuestGeocoder(url, key, cacheSize);
+                break;
+            case "opencage":
+                geocoder = new OpenCageGeocoder(url, key, cacheSize);
+                break;
+            case "bingmaps":
+                geocoder = new BingMapsGeocoder(url, key, cacheSize);
+                break;
+            case "factual":
+                geocoder = new FactualGeocoder(url, key, cacheSize);
+                break;
+            case "geocodefarm":
+                geocoder = new GeocodeFarmGeocoder(key, language, cacheSize);
+                break;
+            default:
+                geocoder = new GoogleGeocoder(key, language, cacheSize);
+                break;
+        }
     }
 
     public static void init(IdentityManager testIdentityManager) {
         config = new Config();
         objectMapper = new ObjectMapper();
-        objectWriterPrettyPrinter = objectMapper.writerWithDefaultPrettyPrinter();
         identityManager = testIdentityManager;
     }
 

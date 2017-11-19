@@ -29,7 +29,6 @@ import org.traccar.model.Geofence;
 import org.traccar.model.Position;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
 import com.ning.http.client.FluentCaseInsensitiveStringsMap;
 
@@ -39,14 +38,12 @@ public abstract class EventForwarder {
     private String header;
     private final String payloadParamName;
     private final String additionalParams;
-    private final boolean prettyPrinted;
 
     public EventForwarder() {
         url = Context.getConfig().getString("event.forward.url", "http://localhost/");
         header = Context.getConfig().getString("event.forward.header", "");
         payloadParamName = Context.getConfig().getString("event.forward.paramMode.payloadParamName", "payload");
         additionalParams = Context.getConfig().getString("event.forward.paramMode.additionalParams", "");
-        prettyPrinted = Context.getConfig().getBoolean("event.forward.prettyPrintedPayload");
     }
 
     private static final String KEY_POSITION = "position";
@@ -105,28 +102,18 @@ public abstract class EventForwarder {
             }
         }
         try {
-            return getObjectWriter().writeValueAsString(data);
+            return Context.getObjectMapper().writeValueAsString(data);
         } catch (JsonProcessingException e) {
             Log.warning(e);
             return null;
         }
     }
 
-    protected ObjectWriter getObjectWriter() {
-        return prettyPrinted
-            ? Context.getObjectWriterPrettyPrinter()
-            : Context.getObjectMapper().writer();
-    }
-
-
     protected String getPayloadParamName() {
         return payloadParamName;
     }
     protected String getAdditionalParams() {
         return additionalParams;
-    }
-    protected boolean isPrettyPrinted() {
-        return prettyPrinted;
     }
 
     protected abstract String getContentType();
