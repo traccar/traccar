@@ -88,7 +88,7 @@ public final class NotificationFormatter {
     public static MailMessage formatMailMessage(long userId, Event event, Position position) {
         String templatePath = Context.getConfig().getString("mail.templatesPath", "mail");
         VelocityContext velocityContext = prepareContext(userId, event, position);
-        String formattedMessage = formatterLogic(velocityContext, userId, event, position, templatePath);
+        String formattedMessage = formatMessage(velocityContext, userId, event, position, templatePath);
 
         return new MailMessage((String) velocityContext.get("subject"), formattedMessage);
     }
@@ -96,10 +96,10 @@ public final class NotificationFormatter {
     public static String formatSmsMessage(long userId, Event event, Position position) {
         String templatePath = Context.getConfig().getString("sms.templatesPath", "sms");
 
-        return formatterLogic(null, userId, event, position, templatePath);
+        return formatMessage(null, userId, event, position, templatePath);
     }
 
-    private static String formatterLogic(VelocityContext vc, Long userId, Event event, Position position,
+    private static String formatMessage(VelocityContext vc, Long userId, Event event, Position position,
             String templatePath) {
 
         VelocityContext velocityContext = vc;

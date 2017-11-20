@@ -325,7 +325,7 @@ public final class Context {
         objectMapper = new ObjectMapper();
         objectMapper.setConfig(
                 objectMapper.getSerializationConfig().without(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS));
-        if (Context.getConfig().getBoolean("config.mapper.prettyPrintedJson")) {
+        if (Context.getConfig().getBoolean("mapper.prettyPrintedJson")) {
             objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         }
 
@@ -354,7 +354,7 @@ public final class Context {
         }
 
         if (config.getBoolean("geolocation.enable")) {
-            initLocationResolutionSystem();
+            initGeolocationModule();
         }
 
         if (config.getBoolean("web.enable")) {
@@ -368,7 +368,7 @@ public final class Context {
         tripsConfig = initTripsConfig();
 
         if (config.getBoolean("event.enable")) {
-            initEventsSubsystem();
+            initEventsModule();
         }
 
         serverManager = new ServerManager();
@@ -395,7 +395,7 @@ public final class Context {
 
     }
 
-    private static void initLocationResolutionSystem() {
+    private static void initGeolocationModule() {
 
         String type = config.getString("geolocation.type", "mozilla");
         String url = config.getString("geolocation.url");
@@ -417,7 +417,7 @@ public final class Context {
         }
     }
 
-    private static void initEventsSubsystem() {
+    private static void initEventsModule() {
 
         geofenceManager = new GeofenceManager(dataManager);
         calendarManager = new CalendarManager(dataManager);

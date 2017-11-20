@@ -15,11 +15,10 @@
  */
 package org.traccar.notification;
 
-import java.nio.charset.StandardCharsets;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.traccar.Context;
 import org.traccar.helper.Log;
@@ -28,8 +27,9 @@ import org.traccar.model.Event;
 import org.traccar.model.Geofence;
 import org.traccar.model.Position;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import com.ning.http.client.FluentCaseInsensitiveStringsMap;
 
 public abstract class EventForwarder {

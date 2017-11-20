@@ -9,7 +9,6 @@ public class JsonTypeEventForwarder extends EventForwarder {
 
     @Override
     protected String getContentType() {
-
         return "application/json; charset=utf-8";
     }
 
