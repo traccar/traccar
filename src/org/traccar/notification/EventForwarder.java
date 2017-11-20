@@ -36,14 +36,10 @@ public abstract class EventForwarder {
 
     private final String url;
     private final String header;
-    private final String payloadParamName;
-    private final String additionalParams;
 
     public EventForwarder() {
         url = Context.getConfig().getString("event.forward.url", "http://localhost/");
         header = Context.getConfig().getString("event.forward.header", "");
-        payloadParamName = Context.getConfig().getString("event.forward.paramMode.payloadParamName", "payload");
-        additionalParams = Context.getConfig().getString("event.forward.paramMode.additionalParams", "");
     }
 
     private static final String KEY_POSITION = "position";
@@ -107,13 +103,6 @@ public abstract class EventForwarder {
             Log.warning(e);
             return null;
         }
-    }
-
-    protected String getPayloadParamName() {
-        return payloadParamName;
-    }
-    protected String getAdditionalParams() {
-        return additionalParams;
     }
 
     protected abstract String getContentType();
