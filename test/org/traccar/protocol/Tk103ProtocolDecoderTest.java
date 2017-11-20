@@ -184,6 +184,23 @@ public class Tk103ProtocolDecoderTest extends ProtocolTest {
         verifyNotNull(decoder, text(
                 "(013632651491,DW50,460,0,0,6,0,040613,040137"));
 
+        verifyNotNull(decoder, text(
+                "(864555555555555,ZC03,191117,234207,$Notice: Device version: 1.0$"));
+
+        verifyNotNull(decoder, text(
+                "(864555555555555,ZC03,191117,234207,$1 .Sensor sensitivity: 1\r\n" +
+                        "2 .Alert status: Off\r\n" +
+                        "3 .Check interval is set to 240 minute(s).\r\n" +
+                        "4 .Checkgsm interval is set to 60 minute(s).\r\n" +
+                        "5 .SOS SMS Alert: On\r\n" +
+                        "6 .SOS Call Alert: On\r\n" +
+                        "7 . Power: 95%$"));
+
+        verifyNotNull(decoder, text(
+                "(864555555555555,ZC03,191117,234207,$1 .Sensor sensitivity: 1\r\n" +
+                        "2 .Alert status: Off\r\n" +
+                        "3 .Check interval is set to 240 minute(s"));
+
     }
 
 }

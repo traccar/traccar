@@ -29,8 +29,6 @@ import org.traccar.model.Position;
 import org.traccar.model.WifiAccessPoint;
 
 import java.net.SocketAddress;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
@@ -67,8 +65,8 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .number("([+-]ddd.d)?")              // temperature
             .groupBegin()
-            .number("([+-]?d+.d{1,2}),").optional() // altitude
-            .number("(d+)$").optional()         // number of visible satellites
+            .number("([+-]?d+.d{1,2}),")         // altitude
+            .number("(d+)$")                     // number of visible satellites
             .groupEnd("?")
             .text(")").optional()
             .compile();
@@ -102,9 +100,18 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // lac
             .number("(d+),")                     // cid
             .number("(d+),")                     // number of wifi macs
-            .expression("((?:(?:[0-9A-Fa-f]{2}:){5}(?:[0-9A-Fa-f]{2})\\*[-+]?\\d{1,2}\\*\\d{1,2},)*)")
+            .number("((?:(?:xx:){5}(?:xx)\\*[-+]?d+\\*d+,)*)")
             .number("(dd)(dd)(dd),")             // date (ddmmyy)
             .number("(dd)(dd)(dd)")              // time (hhmmss)
+            .any()
+            .compile();
+
+    private static final Pattern PATTERN_COMMAND_RESULT = new PatternBuilder()
+            .number("(d+),")                     // device id
+            .expression(".{4},")                 // command
+            .number("(dd)(dd)(dd),")             // date (ddmmyy)
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
+            .expression("\\$([\\s\\S]*?)(?:\\$|$)") // message
             .any()
             .compile();
 
@@ -132,89 +139,60 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             case "BO01":
                 position.set(Position.KEY_ALARM, decodeAlarm(data.charAt(0) - '0'));
                 break;
-            // Motion Alert with Location
             case "ZC11":
             case "DW31":
             case "DW51":
                 position.set(Position.KEY_ALARM, Position.ALARM_MOVEMENT);
                 break;
-            // Low Battery Alert with Location
             case "ZC12":
             case "DW32":
             case "DW52":
                 position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
                 break;
-            // Power Cut Alert with Location
             case "ZC13":
             case "DW33":
             case "DW53":
                 position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
                 break;
-            // ACC On Alert with Location
             case "ZC15":
             case "DW35":
             case "DW55":
                 position.set(Position.KEY_IGNITION, true);
                 break;
-            // ACC Off Alert with Location
             case "ZC16":
             case "DW36":
             case "DW56":
                 position.set(Position.KEY_IGNITION, false);
                 break;
-            // Ignition Alert with Location
             case "ZC29":
             case "DW42":
             case "DW62":
                 position.set(Position.KEY_IGNITION, true);
                 break;
-            // Dismounting Alert with Location
             case "ZC17":
             case "DW37":
             case "DW57":
                 position.set(Position.KEY_ALARM, Position.ALARM_REMOVING);
                 break;
-            // SOS Alert with Location
             case "ZC25":
             case "DW3E":
             case "DW5E":
                 position.set(Position.KEY_ALARM, Position.ALARM_SOS);
                 break;
-            // Tampering Alert with Location:
             case "ZC26":
             case "DW3F":
             case "DW5F":
                 position.set(Position.KEY_ALARM, Position.ALARM_TAMPERING);
                 break;
-            // Low Power Alert with Location
             case "ZC27":
             case "DW40":
             case "DW60":
                 position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
                 break;
-            // Bad Battery Alert with Location
             case "ZC28":
             case "DW41":
             case "DW61":
                 position.set(Position.KEY_ALARM, "badBattery");
-                break;
-            // Fuel Cut On with Location
-            case "ZC2A":
-            case "DW43":
-            case "DW63":
-                position.set(Position.KEY_FUEL_LEVEL, 0.0);
-                break;
-            // Fuel Cut Off with Location:
-            case "ZC2B":
-            case "DW44":
-            case "DW64":
-                position.set(Position.KEY_FUEL_LEVEL, 1.0);
-                break;
-            // Fuel Cut Alert with Location:
-            case "ZC2C":
-            case "DW45":
-            case "DW65":
-                position.set(Position.KEY_ALARM, "fuelCut");
                 break;
             default:
                 break;
@@ -228,41 +206,13 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             case 5:
                 return 80;
             case 4:
-                return 60;
+                return 50;
             case 3:
                 return 20;
             case 2:
                 return 10;
             default:
                 return null;
-        }
-    }
-
-    private static Map<Long, Position> batteryInfo = new HashMap<Long, Position>();
-
-    public void setLastBatteryPower(Position positionWithCurrentBatteryInfo) {
-        batteryInfo.put(positionWithCurrentBatteryInfo.getDeviceId(), positionWithCurrentBatteryInfo);
-    }
-
-    // It is possible to use "processing.copyAttributes" configuration to have battery level in all events,
-    //  but this will not work if battery events will be filtered somehow and dropped from DB, so it will be no
-    //  event in DB with latest battery level. So, ensure all our events have latest battery level.
-    public void getLastBatteryPower(Position position) {
-        if (position != null && position.getDeviceId() != 0) {
-            Position bi = batteryInfo.get(position.getDeviceId());
-            if (bi == null) {
-                bi = new Position();
-                getLastLocation(bi, null);
-            }
-            if (bi.getAttributes().containsKey(Position.KEY_BATTERY_LEVEL)) {
-                position.set(Position.KEY_BATTERY_LEVEL, bi.getDouble(Position.KEY_BATTERY_LEVEL));
-            }
-            if (bi.getAttributes().containsKey(Position.KEY_BATTERY)) {
-                position.set(Position.KEY_BATTERY, bi.getDouble(Position.KEY_BATTERY));
-            }
-            if (bi.getAttributes().containsKey(Position.KEY_POWER)) {
-                position.set(Position.KEY_POWER, bi.getDouble(Position.KEY_POWER));
-            }
         }
     }
 
@@ -298,8 +248,6 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_POWER, power * 0.1);
         }
 
-        setLastBatteryPower(position);
-
         return position;
     }
 
@@ -319,8 +267,6 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         getLastLocation(position, null);
-
-        getLastBatteryPower(position);
 
         position.setNetwork(new Network(CellTower.from(
                 parser.nextInt(0), parser.nextInt(0), parser.nextHexInt(0), parser.nextHexInt(0))));
@@ -347,21 +293,16 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
         getLastLocation(position, null);
 
-        getLastBatteryPower(position);
-
         Network network = new Network();
 
-        // Parse LBS
         network.addCellTower(CellTower.from(
                 parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextInt()));
 
-        // Parse WiFi macs number and mac addresses itself.
         int wifiCount = parser.nextInt();
         if (parser.hasNext()) {
             String[] wifimacs = parser.next().split(",");
             if (wifimacs.length == wifiCount) {
                 for (int i = 0; i < wifiCount; i++) {
-                    // Sample wifi string: “00:80:E1:7F:86:97*-55*6” (mac*rssi*channel_number)
                     String[] wifiinfo = wifimacs[i].split("\\*");
                     network.addWifiAccessPoint(WifiAccessPoint.from(
                             wifiinfo[0], Integer.parseInt(wifiinfo[1]), Integer.parseInt(wifiinfo[2])));
@@ -373,21 +314,35 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             position.setNetwork(network);
         }
 
-        // Parse date-time
-        DateBuilder dateBuilder = new DateBuilder()
-                .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-        // Set both DeviceTime and FixTime here, as some alarm messages like SOS at device start may be
-        //  sent without valid LBS/WiFi position, so FixTime from getLastLocation will be used as time
-        //  for this SOS alarm, which can be very old. And traccar UI only display FixTime.
-        // Valid flag will be "false" anyway, so it is possible to check should the position and fixTime
-        //   be trusted or not.
-        position.setTime(dateBuilder.getDate());
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
 
         return position;
     }
 
-    @Override
+    private Position decodeCommandResult(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN_COMMAND_RESULT, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
+
+        position.set(Position.KEY_RESULT, parser.next());
+
+        return position;
+
+    }
+
+@Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
@@ -398,7 +353,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             sentence = sentence.substring(beginIndex + 1);
         }
 
-        if (channel != null) {
+        if (channel != null && sentence.length() >= 16) {
             String id = sentence.substring(0, 12);
             String type = sentence.substring(12, 16);
             if (type.equals("BP00")) {
@@ -413,11 +368,10 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             return decodeBattery(channel, remoteAddress, sentence);
         } else if (sentence.contains("BZ00")) {
             return decodeNetwork(channel, remoteAddress, sentence);
-        }
-
-        Position positionWifi = decodeLbsWifi(channel, remoteAddress, sentence);
-        if (positionWifi != null) {
-            return positionWifi;
+        } else if (sentence.contains("ZC03")) {
+            return decodeCommandResult(channel, remoteAddress, sentence);
+        } else if (sentence.contains("DW5")) {
+            return decodeLbsWifi(channel, remoteAddress, sentence);
         }
 
         Parser parser = new Parser(PATTERN, sentence);
@@ -437,8 +391,6 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         boolean alternative = parser.next() != null;
 
         decodeType(position, parser.next(), parser.next());
-
-        getLastBatteryPower(position);
 
         DateBuilder dateBuilder = new DateBuilder();
         if (alternative) {
@@ -503,8 +455,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (parser.hasNext()) {
-            // Store amount of visible satellites as RSSI
-            position.set(Position.KEY_RSSI, parser.nextInt(0));
+            position.set(Position.KEY_SATELLITES_VISIBLE, parser.nextInt(0));
         }
 
         return position;

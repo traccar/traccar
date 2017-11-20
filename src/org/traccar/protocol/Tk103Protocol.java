@@ -33,6 +33,14 @@ public class Tk103Protocol extends BaseProtocol {
     public Tk103Protocol() {
         super("tk103");
         setSupportedDataCommands(
+                Command.TYPE_CUSTOM,
+                Command.TYPE_GET_DEVICE_STATUS,
+                Command.TYPE_IDENTIFICATION,
+                Command.TYPE_MODE_DEEP_SLEEP,
+                Command.TYPE_MODE_POWER_SAVING,
+                Command.TYPE_ALARM_SOS,
+                Command.TYPE_SET_CONNECTION,
+                Command.TYPE_SOS_NUMBER,
                 Command.TYPE_POSITION_SINGLE,
                 Command.TYPE_POSITION_PERIODIC,
                 Command.TYPE_POSITION_STOP,
@@ -40,22 +48,7 @@ public class Tk103Protocol extends BaseProtocol {
                 Command.TYPE_REBOOT_DEVICE,
                 Command.TYPE_SET_ODOMETER,
                 Command.TYPE_ENGINE_STOP,
-                Command.TYPE_ENGINE_RESUME,
-                //T580W commands:
-                "T580W_positionSingle",
-                "T580W_positionRealtime",
-                "T580W_positionRealtimeStop",
-                "T580W_modeDeepSleepInterval1Hour",
-                "T580W_modeDeepSleepInterval2Hour",
-                "T580W_modeDeepSleepInterval3Hour",
-                "T580W_modeDeepSleepInterval4Hour",
-                "T580W_modeDeepSleepMotion",
-                "T580W_modeDeepSleepOff",
-                "T580W_alarmSosOn",
-                "T580W_alarmSosOff",
-                "T580W_multiControllerOn",
-                "T580W_multiControllerOff",
-                "T580W_rebootDevice");
+                Command.TYPE_ENGINE_RESUME);
     }
 
     @Override
