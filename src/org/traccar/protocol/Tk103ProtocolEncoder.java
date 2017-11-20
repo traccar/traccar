@@ -23,82 +23,61 @@ import org.traccar.model.Command;
 
 public class Tk103ProtocolEncoder extends StringProtocolEncoder {
 
-    protected String t580WFormatCommand(Command command, String format, String... keys) {
-        String content = super.formatCommand(command, format, keys);
-        return String.format("[begin]sms2,%s,[end]", content);
-    }
-
-    protected String checkEn(Command command, String ifEnabled, String ifDisabled) {
-        return command.getBoolean(Command.KEY_ENABLE) ? ifEnabled : ifDisabled;
-    }
-
     @Override
     protected Object encodeCommand(Command command) {
 
-        boolean deviceT580W = Context.getIdentityManager().lookupAttributeBoolean(
-                command.getDeviceId(), "tk103.deviceT580W", false, true);
+        boolean alternative = Context.getIdentityManager().lookupAttributeBoolean(
+                command.getDeviceId(), "tk103.alternative", false, true);
 
-        if (deviceT580W) {
+        initDevicePassword(command, "123456");
 
-            initDevicePassword(command, "123456");
-
-            switch (command.getType()) {
-                case Command.TYPE_CUSTOM:
-                    return t580WFormatCommand(command, "{%s}", Command.KEY_DATA);
-                case Command.TYPE_GET_DEVICE_STATUS:
-                    return t580WFormatCommand(command, "*status*");
-                case Command.TYPE_GET_VERSION:
-                    return t580WFormatCommand(command, "*about*");
-                case Command.TYPE_IDENTIFICATION:
-                    return t580WFormatCommand(command, "999999");
-                case Command.TYPE_REBOOT_DEVICE:
-                    return t580WFormatCommand(command, "88888888");
-                case Command.TYPE_POSITION_SINGLE:
-                    return t580WFormatCommand(command, "*getposl*");
-                case Command.TYPE_POSITION_PERIODIC:
-                    return t580WFormatCommand(command, "*routetrack*99*");
-                case Command.TYPE_POSITION_STOP:
-                    return t580WFormatCommand(command, "*routetrackoff*");
-                case Command.TYPE_MODE_DEEP_SLEEP:
-                    return t580WFormatCommand(command, checkEn(command, "*sleep*2*", "*sleepoff*"));
-                case Command.TYPE_MODE_POWER_SAVING:
-                    return t580WFormatCommand(command, checkEn(command, "*sleepv*", "*sleepoff*"));
-                case Command.TYPE_ALARM_SOS:
-                    return t580WFormatCommand(command, checkEn(command, "*soson*", "*sosoff*"));
-                case Command.TYPE_SET_CONNECTION:
-                    String ipAddress = command.getString(Command.KEY_SERVER);
-                    ipAddress = ipAddress.replace(".", "*");
-                    return t580WFormatCommand(command, "*setip*%s*{%s}*", ipAddress, Command.KEY_PORT);
-                case Command.TYPE_SOS_NUMBER:
-                    return t580WFormatCommand(command, "*master*{%s}*{%s}*",
-                            Command.KEY_DEVICE_PASSWORD, Command.KEY_PHONE);
-                default:
-                    Log.warning(new UnsupportedOperationException(command.getType()));
-                    break;
-            }
-        } else {
-            switch (command.getType()) {
-                case Command.TYPE_GET_VERSION:
-                    return formatCommand(command, "({%s}AP07)", Command.KEY_UNIQUE_ID);
-                case Command.TYPE_REBOOT_DEVICE:
-                    return formatCommand(command, "({%s}AT00)", Command.KEY_UNIQUE_ID);
-                case Command.TYPE_SET_ODOMETER:
-                    return formatCommand(command, "({%s}AX01)", Command.KEY_UNIQUE_ID);
-                case Command.TYPE_POSITION_SINGLE:
-                    return formatCommand(command, "({%s}AP00)", Command.KEY_UNIQUE_ID);
-                case Command.TYPE_POSITION_PERIODIC:
-                    return formatCommand(command, "({%s}AR00%s0000)", Command.KEY_UNIQUE_ID,
-                            String.format("%04X", command.getInteger(Command.KEY_FREQUENCY)));
-                case Command.TYPE_POSITION_STOP:
-                    return formatCommand(command, "({%s}AR0000000000)", Command.KEY_UNIQUE_ID);
-                case Command.TYPE_ENGINE_STOP:
-                    return formatCommand(command, "({%s}AV011)", Command.KEY_UNIQUE_ID);
-                case Command.TYPE_ENGINE_RESUME:
-                    return formatCommand(command, "({%s}AV010)", Command.KEY_UNIQUE_ID);
-                default:
-                    Log.warning(new UnsupportedOperationException(command.getType()));
-                    break;
-            }
+        switch (command.getType()) {
+            case Command.TYPE_GET_VERSION:
+                return alternative ? formatCommand(command, "[begin]sms2,*about*,[end]")
+                        : formatCommand(command, "({%s}AP07)", Command.KEY_UNIQUE_ID);
+            case Command.TYPE_REBOOT_DEVICE:
+                return alternative ? formatCommand(command, "[begin]sms2,88888888,[end]")
+                        : formatCommand(command, "({%s}AT00)", Command.KEY_UNIQUE_ID);
+            case Command.TYPE_SET_ODOMETER:
+                return formatCommand(command, "({%s}AX01)", Command.KEY_UNIQUE_ID);
+            case Command.TYPE_POSITION_SINGLE:
+                return alternative ? formatCommand(command, "[begin]sms2,*getposl*,[end]")
+                        : formatCommand(command, "({%s}AP00)", Command.KEY_UNIQUE_ID);
+            case Command.TYPE_POSITION_PERIODIC:
+                return alternative ? formatCommand(command, "[begin]sms2,*routetrack*99*,[end]")
+                        : formatCommand(command, "({%s}AR00%s0000)", Command.KEY_UNIQUE_ID,
+                        String.format("%04X", command.getInteger(Command.KEY_FREQUENCY)));
+            case Command.TYPE_POSITION_STOP:
+                return alternative ? formatCommand(command, "[begin]sms2,*routetrackoff*,[end]")
+                        : formatCommand(command, "({%s}AR0000000000)", Command.KEY_UNIQUE_ID);
+            case Command.TYPE_ENGINE_STOP:
+                return formatCommand(command, "({%s}AV011)", Command.KEY_UNIQUE_ID);
+            case Command.TYPE_ENGINE_RESUME:
+                return formatCommand(command, "({%s}AV010)", Command.KEY_UNIQUE_ID);
+            case Command.TYPE_CUSTOM:
+                return formatCommand(command, "[begin]sms2,{%s},[end]", Command.KEY_DATA);
+            case Command.TYPE_GET_DEVICE_STATUS:
+                return formatCommand(command, "[begin]sms2,*status*,[end]");
+            case Command.TYPE_IDENTIFICATION:
+                return formatCommand(command, "[begin]sms2,999999,[end]");
+            case Command.TYPE_MODE_DEEP_SLEEP:
+                return formatCommand(command, command.getBoolean(Command.KEY_ENABLE)
+                        ? "[begin]sms2,*sleep*2*,[end]" : "[begin]sms2,*sleepoff*,[end]");
+            case Command.TYPE_MODE_POWER_SAVING:
+                return formatCommand(command, command.getBoolean(Command.KEY_ENABLE)
+                        ? "[begin]sms2,*sleepv*,[end]" : "[begin]sms2,*sleepoff*,[end]");
+            case Command.TYPE_ALARM_SOS:
+                return formatCommand(command, command.getBoolean(Command.KEY_ENABLE)
+                        ? "[begin]sms2,*soson*,[end]" : "[begin]sms2,*sosoff*,[end]");
+            case Command.TYPE_SET_CONNECTION:
+                return formatCommand(command, "[begin]sms2,*setip*%s*{%s}*,[end]",
+                        command.getString(Command.KEY_SERVER).replace(".", "*"), Command.KEY_PORT);
+            case Command.TYPE_SOS_NUMBER:
+                return formatCommand(command, "[begin]sms2,*master*{%s}*{%s}*,[end]",
+                        Command.KEY_DEVICE_PASSWORD, Command.KEY_PHONE);
+            default:
+                Log.warning(new UnsupportedOperationException(command.getType()));
+                break;
         }
 
         return null;
