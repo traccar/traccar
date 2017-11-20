@@ -34,8 +34,8 @@ import com.ning.http.client.FluentCaseInsensitiveStringsMap;
 
 public abstract class EventForwarder {
 
-    private String url;
-    private String header;
+    private final String url;
+    private final String header;
     private final String payloadParamName;
     private final String additionalParams;
 
