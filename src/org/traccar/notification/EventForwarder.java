@@ -20,6 +20,7 @@ import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
@@ -39,7 +40,7 @@ public abstract class EventForwarder {
 
     public EventForwarder() {
         url = Context.getConfig().getString("event.forward.url", "http://localhost/");
-        header = Context.getConfig().getString("event.forward.header", "");
+        header = Context.getConfig().getString("event.forward.header");
     }
 
     private static final String KEY_POSITION = "position";
@@ -54,9 +55,9 @@ public abstract class EventForwarder {
 
         requestBuilder.addHeader("Content-Type", getContentType());
 
-        if (!header.equals("")) {
+        if (StringUtils.isNotEmpty(header)) {
             FluentCaseInsensitiveStringsMap params = new FluentCaseInsensitiveStringsMap();
-            params.putAll(splitParams(header, ":"));
+            params.putAll(splitIntoKeyValues(header, ":"));
             requestBuilder.setHeaders(params);
         }
 
@@ -64,7 +65,7 @@ public abstract class EventForwarder {
         requestBuilder.execute();
     }
 
-    protected Map<String, List<String>> splitParams(String params, String separator) {
+    protected Map<String, List<String>> splitIntoKeyValues(String params, String separator) {
 
         String[] splitedLine;
         Map<String, List<String>> paramsMap = new HashMap<>();

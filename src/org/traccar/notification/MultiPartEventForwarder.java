@@ -1,10 +1,11 @@
 package org.traccar.notification;
 
-import java.nio.charset.StandardCharsets;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang3.StringUtils;
 import org.traccar.Context;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -19,7 +20,7 @@ public class MultiPartEventForwarder extends EventForwarder {
 
     public MultiPartEventForwarder() {
         payloadParamName = Context.getConfig().getString("event.forward.paramMode.payloadParamName", "payload");
-        additionalParams = Context.getConfig().getString("event.forward.paramMode.additionalParams", "");
+        additionalParams = Context.getConfig().getString("event.forward.paramMode.additionalParams");
     }
 
     @Override
@@ -30,18 +31,16 @@ public class MultiPartEventForwarder extends EventForwarder {
     @Override
     protected void setContent(Event event, Position position, BoundRequestBuilder requestBuilder) {
 
-        if (!additionalParams.equals("")) {
-            Map<String, List<String>> paramsToAdd = splitParams(additionalParams, "=");
+        if (StringUtils.isNotEmpty(additionalParams)) {
+            Map<String, List<String>> paramsToAdd = splitIntoKeyValues(additionalParams, "=");
 
-            for (Entry<String, List<String>> en : paramsToAdd.entrySet()) {
-                for (String value : en.getValue()) {
-                    requestBuilder.addBodyPart(new StringPart(en.getKey(), value, null, StandardCharsets.UTF_8));
+            for (Entry<String, List<String>> param : paramsToAdd.entrySet()) {
+                for (String singleParamValue : param.getValue()) {
+                    requestBuilder.addBodyPart(new StringPart(param.getKey(), singleParamValue, null, UTF_8));
                 }
             }
         }
         requestBuilder.addBodyPart(new StringPart(payloadParamName,
-                                                  prepareJsonPayload(event, position),
-                                                  "application/json",
-                                                  StandardCharsets.UTF_8));
+                prepareJsonPayload(event, position), "application/json", UTF_8));
     }
 }
