@@ -17,14 +17,17 @@
 package org.traccar.protocol;
 
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.frame.FrameDecoder;
 
-import java.nio.ByteOrder;
-
 public class Tk103FrameDecoder extends FrameDecoder {
+
+    private static final int FRAME_MIN_SIZE = 2;
+    private static final int FRAME_MAX_SIZE = 1024;
+    private static final byte FRAME_START_SYMBOL = (byte) '(';
+    private static final byte FRAME_END_SYMBOL = (byte) ')';
+    private static final byte FRAME_FREE_TEXT_BLOCK_SYMBOL = (byte) '$';
 
     @Override
     protected Object decode(
@@ -32,20 +35,28 @@ public class Tk103FrameDecoder extends FrameDecoder {
             Channel channel,
             ChannelBuffer buf) throws Exception {
 
-        if (buf.readableBytes() < 2) {
+        if (buf.readableBytes() < FRAME_MIN_SIZE) {
             return null;
         }
 
-        int index;
-        for (index = buf.readerIndex(); true; index++) {
-            index = buf.indexOf(index, buf.writerIndex(), (byte) ')');
+        int indexStart = buf.indexOf(buf.readerIndex(), buf.writerIndex(), FRAME_START_SYMBOL);
+        if (indexStart == -1) {
+            buf.clear();
+            return null;
+        }
+        indexStart++;
+
+        int index, cnt;
+        for (index = indexStart, cnt = 0;; index++) {
+            int i = index;
+            index = buf.indexOf(index, buf.writerIndex(), FRAME_END_SYMBOL);
             if (index == -1) {
                 break;
             }
-            int cnt = 0;
-            for (int i = buf.readerIndex(); i < index; i++) {
-                if (buf.getByte(i) == (byte) '$') {
-                    cnt++;
+            for (;; i++, cnt++) {
+                i = buf.indexOf(i, index, FRAME_FREE_TEXT_BLOCK_SYMBOL);
+                if (i == -1 || i >= index) {
+                    break;
                 }
             }
             if (cnt % 2 == 0) {
@@ -53,14 +64,24 @@ public class Tk103FrameDecoder extends FrameDecoder {
             }
         }
 
-        if (index != -1) {
-            ChannelBuffer result = ChannelBuffers.buffer(ByteOrder.LITTLE_ENDIAN, index + 1 - buf.readerIndex());
-            buf.readBytes(result, index + 1 - buf.readerIndex());
-            result.writerIndex(result.writerIndex() - 1);
-            return result;
+        if (index == -1) {
+            while (buf.readableBytes() > FRAME_MAX_SIZE) {
+                int i = buf.indexOf(buf.readerIndex() + 1, buf.writerIndex(), FRAME_START_SYMBOL);
+                if (i == -1) {
+                    buf.clear();
+                } else {
+                    buf.readerIndex(i);
+                }
+            }
+            return null;
         }
 
-        return null;
+        buf.readerIndex(indexStart);
+        ChannelBuffer result = buf.readBytes(index - indexStart);
+        buf.readerIndex(buf.readerIndex() + 1);
+
+        return result;
+
     }
 
 }
