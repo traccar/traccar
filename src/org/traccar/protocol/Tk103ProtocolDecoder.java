@@ -353,7 +353,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             sentence = sentence.substring(beginIndex + 1);
         }
 
-        if (channel != null && sentence.length() >= 16) {
+        if (channel != null) {
             String id = sentence.substring(0, 12);
             String type = sentence.substring(12, 16);
             if (type.equals("BP00")) {

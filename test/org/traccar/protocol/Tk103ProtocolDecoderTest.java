@@ -159,7 +159,6 @@ public class Tk103ProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "(094050000111BP05000094050000111150808A3804.2418N04616.7468E000.0201447133.3501000011L0028019DT000)"));
 
-        //T580W
         verifyPosition(decoder, text(
                 "(864555555555555,DW3B,131117,A,5544.02870N,01315.08194E,1.597,223707,291.65,-0.10,4)"));
 

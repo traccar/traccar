@@ -40,7 +40,7 @@ public class BaseTest {
             @Override
             public boolean lookupAttributeBoolean(
                     long deviceId, String attributeName, boolean defaultValue, boolean lookupConfig) {
-                return (deviceId == 2 && attributeName == "tk103.alternative" && lookupConfig) ? true : defaultValue;
+                return defaultValue;
             }
 
             @Override

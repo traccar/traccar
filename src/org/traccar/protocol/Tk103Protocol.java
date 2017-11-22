@@ -22,7 +22,6 @@ import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.handler.codec.string.StringDecoder;
 import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
-import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.TrackerServer;
 import org.traccar.model.Command;
 
@@ -56,7 +55,7 @@ public class Tk103Protocol extends BaseProtocol {
         serverList.add(new TrackerServer(new ServerBootstrap(), getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, ')'));
+                pipeline.addLast("frameDecoder", new Tk103FrameDecoder());
                 pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("stringEncoder", new StringEncoder());
                 pipeline.addLast("objectEncoder", new Tk103ProtocolEncoder());
