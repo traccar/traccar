@@ -71,8 +71,8 @@ import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.geolocation.MozillaGeolocationProvider;
 import org.traccar.geolocation.OpenCellIdGeolocationProvider;
 import org.traccar.notification.EventForwarder;
-import org.traccar.notification.FormTypeEventForwarder;
 import org.traccar.notification.JsonTypeEventForwarder;
+import org.traccar.notification.MultiPartEventForwarder;
 import org.traccar.reports.model.TripsConfig;
 import org.traccar.smpp.SmppClient;
 import org.traccar.web.WebServer;
@@ -375,7 +375,7 @@ public final class Context {
 
         if (config.getBoolean("event.forward.enable")) {
             if (Context.getConfig().getBoolean("event.forward.payloadAsParamMode")) {
-                eventForwarder = new FormTypeEventForwarder();
+                eventForwarder = new MultiPartEventForwarder();
             } else {
                 eventForwarder = new JsonTypeEventForwarder();
             }
