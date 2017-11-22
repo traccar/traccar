@@ -528,6 +528,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         if (type == MSG_LBS_MULTIPLE || type == MSG_LBS_EXTEND || type == MSG_LBS_WIFI
                 || type == MSG_LBS_2 || type == MSG_WIFI_3) {
 
+            boolean longFormat = type == MSG_LBS_2 || type == MSG_WIFI_3;
+
             DateBuilder dateBuilder = new DateBuilder(timeZone)
                     .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
                     .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
@@ -538,8 +540,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             int mnc = buf.readUnsignedByte();
             Network network = new Network();
             for (int i = 0; i < 7; i++) {
-                int lac = buf.readUnsignedShort();
-                int cid = buf.readUnsignedMedium();
+                int lac = longFormat ? buf.readInt() : buf.readUnsignedShort();
+                int cid = longFormat ? (int) buf.readLong() : buf.readUnsignedMedium();
                 int rssi = -buf.readUnsignedByte();
                 if (lac > 0) {
                     network.addCellTower(CellTower.from(mcc, mnc, lac, cid, rssi));
