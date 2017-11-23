@@ -23,61 +23,55 @@ import org.jboss.netty.handler.codec.frame.FrameDecoder;
 
 public class Tk103FrameDecoder extends FrameDecoder {
 
-    private static final int FRAME_MIN_SIZE = 2;
-    private static final int FRAME_MAX_SIZE = 1024;
-    private static final byte FRAME_START_SYMBOL = (byte) '(';
-    private static final byte FRAME_END_SYMBOL = (byte) ')';
-    private static final byte FRAME_FREE_TEXT_BLOCK_SYMBOL = (byte) '$';
-
     @Override
     protected Object decode(
             ChannelHandlerContext ctx,
             Channel channel,
             ChannelBuffer buf) throws Exception {
 
-        if (buf.readableBytes() < FRAME_MIN_SIZE) {
+        if (buf.readableBytes() < 2) {
             return null;
         }
 
-        int indexStart = buf.indexOf(buf.readerIndex(), buf.writerIndex(), FRAME_START_SYMBOL);
-        if (indexStart == -1) {
+        int frameStartIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '(');
+        if (frameStartIndex == -1) {
             buf.clear();
             return null;
         }
-        indexStart++;
+        frameStartIndex++;
 
-        int index, cnt;
-        for (index = indexStart, cnt = 0;; index++) {
-            int i = index;
-            index = buf.indexOf(index, buf.writerIndex(), FRAME_END_SYMBOL);
-            if (index == -1) {
+        int frameEndIndex, freeTextSymbolCounter;
+        for (frameEndIndex = frameStartIndex, freeTextSymbolCounter = 0;; frameEndIndex++) {
+            int freeTextIndex = frameEndIndex;
+            frameEndIndex = buf.indexOf(frameEndIndex, buf.writerIndex(), (byte) ')');
+            if (frameEndIndex == -1) {
                 break;
             }
-            for (;; i++, cnt++) {
-                i = buf.indexOf(i, index, FRAME_FREE_TEXT_BLOCK_SYMBOL);
-                if (i == -1 || i >= index) {
+            for (;; freeTextIndex++, freeTextSymbolCounter++) {
+                freeTextIndex = buf.indexOf(freeTextIndex, frameEndIndex, (byte) '$');
+                if (freeTextIndex == -1 || freeTextIndex >= frameEndIndex) {
                     break;
                 }
             }
-            if (cnt % 2 == 0) {
+            if (freeTextSymbolCounter % 2 == 0) {
                 break;
             }
         }
 
-        if (index == -1) {
-            while (buf.readableBytes() > FRAME_MAX_SIZE) {
-                int i = buf.indexOf(buf.readerIndex() + 1, buf.writerIndex(), FRAME_START_SYMBOL);
-                if (i == -1) {
+        if (frameEndIndex == -1) {
+            while (buf.readableBytes() > 1024) {
+                int discardUntilIndex = buf.indexOf(buf.readerIndex() + 1, buf.writerIndex(), (byte) '(');
+                if (discardUntilIndex == -1) {
                     buf.clear();
                 } else {
-                    buf.readerIndex(i);
+                    buf.readerIndex(discardUntilIndex);
                 }
             }
             return null;
         }
 
-        buf.readerIndex(indexStart);
-        ChannelBuffer result = buf.readBytes(index - indexStart);
+        buf.readerIndex(frameStartIndex);
+        ChannelBuffer result = buf.readBytes(frameEndIndex - frameStartIndex);
         buf.readerIndex(buf.readerIndex() + 1);
 
         return result;
