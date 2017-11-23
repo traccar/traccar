@@ -1,11 +1,10 @@
 package org.traccar.notification;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.lang3.StringUtils;
 import org.traccar.Context;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -31,16 +30,17 @@ public class MultiPartEventForwarder extends EventForwarder {
     @Override
     protected void setContent(Event event, Position position, BoundRequestBuilder requestBuilder) {
 
-        if (StringUtils.isNotEmpty(additionalParams)) {
+        if (additionalParams != null && !additionalParams.isEmpty()) {
             Map<String, List<String>> paramsToAdd = splitIntoKeyValues(additionalParams, "=");
 
             for (Entry<String, List<String>> param : paramsToAdd.entrySet()) {
                 for (String singleParamValue : param.getValue()) {
-                    requestBuilder.addBodyPart(new StringPart(param.getKey(), singleParamValue, null, UTF_8));
+                    requestBuilder.addBodyPart(new StringPart(param.getKey(), singleParamValue, null,
+                            StandardCharsets.UTF_8));
                 }
             }
         }
         requestBuilder.addBodyPart(new StringPart(payloadParamName,
-                prepareJsonPayload(event, position), "application/json", UTF_8));
+                prepareJsonPayload(event, position), "application/json", StandardCharsets.UTF_8));
     }
 }

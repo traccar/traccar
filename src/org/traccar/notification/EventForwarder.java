@@ -20,7 +20,6 @@ import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
@@ -55,7 +54,7 @@ public abstract class EventForwarder {
 
         requestBuilder.addHeader("Content-Type", getContentType());
 
-        if (StringUtils.isNotEmpty(header)) {
+        if (header != null && !header.isEmpty()) {
             FluentCaseInsensitiveStringsMap params = new FluentCaseInsensitiveStringsMap();
             params.putAll(splitIntoKeyValues(header, ":"));
             requestBuilder.setHeaders(params);
