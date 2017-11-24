@@ -223,5 +223,6 @@
     <entry key='oko.port'>5152</entry>
     <entry key='ivt401.port'>5153</entry>
     <entry key='sigfox.port'>5154</entry>
+    <entry key='starcom.port'>5155</entry>
 
 </properties>
