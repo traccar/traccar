@@ -265,6 +265,16 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
+        DeviceSession deviceSession = null;
+
+        if (buf.getByte(0) == 'E' && buf.getByte(1) == 'L') {
+            buf.skipBytes(2 + 2 + 2); // udp header
+            deviceSession = getDeviceSession(
+                    channel, remoteAddress, ChannelBuffers.hexDump(buf.readBytes(8)).substring(1));
+        } else {
+            deviceSession = getDeviceSession(channel, remoteAddress);
+        }
+
         buf.skipBytes(2); // header
         int type = buf.readUnsignedByte();
         buf.readShort(); // length
@@ -276,11 +286,12 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
         if (type == MSG_LOGIN) {
 
-            getDeviceSession(channel, remoteAddress, ChannelBuffers.hexDump(buf.readBytes(8)).substring(1));
+            if (deviceSession == null) {
+                getDeviceSession(channel, remoteAddress, ChannelBuffers.hexDump(buf.readBytes(8)).substring(1));
+            }
 
         } else {
 
-            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
             if (deviceSession == null) {
                 return null;
             }
