@@ -9,7 +9,7 @@ public class EelinkProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        EelinkProtocolEncoder encoder = new EelinkProtocolEncoder();
+        EelinkProtocolEncoder encoder = new EelinkProtocolEncoder(false);
         
         Command command = new Command();
         command.setDeviceId(1);

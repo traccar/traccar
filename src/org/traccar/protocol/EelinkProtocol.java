@@ -31,6 +31,7 @@ public class EelinkProtocol extends BaseProtocol {
         super("eelink");
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM,
+                Command.TYPE_POSITION_SINGLE,
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME,
                 Command.TYPE_REBOOT_DEVICE);
@@ -42,14 +43,14 @@ public class EelinkProtocol extends BaseProtocol {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 3, 2));
-                pipeline.addLast("objectEncoder", new EelinkProtocolEncoder());
+                pipeline.addLast("objectEncoder", new EelinkProtocolEncoder(false));
                 pipeline.addLast("objectDecoder", new EelinkProtocolDecoder(EelinkProtocol.this));
             }
         });
         serverList.add(new TrackerServer(new ConnectionlessBootstrap(), getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                pipeline.addLast("objectEncoder", new EelinkProtocolEncoder());
+                pipeline.addLast("objectEncoder", new EelinkProtocolEncoder(true));
                 pipeline.addLast("objectDecoder", new EelinkProtocolDecoder(EelinkProtocol.this));
             }
         });
