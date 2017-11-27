@@ -70,7 +70,7 @@ public class TmgProtocolDecoder extends BaseProtocolDecoder {
             .number("[^,]*,")                    // cid
             .number("(d+),")                     // rssi
             .number("(d+),")                     // satellites
-            .number("(d+),")                     // battery level
+            .number("[^,]*,")                    // battery level
             .expression("([01]),")               // ignition
             .expression("[LH]{4},")              // input
             .expression("[NT]{4},")              // tamper status
@@ -166,11 +166,10 @@ public class TmgProtocolDecoder extends BaseProtocolDecoder {
 
         }
 
-        if (parser.hasNext()) {
+        if (parser.hasNext(6)) {
 
             position.set(Position.KEY_RSSI, parser.nextInt());
             position.set(Position.KEY_SATELLITES, parser.nextInt());
-            position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
             position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
             position.set(Position.PREFIX_ADC + 1, parser.nextDouble());
             position.set(Position.PREFIX_ADC + 2, parser.nextDouble());
