@@ -307,7 +307,7 @@ public class DataManager {
                 .executeQuerySingle(User.class);
         LdapProvider ldapProvider = Context.getLdapProvider();
         if (user != null) {
-            if (ldapProvider != null && ldapProvider.login(user.getLogin(), password)
+            if (ldapProvider != null && user.getLogin() != null && ldapProvider.login(user.getLogin(), password)
                     || !forceLdap && user.isPasswordValid(password)) {
                 return user;
             }
