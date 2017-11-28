@@ -518,7 +518,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             position.setProtocol(getProtocolName());
             position.set(Position.KEY_INDEX, index);
 
-            if (type == MSG_GPS || type == MSG_ALARM || type == MSG_STATE || type == MSG_SMS){
+            if (type == MSG_GPS || type == MSG_ALARM || type == MSG_STATE || type == MSG_SMS) {
                 return decodeOld(buf, channel, position, type, index);
             } else if (type == MSG_DOWNLINK) {
                 return decodeDownlink(buf, position, index);

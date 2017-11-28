@@ -91,7 +91,8 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
             case Command.TYPE_GET_DEVICE_STATUS:
                 return encodeContent(command.getDeviceId(), "STATUS#");
             case Command.TYPE_POSITION_PERIODIC:
-                return encodeContent(command.getDeviceId(), "TIMER," + command.getInteger(Command.KEY_FREQUENCY) + ",1#");
+                return encodeContent(command.getDeviceId(), "TIMER,"
+                        + command.getInteger(Command.KEY_FREQUENCY) + ",1#");
             case Command.TYPE_POSITION_STOP:
                 return encodeContent(command.getDeviceId(), "TIMER,0,0#");
             case Command.TYPE_OUTPUT_CONTROL:
@@ -107,7 +108,8 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
                 return encodeContent(command.getDeviceId(), "PORT," + state + "," + mask + "#");
             case Command.TYPE_SET_TIMEZONE:
                 int tz = command.getInteger(Command.KEY_TIMEZONE);
-                return encodeContent(command.getDeviceId(), "GMT," + (tz < 0 ? "E" : "W") + "," + (tz / 3600 / 60) + "#");
+                return encodeContent(command.getDeviceId(), "GMT,"
+                        + (tz < 0 ? "E" : "W") + "," + (tz / 3600 / 60) + "#");
             case Command.TYPE_SOS_NUMBER:
                 String sosPhoneNumber = command.getString(Command.KEY_DATA);
                 if (sosPhoneNumber != null && !sosPhoneNumber.isEmpty()) {
