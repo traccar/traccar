@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,8 @@ public class GoogleGeocoder extends JsonGeocoder {
         return url;
     }
 
-    public GoogleGeocoder(String key, String language, int cacheSize) {
-        super(formatUrl(key, language), cacheSize);
+    public GoogleGeocoder(String key, String language, int cacheSize, AddressFormat addressFormat) {
+        super(formatUrl(key, language), cacheSize, addressFormat);
     }
 
     @Override

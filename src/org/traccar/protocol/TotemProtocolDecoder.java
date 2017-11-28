@@ -131,7 +131,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN4 = new PatternBuilder()
             .text("$$")                          // header
             .number("dddd")                      // length
-            .text("AA")                          // type
+            .expression("A[ABC]")                // type
             .number("(d+)|")                     // imei
             .number("(x{8})")                    // status
             .number("(dd)(dd)(dd)")              // date (yymmdd)
@@ -182,15 +182,138 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private boolean decode12(Position position, Parser parser, Pattern pattern) {
+
+        if (parser.hasNext()) {
+            position.set(Position.KEY_ALARM, decodeAlarm(Short.parseShort(parser.next(), 16)));
+        }
+        DateBuilder dateBuilder = new DateBuilder();
+        int year = 0, month = 0, day = 0;
+        if (pattern == PATTERN2) {
+            day   = parser.nextInt(0);
+            month = parser.nextInt(0);
+            year  = parser.nextInt(0);
+        }
+        dateBuilder.setTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
+
+        position.setValid(parser.next().equals("A"));
+        position.setLatitude(parser.nextCoordinate());
+        position.setLongitude(parser.nextCoordinate());
+        position.setSpeed(parser.nextDouble(0));
+        position.setCourse(parser.nextDouble(0));
+
+        if (pattern == PATTERN1) {
+            day   = parser.nextInt(0);
+            month = parser.nextInt(0);
+            year  = parser.nextInt(0);
+        }
+        if (year == 0) {
+            return false; // ignore invalid data
+        }
+        dateBuilder.setDate(year, month, day);
+        position.setTime(dateBuilder.getDate());
+
+        if (pattern == PATTERN1) {
+            position.set(Position.KEY_PDOP, parser.nextDouble());
+            position.set(Position.KEY_HDOP, parser.nextDouble());
+            position.set(Position.KEY_VDOP, parser.nextDouble());
+        } else {
+            position.set(Position.KEY_HDOP, parser.nextDouble());
+        }
+
+        position.set(Position.PREFIX_IO + 1, parser.next());
+        if (pattern == PATTERN1) {
+            position.set(Position.KEY_BATTERY, parser.nextDouble(0) * 0.01);
+        } else {
+            position.set(Position.KEY_BATTERY, parser.nextDouble(0) * 0.1);
+        }
+        position.set(Position.KEY_POWER, parser.nextDouble(0));
+        position.set(Position.PREFIX_ADC + 1, parser.next());
+
+        int lac = parser.nextHexInt(0);
+        int cid = parser.nextHexInt(0);
+        if (lac != 0 && cid != 0) {
+            position.setNetwork(new Network(CellTower.fromLacCid(lac, cid)));
+        }
+
+        position.set(Position.PREFIX_TEMP + 1, parser.next());
+        position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1000);
+
+        return true;
+    }
+
+    private boolean decode3(Position position, Parser parser) {
+
+        if (parser.hasNext()) {
+            position.set(Position.KEY_ALARM, decodeAlarm(Short.parseShort(parser.next(), 16)));
+        }
+
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
+
+        position.set(Position.PREFIX_IO + 1, parser.next());
+        position.set(Position.KEY_BATTERY, parser.nextDouble(0) * 0.1);
+        position.set(Position.KEY_POWER, parser.nextDouble(0));
+        position.set(Position.PREFIX_ADC + 1, parser.next());
+        position.set(Position.PREFIX_ADC + 2, parser.next());
+        position.set(Position.PREFIX_TEMP + 1, parser.next());
+        position.set(Position.PREFIX_TEMP + 2, parser.next());
+
+        position.setNetwork(new Network(
+                CellTower.fromLacCid(parser.nextHexInt(0), parser.nextHexInt(0))));
+
+        position.setValid(parser.next().equals("A"));
+        position.set(Position.KEY_SATELLITES, parser.nextInt());
+        position.setCourse(parser.nextDouble(0));
+        position.setSpeed(parser.nextDouble(0));
+        position.set(Position.KEY_PDOP, parser.nextDouble());
+        position.set(Position.KEY_ODOMETER, parser.nextInt(0) * 1000);
+
+        position.setLatitude(parser.nextCoordinate());
+        position.setLongitude(parser.nextCoordinate());
+
+        return true;
+    }
+
+    private boolean decode4(Position position, Parser parser) {
+
+        position.set(Position.KEY_STATUS, parser.next());
+
+        position.setTime(parser.nextDateTime());
+
+        position.set(Position.KEY_BATTERY, parser.nextDouble(0) * 0.1);
+        position.set(Position.KEY_POWER, parser.nextDouble(0));
+
+        position.set(Position.PREFIX_ADC + 1, parser.next());
+        position.set(Position.PREFIX_ADC + 2, parser.next());
+        position.set(Position.PREFIX_ADC + 3, parser.next());
+        position.set(Position.PREFIX_ADC + 4, parser.next());
+        position.set(Position.PREFIX_TEMP + 1, parser.next());
+        position.set(Position.PREFIX_TEMP + 2, parser.next());
+
+        CellTower cellTower = CellTower.fromLacCid(parser.nextHexInt(0), parser.nextHexInt(0));
+        position.set(Position.KEY_SATELLITES, parser.nextInt(0));
+        cellTower.setSignalStrength(parser.nextInt(0));
+        position.setNetwork(new Network(cellTower));
+
+        position.setCourse(parser.nextDouble(0));
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
+        position.set(Position.KEY_HDOP, parser.nextDouble(0));
+        position.set(Position.KEY_ODOMETER, parser.nextInt(0) * 1000);
+
+        position.setValid(true);
+        position.setLatitude(parser.nextCoordinate());
+        position.setLongitude(parser.nextCoordinate());
+
+        return true;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         String sentence = (String) msg;
-
-        // Determine format
         Pattern pattern = PATTERN3;
-        if (sentence.indexOf("AA") == 6) {
+        if (sentence.indexOf("A") == 6) {
             pattern = PATTERN4;
         } else if (sentence.contains("$GPRMC")) {
             pattern = PATTERN1;
@@ -215,123 +338,24 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(deviceSession.getDeviceId());
 
+        boolean result;
         if (pattern == PATTERN1 || pattern == PATTERN2) {
-            if (parser.hasNext()) {
-                position.set(Position.KEY_ALARM, decodeAlarm(Short.parseShort(parser.next(), 16)));
-            }
-            DateBuilder dateBuilder = new DateBuilder();
-            int year = 0, month = 0, day = 0;
-            if (pattern == PATTERN2) {
-                day   = parser.nextInt(0);
-                month = parser.nextInt(0);
-                year  = parser.nextInt(0);
-            }
-            dateBuilder.setTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
-
-            position.setValid(parser.next().equals("A"));
-            position.setLatitude(parser.nextCoordinate());
-            position.setLongitude(parser.nextCoordinate());
-            position.setSpeed(parser.nextDouble(0));
-            position.setCourse(parser.nextDouble(0));
-
-            if (pattern == PATTERN1) {
-                day   = parser.nextInt(0);
-                month = parser.nextInt(0);
-                year  = parser.nextInt(0);
-            }
-            if (year == 0) {
-                return null; // ignore invalid data
-            }
-            dateBuilder.setDate(year, month, day);
-            position.setTime(dateBuilder.getDate());
-
-            if (pattern == PATTERN1) {
-                position.set(Position.KEY_PDOP, parser.nextDouble());
-                position.set(Position.KEY_HDOP, parser.nextDouble());
-                position.set(Position.KEY_VDOP, parser.nextDouble());
-            } else {
-                position.set(Position.KEY_HDOP, parser.nextDouble());
-            }
-
-            position.set(Position.PREFIX_IO + 1, parser.next());
-            if (pattern == PATTERN1) {
-                position.set(Position.KEY_BATTERY, parser.nextDouble(0) * 0.01);
-            } else {
-                position.set(Position.KEY_BATTERY, parser.nextDouble(0) * 0.1);
-            }
-            position.set(Position.KEY_POWER, parser.nextDouble(0));
-            position.set(Position.PREFIX_ADC + 1, parser.next());
-
-            int lac = parser.nextHexInt(0);
-            int cid = parser.nextHexInt(0);
-            if (lac != 0 && cid != 0) {
-                position.setNetwork(new Network(CellTower.fromLacCid(lac, cid)));
-            }
-
-            position.set(Position.PREFIX_TEMP + 1, parser.next());
-            position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1000);
-
+            result = decode12(position, parser, pattern);
         } else if (pattern == PATTERN3) {
-            if (parser.hasNext()) {
-                position.set(Position.KEY_ALARM, decodeAlarm(Short.parseShort(parser.next(), 16)));
-            }
-
-            position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
-
-            position.set(Position.PREFIX_IO + 1, parser.next());
-            position.set(Position.KEY_BATTERY, parser.nextDouble(0) * 0.1);
-            position.set(Position.KEY_POWER, parser.nextDouble(0));
-            position.set(Position.PREFIX_ADC + 1, parser.next());
-            position.set(Position.PREFIX_ADC + 2, parser.next());
-            position.set(Position.PREFIX_TEMP + 1, parser.next());
-            position.set(Position.PREFIX_TEMP + 2, parser.next());
-
-            position.setNetwork(new Network(
-                    CellTower.fromLacCid(parser.nextHexInt(0), parser.nextHexInt(0))));
-
-            position.setValid(parser.next().equals("A"));
-            position.set(Position.KEY_SATELLITES, parser.nextInt());
-            position.setCourse(parser.nextDouble(0));
-            position.setSpeed(parser.nextDouble(0));
-            position.set(Position.KEY_PDOP, parser.nextDouble());
-            position.set(Position.KEY_ODOMETER, parser.nextInt(0) * 1000);
-
-            position.setLatitude(parser.nextCoordinate());
-            position.setLongitude(parser.nextCoordinate());
-
-        } else if (pattern == PATTERN4) {
-            position.set(Position.KEY_STATUS, parser.next());
-
-            position.setTime(parser.nextDateTime());
-
-            position.set(Position.KEY_BATTERY, parser.nextDouble(0) * 0.1);
-            position.set(Position.KEY_POWER, parser.nextDouble(0));
-
-            position.set(Position.PREFIX_ADC + 1, parser.next());
-            position.set(Position.PREFIX_ADC + 2, parser.next());
-            position.set(Position.PREFIX_ADC + 3, parser.next());
-            position.set(Position.PREFIX_ADC + 4, parser.next());
-            position.set(Position.PREFIX_TEMP + 1, parser.next());
-            position.set(Position.PREFIX_TEMP + 2, parser.next());
-
-            CellTower cellTower = CellTower.fromLacCid(parser.nextHexInt(0), parser.nextHexInt(0));
-            position.set(Position.KEY_SATELLITES, parser.nextInt(0));
-            cellTower.setSignalStrength(parser.nextInt(0));
-            position.setNetwork(new Network(cellTower));
-
-            position.setCourse(parser.nextDouble(0));
-            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
-            position.set(Position.KEY_HDOP, parser.nextDouble(0));
-            position.set(Position.KEY_ODOMETER, parser.nextInt(0) * 1000);
-
-            position.setValid(true);
-            position.setLatitude(parser.nextCoordinate());
-            position.setLongitude(parser.nextCoordinate());
+            result = decode3(position, parser);
+        } else {
+            result = decode4(position, parser);
         }
+
         if (channel != null) {
-            channel.write("ACK OK\r\n");
+            if (pattern == PATTERN4) {
+                channel.write("$$0014AA" + sentence.substring(sentence.length() - 6));
+            } else {
+                channel.write("ACK OK\r\n");
+            }
         }
-        return position;
+
+        return result ? position : null;
     }
 
 }

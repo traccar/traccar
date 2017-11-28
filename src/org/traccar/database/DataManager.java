@@ -40,6 +40,7 @@ import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 
 import org.traccar.Config;
+import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Attribute;
 import org.traccar.model.Device;
@@ -75,8 +76,12 @@ public class DataManager {
 
     private boolean generateQueries;
 
+    private boolean forceLdap;
+
     public DataManager(Config config) throws Exception {
         this.config = config;
+
+        forceLdap = config.getBoolean("ldap.force");
 
         initDatabase();
         initDatabaseSchema();
@@ -300,11 +305,20 @@ public class DataManager {
         User user = QueryBuilder.create(dataSource, getQuery("database.loginUser"))
                 .setString("email", email.trim())
                 .executeQuerySingle(User.class);
-        if (user != null && user.isPasswordValid(password)) {
-            return user;
+        LdapProvider ldapProvider = Context.getLdapProvider();
+        if (user != null) {
+            if (ldapProvider != null && user.getLogin() != null && ldapProvider.login(user.getLogin(), password)
+                    || !forceLdap && user.isPasswordValid(password)) {
+                return user;
+            }
         } else {
-            return null;
+            if (ldapProvider != null && ldapProvider.login(email, password)) {
+                user = ldapProvider.getUser(email);
+                Context.getUsersManager().addItem(user);
+                return user;
+            }
         }
+        return null;
     }
 
     public void updateDeviceStatus(Device device) throws SQLException {

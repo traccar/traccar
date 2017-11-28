@@ -35,7 +35,7 @@
  
     <entry key='database.loginUser'>
         SELECT * FROM users
-        WHERE email = :email
+        WHERE email = :email OR login = :email
     </entry>
 
     <entry key='database.selectPositions'>
@@ -217,5 +217,11 @@
     <entry key='tlv.port'>5146</entry>
     <entry key='esky.port'>5147</entry>
     <entry key='genx.port'>5148</entry>
+    <entry key='flespi.port'>5149</entry>
+    <entry key='dway.port'>5150</entry>
+    <entry key='recoda.port'>5151</entry>
+    <entry key='oko.port'>5152</entry>
+    <entry key='ivt401.port'>5153</entry>
+    <entry key='sigfox.port'>5154</entry>
 
 </properties>

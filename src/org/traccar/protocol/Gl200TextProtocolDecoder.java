@@ -31,8 +31,12 @@ import org.traccar.model.WifiAccessPoint;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -216,7 +220,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("(d{1,7}.d)?,")              // odometer
             .number("(d{5}:dd:dd)?,")            // hour meter
             .number("(x+)?,")                    // adc 1
-            .number("(x+)?,")                    // adc 2
+            .number("(x+)?,").optional()         // adc 2
             .number("(d{1,3})?,")                // battery
             .number("(?:(xx)(xx)(xx))?,")        // device status
             .expression("(.*)")                  // additional data
@@ -519,6 +523,131 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1000);
 
         decodeDeviceTime(position, parser);
+
+        return position;
+    }
+
+    private Object decodeCan(Channel channel, SocketAddress remoteAddress, String sentence) throws ParseException {
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
+
+        int index = 0;
+        String[] values = sentence.split(",");
+
+        index += 1; // header
+        index += 1; // protocol version
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, values[index++]);
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        index += 1; // device name
+        index += 1; // report type
+        index += 1; // canbus state
+        long reportMask = Long.parseLong(values[index++], 16);
+
+        if (BitUtil.check(reportMask, 0)) {
+            position.set(Position.KEY_VIN, values[index++]);
+        }
+        if (BitUtil.check(reportMask, 1)) {
+            position.set(Position.KEY_IGNITION, Integer.parseInt(values[index++]) > 0);
+        }
+        if (BitUtil.check(reportMask, 2)) {
+            index += 1; // total distance
+        }
+        if (BitUtil.check(reportMask, 3)) {
+            position.set("totalFuelConsumption", Double.parseDouble(values[index++]));
+        }
+        if (BitUtil.check(reportMask, 5)) {
+            position.set(Position.KEY_RPM, Integer.parseInt(values[index++]));
+        }
+        if (BitUtil.check(reportMask, 4)) {
+            position.set(Position.KEY_OBD_SPEED, UnitsConverter.knotsFromKph(Integer.parseInt(values[index++])));
+        }
+        if (BitUtil.check(reportMask, 6)) {
+            position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(values[index++]));
+        }
+        if (BitUtil.check(reportMask, 7)) {
+            index += 1; // fuel consumption
+        }
+        if (BitUtil.check(reportMask, 8)) {
+            index += 1; // fuel level
+        }
+        if (BitUtil.check(reportMask, 9)) {
+            index += 1; // range
+        }
+        if (BitUtil.check(reportMask, 10)) {
+            if (!values[index++].isEmpty()) {
+                position.set(Position.KEY_THROTTLE, Integer.parseInt(values[index - 1]));
+            }
+        }
+        if (BitUtil.check(reportMask, 11)) {
+            position.set(Position.KEY_HOURS, Double.parseDouble(values[index++]));
+        }
+        if (BitUtil.check(reportMask, 12)) {
+            index += 1; // driving time
+        }
+        if (BitUtil.check(reportMask, 13)) {
+            index += 1; // idle time
+        }
+        if (BitUtil.check(reportMask, 14)) {
+            index += 1; // idle fuel
+        }
+        if (BitUtil.check(reportMask, 15)) {
+            index += 1; // axle weight
+        }
+        if (BitUtil.check(reportMask, 16)) {
+            index += 1; // tachograph info
+        }
+        if (BitUtil.check(reportMask, 17)) {
+            index += 1; // indicators
+        }
+        if (BitUtil.check(reportMask, 18)) {
+            index += 1; // lights
+        }
+        if (BitUtil.check(reportMask, 19)) {
+            index += 1; // doors
+        }
+        if (BitUtil.check(reportMask, 20)) {
+            index += 1; // total vehicle overspeed time
+        }
+        if (BitUtil.check(reportMask, 21)) {
+            index += 1; // total engine overspeed time
+        }
+        if (BitUtil.check(reportMask, 29)) {
+            index += 1; // expansion
+        }
+
+        DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        if (BitUtil.check(reportMask, 30)) {
+            position.setValid(Integer.parseInt(values[index++]) > 0);
+            if (!values[index].isEmpty()) {
+                position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(values[index++])));
+                position.setCourse(Integer.parseInt(values[index++]));
+                position.setAltitude(Double.parseDouble(values[index++]));
+                position.setLongitude(Double.parseDouble(values[index++]));
+                position.setLatitude(Double.parseDouble(values[index++]));
+                position.setTime(dateFormat.parse(values[index++]));
+            } else {
+                index += 6; // no location
+                getLastLocation(position, null);
+            }
+        } else {
+            getLastLocation(position, null);
+        }
+
+        if (BitUtil.check(reportMask, 31)) {
+            index += 4; // cell
+        }
+
+        index += 1; // reserved
+
+        if (ignoreFixTime) {
+            position.setTime(dateFormat.parse(values[index]));
+        } else {
+            position.setDeviceTime(dateFormat.parse(values[index]));
+        }
 
         return position;
     }
@@ -868,6 +997,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case "OBD":
                     result = decodeObd(channel, remoteAddress, sentence);
+                    break;
+                case "CAN":
+                    result = decodeCan(channel, remoteAddress, sentence);
                     break;
                 case "FRI":
                     result = decodeFri(channel, remoteAddress, sentence);

@@ -168,10 +168,18 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_BATTERY, parser.nextDouble());
 
         if (parser.hasNext(6)) {
-            long status = parser.nextLong(16, 0);
-            position.set(Position.KEY_IGNITION, BitUtil.check(status, 13));
-            position.set(Position.KEY_STATUS, status);
-            position.set("ioStatus", parser.next());
+            position.set(Position.KEY_STATUS, parser.nextHexLong());
+            Integer io = parser.nextHexInt();
+            if (io != null) {
+                position.set(Position.KEY_IGNITION, BitUtil.check(io, 0));
+                position.set(Position.PREFIX_IN + 1, BitUtil.check(io, 1));
+                position.set(Position.PREFIX_IN + 2, BitUtil.check(io, 2));
+                position.set(Position.PREFIX_IN + 3, BitUtil.check(io, 3));
+                position.set(Position.PREFIX_IN + 4, BitUtil.check(io, 4));
+                position.set(Position.PREFIX_OUT + 1, BitUtil.check(io, 5));
+                position.set(Position.PREFIX_OUT + 2, BitUtil.check(io, 6));
+                position.set(Position.PREFIX_OUT + 3, BitUtil.check(io, 7));
+            }
             position.set(Position.KEY_GEOFENCE, parser.next() + parser.next());
             position.set("eventStatus", parser.next());
             position.set("packetType", parser.next());

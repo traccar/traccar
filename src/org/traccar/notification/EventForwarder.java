@@ -17,6 +17,9 @@ package org.traccar.notification;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
+import java.util.Arrays;
+import java.util.List;
+
 import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
@@ -27,15 +30,16 @@ import org.traccar.model.Position;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import com.ning.http.client.FluentCaseInsensitiveStringsMap;
 
-public final class EventForwarder {
+public abstract class EventForwarder {
 
-    private String url;
-    private String header;
+    private final String url;
+    private final String header;
 
     public EventForwarder() {
         url = Context.getConfig().getString("event.forward.url", "http://localhost/");
-        header = Context.getConfig().getString("event.forward.header", "");
+        header = Context.getConfig().getString("event.forward.header");
     }
 
     private static final String KEY_POSITION = "position";
@@ -43,26 +47,39 @@ public final class EventForwarder {
     private static final String KEY_GEOFENCE = "geofence";
     private static final String KEY_DEVICE = "device";
 
-    public void forwardEvent(Event event, Position position) {
+    public final void forwardEvent(Event event, Position position) {
 
         BoundRequestBuilder requestBuilder = Context.getAsyncHttpClient().preparePost(url);
+        requestBuilder.setBodyEncoding(StandardCharsets.UTF_8.name());
 
-        requestBuilder.addHeader("Content-Type", "application/json; charset=utf-8");
-        if (!header.equals("")) {
-            String[] headerLines = header.split("\\r?\\n");
-            for (String headerLine: headerLines) {
-                String[] splitedLine = headerLine.split(":", 2);
-                if (splitedLine.length == 2) {
-                    requestBuilder.setHeader(splitedLine[0].trim(), splitedLine[1].trim());
-                }
-            }
+        requestBuilder.addHeader("Content-Type", getContentType());
+
+        if (header != null && !header.isEmpty()) {
+            FluentCaseInsensitiveStringsMap params = new FluentCaseInsensitiveStringsMap();
+            params.putAll(splitIntoKeyValues(header, ":"));
+            requestBuilder.setHeaders(params);
         }
 
-        requestBuilder.setBody(preparePayload(event, position));
+        setContent(event, position, requestBuilder);
         requestBuilder.execute();
     }
 
-    private byte[] preparePayload(Event event, Position position) {
+    protected Map<String, List<String>> splitIntoKeyValues(String params, String separator) {
+
+        String[] splitedLine;
+        Map<String, List<String>> paramsMap = new HashMap<>();
+        String[] paramsLines = params.split("\\r?\\n");
+
+        for (String paramLine: paramsLines) {
+            splitedLine = paramLine.split(separator, 2);
+            if (splitedLine.length == 2) {
+                paramsMap.put(splitedLine[0].trim(), Arrays.asList(splitedLine[1].trim()));
+            }
+        }
+        return paramsMap;
+    }
+
+    protected String prepareJsonPayload(Event event, Position position) {
         Map<String, Object> data = new HashMap<>();
         data.put(KEY_EVENT, event);
         if (position != null) {
@@ -81,11 +98,14 @@ public final class EventForwarder {
             }
         }
         try {
-            return Context.getObjectMapper().writeValueAsString(data).getBytes(StandardCharsets.UTF_8);
+            return Context.getObjectMapper().writeValueAsString(data);
         } catch (JsonProcessingException e) {
             Log.warning(e);
             return null;
         }
     }
+
+    protected abstract String getContentType();
+    protected abstract void setContent(Event event, Position position, BoundRequestBuilder requestBuilder);
 
 }

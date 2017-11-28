@@ -27,12 +27,13 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class StatisticsManager {
 
     private static final int SPLIT_MODE = Calendar.DAY_OF_MONTH;
 
-    private int lastUpdate = Calendar.getInstance().get(SPLIT_MODE);
+    private AtomicInteger lastUpdate = new AtomicInteger(Calendar.getInstance().get(SPLIT_MODE));
 
     private Set<Long> users = new HashSet<>();
     private Set<Long> devices = new HashSet<>();
@@ -47,7 +48,7 @@ public class StatisticsManager {
 
     private void checkSplit() {
         int currentUpdate = Calendar.getInstance().get(SPLIT_MODE);
-        if (lastUpdate != currentUpdate) {
+        if (lastUpdate.getAndSet(currentUpdate) != currentUpdate) {
             Statistics statistics = new Statistics();
             statistics.setCaptureTime(new Date());
             statistics.setActiveUsers(users.size());
@@ -96,7 +97,6 @@ public class StatisticsManager {
             smsSent = 0;
             geocoderRequests = 0;
             geolocationRequests = 0;
-            lastUpdate = currentUpdate;
         }
     }
 

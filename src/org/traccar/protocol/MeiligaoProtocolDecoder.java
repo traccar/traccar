@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,8 @@ import org.traccar.model.Position;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
@@ -55,11 +57,21 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             .number("|(xxxx)?")                  // state
             .groupBegin()
             .number("|(xxxx),(xxxx)")            // adc
-            .number("(?:,(xxxx),(xxxx),(xxxx),(xxxx),(xxxx),(xxxx))?")
+            .number(",(xxxx)").optional()
+            .number(",(xxxx)").optional()
+            .number(",(xxxx)").optional()
+            .number(",(xxxx)").optional()
+            .number(",(xxxx)").optional()
+            .number(",(xxxx)").optional()
             .groupBegin()
-            .number("|x{16}")                    // cell
-            .number("|(xx)")                     // gsm
+            .number("|x{16,20}")                 // cell
+            .number("|(xx)")                     // rssi
             .number("|(x{8})")                   // odometer
+            .groupBegin()
+            .number("|(xx)")                     // satellites
+            .text("|")
+            .expression("(.*)")                  // driver
+            .groupEnd("?")
             .or()
             .number("|(x{9})")                   // odometer
             .groupBegin()
@@ -118,6 +130,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_POSITION_LOGGED = 0x9016;
     public static final int MSG_ALARM = 0x9999;
     public static final int MSG_RFID = 0x9966;
+    public static final int MSG_RETRANSMISSION = 0x6688;
 
     public static final int MSG_OBD_RT = 0x9901;
     public static final int MSG_OBD_RTA = 0x9902;
@@ -242,25 +255,15 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_STATUS, parser.next());
 
         for (int i = 1; i <= 8; i++) {
-            if (parser.hasNext()) {
-                position.set(Position.PREFIX_ADC + i, parser.nextHexInt(0));
-            }
+            position.set(Position.PREFIX_ADC + i, parser.nextHexInt());
         }
 
-        if (parser.hasNext()) {
-            position.set(Position.KEY_RSSI, parser.nextHexInt(0));
-        }
-
-        if (parser.hasNext()) {
-            position.set(Position.KEY_ODOMETER, parser.nextLong(16, 0));
-        }
-        if (parser.hasNext()) {
-            position.set(Position.KEY_ODOMETER, parser.nextLong(16, 0));
-        }
-
-        if (parser.hasNext()) {
-            position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(parser.nextHexInt(0)));
-        }
+        position.set(Position.KEY_RSSI, parser.nextHexInt());
+        position.set(Position.KEY_ODOMETER, parser.nextHexLong());
+        position.set(Position.KEY_SATELLITES, parser.nextHexInt());
+        position.set("driverLicense", parser.next());
+        position.set(Position.KEY_ODOMETER, parser.nextHexLong());
+        position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
 
         return position;
     }
@@ -328,6 +331,40 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private List<Position> decodeRetransmission(ChannelBuffer buf, DeviceSession deviceSession) {
+        List<Position> positions = new LinkedList<>();
+
+        int count = buf.readUnsignedByte();
+        for (int i = 0; i < count; i++) {
+
+            buf.readUnsignedByte(); // alarm
+
+            int endIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '\\');
+            if (endIndex < 0) {
+                endIndex = buf.writerIndex() - 4;
+            }
+
+            String sentence = buf.readBytes(endIndex - buf.readerIndex()).toString(StandardCharsets.US_ASCII);
+
+            Position position = new Position();
+            position.setProtocol(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            position = decodeRegular(position, sentence);
+
+            if (position != null) {
+                positions.add(position);
+            }
+
+            if (buf.readableBytes() > 4) {
+                buf.readUnsignedByte(); // delimiter
+            }
+
+        }
+
+        return positions;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -355,48 +392,57 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
-
-        if (command == MSG_ALARM) {
-            short alarmCode = buf.readUnsignedByte();
-            position.set(Position.KEY_ALARM, decodeAlarm(alarmCode));
-            if (alarmCode >= 0x02 && alarmCode <= 0x05) {
-                position.set(Position.PREFIX_IN + alarmCode, 1);
-            } else if (alarmCode >= 0x32 && alarmCode <= 0x35) {
-                position.set(Position.PREFIX_IN + (alarmCode - 0x30), 0);
-            }
-        } else if (command == MSG_POSITION_LOGGED) {
-            buf.skipBytes(6);
-        }
-
         DeviceSession deviceSession = identify(id, channel, remoteAddress);
         if (deviceSession == null) {
             return null;
         }
-        position.setDeviceId(deviceSession.getDeviceId());
 
-        if (command == MSG_RFID) {
-            for (int i = 0; i < 15; i++) {
-                long rfid = buf.readUnsignedInt();
-                if (rfid != 0) {
-                    String card = String.format("%010d", rfid);
-                    position.set("card" + (i + 1), card);
-                    position.set(Position.KEY_DRIVER_UNIQUE_ID, card);
+        if (command == MSG_RETRANSMISSION) {
+
+            return decodeRetransmission(buf, deviceSession);
+
+        } else {
+
+            Position position = new Position();
+            position.setProtocol(getProtocolName());
+
+            if (command == MSG_ALARM) {
+                short alarmCode = buf.readUnsignedByte();
+                position.set(Position.KEY_ALARM, decodeAlarm(alarmCode));
+                if (alarmCode >= 0x02 && alarmCode <= 0x05) {
+                    position.set(Position.PREFIX_IN + alarmCode, 1);
+                } else if (alarmCode >= 0x32 && alarmCode <= 0x35) {
+                    position.set(Position.PREFIX_IN + (alarmCode - 0x30), 0);
+                }
+            } else if (command == MSG_POSITION_LOGGED) {
+                buf.skipBytes(6);
+            }
+
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            if (command == MSG_RFID) {
+                for (int i = 0; i < 15; i++) {
+                    long rfid = buf.readUnsignedInt();
+                    if (rfid != 0) {
+                        String card = String.format("%010d", rfid);
+                        position.set("card" + (i + 1), card);
+                        position.set(Position.KEY_DRIVER_UNIQUE_ID, card);
+                    }
                 }
             }
-        }
 
-        String sentence = buf.toString(buf.readerIndex(), buf.readableBytes() - 4, StandardCharsets.US_ASCII);
+            String sentence = buf.toString(buf.readerIndex(), buf.readableBytes() - 4, StandardCharsets.US_ASCII);
 
-        if (command == MSG_POSITION || command == MSG_POSITION_LOGGED || command == MSG_ALARM) {
-            return decodeRegular(position, sentence);
-        } else if (command == MSG_RFID) {
-            return decodeRfid(position, sentence);
-        } else if (command == MSG_OBD_RT) {
-            return decodeObd(position, sentence);
-        } else if (command == MSG_OBD_RTA) {
-            return decodeObdA(position, sentence);
+            if (command == MSG_POSITION || command == MSG_POSITION_LOGGED || command == MSG_ALARM) {
+                return decodeRegular(position, sentence);
+            } else if (command == MSG_RFID) {
+                return decodeRfid(position, sentence);
+            } else if (command == MSG_OBD_RT) {
+                return decodeObd(position, sentence);
+            } else if (command == MSG_OBD_RTA) {
+                return decodeObdA(position, sentence);
+            }
+
         }
 
         return null;

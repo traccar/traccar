@@ -22,6 +22,8 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.events.TextMessageEventHandler;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.Parser;
+import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.WifiAccessPoint;
@@ -32,6 +34,7 @@ import org.traccar.Context;
 
 import java.net.SocketAddress;
 import java.util.Date;
+import java.util.regex.Pattern;
 
 import java.nio.charset.StandardCharsets;
 
@@ -70,6 +73,24 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
     public static final int MSG_SIGN_COMMAND = 0x01;
     public static final int MSG_SIGN_NEWS = 0x02;
+
+    private static final Pattern PATTERN = new PatternBuilder()
+            .text("Lat:")
+            .number("([NS])(d+.d+)")             // latitude
+            .any()
+            .text("Lon:")
+            .number("([EW])(d+.d+)")             // longitude
+            .any()
+            .text("Course:")
+            .number("(d+.d+)")                   // course
+            .any()
+            .text("Speed:")
+            .number("(d+.d+)KM/H")               // speed
+            .any()
+            .text("Date.?Time:")
+            .number("(dddd)-(dd)-(dd) ")         // date
+            .number("(dd):(dd):(dd)")            // time
+            .compile();
 
     private void sendResponse(Channel channel, int type, int index, ChannelBuffer content) {
         if (channel != null) {
@@ -157,17 +178,28 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_STATUS, status);
     }
 
-    private Position decodeDownlink(ChannelBuffer buf, Position position) {
-
-        getLastLocation(position, new Date());
+    private Position decodeDownlink(ChannelBuffer buf, Position position, int index) {
 
         switch (buf.readUnsignedByte()) {
             case MSG_SIGN_COMMAND:
                 buf.skipBytes(4); // server flag ignored
 
-                String content = buf.readBytes(buf.readableBytes()).toString(StandardCharsets.UTF_8);
+                String sentence = buf.toString(StandardCharsets.UTF_8);
 
-                position.set(Position.KEY_RESULT, content);
+                Parser parser = new Parser(PATTERN, sentence);
+
+                if (parser.matches()) {
+                    position.setValid(true);
+                    position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG));
+                    position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG));
+                    position.setCourse(parser.nextDouble());
+                    position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+                    position.setTime(parser.nextDateTime());
+                } else {
+                    getLastLocation(position, null);
+                }
+
+                position.set(Position.KEY_RESULT, sentence);
                 break;
             default:
                 return null;
@@ -411,6 +443,16 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
+        DeviceSession deviceSession;
+
+        if (buf.getByte(0) == 'E' && buf.getByte(1) == 'L') {
+            buf.skipBytes(2 + 2 + 2); // udp header
+            deviceSession = getDeviceSession(
+                    channel, remoteAddress, ChannelBuffers.hexDump(buf.readBytes(8)).substring(1));
+        } else {
+            deviceSession = getDeviceSession(channel, remoteAddress);
+        }
+
         // check that incoming protocall has correct eelink prefix
         if (buf.readShort() != HEADER_KEY) {
             Log.warning(new IllegalArgumentException("Invalid Header"));
@@ -435,7 +477,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             }
 
             String uniqueId = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
-            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, uniqueId);
+            deviceSession = getDeviceSession(channel, remoteAddress, uniqueId);
 
             if (deviceSession != null) {
                 ChannelBuffer response = ChannelBuffers.dynamicBuffer();
@@ -452,14 +494,12 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
             return null;
         } else {
-
-            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
             if (deviceSession == null) {
                 return null;
             }
 
             // check if we have received a packet out of sequence
-            if (!Context.getIdentityManager().lookupAttributeBoolean(
+            /*if (!Context.getIdentityManager().lookupAttributeBoolean(
                      deviceSession.getDeviceId(), "ignorePacketOrder", false, true)) {
                 if (previousIndex >= 0 && index <= previousIndex) {
                     Log.warning(new IllegalArgumentException(
@@ -471,17 +511,17 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                         previousIndex = 0; // rollover
                     }
                 }
-            }
+            }*/
 
             Position position = new Position();
             position.setDeviceId(deviceSession.getDeviceId());
             position.setProtocol(getProtocolName());
             position.set(Position.KEY_INDEX, index);
 
-            if (type == MSG_GPS || type == MSG_ALARM || type == MSG_STATE || type == MSG_SMS) {
+            if (type == MSG_GPS || type == MSG_ALARM || type == MSG_STATE || type == MSG_SMS){
                 return decodeOld(buf, channel, position, type, index);
             } else if (type == MSG_DOWNLINK) {
-                return decodeDownlink(buf, position);
+                return decodeDownlink(buf, position, index);
             } else if (type >= MSG_NORMAL && type <= MSG_OBD_CODE) {
                 return decodeNew(buf, channel, position, type, index);
             } else if (type == MSG_HEARTBEAT && buf.readableBytes() >= 2) {
@@ -507,7 +547,6 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 Log.warning(new UnsupportedOperationException());
                 sendResponse(channel, type, index, null);
             }
-
         }
 
         return null;
