@@ -255,7 +255,8 @@ public class PermissionsManager {
         }
         if (before.getReadonly() != after.getReadonly()
                 || before.getDeviceReadonly() != after.getDeviceReadonly()
-                || before.getDisabled() != after.getDisabled()) {
+                || before.getDisabled() != after.getDisabled()
+                || before.getLimitCommands() != after.getLimitCommands()) {
             if (userId == after.getId()) {
                 checkAdmin(userId);
             }
