@@ -22,6 +22,7 @@ import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 import javax.xml.bind.DatatypeConverter;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 public class EelinkProtocolEncoder extends BaseProtocolEncoder {
@@ -30,6 +31,14 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
 
     public EelinkProtocolEncoder(boolean connectionless) {
         this.connectionless = connectionless;
+    }
+
+    public static int checksum(ByteBuffer buf) {
+        int sum = 0;
+        while (buf.hasRemaining()) {
+            sum = (((sum << 1) | (sum >> 15)) + (buf.get() & 0xFF)) & 0xFFFF;
+        }
+        return sum;
     }
 
     private ChannelBuffer encodeContent(long deviceId, String content) {
@@ -56,7 +65,7 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
             result.writeByte('E');
             result.writeByte('L');
             result.writeShort(2 + 2 + 2 + buf.readableBytes()); // length
-            result.writeShort(0); // checksum
+            result.writeShort(checksum(buf.toByteBuffer()));
         }
 
         result.writeBytes(buf);

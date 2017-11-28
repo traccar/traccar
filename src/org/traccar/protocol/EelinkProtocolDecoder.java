@@ -21,13 +21,17 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.Parser;
+import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.regex.Pattern;
 
 public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
@@ -259,13 +263,73 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    /*
+    gg^WLuLuLat:N23.111743
+Lon:E114.409238
+Course:0.00
+Speed:0.17KM/H
+Date Time:2015-09-13 20:21:20
+     */
+
+    private static final Pattern PATTERN = new PatternBuilder()
+            .text("Lat:")
+            .number("([NS])(d+.d+)")             // latitude
+            .any()
+            .text("Lon:")
+            .number("([EW])(d+.d+)")             // longitude
+            .any()
+            .text("Course:")
+            .number("(d+.d+)")                   // course
+            .any()
+            .text("Speed:")
+            .number("(d+.d+)KM/H")               // speed
+            .any()
+            .text("Date Time:")
+            .number("(dddd)-(dd)-(dd) ")         // date
+            .number("(dd):(dd):(dd)")            // time
+            .compile();
+
+    private Position decodeResult(DeviceSession deviceSession, ChannelBuffer buf, int index) {
+
+        Position position = new Position();
+        position.setDeviceId(deviceSession.getDeviceId());
+        position.setProtocol(getProtocolName());
+
+        position.set(Position.KEY_INDEX, index);
+
+        buf.readUnsignedByte(); // type
+        buf.readUnsignedInt(); // uid
+
+        String sentence = buf.toString(StandardCharsets.UTF_8);
+
+        Parser parser = new Parser(PATTERN, sentence);
+        if (parser.matches()) {
+
+            position.setValid(true);
+            position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG));
+            position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG));
+            position.setCourse(parser.nextDouble());
+            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+            position.setTime(parser.nextDateTime());
+
+        } else {
+
+            getLastLocation(position, null);
+
+            position.set(Position.KEY_RESULT, sentence);
+
+        }
+
+        return position;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
-        DeviceSession deviceSession = null;
+        DeviceSession deviceSession;
 
         if (buf.getByte(0) == 'E' && buf.getByte(1) == 'L') {
             buf.skipBytes(2 + 2 + 2); // udp header
@@ -297,9 +361,13 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (type == MSG_GPS || type == MSG_ALARM || type == MSG_STATE || type == MSG_SMS) {
+
                 return decodeOld(deviceSession, buf, type, index);
+
             } else if (type >= MSG_NORMAL && type <= MSG_OBD_CODE) {
+
                 return decodeNew(deviceSession, buf, index);
+
             } else if (type == MSG_HEARTBEAT && buf.readableBytes() >= 2) {
 
                 Position position = new Position();
@@ -311,6 +379,10 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 decodeStatus(position, buf.readUnsignedShort());
 
                 return position;
+
+            } else if (type == MSG_DOWNLINK) {
+
+                return decodeResult(deviceSession, buf, index);
 
             }
 
