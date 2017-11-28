@@ -263,14 +263,6 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    /*
-    gg^WLuLuLat:N23.111743
-Lon:E114.409238
-Course:0.00
-Speed:0.17KM/H
-Date Time:2015-09-13 20:21:20
-     */
-
     private static final Pattern PATTERN = new PatternBuilder()
             .text("Lat:")
             .number("([NS])(d+.d+)")             // latitude
