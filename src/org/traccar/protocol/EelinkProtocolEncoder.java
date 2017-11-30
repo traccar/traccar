@@ -41,23 +41,24 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
         return sum;
     }
 
-    private ChannelBuffer encodeContent(long deviceId, String content) {
+    public static ChannelBuffer encodeContent(
+            boolean connectionless, String uniqueId, int type, int index, ChannelBuffer content) {
 
         ChannelBuffer buf = ChannelBuffers.dynamicBuffer();
 
         if (connectionless) {
-            buf.writeBytes(ChannelBuffers.wrappedBuffer(DatatypeConverter.parseHexBinary('0' + getUniqueId(deviceId))));
+            buf.writeBytes(ChannelBuffers.wrappedBuffer(DatatypeConverter.parseHexBinary('0' + uniqueId)));
         }
 
         buf.writeByte(0x67);
         buf.writeByte(0x67);
-        buf.writeByte(EelinkProtocolDecoder.MSG_DOWNLINK);
-        buf.writeShort(2 + 1 + 4 + content.length()); // length
-        buf.writeShort(0); // index
+        buf.writeByte(type);
+        buf.writeShort(2 + (content != null ? content.readableBytes() : 0)); // length
+        buf.writeShort(index);
 
-        buf.writeByte(0x01); // command
-        buf.writeInt(0); // server id
-        buf.writeBytes(content.getBytes(StandardCharsets.UTF_8));
+        if (content != null) {
+            buf.writeBytes(content);
+        }
 
         ChannelBuffer result = ChannelBuffers.dynamicBuffer();
 
@@ -71,6 +72,17 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
         result.writeBytes(buf);
 
         return result;
+    }
+
+    private ChannelBuffer encodeContent(long deviceId, String content) {
+
+        ChannelBuffer buf = ChannelBuffers.dynamicBuffer();
+
+        buf.writeByte(0x01); // command
+        buf.writeInt(0); // server id
+        buf.writeBytes(content.getBytes(StandardCharsets.UTF_8));
+
+        return encodeContent(connectionless, getUniqueId(deviceId), EelinkProtocolDecoder.MSG_DOWNLINK, 0, buf);
     }
 
     @Override

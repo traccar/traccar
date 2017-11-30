@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.socket.DatagramChannel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
@@ -59,14 +60,10 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_CAMERA_INFO = 0x1E;
     public static final int MSG_CAMERA_DATA = 0x1F;
 
-    private void sendResponse(Channel channel, int type, int index) {
+    private void sendResponse(Channel channel, SocketAddress remoteAddress, String uniqueId, int type, int index) {
         if (channel != null) {
-            ChannelBuffer response = ChannelBuffers.buffer(7);
-            response.writeByte(0x67); response.writeByte(0x67); // header
-            response.writeByte(type);
-            response.writeShort(2); // length
-            response.writeShort(index);
-            channel.write(response);
+            channel.write(EelinkProtocolEncoder.encodeContent(
+                    channel instanceof DatagramChannel, uniqueId, type, index, null), remoteAddress);
         }
     }
 
@@ -321,12 +318,13 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
+        String uniqueId = null;
         DeviceSession deviceSession;
 
         if (buf.getByte(0) == 'E' && buf.getByte(1) == 'L') {
             buf.skipBytes(2 + 2 + 2); // udp header
-            deviceSession = getDeviceSession(
-                    channel, remoteAddress, ChannelBuffers.hexDump(buf.readBytes(8)).substring(1));
+            uniqueId = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
+            deviceSession = getDeviceSession(channel, remoteAddress, uniqueId);
         } else {
             deviceSession = getDeviceSession(channel, remoteAddress);
         }
@@ -337,7 +335,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         int index = buf.readUnsignedShort();
 
         if (type != MSG_GPS && type != MSG_DATA) {
-            sendResponse(channel, type, index);
+            sendResponse(channel, remoteAddress, uniqueId, type, index);
         }
 
         if (type == MSG_LOGIN) {
