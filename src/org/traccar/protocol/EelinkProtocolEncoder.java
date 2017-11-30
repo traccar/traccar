@@ -65,7 +65,7 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
         if (connectionless) {
             result.writeByte('E');
             result.writeByte('L');
-            result.writeShort(2 + 2 + 2 + buf.readableBytes()); // length
+            result.writeShort(2 + buf.readableBytes()); // length
             result.writeShort(checksum(buf.toByteBuffer()));
         }
 
