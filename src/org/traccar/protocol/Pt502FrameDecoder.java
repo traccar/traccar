@@ -43,11 +43,18 @@ public class Pt502FrameDecoder extends FrameDecoder {
 
         if (index > 0) {
             ChannelBuffer result = buf.readBytes(index - buf.readerIndex());
-            while (buf.readable()
-                    && (buf.getByte(buf.readerIndex()) == '\r' || buf.getByte(buf.readerIndex()) == '\n')) {
-                buf.skipBytes(1);
-            }
+
+            buf.skipBytes(index - buf.readerIndex());
+
             return result;
+        } else { // some messages are shorter and have a different format
+            if (buf.getUnsignedByte(buf.readerIndex()) == (byte) '@') {
+                ChannelBuffer result = buf.readBytes(buf.writerIndex() - buf.readerIndex());
+
+                buf.skipBytes(buf.writerIndex() - buf.readerIndex());
+
+                return result;
+            }
         }
 
         return null;

@@ -89,13 +89,26 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        Parser parser = new Parser(PATTERN, (String) msg);
-        if (!parser.matches()) {
-            return null;
-        }
-
         Position position = new Position();
         position.setProtocol(getProtocolName());
+
+        String strdata = (String) msg;
+        Parser parser = new Parser(PATTERN, strdata);
+
+        if (!parser.matches()) {
+            // observed messages have a length >= 11
+            if (strdata.length() >= 11 && strdata.charAt(0) == '@') {
+                if (strdata.substring(5, 8).equals("CPA")) {
+                    position.set(Position.KEY_ALARM, "CPA");
+
+                    return position;
+                } else {
+                    System.out.println(strdata.substring(5, 8));
+                }
+            }
+
+            return null;
+        }
 
         String type = parser.next();
 
