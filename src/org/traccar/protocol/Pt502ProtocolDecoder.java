@@ -98,12 +98,14 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
         if (!parser.matches()) {
             // observed messages have a length >= 11
             if (strdata.length() >= 11 && strdata.charAt(0) == '@') {
-                if (strdata.substring(5, 8).equals("CPA")) {
+                String command = strdata.substring(5, 8);
+                if (command.equals("CPA")) {
                     position.set(Position.KEY_ALARM, "CPA");
 
                     return position;
-                } else {
-                    System.out.println(strdata.substring(5, 8));
+                } else if (command.equals("POS")) {
+                    // this might be a position update in the form of a delta
+                    // for the previous position
                 }
             }
 

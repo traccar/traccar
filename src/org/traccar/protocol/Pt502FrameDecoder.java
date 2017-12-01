@@ -38,6 +38,9 @@ public class Pt502FrameDecoder extends FrameDecoder {
 
         int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '\r');
         if (index < 0) {
+            index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '#');
+        }
+        if (index < 0) {
             index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '\n');
         }
 
