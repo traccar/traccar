@@ -271,9 +271,9 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d+)")                   // course
             .any()
             .text("Speed:")
-            .number("(d+.d+)KM/H")               // speed
+            .number("(d+.d+)")                   // speed
             .any()
-            .text("Date Time:")
+            .expression("Date ?Time:")
             .number("(dddd)-(dd)-(dd) ")         // date
             .number("(dd):(dd):(dd)")            // time
             .compile();
