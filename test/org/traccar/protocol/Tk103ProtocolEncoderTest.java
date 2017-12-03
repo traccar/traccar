@@ -33,12 +33,6 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
 
         Assert.assertEquals("(123456789012345AP00)", encoder.encodeCommand(command));
 
-        Device device = TestIdentityManager.createTestDevice();
-        device.set("tk103.alternative", true);
-        command.setDeviceId(device.getId());
-
-        Assert.assertEquals("[begin]sms2,*getposl*,[end]", encoder.encodeCommand(command));
-
     }
 
     @Test
@@ -53,12 +47,6 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
 
         Assert.assertEquals("(123456789012345AR00003C0000)", encoder.encodeCommand(command));
 
-        Device device = TestIdentityManager.createTestDevice();
-        device.set("tk103.alternative", true);
-        command.setDeviceId(device.getId());
-
-        Assert.assertEquals("[begin]sms2,*routetrack*99*,[end]", encoder.encodeCommand(command));
-
     }
 
     @Test
@@ -71,12 +59,6 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_POSITION_STOP);
 
         Assert.assertEquals("(123456789012345AR0000000000)", encoder.encodeCommand(command));
-
-        Device device = TestIdentityManager.createTestDevice();
-        device.set("tk103.alternative", true);
-        command.setDeviceId(device.getId());
-
-        Assert.assertEquals("[begin]sms2,*routetrackoff*,[end]", encoder.encodeCommand(command));
 
     }
 
@@ -91,12 +73,6 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
 
         Assert.assertEquals("(123456789012345AP07)", encoder.encodeCommand(command));
 
-        Device device = TestIdentityManager.createTestDevice();
-        device.set("tk103.alternative", true);
-        command.setDeviceId(device.getId());
-
-        Assert.assertEquals("[begin]sms2,*about*,[end]", encoder.encodeCommand(command));
-
     }
 
     @Test
@@ -109,12 +85,6 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_REBOOT_DEVICE);
 
         Assert.assertEquals("(123456789012345AT00)", encoder.encodeCommand(command));
-
-        Device device = TestIdentityManager.createTestDevice();
-        device.set("tk103.alternative", true);
-        command.setDeviceId(device.getId());
-
-        Assert.assertEquals("[begin]sms2,88888888,[end]", encoder.encodeCommand(command));
 
     }
 
@@ -132,15 +102,77 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
-    public void testEncodeIdentification() throws Exception {
+    public void testEncodePositionSingleAlternative() throws Exception {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder();
-
-        Device device = TestIdentityManager.createTestDevice();
-        device.set("tk103.alternative", true);
+        Tk103ProtocolEncoderAlternative encoder = new Tk103ProtocolEncoderAlternative();
 
         Command command = new Command();
-        command.setDeviceId(device.getId());
+        command.setDeviceId(1);
+        command.setType(Command.TYPE_POSITION_SINGLE);
+
+        Assert.assertEquals("[begin]sms2,*getposl*,[end]", encoder.encodeCommand(command));
+
+    }
+
+    @Test
+    public void testEncodePositionPeriodicAlternative() throws Exception {
+
+        Tk103ProtocolEncoderAlternative encoder = new Tk103ProtocolEncoderAlternative();
+
+        Command command = new Command();
+        command.setDeviceId(1);
+        command.setType(Command.TYPE_POSITION_PERIODIC);
+
+        Assert.assertEquals("[begin]sms2,*routetrack*99*,[end]", encoder.encodeCommand(command));
+
+    }
+
+    @Test
+    public void testEncodePositionStopAlternative() throws Exception {
+
+        Tk103ProtocolEncoderAlternative encoder = new Tk103ProtocolEncoderAlternative();
+
+        Command command = new Command();
+        command.setDeviceId(1);
+        command.setType(Command.TYPE_POSITION_STOP);
+
+        Assert.assertEquals("[begin]sms2,*routetrackoff*,[end]", encoder.encodeCommand(command));
+
+    }
+
+    @Test
+    public void testEncodeGetVersionAlternative() throws Exception {
+
+        Tk103ProtocolEncoderAlternative encoder = new Tk103ProtocolEncoderAlternative();
+
+        Command command = new Command();
+        command.setDeviceId(1);
+        command.setType(Command.TYPE_GET_VERSION);
+
+        Assert.assertEquals("[begin]sms2,*about*,[end]", encoder.encodeCommand(command));
+
+    }
+
+    @Test
+    public void testEncodeRebootDeviceAlternative() throws Exception {
+
+        Tk103ProtocolEncoderAlternative encoder = new Tk103ProtocolEncoderAlternative();
+
+        Command command = new Command();
+        command.setDeviceId(1);
+        command.setType(Command.TYPE_REBOOT_DEVICE);
+
+        Assert.assertEquals("[begin]sms2,88888888,[end]", encoder.encodeCommand(command));
+
+    }
+
+    @Test
+    public void testEncodeIdentificationAlternative() throws Exception {
+
+        Tk103ProtocolEncoderAlternative encoder = new Tk103ProtocolEncoderAlternative();
+
+        Command command = new Command();
+        command.setDeviceId(1);
         command.setType(Command.TYPE_IDENTIFICATION);
 
         Assert.assertEquals("[begin]sms2,999999,[end]", encoder.encodeCommand(command));
@@ -148,15 +180,12 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
-    public void testEncodeSosOn() throws Exception {
+    public void testEncodeSosOnAlternative() throws Exception {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder();
-
-        Device device = TestIdentityManager.createTestDevice();
-        device.set("tk103.alternative", true);
+        Tk103ProtocolEncoderAlternative encoder = new Tk103ProtocolEncoderAlternative();
 
         Command command = new Command();
-        command.setDeviceId(device.getId());
+        command.setDeviceId(1);
         command.setType(Command.TYPE_ALARM_SOS);
         command.set(Command.KEY_ENABLE, true);
 
@@ -165,15 +194,12 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
-    public void testEncodeSosOff() throws Exception {
+    public void testEncodeSosOffAlternative() throws Exception {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder();
-
-        Device device = TestIdentityManager.createTestDevice();
-        device.set("tk103.alternative", true);
+        Tk103ProtocolEncoderAlternative encoder = new Tk103ProtocolEncoderAlternative();
 
         Command command = new Command();
-        command.setDeviceId(device.getId());
+        command.setDeviceId(1);
         command.setType(Command.TYPE_ALARM_SOS);
         command.set(Command.KEY_ENABLE, false);
 
@@ -182,15 +208,12 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
-    public void testEncodeCustom() throws Exception {
+    public void testEncodeCustomAlternative() throws Exception {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder();
-
-        Device device = TestIdentityManager.createTestDevice();
-        device.set("tk103.alternative", true);
+        Tk103ProtocolEncoderAlternative encoder = new Tk103ProtocolEncoderAlternative();
 
         Command command = new Command();
-        command.setDeviceId(device.getId());
+        command.setDeviceId(1);
         command.setType(Command.TYPE_CUSTOM);
         command.set(Command.KEY_DATA, "any text is ok");
 
@@ -199,15 +222,12 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
-    public void testEncodeSetConnection() throws Exception {
+    public void testEncodeSetConnectionAlternative() throws Exception {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder();
-
-        Device device = TestIdentityManager.createTestDevice();
-        device.set("tk103.alternative", true);
+        Tk103ProtocolEncoderAlternative encoder = new Tk103ProtocolEncoderAlternative();
 
         Command command = new Command();
-        command.setDeviceId(device.getId());
+        command.setDeviceId(1);
         command.setType(Command.TYPE_SET_CONNECTION);
         command.set(Command.KEY_SERVER, "1.2.3.4");
         command.set(Command.KEY_PORT, "5555");
@@ -217,19 +237,16 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
-    public void testEncodeSosNumber() throws Exception {
+    public void testEncodeSosNumberAlternative() throws Exception {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder();
-
-        Device device = TestIdentityManager.createTestDevice();
-        device.set("tk103.alternative", true);
-        device.set(Command.KEY_DEVICE_PASSWORD, "232323");
+        Tk103ProtocolEncoderAlternative encoder = new Tk103ProtocolEncoderAlternative();
 
         Command command = new Command();
-        command.setDeviceId(device.getId());
+        command.setDeviceId(1);
         command.setType(Command.TYPE_SOS_NUMBER);
         command.set(Command.KEY_INDEX, "0");
         command.set(Command.KEY_PHONE, "+55555555555");
+        command.set(Command.KEY_DEVICE_PASSWORD, "232323");
 
         Assert.assertEquals("[begin]sms2,*master*232323*+55555555555*,[end]", encoder.encodeCommand(command));
 
