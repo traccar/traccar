@@ -41,6 +41,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
+            .text("(").optional()
             .number("(d+)(,)?")                  // device id
             .expression("(.{4}),?")              // command
             .number("(d*)")
@@ -72,6 +73,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private static final Pattern PATTERN_BATTERY = new PatternBuilder()
+            .text("(").optional()
             .number("(d+),")                     // device id
             .text("ZC20,")
             .number("(dd)(dd)(dd),")             // date (ddmmyy)
@@ -80,9 +82,11 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // battery voltage
             .number("(d+),")                     // power voltage
             .number("d+")                        // installed
+            .any()
             .compile();
 
     private static final Pattern PATTERN_NETWORK = new PatternBuilder()
+            .text("(").optional()
             .number("(d{12})")                   // device id
             .text("BZ00,")
             .number("(d+),")                     // mcc
@@ -93,6 +97,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private static final Pattern PATTERN_LBSWIFI = new PatternBuilder()
+            .text("(").optional()
             .number("(d+),")                     // device id
             .expression("(.{4}),")               // command
             .number("(d+),")                     // mcc
@@ -107,6 +112,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private static final Pattern PATTERN_COMMAND_RESULT = new PatternBuilder()
+            .text("(").optional()
             .number("(d+),")                     // device id
             .expression(".{4},")                 // command
             .number("(dd)(dd)(dd),")             // date (ddmmyy)
@@ -349,8 +355,8 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         String sentence = (String) msg;
 
         if (channel != null) {
-            String id = sentence.substring(0, 12);
-            String type = sentence.substring(12, 16);
+            String id = sentence.substring(1, 13);
+            String type = sentence.substring(13, 17);
             if (type.equals("BP00")) {
                 channel.write("(" + id + "AP01HSO)");
                 return null;

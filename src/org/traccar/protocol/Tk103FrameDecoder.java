@@ -38,7 +38,6 @@ public class Tk103FrameDecoder extends FrameDecoder {
             buf.clear();
             return null;
         }
-        frameStartIndex++;
 
         int frameEndIndex, freeTextSymbolCounter;
         for (frameEndIndex = frameStartIndex, freeTextSymbolCounter = 0;; frameEndIndex++) {
@@ -71,8 +70,7 @@ public class Tk103FrameDecoder extends FrameDecoder {
         }
 
         buf.readerIndex(frameStartIndex);
-        ChannelBuffer result = buf.readBytes(frameEndIndex - frameStartIndex);
-        buf.readerIndex(buf.readerIndex() + 1);
+        ChannelBuffer result = buf.readBytes(frameEndIndex + 1 - frameStartIndex);
 
         return result;
 
