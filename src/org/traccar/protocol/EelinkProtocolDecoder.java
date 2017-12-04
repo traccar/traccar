@@ -240,7 +240,8 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
-    private Position decodeOld(ChannelBuffer buf, Channel channel, SocketAddress remoteAddress, String uniqueId, Position position, int type, int index) {
+    private Position decodeOld(ChannelBuffer buf, Channel channel, SocketAddress remoteAddress,
+            String uniqueId, Position position, int type, int index) {
 
         position.setTime(new Date(buf.readUnsignedInt() * 1000));
         position.setLatitude(buf.readInt() / 1800000.0);
@@ -298,7 +299,8 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private Position decodeNew(ChannelBuffer buf, Channel channel, SocketAddress remoteAddress, String uniqueId, Position position, int type, int index) {
+    private Position decodeNew(ChannelBuffer buf, Channel channel, SocketAddress remoteAddress,
+            String uniqueId, Position position, int type, int index) {
 
         Date deviceTime = new Date(buf.readUnsignedInt() * 1000);
         int flags = buf.readUnsignedByte();
