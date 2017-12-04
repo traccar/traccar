@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.socket.DatagramChannel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.events.TextMessageEventHandler;
@@ -47,6 +48,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
     private int previousIndex;
 
     public static final short HEADER_KEY = 0x6767;
+    public static final short UDP_HEADER_KEY = 0x454C; // 454C:EL  4550:EP
 
     public static final int MSG_LOGIN = 0x01;
     public static final int MSG_GPS = 0x02;
@@ -87,25 +89,16 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             .text("Speed:")
             .number("(d+.d+)KM/H")               // speed
             .any()
-            .text("Date.?Time:")
+            .expression("Date ?Time:")
             .number("(dddd)-(dd)-(dd) ")         // date
             .number("(dd):(dd):(dd)")            // time
             .compile();
 
-    private void sendResponse(Channel channel, int type, int index, ChannelBuffer content) {
+    private void sendResponse(Channel channel, SocketAddress remoteAddress, String uniqueId,
+            int type, int index, ChannelBuffer content) {
         if (channel != null) {
-            ChannelBuffer response = ChannelBuffers.dynamicBuffer();
-            response.writeShort(HEADER_KEY);
-            response.writeByte(type);
-            response.writeShort(2); // initial packet length
-            response.writeShort(index);
-
-            if (content != null && content.readableBytes() > 0) {
-                response.writeBytes(content);
-                response.setShort(3, 2 + content.writerIndex()); // change packet length including buf
-            }
-
-            channel.write(response);
+            channel.write(EelinkProtocolEncoder.encodeContent(
+                    channel instanceof DatagramChannel, uniqueId, type, index, content), remoteAddress);
         }
     }
 
@@ -189,6 +182,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 Parser parser = new Parser(PATTERN, sentence);
 
                 if (parser.matches()) {
+                    System.out.println("match");
                     position.setValid(true);
                     position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG));
                     position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG));
@@ -196,6 +190,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                     position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
                     position.setTime(parser.nextDateTime());
                 } else {
+                    System.out.println("nomatch");
                     getLastLocation(position, null);
                 }
 
@@ -245,7 +240,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
-    private Position decodeOld(ChannelBuffer buf, Channel channel, Position position, int type, int index) {
+    private Position decodeOld(ChannelBuffer buf, Channel channel, SocketAddress remoteAddress, String uniqueId, Position position, int type, int index) {
 
         position.setTime(new Date(buf.readUnsignedInt() * 1000));
         position.setLatitude(buf.readInt() / 1800000.0);
@@ -259,7 +254,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         switch (type) {
             case MSG_ALARM:
                 position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
-                sendResponse(channel, type, index, null);
+                sendResponse(channel, remoteAddress, uniqueId, type, index, null);
                 break;
             case MSG_STATE:
                 switch (buf.readUnsignedByte()) {
@@ -272,7 +267,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                     default:
                         break;
                 }
-                sendResponse(channel, type, index, null);
+                sendResponse(channel, remoteAddress, uniqueId, type, index, null);
                 break;
             case MSG_GPS:
                 // only read remaining 10 bytes if they exist as they are optional in spec
@@ -290,20 +285,20 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             case MSG_SMS:
                 ChannelBuffer response = decodeSMS(position, buf);
                 if (response != null) {
-                    sendResponse(channel, type, index, response);
+                    sendResponse(channel, remoteAddress, uniqueId, type, index, response);
                 } else {
-                    sendResponse(channel, type, index, null);
+                    sendResponse(channel, remoteAddress, uniqueId, type, index, null);
                 }
                 break;
             default:
-                sendResponse(channel, type, index, null);
+                sendResponse(channel, remoteAddress, uniqueId, type, index, null);
                 break;
         }
 
         return position;
     }
 
-    private Position decodeNew(ChannelBuffer buf, Channel channel, Position position, int type, int index) {
+    private Position decodeNew(ChannelBuffer buf, Channel channel, SocketAddress remoteAddress, String uniqueId, Position position, int type, int index) {
 
         Date deviceTime = new Date(buf.readUnsignedInt() * 1000);
         int flags = buf.readUnsignedByte();
@@ -373,7 +368,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             case MSG_WARNING:
                 position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
                 decodeStatus(position, buf.readUnsignedShort());
-                sendResponse(channel, type, index, null);
+                sendResponse(channel, remoteAddress, uniqueId, type, index, null);
                 break;
             case MSG_REPORT:
                 switch (buf.readUnsignedByte()) { // status type
@@ -385,14 +380,14 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                     default:
                         break;
                 }
-                sendResponse(channel, type, index, null);
+                sendResponse(channel, remoteAddress, uniqueId, type, index, null);
                 break;
             case MSG_COMMAND:
                 ChannelBuffer response = decodeSMS(position, buf);
                 if (response != null) {
-                    sendResponse(channel, type, index, response);
+                    sendResponse(channel, remoteAddress, uniqueId, type, index, response);
                 } else {
-                    sendResponse(channel, type, index, null);
+                    sendResponse(channel, remoteAddress, uniqueId, type, index, null);
                 }
                 break;
             default:
@@ -430,7 +425,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                     position.set("co2", buf.readUnsignedInt());
                 }
 
-                sendResponse(channel, type, index, null);
+                sendResponse(channel, remoteAddress, uniqueId, type, index, null);
                 break;
         }
 
@@ -442,19 +437,34 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
-
         DeviceSession deviceSession;
+        String uniqueId = null;
 
-        if (buf.getByte(0) == 'E' && buf.getByte(1) == 'L') {
-            buf.skipBytes(2 + 2 + 2); // udp header
-            deviceSession = getDeviceSession(
-                    channel, remoteAddress, ChannelBuffers.hexDump(buf.readBytes(8)).substring(1));
-        } else {
+        short header = buf.readShort();
+
+        if (header == UDP_HEADER_KEY) {
+            short length = buf.readShort();
+
+            if (buf.readableBytes() != length) { // check remaining length matches defined packet length
+                Log.warning(new IllegalArgumentException("UDP Packet length error"));
+                return null;
+            }
+
+            if (buf.readShort() != (short) EelinkProtocolEncoder.checksum(buf.toByteBuffer())) {
+                Log.warning(new IllegalArgumentException("UDP Checksum error"));
+                return null;
+            }
+
+            uniqueId = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
+            deviceSession = getDeviceSession(channel, remoteAddress, uniqueId);
+
+            if (buf.readShort() != HEADER_KEY) {
+                Log.warning(new IllegalArgumentException("Invalid Header"));
+                return null;
+            }
+        } else if (header == HEADER_KEY) {
             deviceSession = getDeviceSession(channel, remoteAddress);
-        }
-
-        // check that incoming protocall has correct eelink prefix
-        if (buf.readShort() != HEADER_KEY) {
+        } else {
             Log.warning(new IllegalArgumentException("Invalid Header"));
             return null;
         }
@@ -476,7 +486,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 version = 2;
             }
 
-            String uniqueId = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
+            uniqueId = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
             deviceSession = getDeviceSession(channel, remoteAddress, uniqueId);
 
             if (deviceSession != null) {
@@ -489,7 +499,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                     response.writeLong(new Date().getTime() / 1000);
                     response.writeByte(2);
                 }
-                sendResponse(channel, type, index, response);
+                sendResponse(channel, remoteAddress, uniqueId, type, index, null);
             }
 
             return null;
@@ -519,11 +529,11 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_INDEX, index);
 
             if (type == MSG_GPS || type == MSG_ALARM || type == MSG_STATE || type == MSG_SMS) {
-                return decodeOld(buf, channel, position, type, index);
+                return decodeOld(buf, channel, remoteAddress, uniqueId, position, type, index);
             } else if (type == MSG_DOWNLINK) {
                 return decodeDownlink(buf, position, index);
             } else if (type >= MSG_NORMAL && type <= MSG_OBD_CODE) {
-                return decodeNew(buf, channel, position, type, index);
+                return decodeNew(buf, channel, remoteAddress, uniqueId, position, type, index);
             } else if (type == MSG_HEARTBEAT && buf.readableBytes() >= 2) {
                 Position last = Context.getIdentityManager().getLastPosition(position.getDeviceId());
 
@@ -532,20 +542,20 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 if (last != null) {
                     if (last.getInteger(Position.KEY_STATUS) != position.getInteger(Position.KEY_STATUS)) {
                         getLastLocation(position, null);
-                        sendResponse(channel, type, index, null);
+                        sendResponse(channel, remoteAddress, uniqueId, type, index, null);
                         return position;
                     } else {
-                        sendResponse(channel, type, index, null);
+                        sendResponse(channel, remoteAddress, uniqueId, type, index, null);
                         return null;
                     }
                 } else {
                     getLastLocation(position, null);
-                    sendResponse(channel, type, index, null);
+                    sendResponse(channel, remoteAddress, uniqueId, type, index, null);
                     return position;
                 }
             } else {
                 Log.warning(new UnsupportedOperationException());
-                sendResponse(channel, type, index, null);
+                sendResponse(channel, remoteAddress, uniqueId, type, index, null);
             }
         }
 

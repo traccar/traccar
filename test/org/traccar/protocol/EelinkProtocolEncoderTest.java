@@ -15,7 +15,7 @@ public class EelinkProtocolEncoderTest extends ProtocolTest {
 
         verifyCommand(new EelinkProtocolEncoder(false), command, binary("676780000f0000010000000052454c41592c3123"));
 
-        verifyCommand(new EelinkProtocolEncoder(true), command, binary("454c0022b41a0123456789012345676780000f0000010000000052454c41592c3123"));
+        verifyCommand(new EelinkProtocolEncoder(true), command, binary("454c001eb41a0123456789012345676780000f0000010000000052454c41592c3123"));
 
     }
 

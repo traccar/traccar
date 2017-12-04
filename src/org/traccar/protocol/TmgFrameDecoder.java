@@ -47,13 +47,13 @@ public class TmgFrameDecoder extends FrameDecoder {
             }
         });
 
-        if (beginIndex > 0) {
+        if (beginIndex >= 0) {
 
             buf.readerIndex(beginIndex);
 
             int endIndex = buf.indexOf(beginIndex, buf.writerIndex(), (byte) '\n');
 
-            if (endIndex > 0) {
+            if (endIndex >= 0) {
                 ChannelBuffer frame = buf.readBytes(endIndex - beginIndex);
                 buf.readByte(); // delimiter
                 return frame;

@@ -78,6 +78,8 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_VIBRATION;
             case "PMA":
                 return Position.ALARM_MOVEMENT;
+            case "CPA":
+                return Position.ALARM_POWER_CUT;
             default:
                 return null;
         }

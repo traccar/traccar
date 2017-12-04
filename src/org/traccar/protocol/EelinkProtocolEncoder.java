@@ -41,35 +41,46 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
         return sum;
     }
 
-    private ChannelBuffer encodeContent(long deviceId, String content) {
+    public static ChannelBuffer encodeContent(
+            boolean connectionless, String uniqueId, int type, int index, ChannelBuffer content) {
 
         ChannelBuffer buf = ChannelBuffers.dynamicBuffer();
 
         if (connectionless) {
-            buf.writeBytes(ChannelBuffers.wrappedBuffer(DatatypeConverter.parseHexBinary('0' + getUniqueId(deviceId))));
+            buf.writeBytes(ChannelBuffers.wrappedBuffer(DatatypeConverter.parseHexBinary('0' + uniqueId)));
         }
 
         buf.writeShort(EelinkProtocolDecoder.HEADER_KEY);
         buf.writeByte(EelinkProtocolDecoder.MSG_DOWNLINK);
-        buf.writeShort(2 + 1 + 4 + content.length()); // data length
+        buf.writeShort(2 + (content != null ? content.readableBytes() : 0)); // length
         buf.writeShort(0); // index
 
-        buf.writeByte(EelinkProtocolDecoder.MSG_SIGN_COMMAND);
-        buf.writeInt(0); // server id
-        buf.writeBytes(content.getBytes(StandardCharsets.UTF_8));
+        if (content != null) {
+            buf.writeBytes(content);
+        }
 
         ChannelBuffer result = ChannelBuffers.dynamicBuffer();
 
         if (connectionless) {
-            result.writeByte('E');
-            result.writeByte('L');
-            result.writeShort(2 + 2 + 2 + buf.readableBytes()); // length
+            result.writeShort(EelinkProtocolDecoder.UDP_HEADER_KEY);
+            result.writeShort(2 + buf.readableBytes()); // length
             result.writeShort(checksum(buf.toByteBuffer()));
         }
 
         result.writeBytes(buf);
 
         return result;
+    }
+
+    private ChannelBuffer encodeContent(long deviceId, String content) {
+
+        ChannelBuffer buf = ChannelBuffers.dynamicBuffer();
+
+        buf.writeByte(EelinkProtocolDecoder.MSG_SIGN_COMMAND); // command
+        buf.writeInt(0); // server id
+        buf.writeBytes(content.getBytes(StandardCharsets.UTF_8));
+
+        return encodeContent(connectionless, getUniqueId(deviceId), EelinkProtocolDecoder.MSG_DOWNLINK, 0, buf);
     }
 
     @Override
