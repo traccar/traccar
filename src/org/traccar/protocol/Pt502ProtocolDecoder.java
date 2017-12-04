@@ -97,7 +97,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
 
         if (!parser.matches()) {
             // observed messages have a length >= 11
-            if (strdata.length() >= 11 && strdata.charAt(0) == '@') {
+            if (strdata.charAt(0) == '@') {
                 String command = strdata.substring(5, 8);
                 if (command.equals("CPA")) {
                     position.set(Position.KEY_ALARM, "CPA");
