@@ -42,8 +42,8 @@ public class Pt502FrameDecoderTest extends ProtocolTest {
                 decoder.decode(null, null, binary(ByteOrder.LITTLE_ENDIAN, "4060000103504f53020505392e303030")));
 
         verifyFrame(
-                binary("405b02040633342e3030301300020d0a4060000103504f"),
-                decoder.decode(null, null, binary(ByteOrder.LITTLE_ENDIAN, "405b02040633342e3030301300020d0a")));
+                binary("405b02040633342e3030301300020d0a"),
+                decoder.decode(null, null, binary(ByteOrder.LITTLE_ENDIAN, "405b02040633342e3030301300020d0a4060000103504f")));
 
     }
 

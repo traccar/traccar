@@ -24,8 +24,8 @@ public class Pt502FrameDecoder extends FrameDecoder {
 
     private static final int BINARY_HEADER = 5;
 
-    private void skipTrailing(ChannelBuffer buf) {
-        while (buf.readableBytes() > 0) {
+    private void skipFrameEnd(ChannelBuffer buf) {
+        while (buf.readable()) {
             short currentByte = buf.getUnsignedByte(buf.readerIndex());
 
             if (currentByte != (byte) '\r' && currentByte != (byte) '#' && currentByte != (byte) '\n') {
@@ -62,15 +62,24 @@ public class Pt502FrameDecoder extends FrameDecoder {
             if (index > 0) {
                 ChannelBuffer result = buf.readBytes(index - buf.readerIndex());
 
-                buf.skipBytes(index - buf.readerIndex());
-                skipTrailing(buf);
+                skipFrameEnd(buf);
 
                 return result;
             }
         } else if (buf.getUnsignedByte(buf.readerIndex()) == (byte) '@') {
-            ChannelBuffer result = buf.readBytes(buf.writerIndex() - buf.readerIndex());
+            int toRead = 5;
 
-            buf.skipBytes(buf.writerIndex() - buf.readerIndex());
+            while (toRead <= buf.readableBytes()) {
+                toRead += buf.getUnsignedByte(buf.readerIndex() + toRead - 1);
+
+                if (toRead == buf.readableBytes() || buf.getUnsignedByte(buf.readerIndex() + toRead) > 31) {
+                    break;
+                } else {
+                    toRead += 3;
+                }
+            }
+
+            ChannelBuffer result = buf.readBytes(toRead);
 
             return result;
         }
