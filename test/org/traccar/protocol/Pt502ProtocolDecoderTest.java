@@ -46,8 +46,8 @@ public class Pt502ProtocolDecoderTest extends ProtocolTest {
         verifyAttribute(decoder, text(
                 "$CPA,40456789,083125.000,A,2232.0971,N,11400.9504,E,7.62,265.24,291117,,,A/00000,00000/0/1200//#"), Position.KEY_ALARM, Position.ALARM_POWER_CUT);
 
-        verifyPosition(decoder, binary(
-                "407200010343504102040633382e30303004060338383106080230390900053330312e30").toString(0, 36, Charset.forName("US-ASCII")));
+        verifyAttribute(decoder, binary(
+                "407200010343504102040633382e30303004060338383106080230390900053330312e30").toString(0, 36, Charset.forName("US-ASCII")), Position.KEY_ALARM, Position.ALARM_POWER_CUT);
 
         verifyPosition(decoder, text(
                 "$POS,216769295715,163237.000,A,3258.1738,S,02755.4350,E,0.00,215.88,100915,,,A/0000,0//232300//5b3/"),

@@ -33,6 +33,8 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
 
     private byte[] photo;
 
+    private static final String HEADER_ALARM = new String(new byte[] {0, 1});
+
     public Pt502ProtocolDecoder(Pt502Protocol protocol) {
         super(protocol);
     }
@@ -96,18 +98,20 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
         Parser parser = new Parser(PATTERN, strdata);
 
         if (!parser.matches()) {
-            // observed messages have a length >= 11
             if (strdata.charAt(0) == '@') {
-                String command = strdata.substring(5, 8);
-                if (command.equals("CPA")) {
-                    position.set(Position.KEY_ALARM, "CPA");
+                int index = 2;
 
-                    return position;
-                } else if (command.equals("POS")) {
-                    // this might be a position update in the form of a delta
-                    // for the previous position
-                    return null;
+                while (index < strdata.length()) {
+                    String infoType = strdata.substring(index, index + 2); index += 2;
+                    int infoLength = strdata.charAt(index); index += 1;
+                    String rawInfo = strdata.substring(index, index + infoLength); index += infoLength;
+
+                    if (infoType.equals(HEADER_ALARM)) {
+                        position.set(Position.KEY_ALARM, decodeAlarm(rawInfo));
+                    }
                 }
+
+                return position;
             }
 
             return null;
