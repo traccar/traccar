@@ -24,6 +24,19 @@ public class Pt502FrameDecoder extends FrameDecoder {
 
     private static final int BINARY_HEADER = 5;
 
+    private void skipTrailing(ChannelBuffer buf) {
+        while (buf.readableBytes() > 0) {
+            short currentByte = buf.getUnsignedByte(buf.readerIndex());
+
+            if (currentByte != (byte) '\r' && currentByte != (byte) '#' && currentByte != (byte) '\n') {
+                break;
+            }
+
+            buf.skipBytes(1);
+        }
+    }
+
+
     @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
@@ -36,28 +49,30 @@ public class Pt502FrameDecoder extends FrameDecoder {
             buf.skipBytes(BINARY_HEADER);
         }
 
-        int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '\r');
-        if (index < 0) {
-            index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '#');
-        }
-        if (index < 0) {
-            index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '\n');
-        }
+        if (buf.getUnsignedByte(buf.readerIndex()) == (byte) '$') {
+            int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '\r');
 
-        if (index > 0) {
-            ChannelBuffer result = buf.readBytes(index - buf.readerIndex());
+            if (index < 0) {
+                index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '#');
+            }
+            if (index < 0) {
+                index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '\n');
+            }
 
-            buf.skipBytes(index - buf.readerIndex());
+            if (index > 0) {
+                ChannelBuffer result = buf.readBytes(index - buf.readerIndex());
 
-            return result;
-        } else { // some messages are shorter and have a different format
-            if (buf.getUnsignedByte(buf.readerIndex()) == (byte) '@') {
-                ChannelBuffer result = buf.readBytes(buf.writerIndex() - buf.readerIndex());
-
-                buf.skipBytes(buf.writerIndex() - buf.readerIndex());
+                buf.skipBytes(index - buf.readerIndex());
+                skipTrailing(buf);
 
                 return result;
             }
+        } else if (buf.getUnsignedByte(buf.readerIndex()) == (byte) '@') {
+            ChannelBuffer result = buf.readBytes(buf.writerIndex() - buf.readerIndex());
+
+            buf.skipBytes(buf.writerIndex() - buf.readerIndex());
+
+            return result;
         }
 
         return null;

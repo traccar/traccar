@@ -106,6 +106,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
                 } else if (command.equals("POS")) {
                     // this might be a position update in the form of a delta
                     // for the previous position
+                    return null;
                 }
             }
 
