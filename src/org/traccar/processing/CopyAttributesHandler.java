@@ -16,10 +16,11 @@
  */
 package org.traccar.processing;
 
+import java.util.StringJoiner;
+
 import org.traccar.BaseDataHandler;
 import org.traccar.Context;
 import org.traccar.model.Position;
-import java.util.StringJoiner;
 
 public class CopyAttributesHandler extends BaseDataHandler {
 
