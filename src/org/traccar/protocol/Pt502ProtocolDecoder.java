@@ -33,6 +33,8 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
 
     private byte[] photo;
 
+    private static final String HEADER_ALARM = new String(new byte[] {0, 1});
+
     public Pt502ProtocolDecoder(Pt502Protocol protocol) {
         super(protocol);
     }
@@ -89,13 +91,44 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        Parser parser = new Parser(PATTERN, (String) msg);
-        if (!parser.matches()) {
-            return null;
-        }
-
         Position position = new Position();
         position.setProtocol(getProtocolName());
+
+        String strdata = (String) msg;
+        Parser parser = new Parser(PATTERN, strdata);
+
+        if (!parser.matches()) {
+            if (strdata.charAt(0) == '@') {
+                int index = 2;
+                int infoSet = 0;
+
+                while (index < strdata.length()) {
+                    String infoType = strdata.substring(index, index + 2); index += 2;
+                    int infoLength = strdata.charAt(index); index += 1;
+                    String rawInfo = strdata.substring(index, index + infoLength); index += infoLength;
+
+                    if (infoType.equals(HEADER_ALARM)) {
+                        String alarm = decodeAlarm(rawInfo);
+                        position.set(Position.KEY_ALARM, alarm);
+
+                        if (alarm != null) {
+                            infoSet++;
+                        }
+                    }
+                }
+
+                DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+
+                if (infoSet > 0 && deviceSession != null) {
+                    position.setDeviceId(deviceSession.getDeviceId());
+                    getLastLocation(position, null);
+
+                    return position;
+                }
+            }
+
+            return null;
+        }
 
         String type = parser.next();
 

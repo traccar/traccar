@@ -24,6 +24,19 @@ public class Pt502FrameDecoder extends FrameDecoder {
 
     private static final int BINARY_HEADER = 5;
 
+    private void skipFrameEnd(ChannelBuffer buf) {
+        while (buf.readable()) {
+            short currentByte = buf.getUnsignedByte(buf.readerIndex());
+
+            if (currentByte != (byte) '\r' && currentByte != (byte) '#' && currentByte != (byte) '\n') {
+                break;
+            }
+
+            buf.skipBytes(1);
+        }
+    }
+
+
     @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
@@ -36,18 +49,39 @@ public class Pt502FrameDecoder extends FrameDecoder {
             buf.skipBytes(BINARY_HEADER);
         }
 
-        int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '\r');
-        if (index < 0) {
-            index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '\n');
-        }
+        if (buf.getUnsignedByte(buf.readerIndex()) == (byte) '$') {
+            int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '\r');
 
-        if (index > 0) {
-            ChannelBuffer result = buf.readBytes(index - buf.readerIndex());
-            while (buf.readable()
-                    && (buf.getByte(buf.readerIndex()) == '\r' || buf.getByte(buf.readerIndex()) == '\n')) {
-                buf.skipBytes(1);
+            if (index < 0) {
+                index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '#');
             }
-            return result;
+            if (index < 0) {
+                index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '\n');
+            }
+
+            if (index > 0) {
+                ChannelBuffer frame = buf.readBytes(index - buf.readerIndex());
+
+                skipFrameEnd(buf);
+
+                return frame;
+            }
+        } else if (buf.getUnsignedByte(buf.readerIndex()) == (byte) '@') {
+            int toRead = 5;
+
+            while (toRead <= buf.readableBytes()) {
+                toRead += buf.getUnsignedByte(buf.readerIndex() + toRead - 1);
+
+                if (toRead == buf.readableBytes() || buf.getUnsignedByte(buf.readerIndex() + toRead) > 31) {
+                    break;
+                } else {
+                    toRead += 3;
+                }
+            }
+
+            ChannelBuffer frame = buf.readBytes(toRead);
+
+            return frame;
         }
 
         return null;
