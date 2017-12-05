@@ -60,11 +60,11 @@ public class Pt502FrameDecoder extends FrameDecoder {
             }
 
             if (index > 0) {
-                ChannelBuffer result = buf.readBytes(index - buf.readerIndex());
+                ChannelBuffer frame = buf.readBytes(index - buf.readerIndex());
 
                 skipFrameEnd(buf);
 
-                return result;
+                return frame;
             }
         } else if (buf.getUnsignedByte(buf.readerIndex()) == (byte) '@') {
             int toRead = 5;
@@ -79,9 +79,9 @@ public class Pt502FrameDecoder extends FrameDecoder {
                 }
             }
 
-            ChannelBuffer result = buf.readBytes(toRead);
+            ChannelBuffer frame = buf.readBytes(toRead);
 
-            return result;
+            return frame;
         }
 
         return null;
