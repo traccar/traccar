@@ -100,6 +100,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
         if (!parser.matches()) {
             if (strdata.charAt(0) == '@') {
                 int index = 2;
+                int infoSet = 0;
 
                 while (index < strdata.length()) {
                     String infoType = strdata.substring(index, index + 2); index += 2;
@@ -107,11 +108,23 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
                     String rawInfo = strdata.substring(index, index + infoLength); index += infoLength;
 
                     if (infoType.equals(HEADER_ALARM)) {
-                        position.set(Position.KEY_ALARM, decodeAlarm(rawInfo));
+                        String alarm = decodeAlarm(rawInfo);
+                        position.set(Position.KEY_ALARM, alarm);
+
+                        if (alarm != null) {
+                            infoSet++;
+                        }
                     }
                 }
 
-                return position;
+                DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+
+                if (infoSet > 0 && deviceSession != null) {
+                    position.setDeviceId(deviceSession.getDeviceId());
+                    getLastLocation(position, null);
+
+                    return position;
+                }
             }
 
             return null;
