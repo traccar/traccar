@@ -19,7 +19,7 @@ package org.traccar.processing;
 import org.traccar.BaseDataHandler;
 import org.traccar.Context;
 import org.traccar.model.Position;
-import org.apache.commons.lang3.StringUtils;
+import java.util.StringJoiner;
 
 public class CopyAttributesHandler extends BaseDataHandler {
 
@@ -30,19 +30,17 @@ public class CopyAttributesHandler extends BaseDataHandler {
         return null;
     }
 
-    @Override
-    protected Position handlePosition(Position position) {
-        Position last = getLastPosition(position.getDeviceId());
-
+    public Position copyAttributes(String attributesString, Position position, Position last) {
         if (last != null) {
-            String attributesString = Context.getDeviceManager().lookupAttributeString(
-                    position.getDeviceId(), "processing.copyAttributes", null, true);
-
             if (attributesString == null) {
                 attributesString = Position.KEY_DRIVER_UNIQUE_ID;
             } else {
                 if (attributesString.isEmpty()) {
-                    attributesString = StringUtils.join(last.getAttributes(), ",");
+                    StringJoiner attribs = new StringJoiner(",");
+                    for (String s : last.getAttributes().keySet()) {
+                        attribs.add(s);
+                    }
+                    attributesString = attribs.toString();
                 } else {
                     attributesString += "," + Position.KEY_DRIVER_UNIQUE_ID;
                 }
@@ -54,8 +52,17 @@ public class CopyAttributesHandler extends BaseDataHandler {
                 }
             }
         }
-
         return position;
+    }
+
+    @Override
+    protected Position handlePosition(Position position) {
+        Position last = getLastPosition(position.getDeviceId());
+
+        String attributesString = Context.getDeviceManager().lookupAttributeString(
+                position.getDeviceId(), "processing.copyAttributes", null, true);
+
+        return copyAttributes(attributesString, position, last);
     }
 
 }
