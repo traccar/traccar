@@ -40,7 +40,7 @@ end;
 
 function InitializeSetup(): Boolean;
 begin
-  if RegKeyExists(GetLocalMachine(), 'SOFTWARE\JavaSoft\Java Runtime Environment') then
+  if RegKeyExists(GetLocalMachine(), 'SOFTWARE\JavaSoft') then
   begin
     Result := true;
   end
