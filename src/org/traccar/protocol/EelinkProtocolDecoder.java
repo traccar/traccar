@@ -190,6 +190,8 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
             position.setCourse(buf.readUnsignedShort());
             position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+        } else {
+            getLastLocation(position, position.getDeviceTime());
         }
 
         if (BitUtil.check(flags, 1)) {
