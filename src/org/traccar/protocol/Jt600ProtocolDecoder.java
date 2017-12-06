@@ -63,8 +63,9 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
+        int protocolVersion = 0;
         if (longFormat) {
-            buf.readUnsignedByte(); // protocol
+            protocolVersion = buf.readUnsignedByte();
         }
 
         int version = BitUtil.from(buf.readUnsignedByte(), 4);
@@ -121,6 +122,11 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
                 CellTower cellTower = CellTower.fromCidLac(buf.readUnsignedShort(), buf.readUnsignedShort());
                 cellTower.setSignalStrength((int) buf.readUnsignedByte());
                 position.setNetwork(new Network(cellTower));
+
+                if (protocolVersion == 0x17) {
+                    buf.readUnsignedByte(); // geofence id
+                    buf.skipBytes(3); // reserved
+                }
 
             } else if (version == 1) {
 
