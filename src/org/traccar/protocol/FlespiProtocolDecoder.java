@@ -38,8 +38,6 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.Iterator;
 
 public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
 
@@ -85,11 +83,7 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
     }
 
     private void decodePosition(JsonObject object, Position position) {
-        // store all params in position
-        Set<Map.Entry<String, JsonValue>> params = object.entrySet();
-        Iterator<Map.Entry<String, JsonValue>> it = params.iterator();
-        while (it.hasNext()) {
-            Map.Entry<String, JsonValue> param = it.next();
+        for (Map.Entry<String, JsonValue> param : object.entrySet()) {
             String paramName = param.getKey();
             JsonValue paramValue = param.getValue();
             int index = -1;
@@ -98,8 +92,8 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
                 paramName = parts[0];
                 index = Integer.parseInt(parts[1]);
             }
-            if (!saveParam(paramName, index, paramValue, position)) {
-                saveUnknownParam(param.getKey(), param.getValue(), position);
+            if (!decodeParam(paramName, index, paramValue, position)) {
+                decodeUnknownParam(param.getKey(), param.getValue(), position);
             }
         }
         if (position.getLatitude() == 0 && position.getLongitude() == 0) {
@@ -107,11 +101,10 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
         }
     }
 
-    private boolean saveParam(String name, int index, JsonValue value, Position position) {
+    private boolean decodeParam(String name, int index, JsonValue value, Position position) {
         switch (name) {
             case "timestamp":
-                Date deviceTime = new Date((long) (((JsonNumber) value).doubleValue() * 1000));
-                position.setTime(deviceTime);
+                position.setTime(new Date((((JsonNumber) value).longValue() * 1000)));
                 return true;
             case "position.latitude":
                 position.setLatitude(((JsonNumber) value).doubleValue());
@@ -142,7 +135,7 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
                 return true;
             case "din":
             case "dout":
-                String key = ("din".equals(name)) ? Position.KEY_INPUT : Position.KEY_OUTPUT;
+                String key = name.equals("din") ? Position.KEY_INPUT : Position.KEY_OUTPUT;
                 if (value == JsonValue.TRUE && index <= 32 && index >= 1) {
                     if (position.getInteger(key) == 0) {
                         position.set(key, 1 << (index - 1));
@@ -252,7 +245,7 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
         }
     }
 
-    private void saveUnknownParam(String name, JsonValue value, Position position) {
+    private void decodeUnknownParam(String name, JsonValue value, Position position) {
         if (value instanceof JsonNumber) {
             if (((JsonNumber) value).isIntegral()) {
                 position.set(name, ((JsonNumber) value).longValue());
@@ -266,4 +259,5 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
             position.set(name, value == JsonValue.TRUE);
         }
     }
+
 }
