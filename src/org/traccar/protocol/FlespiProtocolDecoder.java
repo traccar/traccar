@@ -98,7 +98,7 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
                 paramName = parts[0];
                 index = Integer.parseInt(parts[1]);
             }
-            if (saveParam(paramName, index, paramValue, position) == 0) {
+            if (!saveParam(paramName, index, paramValue, position)) {
                 saveUnknownParam(param.getKey(), param.getValue(), position);
             }
         }
@@ -107,39 +107,39 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
         }
     }
 
-    private int saveParam(String name, int index, JsonValue value, Position position) {
+    private boolean saveParam(String name, int index, JsonValue value, Position position) {
         switch (name) {
             case "timestamp":
                 Date deviceTime = new Date((long) (((JsonNumber) value).doubleValue() * 1000));
                 position.setTime(deviceTime);
-                return 1;
+                return true;
             case "position.latitude":
                 position.setLatitude(((JsonNumber) value).doubleValue());
-                return 1;
+                return true;
             case "position.longitude":
                 position.setLongitude(((JsonNumber) value).doubleValue());
-                return 1;
+                return true;
             case "position.speed":
                 position.setSpeed(((JsonNumber) value).doubleValue());
-                return 1;
+                return true;
             case "position.direction":
                 position.setCourse(((JsonNumber) value).doubleValue());
-                return 1;
+                return true;
             case "position.altitude":
                 position.setAltitude(((JsonNumber) value).doubleValue());
-                return 1;
+                return true;
             case "position.satellites":
                 position.set(Position.KEY_SATELLITES, ((JsonNumber) value).intValue());
-                return 1;
+                return true;
             case "position.valid":
                 position.setValid(value == JsonValue.TRUE);
-                return 1;
+                return true;
             case "position.hdop":
                 position.set(Position.KEY_HDOP, ((JsonNumber) value).doubleValue());
-                return 1;
+                return true;
             case "position.pdop":
                 position.set(Position.KEY_PDOP, ((JsonNumber) value).doubleValue());
-                return 1;
+                return true;
             case "din":
             case "dout":
                 String key = ("din".equals(name)) ? Position.KEY_INPUT : Position.KEY_OUTPUT;
@@ -150,105 +150,105 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
                         position.set(key, (position.getInteger(key) | 1 << (index - 1)));
                     }
                 }
-                return 1;
+                return true;
             case "gps.vehicle.mileage":
                 position.set(Position.KEY_ODOMETER, ((JsonNumber) value).doubleValue());
-                return 1;
+                return true;
             case "external.powersource.voltage":
                 position.set(Position.KEY_POWER, ((JsonNumber) value).doubleValue());
-                return 1;
+                return true;
             case "battery.voltage":
                 position.set(Position.KEY_BATTERY, ((JsonNumber) value).doubleValue());
-                return 1;
+                return true;
             case "fuel.level":
             case "can.fuel.level":
                 position.set(Position.KEY_FUEL_LEVEL, ((JsonNumber) value).doubleValue());
-                return 1;
+                return true;
             case "engine.rpm":
             case "can.engine.rpm":
                 position.set(Position.KEY_RPM, ((JsonNumber) value).doubleValue());
-                return 1;
+                return true;
             case "can.engine.temperature":
                 position.set(Position.PREFIX_TEMP + (index > 0 ? index : 0), ((JsonNumber) value).doubleValue());
-                return 1;
+                return true;
             case "engine.ignition.status":
                 position.set(Position.KEY_IGNITION, value == JsonValue.TRUE);
-                return 1;
+                return true;
             case "movement.status":
                 position.set(Position.KEY_MOTION, value == JsonValue.TRUE);
-                return 1;
+                return true;
             case "device.temperature":
                 position.set(Position.KEY_DEVICE_TEMP, ((JsonNumber) value).doubleValue());
-                return 1;
+                return true;
             case "ibutton.code":
                 position.set(Position.KEY_DRIVER_UNIQUE_ID, ((JsonString) value).getString());
-                return 1;
+                return true;
             case "vehicle.vin":
                 position.set(Position.KEY_VIN, ((JsonString) value).getString());
-                return 1;
+                return true;
             case "alarm.event.trigger":
                 if (value == JsonValue.TRUE) {
                     position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
                 }
-                return 1;
+                return true;
             case "towing.event.trigger":
             case "towing.alarm.status":
                 if (value == JsonValue.TRUE) {
                     position.set(Position.KEY_ALARM, Position.ALARM_TOW);
                 }
-                return 1;
+                return true;
             case "geofence.event.enter":
                 if (value == JsonValue.TRUE) {
                     position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_ENTER);
                 }
-                return 1;
+                return true;
             case "geofence.event.exit":
                 if (value == JsonValue.TRUE) {
                     position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_EXIT);
                 }
-                return 1;
+                return true;
             case "shock.event.trigger":
                 if (value == JsonValue.TRUE) {
                     position.set(Position.KEY_ALARM, Position.ALARM_SHOCK);
                 }
-                return 1;
+                return true;
             case "overspeeding.event.trigger":
                 if (value == JsonValue.TRUE) {
                     position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
                 }
-                return 1;
+                return true;
             case "harsh.acceleration.event.trigger":
                 if (value == JsonValue.TRUE) {
                     position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
                 }
-                return 1;
+                return true;
             case "harsh.braking.event.trigger":
                 if (value == JsonValue.TRUE) {
                     position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
                 }
-                return 1;
+                return true;
             case "harsh.cornering.event.trigger":
                 if (value == JsonValue.TRUE) {
                     position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
                 }
-                return 1;
+                return true;
             case "gnss.antenna.cut.status":
                 if (value == JsonValue.TRUE) {
                     position.set(Position.KEY_ALARM, Position.ALARM_GPS_ANTENNA_CUT);
                 }
-                return 1;
+                return true;
             case "gsm.jamming.event.trigger":
                 if (value == JsonValue.TRUE) {
                     position.set(Position.KEY_ALARM, Position.ALARM_JAMMING);
                 }
-                return 1;
+                return true;
             case "hood.open.status":
                 if (value == JsonValue.TRUE) {
                     position.set(Position.KEY_ALARM, Position.ALARM_BONNET);
                 }
-                return 1;
+                return true;
             default:
-                return 0;
+                return false;
         }
     }
 
