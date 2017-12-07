@@ -72,9 +72,9 @@ public class TmgProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // satellites
             .number("[^,]*,")                    // battery level
             .expression("([01]),")               // ignition
-            .expression("[LH]{4},")              // input
+            .expression("([LH]{4}),")            // input
             .expression("[NT]{4},")              // tamper status
-            .expression("[LH]{2},")              // output
+            .expression("([LH]{2}),")            // output
             .number("(d+.d+),")                  // adc1
             .number("(d+.d+),")                  // adc1
             .number("[^,]*,")                    // device id
@@ -171,6 +171,17 @@ public class TmgProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_RSSI, parser.nextInt());
             position.set(Position.KEY_SATELLITES, parser.nextInt());
             position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
+
+            char[] input = parser.next().toCharArray();
+            for (int i = 0; i < input.length; i++) {
+                position.set(Position.PREFIX_IN + (i + 1), input[i] == 'H');
+            }
+
+            char[] output = parser.next().toCharArray();
+            for (int i = 0; i < output.length; i++) {
+                position.set(Position.PREFIX_OUT + (i + 1), output[i] == 'H');
+            }
+
             position.set(Position.PREFIX_ADC + 1, parser.nextDouble());
             position.set(Position.PREFIX_ADC + 2, parser.nextDouble());
             position.set(Position.KEY_ODOMETER, parser.nextInt());
