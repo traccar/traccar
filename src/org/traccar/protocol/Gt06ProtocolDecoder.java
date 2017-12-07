@@ -236,8 +236,11 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
+        int mcc = buf.readUnsignedShort();
+        int mnc = BitUtil.check(mcc, 15) ? buf.readUnsignedShort() : buf.readUnsignedByte();
+
         position.setNetwork(new Network(CellTower.from(
-                buf.readUnsignedShort(), buf.readUnsignedByte(), buf.readUnsignedShort(), buf.readUnsignedMedium())));
+                BitUtil.to(mcc, 15), mnc, buf.readUnsignedShort(), buf.readUnsignedMedium())));
 
         if (length > 0) {
             buf.skipBytes(length - (hasLength ? 9 : 8));
