@@ -184,13 +184,7 @@ public class Tk103ProtocolDecoderTest extends ProtocolTest {
                 "(864555555555555,ZC03,191117,234207,$Notice: Device version: 1.0$)"));
 
         verifyNotNull(decoder, text(
-                "(864555555555555,ZC03,191117,234207,$1 .Sensor sensitivity: 1\r\n" +
-                "2 .Alert status: Off\r\n" +
-                "3 .Check interval is set to 240 minute(s).\r\n" +
-                "4 .Checkgsm interval is set to 60 minute(s).\r\n" +
-                "5 .SOS SMS Alert: On\r\n" +
-                "6 .SOS Call Alert: On\r\n" +
-                "7 . Power: 95%$)"));
+                "(864555555555555,ZC03,191117,234207,$1 .Sensor sensitivity: 1\r\n2 .Alert status: Off\r\n3 .Check interval is set to 240 minute(s).\r\n4 .Checkgsm interval is set to 60 minute(s).\r\n5 .SOS SMS Alert: On\r\n6 .SOS Call Alert: On\r\n7 . Power: 95%$)"));
 
     }
 

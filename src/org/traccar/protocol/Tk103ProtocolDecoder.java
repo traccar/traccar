@@ -195,11 +195,6 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             case "DW60":
                 position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
                 break;
-            case "ZC28":
-            case "DW41":
-            case "DW61":
-                position.set(Position.KEY_ALARM, "badBattery");
-                break;
             default:
                 break;
         }

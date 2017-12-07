@@ -25,9 +25,7 @@ public class Tk103FrameDecoder extends FrameDecoder {
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx,
-            Channel channel,
-            ChannelBuffer buf) throws Exception {
+            ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
 
         if (buf.readableBytes() < 2) {
             return null;
@@ -70,10 +68,8 @@ public class Tk103FrameDecoder extends FrameDecoder {
         }
 
         buf.readerIndex(frameStartIndex);
-        ChannelBuffer result = buf.readBytes(frameEndIndex + 1 - frameStartIndex);
 
-        return result;
-
+        return buf.readBytes(frameEndIndex + 1 - frameStartIndex);
     }
 
 }
