@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,17 +38,21 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_POSITION_RSP = 0xFF01;
     public static final int MSG_LOGIN = 0xAA02;
     public static final int MSG_LOGIN_RSP = 0xFF03;
+    public static final int MSG_HSO_REQ = 0x0002;
+    public static final int MSG_HSO_RSP = 0x0003;
 
-    private static void sendResponse(Channel channel, int type, int index, ChannelBuffer content) {
+    private void sendResponse(Channel channel, int type, int index, ChannelBuffer content) {
         if (channel != null) {
             ChannelBuffer response = ChannelBuffers.dynamicBuffer();
             response.writeByte(0xC0);
             response.writeShort(0x0100);
-            response.writeShort(12 + content.readableBytes());
+            response.writeShort(12 + (content != null ? content.readableBytes() : 0));
             response.writeShort(type);
             response.writeShort(0);
             response.writeInt(index);
-            response.writeBytes(content);
+            if (content != null) {
+                response.writeBytes(content);
+            }
             response.writeByte(0xC0);
             channel.write(response);
         }
@@ -87,6 +91,10 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
                     buf.skipBytes(length);
                 }
             }
+
+        } else if (type == MSG_HSO_REQ) {
+
+            sendResponse(channel, MSG_HSO_RSP, index, null);
 
         } else if (type == MSG_POSITION) {
 
@@ -133,7 +141,7 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
                 buf.skipBytes(length);
             }
 
-            sendResponse(channel, MSG_POSITION_RSP, index, ChannelBuffers.dynamicBuffer());
+            sendResponse(channel, MSG_POSITION_RSP, index, null);
 
             return position;
 
