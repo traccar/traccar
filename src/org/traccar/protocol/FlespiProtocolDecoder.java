@@ -92,17 +92,13 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
             Map.Entry<String, JsonValue> param = it.next();
             String paramName = param.getKey();
             JsonValue paramValue = param.getValue();
-            if ("timestamp".equals(paramName)) {
-                Date deviceTime = new Date((long) (((JsonNumber) paramValue).doubleValue() * 1000));
-                position.setTime(deviceTime);
-            } else if (paramName.startsWith("position.")) {
-                savePosition(paramName, paramValue, position);
-            } else if (paramName.matches("din#[\\d]{1,2}")) {
-                saveInput(paramName, paramValue, position);
-            } else if (paramName.matches("dout#[\\d]{1,2}")) {
-                saveOutput(paramName, paramValue, position);
-            } else if (saveAlarm(paramName, paramValue, position) == 0
-                    && saveParam(paramName, paramValue, position) == 0) {
+            int index = -1;
+            if (paramName.contains("#")) {
+                String[] parts = paramName.split("#");
+                paramName = parts[0];
+                index = Integer.parseInt(parts[1]);
+            }
+            if (saveParam(paramName, index, paramValue, position) == 0) {
                 saveUnknownParam(param.getKey(), param.getValue(), position);
             }
         }
@@ -111,205 +107,148 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
         }
     }
 
-    private void savePosition(String name, JsonValue value, Position position) {
+    private int saveParam(String name, int index, JsonValue value, Position position) {
         switch (name) {
+            case "timestamp":
+                Date deviceTime = new Date((long) (((JsonNumber) value).doubleValue() * 1000));
+                position.setTime(deviceTime);
+                return 1;
             case "position.latitude":
                 position.setLatitude(((JsonNumber) value).doubleValue());
-                break;
+                return 1;
             case "position.longitude":
                 position.setLongitude(((JsonNumber) value).doubleValue());
-                break;
+                return 1;
             case "position.speed":
                 position.setSpeed(((JsonNumber) value).doubleValue());
-                break;
+                return 1;
             case "position.direction":
                 position.setCourse(((JsonNumber) value).doubleValue());
-                break;
+                return 1;
             case "position.altitude":
                 position.setAltitude(((JsonNumber) value).doubleValue());
-                break;
+                return 1;
             case "position.satellites":
                 position.set(Position.KEY_SATELLITES, ((JsonNumber) value).intValue());
-                break;
+                return 1;
             case "position.valid":
                 position.setValid(value == JsonValue.TRUE);
-                break;
+                return 1;
             case "position.hdop":
                 position.set(Position.KEY_HDOP, ((JsonNumber) value).doubleValue());
-                break;
+                return 1;
             case "position.pdop":
                 position.set(Position.KEY_PDOP, ((JsonNumber) value).doubleValue());
-                break;
-            default:
-                saveUnknownParam(name, value, position);
-                break;
-        }
-    }
-
-    private int saveParam(String name, JsonValue value, Position position) {
-        if (name == null) {
-            return 0;
-        }
-        if (name.equals("gps.vehicle.mileage") || name.startsWith("gps.vehicle.mileage#")) {
-            position.set(Position.KEY_ODOMETER, ((JsonNumber) value).doubleValue());
-            return 1;
-        }
-        if (name.equals("external.powersource.voltage") || name.startsWith("external.powersource.voltage#")) {
-            position.set(Position.KEY_POWER, ((JsonNumber) value).doubleValue());
-            return 1;
-        }
-        if (name.equals("battery.voltage") || name.startsWith("battery.voltage#")) {
-            position.set(Position.KEY_BATTERY, ((JsonNumber) value).doubleValue());
-            return 1;
-        }
-        if (name.equals("fuel.level") || name.equals("can.fuel.level")
-                || name.startsWith("fuel.level#") || name.startsWith("can.fuel.level#")) {
-            position.set(Position.KEY_FUEL_LEVEL, ((JsonNumber) value).doubleValue());
-            return 1;
-        }
-        if (name.equals("engine.rpm") || name.equals("can.engine.rpm")
-                || name.startsWith("engine.rpm#") || name.startsWith("can.engine.rpm#")) {
-            position.set(Position.KEY_RPM, ((JsonNumber) value).doubleValue());
-            return 1;
-        }
-        if (name.equals("can.engine.temperature") || name.startsWith("can.engine.temperature#")) {
-            int seqNum = 0;
-            if (name.contains("#")) {
-                try {
-                    seqNum = Integer.parseInt(name.replaceAll("can\\.engine\\.temperature#", ""));
-                } catch (NumberFormatException e) {
-                    seqNum = 0;
+                return 1;
+            case "din":
+            case "dout":
+                String key = ("din".equals(name)) ? Position.KEY_INPUT : Position.KEY_OUTPUT;
+                if (value == JsonValue.TRUE && index <= 32 && index >= 1) {
+                    if (position.getInteger(key) == 0) {
+                        position.set(key, 1 << (index - 1));
+                    } else {
+                        position.set(key, (position.getInteger(key) | 1 << (index - 1)));
+                    }
                 }
-            }
-            position.set(Position.PREFIX_TEMP + seqNum, ((JsonNumber) value).doubleValue());
-            return 1;
-        }
-        if (name.equals("engine.ignition.status")) {
-            position.set(Position.KEY_IGNITION, value == JsonValue.TRUE);
-            return 1;
-        }
-        if (name.equals("movement.status")) {
-            position.set(Position.KEY_MOTION, value == JsonValue.TRUE);
-            return 1;
-        }
-        if (name.equals("device.temperature")) {
-            position.set(Position.KEY_DEVICE_TEMP, ((JsonNumber) value).doubleValue());
-            return 1;
-        }
-        if (name.equals("ibutton.code")) {
-            position.set(Position.KEY_DRIVER_UNIQUE_ID, ((JsonString) value).getString());
-            return 1;
-        }
-        if (name.equals("vehicle.vin")) {
-            position.set(Position.KEY_VIN, ((JsonString) value).getString());
-            return 1;
-        }
-        return 0;
-    }
-
-    private int saveAlarm(String name, JsonValue value, Position position) {
-        if ("alarm.event.trigger".equals(name)) {
-            if (value == JsonValue.TRUE) {
-                position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
-            }
-            return 1;
-        }
-        if ("towing.event.trigger".equals(name) || "towing.alarm.status".equals(name)) {
-            if (value == JsonValue.TRUE) {
-                position.set(Position.KEY_ALARM, Position.ALARM_TOW);
-            }
-            return 1;
-        }
-        if ("geofence.event.enter".equals(name)) {
-            if (value == JsonValue.TRUE) {
-                position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_ENTER);
-            }
-            return 1;
-        }
-        if ("geofence.event.exit".equals(name)) {
-            if (value == JsonValue.TRUE) {
-                position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_EXIT);
-            }
-            return 1;
-        }
-        if ("shock.event.trigger".equals(name)) {
-            if (value == JsonValue.TRUE) {
-                position.set(Position.KEY_ALARM, Position.ALARM_SHOCK);
-            }
-            return 1;
-        }
-        if ("overspeeding.event.trigger".equals(name)) {
-            if (value == JsonValue.TRUE) {
-                position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
-            }
-            return 1;
-        }
-        if ("harsh.acceleration.event.trigger".equals(name)) {
-            if (value == JsonValue.TRUE) {
-                position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
-            }
-            return 1;
-        }
-        if ("harsh.braking.event.trigger".equals(name)) {
-            if (value == JsonValue.TRUE) {
-                position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
-            }
-            return 1;
-        }
-        if ("harsh.cornering.event.trigger".equals(name)) {
-            if (value == JsonValue.TRUE) {
-                position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
-            }
-            return 1;
-        }
-        if ("gnss.antenna.cut.status".equals(name)) {
-            if (value == JsonValue.TRUE) {
-                position.set(Position.KEY_ALARM, Position.ALARM_GPS_ANTENNA_CUT);
-            }
-            return 1;
-        }
-        if ("gsm.jamming.event.trigger".equals(name)) {
-            if (value == JsonValue.TRUE) {
-                position.set(Position.KEY_ALARM, Position.ALARM_JAMMING);
-            }
-            return 1;
-        }
-        if ("hood.open.status".equals(name)) {
-            if (value == JsonValue.TRUE) {
-                position.set(Position.KEY_ALARM, Position.ALARM_BONNET);
-            }
-            return 1;
-        }
-        return 0;
-    }
-
-    private void saveInput(String name, JsonValue value, Position position) {
-        if (value != JsonValue.TRUE) {
-            return;
-        }
-        int in = Integer.parseInt(name.replaceAll("^din#", ""));
-        if (in > 32 || in < 1) {
-            return;
-        }
-        if (position.getInteger(Position.KEY_INPUT) == 0) {
-            position.set(Position.KEY_INPUT, 1 << (in - 1));
-        } else {
-            position.set(Position.KEY_INPUT, (position.getInteger(Position.KEY_INPUT) | 1 << (in - 1)));
-        }
-    }
-
-    private void saveOutput(String name, JsonValue value, Position position) {
-        if (value != JsonValue.TRUE) {
-            return;
-        }
-        int out = Integer.parseInt(name.replaceAll("^dout#", ""));
-        if (out > 32 || out < 1) {
-            return;
-        }
-        if (position.getInteger(Position.KEY_OUTPUT) == 0) {
-            position.set(Position.KEY_OUTPUT, 1 << (out - 1));
-        } else {
-            position.set(Position.KEY_OUTPUT, (position.getInteger(Position.KEY_OUTPUT) | 1 << (out - 1)));
+                return 1;
+            case "gps.vehicle.mileage":
+                position.set(Position.KEY_ODOMETER, ((JsonNumber) value).doubleValue());
+                return 1;
+            case "external.powersource.voltage":
+                position.set(Position.KEY_POWER, ((JsonNumber) value).doubleValue());
+                return 1;
+            case "battery.voltage":
+                position.set(Position.KEY_BATTERY, ((JsonNumber) value).doubleValue());
+                return 1;
+            case "fuel.level":
+            case "can.fuel.level":
+                position.set(Position.KEY_FUEL_LEVEL, ((JsonNumber) value).doubleValue());
+                return 1;
+            case "engine.rpm":
+            case "can.engine.rpm":
+                position.set(Position.KEY_RPM, ((JsonNumber) value).doubleValue());
+                return 1;
+            case "can.engine.temperature":
+                position.set(Position.PREFIX_TEMP + (index > 0 ? index : 0), ((JsonNumber) value).doubleValue());
+                return 1;
+            case "engine.ignition.status":
+                position.set(Position.KEY_IGNITION, value == JsonValue.TRUE);
+                return 1;
+            case "movement.status":
+                position.set(Position.KEY_MOTION, value == JsonValue.TRUE);
+                return 1;
+            case "device.temperature":
+                position.set(Position.KEY_DEVICE_TEMP, ((JsonNumber) value).doubleValue());
+                return 1;
+            case "ibutton.code":
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, ((JsonString) value).getString());
+                return 1;
+            case "vehicle.vin":
+                position.set(Position.KEY_VIN, ((JsonString) value).getString());
+                return 1;
+            case "alarm.event.trigger":
+                if (value == JsonValue.TRUE) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+                }
+                return 1;
+            case "towing.event.trigger":
+            case "towing.alarm.status":
+                if (value == JsonValue.TRUE) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_TOW);
+                }
+                return 1;
+            case "geofence.event.enter":
+                if (value == JsonValue.TRUE) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_ENTER);
+                }
+                return 1;
+            case "geofence.event.exit":
+                if (value == JsonValue.TRUE) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_EXIT);
+                }
+                return 1;
+            case "shock.event.trigger":
+                if (value == JsonValue.TRUE) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_SHOCK);
+                }
+                return 1;
+            case "overspeeding.event.trigger":
+                if (value == JsonValue.TRUE) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+                }
+                return 1;
+            case "harsh.acceleration.event.trigger":
+                if (value == JsonValue.TRUE) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+                }
+                return 1;
+            case "harsh.braking.event.trigger":
+                if (value == JsonValue.TRUE) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+                }
+                return 1;
+            case "harsh.cornering.event.trigger":
+                if (value == JsonValue.TRUE) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
+                }
+                return 1;
+            case "gnss.antenna.cut.status":
+                if (value == JsonValue.TRUE) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_GPS_ANTENNA_CUT);
+                }
+                return 1;
+            case "gsm.jamming.event.trigger":
+                if (value == JsonValue.TRUE) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_JAMMING);
+                }
+                return 1;
+            case "hood.open.status":
+                if (value == JsonValue.TRUE) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_BONNET);
+                }
+                return 1;
+            default:
+                return 0;
         }
     }
 
