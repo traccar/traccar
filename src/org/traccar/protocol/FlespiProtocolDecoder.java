@@ -104,7 +104,7 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
     private boolean decodeParam(String name, int index, JsonValue value, Position position) {
         switch (name) {
             case "timestamp":
-                position.setTime(new Date((((JsonNumber) value).longValue() * 1000)));
+                position.setTime(new Date(((JsonNumber) value).longValue() * 1000));
                 return true;
             case "position.latitude":
                 position.setLatitude(((JsonNumber) value).doubleValue());
@@ -140,7 +140,7 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
                     if (position.getInteger(key) == 0) {
                         position.set(key, 1 << (index - 1));
                     } else {
-                        position.set(key, (position.getInteger(key) | 1 << (index - 1)));
+                        position.set(key, position.getInteger(key) | 1 << (index - 1));
                     }
                 }
                 return true;

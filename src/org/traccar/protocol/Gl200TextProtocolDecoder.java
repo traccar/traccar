@@ -575,10 +575,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(reportMask, 9)) {
             index += 1; // range
         }
-        if (BitUtil.check(reportMask, 10)) {
-            if (!values[index++].isEmpty()) {
-                position.set(Position.KEY_THROTTLE, Integer.parseInt(values[index - 1]));
-            }
+        if (BitUtil.check(reportMask, 10) && !values[index++].isEmpty()) {
+            position.set(Position.KEY_THROTTLE, Integer.parseInt(values[index - 1]));
         }
         if (BitUtil.check(reportMask, 11)) {
             position.set(Position.KEY_HOURS, Double.parseDouble(values[index++]));
