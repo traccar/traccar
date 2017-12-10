@@ -75,13 +75,20 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             .number("(x+)|")                     // battery
             .number("(x+)?,")                    // power
             .groupBegin()
-            .expression("([^,]+)?,")             // event specific
+            .expression("([^,]+)?,").optional()  // event specific
             .expression("[^,]*,")                // reserved
             .number("(d+)?,")                    // protocol
             .number("(x{4})?")                   // fuel
-            .number("(?:,(x{6}(?:|x{6})*))?")    // temperature
+            .groupBegin()
+            .number(",(x{6}(?:|x{6})*)?")        // temperature
+            .groupBegin()
+            .number(",(d+)")                     // data count
+            .expression(",([^*]*)")              // data
             .groupEnd("?")
+            .groupEnd("?")
+            .or()
             .any()
+            .groupEnd()
             .text("*")
             .number("xx")
             .text("\r\n").optional()
@@ -234,7 +241,33 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
+        if (parser.hasNext(2)) {
+            decodeDataFields(position, parser.nextInt(), parser.next().split(","));
+        }
+
         return position;
+    }
+
+    private void decodeDataFields(Position position, int count, String[] values) {
+
+        if (values.length > 1 && !values[1].isEmpty()) {
+            position.set("tempData", values[1]);
+        }
+
+        if (values.length > 5 && !values[5].isEmpty()) {
+            String[] data = values[5].split("\\|");
+            boolean started = data[0].charAt(0) == '0';
+            position.set("taximeterOn", started);
+            position.set("taximeterStart", data[1]);
+            if (!started) {
+                position.set("taximeterEnd", data[2]);
+                position.set("taximeterDistance", Integer.parseInt(data[3]));
+                position.set("taximeterFare", Integer.parseInt(data[4]));
+                position.set("taximeterTrip", data[5]);
+                position.set("taximeterWait", data[6]);
+            }
+        }
+
     }
 
     private List<Position> decodeBinaryC(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
