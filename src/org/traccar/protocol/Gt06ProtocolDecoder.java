@@ -158,7 +158,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
     private static boolean hasLanguage(int type) {
         switch (type) {
-            case MSG_LBS_EXTEND:
             case MSG_GPS_PHONE:
             case MSG_HEARTBEAT:
             case MSG_GPS_LBS_STATUS_3:
