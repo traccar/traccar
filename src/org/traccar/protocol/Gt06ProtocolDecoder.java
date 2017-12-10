@@ -156,6 +156,21 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private static boolean hasLanguage(int type) {
+        switch (type) {
+            case MSG_LBS_EXTEND:
+            case MSG_GPS_PHONE:
+            case MSG_HEARTBEAT:
+            case MSG_GPS_LBS_STATUS_3:
+            case MSG_LBS_MULTIPLE:
+            case MSG_LBS_2:
+            case MSG_FENCE_MULTI:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     private void sendResponse(Channel channel, boolean extended, int type, ChannelBuffer content) {
         if (channel != null) {
             ChannelBuffer response = ChannelBuffers.dynamicBuffer();
@@ -610,6 +625,10 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             }
             return null;
 
+        }
+
+        if (hasLanguage(type)) {
+            buf.readUnsignedShort();
         }
 
         sendResponse(channel, false, type, null);
