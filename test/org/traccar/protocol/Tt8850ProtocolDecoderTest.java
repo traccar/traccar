@@ -11,6 +11,9 @@ public class Tt8850ProtocolDecoderTest extends ProtocolTest {
         Tt8850ProtocolDecoder decoder = new Tt8850ProtocolDecoder(new Tt8850Protocol());
 
         verifyPosition(decoder, text(
+                "\u0000\u0004,007F,0,GTFRI,020102,867844000667538,4142726856,0,0,1,3,1.6,0,997.3,-66.830786,10.483394,20171212171418,0734,0004,041A,4220,69,20171212171657,FF61"));
+
+        verifyPosition(decoder, text(
                 "\u0000\u0004,005F,0,GTFRI,020100,135790246811220,,0,0,1,1,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,6141,90,20090214093254,11F0"));
         
         verifyPosition(decoder, text(
