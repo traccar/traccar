@@ -630,6 +630,10 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedShort();
         }
 
+        if (type == MSG_GPS_LBS_STATUS_3) {
+            position.set(Position.KEY_GEOFENCE, buf.readUnsignedByte());
+        }
+
         sendResponse(channel, false, type, null);
 
         return position;
