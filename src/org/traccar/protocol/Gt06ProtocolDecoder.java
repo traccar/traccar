@@ -118,6 +118,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             case MSG_GPS_LBS_EXTEND:
             case MSG_GPS_2:
             case MSG_FENCE_SINGLE:
+            case MSG_FENCE_MULTI:
                 return true;
             default:
                 return false;
@@ -135,6 +136,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             case MSG_GPS_LBS_STATUS_3:
             case MSG_GPS_2:
             case MSG_FENCE_SINGLE:
+            case MSG_FENCE_MULTI:
             case MSG_LBS_ALARM:
             case MSG_LBS_ADDRESS:
                 return true;
@@ -630,7 +632,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedShort();
         }
 
-        if (type == MSG_GPS_LBS_STATUS_3) {
+        if (type == MSG_GPS_LBS_STATUS_3 || type == MSG_FENCE_MULTI) {
             position.set(Position.KEY_GEOFENCE, buf.readUnsignedByte());
         }
 
