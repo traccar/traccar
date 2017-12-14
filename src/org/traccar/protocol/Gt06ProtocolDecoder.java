@@ -554,14 +554,14 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             getLastLocation(position, dateBuilder.getDate());
 
             int mcc = buf.readUnsignedShort();
-            int mnc = buf.readUnsignedByte();
+            int mnc = BitUtil.check(mcc, 15) ? buf.readUnsignedShort() : buf.readUnsignedByte();
             Network network = new Network();
             for (int i = 0; i < 7; i++) {
                 int lac = longFormat ? buf.readInt() : buf.readUnsignedShort();
                 int cid = longFormat ? (int) buf.readLong() : buf.readUnsignedMedium();
                 int rssi = -buf.readUnsignedByte();
                 if (lac > 0) {
-                    network.addCellTower(CellTower.from(mcc, mnc, lac, cid, rssi));
+                    network.addCellTower(CellTower.from(BitUtil.to(mcc, 15), mnc, lac, cid, rssi));
                 }
             }
 
