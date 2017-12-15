@@ -249,7 +249,7 @@ public class DeviceManager implements IdentityManager {
 
     public void updateLatestPosition(Position position) throws SQLException {
 
-        if (isLatestPosition(position)) {
+        if (isLatestPosition(position) && position.getValid()) {
 
             dataManager.updateLatestPosition(position);
 
