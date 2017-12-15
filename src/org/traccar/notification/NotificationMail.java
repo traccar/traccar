@@ -45,18 +45,18 @@ public final class NotificationMail {
             properties.put("mail.smtp.host", host);
             properties.put("mail.smtp.port", String.valueOf(provider.getInteger("mail.smtp.port", 25)));
 
-            String starttlsEnable = provider.getString("mail.smtp.starttls.enable");
+            Boolean starttlsEnable = provider.getBoolean("mail.smtp.starttls.enable");
             if (starttlsEnable != null) {
-                properties.put("mail.smtp.starttls.enable", Boolean.parseBoolean(starttlsEnable));
+                properties.put("mail.smtp.starttls.enable", String.valueOf(starttlsEnable));
             }
-            String starttlsRequired = provider.getString("mail.smtp.starttls.required");
+            Boolean starttlsRequired = provider.getBoolean("mail.smtp.starttls.required");
             if (starttlsRequired != null) {
-                properties.put("mail.smtp.starttls.required", Boolean.parseBoolean(starttlsRequired));
+                properties.put("mail.smtp.starttls.required", String.valueOf(starttlsRequired));
             }
 
-            String sslEnable = provider.getString("mail.smtp.ssl.enable");
+            Boolean sslEnable = provider.getBoolean("mail.smtp.ssl.enable");
             if (sslEnable != null) {
-                properties.put("mail.smtp.ssl.enable", Boolean.parseBoolean(sslEnable));
+                properties.put("mail.smtp.ssl.enable", String.valueOf(sslEnable));
             }
             String sslTrust = provider.getString("mail.smtp.ssl.trust");
             if (sslTrust != null) {
