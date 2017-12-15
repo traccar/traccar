@@ -47,16 +47,16 @@ public final class NotificationMail {
 
             Boolean starttlsEnable = provider.getBoolean("mail.smtp.starttls.enable");
             if (starttlsEnable != null) {
-                properties.put("mail.smtp.starttls.enable", starttlsEnable);
+                properties.put("mail.smtp.starttls.enable", String.valueOf(starttlsEnable));
             }
             Boolean starttlsRequired = provider.getBoolean("mail.smtp.starttls.required");
             if (starttlsRequired != null) {
-                properties.put("mail.smtp.starttls.required", starttlsRequired);
+                properties.put("mail.smtp.starttls.required", String.valueOf(starttlsRequired));
             }
 
             Boolean sslEnable = provider.getBoolean("mail.smtp.ssl.enable");
             if (sslEnable != null) {
-                properties.put("mail.smtp.ssl.enable", sslEnable);
+                properties.put("mail.smtp.ssl.enable", String.valueOf(sslEnable));
             }
             String sslTrust = provider.getString("mail.smtp.ssl.trust");
             if (sslTrust != null) {
