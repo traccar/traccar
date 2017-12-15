@@ -61,4 +61,21 @@ public class PropertiesProvider {
         }
     }
 
+    public Boolean getBoolean(String key) {
+        if (config != null) {
+            if (config.hasKey(key)) {
+                return config.getBoolean(key);
+            } else {
+                return null;
+            }
+        } else {
+            Object result = extendedModel.getAttributes().get(key);
+            if (result != null) {
+                return result instanceof String ? Boolean.valueOf((String) result) : (Boolean) result;
+            } else {
+                return null;
+            }
+        }
+    }
+
 }
