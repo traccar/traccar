@@ -552,7 +552,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_IGNITION, Integer.parseInt(values[index++]) > 0);
         }
         if (BitUtil.check(reportMask, 2)) {
-            index += 1; // total distance
+            position.set("totalVehicleDistance", values[index++]);
         }
         if (BitUtil.check(reportMask, 3)) {
             position.set("totalFuelConsumption", Double.parseDouble(values[index++]));
@@ -566,14 +566,14 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(reportMask, 6)) {
             position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(values[index++]));
         }
-        if (BitUtil.check(reportMask, 7)) {
-            index += 1; // fuel consumption
+        if (BitUtil.check(reportMask, 7) && !values[index++].isEmpty()) {
+            position.set(Position.KEY_FUEL_CONSUMPTION, Double.parseDouble(values[index - 1].substring(1)));
         }
-        if (BitUtil.check(reportMask, 8)) {
-            index += 1; // fuel level
+        if (BitUtil.check(reportMask, 8) && !values[index++].isEmpty()) {
+            position.set(Position.KEY_FUEL_LEVEL, Double.parseDouble(values[index - 1].substring(1)));
         }
-        if (BitUtil.check(reportMask, 9)) {
-            index += 1; // range
+        if (BitUtil.check(reportMask, 9) && !values[index++].isEmpty()) {
+            position.set("range", Long.parseLong(values[index - 1]) * 100);
         }
         if (BitUtil.check(reportMask, 10) && !values[index++].isEmpty()) {
             position.set(Position.KEY_THROTTLE, Integer.parseInt(values[index - 1]));
@@ -582,34 +582,34 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_HOURS, Double.parseDouble(values[index++]));
         }
         if (BitUtil.check(reportMask, 12)) {
-            index += 1; // driving time
+            position.set("drivingHours", Double.parseDouble(values[index++]));
         }
         if (BitUtil.check(reportMask, 13)) {
-            index += 1; // idle time
+            position.set("idleHours", Double.parseDouble(values[index++]));
         }
-        if (BitUtil.check(reportMask, 14)) {
-            index += 1; // idle fuel
+        if (BitUtil.check(reportMask, 14) && !values[index++].isEmpty()) {
+            position.set("idleFuelConsumption", Double.parseDouble(values[index - 1]));
         }
-        if (BitUtil.check(reportMask, 15)) {
-            index += 1; // axle weight
+        if (BitUtil.check(reportMask, 15) && !values[index++].isEmpty()) {
+            position.set(Position.KEY_AXLE_WEIGHT, Integer.parseInt(values[index - 1]));
         }
-        if (BitUtil.check(reportMask, 16)) {
-            index += 1; // tachograph info
+        if (BitUtil.check(reportMask, 16) && !values[index++].isEmpty()) {
+            position.set("tachographInfo", Integer.parseInt(values[index - 1]));
         }
-        if (BitUtil.check(reportMask, 17)) {
-            index += 1; // indicators
+        if (BitUtil.check(reportMask, 17) && !values[index++].isEmpty()) {
+            position.set("indicators", Integer.parseInt(values[index - 1]));
         }
-        if (BitUtil.check(reportMask, 18)) {
-            index += 1; // lights
+        if (BitUtil.check(reportMask, 18) && !values[index++].isEmpty()) {
+            position.set("lights", Integer.parseInt(values[index - 1]));
         }
-        if (BitUtil.check(reportMask, 19)) {
-            index += 1; // doors
+        if (BitUtil.check(reportMask, 19) && !values[index++].isEmpty()) {
+            position.set("doors", Integer.parseInt(values[index - 1]));
         }
-        if (BitUtil.check(reportMask, 20)) {
-            index += 1; // total vehicle overspeed time
+        if (BitUtil.check(reportMask, 20) && !values[index++].isEmpty()) {
+            position.set("vehicleOverspeed", Double.parseDouble(values[index - 1]));
         }
-        if (BitUtil.check(reportMask, 21)) {
-            index += 1; // total engine overspeed time
+        if (BitUtil.check(reportMask, 21) && !values[index++].isEmpty()) {
+            position.set("engineOverspeed", Double.parseDouble(values[index - 1]));
         }
         if (BitUtil.check(reportMask, 29)) {
             index += 1; // expansion

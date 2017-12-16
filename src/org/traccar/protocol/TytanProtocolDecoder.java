@@ -84,7 +84,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                     }
                     break;
                 case 28:
-                    position.set("weight", buf.readUnsignedShort());
+                    position.set(Position.KEY_AXLE_WEIGHT, buf.readUnsignedShort());
                     buf.readUnsignedByte();
                     break;
                 case 90:
