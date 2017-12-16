@@ -13,8 +13,10 @@
     <entry key='web.origin'>*</entry>
 
     <entry key='geocoder.enable'>false</entry>
-
     <entry key='logger.file'>target/tracker-server.log</entry>
+
+    <entry key='coordinates.filter'>true</entry>
+    <entry key='coordinates.minError'>500</entry>
 
     <!--<entry key='database.driver'>org.h2.Driver</entry>-->
     <!--<entry key='database.url'>jdbc:h2:./target/database</entry>-->
@@ -28,6 +30,7 @@
     <entry key='database.user'>root</entry>
     <entry key='database.password'></entry>
 
+    <entry key='aquila.port'>5089</entry>
     <entry key='intellitrac.port'>6037</entry>
     <entry key='osmandprotocol.port'>5055</entry>
 
