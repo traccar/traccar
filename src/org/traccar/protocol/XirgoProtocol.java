@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.TrackerServer;
+import org.traccar.model.Command;
 
 import java.util.List;
 
@@ -30,6 +31,8 @@ public class XirgoProtocol extends BaseProtocol {
 
     public XirgoProtocol() {
         super("xirgo");
+        setSupportedDataCommands(
+                Command.TYPE_OUTPUT_CONTROL);
     }
 
     @Override
@@ -40,6 +43,7 @@ public class XirgoProtocol extends BaseProtocol {
                 pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, "##"));
                 pipeline.addLast("stringEncoder", new StringEncoder());
                 pipeline.addLast("stringDecoder", new StringDecoder());
+                pipeline.addLast("objectEncoder", new XirgoProtocolEncoder());
                 pipeline.addLast("objectDecoder", new XirgoProtocolDecoder(XirgoProtocol.this));
             }
         });
@@ -48,6 +52,7 @@ public class XirgoProtocol extends BaseProtocol {
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("stringEncoder", new StringEncoder());
                 pipeline.addLast("stringDecoder", new StringDecoder());
+                pipeline.addLast("objectEncoder", new XirgoProtocolEncoder());
                 pipeline.addLast("objectDecoder", new XirgoProtocolDecoder(XirgoProtocol.this));
             }
         });
