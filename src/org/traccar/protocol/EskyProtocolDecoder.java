@@ -33,7 +33,7 @@ public class EskyProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .text("EO;")                         // header
+            .expression("..;")                   // header
             .number("d+;")                       // index
             .number("(d+);")                     // imei
             .text("R;")                          // data type

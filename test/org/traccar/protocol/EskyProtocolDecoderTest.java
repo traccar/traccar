@@ -19,7 +19,7 @@ public class EskyProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "EO;0;864906029196626;R;0+170808155352+0.00000+0.00000+0.00+0+0x1+0+0+0+1233"));
 
-        verifyNull(decoder, text(
+        verifyPosition(decoder, text(
                 "ET;1;014682000989425;R;0+171216001250+33.34405+-111.96682+0.00+0+0x1+0+25598+0+1257+0"));
 
     }
