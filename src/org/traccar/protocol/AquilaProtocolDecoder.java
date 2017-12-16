@@ -43,7 +43,7 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd)(dd)(dd),")             // time (hhmmss)
             .expression("([AV]),")               // validity
             .number("(d+),")                     // gsm
-            .number("(d+),")                     // speed
+            .number("(d+.?d*),")                     // speed
             .number("(d+),")                     // distance
             .groupBegin()
             .number("d+,")                       // driver code
