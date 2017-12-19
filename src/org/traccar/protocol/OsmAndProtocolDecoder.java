@@ -22,7 +22,10 @@ import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import org.joda.time.format.ISODateTimeFormat;
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.model.WifiAccessPoint;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -53,6 +56,8 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocolName());
         position.setValid(true);
+
+        Network network = new Network();
 
         for (Map.Entry<String, List<String>> entry : params.entrySet()) {
             String value = entry.getValue().get(0);
@@ -96,6 +101,23 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
                     String[] location = value.split(",");
                     position.setLatitude(Double.parseDouble(location[0]));
                     position.setLongitude(Double.parseDouble(location[1]));
+                    break;
+                case "cell":
+                    String[] cell = value.split(",");
+                    if (cell.length > 4) {
+                        network.addCellTower(CellTower.from(
+                                Integer.parseInt(cell[0]), Integer.parseInt(cell[1]),
+                                Integer.parseInt(cell[2]), Integer.parseInt(cell[3]), Integer.parseInt(cell[4])));
+                    } else {
+                        network.addCellTower(CellTower.from(
+                                Integer.parseInt(cell[0]), Integer.parseInt(cell[1]),
+                                Integer.parseInt(cell[2]), Integer.parseInt(cell[3])));
+                    }
+                    break;
+                case "wifi":
+                    String[] wifi = value.split(",");
+                    network.addWifiAccessPoint(WifiAccessPoint.from(
+                            wifi[0].replace('-', ':'), Integer.parseInt(wifi[1])));
                     break;
                 case "speed":
                     position.setSpeed(convertSpeed(Double.parseDouble(value), "kn"));
@@ -141,6 +163,14 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
 
         if (position.getFixTime() == null) {
             position.setTime(new Date());
+        }
+
+        if (network.getCellTowers() != null || network.getWifiAccessPoints() != null) {
+            position.setNetwork(network);
+        }
+
+        if (position.getLatitude() == 0 && position.getLongitude() == 0) {
+            getLastLocation(position, position.getDeviceTime());
         }
 
         if (position.getDeviceId() != 0) {
