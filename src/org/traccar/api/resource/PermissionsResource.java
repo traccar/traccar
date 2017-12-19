@@ -29,6 +29,7 @@ import javax.ws.rs.core.Response;
 
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
+import org.traccar.helper.LogAction;
 import org.traccar.model.Device;
 import org.traccar.model.Permission;
 import org.traccar.model.User;
@@ -61,6 +62,8 @@ public class PermissionsResource  extends BaseResource {
         checkPermission(permission, true);
         Context.getDataManager().linkObject(permission.getOwnerClass(), permission.getOwnerId(),
                 permission.getPropertyClass(), permission.getPropertyId(), true);
+        LogAction.link(getUserId(), permission.getOwnerClass(), permission.getOwnerId(),
+                permission.getPropertyClass(), permission.getPropertyId());
         Context.getPermissionsManager().refreshPermissions(permission);
         return Response.noContent().build();
     }
@@ -72,6 +75,8 @@ public class PermissionsResource  extends BaseResource {
         checkPermission(permission, false);
         Context.getDataManager().linkObject(permission.getOwnerClass(), permission.getOwnerId(),
                 permission.getPropertyClass(), permission.getPropertyId(), false);
+        LogAction.unlink(getUserId(), permission.getOwnerClass(), permission.getOwnerId(),
+                permission.getPropertyClass(), permission.getPropertyId());
         Context.getPermissionsManager().refreshPermissions(permission);
         return Response.noContent().build();
     }

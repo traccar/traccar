@@ -18,6 +18,7 @@ package org.traccar.api.resource;
 import org.traccar.Context;
 import org.traccar.api.BaseObjectResource;
 import org.traccar.database.UsersManager;
+import org.traccar.helper.LogAction;
 import org.traccar.model.ManagedUser;
 import org.traccar.model.User;
 
@@ -81,8 +82,10 @@ public class UserResource extends BaseObjectResource<User> {
             }
         }
         Context.getUsersManager().addItem(entity);
+        LogAction.create(getUserId(), entity);
         if (Context.getPermissionsManager().getUserManager(getUserId())) {
             Context.getDataManager().linkObject(User.class, getUserId(), ManagedUser.class, entity.getId(), true);
+            LogAction.link(getUserId(), User.class, getUserId(), ManagedUser.class, entity.getId());
         }
         Context.getUsersManager().refreshUserItems();
         return Response.ok(entity).build();

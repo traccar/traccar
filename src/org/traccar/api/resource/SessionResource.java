@@ -17,6 +17,7 @@ package org.traccar.api.resource;
 
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
+import org.traccar.helper.LogAction;
 import org.traccar.model.User;
 
 import javax.annotation.security.PermitAll;
@@ -103,6 +104,7 @@ public class SessionResource extends BaseResource {
         User user = Context.getPermissionsManager().login(email, password);
         if (user != null) {
             request.getSession().setAttribute(USER_ID_KEY, user.getId());
+            LogAction.login(user.getId());
             return user;
         } else {
             throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).build());
@@ -111,6 +113,7 @@ public class SessionResource extends BaseResource {
 
     @DELETE
     public Response remove() {
+        LogAction.logout(getUserId());
         request.getSession().removeAttribute(USER_ID_KEY);
         return Response.noContent().build();
     }
