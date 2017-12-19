@@ -78,15 +78,15 @@ public class Address {
     }
 
     private String political;
-    
+
     public String getPolitical() {
         return political;
     }
-    
+
     public void setPolitical(String political) {
         this.political = political;
     }
-    
+
     private String street;
 
     public String getStreet() {
