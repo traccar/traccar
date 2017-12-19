@@ -16,6 +16,8 @@
  */
 package org.traccar.helper;
 
+import java.beans.Introspector;
+
 import org.traccar.model.BaseModel;
 
 public final class LogAction {
@@ -35,10 +37,10 @@ public final class LogAction {
 
     private static final String ACTION_TOTAL_DISTANCE = "resetTotalDistance";
 
-    private static final String PATTERN_OBJECT = "User: %d, Action: %s, Object: %s, Id: %d";
-    private static final String PATTERN_LINK = "User: %d, Action: %s, Owner: %s, Id: %d, Property: %s, Id: %d";
-    private static final String PATTERN_LOGIN = "User: %d, Action: %s";
-    private static final String PATTERN_TOTAL_DISTANCE = "User: %d, Action: %s, DeviceId: %d";
+    private static final String PATTERN_OBJECT = "user: %d, action: %s, object: %s, id: %d";
+    private static final String PATTERN_LINK = "user: %d, action: %s, owner: %s, id: %d, property: %s, id: %d";
+    private static final String PATTERN_LOGIN = "user: %d, action: %s";
+    private static final String PATTERN_TOTAL_DISTANCE = "user: %d, action: %s, deviceId: %d";
 
     public static void create(long userId, BaseModel object) {
         logObjectAction(ACTION_CREATE, userId, object.getClass(), object.getId());
@@ -73,13 +75,14 @@ public final class LogAction {
     }
 
     private static void logObjectAction(String action, long userId, Class<?> clazz, long objectId) {
-        log(String.format(PATTERN_OBJECT, userId, action, clazz.getSimpleName(), objectId));
+        log(String.format(PATTERN_OBJECT, userId, action, Introspector.decapitalize(clazz.getSimpleName()), objectId));
     }
 
     private static void logLinkAction(String action, long userId,
             Class<?> owner, long ownerId, Class<?> property, long propertyId) {
         log(String.format(PATTERN_LINK, userId, action,
-                owner.getSimpleName(), ownerId, property.getSimpleName(), propertyId));
+                Introspector.decapitalize(owner.getSimpleName()), ownerId,
+                Introspector.decapitalize(property.getSimpleName()), propertyId));
     }
 
     private static void logLoginAction(String action, long userId) {
