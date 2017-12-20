@@ -60,104 +60,105 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
         Network network = new Network();
 
         for (Map.Entry<String, List<String>> entry : params.entrySet()) {
-            String value = entry.getValue().get(0);
-            switch (entry.getKey()) {
-                case "id":
-                case "deviceid":
-                    DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, value);
-                    if (deviceSession == null) {
-                        sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
-                        return null;
-                    }
-                    position.setDeviceId(deviceSession.getDeviceId());
-                    break;
-                case "valid":
-                    position.setValid(Boolean.parseBoolean(value));
-                    break;
-                case "timestamp":
-                    try {
-                        long timestamp = Long.parseLong(value);
-                        if (timestamp < Integer.MAX_VALUE) {
-                            timestamp *= 1000;
+            for (String value : entry.getValue()) {
+                switch (entry.getKey()) {
+                    case "id":
+                    case "deviceid":
+                        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, value);
+                        if (deviceSession == null) {
+                            sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
+                            return null;
                         }
-                        position.setTime(new Date(timestamp));
-                    } catch (NumberFormatException error) {
-                        if (value.contains("T")) {
-                            position.setTime(new Date(
-                                    ISODateTimeFormat.dateTimeParser().parseMillis(value)));
+                        position.setDeviceId(deviceSession.getDeviceId());
+                        break;
+                    case "valid":
+                        position.setValid(Boolean.parseBoolean(value));
+                        break;
+                    case "timestamp":
+                        try {
+                            long timestamp = Long.parseLong(value);
+                            if (timestamp < Integer.MAX_VALUE) {
+                                timestamp *= 1000;
+                            }
+                            position.setTime(new Date(timestamp));
+                        } catch (NumberFormatException error) {
+                            if (value.contains("T")) {
+                                position.setTime(new Date(
+                                        ISODateTimeFormat.dateTimeParser().parseMillis(value)));
+                            } else {
+                                DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                                position.setTime(dateFormat.parse(value));
+                            }
+                        }
+                        break;
+                    case "lat":
+                        position.setLatitude(Double.parseDouble(value));
+                        break;
+                    case "lon":
+                        position.setLongitude(Double.parseDouble(value));
+                        break;
+                    case "location":
+                        String[] location = value.split(",");
+                        position.setLatitude(Double.parseDouble(location[0]));
+                        position.setLongitude(Double.parseDouble(location[1]));
+                        break;
+                    case "cell":
+                        String[] cell = value.split(",");
+                        if (cell.length > 4) {
+                            network.addCellTower(CellTower.from(
+                                    Integer.parseInt(cell[0]), Integer.parseInt(cell[1]),
+                                    Integer.parseInt(cell[2]), Integer.parseInt(cell[3]), Integer.parseInt(cell[4])));
                         } else {
-                            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                            position.setTime(dateFormat.parse(value));
+                            network.addCellTower(CellTower.from(
+                                    Integer.parseInt(cell[0]), Integer.parseInt(cell[1]),
+                                    Integer.parseInt(cell[2]), Integer.parseInt(cell[3])));
                         }
-                    }
-                    break;
-                case "lat":
-                    position.setLatitude(Double.parseDouble(value));
-                    break;
-                case "lon":
-                    position.setLongitude(Double.parseDouble(value));
-                    break;
-                case "location":
-                    String[] location = value.split(",");
-                    position.setLatitude(Double.parseDouble(location[0]));
-                    position.setLongitude(Double.parseDouble(location[1]));
-                    break;
-                case "cell":
-                    String[] cell = value.split(",");
-                    if (cell.length > 4) {
-                        network.addCellTower(CellTower.from(
-                                Integer.parseInt(cell[0]), Integer.parseInt(cell[1]),
-                                Integer.parseInt(cell[2]), Integer.parseInt(cell[3]), Integer.parseInt(cell[4])));
-                    } else {
-                        network.addCellTower(CellTower.from(
-                                Integer.parseInt(cell[0]), Integer.parseInt(cell[1]),
-                                Integer.parseInt(cell[2]), Integer.parseInt(cell[3])));
-                    }
-                    break;
-                case "wifi":
-                    String[] wifi = value.split(",");
-                    network.addWifiAccessPoint(WifiAccessPoint.from(
-                            wifi[0].replace('-', ':'), Integer.parseInt(wifi[1])));
-                    break;
-                case "speed":
-                    position.setSpeed(convertSpeed(Double.parseDouble(value), "kn"));
-                    break;
-                case "bearing":
-                case "heading":
-                    position.setCourse(Double.parseDouble(value));
-                    break;
-                case "altitude":
-                    position.setAltitude(Double.parseDouble(value));
-                    break;
-                case "accuracy":
-                    position.setAccuracy(Double.parseDouble(value));
-                    break;
-                case "hdop":
-                    position.set(Position.KEY_HDOP, Double.parseDouble(value));
-                    break;
-                case "batt":
-                    position.set(Position.KEY_BATTERY_LEVEL, Double.parseDouble(value));
-                    break;
-                case "driverUniqueId":
-                    position.set(Position.KEY_DRIVER_UNIQUE_ID, value);
-                    break;
-                default:
-                    try {
-                        position.set(entry.getKey(), Double.parseDouble(value));
-                    } catch (NumberFormatException e) {
-                        switch (value) {
-                            case "true":
-                                position.set(entry.getKey(), true);
-                                break;
-                            case "false":
-                                position.set(entry.getKey(), false);
-                                break;
-                            default:
-                                position.set(entry.getKey(), value);
-                                break;
+                        break;
+                    case "wifi":
+                        String[] wifi = value.split(",");
+                        network.addWifiAccessPoint(WifiAccessPoint.from(
+                                wifi[0].replace('-', ':'), Integer.parseInt(wifi[1])));
+                        break;
+                    case "speed":
+                        position.setSpeed(convertSpeed(Double.parseDouble(value), "kn"));
+                        break;
+                    case "bearing":
+                    case "heading":
+                        position.setCourse(Double.parseDouble(value));
+                        break;
+                    case "altitude":
+                        position.setAltitude(Double.parseDouble(value));
+                        break;
+                    case "accuracy":
+                        position.setAccuracy(Double.parseDouble(value));
+                        break;
+                    case "hdop":
+                        position.set(Position.KEY_HDOP, Double.parseDouble(value));
+                        break;
+                    case "batt":
+                        position.set(Position.KEY_BATTERY_LEVEL, Double.parseDouble(value));
+                        break;
+                    case "driverUniqueId":
+                        position.set(Position.KEY_DRIVER_UNIQUE_ID, value);
+                        break;
+                    default:
+                        try {
+                            position.set(entry.getKey(), Double.parseDouble(value));
+                        } catch (NumberFormatException e) {
+                            switch (value) {
+                                case "true":
+                                    position.set(entry.getKey(), true);
+                                    break;
+                                case "false":
+                                    position.set(entry.getKey(), false);
+                                    break;
+                                default:
+                                    position.set(entry.getKey(), value);
+                                    break;
+                            }
                         }
-                    }
-                    break;
+                        break;
+                }
             }
         }
 
