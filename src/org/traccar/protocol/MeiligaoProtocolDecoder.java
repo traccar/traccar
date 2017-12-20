@@ -73,7 +73,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             .expression("(.*)")                  // driver
             .groupEnd("?")
             .or()
-            .number("|(x{9})")                   // odometer
+            .number("|(d{1,9})")                 // odometer
             .groupBegin()
             .number("|(x{5,})")                  // rfid
             .groupEnd("?")
@@ -262,7 +262,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_ODOMETER, parser.nextHexLong());
         position.set(Position.KEY_SATELLITES, parser.nextHexInt());
         position.set("driverLicense", parser.next());
-        position.set(Position.KEY_ODOMETER, parser.nextHexLong());
+        position.set(Position.KEY_ODOMETER, parser.nextLong());
         position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
 
         return position;
