@@ -168,7 +168,10 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         }
         if (device.getPhone() != null && !device.getPhone().isEmpty()
                 && !device.getPhone().equals(cachedDevice.getPhone())) {
-            devicesByPhone.remove(cachedDevice.getPhone());
+            String phone = cachedDevice.getPhone();
+            if (phone != null && !phone.isEmpty()) {
+                devicesByPhone.remove(phone);
+            }
             cachedDevice.setPhone(device.getPhone());
             putPhone(cachedDevice);
         }
