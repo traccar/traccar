@@ -1,4 +1,5 @@
 // Copyright (c) Philipp Wagner. All rights reserved.
+
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 package org.traccar.fcm.core.requests.groups;
@@ -13,7 +14,8 @@ public class RemoveDeviceGroupMessage extends DeviceGroupMessage {
 
     private final String notificationKey;
 
-    public RemoveDeviceGroupMessage(FcmMessageOptions options, List<String> registrationIds, String notificationKeyName, String notificationKey) {
+    public RemoveDeviceGroupMessage(FcmMessageOptions options,
+                                    List<String> registrationIds, String notificationKeyName, String notificationKey) {
         super(options, registrationIds, notificationKeyName);
 
         this.notificationKey = notificationKey;

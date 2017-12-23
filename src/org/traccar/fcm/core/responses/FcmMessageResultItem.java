@@ -37,12 +37,4 @@ public class FcmMessageResultItem {
         return errorCode;
     }
 
-    @Override
-    public String toString() {
-        return "FcmMessageResultItem{" +
-                "messageId='" + messageId + '\'' +
-                ", canonicalRegistrationId='" + canonicalRegistrationId + '\'' +
-                ", errorCode=" + errorCode +
-                '}';
-    }
 }

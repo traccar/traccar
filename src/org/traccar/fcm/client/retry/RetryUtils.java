@@ -11,8 +11,12 @@ import org.traccar.fcm.client.retry.strategy.SimpleRetryStrategy;
 /**
  * This class implements RetryStrategies, for explicitly retrying requests to the FCM server.
  */
-public class RetryUtils {
+public final class RetryUtils {
 
+    private RetryUtils()
+    {
+
+    }
     /**
      * Retries a method with the SimpleRetryStrategy and a maximum amount of retries.
      *

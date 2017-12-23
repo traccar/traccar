@@ -1,4 +1,5 @@
 // Copyright (c) Philipp Wagner. All rights reserved.
+
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 package org.traccar.fcm.client;
@@ -95,7 +96,8 @@ public class FcmClient implements IFcmClient {
         post(message);
     }
 
-    protected <TRequestMessage, TResponseMessage> TResponseMessage post(TRequestMessage requestMessage, Class<TResponseMessage> responseType) {
+    protected <TRequestMessage, TResponseMessage> TResponseMessage post(
+            TRequestMessage requestMessage, Class<TResponseMessage> responseType) {
         return httpClient.post(requestMessage, responseType);
     }
 

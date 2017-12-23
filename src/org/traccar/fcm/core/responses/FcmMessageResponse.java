@@ -52,14 +52,4 @@ public class FcmMessageResponse {
         return results;
     }
 
-    @Override
-    public String toString() {
-        return "FcmMessageResponse{" +
-                "multicastId=" + multicastId +
-                ", numberOfSuccess=" + numberOfSuccess +
-                ", numberOfFailure=" + numberOfFailure +
-                ", numberOfCanonicalIds=" + numberOfCanonicalIds +
-                ", results=" + results +
-                '}';
-    }
 }

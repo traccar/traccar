@@ -1,5 +1,7 @@
 // Copyright (c) Philipp Wagner. All rights reserved.
+
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 
 package org.traccar.fcm.core.requests.data;
 
@@ -20,7 +22,8 @@ public class DataMulticastMessage extends FcmMulticastMessage<Object> {
         this(options, registratiodIds, data, null);
     }
 
-    public DataMulticastMessage(FcmMessageOptions options, List<String> registratiodIds, Object data, NotificationPayload notification) {
+    public DataMulticastMessage(FcmMessageOptions options,
+                                List<String> registratiodIds, Object data, NotificationPayload notification) {
         super(options, registratiodIds);
 
         this.data = data;

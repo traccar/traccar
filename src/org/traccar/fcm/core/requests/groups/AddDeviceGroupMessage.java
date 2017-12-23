@@ -13,7 +13,8 @@ public class AddDeviceGroupMessage extends DeviceGroupMessage {
 
     private final String notificationKey;
 
-    public AddDeviceGroupMessage(FcmMessageOptions options, List<String> registrationIds, String notificationKeyName, String notificationKey) {
+    public AddDeviceGroupMessage(FcmMessageOptions options,
+                                 List<String> registrationIds, String notificationKeyName, String notificationKey) {
         super(options, registrationIds, notificationKeyName);
 
         this.notificationKey = notificationKey;

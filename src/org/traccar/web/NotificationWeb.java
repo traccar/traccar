@@ -66,7 +66,8 @@ public final class NotificationWeb {
                     .setBody(NotificationFormatter.formatWebMessage(userId, event, position))
                     .build();
 
-            NotificationUnicastMessage notificationUnicastMessage = new NotificationUnicastMessage(options, fcmToken, notificationPayload);
+            NotificationUnicastMessage notificationUnicastMessage =
+                    new NotificationUnicastMessage(options, fcmToken, notificationPayload);
             client.send(notificationUnicastMessage);
         } catch (Exception e) {
             Log.warning(e);

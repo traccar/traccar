@@ -10,7 +10,8 @@ import java.util.List;
 
 public class CreateDeviceGroupMessage extends DeviceGroupMessage {
 
-    public CreateDeviceGroupMessage(FcmMessageOptions options, List<String> registrationIds, String notificationKeyName) {
+    public CreateDeviceGroupMessage(FcmMessageOptions options,
+                                    List<String> registrationIds, String notificationKeyName) {
         super(options, registrationIds, notificationKeyName);
     }
 

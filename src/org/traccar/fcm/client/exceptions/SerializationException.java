@@ -1,5 +1,6 @@
 package org.traccar.fcm.client.exceptions;
 
+
 public class SerializationException extends RuntimeException {
     public SerializationException() {
         super();
@@ -17,7 +18,8 @@ public class SerializationException extends RuntimeException {
         super(cause);
     }
 
-    public SerializationException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public SerializationException(String message, Throwable cause,
+                                  boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }

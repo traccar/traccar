@@ -1,4 +1,5 @@
 // Copyright (c) Philipp Wagner. All rights reserved.
+
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 package org.traccar.fcm.core.http.exceptions;
@@ -20,7 +21,8 @@ public class HttpCommunicationException extends RuntimeException {
         super(cause);
     }
 
-    public HttpCommunicationException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public HttpCommunicationException(String message, Throwable cause,
+                                      boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 

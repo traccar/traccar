@@ -1,5 +1,7 @@
 // Copyright (c) Philipp Wagner. All rights reserved.
+
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 
 package org.traccar.fcm.client.http.apache;
 
@@ -54,7 +56,8 @@ public class DefaultHttpClient implements IHttpClient {
         this(settings, serializer, HttpClientBuilder.create());
     }
 
-    public DefaultHttpClient(IFcmClientSettings settings, IJsonSerializer serializer, HttpClientBuilder httpClientBuilder) {
+    public DefaultHttpClient(IFcmClientSettings settings,
+                             IJsonSerializer serializer, HttpClientBuilder httpClientBuilder) {
 
         if (settings == null) {
             throw new IllegalArgumentException("settings");
@@ -95,7 +98,9 @@ public class DefaultHttpClient implements IHttpClient {
 
     }
 
-    private <TRequestMessage, TResponseMessage> TResponseMessage internalPost(TRequestMessage requestMessage, Class<TResponseMessage> responseType) throws IOException {
+    private <TRequestMessage, TResponseMessage> TResponseMessage internalPost(
+            TRequestMessage requestMessage, Class<TResponseMessage> responseType
+    ) throws IOException {
 
         // Execute the Request:
         try (CloseableHttpResponse response = client.execute(buildPostRequest(requestMessage))) {
@@ -193,7 +198,8 @@ public class DefaultHttpClient implements IHttpClient {
     }
 
     @Override
-    public <TRequestMessage, TResponseMessage> TResponseMessage post(TRequestMessage requestMessage, Class<TResponseMessage> responseType) {
+    public <TRequestMessage, TResponseMessage> TResponseMessage post(
+            TRequestMessage requestMessage, Class<TResponseMessage> responseType) {
         try {
             return internalPost(requestMessage, responseType);
         } catch (IOException e) {

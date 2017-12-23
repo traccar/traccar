@@ -1,10 +1,14 @@
 package org.traccar.fcm.client.utils;
 
+
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
-public class DateUtils {
+public final class DateUtils {
 
+    private DateUtils(){
+
+    }
     /**
      * Gets the current UTC DateTime.
      *

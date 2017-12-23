@@ -1,4 +1,5 @@
 // Copyright (c) Philipp Wagner. All rights reserved.
+
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 package org.traccar.fcm.core.requests.notification;
@@ -13,7 +14,8 @@ public class NotificationMulticastMessage extends FcmMulticastMessage<Notificati
 
     private final NotificationPayload notificationPayload;
 
-    public NotificationMulticastMessage(FcmMessageOptions options, List<String> registrationIds, NotificationPayload notificationPayload) {
+    public NotificationMulticastMessage(FcmMessageOptions options,
+                                        List<String> registrationIds, NotificationPayload notificationPayload) {
         super(options, registrationIds);
 
         if (notificationPayload == null) {

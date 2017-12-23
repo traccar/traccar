@@ -10,6 +10,7 @@ public interface IHttpClient extends AutoCloseable {
 
     <TRequestMessage> void post(TRequestMessage requestMessage);
 
-    <TRequestMessage, TResponseMessage> TResponseMessage post(TRequestMessage requestMessage, Class<TResponseMessage> responseType);
+    <TRequestMessage, TResponseMessage> TResponseMessage post(
+            TRequestMessage requestMessage, Class<TResponseMessage> responseType);
 
 }

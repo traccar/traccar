@@ -24,7 +24,8 @@ public class TopicMulticastMessage extends FcmMessage<Object> {
         this(options, topicList, null, notification);
     }
 
-    public TopicMulticastMessage(FcmMessageOptions options, TopicList topicList, Object data, NotificationPayload notification) {
+    public TopicMulticastMessage(FcmMessageOptions options,
+                                 TopicList topicList, Object data, NotificationPayload notification) {
 
         super(options);
 
@@ -45,7 +46,8 @@ public class TopicMulticastMessage extends FcmMessage<Object> {
         this(options, condition, null, notification);
     }
 
-    public TopicMulticastMessage(FcmMessageOptions options, String condition, Object data, NotificationPayload notification) {
+    public TopicMulticastMessage(FcmMessageOptions options, String condition,
+                                 Object data, NotificationPayload notification) {
 
         super(options);
 

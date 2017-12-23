@@ -30,11 +30,4 @@ public class TopicMessageResponse {
         return errorCode;
     }
 
-    @Override
-    public String toString() {
-        return "TopicMessageResponse{" +
-                "messageId=" + messageId +
-                ", errorCode=" + errorCode +
-                '}';
-    }
 }
