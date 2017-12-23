@@ -6,9 +6,10 @@ import org.joda.time.DateTimeZone;
 
 public final class DateUtils {
 
-    private DateUtils(){
+    private DateUtils() {
 
     }
+
     /**
      * Gets the current UTC DateTime.
      *

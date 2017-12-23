@@ -5,10 +5,10 @@ package org.traccar.fcm.core.http.constants;
 
 public final class HttpStatus {
 
-    private HttpStatus()
-    {
+    private HttpStatus() {
 
     }
+
     public static final int CONTINUE = 100;
 
     public static final int SWITCHING_PROTOCOLS = 101;

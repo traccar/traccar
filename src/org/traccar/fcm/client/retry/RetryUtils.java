@@ -13,10 +13,10 @@ import org.traccar.fcm.client.retry.strategy.SimpleRetryStrategy;
  */
 public final class RetryUtils {
 
-    private RetryUtils()
-    {
+    private RetryUtils() {
 
     }
+
     /**
      * Retries a method with the SimpleRetryStrategy and a maximum amount of retries.
      *

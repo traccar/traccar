@@ -17,10 +17,10 @@ import org.traccar.fcm.client.utils.StringUtils;
 
 public final class RetryHeaderUtils {
 
-    private RetryHeaderUtils()
-    {
+    private RetryHeaderUtils() {
 
     }
+
     public static boolean tryDetermineRetryDelay(HttpResponse httpResponse, OutParameter<Duration> result) {
         try {
             return internalTryDetermineRetryDelay(httpResponse, result);
