@@ -16,11 +16,6 @@
  */
 package org.traccar.notification;
 
-import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
-import java.util.Locale;
-
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.exception.ResourceNotFoundException;
@@ -33,6 +28,11 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.reports.ReportUtils;
+
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
+import java.util.Locale;
 
 public final class NotificationFormatter {
 
@@ -110,6 +110,12 @@ public final class NotificationFormatter {
         getTemplate(event, templatePath).merge(velocityContext, writer);
 
         return writer.toString();
+    }
+
+    public static String formatWebMessage(long userId, Event event, Position position) {
+        String templatePath = Context.getConfig().getString("web.templatesPath", "web");
+
+        return formatMessage(null, userId, event, position, templatePath);
     }
 
 }

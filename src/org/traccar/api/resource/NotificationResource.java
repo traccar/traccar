@@ -15,17 +15,10 @@
  */
 package org.traccar.api.resource;
 
-import java.util.Collection;
-
-import javax.mail.MessagingException;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
+import com.cloudhopper.smpp.type.RecoverablePduException;
+import com.cloudhopper.smpp.type.SmppChannelException;
+import com.cloudhopper.smpp.type.SmppTimeoutException;
+import com.cloudhopper.smpp.type.UnrecoverablePduException;
 import org.traccar.Context;
 import org.traccar.api.ExtendedObjectResource;
 import org.traccar.model.Event;
@@ -33,11 +26,13 @@ import org.traccar.model.Notification;
 import org.traccar.model.Typed;
 import org.traccar.notification.NotificationMail;
 import org.traccar.notification.NotificationSms;
+import org.traccar.web.NotificationWeb;
 
-import com.cloudhopper.smpp.type.RecoverablePduException;
-import com.cloudhopper.smpp.type.SmppChannelException;
-import com.cloudhopper.smpp.type.SmppTimeoutException;
-import com.cloudhopper.smpp.type.UnrecoverablePduException;
+import javax.mail.MessagingException;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.Collection;
 
 @Path("notifications")
 @Produces(MediaType.APPLICATION_JSON)
@@ -58,6 +53,7 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
     @Path("test")
     public Response testMessage() throws MessagingException, RecoverablePduException,
             UnrecoverablePduException, SmppTimeoutException, SmppChannelException, InterruptedException {
+        NotificationWeb.sendWebAsync(getUserId(), new Event("test", 0), null);
         NotificationMail.sendMailSync(getUserId(), new Event("test", 0), null);
         NotificationSms.sendSmsSync(getUserId(), new Event("test", 0), null);
         return Response.noContent().build();

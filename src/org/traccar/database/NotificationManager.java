@@ -16,14 +16,6 @@
  */
 package org.traccar.database;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Event;
@@ -32,6 +24,15 @@ import org.traccar.model.Position;
 import org.traccar.model.Typed;
 import org.traccar.notification.NotificationMail;
 import org.traccar.notification.NotificationSms;
+import org.traccar.web.NotificationWeb;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 public class NotificationManager extends ExtendedObjectManager<Notification> {
 
@@ -78,6 +79,7 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
                     if (getById(notificationId).getType().equals(event.getType())) {
                         if (!sentWeb && notification.getWeb()) {
                             Context.getConnectionManager().updateEvent(userId, event);
+                            NotificationWeb.sendWebAsync(userId, event, position);
                             sentWeb = true;
                         }
                         if (!sentMail && notification.getMail()) {
