@@ -18,10 +18,6 @@ package org.traccar.protocol;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.jboss.netty.handler.codec.http.multipart.Attribute;
-import org.jboss.netty.handler.codec.http.multipart.DefaultHttpDataFactory;
-import org.jboss.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
-import org.jboss.netty.handler.codec.http.multipart.InterfaceHttpData;
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.model.Position;
@@ -34,6 +30,7 @@ import javax.json.JsonString;
 import javax.json.JsonValue;
 import java.io.StringReader;
 import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -50,16 +47,8 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         HttpRequest request = (HttpRequest) msg;
-        HttpPostRequestDecoder decoder = new HttpPostRequestDecoder(new DefaultHttpDataFactory(false), request);
-        InterfaceHttpData data = decoder.getBodyHttpData("data");
-        if (data.getHttpDataType() != InterfaceHttpData.HttpDataType.Attribute) {
-            sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
-            return null;
-        }
-
-        Attribute attribute = (Attribute) data;
-        String value = attribute.getValue();
-        JsonArray result = Json.createReader(new StringReader(value)).readArray();
+        JsonArray result = Json.createReader(new StringReader(request.getContent().toString(StandardCharsets.UTF_8)))
+                .readArray();
         List<Position> positions = new LinkedList<>();
         for (int i = 0; i < result.size(); i++) {
             JsonObject message = result.getJsonObject(i);
