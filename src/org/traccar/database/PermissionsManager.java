@@ -199,6 +199,11 @@ public class PermissionsManager {
         return user != null && user.getDeviceReadonly();
     }
 
+    public boolean getDeviceDisabled(long userId, long deviceId) {
+        Device device = Context.getIdentityManager().getById(deviceId);
+        return !getUserAdmin(userId) && device != null && device.getDisabled();
+    }
+
     public boolean getUserLimitCommands(long userId) {
         User user = getUser(userId);
         return user != null && user.getLimitCommands();
@@ -263,6 +268,12 @@ public class PermissionsManager {
             if (!getUserAdmin(userId)) {
                 checkManager(userId);
             }
+        }
+    }
+
+    public void checkDeviceUpdate(long userId, Device before, Device after) throws SecurityException {
+        if (before.getDisabled() && !after.getDisabled()) {
+            checkAdmin(userId);
         }
     }
 

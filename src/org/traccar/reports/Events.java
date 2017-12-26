@@ -46,13 +46,15 @@ public final class Events {
         ArrayList<Event> result = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            Collection<Event> events = Context.getDataManager().getEvents(deviceId, from, to);
-            boolean all = types.isEmpty() || types.contains(Event.ALL_EVENTS);
-            for (Event event : events) {
-                if (all || types.contains(event.getType())) {
-                    long geofenceId = event.getGeofenceId();
-                    if (geofenceId == 0 || Context.getGeofenceManager().checkItemPermission(userId, geofenceId)) {
-                       result.add(event);
+            if (!Context.getPermissionsManager().getDeviceDisabled(userId, deviceId)) {
+                Collection<Event> events = Context.getDataManager().getEvents(deviceId, from, to);
+                boolean all = types.isEmpty() || types.contains(Event.ALL_EVENTS);
+                for (Event event : events) {
+                    if (all || types.contains(event.getType())) {
+                        long geofenceId = event.getGeofenceId();
+                        if (geofenceId == 0 || Context.getGeofenceManager().checkItemPermission(userId, geofenceId)) {
+                           result.add(event);
+                        }
                     }
                 }
             }
@@ -69,38 +71,40 @@ public final class Events {
         HashMap<Long, String> geofenceNames = new HashMap<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            Collection<Event> events = Context.getDataManager().getEvents(deviceId, from, to);
-            boolean all = types.isEmpty() || types.contains(Event.ALL_EVENTS);
-            for (Iterator<Event> iterator = events.iterator(); iterator.hasNext();) {
-                Event event = iterator.next();
-                if (all || types.contains(event.getType())) {
-                    long geofenceId = event.getGeofenceId();
-                    if (geofenceId != 0) {
-                        if (Context.getGeofenceManager().checkItemPermission(userId, geofenceId)) {
-                            Geofence geofence = (Geofence) Context.getGeofenceManager().getById(geofenceId);
-                            if (geofence != null) {
-                                geofenceNames.put(geofenceId, geofence.getName());
+            if (!Context.getPermissionsManager().getDeviceDisabled(userId, deviceId)) {
+                Collection<Event> events = Context.getDataManager().getEvents(deviceId, from, to);
+                boolean all = types.isEmpty() || types.contains(Event.ALL_EVENTS);
+                for (Iterator<Event> iterator = events.iterator(); iterator.hasNext();) {
+                    Event event = iterator.next();
+                    if (all || types.contains(event.getType())) {
+                        long geofenceId = event.getGeofenceId();
+                        if (geofenceId != 0) {
+                            if (Context.getGeofenceManager().checkItemPermission(userId, geofenceId)) {
+                                Geofence geofence = (Geofence) Context.getGeofenceManager().getById(geofenceId);
+                                if (geofence != null) {
+                                    geofenceNames.put(geofenceId, geofence.getName());
+                                }
+                            } else {
+                                iterator.remove();
                             }
-                        } else {
-                            iterator.remove();
                         }
+                    } else {
+                        iterator.remove();
                     }
-                } else {
-                    iterator.remove();
                 }
-            }
-            DeviceReport deviceEvents = new DeviceReport();
-            Device device = Context.getIdentityManager().getById(deviceId);
-            deviceEvents.setDeviceName(device.getName());
-            sheetNames.add(WorkbookUtil.createSafeSheetName(deviceEvents.getDeviceName()));
-            if (device.getGroupId() != 0) {
-                Group group = Context.getGroupsManager().getById(device.getGroupId());
-                if (group != null) {
-                    deviceEvents.setGroupName(group.getName());
+                DeviceReport deviceEvents = new DeviceReport();
+                Device device = Context.getIdentityManager().getById(deviceId);
+                deviceEvents.setDeviceName(device.getName());
+                sheetNames.add(WorkbookUtil.createSafeSheetName(deviceEvents.getDeviceName()));
+                if (device.getGroupId() != 0) {
+                    Group group = Context.getGroupsManager().getById(device.getGroupId());
+                    if (group != null) {
+                        deviceEvents.setGroupName(group.getName());
+                    }
                 }
+                deviceEvents.setObjects(events);
+                devicesEvents.add(deviceEvents);
             }
-            deviceEvents.setObjects(events);
-            devicesEvents.add(deviceEvents);
         }
         String templatePath = Context.getConfig().getString("report.templatesPath",
                 "templates/export/");

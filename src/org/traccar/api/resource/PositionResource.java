@@ -34,6 +34,7 @@ import javax.ws.rs.core.Response;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 @Path("positions")
@@ -56,15 +57,21 @@ public class PositionResource extends BaseResource {
             for (Long positionId : positionIds) {
                 Position position = Context.getDataManager().getObject(Position.class, positionId);
                 Context.getPermissionsManager().checkDevice(getUserId(), position.getDeviceId());
-                positions.add(position);
+                if (!Context.getPermissionsManager().getDeviceDisabled(getUserId(), deviceId)) {
+                    positions.add(position);
+                }
             }
             return positions;
         } else if (deviceId == 0) {
             return Context.getDeviceManager().getInitialState(getUserId());
         } else {
             Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
-            return Context.getDataManager().getPositions(
-                    deviceId, DateUtil.parseDate(from), DateUtil.parseDate(to));
+            if (!Context.getPermissionsManager().getDeviceDisabled(getUserId(), deviceId)) {
+                return Context.getDataManager().getPositions(deviceId,
+                    DateUtil.parseDate(from), DateUtil.parseDate(to));
+            } else {
+                return Collections.emptyList();
+            }
         }
     }
 
@@ -74,11 +81,16 @@ public class PositionResource extends BaseResource {
             @QueryParam("deviceId") long deviceId, @QueryParam("from") String from, @QueryParam("to") String to)
             throws SQLException {
         Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
-        CsvBuilder csv = new CsvBuilder();
-        csv.addHeaderLine(new Position());
-        csv.addArray(Context.getDataManager().getPositions(
-                deviceId, DateUtil.parseDate(from), DateUtil.parseDate(to)));
-        return Response.ok(csv.build()).header(HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE_CSV).build();
+        if (!Context.getPermissionsManager().getDeviceDisabled(getUserId(), deviceId)) {
+            CsvBuilder csv = new CsvBuilder();
+            csv.addHeaderLine(new Position());
+            csv.addArray(Context.getDataManager().getPositions(
+                    deviceId, DateUtil.parseDate(from), DateUtil.parseDate(to)));
+            return Response.ok(csv.build())
+                    .header(HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE_CSV).build();
+        } else {
+            return Response.noContent().build();
+        }
     }
 
     @GET
@@ -87,10 +99,15 @@ public class PositionResource extends BaseResource {
             @QueryParam("deviceId") long deviceId, @QueryParam("from") String from, @QueryParam("to") String to)
             throws SQLException {
         Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
-        GpxBuilder gpx = new GpxBuilder(Context.getIdentityManager().getById(deviceId).getName());
-        gpx.addPositions(Context.getDataManager().getPositions(
-                deviceId, DateUtil.parseDate(from), DateUtil.parseDate(to)));
-        return Response.ok(gpx.build()).header(HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE_GPX).build();
+        if (!Context.getPermissionsManager().getDeviceDisabled(getUserId(), deviceId)) {
+            GpxBuilder gpx = new GpxBuilder(Context.getIdentityManager().getById(deviceId).getName());
+            gpx.addPositions(Context.getDataManager().getPositions(
+                    deviceId, DateUtil.parseDate(from), DateUtil.parseDate(to)));
+            return Response.ok(gpx.build())
+                    .header(HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE_GPX).build();
+        } else {
+            return Response.noContent().build();
+        }
     }
 
 }

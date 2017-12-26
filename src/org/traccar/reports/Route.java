@@ -43,7 +43,9 @@ public final class Route {
         ArrayList<Position> result = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            result.addAll(Context.getDataManager().getPositions(deviceId, from, to));
+            if (!Context.getPermissionsManager().getDeviceDisabled(userId, deviceId)) {
+                result.addAll(Context.getDataManager().getPositions(deviceId, from, to));
+            }
         }
         return result;
     }
@@ -56,20 +58,22 @@ public final class Route {
         ArrayList<String> sheetNames = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            Collection<Position> positions = Context.getDataManager()
-                    .getPositions(deviceId, from, to);
-            DeviceReport deviceRoutes = new DeviceReport();
-            Device device = Context.getIdentityManager().getById(deviceId);
-            deviceRoutes.setDeviceName(device.getName());
-            sheetNames.add(WorkbookUtil.createSafeSheetName(deviceRoutes.getDeviceName()));
-            if (device.getGroupId() != 0) {
-                Group group = Context.getGroupsManager().getById(device.getGroupId());
-                if (group != null) {
-                    deviceRoutes.setGroupName(group.getName());
+            if (!Context.getPermissionsManager().getDeviceDisabled(userId, deviceId)) {
+                Collection<Position> positions = Context.getDataManager()
+                        .getPositions(deviceId, from, to);
+                DeviceReport deviceRoutes = new DeviceReport();
+                Device device = Context.getIdentityManager().getById(deviceId);
+                deviceRoutes.setDeviceName(device.getName());
+                sheetNames.add(WorkbookUtil.createSafeSheetName(deviceRoutes.getDeviceName()));
+                if (device.getGroupId() != 0) {
+                    Group group = Context.getGroupsManager().getById(device.getGroupId());
+                    if (group != null) {
+                        deviceRoutes.setGroupName(group.getName());
+                    }
                 }
+                deviceRoutes.setObjects(positions);
+                devicesRoutes.add(deviceRoutes);
             }
-            deviceRoutes.setObjects(positions);
-            devicesRoutes.add(deviceRoutes);
         }
         String templatePath = Context.getConfig().getString("report.templatesPath",
                 "templates/export/");

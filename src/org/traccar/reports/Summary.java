@@ -72,7 +72,9 @@ public final class Summary {
         ArrayList<SummaryReport> result = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            result.add(calculateSummaryResult(deviceId, from, to));
+            if (!Context.getPermissionsManager().getDeviceDisabled(userId, deviceId)) {
+                result.add(calculateSummaryResult(deviceId, from, to));
+            }
         }
         return result;
     }
