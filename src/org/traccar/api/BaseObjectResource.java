@@ -101,6 +101,8 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         Context.getPermissionsManager().checkReadonly(getUserId());
         if (baseClass.equals(Device.class)) {
             Context.getPermissionsManager().checkDeviceReadonly(getUserId());
+            Device before = Context.getIdentityManager().getById(entity.getId());
+            Context.getPermissionsManager().checkDeviceUpdate(getUserId(), before, (Device) entity);
         } else if (baseClass.equals(User.class)) {
             User before = Context.getPermissionsManager().getUser(entity.getId());
             Context.getPermissionsManager().checkUserUpdate(getUserId(), before, (User) entity);

@@ -56,7 +56,9 @@ public final class Stops {
         ArrayList<StopReport> result = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            result.addAll(detectStops(deviceId, from, to));
+            if (!Context.getPermissionsManager().getDeviceDisabled(userId, deviceId)) {
+                result.addAll(detectStops(deviceId, from, to));
+            }
         }
         return result;
     }
@@ -69,19 +71,21 @@ public final class Stops {
         ArrayList<String> sheetNames = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            Collection<StopReport> stops = detectStops(deviceId, from, to);
-            DeviceReport deviceStops = new DeviceReport();
-            Device device = Context.getIdentityManager().getById(deviceId);
-            deviceStops.setDeviceName(device.getName());
-            sheetNames.add(WorkbookUtil.createSafeSheetName(deviceStops.getDeviceName()));
-            if (device.getGroupId() != 0) {
-                Group group = Context.getGroupsManager().getById(device.getGroupId());
-                if (group != null) {
-                    deviceStops.setGroupName(group.getName());
+            if (!Context.getPermissionsManager().getDeviceDisabled(userId, deviceId)) {
+                Collection<StopReport> stops = detectStops(deviceId, from, to);
+                DeviceReport deviceStops = new DeviceReport();
+                Device device = Context.getIdentityManager().getById(deviceId);
+                deviceStops.setDeviceName(device.getName());
+                sheetNames.add(WorkbookUtil.createSafeSheetName(deviceStops.getDeviceName()));
+                if (device.getGroupId() != 0) {
+                    Group group = Context.getGroupsManager().getById(device.getGroupId());
+                    if (group != null) {
+                        deviceStops.setGroupName(group.getName());
+                    }
                 }
+                deviceStops.setObjects(stops);
+                devicesStops.add(deviceStops);
             }
-            deviceStops.setObjects(stops);
-            devicesStops.add(deviceStops);
         }
         String templatePath = Context.getConfig().getString("report.templatesPath",
                 "templates/export/");

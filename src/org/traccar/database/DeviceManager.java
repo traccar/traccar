@@ -160,6 +160,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         cachedDevice.setCategory(device.getCategory());
         cachedDevice.setContact(device.getContact());
         cachedDevice.setModel(device.getModel());
+        cachedDevice.setDisabled(device.getDisabled());
         cachedDevice.setAttributes(device.getAttributes());
         if (!device.getUniqueId().equals(cachedDevice.getUniqueId())) {
             devicesByUniqueId.remove(cachedDevice.getUniqueId());
@@ -247,7 +248,8 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
 
         if (Context.getPermissionsManager() != null) {
             for (long deviceId : getUserItems(userId)) {
-                if (positions.containsKey(deviceId)) {
+                if (positions.containsKey(deviceId)
+                        && !Context.getPermissionsManager().getDeviceDisabled(userId, deviceId)) {
                     result.add(positions.get(deviceId));
                 }
             }

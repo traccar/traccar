@@ -68,7 +68,8 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
         long deviceId = event.getDeviceId();
         Set<Long> users = Context.getPermissionsManager().getDeviceUsers(deviceId);
         for (long userId : users) {
-            if (event.getGeofenceId() == 0 || Context.getGeofenceManager() != null
+            if (!Context.getPermissionsManager().getDeviceDisabled(userId, deviceId)
+                    && event.getGeofenceId() == 0 || Context.getGeofenceManager() != null
                     && Context.getGeofenceManager().checkItemPermission(userId, event.getGeofenceId())) {
                 boolean sentWeb = false;
                 boolean sentMail = false;

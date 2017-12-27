@@ -54,7 +54,9 @@ public final class Trips {
         ArrayList<TripReport> result = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            result.addAll(detectTrips(deviceId, from, to));
+            if (!Context.getPermissionsManager().getDeviceDisabled(userId, deviceId)) {
+                result.addAll(detectTrips(deviceId, from, to));
+            }
         }
         return result;
     }
@@ -67,19 +69,21 @@ public final class Trips {
         ArrayList<String> sheetNames = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            Collection<TripReport> trips = detectTrips(deviceId, from, to);
-            DeviceReport deviceTrips = new DeviceReport();
-            Device device = Context.getIdentityManager().getById(deviceId);
-            deviceTrips.setDeviceName(device.getName());
-            sheetNames.add(WorkbookUtil.createSafeSheetName(deviceTrips.getDeviceName()));
-            if (device.getGroupId() != 0) {
-                Group group = Context.getGroupsManager().getById(device.getGroupId());
-                if (group != null) {
-                    deviceTrips.setGroupName(group.getName());
+            if (!Context.getPermissionsManager().getDeviceDisabled(userId, deviceId)) {
+                Collection<TripReport> trips = detectTrips(deviceId, from, to);
+                DeviceReport deviceTrips = new DeviceReport();
+                Device device = Context.getIdentityManager().getById(deviceId);
+                deviceTrips.setDeviceName(device.getName());
+                sheetNames.add(WorkbookUtil.createSafeSheetName(deviceTrips.getDeviceName()));
+                if (device.getGroupId() != 0) {
+                    Group group = Context.getGroupsManager().getById(device.getGroupId());
+                    if (group != null) {
+                        deviceTrips.setGroupName(group.getName());
+                    }
                 }
+                deviceTrips.setObjects(trips);
+                devicesTrips.add(deviceTrips);
             }
-            deviceTrips.setObjects(trips);
-            devicesTrips.add(deviceTrips);
         }
         String templatePath = Context.getConfig().getString("report.templatesPath",
                 "templates/export/");
