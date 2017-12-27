@@ -149,4 +149,14 @@ public class Device extends ExtendedModel {
         this.category = category;
     }
 
+    private boolean disabled;
+
+    public boolean getDisabled() {
+        return disabled;
+    }
+
+    public void setDisabled(boolean disabled) {
+        this.disabled = disabled;
+    }
+
 }

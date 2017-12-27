@@ -74,11 +74,26 @@ public class PermissionsManager {
         return devicePermissions.get(userId);
     }
 
-    public Set<Long> getDeviceUsers(long deviceId) {
+    private Set<Long> getAllDeviceUsers(long deviceId) {
         if (!deviceUsers.containsKey(deviceId)) {
             deviceUsers.put(deviceId, new HashSet<Long>());
         }
         return deviceUsers.get(deviceId);
+    }
+
+    public Set<Long> getDeviceUsers(long deviceId) {
+        Device device = Context.getIdentityManager().getById(deviceId);
+        if (device != null && !device.getDisabled()) {
+            return getAllDeviceUsers(deviceId);
+        } else {
+            Set<Long> result = new HashSet<>();
+            for (long userId : getAllDeviceUsers(deviceId)) {
+                if (getUserAdmin(userId)) {
+                    result.add(userId);
+                }
+            }
+            return result;
+        }
     }
 
     public Set<Long> getGroupDevices(long groupId) {
@@ -133,7 +148,7 @@ public class PermissionsManager {
         deviceUsers.clear();
         for (Map.Entry<Long, Set<Long>> entry : devicePermissions.entrySet()) {
             for (long deviceId : entry.getValue()) {
-                getDeviceUsers(deviceId).add(entry.getKey());
+                getAllDeviceUsers(deviceId).add(entry.getKey());
             }
         }
     }
@@ -179,9 +194,9 @@ public class PermissionsManager {
         if (deviceLimit != -1) {
             int deviceCount = 0;
             if (getUserManager(userId)) {
-                deviceCount = Context.getDeviceManager().getManagedItems(userId).size();
+                deviceCount = Context.getDeviceManager().getAllManagedItems(userId).size();
             } else {
-                deviceCount = Context.getDeviceManager().getUserItems(userId).size();
+                deviceCount = Context.getDeviceManager().getAllUserItems(userId).size();
             }
             if (deviceCount >= deviceLimit) {
                 throw new SecurityException("User device limit reached");
