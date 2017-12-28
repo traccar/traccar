@@ -259,7 +259,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             boolean started = data[0].charAt(0) == '0';
             position.set("taximeterOn", started);
             position.set("taximeterStart", data[1]);
-            if (!started) {
+            if (data.length > 2) {
                 position.set("taximeterEnd", data[2]);
                 position.set("taximeterDistance", Integer.parseInt(data[3]));
                 position.set("taximeterFare", Integer.parseInt(data[4]));
