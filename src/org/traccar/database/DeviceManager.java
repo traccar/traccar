@@ -113,7 +113,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         if (Context.getPermissionsManager() != null) {
             Set<Long> result = new HashSet<>();
             for (long deviceId : Context.getPermissionsManager().getDevicePermissions(userId)) {
-                Device device = Context.getIdentityManager().getById(deviceId);
+                Device device = getById(deviceId);
                 if (device != null && !device.getDisabled()) {
                     result.add(deviceId);
                 }
