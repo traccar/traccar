@@ -85,12 +85,13 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     private Map<SocketAddress, DeviceSession> addressDeviceSessions = new HashMap<>(); // connectionless protocols
 
     private long findDeviceId(SocketAddress remoteAddress, String... uniqueIds) {
-        long deviceId = 0;
         if (uniqueIds.length > 0) {
+            long deviceId = 0;
+            Device device = null;
             try {
                 for (String uniqueId : uniqueIds) {
                     if (uniqueId != null) {
-                        Device device = Context.getIdentityManager().getByUniqueId(uniqueId);
+                        device = Context.getIdentityManager().getByUniqueId(uniqueId);
                         if (device != null) {
                             deviceId = device.getId();
                             break;
@@ -100,22 +101,27 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
             } catch (Exception e) {
                 Log.warning(e);
             }
-            if (deviceId == 0) {
-                if (Context.getConfig().getBoolean("database.registerUnknown")) {
-                    return addUnknownDevice(uniqueIds[0]);
-                }
-
-                StringBuilder message = new StringBuilder("Unknown device -");
-                for (String uniqueId : uniqueIds) {
-                    message.append(" ").append(uniqueId);
-                }
-                if (remoteAddress != null) {
-                    message.append(" (").append(((InetSocketAddress) remoteAddress).getHostString()).append(")");
-                }
-                Log.warning(message.toString());
+            if (deviceId == 0 && Context.getConfig().getBoolean("database.registerUnknown")) {
+                return addUnknownDevice(uniqueIds[0]);
             }
+            if (device != null && !device.getDisabled() || Context.getConfig().getBoolean("database.storeDisabled")) {
+                return deviceId;
+            }
+            StringBuilder message = new StringBuilder();
+            if (deviceId == 0) {
+                message.append("Unknown device -");
+            } else {
+                message.append("Disabled device -");
+            }
+            for (String uniqueId : uniqueIds) {
+                message.append(" ").append(uniqueId);
+            }
+            if (remoteAddress != null) {
+                message.append(" (").append(((InetSocketAddress) remoteAddress).getHostString()).append(")");
+            }
+            Log.warning(message.toString());
         }
-        return deviceId;
+        return 0;
     }
 
     public DeviceSession getDeviceSession(Channel channel, SocketAddress remoteAddress, String... uniqueIds) {
