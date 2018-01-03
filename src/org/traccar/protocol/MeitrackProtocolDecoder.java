@@ -459,6 +459,10 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
         switch (type) {
             case "D00":
+                if (photo == null) {
+                    return null;
+                }
+
                 index = buf.indexOf(index + 1 + type.length() + 1, buf.writerIndex(), (byte) ',') + 1;
                 int endIndex =  buf.indexOf(index, buf.writerIndex(), (byte) ',');
                 int total = Integer.parseInt(buf.toString(index, endIndex - index, StandardCharsets.US_ASCII));
