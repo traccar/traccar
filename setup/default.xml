@@ -225,5 +225,6 @@
     <entry key='sigfox.port'>5154</entry>
     <entry key='t57.port'>5155</entry>
     <entry key='spot.port'>5156</entry>
+    <entry key='m2c.port'>5157</entry>
 
 </properties>
