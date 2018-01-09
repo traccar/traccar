@@ -242,13 +242,14 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (parser.hasNext(2)) {
-            decodeDataFields(position, parser.nextInt(), parser.next().split(","));
+            parser.nextInt(); // count
+            decodeDataFields(position, parser.next().split(","));
         }
 
         return position;
     }
 
-    private void decodeDataFields(Position position, int count, String[] values) {
+    private void decodeDataFields(Position position, String[] values) {
 
         if (values.length > 1 && !values[1].isEmpty()) {
             position.set("tempData", values[1]);

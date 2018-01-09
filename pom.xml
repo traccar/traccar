@@ -314,6 +314,9 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>findbugs-maven-plugin</artifactId>
                 <version>3.0.5</version>
+                <configuration>
+                    <excludeFilterFile>findbugs.xml</excludeFilterFile>
+                </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-pmd-plugin</artifactId>
