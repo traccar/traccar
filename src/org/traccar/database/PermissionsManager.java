@@ -300,7 +300,13 @@ public class PermissionsManager {
     }
 
     public void checkDevice(long userId, long deviceId) throws SecurityException {
-        if (!Context.getDeviceManager().getUserItems(userId).contains(deviceId) && !getUserAdmin(userId)) {
+        if (!Context.getDeviceManager().getUserItems(userId).contains(deviceId)) {
+            checkDeviceManagerOrAdmin(userId, deviceId);
+        }
+    }
+
+    public void checkDeviceManagerOrAdmin(long userId, long deviceId) throws SecurityException {
+        if (!getUserAdmin(userId)) {
             checkManager(userId);
             for (long managedUserId : usersManager.getUserItems(userId)) {
                 if (Context.getDeviceManager().getUserItems(managedUserId).contains(deviceId)) {

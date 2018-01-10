@@ -88,7 +88,7 @@ public class DeviceResource extends BaseObjectResource<Device> {
     @Path("{id}/distance")
     @PUT
     public Response updateTotalDistance(DeviceTotalDistance entity) throws SQLException {
-        Context.getPermissionsManager().checkDevice(getUserId(), entity.getDeviceId());
+        Context.getPermissionsManager().checkDeviceManagerOrAdmin(getUserId(), entity.getDeviceId());
         Context.getDeviceManager().resetTotalDistance(entity);
         LogAction.resetTotalDistance(getUserId(), entity.getDeviceId());
         return Response.noContent().build();
