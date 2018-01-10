@@ -15,98 +15,6 @@
  * limitations under the License.
  */
 
- /* TODO
- * Position.outdated
- * Position.network
- *
- * public static final String KEY_INDEX = "index";
- * public static final String KEY_HDOP = "hdop";
- * public static final String KEY_VDOP = "vdop";
- * public static final String KEY_PDOP = "pdop";
- * public static final String KEY_SATELLITES = "sat"; // in use
- * public static final String KEY_SATELLITES_VISIBLE = "satVisible";
- * public static final String KEY_RSSI = "rssi";
- * public static final String KEY_GPS = "gps";
- * public static final String KEY_ROAMING = "roaming";
- * public static final String KEY_STATUS = "status";
- * public static final String KEY_ODOMETER_SERVICE = "serviceOdometer"; // meters
- * public static final String KEY_ODOMETER_TRIP = "tripOdometer"; // meters
- * public static final String KEY_HOURS = "hours";
- * public static final String KEY_STEPS = "steps";
- * public static final String KEY_INPUT = "input";
- * public static final String KEY_OUTPUT = "output";
-
- * public static final String KEY_FUEL_LEVEL = "fuel"; // liters
- * public static final String KEY_FUEL_CONSUMPTION = "fuelConsumption"; // liters/hour
-
- * public static final String KEY_VERSION_FW = "versionFw";
- * public static final String KEY_VERSION_HW = "versionHw";
- * public static final String KEY_TYPE = "type";
- * public static final String KEY_FLAGS = "flags";
- * public static final String KEY_CHARGE = "charge";
- * public static final String KEY_IP = "ip";
- * public static final String KEY_ARCHIVE = "archive";
- * public static final String KEY_DISTANCE = "distance"; // meters
- * public static final String KEY_TOTAL_DISTANCE = "totalDistance"; // meters
- * public static final String KEY_APPROXIMATE = "approximate";
- * public static final String KEY_THROTTLE = "throttle";
- *
- * // Start with 1 not 0
- * public static final String PREFIX_TEMP = "temp";
- * public static final String PREFIX_ADC = "adc";
- * public static final String PREFIX_IO = "io";
- * public static final String PREFIX_COUNT = "count";
- * public static final String PREFIX_IN = "in";
- * public static final String PREFIX_OUT = "out";
- *
- * public static final String ALARM_GENERAL = "general";
- * public static final String ALARM_SOS = "sos";
- * public static final String ALARM_VIBRATION = "vibration";
- * public static final String ALARM_MOVEMENT = "movement";
- * public static final String ALARM_LOW_POWER = "lowPower";
- * public static final String ALARM_LOW_BATTERY = "lowBattery";
- * public static final String ALARM_FAULT = "fault";
- * public static final String ALARM_POWER_OFF = "powerOff";
- * public static final String ALARM_POWER_ON = "powerOn";
- * public static final String ALARM_DOOR = "door";
- * public static final String ALARM_GEOFENCE = "geofence";
- * public static final String ALARM_GEOFENCE_ENTER = "geofenceEnter";
- * public static final String ALARM_GEOFENCE_EXIT = "geofenceExit";
- * public static final String ALARM_GPS_ANTENNA_CUT = "gpsAntennaCut";
- * public static final String ALARM_ACCIDENT = "accident";
- * public static final String ALARM_ACCELERATION = "hardAcceleration";
- * public static final String ALARM_BRAKING = "hardBraking";
- * public static final String ALARM_CORNERING = "hardCornering";
- * public static final String ALARM_FATIGUE_DRIVING = "fatigueDriving";
- * public static final String ALARM_JAMMING = "jamming";
- * public static final String ALARM_TEMPERATURE = "temperature";
- * public static final String ALARM_SHOCK = "shock";
- * public static final String ALARM_BONNET = "bonnet";
- * public static final String ALARM_FOOT_BRAKE = "footBrake";
- * public static final String ALARM_OIL_LEAK = "oilLeak";
- * public static final String ALARM_TAMPERING = "tampering";
- * public static final String ALARM_REMOVING = "removing";
- *
- *
- * Network.radiotype // String e.g. "gsm"
- * Network.carrier // String e.g. "gsm"
- * Network.homeMobileCountryCode // Integer MCC
- * Network.homeMobileNetworkCode // Integer MNC
- * Network.considerIp // Boolean
- * Network.wifiAccessPoints // Collection
- * Network.cellTowers // Collection
- *
- * WifiAccesPoint.macAddress // String
- * WifiAccesPoint.signalStrength // Integer
- * WifiAccesPoint.channel // Integer
- *
- * CellTowers.radioType // String e.g. "gsm"
- * CellTowers.cellId // Long CID
- * CellTowers.locationAreaCode // Integer LAC
- * CellTowers.mobileCountryCode // Integer MCC
- * CellTowers.mobileNetworkCode // Integer MNC
- * CellTowers.signalStrength // Integer
- */
 package org.traccar.protocol;
 
 import org.jboss.netty.channel.Channel;
@@ -196,25 +104,6 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
                 position.set(Position.KEY_EVENT, Event.TYPE_ALARM);
                 position.set(Position.KEY_ALARM, Position.ALARM_TOW);
             }
-            /* these triggers are not handled as alarms
-                * `b` beacon region enter/leave event
-                * `c` circular region enter/leave event
-                * `f` First publish after reboot
-                * `l` Last known position when device lost GPS fix
-                * `L` Last known position before gracefull shutdown
-                * `m` Manually requested locations (e.g. by publishing to `/cmd`)
-                * `p` ping issued randomly by background task
-                * `r` response to a reportLocation cmd message
-                * `t` timer based publish in move move
-                * `t` Time for location published because device is moving.
-                * `T` Time for location published because of time passed while device is stationary (`maxInterval`)
-                * `u` manual publish requested by the user
-
-                * `o` Corner
-                * `M` Mileage
-                * `2` Battery stop charging
-                * `3` Battery start charging
-            */
         }
         if (root.containsKey("batt")) {
             position.set(Position.KEY_BATTERY_LEVEL, root.getInt("batt"));
@@ -242,6 +131,23 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
         }
         if (root.containsKey("odometer")) {
             position.set(Position.KEY_ODOMETER, root.getJsonNumber("odometer").doubleValue() * 1000.0);
+        }
+        if (root.containsKey("hmc")) {
+            position.set(Position.KEY_HOURS, root.getJsonNumber("hmc").doubleValue() / 3600.0);
+        }
+
+        if (root.containsKey("anum")) {
+            Integer anum = root.getInt("anum");
+            for (Integer i = 0; i < anum; i++) {
+                String indexString = String.format("%02d", i);
+                if (root.containsKey("adda-" + indexString)) {
+                    position.set(Position.PREFIX_ADC + (i + 1), root.getString("adda-" + indexString));
+                }
+                if (root.containsKey("temp_c-" + indexString)) {
+                    position.set(Position.PREFIX_TEMP + (i + 1),
+                        root.getJsonNumber("temp_c-" + indexString).doubleValue());
+                }
+            }
         }
 
         position.setTime(new Date(root.getJsonNumber("tst").longValue() * 1000));
