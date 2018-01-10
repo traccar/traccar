@@ -240,7 +240,9 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
         if (root.containsKey("motion")) {
             position.set(Position.KEY_MOTION, root.getBoolean("motion"));
         }
-
+        if (root.containsKey("odometer")) {
+            position.set(Position.KEY_ODOMETER, root.getJsonNumber("odometer").doubleValue() * 1000.0);
+        }
 
         position.setTime(new Date(root.getJsonNumber("tst").longValue() * 1000));
         if (root.containsKey("sent")) {
