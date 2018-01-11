@@ -126,6 +126,10 @@ public final class QueryBuilder {
         return parsedQuery.toString();
     }
 
+    public PreparedStatement getQueryStatement() {
+        return statement;
+    }
+
     public static QueryBuilder create(DataSource dataSource, String query) throws SQLException {
         return new QueryBuilder(dataSource, query, false);
     }

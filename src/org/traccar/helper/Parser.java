@@ -292,6 +292,8 @@ public class Parser {
                 break;
         }
 
+        Log.info("Date parts: " + year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second);
+
         if (format == DateTimeFormat.YMD_HMSS || format == DateTimeFormat.DMY_HMSS) {
             millisecond = nextInt(0); // (ddd)
         }
@@ -326,7 +328,9 @@ public class Parser {
     }
 
     public Date nextDateTime() {
-        return nextDateTime(DateTimeFormat.YMD_HMS, null);
+        Date date = nextDateTime(DateTimeFormat.YMD_HMS, null);
+        Log.info("Date from device: " + date);
+        return date;
     }
 
 }
