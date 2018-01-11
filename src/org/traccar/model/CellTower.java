@@ -106,4 +106,10 @@ public class CellTower {
         this.signalStrength = signalStrength;
     }
 
+    public void setOperator(long operator) {
+        String operatorString = String.valueOf(operator);
+        mobileCountryCode = Integer.parseInt(operatorString.substring(0, 3));
+        mobileNetworkCode = Integer.parseInt(operatorString.substring(3));
+    }
+
 }

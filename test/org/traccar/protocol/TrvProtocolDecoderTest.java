@@ -11,6 +11,15 @@ public class TrvProtocolDecoderTest extends ProtocolTest {
         TrvProtocolDecoder decoder = new TrvProtocolDecoder(new TrvProtocol());
 
         verifyNull(decoder, text(
+                "TRVAP00352121088015548"));
+
+        verifyPosition(decoder, text(
+                "TRVAP01170905A5227.1382N00541.4256E001.7095844000.0008100610020100,204,8,3230,13007"));
+
+        verifyAttributes(decoder, text(
+                "TRVCP01,07800010010000602001206001120124"));
+
+        verifyNull(decoder, text(
                 "IWAP00353456789012345"));
 
         verifyPosition(decoder, text(

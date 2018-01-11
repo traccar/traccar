@@ -4,7 +4,7 @@
 
 <properties>
 
-    <entry key="config.default">default.xml</entry>
+    <entry key='config.default'>./setup/default.xml</entry>
 
     <entry key='web.path'>../traccar-web/web</entry>
     <entry key='web.debug'>true</entry>
@@ -25,13 +25,16 @@
 
     <entry key='database.driver'>com.mysql.jdbc.Driver</entry>
     <entry key='database.url'>jdbc:mysql://localhost:3306/traccar?allowMultiQueries=true&amp;autoReconnect=true&amp;useUnicode=yes&amp;characterEncoding=UTF-8&amp;sessionVariables=sql_mode=''</entry>
-    <!--<entry key='database.user'>truckbot</entry>-->
-    <!--<entry key='database.password'>Por$che@911</entry>-->
+
     <entry key='database.user'>root</entry>
     <entry key='database.password'></entry>
 
     <entry key='aquila.port'>5089</entry>
     <entry key='intellitrac.port'>6037</entry>
     <entry key='osmandprotocol.port'>5055</entry>
+
+    <!--<entry key='ldap.enable'>true</entry>
+    <entry key='ldap.url'>ldap://ldap.forumsys.com:389</entry>
+    <entry key='ldap.context'>dc=example,dc=com</entry>-->
 
 </properties>

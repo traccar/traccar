@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+  logicalFilePath="changelog-3.15">
+
+  <changeSet author="author" id="changelog-3.15">
+
+    <dropForeignKeyConstraint baseTableName="attribute_aliases" constraintName="fk_attribute_aliases_deviceid" />
+    <dropUniqueConstraint tableName="attribute_aliases" constraintName="uk_deviceid_attribute" />
+
+    <dropTable tableName="attribute_aliases" />
+
+    <dropColumn tableName="servers" columnName="timezone" />
+    <dropColumn tableName="servers" columnName="speedunit" />
+    <dropColumn tableName="servers" columnName="distanceunit" />
+
+    <dropColumn tableName="users" columnName="timezone" />
+    <dropColumn tableName="users" columnName="speedunit" />
+    <dropColumn tableName="users" columnName="distanceunit" />
+
+    <createTable tableName="commands">
+      <column name="id" type="INT" autoIncrement="true">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="description" type="VARCHAR(4000)">
+        <constraints nullable="false" />
+      </column>
+      <column name="type" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="textchannel" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+      <column name="attributes" type="VARCHAR(4000)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="user_command">
+      <column name="userid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="commandid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="user_command" baseColumnNames="userid" constraintName="fk_user_command_userid" referencedTableName="users" referencedColumnNames="id" onDelete="CASCADE" />
+    <addForeignKeyConstraint baseTableName="user_command" baseColumnNames="commandid" constraintName="fk_user_command_commandid" referencedTableName="commands" referencedColumnNames="id" onDelete="CASCADE" />
+
+    <createTable tableName="group_command">
+      <column name="groupid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="commandid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="group_command" baseColumnNames="groupid" constraintName="fk_group_command_groupid" referencedTableName="groups" referencedColumnNames="id" onDelete="CASCADE" />
+    <addForeignKeyConstraint baseTableName="group_command" baseColumnNames="commandid" constraintName="fk_group_command_commandid" referencedTableName="commands" referencedColumnNames="id" onDelete="CASCADE" />
+
+    <createTable tableName="device_command">
+      <column name="deviceid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="commandid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="device_command" baseColumnNames="deviceid" constraintName="fk_device_command_deviceid" referencedTableName="devices" referencedColumnNames="id" onDelete="CASCADE" />
+    <addForeignKeyConstraint baseTableName="device_command" baseColumnNames="commandid" constraintName="fk_device_command_commandid" referencedTableName="commands" referencedColumnNames="id" onDelete="CASCADE" />
+
+    <addColumn tableName="servers">
+      <column name="limitcommands" type="BOOLEAN" defaultValueBoolean="false" />
+    </addColumn>
+
+    <addColumn tableName="users">
+      <column name="limitcommands" type="BOOLEAN" defaultValueBoolean="false" />
+    </addColumn>
+
+    <addColumn tableName="notifications">
+      <column name="always" type="BOOLEAN" defaultValueBoolean="false" valueBoolean="true">
+        <constraints nullable="false" />
+      </column>
+    </addColumn>
+
+    <createTable tableName="user_notification">
+      <column name="userid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="notificationid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="user_notification" baseColumnNames="userid" constraintName="fk_user_notification_userid" referencedTableName="users" referencedColumnNames="id" onDelete="CASCADE" />
+
+    <sql>
+      INSERT INTO user_notification (notificationid, userid) SELECT id AS notificationid, userid FROM notifications;
+    </sql>
+
+    <dropForeignKeyConstraint baseTableName="notifications" constraintName="fk_notifications_userid"/>
+    <dropColumn tableName="notifications" columnName="userid" />
+
+    <addForeignKeyConstraint baseTableName="user_notification" baseColumnNames="notificationid" constraintName="fk_user_notification_notificationid" referencedTableName="notifications" referencedColumnNames="id" onDelete="CASCADE" />
+
+    <createTable tableName="group_notification">
+      <column name="groupid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="notificationid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="group_notification" baseColumnNames="groupid" constraintName="fk_group_notification_groupid" referencedTableName="groups" referencedColumnNames="id" onDelete="CASCADE" />
+    <addForeignKeyConstraint baseTableName="group_notification" baseColumnNames="notificationid" constraintName="fk_group_notification_notificationid" referencedTableName="notifications" referencedColumnNames="id" onDelete="CASCADE" />
+
+    <createTable tableName="device_notification">
+      <column name="deviceid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="notificationid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="device_notification" baseColumnNames="deviceid" constraintName="fk_device_notification_deviceid" referencedTableName="devices" referencedColumnNames="id" onDelete="CASCADE" />
+    <addForeignKeyConstraint baseTableName="device_notification" baseColumnNames="notificationid" constraintName="fk_device_notification_notificationid" referencedTableName="notifications" referencedColumnNames="id" onDelete="CASCADE" />
+
+    <dropNotNullConstraint tableName="users" columnName="hashedpassword" columnDataType="VARCHAR(128)" />
+    <dropNotNullConstraint tableName="users" columnName="salt" columnDataType="VARCHAR(128)" />
+
+    <addColumn tableName="users">
+      <column name="login" type="VARCHAR(128)" />
+    </addColumn>
+
+  </changeSet>
+</databaseChangeLog>

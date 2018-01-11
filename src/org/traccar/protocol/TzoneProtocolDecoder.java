@@ -43,7 +43,7 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
             case 0x11:
                 return Position.ALARM_OVERSPEED;
             case 0x14:
-                return Position.ALARM_BREAKING;
+                return Position.ALARM_BRAKING;
             case 0x15:
                 return Position.ALARM_ACCELERATION;
             case 0x30:
@@ -203,7 +203,16 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
         if (blockLength >= 13) {
             position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
             position.set("terminalInfo", buf.readUnsignedByte());
-            position.set(Position.PREFIX_IO + 1, buf.readUnsignedShort());
+
+            int status = buf.readUnsignedByte();
+            position.set(Position.PREFIX_OUT + 1, BitUtil.check(status, 0));
+            position.set(Position.PREFIX_OUT + 2, BitUtil.check(status, 1));
+            status = buf.readUnsignedByte();
+            position.set(Position.PREFIX_IN + 1, BitUtil.check(status, 4));
+            if (BitUtil.check(status, 0)) {
+                position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+            }
+
             position.set(Position.KEY_RSSI, buf.readUnsignedByte());
             position.set("gsmStatus", buf.readUnsignedByte());
             position.set(Position.KEY_BATTERY, buf.readUnsignedShort());

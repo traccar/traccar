@@ -96,4 +96,8 @@ public class Config {
         return key.replaceAll("\\.", "_").replaceAll("(\\p{Lu})", "_$1").toUpperCase();
     }
 
+    public void setString(String key, String value) {
+        properties.put(key, value);
+    }
+
 }

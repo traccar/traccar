@@ -11,12 +11,12 @@ public class MiniFinderProtocolEncoderTest extends ProtocolTest {
     public void testEncode() throws Exception {
 
         MiniFinderProtocolEncoder encoder = new MiniFinderProtocolEncoder();
-        
+
         Command command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_SET_TIMEZONE);
-        command.set(Command.KEY_TIMEZONE, 3600);
-        
+        command.set(Command.KEY_TIMEZONE, "GMT+1");
+
         Assert.assertEquals("123456L+01", encoder.encodeCommand(command));
 
         command = new Command();

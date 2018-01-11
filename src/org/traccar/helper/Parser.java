@@ -109,6 +109,22 @@ public class Parser {
         }
     }
 
+    public Long nextLong() {
+        if (hasNext()) {
+            return Long.parseLong(next());
+        } else {
+            return null;
+        }
+    }
+
+    public Long nextHexLong() {
+        if (hasNext()) {
+            return Long.parseLong(next(), 16);
+        } else {
+            return null;
+        }
+    }
+
     public long nextLong(long defaultValue) {
         return nextLong(10, defaultValue);
     }

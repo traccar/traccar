@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,21 @@ import org.jboss.netty.buffer.ChannelBuffers;
 
 public class BitBuffer {
 
-    private ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
+    private final ChannelBuffer buffer;
 
     private int writeByte;
     private int writeCount;
 
     private int readByte;
     private int readCount;
+
+    public BitBuffer() {
+        buffer = ChannelBuffers.dynamicBuffer();
+    }
+
+    public BitBuffer(ChannelBuffer buffer) {
+        this.buffer = buffer;
+    }
 
     public void writeEncoded(byte[] bytes) {
         for (byte b : bytes) {

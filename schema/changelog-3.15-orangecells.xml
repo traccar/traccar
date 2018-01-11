@@ -8,6 +8,12 @@
 
     <changeSet author="author" id="changelog-3.15-orangecells">
 
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="trucks" />
+            </not>
+        </preConditions>
+
         <createTable tableName="trucks">
             <column name="id" type="INT" autoIncrement="true">
                 <constraints primaryKey="true" />

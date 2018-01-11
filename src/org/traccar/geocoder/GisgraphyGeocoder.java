@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,12 @@ import javax.json.JsonObject;
 
 public class GisgraphyGeocoder extends JsonGeocoder {
 
-    public GisgraphyGeocoder() {
-        this("http://services.gisgraphy.com/reversegeocoding/search", 0);
+    public GisgraphyGeocoder(AddressFormat addressFormat) {
+        this("http://services.gisgraphy.com/reversegeocoding/search", 0, addressFormat);
     }
 
-    public GisgraphyGeocoder(String url, int cacheSize) {
-        super(url + "?format=json&lat=%f&lng=%f&from=1&to=1", cacheSize);
+    public GisgraphyGeocoder(String url, int cacheSize, AddressFormat addressFormat) {
+        super(url + "?format=json&lat=%f&lng=%f&from=1&to=1", cacheSize, addressFormat);
     }
 
     @Override

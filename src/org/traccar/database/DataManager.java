@@ -15,14 +15,18 @@
  */
 package org.traccar.database;
 
+import java.beans.Introspector;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
@@ -36,45 +40,48 @@ import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 
 import org.traccar.Config;
+import org.traccar.Context;
 import org.traccar.helper.Log;
-import org.traccar.model.AttributeAlias;
-import org.traccar.model.AttributePermission;
-import org.traccar.model.Calendar;
-import org.traccar.model.CalendarPermission;
 import org.traccar.model.Attribute;
 import org.traccar.model.Device;
-import org.traccar.model.DeviceAttribute;
-import org.traccar.model.DeviceDriver;
-import org.traccar.model.DevicePermission;
 import org.traccar.model.Driver;
-import org.traccar.model.DriverPermission;
 import org.traccar.model.Event;
 import org.traccar.model.Geofence;
 import org.traccar.model.Group;
-import org.traccar.model.GroupAttribute;
-import org.traccar.model.GroupDriver;
-import org.traccar.model.GroupGeofence;
-import org.traccar.model.GroupPermission;
+import org.traccar.model.ManagedUser;
 import org.traccar.model.Notification;
+import org.traccar.model.Permission;
+import org.traccar.model.BaseModel;
+import org.traccar.model.Calendar;
+import org.traccar.model.Command;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
 import org.traccar.model.Statistics;
 import org.traccar.model.User;
-import org.traccar.model.UserPermission;
-import org.traccar.model.DeviceGeofence;
-import org.traccar.model.GeofencePermission;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 public class DataManager {
 
+    public static final String ACTION_SELECT_ALL = "selectAll";
+    public static final String ACTION_SELECT = "select";
+    public static final String ACTION_INSERT = "insert";
+    public static final String ACTION_UPDATE = "update";
+    public static final String ACTION_DELETE = "delete";
+
     private final Config config;
 
     private DataSource dataSource;
 
+    private boolean generateQueries;
+
+    private boolean forceLdap;
+
     public DataManager(Config config) throws Exception {
         this.config = config;
+
+        forceLdap = config.getBoolean("ldap.force");
 
         initDatabase();
         initDatabaseSchema();
@@ -121,8 +128,80 @@ public class DataManager {
                 hikariConfig.setMaximumPoolSize(maxPoolSize);
             }
 
+            generateQueries = config.getBoolean("database.generateQueries");
+
             dataSource = new HikariDataSource(hikariConfig);
 
+        }
+    }
+
+    public static String constructObjectQuery(String action, Class<?> clazz, boolean extended) {
+        switch (action) {
+            case ACTION_INSERT:
+            case ACTION_UPDATE:
+                StringBuilder result = new StringBuilder();
+                StringBuilder fields = new StringBuilder();
+                StringBuilder values = new StringBuilder();
+
+                Set<Method> methods = new HashSet<>(Arrays.asList(clazz.getMethods()));
+                methods.removeAll(Arrays.asList(Object.class.getMethods()));
+                methods.removeAll(Arrays.asList(BaseModel.class.getMethods()));
+                for (Method method : methods) {
+                    boolean skip;
+                    if (extended) {
+                        skip = !method.isAnnotationPresent(QueryExtended.class);
+                    } else {
+                        skip = method.isAnnotationPresent(QueryIgnore.class)
+                                || method.isAnnotationPresent(QueryExtended.class) && !action.equals(ACTION_INSERT);
+                    }
+                    if (!skip && method.getName().startsWith("get") && method.getParameterTypes().length == 0) {
+                        String name = Introspector.decapitalize(method.getName().substring(3));
+                        if (action.equals(ACTION_INSERT)) {
+                            fields.append(name).append(", ");
+                            values.append(":").append(name).append(", ");
+                        } else {
+                            fields.append(name).append(" = :").append(name).append(", ");
+                        }
+                    }
+                }
+                fields.setLength(fields.length() - 2);
+                if (action.equals(ACTION_INSERT)) {
+                    values.setLength(values.length() - 2);
+                    result.append("INSERT INTO ").append(getObjectsTableName(clazz)).append(" (");
+                    result.append(fields).append(") ");
+                    result.append("VALUES (").append(values).append(")");
+                } else {
+                    result.append("UPDATE ").append(getObjectsTableName(clazz)).append(" SET ");
+                    result.append(fields);
+                    result.append(" WHERE id = :id");
+                }
+                return result.toString();
+            case ACTION_SELECT_ALL:
+                return "SELECT * FROM " + getObjectsTableName(clazz);
+            case ACTION_SELECT:
+                return "SELECT * FROM " + getObjectsTableName(clazz) + " WHERE id = :id";
+            case ACTION_DELETE:
+                return "DELETE FROM " + getObjectsTableName(clazz) + " WHERE id = :id";
+            default:
+                throw new IllegalArgumentException("Unknown action");
+        }
+    }
+
+    public static String constructPermissionQuery(String action, Class<?> owner, Class<?> property) {
+        switch (action) {
+        case ACTION_SELECT_ALL:
+            return "SELECT " + makeNameId(owner) + ", " + makeNameId(property) + " FROM "
+                    + getPermissionsTableName(owner, property);
+        case ACTION_INSERT:
+            return "INSERT INTO " + getPermissionsTableName(owner, property)
+                    + " (" + makeNameId(owner) + ", " + makeNameId(property) + ") VALUES (:"
+                    + makeNameId(owner) + ", :" + makeNameId(property) + ")";
+        case ACTION_DELETE:
+            return "DELETE FROM " + getPermissionsTableName(owner, property)
+                    + " WHERE " + makeNameId(owner) + " = :" + makeNameId(owner)
+                    + " AND " + makeNameId(property) + " = :" + makeNameId(property);
+        default:
+            throw new IllegalArgumentException("Unknown action");
         }
     }
 
@@ -132,6 +211,73 @@ public class DataManager {
             Log.info("Query not provided: " + key);
         }
         return query;
+    }
+
+    public String getQuery(String action, Class<?> clazz) {
+        return getQuery(action, clazz, false);
+    }
+
+    public String getQuery(String action, Class<?> clazz, boolean extended) {
+        String queryName;
+        if (action.equals(ACTION_SELECT_ALL)) {
+            queryName = "database.select" + clazz.getSimpleName() + "s";
+        } else {
+            queryName = "database." + action.toLowerCase() + clazz.getSimpleName();
+            if (extended) {
+                queryName += "Extended";
+            }
+        }
+        String query = config.getString(queryName);
+        if (query == null) {
+            if (generateQueries) {
+                query = constructObjectQuery(action, clazz, extended);
+                config.setString(queryName, query);
+            } else {
+                Log.info("Query not provided: " + queryName);
+            }
+        }
+
+        return query;
+    }
+
+    public String getQuery(String action, Class<?> owner, Class<?> property) {
+        String queryName;
+        if (action.equals(ACTION_SELECT_ALL)) {
+            queryName = "database.select" + owner.getSimpleName() + property.getSimpleName() + "s";
+        } else if (action.equals(ACTION_INSERT)) {
+            queryName = "database.link" + owner.getSimpleName() + property.getSimpleName();
+        } else {
+            queryName = "database.unlink" + owner.getSimpleName() + property.getSimpleName();
+        }
+        String query = config.getString(queryName);
+        if (query == null) {
+            if (generateQueries) {
+                query = constructPermissionQuery(action, owner,
+                        property.equals(User.class) ? ManagedUser.class : property);
+                config.setString(queryName, query);
+            } else {
+                Log.info("Query not provided: " + queryName);
+            }
+        }
+
+        return query;
+    }
+
+    private static String getPermissionsTableName(Class<?> owner, Class<?> property) {
+        String propertyName = property.getSimpleName();
+        if (propertyName.equals("ManagedUser")) {
+            propertyName = "User";
+        }
+        return Introspector.decapitalize(owner.getSimpleName()) + "_" + Introspector.decapitalize(propertyName);
+    }
+
+    private static String getObjectsTableName(Class<?> clazz) {
+        String result = Introspector.decapitalize(clazz.getSimpleName());
+        // Add "s" ending if object name is not plural already
+        if (!result.endsWith("s")) {
+            result += "s";
+        }
+        return result;
     }
 
     private void initDatabaseSchema() throws SQLException, LiquibaseException {
@@ -157,130 +303,27 @@ public class DataManager {
 
     public User login(String email, String password) throws SQLException {
         User user = QueryBuilder.create(dataSource, getQuery("database.loginUser"))
-                .setString("email", email)
+                .setString("email", email.trim())
                 .executeQuerySingle(User.class);
-        if (user != null && user.isPasswordValid(password)) {
-            return user;
+        LdapProvider ldapProvider = Context.getLdapProvider();
+        if (user != null) {
+            if (ldapProvider != null && user.getLogin() != null && ldapProvider.login(user.getLogin(), password)
+                    || !forceLdap && user.isPasswordValid(password)) {
+                return user;
+            }
         } else {
-            return null;
+            if (ldapProvider != null && ldapProvider.login(email, password)) {
+                user = ldapProvider.getUser(email);
+                Context.getUsersManager().addItem(user);
+                return user;
+            }
         }
-    }
-
-    public Collection<User> getUsers() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectUsersAll"))
-                .executeQuery(User.class);
-    }
-
-    public void addUser(User user) throws SQLException {
-        user.setId(QueryBuilder.create(dataSource, getQuery("database.insertUser"), true)
-                .setObject(user)
-                .executeUpdate());
-    }
-
-    public void updateUser(User user) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.updateUser"))
-                .setObject(user)
-                .executeUpdate();
-        if (user.getHashedPassword() != null) {
-            QueryBuilder.create(dataSource, getQuery("database.updateUserPassword"))
-                .setObject(user)
-                .executeUpdate();
-        }
-    }
-
-    public void removeUser(long userId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.deleteUser"))
-                .setLong("id", userId)
-                .executeUpdate();
-    }
-
-    public Collection<DevicePermission> getDevicePermissions() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectDevicePermissions"))
-                .executeQuery(DevicePermission.class);
-    }
-
-    public Collection<GroupPermission> getGroupPermissions() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectGroupPermissions"))
-                .executeQuery(GroupPermission.class);
-    }
-
-    public Collection<Device> getAllDevices() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectDevicesAll"))
-                .executeQuery(Device.class);
-    }
-
-    public void addDevice(Device device) throws SQLException {
-        device.setId(QueryBuilder.create(dataSource, getQuery("database.insertDevice"), true)
-                .setObject(device)
-                .executeUpdate());
-    }
-
-    public void updateDevice(Device device) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.updateDevice"))
-                .setObject(device)
-                .executeUpdate();
+        return null;
     }
 
     public void updateDeviceStatus(Device device) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.updateDeviceStatus"))
+        QueryBuilder.create(dataSource, getQuery(ACTION_UPDATE, Device.class, true))
                 .setObject(device)
-                .executeUpdate();
-    }
-
-    public void removeDevice(long deviceId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.deleteDevice"))
-                .setLong("id", deviceId)
-                .executeUpdate();
-    }
-
-    public void linkDevice(long userId, long deviceId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.linkDevice"))
-                .setLong("userId", userId)
-                .setLong("deviceId", deviceId)
-                .executeUpdate();
-    }
-
-    public void unlinkDevice(long userId, long deviceId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.unlinkDevice"))
-                .setLong("userId", userId)
-                .setLong("deviceId", deviceId)
-                .executeUpdate();
-    }
-
-    public Collection<Group> getAllGroups() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectGroupsAll"))
-                .executeQuery(Group.class);
-    }
-
-    public void addGroup(Group group) throws SQLException {
-        group.setId(QueryBuilder.create(dataSource, getQuery("database.insertGroup"), true)
-                .setObject(group)
-                .executeUpdate());
-    }
-
-    public void updateGroup(Group group) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.updateGroup"))
-                .setObject(group)
-                .executeUpdate();
-    }
-
-    public void removeGroup(long groupId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.deleteGroup"))
-                .setLong("id", groupId)
-                .executeUpdate();
-    }
-
-    public void linkGroup(long userId, long groupId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.linkGroup"))
-                .setLong("userId", userId)
-                .setLong("groupId", groupId)
-                .executeUpdate();
-    }
-
-    public void unlinkGroup(long userId, long groupId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.unlinkGroup"))
-                .setLong("userId", userId)
-                .setLong("groupId", groupId)
                 .executeUpdate();
     }
 
@@ -293,16 +336,10 @@ public class DataManager {
         return queryBuilder.executeQuery(Position.class);
     }
 
-    public Position getPosition(long positionId) throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectPosition"))
-                .setLong("id", positionId)
-                .executeQuerySingle(Position.class);
-    }
-
     public void addPosition(Position position) throws SQLException {
-        position.setId(QueryBuilder.create(dataSource, getQuery("database.insertPosition"), true)
-                .setDate("now", new Date())
+        position.setId(QueryBuilder.create(dataSource, getQuery(ACTION_INSERT, Position.class), true)
                 .setObject(position)
+                .setDate("serverTime", new Date())
                 .executeUpdate());
     }
 
@@ -333,26 +370,8 @@ public class DataManager {
     }
 
     public Server getServer() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectServers"))
+        return QueryBuilder.create(dataSource, getQuery(ACTION_SELECT_ALL, Server.class))
                 .executeQuerySingle(Server.class);
-    }
-
-    public void updateServer(Server server) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.updateServer"))
-                .setObject(server)
-                .executeUpdate();
-    }
-
-    public Event getEvent(long eventId) throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectEvent"))
-                .setLong("id", eventId)
-                .executeQuerySingle(Event.class);
-    }
-
-    public void addEvent(Event event) throws SQLException {
-        event.setId(QueryBuilder.create(dataSource, getQuery("database.insertEvent"), true)
-                .setObject(event)
-                .executeUpdate());
     }
 
     public Collection<Event> getEvents(long deviceId, Date from, Date to) throws SQLException {
@@ -363,132 +382,6 @@ public class DataManager {
                 .executeQuery(Event.class);
     }
 
-    public Collection<Geofence> getGeofences() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectGeofencesAll"))
-                .executeQuery(Geofence.class);
-    }
-
-    public void addGeofence(Geofence geofence) throws SQLException {
-        geofence.setId(QueryBuilder.create(dataSource, getQuery("database.insertGeofence"), true)
-                .setObject(geofence)
-                .executeUpdate());
-    }
-
-    public void updateGeofence(Geofence geofence) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.updateGeofence"))
-                .setObject(geofence)
-                .executeUpdate();
-    }
-
-    public void removeGeofence(long geofenceId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.deleteGeofence"))
-                .setLong("id", geofenceId)
-                .executeUpdate();
-    }
-
-    public Collection<GeofencePermission> getGeofencePermissions() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectGeofencePermissions"))
-                .executeQuery(GeofencePermission.class);
-    }
-
-    public void linkGeofence(long userId, long geofenceId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.linkGeofence"))
-                .setLong("userId", userId)
-                .setLong("geofenceId", geofenceId)
-                .executeUpdate();
-    }
-
-    public void unlinkGeofence(long userId, long geofenceId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.unlinkGeofence"))
-                .setLong("userId", userId)
-                .setLong("geofenceId", geofenceId)
-                .executeUpdate();
-    }
-
-    public Collection<GroupGeofence> getGroupGeofences() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectGroupGeofences"))
-                .executeQuery(GroupGeofence.class);
-    }
-
-    public void linkGroupGeofence(long groupId, long geofenceId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.linkGroupGeofence"))
-                .setLong("groupId", groupId)
-                .setLong("geofenceId", geofenceId)
-                .executeUpdate();
-    }
-
-    public void unlinkGroupGeofence(long groupId, long geofenceId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.unlinkGroupGeofence"))
-                .setLong("groupId", groupId)
-                .setLong("geofenceId", geofenceId)
-                .executeUpdate();
-    }
-
-    public Collection<DeviceGeofence> getDeviceGeofences() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectDeviceGeofences"))
-                .executeQuery(DeviceGeofence.class);
-    }
-
-    public void linkDeviceGeofence(long deviceId, long geofenceId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.linkDeviceGeofence"))
-                .setLong("deviceId", deviceId)
-                .setLong("geofenceId", geofenceId)
-                .executeUpdate();
-    }
-
-    public void unlinkDeviceGeofence(long deviceId, long geofenceId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.unlinkDeviceGeofence"))
-                .setLong("deviceId", deviceId)
-                .setLong("geofenceId", geofenceId)
-                .executeUpdate();
-    }
-
-    public Collection<Notification> getNotifications() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectNotifications"))
-                .executeQuery(Notification.class);
-    }
-
-    public void addNotification(Notification notification) throws SQLException {
-        notification.setId(QueryBuilder.create(dataSource, getQuery("database.insertNotification"), true)
-                .setObject(notification)
-                .executeUpdate());
-    }
-
-    public void updateNotification(Notification notification) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.updateNotification"))
-                .setObject(notification)
-                .executeUpdate();
-    }
-
-    public void removeNotification(Notification notification) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.deleteNotification"))
-                .setLong("id", notification.getId())
-                .executeUpdate();
-    }
-
-    public Collection<AttributeAlias> getAttributeAliases() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectAttributeAliases"))
-                .executeQuery(AttributeAlias.class);
-    }
-
-    public void addAttributeAlias(AttributeAlias attributeAlias) throws SQLException {
-        attributeAlias.setId(QueryBuilder.create(dataSource, getQuery("database.insertAttributeAlias"), true)
-                .setObject(attributeAlias)
-                .executeUpdate());
-    }
-
-    public void updateAttributeAlias(AttributeAlias attributeAlias) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.updateAttributeAlias"))
-                .setObject(attributeAlias)
-                .executeUpdate();
-    }
-
-    public void removeAttributeAlias(long attributeAliasId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.deleteAttributeAlias"))
-                .setLong("id", attributeAliasId)
-                .executeUpdate();
-    }
-
     public Collection<Statistics> getStatistics(Date from, Date to) throws SQLException {
         return QueryBuilder.create(dataSource, getQuery("database.selectStatistics"))
                 .setDate("from", from)
@@ -496,230 +389,83 @@ public class DataManager {
                 .executeQuery(Statistics.class);
     }
 
-    public void addStatistics(Statistics statistics) throws SQLException {
-        statistics.setId(QueryBuilder.create(dataSource, getQuery("database.insertStatistics"), true)
-                .setObject(statistics)
+    public static Class<?> getClassByName(String name) throws ClassNotFoundException {
+        switch (name.toLowerCase().replace("id", "")) {
+            case "device":
+                return Device.class;
+            case "group":
+                return Group.class;
+            case "user":
+                return User.class;
+            case "manageduser":
+                return ManagedUser.class;
+            case "geofence":
+                return Geofence.class;
+            case "driver":
+                return Driver.class;
+            case "attribute":
+                return Attribute.class;
+            case "calendar":
+                return Calendar.class;
+            case "command":
+                return Command.class;
+            case "notification":
+                return Notification.class;
+            default:
+                throw new ClassNotFoundException();
+        }
+    }
+
+    private static String makeNameId(Class<?> clazz) {
+        String name = clazz.getSimpleName();
+        return Introspector.decapitalize(name) + (!name.contains("Id") ? "Id" : "");
+    }
+
+    public Collection<Permission> getPermissions(Class<? extends BaseModel> owner, Class<? extends BaseModel> property)
+            throws SQLException, ClassNotFoundException {
+        return QueryBuilder.create(dataSource, getQuery(ACTION_SELECT_ALL, owner, property))
+                .executePermissionsQuery();
+    }
+
+    public void linkObject(Class<?> owner, long ownerId, Class<?> property, long propertyId, boolean link)
+            throws SQLException {
+        QueryBuilder.create(dataSource, getQuery(link ? ACTION_INSERT : ACTION_DELETE, owner, property))
+                .setLong(makeNameId(owner), ownerId)
+                .setLong(makeNameId(property), propertyId)
+                .executeUpdate();
+    }
+
+    public <T extends BaseModel> T getObject(Class<T> clazz, long entityId) throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery(ACTION_SELECT, clazz))
+                .setLong("id", entityId)
+                .executeQuerySingle(clazz);
+    }
+
+    public <T extends BaseModel> Collection<T> getObjects(Class<T> clazz) throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery(ACTION_SELECT_ALL, clazz))
+                .executeQuery(clazz);
+    }
+
+    public void addObject(BaseModel entity) throws SQLException {
+        entity.setId(QueryBuilder.create(dataSource, getQuery(ACTION_INSERT, entity.getClass()), true)
+                .setObject(entity)
                 .executeUpdate());
     }
 
-    public Collection<Calendar> getCalendars() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectCalendarsAll"))
-                .executeQuery(Calendar.class);
-    }
-
-    public void addCalendar(Calendar calendar) throws SQLException {
-        calendar.setId(QueryBuilder.create(dataSource, getQuery("database.insertCalendar"), true)
-                .setObject(calendar)
-                .executeUpdate());
-    }
-
-    public void updateCalendar(Calendar calendar) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.updateCalendar"))
-                .setObject(calendar)
+    public void updateObject(BaseModel entity) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery(ACTION_UPDATE, entity.getClass()))
+                .setObject(entity)
                 .executeUpdate();
+        if (entity instanceof User && ((User) entity).getHashedPassword() != null) {
+            QueryBuilder.create(dataSource, getQuery(ACTION_UPDATE, User.class, true))
+                    .setObject(entity)
+                    .executeUpdate();
+        }
     }
 
-    public void removeCalendar(long calendarId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.deleteCalendar"))
-                .setLong("id", calendarId)
-                .executeUpdate();
-    }
-
-    public Collection<CalendarPermission> getCalendarPermissions() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectCalendarPermissions"))
-                .executeQuery(CalendarPermission.class);
-    }
-
-    public void linkCalendar(long userId, long calendarId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.linkCalendar"))
-                .setLong("userId", userId)
-                .setLong("calendarId", calendarId)
-                .executeUpdate();
-    }
-
-    public void unlinkCalendar(long userId, long calendarId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.unlinkCalendar"))
-                .setLong("userId", userId)
-                .setLong("calendarId", calendarId)
-                .executeUpdate();
-    }
-
-    public Collection<UserPermission> getUserPermissions() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectUserPermissions"))
-                .executeQuery(UserPermission.class);
-    }
-
-    public void linkUser(long userId, long managedUserId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.linkUser"))
-                .setLong("userId", userId)
-                .setLong("managedUserId", managedUserId)
-                .executeUpdate();
-    }
-
-    public void unlinkUser(long userId, long managedUserId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.unlinkUser"))
-                .setLong("userId", userId)
-                .setLong("managedUserId", managedUserId)
-                .executeUpdate();
-    }
-
-    public Collection<Attribute> getAttributes() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectAttributes"))
-                .executeQuery(Attribute.class);
-    }
-
-    public void addAttribute(Attribute attribute) throws SQLException {
-        attribute.setId(QueryBuilder.create(dataSource, getQuery("database.insertAttribute"), true)
-                .setObject(attribute)
-                .executeUpdate());
-    }
-
-    public void updateAttribute(Attribute attribute) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.updateAttribute"))
-                .setObject(attribute)
-                .executeUpdate();
-    }
-
-    public void removeAttribute(long computedAttributeId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.deleteAttribute"))
-                .setLong("id", computedAttributeId)
-                .executeUpdate();
-    }
-
-    public Collection<AttributePermission> getAttributePermissions() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectAttributePermissions"))
-                .executeQuery(AttributePermission.class);
-    }
-
-    public void linkAttribute(long userId, long attributeId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.linkAttribute"))
-                .setLong("userId", userId)
-                .setLong("attributeId", attributeId)
-                .executeUpdate();
-    }
-
-    public void unlinkAttribute(long userId, long attributeId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.unlinkAttribute"))
-                .setLong("userId", userId)
-                .setLong("attributeId", attributeId)
-                .executeUpdate();
-    }
-
-    public Collection<GroupAttribute> getGroupAttributes() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectGroupAttributes"))
-                .executeQuery(GroupAttribute.class);
-    }
-
-    public void linkGroupAttribute(long groupId, long attributeId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.linkGroupAttribute"))
-                .setLong("groupId", groupId)
-                .setLong("attributeId", attributeId)
-                .executeUpdate();
-    }
-
-    public void unlinkGroupAttribute(long groupId, long attributeId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.unlinkGroupAttribute"))
-                .setLong("groupId", groupId)
-                .setLong("attributeId", attributeId)
-                .executeUpdate();
-    }
-
-    public Collection<DeviceAttribute> getDeviceAttributes() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectDeviceAttributes"))
-                .executeQuery(DeviceAttribute.class);
-    }
-
-    public void linkDeviceAttribute(long deviceId, long attributeId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.linkDeviceAttribute"))
-                .setLong("deviceId", deviceId)
-                .setLong("attributeId", attributeId)
-                .executeUpdate();
-    }
-
-    public void unlinkDeviceAttribute(long deviceId, long attributeId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.unlinkDeviceAttribute"))
-                .setLong("deviceId", deviceId)
-                .setLong("attributeId", attributeId)
-                .executeUpdate();
-    }
-
-    public Collection<Driver> getDrivers() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectDrivers"))
-                .executeQuery(Driver.class);
-    }
-
-    public void addDriver(Driver driver) throws SQLException {
-        driver.setId(QueryBuilder.create(dataSource, getQuery("database.insertDriver"), true)
-                .setObject(driver)
-                .executeUpdate());
-    }
-
-    public void updateDriver(Driver driver) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.updateDriver"))
-                .setObject(driver)
-                .executeUpdate();
-    }
-
-    public void removeDriver(long driverId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.deleteDriver"))
-                .setLong("id", driverId)
-                .executeUpdate();
-    }
-
-    public Collection<DriverPermission> getDriverPermissions() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectDriverPermissions"))
-                .executeQuery(DriverPermission.class);
-    }
-
-    public void linkDriver(long userId, long driverId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.linkDriver"))
-                .setLong("userId", userId)
-                .setLong("driverId", driverId)
-                .executeUpdate();
-    }
-
-    public void unlinkDriver(long userId, long driverId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.unlinkDriver"))
-                .setLong("userId", userId)
-                .setLong("driverId", driverId)
-                .executeUpdate();
-    }
-
-    public Collection<GroupDriver> getGroupDrivers() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectGroupDrivers"))
-                .executeQuery(GroupDriver.class);
-    }
-
-    public void linkGroupDriver(long groupId, long driverId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.linkGroupDriver"))
-                .setLong("groupId", groupId)
-                .setLong("driverId", driverId)
-                .executeUpdate();
-    }
-
-    public void unlinkGroupDriver(long groupId, long driverId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.unlinkGroupDriver"))
-                .setLong("groupId", groupId)
-                .setLong("driverId", driverId)
-                .executeUpdate();
-    }
-
-    public Collection<DeviceDriver> getDeviceDrivers() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectDeviceDrivers"))
-                .executeQuery(DeviceDriver.class);
-    }
-
-    public void linkDeviceDriver(long deviceId, long driverId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.linkDeviceDriver"))
-                .setLong("deviceId", deviceId)
-                .setLong("driverId", driverId)
-                .executeUpdate();
-    }
-
-    public void unlinkDeviceDriver(long deviceId, long driverId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.unlinkDeviceDriver"))
-                .setLong("deviceId", deviceId)
-                .setLong("driverId", driverId)
+    public void removeObject(Class<? extends BaseModel> clazz, long entityId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery(ACTION_DELETE, clazz))
+                .setLong("id", entityId)
                 .executeUpdate();
     }
 

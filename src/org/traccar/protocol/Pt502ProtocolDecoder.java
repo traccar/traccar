@@ -62,18 +62,24 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
 
     private String decodeAlarm(String value) {
         switch (value) {
+            case "IN1":
+                return Position.ALARM_SOS;
+            case "GOF":
+                return Position.ALARM_GEOFENCE;
             case "TOW":
                 return Position.ALARM_TOW;
             case "HDA":
                 return Position.ALARM_ACCELERATION;
             case "HDB":
-                return Position.ALARM_BREAKING;
+                return Position.ALARM_BRAKING;
             case "FDA":
                 return Position.ALARM_FATIGUE_DRIVING;
             case "SKA":
                 return Position.ALARM_VIBRATION;
             case "PMA":
                 return Position.ALARM_MOVEMENT;
+            case "CPA":
+                return Position.ALARM_POWER_CUT;
             default:
                 return null;
         }

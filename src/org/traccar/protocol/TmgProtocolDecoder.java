@@ -36,7 +36,7 @@ public class TmgProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN = new PatternBuilder()
             .text("$")
             .expression("(...),")                // type
-            .expression("[LH],")                 // history
+            .expression("[LH],").optional()      // history
             .number("(d+),")                     // imei
             .number("(dd)(dd)(dddd),")           // date (ddmmyyyy)
             .number("(dd)(dd)(dd),")             // time (hhmmss)
@@ -47,6 +47,7 @@ public class TmgProtocolDecoder extends BaseProtocolDecoder {
             .expression("([EW]),")
             .number("(d+.?d*),")                 // speed
             .number("(d+.?d*),")                 // course
+            .groupBegin()
             .number("(-?d+.?d*),")               // altitude
             .number("(d+.d+),")                  // hdop
             .number("(d+),")                     // satellites
@@ -65,6 +66,20 @@ public class TmgProtocolDecoder extends BaseProtocolDecoder {
             .number("d+.?d*,")                   // trip meter
             .expression("([^,]*),")              // software version
             .expression("([^,]*),").optional()   // rfid
+            .or()
+            .number("[^,]*,")                    // cid
+            .number("(d+),")                     // rssi
+            .number("(d+),")                     // satellites
+            .number("[^,]*,")                    // battery level
+            .expression("([01]),")               // ignition
+            .expression("([LH]{4}),")            // input
+            .expression("[NT]{4},")              // tamper status
+            .expression("([LH]{2}),")            // output
+            .number("(d+.d+),")                  // adc1
+            .number("(d+.d+),")                  // adc1
+            .number("[^,]*,")                    // device id
+            .number("(d+),")                     // odometer
+            .groupEnd()
             .any()
             .compile();
 
@@ -115,36 +130,63 @@ public class TmgProtocolDecoder extends BaseProtocolDecoder {
 
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
 
-        position.setValid(parser.nextInt(0) > 0);
+        position.setValid(parser.nextInt() > 0);
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
-        position.setCourse(parser.nextDouble(0));
-        position.setAltitude(parser.nextDouble(0));
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+        position.setCourse(parser.nextDouble());
 
-        position.set(Position.KEY_HDOP, parser.nextDouble(0));
-        position.set(Position.KEY_SATELLITES, parser.nextInt(0));
-        position.set(Position.KEY_SATELLITES_VISIBLE, parser.nextInt(0));
-        position.set(Position.KEY_OPERATOR, parser.next());
-        position.set(Position.KEY_RSSI, parser.nextInt(0));
-        position.set(Position.KEY_IGNITION, parser.nextInt(0) == 1);
-        position.set(Position.KEY_BATTERY, parser.nextDouble(0));
-        position.set(Position.KEY_POWER, parser.nextDouble(0));
+        if (parser.hasNext(15)) {
 
-        int input = parser.nextBinInt(0);
-        int output = parser.nextBinInt(0);
+            position.setAltitude(parser.nextDouble());
 
-        if (!BitUtil.check(input, 0)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+            position.set(Position.KEY_HDOP, parser.nextDouble());
+            position.set(Position.KEY_SATELLITES, parser.nextInt());
+            position.set(Position.KEY_SATELLITES_VISIBLE, parser.nextInt());
+            position.set(Position.KEY_OPERATOR, parser.next());
+            position.set(Position.KEY_RSSI, parser.nextInt());
+            position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
+            position.set(Position.KEY_BATTERY, parser.nextDouble());
+            position.set(Position.KEY_POWER, parser.nextDouble());
+
+            int input = parser.nextBinInt();
+            int output = parser.nextBinInt();
+
+            if (!BitUtil.check(input, 0)) {
+                position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+            }
+
+            position.set(Position.KEY_INPUT, input);
+            position.set(Position.KEY_OUTPUT, output);
+
+            position.set(Position.PREFIX_ADC + 1, parser.nextDouble());
+            position.set(Position.PREFIX_ADC + 2, parser.nextDouble());
+            position.set(Position.KEY_VERSION_FW, parser.next());
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
+
         }
 
-        position.set(Position.KEY_INPUT, input);
-        position.set(Position.KEY_OUTPUT, output);
+        if (parser.hasNext(6)) {
 
-        position.set(Position.PREFIX_ADC + 1, parser.nextDouble(0));
-        position.set(Position.PREFIX_ADC + 2, parser.nextDouble(0));
-        position.set(Position.KEY_VERSION_FW, parser.next());
-        position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
+            position.set(Position.KEY_RSSI, parser.nextInt());
+            position.set(Position.KEY_SATELLITES, parser.nextInt());
+            position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
+
+            char[] input = parser.next().toCharArray();
+            for (int i = 0; i < input.length; i++) {
+                position.set(Position.PREFIX_IN + (i + 1), input[i] == 'H');
+            }
+
+            char[] output = parser.next().toCharArray();
+            for (int i = 0; i < output.length; i++) {
+                position.set(Position.PREFIX_OUT + (i + 1), output[i] == 'H');
+            }
+
+            position.set(Position.PREFIX_ADC + 1, parser.nextDouble());
+            position.set(Position.PREFIX_ADC + 2, parser.nextDouble());
+            position.set(Position.KEY_ODOMETER, parser.nextInt());
+
+        }
 
         return position;
     }

@@ -20,6 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -43,6 +44,7 @@ public class ComputedAttributesHandler extends BaseDataHandler {
     public ComputedAttributesHandler() {
         engine = new JexlEngine();
         engine.setStrict(true);
+        engine.setFunctions(Collections.singletonMap("math", (Object) Math.class));
         if (Context.getConfig() != null) {
             mapDeviceAttributes = Context.getConfig().getBoolean("processing.computedAttributes.deviceAttributes");
         }
@@ -51,7 +53,7 @@ public class ComputedAttributesHandler extends BaseDataHandler {
     private MapContext prepareContext(Position position) {
         MapContext result = new MapContext();
         if (mapDeviceAttributes) {
-            Device device = Context.getIdentityManager().getDeviceById(position.getDeviceId());
+            Device device = Context.getIdentityManager().getById(position.getDeviceId());
             if (device != null) {
                 for (Object key : device.getAttributes().keySet()) {
                     result.set((String) key, device.getAttributes().get(key));
@@ -86,8 +88,8 @@ public class ComputedAttributesHandler extends BaseDataHandler {
 
     @Override
     protected Position handlePosition(Position position) {
-        Collection<Attribute> attributes = Context.getAttributesManager().getAttributes(
-                Context.getAttributesManager().getAllDeviceAttributes(position.getDeviceId()));
+        Collection<Attribute> attributes = Context.getAttributesManager().getItems(
+                Context.getAttributesManager().getAllDeviceItems(position.getDeviceId()));
         for (Attribute attribute : attributes) {
             if (attribute.getAttribute() != null) {
                 Object result = null;

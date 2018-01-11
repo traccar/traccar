@@ -6,9 +6,41 @@ import org.traccar.ProtocolTest;
 public class SuntechProtocolDecoderTest extends ProtocolTest {
 
     @Test
+    public void testDecodeTemperature() throws Exception {
+
+        SuntechProtocolDecoder decoder = new SuntechProtocolDecoder(new SuntechProtocol());
+
+        decoder.setHbm(true);
+        decoder.setIncludeAdc(true);
+        decoder.setIncludeTemp(true);
+
+        /*verifyPosition(decoder, text(
+                "ST300STT;205170303;12;561;20170816;09:10:34;173f53;+19.082370;-098.214287;006.776;000.00;0;0;52982186;12.75;100000;2;6328;155747;4.2;1;0.00;0;0.00;0.00;00000000000000;0;28F2B7600600005D:+5.2;:;:"));*/
+
+        verifyPosition(decoder, text(
+                "ST300STT;205173382;07;564;20160322;23:23:18;232e19;+19.288278;-099.128750;000.122;000.00;9;1;478391;11.53;000100;1;9498;079324;4.3;1;0.00;0.00;0.00;00000000000000;0;2898E16006000058:-20.8;2861626006000039:+2.5;:"));
+
+        verifyPosition(decoder, text(
+                "ST300EVT;205173382;07;564;20160322;23:23:18;232e19;+19.288278;-099.128750;000.122;000.00;9;1;478391;11.53;000100;2;1;9498;079324;4.3;1;0.00;0.00;0.00;00000000000000;0;2898E16006000058:-20.8;2861626006000039:+2.5;:"));
+
+    }
+
+    @Test
     public void testDecode() throws Exception {
 
         SuntechProtocolDecoder decoder = new SuntechProtocolDecoder(new SuntechProtocol());
+
+        verifyPosition(decoder, text(
+                "STT;100850000;3FFFFF;26;010;1;20161117;08:37:39;0000004F;450;0;0014;20;+37.479323;+126.887827;62.03;65.43;10;1;00000101;00001000;1;2;0492"));
+
+        verifyPosition(decoder, text(
+                "STT;6009999006;3FFFFF;26;398;0;20170827;20:04:37;087d4760;310;410;0ba0;23;+40.123420;-074.995971;000.031;000.00;8;1;00000001;00000000;1;1;0006"));
+
+        verifyPosition(decoder, text(
+                "ST500STT;205450135;07;843;20170816;23:24:45;+19.338432;-099.179817;000.283;000.00;6;1;141121;12.89;0;0;1;4659;002.795;0;001.891;611;4.0"));
+
+        verifyPosition(decoder, text(
+                "ST300STT;205170303;12;561;20170816;09:10:34;173f53;+19.082370;-098.214287;006.776;000.00;0;0;52982186;12.75;100000;2;6328;155747;4.2;1;0.00;0;0.00;0.00;00000000000000;0;28F2B7600600005D:+5.2;:;:"));
 
         verifyPosition(decoder, text(
                 "ST910;Location;205576803;500;20170319;12:18:17;-22.846014;-046.322176;000.000;000.00;0;3.8;0;1;9159"));

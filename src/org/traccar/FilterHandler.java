@@ -29,7 +29,8 @@ public class FilterHandler extends BaseDataHandler {
     private boolean filterStatic;
     private int filterDistance;
     private int filterMaxSpeed;
-    private long filterLimit;
+    private long skipLimit;
+    private boolean skipAttributes;
 
     public void setFilterInvalid(boolean filterInvalid) {
         this.filterInvalid = filterInvalid;
@@ -63,8 +64,12 @@ public class FilterHandler extends BaseDataHandler {
         this.filterMaxSpeed = filterMaxSpeed;
     }
 
-    public void setFilterLimit(long filterLimit) {
-        this.filterLimit = filterLimit;
+    public void setSkipLimit(long skipLimit) {
+        this.skipLimit = skipLimit;
+    }
+
+    public void setSkipAttributes(boolean skipAttributes) {
+        this.skipAttributes = skipAttributes;
     }
 
     public FilterHandler() {
@@ -78,7 +83,8 @@ public class FilterHandler extends BaseDataHandler {
             filterStatic = config.getBoolean("filter.static");
             filterDistance = config.getInteger("filter.distance");
             filterMaxSpeed = config.getInteger("filter.maxSpeed");
-            filterLimit = config.getLong("filter.limit") * 1000;
+            skipLimit = config.getLong("filter.skipLimit") * 1000;
+            skipAttributes = config.getBoolean("filter.skipAttributes.enable");
         }
     }
 
@@ -126,22 +132,30 @@ public class FilterHandler extends BaseDataHandler {
     private boolean filterMaxSpeed(Position position, Position last) {
         if (filterMaxSpeed != 0 && last != null) {
             double distance = position.getDouble(Position.KEY_DISTANCE);
-            long time = position.getFixTime().getTime() - last.getFixTime().getTime();
+            double time = position.getFixTime().getTime() - last.getFixTime().getTime();
             return UnitsConverter.knotsFromMps(distance / (time / 1000)) > filterMaxSpeed;
         }
         return false;
     }
 
-    private boolean filterLimit(Position position, Position last) {
-        if (filterLimit != 0) {
-            if (last != null) {
-                return (position.getFixTime().getTime() - last.getFixTime().getTime()) > filterLimit;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
+    private boolean skipLimit(Position position, Position last) {
+        if (skipLimit != 0 && last != null) {
+            return (position.getFixTime().getTime() - last.getFixTime().getTime()) > skipLimit;
         }
+        return false;
+    }
+
+    private boolean skipAttributes(Position position) {
+        if (skipAttributes) {
+            String attributesString = Context.getIdentityManager().lookupAttributeString(
+                    position.getDeviceId(), "filter.skipAttributes", "", true);
+            for (String attribute : attributesString.split("[ ,]")) {
+                if (position.getAttributes().containsKey(attribute)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private boolean filter(Position position) {
@@ -151,6 +165,10 @@ public class FilterHandler extends BaseDataHandler {
         Position last = null;
         if (Context.getIdentityManager() != null) {
             last = Context.getIdentityManager().getLastPosition(position.getDeviceId());
+        }
+
+        if (skipLimit(position, last) || skipAttributes(position)) {
+            return false;
         }
 
         if (filterInvalid(position)) {
@@ -178,13 +196,13 @@ public class FilterHandler extends BaseDataHandler {
             filterType.append("MaxSpeed ");
         }
 
-        if (filterType.length() > 0 && !filterLimit(position, last)) {
+        if (filterType.length() > 0) {
 
             StringBuilder message = new StringBuilder();
             message.append("Position filtered by ");
             message.append(filterType.toString());
             message.append("filters from device: ");
-            message.append(Context.getIdentityManager().getDeviceById(position.getDeviceId()).getUniqueId());
+            message.append(Context.getIdentityManager().getById(position.getDeviceId()).getUniqueId());
             message.append(" with id: ");
             message.append(position.getDeviceId());
 

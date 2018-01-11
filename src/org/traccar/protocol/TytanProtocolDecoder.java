@@ -84,7 +84,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                     }
                     break;
                 case 28:
-                    position.set("weight", buf.readUnsignedShort());
+                    position.set(Position.KEY_AXLE_WEIGHT, buf.readUnsignedShort());
                     buf.readUnsignedByte();
                     break;
                 case 90:
@@ -111,7 +111,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_OBD_ODOMETER, buf.readUnsignedInt() * 5);
                     break;
                 case 150:
-                    position.set("door", buf.readUnsignedByte());
+                    position.set(Position.KEY_DOOR, buf.readUnsignedByte());
                     break;
                 default:
                     buf.skipBytes(length);

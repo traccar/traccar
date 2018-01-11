@@ -21,21 +21,21 @@ import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
-import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 
 public class FuelDropEventHandler extends BaseEventHandler {
 
     public static final String ATTRIBUTE_FUEL_DROP_THRESHOLD = "fuelDropThreshold";
 
     @Override
-    protected Collection<Event> analyzePosition(Position position) {
+    protected Map<Event, Position> analyzePosition(Position position) {
 
-        Device device = Context.getIdentityManager().getDeviceById(position.getDeviceId());
+        Device device = Context.getIdentityManager().getById(position.getDeviceId());
         if (device == null) {
             return null;
         }
-        if (!Context.getIdentityManager().isLatestPosition(position) || !position.getValid()) {
+        if (!Context.getIdentityManager().isLatestPosition(position)) {
             return null;
         }
 
@@ -52,7 +52,7 @@ public class FuelDropEventHandler extends BaseEventHandler {
                 if (drop >= fuelDropThreshold) {
                     Event event = new Event(Event.TYPE_DEVICE_FUEL_DROP, position.getDeviceId(), position.getId());
                     event.set(ATTRIBUTE_FUEL_DROP_THRESHOLD, fuelDropThreshold);
-                    return Collections.singleton(event);
+                    return Collections.singletonMap(event, position);
                 }
             }
         }

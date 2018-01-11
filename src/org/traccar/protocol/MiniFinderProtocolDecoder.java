@@ -123,7 +123,7 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
 
         position.setAltitude(parser.nextDouble(0));
 
-        position.set(Position.KEY_BATTERY, parser.nextInt(0));
+        position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt(0));
     }
 
     @Override
@@ -133,7 +133,11 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
         String sentence = (String) msg;
 
         if (sentence.startsWith("!1,")) {
-            getDeviceSession(channel, remoteAddress, sentence.substring(3, sentence.length()));
+            int index = sentence.indexOf(',', 3);
+            if (index < 0) {
+                index = sentence.length();
+            }
+            getDeviceSession(channel, remoteAddress, sentence.substring(3, index));
             return null;
         }
 

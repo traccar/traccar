@@ -3,6 +3,8 @@ package org.traccar;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.traccar.database.IdentityManager;
+import org.traccar.model.Device;
 import org.traccar.model.Position;
 
 import java.util.Date;
@@ -10,7 +12,11 @@ import java.util.Date;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-public class FilterHandlerTest extends BaseTest {
+public class FilterHandlerTest {
+
+    static {
+        Context.init(new TestIdentityManager());
+    }
 
     private FilterHandler filtingHandler;
     private FilterHandler passingHandler;
@@ -27,7 +33,7 @@ public class FilterHandlerTest extends BaseTest {
         filtingHandler.setFilterStatic(true);
         filtingHandler.setFilterDistance(10);
         filtingHandler.setFilterMaxSpeed(500);
-        filtingHandler.setFilterLimit(10);
+        filtingHandler.setSkipLimit(10);
     }
 
     @After
@@ -75,6 +81,10 @@ public class FilterHandlerTest extends BaseTest {
 
         assertNull(filtingHandler.decode(null, null, position));
         assertNotNull(passingHandler.decode(null, null, position));
+
+        position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+        filtingHandler.setSkipAttributes(true);
+        assertNotNull(filtingHandler.decode(null, null, position));
     }
 
 }

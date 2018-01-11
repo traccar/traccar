@@ -1,6 +1,6 @@
 [Setup]
 AppName=Traccar
-AppVersion=3.12
+AppVersion=3.15
 DefaultDirName={pf}\Traccar
 AlwaysRestart=yes
 OutputBaseFilename=traccar-setup
@@ -40,7 +40,7 @@ end;
 
 function InitializeSetup(): Boolean;
 begin
-  if RegKeyExists(GetLocalMachine(), 'SOFTWARE\JavaSoft\Java Runtime Environment') then
+  if RegKeyExists(GetLocalMachine(), 'SOFTWARE\JavaSoft') then
   begin
     Result := true;
   end

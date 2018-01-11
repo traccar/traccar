@@ -267,7 +267,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             .or().text(" ")
             .groupEnd("?").text(",")
             .number("(d+)?,")                    // rfid
-            .number("d*,")
+            .expression("[^,]*,")
             .number("(d+)?,")                    // battery
             .expression("([^,]*);")              // alert
             .any()
@@ -280,13 +280,13 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
-
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
             return null;
         }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         if (parser.next().equals("S")) {
@@ -340,30 +340,38 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private String decodeAlarm(String value) {
-        switch (value) {
-            case "SOS":
-            case "Help":
-                return Position.ALARM_SOS;
-            case "Over Speed":
-            case "OverSpeed":
-                return Position.ALARM_OVERSPEED;
-            case "LowSpeed":
-                return Position.ALARM_LOW_SPEED;
-            case "Low Battery":
-            case "LowBattery":
-                return Position.ALARM_LOW_BATTERY;
-            case "VIB":
-                return Position.ALARM_VIBRATION;
-            case "Move in":
-            case "Geo in":
-            case "Geo1 in":
-            case "Geo2 in":
+        value = value.toLowerCase();
+        if (value.startsWith("geo")) {
+            if (value.endsWith("in")) {
                 return Position.ALARM_GEOFENCE_ENTER;
-            case "Move out":
-            case "Geo out":
-            case "Geo1 out":
-            case "Geo2 out":
+            } else if (value.endsWith("out")) {
                 return Position.ALARM_GEOFENCE_EXIT;
+            }
+        }
+        switch (value) {
+            case "poweron":
+                return Position.ALARM_POWER_ON;
+            case "poweroff":
+                return Position.ALARM_POWER_ON;
+            case "sos":
+            case "help":
+                return Position.ALARM_SOS;
+            case "over speed":
+            case "overspeed":
+                return Position.ALARM_OVERSPEED;
+            case "lowspeed":
+                return Position.ALARM_LOW_SPEED;
+            case "low battery":
+            case "lowbattery":
+                return Position.ALARM_LOW_BATTERY;
+            case "vib":
+                return Position.ALARM_VIBRATION;
+            case "move in":
+                return Position.ALARM_GEOFENCE_ENTER;
+            case "move out":
+                return Position.ALARM_GEOFENCE_EXIT;
+            case "error":
+                return Position.ALARM_FAULT;
             default:
                 return null;
         }
