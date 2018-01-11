@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.traccar.model.Command;
 
 import javax.xml.bind.DatatypeConverter;
 import java.nio.charset.StandardCharsets;
+import java.util.TimeZone;
 
 public class MeiligaoProtocolEncoder extends BaseProtocolEncoder {
 
@@ -78,7 +79,7 @@ public class MeiligaoProtocolEncoder extends BaseProtocolEncoder {
                 content.writeShort(command.getInteger(Command.KEY_RADIUS));
                 return encodeContent(command.getDeviceId(), MSG_MOVEMENT_ALARM, content);
             case Command.TYPE_SET_TIMEZONE:
-                int offset = command.getInteger(Command.KEY_TIMEZONE) / 60;
+                int offset = TimeZone.getTimeZone(command.getString(Command.KEY_TIMEZONE)).getRawOffset() / 60000;
                 content.writeBytes(String.valueOf(offset).getBytes(StandardCharsets.US_ASCII));
                 return encodeContent(command.getDeviceId(), MSG_TIME_ZONE, content);
             case Command.TYPE_REBOOT_DEVICE:

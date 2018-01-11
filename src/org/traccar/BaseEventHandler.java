@@ -15,7 +15,7 @@
  */
 package org.traccar;
 
-import java.util.Collection;
+import java.util.Map;
 
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -25,13 +25,13 @@ public abstract class BaseEventHandler extends BaseDataHandler {
     @Override
     protected Position handlePosition(Position position) {
 
-        Collection<Event> events = analyzePosition(position);
+        Map<Event, Position> events = analyzePosition(position);
         if (events != null && Context.getNotificationManager() != null) {
-            Context.getNotificationManager().updateEvents(events, position);
+            Context.getNotificationManager().updateEvents(events);
         }
         return position;
     }
 
-    protected abstract Collection<Event> analyzePosition(Position position);
+    protected abstract Map<Event, Position> analyzePosition(Position position);
 
 }

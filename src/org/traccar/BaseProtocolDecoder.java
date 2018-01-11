@@ -17,7 +17,9 @@ package org.traccar;
 
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.socket.DatagramChannel;
+import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.traccar.helper.Log;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 
@@ -45,15 +47,13 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
         }
 
         try {
-            Context.getDeviceManager().addDevice(device);
+            Context.getDeviceManager().addItem(device);
 
             Log.info("Automatically registered device " + uniqueId);
 
             if (defaultGroupId != 0) {
-                Context.getPermissionsManager().refreshPermissions();
-                if (Context.getGeofenceManager() != null) {
-                    Context.getGeofenceManager().refresh();
-                }
+                Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
+                Context.getPermissionsManager().refreshAllExtendedPermissions();
             }
 
             return device.getId();
@@ -67,16 +67,31 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
         return protocol.getName();
     }
 
+    protected double convertSpeed(double value, String defaultUnits) {
+        switch (Context.getConfig().getString(getProtocolName() + ".speed", defaultUnits)) {
+            case "kmh":
+                return UnitsConverter.knotsFromKph(value);
+            case "mps":
+                return UnitsConverter.knotsFromMps(value);
+            case "mph":
+                return UnitsConverter.knotsFromMph(value);
+            case "kn":
+            default:
+                return value;
+        }
+    }
+
     private DeviceSession channelDeviceSession; // connection-based protocols
     private Map<SocketAddress, DeviceSession> addressDeviceSessions = new HashMap<>(); // connectionless protocols
 
     private long findDeviceId(SocketAddress remoteAddress, String... uniqueIds) {
-        long deviceId = 0;
         if (uniqueIds.length > 0) {
+            long deviceId = 0;
+            Device device = null;
             try {
                 for (String uniqueId : uniqueIds) {
                     if (uniqueId != null) {
-                        Device device = Context.getIdentityManager().getDeviceByUniqueId(uniqueId);
+                        device = Context.getIdentityManager().getByUniqueId(uniqueId);
                         if (device != null) {
                             deviceId = device.getId();
                             break;
@@ -86,26 +101,32 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
             } catch (Exception e) {
                 Log.warning(e);
             }
-            if (deviceId == 0) {
-                if (Context.getConfig().getBoolean("database.registerUnknown")) {
-                    return addUnknownDevice(uniqueIds[0]);
-                }
-
-                StringBuilder message = new StringBuilder("Unknown device -");
-                for (String uniqueId : uniqueIds) {
-                    message.append(" ").append(uniqueId);
-                }
-                if (remoteAddress != null) {
-                    message.append(" (").append(((InetSocketAddress) remoteAddress).getHostString()).append(")");
-                }
-                Log.warning(message.toString());
+            if (deviceId == 0 && Context.getConfig().getBoolean("database.registerUnknown")) {
+                return addUnknownDevice(uniqueIds[0]);
             }
+            if (device != null && !device.getDisabled() || Context.getConfig().getBoolean("database.storeDisabled")) {
+                return deviceId;
+            }
+            StringBuilder message = new StringBuilder();
+            if (deviceId == 0) {
+                message.append("Unknown device -");
+            } else {
+                message.append("Disabled device -");
+            }
+            for (String uniqueId : uniqueIds) {
+                message.append(" ").append(uniqueId);
+            }
+            if (remoteAddress != null) {
+                message.append(" (").append(((InetSocketAddress) remoteAddress).getHostString()).append(")");
+            }
+            Log.warning(message.toString());
         }
-        return deviceId;
+        return 0;
     }
 
     public DeviceSession getDeviceSession(Channel channel, SocketAddress remoteAddress, String... uniqueIds) {
-        if (Context.getConfig().getBoolean("decoder.ignoreSessionCache")) {
+        if (channel != null && channel.getPipeline().get(HttpRequestDecoder.class) != null
+                || Context.getConfig().getBoolean("decoder.ignoreSessionCache")) {
             long deviceId = findDeviceId(remoteAddress, uniqueIds);
             if (deviceId != 0) {
                 if (Context.getConnectionManager() != null) {

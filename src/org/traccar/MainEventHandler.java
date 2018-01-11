@@ -55,7 +55,7 @@ public class MainEventHandler extends IdleStateAwareChannelHandler {
                 Log.warning(error);
             }
 
-            String uniqueId = Context.getIdentityManager().getDeviceById(position.getDeviceId()).getUniqueId();
+            String uniqueId = Context.getIdentityManager().getById(position.getDeviceId()).getUniqueId();
 
             // Log position
             StringBuilder s = new StringBuilder();

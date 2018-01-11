@@ -17,37 +17,24 @@
 package org.traccar.protocol;
 
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
-import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.jboss.netty.handler.codec.http.HttpVersion;
-import org.traccar.BaseProtocolDecoder;
+import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.DeviceSession;
-import org.traccar.model.Position;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.model.Position;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import java.io.StringReader;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
-import java.io.StringReader;
-import javax.json.Json;
-import javax.json.JsonObject;
-
-public class OwnTracksProtocolDecoder extends BaseProtocolDecoder {
+public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
 
     public OwnTracksProtocolDecoder(OwnTracksProtocol protocol) {
         super(protocol);
-    }
-
-    private void sendResponse(Channel channel, HttpResponseStatus status) {
-        if (channel != null) {
-            HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, status);
-            response.headers().add(HttpHeaders.Names.CONTENT_LENGTH, 0);
-            channel.write(response);
-        }
     }
 
     @Override

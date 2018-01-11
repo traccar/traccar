@@ -16,8 +16,8 @@
  */
 package org.traccar.events;
 
-import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 
 import org.traccar.BaseEventHandler;
 import org.traccar.Context;
@@ -28,13 +28,13 @@ import org.traccar.model.Position;
 public class IgnitionEventHandler extends BaseEventHandler {
 
     @Override
-    protected Collection<Event> analyzePosition(Position position) {
-        Device device = Context.getIdentityManager().getDeviceById(position.getDeviceId());
+    protected Map<Event, Position> analyzePosition(Position position) {
+        Device device = Context.getIdentityManager().getById(position.getDeviceId());
         if (device == null || !Context.getIdentityManager().isLatestPosition(position)) {
             return null;
         }
 
-        Collection<Event> result = null;
+        Map<Event, Position> result = null;
 
         if (position.getAttributes().containsKey(Position.KEY_IGNITION)) {
             boolean ignition = position.getBoolean(Position.KEY_IGNITION);
@@ -44,11 +44,11 @@ public class IgnitionEventHandler extends BaseEventHandler {
                 boolean oldIgnition = lastPosition.getBoolean(Position.KEY_IGNITION);
 
                 if (ignition && !oldIgnition) {
-                    result = Collections.singleton(
-                            new Event(Event.TYPE_IGNITION_ON, position.getDeviceId(), position.getId()));
+                    result = Collections.singletonMap(
+                            new Event(Event.TYPE_IGNITION_ON, position.getDeviceId(), position.getId()), position);
                 } else if (!ignition && oldIgnition) {
-                    result = Collections.singleton(
-                            new Event(Event.TYPE_IGNITION_OFF, position.getDeviceId(), position.getId()));
+                    result = Collections.singletonMap(
+                            new Event(Event.TYPE_IGNITION_OFF, position.getDeviceId(), position.getId()), position);
                 }
             }
         }

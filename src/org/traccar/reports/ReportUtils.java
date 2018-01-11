@@ -26,7 +26,10 @@ import org.jxls.transform.Transformer;
 import org.jxls.transform.poi.PoiTransformer;
 import org.jxls.util.TransformerFactory;
 import org.traccar.Context;
+import org.traccar.events.MotionEventHandler;
+import org.traccar.model.DeviceState;
 import org.traccar.model.Driver;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.reports.model.BaseReport;
 import org.traccar.reports.model.StopReport;
@@ -40,8 +43,10 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 
 public final class ReportUtils {
@@ -49,16 +54,27 @@ public final class ReportUtils {
     private ReportUtils() {
     }
 
+    public static void checkPeriodLimit(Date from, Date to) {
+        long limit = Context.getConfig().getLong("report.periodLimit") * 1000;
+        if (limit > 0 && to.getTime() - from.getTime() > limit) {
+            throw new IllegalArgumentException("Time period exceeds the limit");
+        }
+    }
+
     public static String getDistanceUnit(long userId) {
-        return (String) Context.getPermissionsManager().lookupPreference(userId, "distanceUnit", "km");
+        return (String) Context.getPermissionsManager().lookupAttribute(userId, "distanceUnit", "km");
     }
 
     public static String getSpeedUnit(long userId) {
-        return (String) Context.getPermissionsManager().lookupPreference(userId, "speedUnit", "kn");
+        return (String) Context.getPermissionsManager().lookupAttribute(userId, "speedUnit", "kn");
+    }
+
+    public static String getVolumeUnit(long userId) {
+        return (String) Context.getPermissionsManager().lookupAttribute(userId, "volumeUnit", "ltr");
     }
 
     public static TimeZone getTimezone(long userId) {
-        String timezone = (String) Context.getPermissionsManager().lookupPreference(userId, "timezone", null);
+        String timezone = (String) Context.getPermissionsManager().lookupAttribute(userId, "timezone", null);
         return timezone != null ? TimeZone.getTimeZone(timezone) : TimeZone.getDefault();
     }
 
@@ -125,6 +141,7 @@ public final class ReportUtils {
         org.jxls.common.Context jxlsContext = PoiTransformer.createInitialContext();
         jxlsContext.putVar("distanceUnit", getDistanceUnit(userId));
         jxlsContext.putVar("speedUnit", getSpeedUnit(userId));
+        jxlsContext.putVar("volumeUnit", getVolumeUnit(userId));
         jxlsContext.putVar("webUrl", Context.getVelocityEngine().getProperty("web.url"));
         jxlsContext.putVar("dateTool", new DateTool());
         jxlsContext.putVar("numberTool", new NumberTool());
@@ -147,15 +164,6 @@ public final class ReportUtils {
         transformer.write();
     }
 
-    public static TripsConfig initTripsConfig() {
-        return new TripsConfig(
-                Context.getConfig().getLong("report.trip.minimalTripDuration", 300) * 1000,
-                Context.getConfig().getLong("report.trip.minimalTripDistance", 500),
-                Context.getConfig().getLong("report.trip.minimalParkingDuration", 300) * 1000,
-                Context.getConfig().getBoolean("report.trip.greedyParking"),
-                Context.getConfig().getLong("report.trip.minimalNoDataDuration", 3600) * 1000);
-    }
-
     private static TripReport calculateTrip(
             ArrayList<Position> positions, int startIndex, int endIndex, boolean ignoreOdometer) {
         Position startTrip = positions.get(startIndex);
@@ -176,19 +184,29 @@ public final class ReportUtils {
         long tripDuration = endTrip.getFixTime().getTime() - startTrip.getFixTime().getTime();
         long deviceId = startTrip.getDeviceId();
         trip.setDeviceId(deviceId);
-        trip.setDeviceName(Context.getIdentityManager().getDeviceById(deviceId).getName());
+        trip.setDeviceName(Context.getIdentityManager().getById(deviceId).getName());
 
         trip.setStartPositionId(startTrip.getId());
         trip.setStartLat(startTrip.getLatitude());
         trip.setStartLon(startTrip.getLongitude());
         trip.setStartTime(startTrip.getFixTime());
-        trip.setStartAddress(startTrip.getAddress());
+        String startAddress = startTrip.getAddress();
+        if (startAddress == null && Context.getGeocoder() != null
+                && Context.getConfig().getBoolean("geocoder.onRequest")) {
+            startAddress = Context.getGeocoder().getAddress(startTrip.getLatitude(), startTrip.getLongitude(), null);
+        }
+        trip.setStartAddress(startAddress);
 
         trip.setEndPositionId(endTrip.getId());
         trip.setEndLat(endTrip.getLatitude());
         trip.setEndLon(endTrip.getLongitude());
         trip.setEndTime(endTrip.getFixTime());
-        trip.setEndAddress(endTrip.getAddress());
+        String endAddress = endTrip.getAddress();
+        if (endAddress == null && Context.getGeocoder() != null
+                && Context.getConfig().getBoolean("geocoder.onRequest")) {
+            endAddress = Context.getGeocoder().getAddress(endTrip.getLatitude(), endTrip.getLongitude(), null);
+        }
+        trip.setEndAddress(endAddress);
 
         trip.setDistance(calculateDistance(startTrip, endTrip, !ignoreOdometer));
         trip.setDuration(tripDuration);
@@ -210,13 +228,19 @@ public final class ReportUtils {
 
         long deviceId = startStop.getDeviceId();
         stop.setDeviceId(deviceId);
-        stop.setDeviceName(Context.getIdentityManager().getDeviceById(deviceId).getName());
+        stop.setDeviceName(Context.getIdentityManager().getById(deviceId).getName());
 
         stop.setPositionId(startStop.getId());
         stop.setLatitude(startStop.getLatitude());
         stop.setLongitude(startStop.getLongitude());
         stop.setStartTime(startStop.getFixTime());
-        stop.setAddress(startStop.getAddress());
+        String address = startStop.getAddress();
+        if (address == null && Context.getGeocoder() != null
+                && Context.getConfig().getBoolean("geocoder.onRequest")) {
+            address = Context.getGeocoder().getAddress(stop.getLatitude(), stop.getLongitude(), null);
+        }
+        stop.setAddress(address);
+
         stop.setEndTime(endStop.getFixTime());
 
         long stopDuration = endStop.getFixTime().getTime() - startStop.getFixTime().getTime();
@@ -236,115 +260,79 @@ public final class ReportUtils {
 
     }
 
-    private static boolean isMoving(ArrayList<Position> positions, int index,
-            TripsConfig tripsConfig, double speedThreshold) {
-        if (tripsConfig.getMinimalNoDataDuration() > 0 && index < positions.size() - 1
-                && positions.get(index + 1).getFixTime().getTime() - positions.get(index).getFixTime().getTime()
-                >= tripsConfig.getMinimalNoDataDuration()) {
-            return false;
+    private static <T extends BaseReport> T calculateTripOrStop(ArrayList<Position> positions, int startIndex,
+            int endIndex, boolean ignoreOdometer, Class<T> reportClass) {
+        if (reportClass.equals(TripReport.class)) {
+            return (T) calculateTrip(positions, startIndex, endIndex, ignoreOdometer);
+        } else {
+            return (T) calculateStop(positions, startIndex, endIndex);
+        }
+    }
+
+    private static boolean isMoving(ArrayList<Position> positions, int index, TripsConfig tripsConfig) {
+        if (tripsConfig.getMinimalNoDataDuration() > 0) {
+            boolean beforeGap = index < positions.size() - 1
+                    && positions.get(index + 1).getFixTime().getTime() - positions.get(index).getFixTime().getTime()
+                    >= tripsConfig.getMinimalNoDataDuration();
+            boolean afterGap = index > 0
+                    && positions.get(index).getFixTime().getTime() - positions.get(index - 1).getFixTime().getTime()
+                    >= tripsConfig.getMinimalNoDataDuration();
+            if (beforeGap || afterGap) {
+                return false;
+            }
         }
         if (positions.get(index).getAttributes().containsKey(Position.KEY_MOTION)
                 && positions.get(index).getAttributes().get(Position.KEY_MOTION) instanceof Boolean) {
             return positions.get(index).getBoolean(Position.KEY_MOTION);
         } else {
-            return positions.get(index).getSpeed() > speedThreshold;
+            return positions.get(index).getSpeed() > tripsConfig.getSpeedThreshold();
         }
     }
 
-    public static Collection<BaseReport> detectTripsAndStops(TripsConfig tripsConfig, boolean ignoreOdometer,
-            double speedThreshold, Collection<Position> positionCollection, boolean trips) {
-
-        Collection<BaseReport> result = new ArrayList<>();
+    public static <T extends BaseReport> Collection<T> detectTripsAndStops(Collection<Position> positionCollection,
+            TripsConfig tripsConfig, boolean ignoreOdometer, Class<T> reportClass) {
+        Collection<T> result = new ArrayList<>();
 
         ArrayList<Position> positions = new ArrayList<>(positionCollection);
         if (positions != null && !positions.isEmpty()) {
-            int previousStartParkingIndex = 0;
-            int startParkingIndex = -1;
-            int previousEndParkingIndex = 0;
-            int endParkingIndex = 0;
-
-            boolean isMoving = false;
-            boolean isLast = false;
-            boolean skipped = false;
-            boolean tripFiltered = false;
-
+            boolean trips = reportClass.equals(TripReport.class);
+            MotionEventHandler  motionHandler = new MotionEventHandler(tripsConfig);
+            DeviceState deviceState = new DeviceState();
+            deviceState.setMotionState(isMoving(positions, 0, tripsConfig));
+            int startEventIndex = trips == deviceState.getMotionState() ? 0 : -1;
+            int startNoEventIndex = -1;
             for (int i = 0; i < positions.size(); i++) {
-                isMoving = isMoving(positions, i, tripsConfig, speedThreshold);
-                isLast = i == positions.size() - 1;
-
-                if ((isMoving || isLast) && startParkingIndex != -1) {
-                    if (!skipped || previousEndParkingIndex == 0) {
-                        previousEndParkingIndex = endParkingIndex;
-                    }
-                    endParkingIndex = i;
+                Map<Event, Position> event = motionHandler.updateMotionState(deviceState, positions.get(i),
+                        isMoving(positions, i, tripsConfig));
+                if (startEventIndex == -1
+                        && (trips != deviceState.getMotionState() && deviceState.getMotionPosition() != null
+                        || trips == deviceState.getMotionState() && event != null)) {
+                    startEventIndex = i;
+                    startNoEventIndex = -1;
+                } else if (trips != deviceState.getMotionState() && startEventIndex != -1
+                        && deviceState.getMotionPosition() == null && event == null) {
+                    startEventIndex = -1;
                 }
-                if (!isMoving && startParkingIndex == -1) {
-                    if (tripsConfig.getGreedyParking()) {
-                        long tripDuration = positions.get(i).getFixTime().getTime()
-                                - positions.get(endParkingIndex).getFixTime().getTime();
-                        double tripDistance = ReportUtils.calculateDistance(positions.get(endParkingIndex),
-                                positions.get(i), false);
-                        tripFiltered = tripDuration < tripsConfig.getMinimalTripDuration()
-                                && tripDistance < tripsConfig.getMinimalTripDistance();
-                        if (tripFiltered) {
-                            startParkingIndex = previousStartParkingIndex;
-                            endParkingIndex = previousEndParkingIndex;
-                            tripFiltered = false;
-                        } else {
-                            previousStartParkingIndex = i;
-                            startParkingIndex = i;
-                        }
-                    } else {
-                        long tripDuration = positions.get(i).getFixTime().getTime()
-                                - positions.get(previousEndParkingIndex).getFixTime().getTime();
-                        double tripDistance = ReportUtils.calculateDistance(positions.get(previousEndParkingIndex),
-                                positions.get(i), false);
-                        tripFiltered = tripDuration < tripsConfig.getMinimalTripDuration()
-                                && tripDistance < tripsConfig.getMinimalTripDistance();
-                        startParkingIndex = i;
-                    }
+                if (startNoEventIndex == -1
+                        && (trips == deviceState.getMotionState() && deviceState.getMotionPosition() != null
+                        || trips != deviceState.getMotionState() && event != null)) {
+                    startNoEventIndex = i;
+                } else if (startNoEventIndex != -1 && deviceState.getMotionPosition() == null && event == null) {
+                    startNoEventIndex = -1;
                 }
-                if (startParkingIndex != -1 && (endParkingIndex > startParkingIndex || isLast)) {
-                    long parkingDuration = positions.get(endParkingIndex).getFixTime().getTime()
-                            - positions.get(startParkingIndex).getFixTime().getTime();
-                    if ((parkingDuration >= tripsConfig.getMinimalParkingDuration() || isLast)
-                            && previousEndParkingIndex < startParkingIndex) {
-                        if (!tripFiltered) {
-                            if (trips) {
-                                result.add(calculateTrip(
-                                        positions, previousEndParkingIndex, startParkingIndex, ignoreOdometer));
-                            } else {
-                                if (result.isEmpty() && previousEndParkingIndex > previousStartParkingIndex) {
-                                    long previousParkingDuration = positions.get(previousEndParkingIndex)
-                                            .getFixTime().getTime() - positions.get(previousStartParkingIndex)
-                                            .getFixTime().getTime();
-                                    if (previousParkingDuration >= tripsConfig.getMinimalParkingDuration()) {
-                                        result.add(calculateStop(positions, previousStartParkingIndex,
-                                                previousEndParkingIndex));
-                                    }
-                                }
-                                result.add(calculateStop(positions, startParkingIndex, isLast ? i : endParkingIndex));
-                            }
-                        }
-                        previousEndParkingIndex = endParkingIndex;
-                        skipped = false;
-                    } else {
-                        skipped = true;
-                    }
-                    startParkingIndex = -1;
+                if (startEventIndex != -1 && startNoEventIndex != -1 && event != null
+                        && trips != deviceState.getMotionState()) {
+                    result.add(calculateTripOrStop(positions, startEventIndex, startNoEventIndex,
+                            ignoreOdometer, reportClass));
+                    startEventIndex = -1;
                 }
             }
-            if (result.isEmpty() && !trips) {
-                int end = isMoving && !tripsConfig.getGreedyParking()
-                        ? Math.max(endParkingIndex, previousEndParkingIndex) : positions.size() - 1;
-                long parkingDuration = positions.get(end).getFixTime().getTime()
-                        - positions.get(previousStartParkingIndex).getFixTime().getTime();
-                if (parkingDuration >= tripsConfig.getMinimalParkingDuration()) {
-                    result.add(calculateStop(positions, previousStartParkingIndex, end));
-                }
+            if (startEventIndex != -1 && (startNoEventIndex != -1 || !trips)) {
+                result.add(calculateTripOrStop(positions, startEventIndex,
+                            startNoEventIndex != -1 ? startNoEventIndex : positions.size() - 1,
+                            ignoreOdometer, reportClass));
             }
         }
-
         return result;
     }
 }

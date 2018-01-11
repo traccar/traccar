@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,76 +33,75 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
+    public static final int CMD_RESPONSE_SIZE = 0x84;
     public static final int MSG_IMEI = 0x03;
     public static final int MSG_PHOTO = 0x0A;
     public static final int MSG_ADM5 = 0x01;
 
-    @Override
-    protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+    private Position decodeData(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf, int type) {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
-
-        buf.readUnsignedShort(); // device id
-        buf.readUnsignedByte(); // length
-
-        int type = buf.readUnsignedByte();
-
-        DeviceSession deviceSession;
-        if (type == MSG_IMEI) {
-            deviceSession = getDeviceSession(
-                    channel, remoteAddress, buf.readBytes(15).toString(StandardCharsets.US_ASCII));
-        } else {
-            deviceSession = getDeviceSession(channel, remoteAddress);
-        }
-
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
         if (deviceSession == null) {
             return null;
         }
 
         if (BitUtil.to(type, 2) == 0) {
-
             Position position = new Position();
             position.setProtocol(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             position.set(Position.KEY_VERSION_FW, buf.readUnsignedByte());
-            buf.readUnsignedShort(); // index
+            position.set(Position.KEY_INDEX, buf.readUnsignedShort());
 
-            position.set(Position.KEY_STATUS, buf.readUnsignedShort());
-
-            position.setValid(true);
+            int status = buf.readUnsignedShort();
+            position.set(Position.KEY_STATUS, status);
+            position.setValid(!BitUtil.check(status, 5));
             position.setLatitude(buf.readFloat());
             position.setLongitude(buf.readFloat());
             position.setCourse(buf.readUnsignedShort() * 0.1);
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort() * 0.1));
 
-            position.set(Position.KEY_ACCELERATION, buf.readUnsignedByte());
-
+            position.set(Position.KEY_ACCELERATION, buf.readUnsignedByte() * 0.1);
             position.setAltitude(buf.readUnsignedShort());
-
             position.set(Position.KEY_HDOP, buf.readUnsignedByte() * 0.1);
             position.set(Position.KEY_SATELLITES, buf.readUnsignedByte() & 0x0f);
 
             position.setTime(new Date(buf.readUnsignedInt() * 1000));
 
-            position.set(Position.KEY_POWER, buf.readUnsignedShort());
-            position.set(Position.KEY_BATTERY, buf.readUnsignedShort());
+            position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.001);
+            position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
 
             if (BitUtil.check(type, 2)) {
-                buf.skipBytes(4);
+                buf.readUnsignedByte(); // vib
+                buf.readUnsignedByte(); // vib_count
+
+                int out = buf.readUnsignedByte();
+                for (int i = 0; i <= 3; i++) {
+                    position.set(Position.PREFIX_OUT + (i + 1), BitUtil.check(out, i) ? 1 : 0);
+                }
+
+                buf.readUnsignedByte(); // in_alarm
             }
 
             if (BitUtil.check(type, 3)) {
-                buf.skipBytes(12);
+                for (int i = 1; i <= 6; i++) {
+                    position.set(Position.PREFIX_ADC + i, buf.readUnsignedShort() * 0.001);
+                }
             }
 
             if (BitUtil.check(type, 4)) {
-                buf.skipBytes(8);
+                for (int i = 1; i <= 2; i++) {
+                    position.set(Position.PREFIX_COUNT + i, buf.readUnsignedInt());
+                }
             }
 
             if (BitUtil.check(type, 5)) {
-                buf.skipBytes(9);
+                for (int i = 1; i <= 3; i++) {
+                    buf.readUnsignedShort(); // fuel level
+                }
+                for (int i = 1; i <= 3; i++) {
+                    position.set(Position.PREFIX_TEMP + i, buf.readUnsignedByte());
+                }
             }
 
             if (BitUtil.check(type, 6)) {
@@ -114,6 +113,48 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
             }
 
             return position;
+        }
+
+        return null;
+    }
+
+    private Position parseCommandResponse(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, null);
+
+        int responseTextLength = buf.bytesBefore((byte) 0);
+        if (responseTextLength < 0) {
+            responseTextLength = CMD_RESPONSE_SIZE - 3;
+        }
+        position.set(Position.KEY_RESULT, buf.readBytes(responseTextLength).toString(StandardCharsets.UTF_8));
+
+        return position;
+    }
+
+    @Override
+    protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+        ChannelBuffer buf = (ChannelBuffer) msg;
+
+        buf.readUnsignedShort(); // device id
+
+        int size = buf.readUnsignedByte();
+        if (size != CMD_RESPONSE_SIZE) {
+            int type = buf.readUnsignedByte();
+            if (type == MSG_IMEI) {
+                getDeviceSession(channel, remoteAddress, buf.readBytes(15).toString(StandardCharsets.UTF_8));
+            } else {
+                return decodeData(channel, remoteAddress, buf, type);
+            }
+        } else {
+            return parseCommandResponse(channel, remoteAddress, buf);
         }
 
         return null;

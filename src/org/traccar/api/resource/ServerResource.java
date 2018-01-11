@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.traccar.api.resource;
 
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
+import org.traccar.helper.LogAction;
 import org.traccar.model.Server;
 
 import javax.annotation.security.PermitAll;
@@ -25,6 +26,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.sql.SQLException;
@@ -44,7 +46,14 @@ public class ServerResource extends BaseResource {
     public Response update(Server entity) throws SQLException {
         Context.getPermissionsManager().checkAdmin(getUserId());
         Context.getPermissionsManager().updateServer(entity);
+        LogAction.edit(getUserId(), entity);
         return Response.ok(entity).build();
+    }
+
+    @Path("geocode")
+    @GET
+    public String geocode(@QueryParam("latitude") double latitude, @QueryParam("longitude") double longitude) {
+        return Context.getGeocoder().getAddress(latitude, longitude, null);
     }
 
 }

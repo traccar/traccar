@@ -10,6 +10,15 @@ public class MegastekProtocolDecoderTest extends ProtocolTest {
 
         MegastekProtocolDecoder decoder = new MegastekProtocolDecoder(new MegastekProtocol());
 
+        verifyNull(decoder, text(
+                "0112$MGV002,,GVT900-3,S,010114,000003,,,,,,00,00,00,,0.000,0.00,,0.0,,,,,,0000,0000,14,10,0, , ,,1-0,0,Low Ext Vol;!"));
+
+        verifyPosition(decoder, text(
+                "0170$MGV002,354550056642321,GVT900-3,S,011017,090208,A,1635.8484,N,10446.6095,E,00,09,00,0.91,16.980,257.73,177.6,0.0,457,01,0741,00C0,21,0000,0000,20,10,0, , ,,1-1,54,Dist;!"));
+
+        verifyNull(decoder, text(
+                "0140$MGV002,354550056642321,GVT900-3,S,300917,071731,V,,,,,00,00,00,99.9,0.000,0.00,,0.0,457,01,0741,00CD,,0000,0000,20,10,0, , ,,1-1,94,PW ON;!"));
+
         verifyPosition(decoder, text(
                 "$MGV002,869152024446923,,S,290816,200627,V,5056.21059,N,00439.25034,E,00,00,00,99.9,,,-25.1,,206,01,0BBB,4418,28,,,,,,,,,01,093,Timer;"));
 

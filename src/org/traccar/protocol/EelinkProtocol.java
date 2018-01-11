@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.traccar.protocol;
 
+import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
@@ -30,6 +31,7 @@ public class EelinkProtocol extends BaseProtocol {
         super("eelink");
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM,
+                Command.TYPE_POSITION_SINGLE,
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME,
                 Command.TYPE_REBOOT_DEVICE);
@@ -41,7 +43,14 @@ public class EelinkProtocol extends BaseProtocol {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 3, 2));
-                pipeline.addLast("objectEncoder", new EelinkProtocolEncoder());
+                pipeline.addLast("objectEncoder", new EelinkProtocolEncoder(false));
+                pipeline.addLast("objectDecoder", new EelinkProtocolDecoder(EelinkProtocol.this));
+            }
+        });
+        serverList.add(new TrackerServer(new ConnectionlessBootstrap(), getName()) {
+            @Override
+            protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                pipeline.addLast("objectEncoder", new EelinkProtocolEncoder(true));
                 pipeline.addLast("objectDecoder", new EelinkProtocolDecoder(EelinkProtocol.this));
             }
         });

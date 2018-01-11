@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.DateUtil;
@@ -67,7 +68,6 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             .number("(x{8})")                    // odometer
             .number("[01]")                      // gps power
             .groupEnd("?")
-            .number("(d)")                       // fix mode
             .any()
             .compile();
 
@@ -104,15 +104,38 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
+        Integer event = null;
+
         if (parser.hasNext(3)) {
-            position.set(Position.KEY_EVENT, parser.nextInt(0));
+            event = parser.nextInt();
             position.setTime(getTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0)));
         } else if (parser.hasNext()) {
             position.setTime(getTime(parser.nextInt(0)));
         }
 
         if (parser.hasNext()) {
-            position.set(Position.KEY_EVENT, parser.nextInt(0));
+            event = parser.nextInt();
+        }
+
+        if (event != null) {
+            switch (event) {
+                case 22:
+                    position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+                    break;
+                case 23:
+                    position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+                    break;
+                case 24:
+                    position.set(Position.KEY_ALARM, Position.ALARM_ACCIDENT);
+                    break;
+                case 26:
+                case 28:
+                    position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
+                    break;
+                default:
+                    position.set(Position.KEY_EVENT, event);
+                    break;
+            }
         }
 
         if (parser.hasNext(6)) {
@@ -138,7 +161,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_ODOMETER, parser.nextLong(16, 0));
         }
 
-        position.setValid(parser.nextInt(0) != 0);
+        position.setValid(true);
 
         String[] attributes = null;
         beginIndex = sentence.indexOf(';');
@@ -149,6 +172,12 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             }
             attributes = sentence.substring(beginIndex, endIndex).split(";");
         }
+
+        return decodeAttributes(channel, remoteAddress, position, attributes);
+    }
+
+    private Position decodeAttributes(
+            Channel channel, SocketAddress remoteAddress, Position position, String[] attributes) {
 
         String uniqueId = null;
         DeviceSession deviceSession = null;
@@ -161,7 +190,6 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
                     String key = attribute.substring(0, index).toLowerCase();
                     String value = attribute.substring(index + 1);
                     switch (key) {
-
                         case "id":
                             uniqueId = value;
                             deviceSession = getDeviceSession(channel, remoteAddress, value);
@@ -169,23 +197,30 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
                                 position.setDeviceId(deviceSession.getDeviceId());
                             }
                             break;
-
+                        case "io":
+                            position.set(Position.KEY_IGNITION, BitUtil.check(value.charAt(0) - '0', 0));
+                            position.set(Position.KEY_CHARGE, BitUtil.check(value.charAt(0) - '0', 1));
+                            position.set(Position.KEY_OUTPUT, value.charAt(1) - '0');
+                            position.set(Position.KEY_INPUT, value.charAt(2) - '0');
+                            break;
+                        case "ix":
+                            position.set(Position.PREFIX_IO + 1, value);
+                            break;
+                        case "ad":
+                            position.set(Position.PREFIX_ADC + 1, Integer.parseInt(value));
+                            break;
                         case "sv":
                             position.set(Position.KEY_SATELLITES, Integer.parseInt(value));
                             break;
-
                         case "bl":
-                            position.set(Position.KEY_BATTERY, Integer.parseInt(value));
+                            position.set(Position.KEY_BATTERY, Integer.parseInt(value) * 0.001);
                             break;
-
                         case "vo":
                             position.set(Position.KEY_ODOMETER, Long.parseLong(value));
                             break;
-
                         default:
                             position.set(key, value);
                             break;
-
                     }
                 } else if (attribute.startsWith("#")) {
                     messageIndex = attribute;

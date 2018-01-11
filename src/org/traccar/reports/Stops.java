@@ -30,10 +30,8 @@ import org.apache.poi.ss.util.WorkbookUtil;
 import org.traccar.Context;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
-import org.traccar.reports.model.BaseReport;
 import org.traccar.reports.model.DeviceReport;
 import org.traccar.reports.model.StopReport;
-import org.traccar.reports.model.TripsConfig;
 
 public final class Stops {
 
@@ -41,22 +39,20 @@ public final class Stops {
     }
 
     private static Collection<StopReport> detectStops(long deviceId, Date from, Date to) throws SQLException {
-        double speedThreshold = Context.getConfig().getDouble("event.motion.speedThreshold", 0.01);
-
-        TripsConfig tripsConfig = ReportUtils.initTripsConfig();
-
         boolean ignoreOdometer = Context.getDeviceManager()
                 .lookupAttributeBoolean(deviceId, "report.ignoreOdometer", false, true);
 
-        Collection<? extends BaseReport> result = ReportUtils.detectTripsAndStops(tripsConfig,
-                ignoreOdometer, speedThreshold,
-                Context.getDataManager().getPositions(deviceId, from, to), false);
+        Collection<StopReport> result = ReportUtils.detectTripsAndStops(
+                Context.getDataManager().getPositions(deviceId, from, to),
+                Context.getTripsConfig(), ignoreOdometer, StopReport.class);
 
-        return (Collection<StopReport>) result;
+        return result;
     }
 
-    public static Collection<StopReport> getObjects(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
+    public static Collection<StopReport> getObjects(
+            long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws SQLException {
+        ReportUtils.checkPeriodLimit(from, to);
         ArrayList<StopReport> result = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
@@ -65,20 +61,21 @@ public final class Stops {
         return result;
     }
 
-    public static void getExcel(OutputStream outputStream,
-            long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
+    public static void getExcel(
+            OutputStream outputStream, long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws SQLException, IOException {
+        ReportUtils.checkPeriodLimit(from, to);
         ArrayList<DeviceReport> devicesStops = new ArrayList<>();
         ArrayList<String> sheetNames = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
             Collection<StopReport> stops = detectStops(deviceId, from, to);
             DeviceReport deviceStops = new DeviceReport();
-            Device device = Context.getIdentityManager().getDeviceById(deviceId);
+            Device device = Context.getIdentityManager().getById(deviceId);
             deviceStops.setDeviceName(device.getName());
             sheetNames.add(WorkbookUtil.createSafeSheetName(deviceStops.getDeviceName()));
             if (device.getGroupId() != 0) {
-                Group group = Context.getDeviceManager().getGroupById(device.getGroupId());
+                Group group = Context.getGroupsManager().getById(device.getGroupId());
                 if (group != null) {
                     deviceStops.setGroupName(group.getName());
                 }

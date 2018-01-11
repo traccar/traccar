@@ -76,7 +76,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_TYPE, buf.readUnsignedByte());
 
-        position.set(Position.KEY_COMMAND, buf.readBytes(buf.readInt()).toString(StandardCharsets.US_ASCII));
+        position.set(Position.KEY_RESULT, buf.readBytes(buf.readInt()).toString(StandardCharsets.US_ASCII));
 
     }
 
@@ -93,7 +93,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private void decodeParameter(Position position, int id, ChannelBuffer buf, int length) {
+    private void decodeOtherParameter(Position position, int id, ChannelBuffer buf, int length) {
         switch (id) {
             case 1:
             case 2:
@@ -104,14 +104,23 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             case 9:
                 position.set(Position.PREFIX_ADC + 1, readValue(buf, length, false));
                 break;
+            case 17:
+                position.set("axisX", readValue(buf, length, true));
+                break;
+            case 18:
+                position.set("axisY", readValue(buf, length, true));
+                break;
+            case 19:
+                position.set("axisZ", readValue(buf, length, true));
+                break;
+            case 21:
+                position.set(Position.KEY_RSSI, readValue(buf, length, false));
+                break;
             case 66:
                 position.set(Position.KEY_POWER, readValue(buf, length, false) * 0.001);
                 break;
             case 67:
                 position.set(Position.KEY_BATTERY, readValue(buf, length, false) * 0.001);
-                break;
-            case 70:
-                position.set(Position.KEY_DEVICE_TEMP, readValue(buf, length, true) * 0.1);
                 break;
             case 72:
                 position.set(Position.PREFIX_TEMP + 1, readValue(buf, length, true) * 0.1);
@@ -123,14 +132,99 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.PREFIX_TEMP + 3, readValue(buf, length, true) * 0.1);
                 break;
             case 78:
-                position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(readValue(buf, length, false)));
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, String.format("%016X", readValue(buf, length, false)));
+                break;
+            case 80:
+                position.set("workMode", readValue(buf, length, false));
+                break;
+            case 179:
+                position.set(Position.PREFIX_OUT + 1, readValue(buf, length, false) == 1);
+                break;
+            case 180:
+                position.set(Position.PREFIX_OUT + 2, readValue(buf, length, false) == 1);
+                break;
+            case 181:
+                position.set(Position.KEY_PDOP, readValue(buf, length, false) * 0.1);
                 break;
             case 182:
                 position.set(Position.KEY_HDOP, readValue(buf, length, false) * 0.1);
                 break;
+            case 239:
+                position.set(Position.KEY_IGNITION, readValue(buf, length, false) == 1);
+                break;
+            case 240:
+                position.set(Position.KEY_MOTION, readValue(buf, length, false) == 1);
+                break;
+            case 241:
+                position.set(Position.KEY_OPERATOR, readValue(buf, length, false));
+                break;
             default:
                 position.set(Position.PREFIX_IO + id, readValue(buf, length, false));
                 break;
+        }
+    }
+
+    private void decodeGh3000Parameter(Position position, int id, ChannelBuffer buf, int length) {
+        switch (id) {
+            case 1:
+                position.set(Position.KEY_BATTERY_LEVEL, readValue(buf, length, false));
+                break;
+            case 2:
+                position.set("usbConnected", readValue(buf, length, false) == 1);
+                break;
+            case 5:
+                position.set("uptime", readValue(buf, length, false));
+                break;
+            case 20:
+                position.set(Position.KEY_HDOP, readValue(buf, length, false) * 0.1);
+                break;
+            case 21:
+                position.set(Position.KEY_VDOP, readValue(buf, length, false) * 0.1);
+                break;
+            case 22:
+                position.set(Position.KEY_PDOP, readValue(buf, length, false) * 0.1);
+                break;
+            case 67:
+                position.set(Position.KEY_BATTERY, readValue(buf, length, false) * 0.001);
+                break;
+            case 221:
+                position.set("button", readValue(buf, length, false));
+                break;
+            case 222:
+                if (readValue(buf, length, false) == 1) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+                }
+                break;
+            case 240:
+                position.set(Position.KEY_MOTION, readValue(buf, length, false) == 1);
+                break;
+            case 244:
+                position.set(Position.KEY_ROAMING, readValue(buf, length, false) == 1);
+                break;
+            default:
+                position.set(Position.PREFIX_IO + id, readValue(buf, length, false));
+                break;
+        }
+    }
+
+    private void decodeParameter(Position position, int id, ChannelBuffer buf, int length, int codec) {
+        if (codec == CODEC_GH3000) {
+            decodeGh3000Parameter(position, id, buf, length);
+        } else {
+            decodeOtherParameter(position, id, buf, length);
+        }
+    }
+
+    private void decodeNetwork(Position position) {
+        long cid = position.getLong(Position.PREFIX_IO + 205);
+        int lac = position.getInteger(Position.PREFIX_IO + 206);
+        if (cid != 0 && lac != 0) {
+            CellTower cellTower = CellTower.fromLacCid(lac, cid);
+            long operator = position.getInteger(Position.KEY_OPERATOR);
+            if (operator != 0) {
+                cellTower.setOperator(operator);
+            }
+            position.setNetwork(new Network(cellTower));
         }
     }
 
@@ -180,14 +274,19 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                         cellTower.setSignalStrength((int) buf.readUnsignedByte());
                     }
 
+                    if (BitUtil.check(locationMask, 7)) {
+                        cellTower.setOperator(buf.readUnsignedInt());
+                    }
+
                     position.setNetwork(new Network(cellTower));
 
-                } else if (BitUtil.check(locationMask, 6)) {
-                    position.set(Position.KEY_RSSI, buf.readUnsignedByte());
-                }
-
-                if (BitUtil.check(locationMask, 7)) {
-                    position.set(Position.KEY_OPERATOR, buf.readUnsignedInt());
+                } else {
+                    if (BitUtil.check(locationMask, 6)) {
+                        position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+                    }
+                    if (BitUtil.check(locationMask, 7)) {
+                        position.set(Position.KEY_OPERATOR, buf.readUnsignedInt());
+                    }
                 }
 
             } else {
@@ -224,7 +323,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(globalMask, 1)) {
             int cnt = buf.readUnsignedByte();
             for (int j = 0; j < cnt; j++) {
-                decodeParameter(position, buf.readUnsignedByte(), buf, 1);
+                decodeParameter(position, buf.readUnsignedByte(), buf, 1, codec);
             }
         }
 
@@ -232,7 +331,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(globalMask, 2)) {
             int cnt = buf.readUnsignedByte();
             for (int j = 0; j < cnt; j++) {
-                decodeParameter(position, buf.readUnsignedByte(), buf, 2);
+                decodeParameter(position, buf.readUnsignedByte(), buf, 2, codec);
             }
         }
 
@@ -240,7 +339,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(globalMask, 3)) {
             int cnt = buf.readUnsignedByte();
             for (int j = 0; j < cnt; j++) {
-                decodeParameter(position, buf.readUnsignedByte(), buf, 4);
+                decodeParameter(position, buf.readUnsignedByte(), buf, 4, codec);
             }
         }
 
@@ -248,7 +347,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         if (codec == CODEC_FM4X00) {
             int cnt = buf.readUnsignedByte();
             for (int j = 0; j < cnt; j++) {
-                decodeParameter(position, buf.readUnsignedByte(), buf, 8);
+                decodeOtherParameter(position, buf.readUnsignedByte(), buf, 8);
             }
         }
 
@@ -259,6 +358,8 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.PREFIX_IO + buf.readUnsignedByte(), ChannelBuffers.hexDump(buf.readBytes(16)));
             }
         }
+
+        decodeNetwork(position);
 
     }
 

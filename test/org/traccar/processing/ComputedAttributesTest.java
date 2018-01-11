@@ -8,7 +8,7 @@ import org.traccar.model.Attribute;
 import org.traccar.model.Position;
 
 public class ComputedAttributesTest {
-    
+
     @Test
     public void testComputedAttributes() {
         Position position = new Position();
@@ -39,26 +39,29 @@ public class ComputedAttributesTest {
 
         attribute.setExpression("if (event == 42) \"lowBattery\"");
         Assert.assertEquals("lowBattery", computedAttributesHandler.computeAttribute(attribute, position));
-        
+
         attribute.setExpression("speed > 5 && valid");
         Assert.assertEquals(false, computedAttributesHandler.computeAttribute(attribute, position));
-        
+
         attribute.setExpression("fixTime");
         Assert.assertEquals(date, computedAttributesHandler.computeAttribute(attribute, position));
-        
+
+        attribute.setExpression("math:pow(adc1, 2)");
+        Assert.assertEquals(16384.0, computedAttributesHandler.computeAttribute(attribute, position));
+
         // modification tests
         attribute.setExpression("adc1 = 256");
         computedAttributesHandler.computeAttribute(attribute, position);
         Assert.assertEquals(128, position.getInteger("adc1"));
-        
+
         attribute.setExpression("result = \"fail\"");
         computedAttributesHandler.computeAttribute(attribute, position);
         Assert.assertEquals("success", position.getString("result"));
-        
+
         attribute.setExpression("fixTime = \"2017-10-18 10:00:01\"");
         computedAttributesHandler.computeAttribute(attribute, position);
         Assert.assertEquals(date, position.getFixTime());
-        
+
     }
 
 }

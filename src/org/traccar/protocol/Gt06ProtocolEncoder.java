@@ -27,20 +27,26 @@ import java.nio.charset.StandardCharsets;
 
 public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
 
-    private ChannelBuffer encodeContent(String content) {
+    private ChannelBuffer encodeContent(long deviceId, String content) {
+
+        boolean language = Context.getIdentityManager().lookupAttributeBoolean(deviceId, "gt06.language", false, true);
 
         ChannelBuffer buf = ChannelBuffers.dynamicBuffer();
 
         buf.writeByte(0x78);
         buf.writeByte(0x78);
 
-        buf.writeByte(1 + 1 + 4 + content.length() + 2 + 2); // message length
+        buf.writeByte(1 + 1 + 4 + content.length() + 2 + 2 + (language ? 2 : 0)); // message length
 
         buf.writeByte(0x80); // message type
 
         buf.writeByte(4 + content.length()); // command length
         buf.writeInt(0);
         buf.writeBytes(content.getBytes(StandardCharsets.US_ASCII)); // command
+
+        if (language) {
+            buf.writeShort(2); // english language
+        }
 
         buf.writeShort(0); // message index
 
@@ -60,11 +66,11 @@ public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
 
         switch (command.getType()) {
             case Command.TYPE_ENGINE_STOP:
-                return encodeContent(alternative ? "DYD,123456#" : "Relay,1#");
+                return encodeContent(command.getDeviceId(), alternative ? "DYD,123456#" : "Relay,1#");
             case Command.TYPE_ENGINE_RESUME:
-                return encodeContent(alternative ? "HFYD,123456#" : "Relay,0#");
+                return encodeContent(command.getDeviceId(), alternative ? "HFYD,123456#" : "Relay,0#");
             case Command.TYPE_CUSTOM:
-                return encodeContent(command.getString(Command.KEY_DATA));
+                return encodeContent(command.getDeviceId(), command.getString(Command.KEY_DATA));
             default:
                 Log.warning(new UnsupportedOperationException(command.getType()));
                 break;
