@@ -141,6 +141,10 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
             }
         }
         if (baseClass.equals(Group.class) || baseClass.equals(Device.class) || baseClass.equals(User.class)) {
+            if (baseClass.equals(Group.class)) {
+                Context.getGroupsManager().updateGroupCache(true);
+                Context.getDeviceManager().updateDeviceCache(true);
+            }
             Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
             if (baseClass.equals(User.class)) {
                 Context.getPermissionsManager().refreshAllUsersPermissions();

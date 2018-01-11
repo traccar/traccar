@@ -65,7 +65,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         refreshLastPositions();
     }
 
-    private void updateDeviceCache(boolean force) throws SQLException {
+    public void updateDeviceCache(boolean force) throws SQLException {
         long lastUpdate = devicesLastUpdate.get();
         if ((force || System.currentTimeMillis() - lastUpdate > dataRefreshDelay)
                 && devicesLastUpdate.compareAndSet(lastUpdate, System.currentTimeMillis())) {
