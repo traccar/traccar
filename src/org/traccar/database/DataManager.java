@@ -285,11 +285,12 @@ public class DataManager {
     }
 
     public Collection<Position> getPositions(long deviceId, Date from, Date to) throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectPositions"))
-                .setLong("deviceId", deviceId)
-                .setDate("from", from)
-                .setDate("to", to)
-                .executeQuery(Position.class);
+        QueryBuilder queryBuilder = QueryBuilder.create(dataSource, getQuery("database.selectPositions"))
+                                                .setLong("deviceId", deviceId)
+                                                .setDate("from", from)
+                                                .setDate("to", to);
+        Log.info("GET POSITIONS QUERY: " + queryBuilder.getQueryStatement());
+        return queryBuilder.executeQuery(Position.class);
     }
 
     public Position getPosition(long positionId) throws SQLException {

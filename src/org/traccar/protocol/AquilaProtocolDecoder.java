@@ -147,7 +147,7 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(parser.nextDouble(0));
         position.setLongitude(parser.nextDouble(0));
 
-        position.setTime(parser.nextDateTime());
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.YMD_HMS, "GMT+5:30"));
 
         position.setValid(parser.next().equals("A"));
 
