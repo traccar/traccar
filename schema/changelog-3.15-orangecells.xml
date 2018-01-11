@@ -4,9 +4,9 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
-        logicalFilePath="changelog-3.15">
+        logicalFilePath="changelog-3.15-orangecells">
 
-    <changeSet author="author" id="changelog-3.15">
+    <changeSet author="author" id="changelog-3.15-orangecells">
 
         <createTable tableName="trucks">
             <column name="id" type="INT" autoIncrement="true">
