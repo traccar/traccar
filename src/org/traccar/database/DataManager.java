@@ -177,7 +177,7 @@ public class DataManager {
                 }
                 return result.toString();
             case ACTION_SELECT_ALL:
-                return "SELECT * FROM " + getObjectsTableName(clazz);
+                return getSelectStatementForDevices(clazz);
             case ACTION_SELECT:
                 return "SELECT * FROM " + getObjectsTableName(clazz) + " WHERE id = :id";
             case ACTION_DELETE:
@@ -185,6 +185,19 @@ public class DataManager {
             default:
                 throw new IllegalArgumentException("Unknown action");
         }
+    }
+
+    public static String getSelectStatementForDevices(Class<?> clazz) {
+        String tableName = Introspector.decapitalize(clazz.getSimpleName());
+
+        if (tableName.contains("device")) {
+            return " SELECT d.*, t.registrationnumber as truckRegistrationNumber\n" +
+                   " FROM devices as d\n" +
+                   " JOIN trucks t\n" +
+                   " on d.id = t.deviceid;";
+        }
+
+        return "SELECT * FROM " + getObjectsTableName(clazz);
     }
 
     public static String constructPermissionQuery(String action, Class<?> owner, Class<?> property) {
