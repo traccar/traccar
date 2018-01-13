@@ -81,6 +81,8 @@ public class SpotProtocolDecoder extends BaseHttpProtocolDecoder {
                 position.setLatitude(Double.parseDouble(xPath.evaluate("latitude", node)));
                 position.setLongitude(Double.parseDouble(xPath.evaluate("longitude", node)));
 
+                position.set(Position.KEY_EVENT, xPath.evaluate("messageType", node));
+
                 positions.add(position);
 
             }
