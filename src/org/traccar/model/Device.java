@@ -159,13 +159,13 @@ public class Device extends ExtendedModel {
         this.disabled = disabled;
     }
 
-    private String truckRegistrationNumber;
+    private String registrationNumber;
 
-    public String getTruckRegistrationNumber() {
-        return truckRegistrationNumber;
+    public String getRegistrationNumber() {
+        return registrationNumber;
     }
 
-    public void setTruckRegistrationNumber(String truckRegistrationNumber) {
-        this.truckRegistrationNumber = truckRegistrationNumber;
+    public void setRegistrationNumber(String registrationNumber) {
+        this.registrationNumber = registrationNumber;
     }
 }
