@@ -6,34 +6,9 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
         logicalFilePath="changelog-3.15-orangecells">
 
-    <changeSet author="author" id="changelog-3.15-orangecells">
-
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <tableExists tableName="trucks" />
-            </not>
-        </preConditions>
-
-        <createTable tableName="trucks">
-            <column name="id" type="INT" autoIncrement="true">
-                <constraints primaryKey="true" />
-            </column>
-            <column name="deviceid" type="INT">
-                <constraints nullable="false" />
-            </column>
-            <column name="ownerid" type="INT">
-                <constraints nullable="false" />
-            </column>
-            <column name="registrationnumber" type="VARCHAR(20)">
-                <constraints nullable="false" />
-            </column>
-        </createTable>
-
-        <addUniqueConstraint tableName="trucks" columnNames="deviceid" constraintName="uk_truck_deviceid" />
-        <addUniqueConstraint tableName="trucks" columnNames="registrationnumber" constraintName="uk_truck_reg" />
-
-        <addForeignKeyConstraint baseTableName="trucks" baseColumnNames="deviceid" constraintName="fk_trucks_deviceid" referencedTableName="devices" referencedColumnNames="id" onDelete="CASCADE" />
-        <addForeignKeyConstraint baseTableName="trucks" baseColumnNames="ownerid" constraintName="fk_trucks_ownerid" referencedTableName="devices" referencedColumnNames="id" onDelete="CASCADE" />
-
+    <changeSet author="saurako" id="changelog-3.15-orangecells">
+        <addColumn tableName="devices">
+            <column name="registrationnumber" type="VARCHAR(20)" />
+        </addColumn>
     </changeSet>
 </databaseChangeLog>
