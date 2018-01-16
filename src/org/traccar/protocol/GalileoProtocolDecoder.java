@@ -20,6 +20,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -117,7 +118,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
                 position.setTime(new Date(buf.readUnsignedInt() * 1000));
                 break;
             case 0x33:
-                position.setSpeed(buf.readUnsignedShort() * 0.0539957);
+                position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort() * 0.1));
                 position.setCourse(buf.readUnsignedShort() * 0.1);
                 break;
             case 0x34:
