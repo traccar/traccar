@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -228,6 +228,16 @@ public class User extends ExtendedModel {
 
     public void setLimitCommands(boolean limitCommands) {
         this.limitCommands = limitCommands;
+    }
+
+    private String poiLayer;
+
+    public String getPoiLayer() {
+        return poiLayer;
+    }
+
+    public void setPoiLayer(String poiLayer) {
+        this.poiLayer = poiLayer;
     }
 
     @QueryIgnore
