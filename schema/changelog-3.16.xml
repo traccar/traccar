@@ -12,5 +12,13 @@
       <column name="disabled" type="BOOLEAN" defaultValueBoolean="false" />
     </addColumn>
 
+    <addColumn tableName="users">
+        <column name="poilayer" type="VARCHAR(512)" />
+    </addColumn>
+
+    <addColumn tableName="servers">
+        <column name="poilayer" type="VARCHAR(512)" />
+    </addColumn>
+
   </changeSet>
 </databaseChangeLog>
