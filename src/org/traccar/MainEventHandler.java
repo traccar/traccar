@@ -49,6 +49,44 @@ public class MainEventHandler extends IdleStateAwareChannelHandler {
         if (e.getMessage() != null && e.getMessage() instanceof Position) {
 
             Position position = (Position) e.getMessage();
+
+            Position last = Context.getIdentityManager().getLastPosition(position.getDeviceId());
+            if (last != null) {
+                Double latitudeDifference = last.getLatitude() - position.getLatitude();
+                Double longitudeDifference = last.getLongitude() - position.getLongitude();
+                Double positionDifference = java.lang.Math.sqrt(
+                              latitudeDifference * latitudeDifference
+                            + longitudeDifference * longitudeDifference);
+
+                // inspired by
+                // https://stackoverflow.com/questions/5351483/
+                long timeDifference = position.getFixTime().getTime() - last.getFixTime().getTime();
+
+                if (timeDifference == 0) {
+                    timeDifference = 1;
+                }
+
+                Double speed = positionDifference / timeDifference;
+                // this fails when (position.getFixTime() == 0 || last.getFixTime() == 0),
+                // but I have no idea how to fix it in this case,
+
+                if (speed > 0.01) {
+                    Log.warning("Ignoring a rapid position change from "
+                            + " latitude " + last.getLatitude()
+                            + ", longitude " + last.getLongitude()
+                            + " to latitude " + position.getLatitude()
+                            + ", longitude " + position.getLongitude()
+                            + " in time " + timeDifference + " seconds."
+                            );
+                    return;
+                }
+                /*
+                if (position.getFixTime().getTime() == 0
+                        || last.getFixTime().getTime() == 0) {
+                    if (positionDifference > 1)
+                }*/
+            }
+
             try {
                 Context.getDeviceManager().updateLatestPosition(position);
             } catch (SQLException error) {
