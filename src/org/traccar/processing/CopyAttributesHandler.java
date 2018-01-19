@@ -16,6 +16,8 @@
  */
 package org.traccar.processing;
 
+import java.util.StringJoiner;
+
 import org.traccar.BaseDataHandler;
 import org.traccar.Context;
 import org.traccar.model.Position;
@@ -29,17 +31,22 @@ public class CopyAttributesHandler extends BaseDataHandler {
         return null;
     }
 
-    @Override
-    protected Position handlePosition(Position position) {
-        String attributesString = Context.getDeviceManager().lookupAttributeString(
-                position.getDeviceId(), "processing.copyAttributes", "", true);
-        Position last = getLastPosition(position.getDeviceId());
-        if (attributesString.isEmpty()) {
-            attributesString = Position.KEY_DRIVER_UNIQUE_ID;
-        } else {
-            attributesString += "," + Position.KEY_DRIVER_UNIQUE_ID;
-        }
+    public Position copyAttributes(String attributesString, Position position, Position last) {
         if (last != null) {
+            if (attributesString == null) {
+                attributesString = Position.KEY_DRIVER_UNIQUE_ID;
+            } else {
+                if (attributesString.isEmpty()) {
+                    StringJoiner attribs = new StringJoiner(",");
+                    for (String s : last.getAttributes().keySet()) {
+                        attribs.add(s);
+                    }
+                    attributesString = attribs.toString();
+                } else {
+                    attributesString += "," + Position.KEY_DRIVER_UNIQUE_ID;
+                }
+            }
+
             for (String attribute : attributesString.split("[ ,]")) {
                 if (last.getAttributes().containsKey(attribute) && !position.getAttributes().containsKey(attribute)) {
                     position.getAttributes().put(attribute, last.getAttributes().get(attribute));
@@ -47,6 +54,16 @@ public class CopyAttributesHandler extends BaseDataHandler {
             }
         }
         return position;
+    }
+
+    @Override
+    protected Position handlePosition(Position position) {
+        Position last = getLastPosition(position.getDeviceId());
+
+        String attributesString = Context.getDeviceManager().lookupAttributeString(
+                position.getDeviceId(), "processing.copyAttributes", null, true);
+
+        return copyAttributes(attributesString, position, last);
     }
 
 }

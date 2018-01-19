@@ -97,22 +97,36 @@ public class ComputedAttributesHandler extends BaseDataHandler {
                     result = computeAttribute(attribute, position);
                 } catch (JexlException error) {
                     Log.warning(error);
+                    return position;
                 }
+
                 if (result != null) {
                     try {
                         switch (attribute.getType()) {
                             case "number":
-                                position.getAttributes().put(attribute.getAttribute(), (Number) result);
+                                if (attribute.getAttribute().equals(false) || attribute.getAttribute().equals(true)) {
+                                    throw new IllegalArgumentException(
+                                            "Number Attribute Type was returned Boolean instead of Number");
+                                } else {
+                                    position.getAttributes().put(attribute.getAttribute(), (Number) result);
+                                }
                                 break;
                             case "boolean":
                                 position.getAttributes().put(attribute.getAttribute(), (Boolean) result);
                                 break;
                             default:
-                                position.getAttributes().put(attribute.getAttribute(), result.toString());
+                                if (attribute.getAttribute().equals(false) || attribute.getAttribute().equals(true)) {
+                                    throw new IllegalArgumentException(
+                                            "Default Attribute Type was returned Boolean instead of String");
+                                } else {
+                                    position.getAttributes().put(attribute.getAttribute(), result.toString());
+                                }
                         }
-                    } catch (ClassCastException error) {
+                    } catch (ClassCastException | IllegalArgumentException error) {
                         Log.warning(error);
                     }
+                } else {
+                    position.getAttributes().remove(attribute.getAttribute());
                 }
             }
         }
