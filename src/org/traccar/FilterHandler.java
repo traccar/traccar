@@ -140,7 +140,7 @@ public class FilterHandler extends BaseDataHandler {
 
     private boolean skipLimit(Position position, Position last) {
         if (skipLimit != 0 && last != null) {
-            return (position.getFixTime().getTime() - last.getFixTime().getTime()) > skipLimit;
+            return (position.getServerTime().getTime() - last.getServerTime().getTime()) > skipLimit;
         }
         return false;
     }
