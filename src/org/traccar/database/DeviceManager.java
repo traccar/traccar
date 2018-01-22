@@ -355,7 +355,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         Position last = positions.get(deviceTotalDistance.getDeviceId());
         if (last != null) {
             last.getAttributes().put(Position.KEY_TOTAL_DISTANCE, deviceTotalDistance.getTotalDistance());
-            getDataManager().addPosition(last);
+            getDataManager().addObject(last);
             updateLatestPosition(last);
         } else {
             throw new IllegalArgumentException();

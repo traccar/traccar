@@ -335,13 +335,6 @@ public class DataManager {
                 .executeQuery(Position.class);
     }
 
-    public void addPosition(Position position) throws SQLException {
-        position.setId(QueryBuilder.create(dataSource, getQuery(ACTION_INSERT, Position.class), true)
-                .setObject(position)
-                .setDate("serverTime", new Date())
-                .executeUpdate());
-    }
-
     public void updateLatestPosition(Position position) throws SQLException {
         QueryBuilder.create(dataSource, getQuery("database.updateLatestPosition"))
                 .setDate("now", new Date())

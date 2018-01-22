@@ -24,7 +24,7 @@ public class DefaultDataHandler extends BaseDataHandler {
     protected Position handlePosition(Position position) {
 
         try {
-            Context.getDataManager().addPosition(position);
+            Context.getDataManager().addObject(position);
         } catch (Exception error) {
             Log.warning(error);
         }
