@@ -15,7 +15,11 @@
  */
 package org.traccar;
 
+import org.jboss.netty.channel.ChannelException;
+import org.traccar.helper.Log;
+
 import java.io.File;
+import java.net.BindException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -78,7 +82,13 @@ public class ServerManager {
 
     public void start() {
         for (TrackerServer server: serverList) {
-            server.start();
+            try {
+                server.start();
+            } catch (ChannelException e) {
+                if (e.getCause() instanceof BindException) {
+                    Log.warning("One of the protocols is disabled due to port conflict");
+                }
+            }
         }
     }
 
@@ -86,8 +96,6 @@ public class ServerManager {
         for (TrackerServer server: serverList) {
             server.stop();
         }
-
-        // Release resources
         GlobalChannelFactory.release();
         GlobalTimer.release();
     }
