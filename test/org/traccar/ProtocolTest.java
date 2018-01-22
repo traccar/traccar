@@ -27,11 +27,9 @@ public class ProtocolTest extends BaseTest {
 
         Position position = new Position();
 
-        if (time != null) {
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-            position.setTime(dateFormat.parse(time));
-        }
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        position.setTime(dateFormat.parse(time));
         position.setValid(valid);
         position.setLatitude(lat);
         position.setLongitude(lon);

@@ -64,19 +64,11 @@ public class Event extends Message {
     private Date serverTime;
 
     public Date getServerTime() {
-        if (serverTime != null) {
-            return new Date(serverTime.getTime());
-        } else {
-            return null;
-        }
+        return serverTime;
     }
 
     public void setServerTime(Date serverTime) {
-        if (serverTime != null) {
-            this.serverTime = new Date(serverTime.getTime());
-        } else {
-            this.serverTime = null;
-        }
+        this.serverTime = serverTime;
     }
 
     private long positionId;

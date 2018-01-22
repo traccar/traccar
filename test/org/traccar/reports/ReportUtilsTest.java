@@ -35,9 +35,7 @@ public class ReportUtilsTest extends BaseTest {
 
         Position position = new Position();
 
-        if (time != null) {
-            position.setTime(date(time));
-        }
+        position.setTime(date(time));
         position.setValid(true);
         position.setSpeed(speed);
         position.set(Position.KEY_TOTAL_DISTANCE, totalDistance);

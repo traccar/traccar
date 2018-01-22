@@ -158,19 +158,11 @@ public class User extends ExtendedModel {
     private Date expirationTime;
 
     public Date getExpirationTime() {
-        if (expirationTime != null) {
-            return new Date(expirationTime.getTime());
-        } else {
-            return null;
-        }
+        return expirationTime;
     }
 
     public void setExpirationTime(Date expirationTime) {
-        if (expirationTime != null) {
-            this.expirationTime = new Date(expirationTime.getTime());
-        } else {
-            this.expirationTime = null;
-        }
+        this.expirationTime = expirationTime;
     }
 
     private int deviceLimit;
