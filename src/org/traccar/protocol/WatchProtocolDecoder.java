@@ -164,8 +164,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             if (buf.readable()) {
                 String[] values = buf.toString(StandardCharsets.US_ASCII).split(",");
                 if (values.length >= 3) {
-                    Position position = new Position();
-                    position.setProtocol(getProtocolName());
+                    Position position = new Position(getProtocolName());
                     position.setDeviceId(deviceSession.getDeviceId());
 
                     getLastLocation(position, null);
@@ -188,8 +187,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
                 return null;
             }
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
@@ -225,8 +223,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
             if (buf.readable()) {
 
-                Position position = new Position();
-                position.setProtocol(getProtocolName());
+                Position position = new Position(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());
 
                 getLastLocation(position, new Date());
@@ -242,8 +239,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type.equals("img")) {
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             getLastLocation(position, null);
@@ -256,8 +252,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type.equals("TK")) {
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             getLastLocation(position, null);

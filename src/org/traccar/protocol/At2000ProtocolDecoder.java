@@ -114,8 +114,7 @@ public class At2000ProtocolDecoder extends BaseProtocolDecoder {
 
             while (buf.readableBytes() >= 63) {
 
-                Position position = new Position();
-                position.setProtocol(getProtocolName());
+                Position position = new Position(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());
 
                 buf.readUnsignedShort(); // index

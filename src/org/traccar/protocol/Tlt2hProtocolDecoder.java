@@ -123,8 +123,7 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
             parser = new Parser(PATTERN_POSITION, message);
             if (parser.matches()) {
 
-                Position position = new Position();
-                position.setProtocol(getProtocolName());
+                Position position = new Position(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());
 
                 parser.next(); // base station info

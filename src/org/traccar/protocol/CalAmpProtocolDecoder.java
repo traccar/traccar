@@ -66,9 +66,8 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
 
     private Position decodePosition(DeviceSession deviceSession, int type, ChannelBuffer buf) {
 
-        Position position = new Position();
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
-        position.setProtocol(getProtocolName());
 
         position.setTime(new Date(buf.readUnsignedInt() * 1000));
         if (type != MSG_MINI_EVENT_REPORT) {

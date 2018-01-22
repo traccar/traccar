@@ -116,8 +116,7 @@ public class Xt2400ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
 
         for (byte tag : format) {
             switch ((int) tag) {

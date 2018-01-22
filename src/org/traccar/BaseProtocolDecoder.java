@@ -229,8 +229,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     protected Object handleEmptyMessage(Channel channel, SocketAddress remoteAddress, Object msg) {
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
         if (Context.getConfig().getBoolean("database.saveEmpty") && deviceSession != null) {
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
             getLastLocation(position, null);
             return position;

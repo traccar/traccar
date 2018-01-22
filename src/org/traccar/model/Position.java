@@ -132,7 +132,11 @@ public class Position extends Message {
     public static final String ALARM_REMOVING = "removing";
 
     public Position() {
-        serverTime = new Date();
+    }
+
+    public Position(String protocol) {
+        this.protocol = protocol;
+        this.serverTime = new Date();
     }
 
     private String protocol;

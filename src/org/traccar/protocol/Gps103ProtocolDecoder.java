@@ -174,8 +174,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
 
         Parser parser = new Parser(PATTERN_NETWORK, sentence);
         if (parser.matches()) {

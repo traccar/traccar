@@ -64,8 +64,7 @@ public class DmtHttpProtocolDecoder extends BaseHttpProtocolDecoder {
         JsonArray records = root.getJsonArray("Records");
 
         for (int i = 0; i < records.size(); i++) {
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             JsonObject record = records.getJsonObject(i);

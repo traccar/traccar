@@ -415,9 +415,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == MSG_HEARTBEAT) {
 
-            Position position = new Position();
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
-            position.setProtocol(getProtocolName());
 
             getLastLocation(position, null);
 
@@ -453,9 +452,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == MSG_X1_GPS) {
 
-            Position position = new Position();
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
-            position.setProtocol(getProtocolName());
 
             buf.readUnsignedInt(); // data and alarm
 
@@ -501,9 +499,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodeWifi(ChannelBuffer buf, DeviceSession deviceSession) throws Exception {
 
-        Position position = new Position();
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
-        position.setProtocol(getProtocolName());
 
         DateBuilder dateBuilder = new DateBuilder()
                 .setYear(BcdUtil.readInteger(buf, 2))
@@ -540,9 +537,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     private Object decodeBasicOther(Channel channel, ChannelBuffer buf,
             DeviceSession deviceSession, int type, int dataLength) throws Exception {
 
-        Position position = new Position();
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
-        position.setProtocol(getProtocolName());
 
         if (type == MSG_LBS_MULTIPLE || type == MSG_LBS_EXTEND || type == MSG_LBS_WIFI
                 || type == MSG_LBS_2 || type == MSG_WIFI_3) {
@@ -648,9 +644,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
-        position.setProtocol(getProtocolName());
 
         buf.readUnsignedShort(); // length
         int type = buf.readUnsignedByte();

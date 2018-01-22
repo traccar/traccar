@@ -96,8 +96,7 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
 
                 int recordEnd = buf.readerIndex() + buf.readUnsignedShort();
 
-                Position position = new Position();
-                position.setProtocol(getProtocolName());
+                Position position = new Position(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());
 
                 position.set(Position.KEY_INDEX, buf.readUnsignedInt());

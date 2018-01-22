@@ -147,8 +147,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
 
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         if (!parseLocation(location, position)) {
             return null;
         }
@@ -285,8 +284,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         if (parser.next().equals("S")) {

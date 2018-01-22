@@ -106,8 +106,7 @@ public class VtfmsProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.set(Position.KEY_ALARM, decodeAlarm(parser.nextInt()));

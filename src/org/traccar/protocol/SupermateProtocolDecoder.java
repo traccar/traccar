@@ -65,8 +65,7 @@ public class SupermateProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
 
         String imei = parser.next();
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);

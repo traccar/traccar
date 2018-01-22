@@ -115,9 +115,8 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
     private Position decodeOld(DeviceSession deviceSession, ChannelBuffer buf, int type, int index) {
 
-        Position position = new Position();
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
-        position.setProtocol(getProtocolName());
 
         position.set(Position.KEY_INDEX, index);
 
@@ -173,9 +172,8 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
     private Position decodeNew(DeviceSession deviceSession, ChannelBuffer buf, int index) {
 
-        Position position = new Position();
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
-        position.setProtocol(getProtocolName());
 
         position.set(Position.KEY_INDEX, index);
 
@@ -282,9 +280,8 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
     private Position decodeResult(DeviceSession deviceSession, ChannelBuffer buf, int index) {
 
-        Position position = new Position();
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
-        position.setProtocol(getProtocolName());
 
         position.set(Position.KEY_INDEX, index);
 
@@ -362,9 +359,8 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
             } else if (type == MSG_HEARTBEAT && buf.readableBytes() >= 2) {
 
-                Position position = new Position();
+                Position position = new Position(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());
-                position.setProtocol(getProtocolName());
 
                 getLastLocation(position, null);
 

@@ -68,8 +68,7 @@ public class Vt200ProtocolDecoder extends BaseProtocolDecoder {
 
         if (type == 0x2086 || type == 0x2084 || type == 0x2082) {
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             buf.readUnsignedByte(); // data type
@@ -103,8 +102,7 @@ public class Vt200ProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == 0x3088) {
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             getLastLocation(position, null);

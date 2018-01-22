@@ -88,9 +88,8 @@ public class Avl301ProtocolDecoder extends BaseProtocolDecoder {
                 return null;
             }
 
-            Position position = new Position();
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
-            position.setProtocol(getProtocolName());
 
             DateBuilder dateBuilder = new DateBuilder()
                     .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())

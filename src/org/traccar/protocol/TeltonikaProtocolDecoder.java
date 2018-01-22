@@ -382,8 +382,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         }
 
         for (int i = 0; i < count; i++) {
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
 
             position.setDeviceId(deviceSession.getDeviceId());
 

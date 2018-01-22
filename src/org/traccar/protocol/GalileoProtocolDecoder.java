@@ -249,7 +249,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         boolean hasLocation = false;
 
         DeviceSession deviceSession = null;
-        Position position = new Position();
+        Position position = new Position(getProtocolName());
 
         while (buf.readerIndex() < length) {
 
@@ -260,7 +260,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
                 }
                 tags.clear();
                 hasLocation = false;
-                position = new Position(); // new position starts
+                position = new Position(getProtocolName()); // new position starts
             }
             tags.add(tag);
 
@@ -296,7 +296,6 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         sendReply(channel, buf.readUnsignedShort());
 
         for (Position p : positions) {
-            p.setProtocol(getProtocolName());
             p.setDeviceId(deviceSession.getDeviceId());
         }
 

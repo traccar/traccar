@@ -60,9 +60,8 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
             if (deviceSession == null) {
                 continue;
             }
-            Position position = new Position();
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
-            position.setProtocol(getProtocolName());
             decodePosition(message, position);
             positions.add(position);
         }

@@ -129,8 +129,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == MSG_LOCATION_REPORT) {
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedInt()));

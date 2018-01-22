@@ -77,9 +77,8 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
                 return null;
             }
 
-            Position position = new Position();
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
-            position.setProtocol(getProtocolName());
 
             position.setTime(parser.nextDateTime());
 
