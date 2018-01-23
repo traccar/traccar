@@ -24,7 +24,7 @@
       <column name="calendarid" type="INT" />
     </addColumn>
 
-    <addForeignKeyConstraint baseColumnNames="calendarid" baseTableName="notifications" constraintName="fk_notification_calendar_calendarid" onDelete="SET NULL" onUpdate="RESTRICT" referencedColumnNames="id" referencedTableName="calendars"/>
+    <addForeignKeyConstraint baseColumnNames="calendarid" baseTableName="notifications" constraintName="fk_notification_calendar_calendarid" onDelete="SET NULL" onUpdate="RESTRICT" referencedColumnNames="id" referencedTableName="calendars" />
 
   </changeSet>
 </databaseChangeLog>

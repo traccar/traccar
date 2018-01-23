@@ -44,14 +44,14 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
         geocodeOnRequest = Context.getConfig().getBoolean("geocoder.onRequest");
     }
 
-    private Set<Long> getEffectiveNotifications(long userId, long deviceId, Date date) {
+    private Set<Long> getEffectiveNotifications(long userId, long deviceId, Date time) {
         Set<Long> result = new HashSet<>();
         Set<Long> deviceNotifications = getAllDeviceItems(deviceId);
         for (long itemId : getUserItems(userId)) {
             if (getById(itemId).getAlways() || deviceNotifications.contains(itemId)) {
                 long calendarId = getById(itemId).getCalendarId();
                 Calendar calendar = calendarId != 0 ? Context.getCalendarManager().getById(calendarId) : null;
-                if (calendar == null || calendar.checkMoment(date)) {
+                if (calendar == null || calendar.checkMoment(time)) {
                     result.add(itemId);
                 }
             }
