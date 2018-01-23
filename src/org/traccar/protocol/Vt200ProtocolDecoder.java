@@ -84,7 +84,7 @@ public class Vt200ProtocolDecoder extends BaseProtocolDecoder {
             if (!BitUtil.check(flags, 1)) {
                 position.setLatitude(-position.getLatitude());
             }
-            if (!BitUtil.check(flags, 1)) {
+            if (!BitUtil.check(flags, 2)) {
                 position.setLongitude(-position.getLongitude());
             }
 
