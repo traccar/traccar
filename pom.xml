@@ -168,6 +168,16 @@
             <artifactId>ch-smpp</artifactId>
             <version>5.0.9</version>
         </dependency>
+        <dependency>
+            <groupId>de.bytefish.fcmjava</groupId>
+            <artifactId>fcmjava-core</artifactId>
+            <version>2.5</version>
+        </dependency>
+        <dependency>
+            <groupId>de.bytefish.fcmjava</groupId>
+            <artifactId>fcmjava-client</artifactId>
+            <version>2.5</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -236,8 +246,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.7.0</version>
                 <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                     <compilerArgument>-Xlint:unchecked</compilerArgument>
                 </configuration>
             </plugin>
@@ -276,7 +286,7 @@
                         <configuration>
                             <rules>
                                 <enforceBytecodeVersion>
-                                    <maxJdkVersion>1.7</maxJdkVersion>
+                                    <maxJdkVersion>1.8</maxJdkVersion>
                                     <ignoreClasses>
                                         <ignoreClass>*JDBC42*</ignoreClass>
                                     </ignoreClasses>

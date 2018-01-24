@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+        logicalFilePath="changelog-3.15-orangecells">
+
+    <changeSet author="saurako" id="changelog-3.17-fcm-notifications">
+        <createTable tableName="fcmnotifications">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="clienttoken" type="VARCHAR(5000)">
+                <constraints nullable="false" />
+            </column>
+            <column name="deviceid" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="userid" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="eventtype" type="VARCHAR(128)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

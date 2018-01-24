@@ -43,6 +43,14 @@
         SELECT * FROM positions WHERE deviceId = :deviceId AND fixTime BETWEEN :from AND :to ORDER BY fixTime
     </entry>
 
+    <entry key='database.selectFCMNotifications'>
+        SELECT * FROM fcmnotifications
+    </entry>
+
+    <entry key='database.selectFCMNotificationsByToken'>
+        SELECT deviceId, eventType FROM fcmnotifications WHERE userId = :userId
+    </entry>
+
     <entry key='database.selectLatestPositions'>
         SELECT positions.* FROM positions INNER JOIN devices ON positions.id = devices.positionid;
     </entry>

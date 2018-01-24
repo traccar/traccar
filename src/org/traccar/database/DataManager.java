@@ -50,6 +50,7 @@ import org.traccar.model.Geofence;
 import org.traccar.model.Group;
 import org.traccar.model.ManagedUser;
 import org.traccar.model.Notification;
+import org.traccar.model.FCMNotification;
 import org.traccar.model.Permission;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Calendar;
@@ -332,11 +333,35 @@ public class DataManager {
     }
 
     public Collection<Position> getPositions(long deviceId, Date from, Date to) throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectPositions"))
-                .setLong("deviceId", deviceId)
-                .setDate("from", from)
-                .setDate("to", to)
-                .executeQuery(Position.class);
+        QueryBuilder queryBuilder = QueryBuilder.create(dataSource, getQuery("database.selectPositions"))
+                                                .setLong("deviceId", deviceId)
+                                                .setDate("from", from)
+                                                .setDate("to", to);
+        Log.info("GET POSITIONS QUERY: " + queryBuilder.getQueryStatement());
+        return queryBuilder.executeQuery(Position.class);
+    }
+
+    public Collection<FCMNotification> getFCMNotifications() throws SQLException {
+        QueryBuilder queryBuilder = QueryBuilder.create(dataSource, getQuery("database.selectFCMNotifications"));
+
+        Log.info("GET FCM NOTIFICATIONS QUERY: " + queryBuilder.getQueryStatement());
+        return queryBuilder.executeQuery(FCMNotification.class);
+    }
+
+    public Collection<FCMNotification> getFCMNotificationsForUser(long userId) throws SQLException {
+        QueryBuilder queryBuilder =
+                QueryBuilder.create(dataSource, getQuery("database.selectFCMNotificationsByToken"))
+                            .setLong("userId", userId);
+
+        Log.info("GET FCM NOTIFICATIONS QUERY: " + queryBuilder.getQueryStatement());
+        return queryBuilder.executeQuery(FCMNotification.class);
+    }
+
+    public void addPosition(Position position) throws SQLException {
+        position.setId(QueryBuilder.create(dataSource, getQuery(ACTION_INSERT, Position.class), true)
+                .setObject(position)
+                .setDate("serverTime", new Date())
+                .executeUpdate());
     }
 
     public void updateLatestPosition(Position position) throws SQLException {
