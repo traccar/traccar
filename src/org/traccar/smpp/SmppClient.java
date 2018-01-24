@@ -61,6 +61,7 @@ public class SmppClient {
     private String sourceAddress;
     private String commandSourceAddress;
     private int submitTimeout;
+    private boolean requestDrl;
     private String notificationsCharsetName;
     private byte notificationsDataCoding;
     private String commandsCharsetName;
@@ -89,6 +90,8 @@ public class SmppClient {
         sourceAddress = Context.getConfig().getString("sms.smpp.sourceAddress", "");
         commandSourceAddress = Context.getConfig().getString("sms.smpp.commandSourceAddress", sourceAddress);
         submitTimeout = Context.getConfig().getInteger("sms.smpp.submitTimeout", 10000);
+
+        requestDrl = Context.getConfig().getBoolean("sms.smpp.requestDrl");
 
         notificationsCharsetName = Context.getConfig().getString("sms.smpp.notificationsCharset",
                 CharsetUtil.NAME_UCS_2);
@@ -209,6 +212,9 @@ public class SmppClient {
             byte[] textBytes;
             textBytes = CharsetUtil.encode(message, command ? commandsCharsetName : notificationsCharsetName);
             submit.setDataCoding(command ? commandsDataCoding : notificationsDataCoding);
+            if (requestDrl) {
+                submit.setRegisteredDelivery(SmppConstants.REGISTERED_DELIVERY_SMSC_RECEIPT_REQUESTED);
+            }
             submit.setShortMessage(textBytes);
             submit.setSourceAddress(command ? new Address(commandSourceTon, commandSourceNpi, commandSourceAddress)
                     : new Address(sourceTon, sourceNpi, sourceAddress));
