@@ -8,6 +8,8 @@ import org.traccar.model.Group;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import static org.junit.Assert.assertEquals;
+
 public class GroupTreeTest {
 
     private static Group createGroup(long id, String name, long parent) {
@@ -42,14 +44,14 @@ public class GroupTreeTest {
 
         GroupTree groupTree = new GroupTree(groups, devices);
 
-        Assert.assertEquals(4, groupTree.getGroups(1).size());
-        Assert.assertEquals(3, groupTree.getGroups(2).size());
-        Assert.assertEquals(0, groupTree.getGroups(3).size());
-        Assert.assertEquals(1, groupTree.getGroups(4).size());
+        assertEquals(4, groupTree.getGroups(1).size());
+        assertEquals(3, groupTree.getGroups(2).size());
+        assertEquals(0, groupTree.getGroups(3).size());
+        assertEquals(1, groupTree.getGroups(4).size());
 
-        Assert.assertEquals(3, groupTree.getDevices(1).size());
-        Assert.assertEquals(1, groupTree.getDevices(3).size());
-        Assert.assertEquals(2, groupTree.getDevices(4).size());
+        assertEquals(3, groupTree.getDevices(1).size());
+        assertEquals(1, groupTree.getDevices(3).size());
+        assertEquals(2, groupTree.getDevices(4).size());
     }
 
 }

@@ -7,6 +7,9 @@ import org.traccar.BaseTest;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 public class GeolocationProviderTest extends BaseTest {
 
     @Ignore
@@ -23,13 +26,13 @@ public class GeolocationProviderTest extends BaseTest {
         provider.getLocation(network, new GeolocationProvider.LocationProviderCallback() {
             @Override
             public void onSuccess(double latitude, double longitude, double accuracy) {
-                Assert.assertEquals(60.07254, latitude, 0.00001);
-                Assert.assertEquals(30.30996, longitude, 0.00001);
+                assertEquals(60.07254, latitude, 0.00001);
+                assertEquals(30.30996, longitude, 0.00001);
             }
 
             @Override
             public void onFailure(Throwable e) {
-                Assert.fail();
+                fail();
             }
         });
 

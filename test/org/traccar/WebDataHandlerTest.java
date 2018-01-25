@@ -4,6 +4,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.traccar.model.Position;
 
+import static org.junit.Assert.assertEquals;
+
 public class WebDataHandlerTest extends ProtocolTest {
 
     @Test
@@ -13,7 +15,7 @@ public class WebDataHandlerTest extends ProtocolTest {
 
         WebDataHandler handler = new WebDataHandler("http://localhost/?fixTime={fixTime}&gprmc={gprmc}&name={name}");
 
-        Assert.assertEquals(
+        assertEquals(
                 "http://localhost/?fixTime=1451610123000&gprmc=$GPRMC,010203.000,A,2000.0000,N,03000.0000,E,0.00,0.00,010116,,*05&name=test",
                 handler.formatRequest(p));
 

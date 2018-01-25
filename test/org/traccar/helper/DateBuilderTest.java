@@ -8,6 +8,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 
+import static org.junit.Assert.assertEquals;
+
 public class DateBuilderTest {
     
     @Test
@@ -19,7 +21,7 @@ public class DateBuilderTest {
         DateBuilder dateBuilder = new DateBuilder()
                 .setDate(2015, 10, 20).setTime(1, 21, 11);
 
-        Assert.assertEquals(dateFormat.parse("2015-10-20 01:21:11"), dateBuilder.getDate());
+        assertEquals(dateFormat.parse("2015-10-20 01:21:11"), dateBuilder.getDate());
 
     }
 
