@@ -75,16 +75,16 @@ public class CsvBuilder {
             if (method.getName().startsWith("get") && method.getParameterTypes().length == 0) {
                 try {
                     if (method.getReturnType().equals(boolean.class)) {
-                        builder.append((Boolean) method.invoke(object));
+                        builder.append(method.invoke(object));
                         addSeparator();
                     } else if (method.getReturnType().equals(int.class)) {
-                        builder.append((Integer) method.invoke(object));
+                        builder.append(method.invoke(object));
                         addSeparator();
                     } else if (method.getReturnType().equals(long.class)) {
-                        builder.append((Long) method.invoke(object));
+                        builder.append(method.invoke(object));
                         addSeparator();
                     } else if (method.getReturnType().equals(double.class)) {
-                        builder.append((Double) method.invoke(object));
+                        builder.append(method.invoke(object));
                         addSeparator();
                     } else if (method.getReturnType().equals(String.class)) {
                         builder.append((String) method.invoke(object));

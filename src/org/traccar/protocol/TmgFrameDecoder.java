@@ -37,13 +37,10 @@ public class TmgFrameDecoder extends FrameDecoder {
                 if (buffer.getByte(guessedIndex) != (byte) '$' || buffer.writerIndex() - guessedIndex < 5) {
                     return false;
                 }
-                if (buffer.getByte(guessedIndex + 4) == ','
+                return buffer.getByte(guessedIndex + 4) == ','
                         && isLetter(buffer.getByte(guessedIndex + 1))
                         && isLetter(buffer.getByte(guessedIndex + 2))
-                        && isLetter(buffer.getByte(guessedIndex + 3))) {
-                    return true;
-                }
-                return false;
+                        && isLetter(buffer.getByte(guessedIndex + 3));
             }
         });
 

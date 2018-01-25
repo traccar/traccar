@@ -92,7 +92,7 @@ public abstract class EventForwarder {
             }
         }
         if (event.getGeofenceId() != 0) {
-            Geofence geofence = (Geofence) Context.getGeofenceManager().getById(event.getGeofenceId());
+            Geofence geofence = Context.getGeofenceManager().getById(event.getGeofenceId());
             if (geofence != null) {
                 data.put(KEY_GEOFENCE, geofence);
             }

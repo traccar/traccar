@@ -9,7 +9,7 @@ import org.traccar.model.Command;
 public class H02ProtocolEncoderTest extends ProtocolTest {
 
     private H02ProtocolEncoder encoder = new H02ProtocolEncoder();
-    private DateTime time = new DateTime().withHourOfDay(1).withMinuteOfHour(2).withSecondOfMinute(3);;
+    private DateTime time = new DateTime().withHourOfDay(1).withMinuteOfHour(2).withSecondOfMinute(3);
 
     @Test
     public void testAlarmArmEncode() throws Exception {

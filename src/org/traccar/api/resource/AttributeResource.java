@@ -52,9 +52,9 @@ public class AttributeResource extends ExtendedObjectResource<Attribute> {
             if (result != null) {
                 switch (entity.getType()) {
                     case "number":
-                        return Response.ok((Number) result).build();
+                        return Response.ok(result).build();
                     case "boolean":
-                        return Response.ok((Boolean) result).build();
+                        return Response.ok(result).build();
                     default:
                         return Response.ok(result.toString()).build();
                 }
