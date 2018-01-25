@@ -25,25 +25,25 @@ public class MiniFinderProtocolEncoder extends StringProtocolEncoder implements 
 
     @Override
     public String formatValue(String key, Object value) {
-
-        if (key.equals(Command.KEY_ENABLE)) {
-            return (Boolean) value ? "1" : "0";
-        } else if (key.equals(Command.KEY_TIMEZONE)) {
-            return String.format("%+03d", TimeZone.getTimeZone((String) value).getRawOffset() / 3600000);
-        } else if (key.equals(Command.KEY_INDEX)) {
-            switch (((Number) value).intValue()) {
-                case 0:
-                    return "A";
-                case 1:
-                    return "B";
-                case 2:
-                    return "C";
-                default:
-                    return null;
-            }
+        switch (key) {
+            case Command.KEY_ENABLE:
+                return (Boolean) value ? "1" : "0";
+            case Command.KEY_TIMEZONE:
+                return String.format("%+03d", TimeZone.getTimeZone((String) value).getRawOffset() / 3600000);
+            case Command.KEY_INDEX:
+                switch (((Number) value).intValue()) {
+                    case 0:
+                        return "A";
+                    case 1:
+                        return "B";
+                    case 2:
+                        return "C";
+                    default:
+                        return null;
+                }
+            default:
+                return null;
         }
-
-        return null;
     }
 
     @Override
