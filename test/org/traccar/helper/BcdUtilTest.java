@@ -1,7 +1,6 @@
 package org.traccar.helper;
 
 import org.jboss.netty.buffer.ChannelBuffers;
-import org.junit.Assert;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

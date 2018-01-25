@@ -2,7 +2,6 @@ package org.traccar.protocol;
 
 import java.nio.ByteOrder;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.traccar.ProtocolTest;
 

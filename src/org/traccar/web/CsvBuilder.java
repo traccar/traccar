@@ -51,7 +51,7 @@ public class CsvBuilder {
 
     private SortedSet<Method> getSortedMethods(Object object) {
         Method[] methodArray = object.getClass().getMethods();
-        SortedSet<Method> methods = new TreeSet<Method>(new Comparator<Method>() {
+        SortedSet<Method> methods = new TreeSet<>(new Comparator<Method>() {
             @Override
             public int compare(Method m1, Method m2) {
                 if (m1.getName().equals("getAttributes") && !m1.getName().equals(m2.getName())) {

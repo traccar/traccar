@@ -71,7 +71,7 @@ public class DeviceResource extends BaseObjectResource<Device> {
                 result = deviceManager.getUserItems(userId);
             }
         } else {
-            result = new HashSet<Long>();
+            result = new HashSet<>();
             for (String uniqueId : uniqueIds) {
                 Device device = deviceManager.getByUniqueId(uniqueId);
                 Context.getPermissionsManager().checkDevice(getUserId(), device.getId());

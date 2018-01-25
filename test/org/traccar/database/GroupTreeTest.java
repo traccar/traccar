@@ -1,6 +1,5 @@
 package org.traccar.database;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.traccar.model.Device;
 import org.traccar.model.Group;

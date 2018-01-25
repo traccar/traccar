@@ -1,11 +1,8 @@
 package org.traccar.protocol;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.traccar.ProtocolTest;
-import org.traccar.TestIdentityManager;
 import org.traccar.model.Command;
-import org.traccar.model.Device;
 
 import static org.junit.Assert.assertEquals;
 

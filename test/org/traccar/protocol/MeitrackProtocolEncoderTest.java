@@ -1,6 +1,5 @@
 package org.traccar.protocol;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Command;

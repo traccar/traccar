@@ -2,7 +2,6 @@ package org.traccar.processing;
 
 import java.util.Date;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.traccar.model.Attribute;
 import org.traccar.model.Position;
