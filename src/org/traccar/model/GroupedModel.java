@@ -1,5 +1,6 @@
 /*
- * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +16,16 @@
  */
 package org.traccar.model;
 
-public class Group extends GroupedModel {
+public class GroupedModel extends ExtendedModel {
 
-    private String name;
+    private long groupId;
 
-    public String getName() {
-        return name;
+    public long getGroupId() {
+        return groupId;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setGroupId(long groupId) {
+        this.groupId = groupId;
     }
 
 }
