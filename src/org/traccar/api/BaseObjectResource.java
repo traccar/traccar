@@ -37,6 +37,7 @@ import org.traccar.model.Calendar;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
+import org.traccar.model.GroupedModel;
 import org.traccar.model.ScheduledModel;
 import org.traccar.model.User;
 
@@ -79,9 +80,12 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
             Context.getPermissionsManager().checkDeviceLimit(getUserId());
         } else if (baseClass.equals(Command.class)) {
             Context.getPermissionsManager().checkLimitCommands(getUserId());
-        } else if (entity instanceof ScheduledModel) {
-            Context.getPermissionsManager().checkPermission(Calendar.class, getUserId(),
-                    ((ScheduledModel) entity).getCalendarId());
+        } else if (entity instanceof GroupedModel && ((GroupedModel) entity).getGroupId() != 0) {
+            Context.getPermissionsManager().checkPermission(
+                    Group.class, getUserId(), ((GroupedModel) entity).getGroupId());
+        } else if (entity instanceof ScheduledModel && ((ScheduledModel) entity).getCalendarId() != 0) {
+            Context.getPermissionsManager().checkPermission(
+                    Calendar.class, getUserId(), ((ScheduledModel) entity).getCalendarId());
         }
 
         BaseObjectManager<T> manager = Context.getManager(baseClass);
@@ -111,9 +115,12 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
             Context.getPermissionsManager().checkUserUpdate(getUserId(), before, (User) entity);
         } else if (baseClass.equals(Command.class)) {
             Context.getPermissionsManager().checkLimitCommands(getUserId());
-        } else if (entity instanceof ScheduledModel) {
-            Context.getPermissionsManager().checkPermission(Calendar.class, getUserId(),
-                    ((ScheduledModel) entity).getCalendarId());
+        } else if (entity instanceof GroupedModel && ((GroupedModel) entity).getGroupId() != 0) {
+            Context.getPermissionsManager().checkPermission(
+                    Group.class, getUserId(), ((GroupedModel) entity).getGroupId());
+        } else if (entity instanceof ScheduledModel && ((ScheduledModel) entity).getCalendarId() != 0) {
+            Context.getPermissionsManager().checkPermission(
+                    Calendar.class, getUserId(), ((ScheduledModel) entity).getCalendarId());
         }
         Context.getPermissionsManager().checkPermission(baseClass, getUserId(), entity.getId());
 
