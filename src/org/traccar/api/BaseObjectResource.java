@@ -81,11 +81,11 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         } else if (baseClass.equals(Command.class)) {
             Context.getPermissionsManager().checkLimitCommands(getUserId());
         } else if (entity instanceof GroupedModel && ((GroupedModel) entity).getGroupId() != 0) {
-            Context.getPermissionsManager().checkPermission(Group.class, getUserId(),
-                    ((GroupedModel) entity).getGroupId());
+            Context.getPermissionsManager().checkPermission(
+                    Group.class, getUserId(), ((GroupedModel) entity).getGroupId());
         } else if (entity instanceof ScheduledModel && ((ScheduledModel) entity).getCalendarId() != 0) {
-            Context.getPermissionsManager().checkPermission(Calendar.class, getUserId(),
-                    ((ScheduledModel) entity).getCalendarId());
+            Context.getPermissionsManager().checkPermission(
+                    Calendar.class, getUserId(), ((ScheduledModel) entity).getCalendarId());
         }
 
         BaseObjectManager<T> manager = Context.getManager(baseClass);
@@ -116,11 +116,11 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         } else if (baseClass.equals(Command.class)) {
             Context.getPermissionsManager().checkLimitCommands(getUserId());
         } else if (entity instanceof GroupedModel && ((GroupedModel) entity).getGroupId() != 0) {
-            Context.getPermissionsManager().checkPermission(Group.class, getUserId(),
-                    ((GroupedModel) entity).getGroupId());
+            Context.getPermissionsManager().checkPermission(
+                    Group.class, getUserId(), ((GroupedModel) entity).getGroupId());
         } else if (entity instanceof ScheduledModel && ((ScheduledModel) entity).getCalendarId() != 0) {
-            Context.getPermissionsManager().checkPermission(Calendar.class, getUserId(),
-                    ((ScheduledModel) entity).getCalendarId());
+            Context.getPermissionsManager().checkPermission(
+                    Calendar.class, getUserId(), ((ScheduledModel) entity).getCalendarId());
         }
         Context.getPermissionsManager().checkPermission(baseClass, getUserId(), entity.getId());
 
