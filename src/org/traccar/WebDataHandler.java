@@ -80,6 +80,7 @@ public class WebDataHandler extends BaseDataHandler {
         String request = url
                 .replace("{name}", device.getName())
                 .replace("{uniqueId}", device.getUniqueId())
+                .replace("{status}", device.getStatus())
                 .replace("{deviceId}", String.valueOf(position.getDeviceId()))
                 .replace("{protocol}", String.valueOf(position.getProtocol()))
                 .replace("{deviceTime}", String.valueOf(position.getDeviceTime().getTime()))
@@ -90,8 +91,8 @@ public class WebDataHandler extends BaseDataHandler {
                 .replace("{altitude}", String.valueOf(position.getAltitude()))
                 .replace("{speed}", String.valueOf(position.getSpeed()))
                 .replace("{course}", String.valueOf(position.getCourse()))
-                .replace("{statusCode}", calculateStatus(position))
-                .replace("{status}", device.getStatus());
+                .replace("{statusCode}", calculateStatus(position));
+                
 
         if (position.getAddress() != null) {
             try {
