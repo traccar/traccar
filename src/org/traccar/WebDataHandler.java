@@ -92,7 +92,7 @@ public class WebDataHandler extends BaseDataHandler {
                 .replace("{speed}", String.valueOf(position.getSpeed()))
                 .replace("{course}", String.valueOf(position.getCourse()))
                 .replace("{statusCode}", calculateStatus(position));
-
+                
         if (position.getAddress() != null) {
             try {
                 request = request.replace(
