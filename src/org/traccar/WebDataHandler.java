@@ -80,6 +80,7 @@ public class WebDataHandler extends BaseDataHandler {
         String request = url
                 .replace("{name}", device.getName())
                 .replace("{uniqueId}", device.getUniqueId())
+                .replace("{status}", device.getStatus())
                 .replace("{deviceId}", String.valueOf(position.getDeviceId()))
                 .replace("{protocol}", String.valueOf(position.getProtocol()))
                 .replace("{deviceTime}", String.valueOf(position.getDeviceTime().getTime()))
