@@ -7,12 +7,48 @@
         logicalFilePath="changelog-3.15-orangecells">
 
     <changeSet author="saurako" id="changelog-3.17-fcm-notifications">
-        <createTable tableName="fcmnotifications">
-            <column name="id" type="INT" autoIncrement="true">
+        <createTable tableName="fcmusertokens">
+            <column name="userid" type="INT">
                 <constraints primaryKey="true" />
             </column>
             <column name="clienttoken" type="VARCHAR(5000)">
                 <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="fcmUserTokens" baseColumnNames="userid" constraintName="fk_fcmUserTokens_userid" referencedTableName="users" referencedColumnNames="id" onDelete="CASCADE" />
+
+        <createTable tableName="fcmpushnotificationtypes">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="eventtype" type="VARCHAR(128)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <insert tableName="fcmpushnotificationtypes">
+            <column name="eventtype" value="POWER_FAIL_EVENT" />
+        </insert>
+        <insert tableName="fcmpushnotificationtypes">
+            <column name="eventtype" value="OVER_SPEED_STARTED_EVENT" />
+        </insert>
+        <insert tableName="fcmpushnotificationtypes">
+            <column name="eventtype" value="OVER_SPEED_ENDED_EVENT" />
+        </insert>
+        <insert tableName="fcmpushnotificationtypes">
+            <column name="eventtype" value="HARSH_BRAKING" />
+        </insert>
+        <insert tableName="fcmpushnotificationtypes">
+            <column name="eventtype" value="HARSH_ACCELERATION" />
+        </insert>
+        <insert tableName="fcmpushnotificationtypes">
+            <column name="eventtype" value="INTERNAL_BATTERY_LOW_ALERT" />
+        </insert>
+
+        <createTable tableName="fcmpushnotifications">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" />
             </column>
             <column name="deviceid" type="INT">
                 <constraints nullable="false" />
@@ -20,9 +56,18 @@
             <column name="userid" type="INT">
                 <constraints nullable="false" />
             </column>
-            <column name="eventtype" type="VARCHAR(128)">
+            <column name="eventtypeid" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="enabled" type="BOOLEAN" defaultValueBoolean="false">
                 <constraints nullable="false" />
             </column>
         </createTable>
+
+        <addForeignKeyConstraint baseTableName="fcmpushnotifications" baseColumnNames="deviceid" constraintName="fk_fcmpushnotifications_deviceid" referencedTableName="devices" referencedColumnNames="id" onDelete="CASCADE" />
+        <addForeignKeyConstraint baseTableName="fcmpushnotifications" baseColumnNames="userid" constraintName="fk_fcmpushnotifications_userid" referencedTableName="users" referencedColumnNames="id" onDelete="CASCADE" />
+        <addForeignKeyConstraint baseTableName="fcmpushnotifications" baseColumnNames="eventtypeid" constraintName="fk_fcmpushnotifications_eventtypeid" referencedTableName="fcmpushnotificationtypes" referencedColumnNames="id" onDelete="CASCADE" />
+        <addUniqueConstraint tableName="fcmpushnotifications" columnNames="deviceid, userid, eventtypeid" constraintName="uk_deviceid_userid_eventtypeid" />
+
     </changeSet>
 </databaseChangeLog>

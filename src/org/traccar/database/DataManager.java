@@ -50,7 +50,9 @@ import org.traccar.model.Geofence;
 import org.traccar.model.Group;
 import org.traccar.model.ManagedUser;
 import org.traccar.model.Notification;
-import org.traccar.model.FCMNotification;
+import org.traccar.model.FCMPushNotificationType;
+import org.traccar.model.FCMPushNotification;
+import org.traccar.model.FCMUserToken;
 import org.traccar.model.Permission;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Calendar;
@@ -337,24 +339,23 @@ public class DataManager {
                                                 .setLong("deviceId", deviceId)
                                                 .setDate("from", from)
                                                 .setDate("to", to);
-        Log.info("GET POSITIONS QUERY: " + queryBuilder.getQueryStatement());
         return queryBuilder.executeQuery(Position.class);
     }
 
-    public Collection<FCMNotification> getFCMNotifications() throws SQLException {
-        QueryBuilder queryBuilder = QueryBuilder.create(dataSource, getQuery("database.selectFCMNotifications"));
-
-        Log.info("GET FCM NOTIFICATIONS QUERY: " + queryBuilder.getQueryStatement());
-        return queryBuilder.executeQuery(FCMNotification.class);
+    public Collection<FCMPushNotificationType> getFCMPushNotificationTypes() throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery(ACTION_SELECT_ALL, FCMPushNotificationType.class))
+                           .executeQuery(FCMPushNotificationType.class);
     }
 
-    public Collection<FCMNotification> getFCMNotificationsForUser(long userId) throws SQLException {
-        QueryBuilder queryBuilder =
-                QueryBuilder.create(dataSource, getQuery("database.selectFCMNotificationsByToken"))
-                            .setLong("userId", userId);
+    public Collection<FCMUserToken> getFCMUserTokens() throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery(ACTION_SELECT_ALL, FCMUserToken.class))
+                           .executeQuery(FCMUserToken.class);
+    }
 
-        Log.info("GET FCM NOTIFICATIONS QUERY: " + queryBuilder.getQueryStatement());
-        return queryBuilder.executeQuery(FCMNotification.class);
+    public Collection<FCMPushNotification> getFCMPushNotificationsForUser(long userId) throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.database.selectFCMPushNotificationsByUserIdByUserId"))
+                           .setLong("userId", userId)
+                           .executeQuery(FCMPushNotification.class);
     }
 
     public void addPosition(Position position) throws SQLException {
@@ -489,5 +490,4 @@ public class DataManager {
                 .setLong("id", entityId)
                 .executeUpdate();
     }
-
 }

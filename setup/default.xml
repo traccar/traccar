@@ -43,12 +43,18 @@
         SELECT * FROM positions WHERE deviceId = :deviceId AND fixTime BETWEEN :from AND :to ORDER BY fixTime
     </entry>
 
-    <entry key='database.selectFCMNotifications'>
-        SELECT * FROM fcmnotifications
+    <entry key='database.database.selectFCMPushNotificationsByUserId'>
+        SELECT * FROM fcmpushnotifications
     </entry>
 
-    <entry key='database.selectFCMNotificationsByToken'>
-        SELECT deviceId, eventType FROM fcmnotifications WHERE userId = :userId
+    <entry key='database.database.selectFCMPushNotificationsByUserIdByUserId'>
+        SELECT deviceId, eventTypeId, enabled FROM fcmpushnotifications WHERE userId = :userId
+    </entry>
+
+    <entry key="database.insertFCMPushNotification">
+        INSERT INTO fcmPushNotifications(deviceId, userId, eventTypeId, enabled)
+        VALUES (:deviceId, :userId, :eventTypeId, :enabled)
+        ON DUPLICATE KEY UPDATE enabled = :enabled
     </entry>
 
     <entry key='database.selectLatestPositions'>

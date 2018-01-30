@@ -2,7 +2,7 @@ package org.traccar.api.resource;
 
 import org.traccar.Context;
 import org.traccar.api.BaseObjectResource;
-import org.traccar.model.FCMNotification;
+import org.traccar.model.FCMPushNotification;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -15,35 +15,35 @@ import javax.ws.rs.core.Response;
 import java.sql.SQLException;
 import java.util.Collection;
 
-@Path("fcmnotifications")
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
-public class FCMNotificationResource extends BaseObjectResource<FCMNotification> {
+@Path("fcmpushnotifications")
+public class FCMNotificationResource extends BaseObjectResource<FCMPushNotification> {
 
     public FCMNotificationResource() {
-        super(FCMNotification.class);
+        super(FCMPushNotification.class);
     }
 
     @GET
-    public Collection<FCMNotification> get(
+    @Produces(MediaType.APPLICATION_JSON)
+    public Collection<FCMPushNotification> get(
             @QueryParam("userId") long userId) throws SQLException {
 
-        return Context.getDataManager().getFCMNotificationsForUser(userId);
+        return Context.getDataManager().getFCMPushNotificationsForUser(userId);
     }
 
     @POST
-    public Response add(FCMNotification entity) throws SQLException {
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response add(Collection<FCMPushNotification> entityList) throws SQLException {
 
-        if (getUserId() == entity.getUserId()) {
-            Context.getPermissionsManager().checkDevice(entity.getUserId(),
-                    entity.getDeviceId());
+        for (FCMPushNotification entity : entityList) {
+            if (getUserId() == entity.getUserId()) {
+                Context.getPermissionsManager().checkDevice(entity.getUserId(),
+                        entity.getDeviceId());
 
-
-            Context.getFcmPushNotificationManager().addItem(entity);
-
-
+                // We need a addItemsList in DataManager to avoid multiple writes.
+                Context.getFcmPushNotificationManager().addItem(entity);
+            }
         }
-        Context.getFcmPushNotificationManager().refreshFCMNotificationItems();
-        return Response.ok(entity).build();
+
+        return Response.ok(entityList).build();
     }
 }
