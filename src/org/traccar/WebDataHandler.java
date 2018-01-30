@@ -90,7 +90,8 @@ public class WebDataHandler extends BaseDataHandler {
                 .replace("{altitude}", String.valueOf(position.getAltitude()))
                 .replace("{speed}", String.valueOf(position.getSpeed()))
                 .replace("{course}", String.valueOf(position.getCourse()))
-                .replace("{statusCode}", calculateStatus(position));
+                .replace("{statusCode}", calculateStatus(position))
+                .replace("{status}", device.getStatus());
 
         if (position.getAddress() != null) {
             try {
