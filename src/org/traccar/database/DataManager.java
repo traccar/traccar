@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.management.Query;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
@@ -352,8 +353,14 @@ public class DataManager {
                            .executeQuery(FCMUserToken.class);
     }
 
+    public Collection<FCMPushNotification> getFCMPushNotifications() throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery(ACTION_SELECT_ALL, FCMPushNotification.class))
+                           .executeQuery(FCMPushNotification.class);
+
+    }
+
     public Collection<FCMPushNotification> getFCMPushNotificationsForUser(long userId) throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.database.selectFCMPushNotificationsByUserIdByUserId"))
+        return QueryBuilder.create(dataSource, getQuery("database.database.selectFCMPushNotificationsByUserId"))
                            .setLong("userId", userId)
                            .executeQuery(FCMPushNotification.class);
     }

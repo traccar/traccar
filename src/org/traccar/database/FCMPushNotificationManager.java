@@ -5,46 +5,61 @@ import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.traccar.Context;
 import org.traccar.fcm.PushNotifications;
 import org.traccar.helper.Log;
+import org.traccar.model.Device;
 import org.traccar.model.Event;
-import org.traccar.model.FCMNotification;
+import org.traccar.model.FCMPushNotification;
 import org.traccar.model.Position;
 
 import java.sql.SQLException;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class FCMPushNotificationManager extends ExtendedObjectManager<FCMNotification> {
+public class FCMPushNotificationManager extends ExtendedObjectManager<FCMPushNotification> {
 
-    public static final long DEFAULT_REFRESH_DELAY = 300;
-
-    private final Map<String, String> fcmNotificationTokens = new ConcurrentHashMap<>();
+    private final Map<Long, Map<Long, Set<Long>>> fcmNotificationsMap = new ConcurrentHashMap<>();
 
     public FCMPushNotificationManager(DataManager dataManager) {
-        super(dataManager, FCMNotification.class);
-        refreshFCMNotificationItems();
+        super(dataManager, FCMPushNotification.class);
+        refreshFCMNotificationsMap();
     }
 
-    public void refreshFCMNotificationItems() {
-        if (getDataManager() != null) {
-            try {
-                for (FCMNotification fcmNotification
-                        : getDataManager().getFCMNotifications()) {
-                    String key = getTokenLookupKey(
-                            fcmNotification.getDeviceId(),
-                            fcmNotification.getUserId(),
-                            fcmNotification.getEventType());
+    public void refreshFCMNotificationsMap() {
 
-                    fcmNotificationTokens.put(key, fcmNotification.getClientToken());
+        try {
+            Collection<FCMPushNotification> fcmPushNotifications = Context.getDataManager().getFCMPushNotifications();
+
+            for (FCMPushNotification fcmPushNotification : fcmPushNotifications) {
+                long deviceId = fcmPushNotification.getDeviceId();
+                long userId = fcmPushNotification.getUserId();
+
+                if (fcmPushNotification.getEnabled()) {
+                    if (!fcmNotificationsMap.containsKey(deviceId)) {
+                        fcmNotificationsMap.put(deviceId, new ConcurrentHashMap<>());
+                    }
+
+                    Map<Long, Set<Long>> usersOfDevice = fcmNotificationsMap.get(deviceId);
+
+                    if (!usersOfDevice.containsKey(userId)) {
+                        usersOfDevice.put(userId, new ConcurrentHashSet<>());
+                    }
+
+                    usersOfDevice.get(userId).add(fcmPushNotification.getEventTypeId());
                 }
-            } catch (SQLException error) {
-                Log.warning(error);
             }
+        } catch (SQLException error) {
+            Log.warning(error);
         }
     }
 
-    private String getTokenLookupKey(long deviceId, long userId, String eventType) {
-        return String.format("%d_%d_%s", deviceId, userId, eventType);
+    private Optional<Set<Long>> getFCMDeviceNotificationForUser(long deviceId, long userId) {
+        if (fcmNotificationsMap.containsKey(deviceId)) {
+            Map<Long, Set<Long>> usersOfDevice = fcmNotificationsMap.get(deviceId);
+
+            if (usersOfDevice.containsKey(userId)) {
+                return Optional.of(usersOfDevice.get(userId));
+            }
+        }
+        return Optional.empty();
     }
 
     public void updateEvents(Map<Event, Position> events) {
@@ -53,8 +68,7 @@ public class FCMPushNotificationManager extends ExtendedObjectManager<FCMNotific
         }
     }
 
-    public void updateEvent(Event event, Position position) {
-
+    private void updateEvent(Event event, Position position) {
         String eventType = event.getType();
         if (StringUtils.isBlank(eventType)) {
             return;
@@ -62,16 +76,31 @@ public class FCMPushNotificationManager extends ExtendedObjectManager<FCMNotific
 
         long deviceId = event.getDeviceId();
         Set<Long> userIds = Context.getPermissionsManager().getDeviceUsers(deviceId);
-
         Set<String> tokens = new ConcurrentHashSet<>();
 
+        Map<String, Long> fcmNotificationTypes = FCMPushNotificationTypeManager.getFCMPushNotificationStringToIdMap();
+
+        Log.info("FCM Push notification users list: " + userIds.size());
         for (long userId : userIds) {
-            String tokenLookupKey = getTokenLookupKey(deviceId, userId, eventType);
-            tokens.add(fcmNotificationTokens.get(tokenLookupKey));
+            Optional<Set<Long>> fcmNotificationsForUser = getFCMDeviceNotificationForUser(deviceId, userId);
+            if (fcmNotificationsForUser.isPresent()) {
+                long currentNotificationTypeId = fcmNotificationTypes.get(eventType);
+                if (fcmNotificationsForUser.get().contains(currentNotificationTypeId)) {
+                    Context.getFcmUserTokenManager()
+                           .getFCMUserToken(userId)
+                           .ifPresent(tokens::add);
+                }
+            }
         }
 
-        String title = eventType + " by " + deviceId;
-        String body = eventType + " detected on device " + deviceId + " at " + position.getDeviceTime();
+        if (tokens.isEmpty()) {
+            return;
+        }
+
+        Device device = Context.getDeviceManager().getById(deviceId);
+        String title = device.getRegistrationNumber() + " : " + eventType;
+        String body = String.format("%s detected on %s at %s", eventType, device.getRegistrationNumber(), event.getServerTime().toString());
+
         PushNotifications.getInstance().sendEventNotification(tokens, title, body);
     }
 }

@@ -25,25 +25,38 @@
             <column name="eventtype" type="VARCHAR(128)">
                 <constraints nullable="false" />
             </column>
+            <column name="prettyName" type="VARCHAR(128)">
+                <constraints nullable="false" />
+            </column>
         </createTable>
 
         <insert tableName="fcmpushnotificationtypes">
-            <column name="eventtype" value="POWER_FAIL_EVENT" />
+            <column name="eventtype" value="deviceOnline" />
+            <column name="prettyName" value="Online" />
         </insert>
         <insert tableName="fcmpushnotificationtypes">
-            <column name="eventtype" value="OVER_SPEED_STARTED_EVENT" />
+            <column name="eventtype" value="deviceOffline" />
+            <column name="prettyName" value="Offline" />
         </insert>
         <insert tableName="fcmpushnotificationtypes">
-            <column name="eventtype" value="OVER_SPEED_ENDED_EVENT" />
+            <column name="eventtype" value="deviceMoving" />
+            <column name="prettyName" value="Moving" />
         </insert>
         <insert tableName="fcmpushnotificationtypes">
-            <column name="eventtype" value="HARSH_BRAKING" />
+            <column name="eventtype" value="deviceStopped" />
+            <column name="prettyName" value="Stopped" />
         </insert>
         <insert tableName="fcmpushnotificationtypes">
-            <column name="eventtype" value="HARSH_ACCELERATION" />
+            <column name="eventtype" value="deviceOverspeed" />
+            <column name="prettyName" value="Overspeed" />
         </insert>
         <insert tableName="fcmpushnotificationtypes">
-            <column name="eventtype" value="INTERNAL_BATTERY_LOW_ALERT" />
+            <column name="eventtype" value="ignitionOn" />
+            <column name="prettyName" value="Ignition On" />
+        </insert>
+        <insert tableName="fcmpushnotificationtypes">
+            <column name="eventtype" value="ignitionOff" />
+            <column name="prettyName" value="Ignition Off" />
         </insert>
 
         <createTable tableName="fcmpushnotifications">
