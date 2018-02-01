@@ -25,6 +25,7 @@ import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.server.session.HashSessionManager;
+import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.webapp.WebAppContext;
@@ -35,6 +36,7 @@ import org.traccar.Config;
 import org.traccar.Context;
 import org.traccar.api.AsyncSocketServlet;
 import org.traccar.api.CorsResponseFilter;
+import org.traccar.api.MediaFilter;
 import org.traccar.api.ObjectMapperProvider;
 import org.traccar.api.ResourceErrorHandler;
 import org.traccar.api.SecurityRequestFilter;
@@ -42,6 +44,7 @@ import org.traccar.api.resource.ServerResource;
 import org.traccar.helper.Log;
 
 import javax.naming.InitialContext;
+import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -49,6 +52,7 @@ import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.InetSocketAddress;
+import java.util.EnumSet;
 
 public class WebServer {
 
@@ -80,6 +84,7 @@ public class WebServer {
         }
 
         initServer();
+        initMedia();
         initApi();
         if (config.getBoolean("web.console")) {
             initConsole();
@@ -154,6 +159,19 @@ public class WebServer {
         app.getSessionHandler().setSessionManager(sessionManager);
         app.setWar(config.getString("web.application"));
         handlers.addHandler(app);
+    }
+
+    private void initMedia() {
+        ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        servletHandler.setContextPath("/api/media");
+        servletHandler.getSessionHandler().setSessionManager(sessionManager);
+
+        ServletHolder servletHolder = new ServletHolder("media", DefaultServlet.class);
+        servletHolder.setInitParameter("resourceBase", config.getString("media.path"));
+        servletHolder.setInitParameter("dirAllowed", config.getString("media.dirAllowed", "false"));
+        servletHandler.addServlet(servletHolder, "/*");
+        servletHandler.addFilter(MediaFilter.class, "/*", EnumSet.of(DispatcherType.INCLUDE, DispatcherType.REQUEST));
+        handlers.addHandler(servletHandler);
     }
 
     private void initApi() {
