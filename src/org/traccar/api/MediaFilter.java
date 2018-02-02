@@ -43,6 +43,7 @@ public class MediaFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
+        HttpServletResponse httpResponse = ((HttpServletResponse) response);
         try {
             HttpSession session = ((HttpServletRequest) request).getSession(false);
             Long userId = null;
@@ -54,8 +55,7 @@ public class MediaFilter implements Filter {
                 }
             }
             if (userId == null) {
-                ((HttpServletResponse) response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.getWriter().println("Not authorized");
+                httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
 
@@ -68,19 +68,18 @@ public class MediaFilter implements Filter {
                 if (device != null) {
                     Context.getPermissionsManager().checkDevice(userId, device.getId());
                 } else {
-                    ((HttpServletResponse) response).setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    response.getWriter().println("Device not found");
+                    httpResponse.sendError(HttpServletResponse.SC_NOT_FOUND);
                     return;
                 }
             }
 
             chain.doFilter(request, response);
         } catch (SecurityException e) {
-            ((HttpServletResponse) response).setStatus(HttpServletResponse.SC_FORBIDDEN);
-            response.getWriter().println(Log.exceptionStack(e));
+            httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            httpResponse.getWriter().println(Log.exceptionStack(e));
         } catch (SQLException e) {
-            ((HttpServletResponse) response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().println(Log.exceptionStack(e));
+            httpResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            httpResponse.getWriter().println(Log.exceptionStack(e));
         }
     }
 
