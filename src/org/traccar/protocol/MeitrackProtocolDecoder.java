@@ -477,9 +477,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
                     getLastLocation(position, null);
 
-                    if (Context.getMediaManager() != null) {
-                        position.set(Position.KEY_IMAGE, Context.getMediaManager().writeFile(imei, photo, "jpg"));
-                    }
+                    position.set(Position.KEY_IMAGE, Context.getMediaManager().writeFile(imei, photo, "jpg"));
                     photo = null;
 
                     return position;

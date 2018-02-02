@@ -246,9 +246,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
             int timeIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ',');
             buf.readerIndex(timeIndex + 12 + 2);
-            if (Context.getMediaManager() != null) {
-                position.set(Position.KEY_IMAGE, Context.getMediaManager().writeFile(id, buf, "jpg"));
-            }
+            position.set(Position.KEY_IMAGE, Context.getMediaManager().writeFile(id, buf, "jpg"));
 
             return position;
 
@@ -259,9 +257,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, null);
 
-            if (Context.getMediaManager() != null) {
-                position.set(Position.KEY_AUDIO, Context.getMediaManager().writeFile(id, buf, "amr"));
-            }
+            position.set(Position.KEY_AUDIO, Context.getMediaManager().writeFile(id, buf, "amr"));
 
             return position;
 

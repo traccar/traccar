@@ -703,11 +703,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             if (photo.writableBytes() > 0) {
                 sendPhotoRequest(channel, pictureId);
             } else {
-                if (Context.getMediaManager() != null) {
-                    Device device = Context.getDeviceManager().getById(deviceSession.getDeviceId());
-                    position.set(Position.KEY_IMAGE,
-                            Context.getMediaManager().writeFile(device.getUniqueId(), photo, "jpg"));
-                }
+                Device device = Context.getDeviceManager().getById(deviceSession.getDeviceId());
+                position.set(
+                        Position.KEY_IMAGE, Context.getMediaManager().writeFile(device.getUniqueId(), photo, "jpg"));
                 photos.remove(pictureId);
             }
 
