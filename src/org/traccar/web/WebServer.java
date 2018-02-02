@@ -167,10 +167,10 @@ public class WebServer {
 
         servletHandler.addServlet(new ServletHolder(new AsyncSocketServlet()), "/socket");
 
-        if (config.getBoolean("media.web.enable")) {
+        if (config.hasKey("media.path")) {
             ServletHolder servletHolder = new ServletHolder("media", DefaultServlet.class);
             servletHolder.setInitParameter("resourceBase", config.getString("media.path"));
-            servletHolder.setInitParameter("dirAllowed", config.getString("media.web.directoryAllow", "false"));
+            servletHolder.setInitParameter("dirAllowed", config.getString("media.directoryAllow", "false"));
             servletHolder.setInitParameter("pathInfoOnly", "true");
             servletHandler.addServlet(servletHolder, "/media/*");
             servletHandler.addFilter(MediaFilter.class, "/media/*", EnumSet.allOf(DispatcherType.class));
