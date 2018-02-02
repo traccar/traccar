@@ -170,7 +170,7 @@ public class WebServer {
         if (config.hasKey("media.path")) {
             ServletHolder servletHolder = new ServletHolder("media", DefaultServlet.class);
             servletHolder.setInitParameter("resourceBase", config.getString("media.path"));
-            servletHolder.setInitParameter("dirAllowed", config.getString("media.directoryAllow", "false"));
+            servletHolder.setInitParameter("dirAllowed", config.getString("media.dirAllowed", "false"));
             servletHolder.setInitParameter("pathInfoOnly", "true");
             servletHandler.addServlet(servletHolder, "/media/*");
             servletHandler.addFilter(MediaFilter.class, "/media/*", EnumSet.allOf(DispatcherType.class));
