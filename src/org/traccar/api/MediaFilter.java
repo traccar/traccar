@@ -17,6 +17,7 @@
 package org.traccar.api;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -27,7 +28,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.ws.rs.NotAuthorizedException;
 
 import org.traccar.Context;
 import org.traccar.api.resource.SessionResource;
@@ -54,7 +54,9 @@ public class MediaFilter implements Filter {
                 }
             }
             if (userId == null) {
-                throw new NotAuthorizedException("Not authorized");
+                ((HttpServletResponse) response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().println("Not authorized");
+                return;
             }
 
             String path = ((HttpServletRequest) request).getPathInfo();
@@ -62,26 +64,22 @@ public class MediaFilter implements Filter {
             if (parts.length < 2 || parts.length == 2 && !path.endsWith("/")) {
                 Context.getPermissionsManager().checkAdmin(userId);
             } else {
-                Device device = Context.getIdentityManager().getByUniqueId(parts[1]);
+                Device device = Context.getDeviceManager().getByUniqueId(parts[1]);
                 if (device != null) {
                     Context.getPermissionsManager().checkDevice(userId, device.getId());
                 } else {
-                    throw new IllegalArgumentException("Device not found");
+                    ((HttpServletResponse) response).setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    response.getWriter().println("Device not found");
+                    return;
                 }
             }
 
             chain.doFilter(request, response);
-        } catch (Exception e) {
-            HttpServletResponse httpResponse = (HttpServletResponse) response;
-            if (e instanceof SecurityException) {
-                httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            } else if (e instanceof IllegalArgumentException) {
-                httpResponse.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            } else if (e instanceof NotAuthorizedException) {
-                httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            } else {
-                httpResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            }
+        } catch (SecurityException e) {
+            ((HttpServletResponse) response).setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.getWriter().println(Log.exceptionStack(e));
+        } catch (SQLException e) {
+            ((HttpServletResponse) response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println(Log.exceptionStack(e));
         }
     }
