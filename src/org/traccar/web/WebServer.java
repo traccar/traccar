@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,7 +84,6 @@ public class WebServer {
         }
 
         initServer();
-        initMedia();
         initApi();
         if (config.getBoolean("web.console")) {
             initConsole();
@@ -161,19 +160,6 @@ public class WebServer {
         handlers.addHandler(app);
     }
 
-    private void initMedia() {
-        ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        servletHandler.setContextPath("/api/media");
-        servletHandler.getSessionHandler().setSessionManager(sessionManager);
-
-        ServletHolder servletHolder = new ServletHolder("media", DefaultServlet.class);
-        servletHolder.setInitParameter("resourceBase", config.getString("media.path"));
-        servletHolder.setInitParameter("dirAllowed", config.getString("media.dirAllowed", "false"));
-        servletHandler.addServlet(servletHolder, "/*");
-        servletHandler.addFilter(MediaFilter.class, "/*", EnumSet.of(DispatcherType.INCLUDE, DispatcherType.REQUEST));
-        handlers.addHandler(servletHandler);
-    }
-
     private void initApi() {
         ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         servletHandler.setContextPath("/api");
@@ -181,11 +167,17 @@ public class WebServer {
 
         servletHandler.addServlet(new ServletHolder(new AsyncSocketServlet()), "/socket");
 
+        ServletHolder servletHolder = new ServletHolder("media", DefaultServlet.class);
+        servletHolder.setInitParameter("resourceBase", config.getString("media.path"));
+        servletHolder.setInitParameter("dirAllowed", config.getString("media.directoryAllow", "false"));
+        servletHolder.setInitParameter("pathInfoOnly", "true");
+        servletHandler.addServlet(servletHolder, "/media/*");
+        servletHandler.addFilter(MediaFilter.class, "/media/*", EnumSet.allOf(DispatcherType.class));
+
         ResourceConfig resourceConfig = new ResourceConfig();
         resourceConfig.registerClasses(JacksonFeature.class, ObjectMapperProvider.class, ResourceErrorHandler.class);
         resourceConfig.registerClasses(SecurityRequestFilter.class, CorsResponseFilter.class);
         resourceConfig.packages(ServerResource.class.getPackage().getName());
-
         servletHandler.addServlet(new ServletHolder(new ServletContainer(resourceConfig)), "/*");
 
         handlers.addHandler(servletHandler);

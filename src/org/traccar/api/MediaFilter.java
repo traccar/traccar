@@ -36,24 +36,8 @@ import org.traccar.model.Device;
 
 public class MediaFilter implements Filter {
 
-    private boolean dirAllowed;
-
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        dirAllowed = Context.getConfig().getBoolean("media.dirAllowed");
-    }
-
-    private static void formatError(HttpServletResponse response, Exception e) throws IOException {
-        if (e instanceof SecurityException) {
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-        } else if (e instanceof IllegalArgumentException) {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-        } else if (e instanceof NotAuthorizedException) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        } else {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        }
-        response.getWriter().println(Log.exceptionStack(e));
     }
 
     @Override
@@ -73,15 +57,10 @@ public class MediaFilter implements Filter {
                 throw new NotAuthorizedException("Not authorized");
             }
 
-            String[] parts = ((HttpServletRequest) request).getPathInfo().split("/");
-            if (parts.length < 2) {
-                if (dirAllowed) {
-                    Context.getPermissionsManager().checkAdmin(userId);
-                } else {
-                    throw new SecurityException("Wrong path");
-                }
-            } else if (parts.length == 2 && !dirAllowed) {
-                throw new SecurityException("Wrong path");
+            String path = ((HttpServletRequest) request).getPathInfo();
+            String[] parts = path.split("/");
+            if (parts.length < 2 || parts.length == 2 && !path.endsWith("/")) {
+                Context.getPermissionsManager().checkAdmin(userId);
             } else {
                 Device device = Context.getIdentityManager().getByUniqueId(parts[1]);
                 if (device != null) {
@@ -93,7 +72,17 @@ public class MediaFilter implements Filter {
 
             chain.doFilter(request, response);
         } catch (Exception e) {
-            formatError((HttpServletResponse) response, e);
+            HttpServletResponse httpResponse = (HttpServletResponse) response;
+            if (e instanceof SecurityException) {
+                httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            } else if (e instanceof IllegalArgumentException) {
+                httpResponse.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            } else if (e instanceof NotAuthorizedException) {
+                httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            } else {
+                httpResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            }
+            response.getWriter().println(Log.exceptionStack(e));
         }
     }
 
