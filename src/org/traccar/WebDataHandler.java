@@ -121,7 +121,7 @@ public class WebDataHandler extends BaseDataHandler {
 
     @Override
     protected Position handlePosition(Position position) {
-        if(json){
+        if (json) {
             AsyncHttpClient.BoundRequestBuilder requestBuilder = Context.getAsyncHttpClient().preparePost(url);
             requestBuilder.setBodyEncoding(StandardCharsets.UTF_8.name());
 
@@ -129,7 +129,8 @@ public class WebDataHandler extends BaseDataHandler {
 
             setContent(position, requestBuilder);
             requestBuilder.execute();
-        }else {
+            
+        } else {
             Context.getAsyncHttpClient().prepareGet(formatRequest(position)).execute();
         }
         return position;
