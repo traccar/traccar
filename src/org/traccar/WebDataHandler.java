@@ -16,6 +16,7 @@
 package org.traccar;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.ning.http.client.AsyncHttpClient;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
@@ -24,17 +25,16 @@ import org.traccar.model.Position;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Calendar;
-import java.util.Formatter;
-import java.util.Locale;
-import java.util.TimeZone;
+import java.util.*;
 
 public class WebDataHandler extends BaseDataHandler {
 
     private final String url;
+    private final Boolean json;
 
-    public WebDataHandler(String url) {
+    public WebDataHandler(String url, Boolean json) {
         this.url = url;
+        this.json = json;
     }
 
     private static String formatSentence(Position position) {
@@ -121,10 +121,66 @@ public class WebDataHandler extends BaseDataHandler {
 
     @Override
     protected Position handlePosition(Position position) {
+        if(json){
+            AsyncHttpClient.BoundRequestBuilder requestBuilder = Context.getAsyncHttpClient().preparePost(url);
+            requestBuilder.setBodyEncoding(StandardCharsets.UTF_8.name());
 
-        Context.getAsyncHttpClient().prepareGet(formatRequest(position)).execute();
+            requestBuilder.addHeader("Content-Type", getContentType());
 
+            setContent(position, requestBuilder);
+            requestBuilder.execute();
+        }else {
+            Context.getAsyncHttpClient().prepareGet(formatRequest(position)).execute();
+        }
         return position;
     }
+    protected String getContentType() {
+        return "application/json; charset=utf-8";
+    }
 
+    protected void setContent(Position position, AsyncHttpClient.BoundRequestBuilder requestBuilder) {
+        requestBuilder.setBody(prepareJsonPayload(position));
+    }
+
+    protected String prepareJsonPayload(Position position) {
+        Map<String, Object> data = new HashMap<>();
+        Device device = Context.getIdentityManager().getById(position.getDeviceId());
+
+        data.put("name", device.getName());
+        data.put("uniqueId", device.getUniqueId());
+        data.put("status", device.getStatus());
+        data.put("deviceId", String.valueOf(position.getDeviceId()));
+        data.put("protocol", String.valueOf(position.getProtocol()));
+        data.put("deviceTime", String.valueOf(position.getDeviceTime().getTime()));
+        data.put("fixTime", String.valueOf(position.getFixTime().getTime()));
+        data.put("valid", String.valueOf(position.getValid()));
+        data.put("latitude", String.valueOf(position.getLatitude()));
+        data.put("longitude", String.valueOf(position.getLongitude()));
+        data.put("speed", String.valueOf(position.getSpeed()));
+        data.put("course", String.valueOf(position.getCourse()));
+        data.put("statusCode", calculateStatus(position));
+
+        if (position.getAddress() != null) {
+            try {
+                data.put("address", URLEncoder.encode(position.getAddress(), StandardCharsets.UTF_8.name()));
+            } catch (UnsupportedEncodingException error) {
+                Log.warning(error);
+            }
+        }
+
+        try {
+            String attributes = Context.getObjectMapper().writeValueAsString(position.getAttributes());
+
+            data.put("attributes", URLEncoder.encode(attributes, StandardCharsets.UTF_8.name()));
+        } catch (UnsupportedEncodingException | JsonProcessingException error) {
+            Log.warning(error);
+        }
+
+        try {
+            return Context.getObjectMapper().writeValueAsString(data);
+        } catch (JsonProcessingException e) {
+            Log.warning(e);
+            return null;
+        }
+    }
 }
