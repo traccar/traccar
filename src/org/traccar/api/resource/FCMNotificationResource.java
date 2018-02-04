@@ -43,7 +43,7 @@ public class FCMNotificationResource extends BaseObjectResource<FCMPushNotificat
                 Context.getFcmPushNotificationManager().addItem(entity);
             }
         }
-
+        Context.getFcmPushNotificationManager().refreshFCMNotificationsMap();
         return Response.ok(entityList).build();
     }
 }

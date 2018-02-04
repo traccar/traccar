@@ -98,8 +98,10 @@ public class FCMPushNotificationManager extends ExtendedObjectManager<FCMPushNot
         }
 
         Device device = Context.getDeviceManager().getById(deviceId);
-        String title = device.getRegistrationNumber() + " : " + eventType;
-        String body = String.format("%s detected on %s at %s", eventType, device.getRegistrationNumber(), event.getServerTime().toString());
+        String title = String.format("%s (%s)", device.getName(), device.getRegistrationNumber()) ;
+        String body = String.format("[%s]: Vehicle %s",
+                event.getServerTime().toString(),
+                FCMPushNotificationTypeManager.getFcmPushNotificationTypeToStringMap().get(eventType));
 
         PushNotifications.getInstance().sendEventNotification(tokens, title, body);
     }

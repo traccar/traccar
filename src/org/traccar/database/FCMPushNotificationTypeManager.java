@@ -11,8 +11,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class FCMPushNotificationTypeManager extends ExtendedObjectManager<FCMPushNotificationType> {
 
-    private static Map<Long, String> fcmPushNotificationTypesMap = new ConcurrentHashMap<>();
-    private static Map<String, Long> fcmPushNotificationStringToIdMap = new ConcurrentHashMap<>();
+    private static Map<String, Long> fcmPushNotificationTypeToIdMap = new ConcurrentHashMap<>();
+    private static Map<String, String> fcmPushNotificationTypeToStringMap = new ConcurrentHashMap<>();
 
     protected FCMPushNotificationTypeManager(DataManager dataManager) throws SQLException {
         super(dataManager, FCMPushNotificationType.class);
@@ -25,22 +25,22 @@ public class FCMPushNotificationTypeManager extends ExtendedObjectManager<FCMPus
                     Context.getDataManager().getFCMPushNotificationTypes();
 
             for (FCMPushNotificationType fcmPushNotificationType : fcmPushNotificationTypes) {
-                fcmPushNotificationTypesMap.put(fcmPushNotificationType.getId(), fcmPushNotificationType.getEventType());
-                fcmPushNotificationStringToIdMap.put(fcmPushNotificationType.getEventType(), fcmPushNotificationType.getId());
+                fcmPushNotificationTypeToIdMap.put(fcmPushNotificationType.getEventType(), fcmPushNotificationType.getId());
+                fcmPushNotificationTypeToStringMap.put(fcmPushNotificationType.getEventType(), fcmPushNotificationType.getNotificationString());
             }
         } catch (SQLException error) {
             Log.warning(error);
         }
     }
 
-    public static Map<Long, String> getFcmPushNotificationTypesMap() {
-        return fcmPushNotificationTypesMap;
-    }
-
     public static Map<String, Long> getFCMPushNotificationStringToIdMap() {
-        if (fcmPushNotificationTypesMap.isEmpty()) {
+        if (fcmPushNotificationTypeToStringMap.isEmpty()) {
             refreshFCMNotificationTypesMap();
         }
-        return fcmPushNotificationStringToIdMap;
+        return fcmPushNotificationTypeToIdMap;
+    }
+
+    public static Map<String, String> getFcmPushNotificationTypeToStringMap() {
+        return fcmPushNotificationTypeToStringMap;
     }
 }

@@ -17,6 +17,7 @@
         </createTable>
 
         <addForeignKeyConstraint baseTableName="fcmUserTokens" baseColumnNames="userid" constraintName="fk_fcmUserTokens_userid" referencedTableName="users" referencedColumnNames="id" onDelete="CASCADE" />
+        <addUniqueConstraint tableName="fcmUserTokens" columnNames="userid, clienttoken" constraintName="uk_userid_clienttoken" />
 
         <createTable tableName="fcmpushnotificationtypes">
             <column name="id" type="INT" autoIncrement="true">
@@ -28,35 +29,45 @@
             <column name="prettyName" type="VARCHAR(128)">
                 <constraints nullable="false" />
             </column>
+            <column name="notificationString" type="VARCHAR(128)">
+                <constraints nullable="false" />
+            </column>
         </createTable>
 
         <insert tableName="fcmpushnotificationtypes">
             <column name="eventtype" value="deviceOnline" />
             <column name="prettyName" value="Online" />
+            <column name="notificationString" value="has come online" />
         </insert>
         <insert tableName="fcmpushnotificationtypes">
             <column name="eventtype" value="deviceOffline" />
             <column name="prettyName" value="Offline" />
+            <column name="notificationString" value="has gone offline" />
         </insert>
         <insert tableName="fcmpushnotificationtypes">
             <column name="eventtype" value="deviceMoving" />
             <column name="prettyName" value="Moving" />
+            <column name="notificationString" value="is moving" />
         </insert>
         <insert tableName="fcmpushnotificationtypes">
             <column name="eventtype" value="deviceStopped" />
             <column name="prettyName" value="Stopped" />
+            <column name="notificationString" value="has stopped" />
         </insert>
         <insert tableName="fcmpushnotificationtypes">
             <column name="eventtype" value="deviceOverspeed" />
             <column name="prettyName" value="Overspeed" />
+            <column name="notificationString" value="is overspeeding" />
         </insert>
         <insert tableName="fcmpushnotificationtypes">
             <column name="eventtype" value="ignitionOn" />
             <column name="prettyName" value="Ignition On" />
+            <column name="notificationString" value="ignition has been switched on" />
         </insert>
         <insert tableName="fcmpushnotificationtypes">
             <column name="eventtype" value="ignitionOff" />
             <column name="prettyName" value="Ignition Off" />
+            <column name="notificationString" value="ignition has been switched off" />
         </insert>
 
         <createTable tableName="fcmpushnotifications">
