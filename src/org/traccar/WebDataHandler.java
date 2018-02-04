@@ -22,10 +22,16 @@ import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Formatter;
+import java.util.Locale;
+import java.util.TimeZone;
+
 
 public class WebDataHandler extends BaseDataHandler {
 
@@ -129,7 +135,7 @@ public class WebDataHandler extends BaseDataHandler {
 
             setContent(position, requestBuilder);
             requestBuilder.execute();
-            
+
         } else {
             Context.getAsyncHttpClient().prepareGet(formatRequest(position)).execute();
         }
