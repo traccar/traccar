@@ -144,7 +144,7 @@ public class WebDataHandler extends BaseDataHandler {
     }
 
     protected String prepareJsonPayload(Position position) {
-        
+
         Map<String, Object> data = new HashMap<>();
         Device device = Context.getIdentityManager().getById(position.getDeviceId());
 
