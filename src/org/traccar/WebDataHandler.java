@@ -37,6 +37,8 @@ public class WebDataHandler extends BaseDataHandler {
 
     private final String url;
     private final Boolean json;
+    private static final String KEY_POSITION = "position";
+    private static final String KEY_DEVICE = "device";
 
     public WebDataHandler(String url, Boolean json) {
         this.url = url;
@@ -153,39 +155,20 @@ public class WebDataHandler extends BaseDataHandler {
     protected String prepareJsonPayload(Position position) {
 
         Map<String, Object> data = new HashMap<>();
-        Device device = Context.getIdentityManager().getById(position.getDeviceId());
 
-        data.put("name", device.getName());
-        data.put("uniqueId", device.getUniqueId());
-        data.put("status", device.getStatus());
-        data.put("deviceId", String.valueOf(position.getDeviceId()));
-        data.put("protocol", String.valueOf(position.getProtocol()));
-        data.put("deviceTime", String.valueOf(position.getDeviceTime().getTime()));
-        data.put("fixTime", String.valueOf(position.getFixTime().getTime()));
-        data.put("valid", String.valueOf(position.getValid()));
-        data.put("latitude", String.valueOf(position.getLatitude()));
-        data.put("longitude", String.valueOf(position.getLongitude()));
-        data.put("speed", String.valueOf(position.getSpeed()));
-        data.put("course", String.valueOf(position.getCourse()));
-        data.put("statusCode", calculateStatus(position));
+        if (position != null) {
+            data.put(KEY_POSITION, position);
+        }
 
-        if (position.getAddress() != null) {
-            try {
-                data.put("address", URLEncoder.encode(position.getAddress(), StandardCharsets.UTF_8.name()));
-            } catch (UnsupportedEncodingException error) {
-                Log.warning(error);
+        if (position.getDeviceId() != 0) {
+            Device device = Context.getIdentityManager().getById(position.getDeviceId());
+            if (device != null) {
+                data.put(KEY_DEVICE, device);
             }
         }
 
         try {
-            String attributes = Context.getObjectMapper().writeValueAsString(position.getAttributes());
-
-            data.put("attributes", URLEncoder.encode(attributes, StandardCharsets.UTF_8.name()));
-        } catch (UnsupportedEncodingException | JsonProcessingException error) {
-            Log.warning(error);
-        }
-
-        try {
+            System.out.println(Context.getObjectMapper().writeValueAsString(data).toString());
             return Context.getObjectMapper().writeValueAsString(data);
         } catch (JsonProcessingException e) {
             Log.warning(e);
