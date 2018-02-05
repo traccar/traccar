@@ -26,6 +26,7 @@ public class FilterHandler extends BaseDataHandler {
     private boolean filterDuplicate;
     private long filterFuture;
     private boolean filterApproximate;
+    private int filterAccuracy;
     private boolean filterStatic;
     private int filterDistance;
     private int filterMaxSpeed;
@@ -46,6 +47,10 @@ public class FilterHandler extends BaseDataHandler {
 
     public void setFilterFuture(long filterFuture) {
         this.filterFuture = filterFuture;
+    }
+
+    public void setFilterAccuracy(int filterAccuracy) {
+        this.filterAccuracy = filterAccuracy;
     }
 
     public void setFilterApproximate(boolean filterApproximate) {
@@ -79,6 +84,7 @@ public class FilterHandler extends BaseDataHandler {
             filterZero = config.getBoolean("filter.zero");
             filterDuplicate = config.getBoolean("filter.duplicate");
             filterFuture = config.getLong("filter.future") * 1000;
+            filterAccuracy = config.getInteger("filter.accuracy");
             filterApproximate = config.getBoolean("filter.approximate");
             filterStatic = config.getBoolean("filter.static");
             filterDistance = config.getInteger("filter.distance");
@@ -112,6 +118,10 @@ public class FilterHandler extends BaseDataHandler {
 
     private boolean filterFuture(Position position) {
         return filterFuture != 0 && position.getFixTime().getTime() > System.currentTimeMillis() + filterFuture;
+    }
+
+    private boolean filterAccuracy(Position position) {
+        return filterAccuracy != 0 && position.getAccuracy() > filterAccuracy;
     }
 
     private boolean filterApproximate(Position position) {
@@ -182,6 +192,9 @@ public class FilterHandler extends BaseDataHandler {
         }
         if (filterFuture(position)) {
             filterType.append("Future ");
+        }
+        if (filterAccuracy(position)) {
+            filterType.append("Accuracy ");
         }
         if (filterApproximate(position)) {
             filterType.append("Approximate ");
