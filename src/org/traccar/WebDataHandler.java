@@ -32,15 +32,14 @@ import java.util.Formatter;
 import java.util.Locale;
 import java.util.TimeZone;
 
-
 public class WebDataHandler extends BaseDataHandler {
 
     private final String url;
-    private final Boolean json;
+    private final boolean json;
     private static final String KEY_POSITION = "position";
     private static final String KEY_DEVICE = "device";
 
-    public WebDataHandler(String url, Boolean json) {
+    public WebDataHandler(String url, boolean json) {
         this.url = url;
         this.json = json;
     }
@@ -168,7 +167,6 @@ public class WebDataHandler extends BaseDataHandler {
         }
 
         try {
-            System.out.println(Context.getObjectMapper().writeValueAsString(data).toString());
             return Context.getObjectMapper().writeValueAsString(data);
         } catch (JsonProcessingException e) {
             Log.warning(e);
