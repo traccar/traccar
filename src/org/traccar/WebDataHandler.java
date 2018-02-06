@@ -132,23 +132,15 @@ public class WebDataHandler extends BaseDataHandler {
             AsyncHttpClient.BoundRequestBuilder requestBuilder = Context.getAsyncHttpClient().preparePost(url);
             requestBuilder.setBodyEncoding(StandardCharsets.UTF_8.name());
 
-            requestBuilder.addHeader("Content-Type", getContentType());
+            requestBuilder.addHeader("Content-Type", "application/json; charset=utf-8");
 
-            setContent(position, requestBuilder);
+            requestBuilder.setBody(prepareJsonPayload(position));
             requestBuilder.execute();
 
         } else {
             Context.getAsyncHttpClient().prepareGet(formatRequest(position)).execute();
         }
         return position;
-    }
-
-    protected String getContentType() {
-        return "application/json; charset=utf-8";
-    }
-
-    protected void setContent(Position position, AsyncHttpClient.BoundRequestBuilder requestBuilder) {
-        requestBuilder.setBody(prepareJsonPayload(position));
     }
 
     protected String prepareJsonPayload(Position position) {
