@@ -43,6 +43,24 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_COMMIT = 0x05;
     public static final int MSG_COMMIT_RESPONSE = 0x06;
 
+    public static final int MSG_CANNED_REQUEST_1 = 0x14;
+    public static final int MSG_CANNED_RESPONSE_1 = 0x15;
+    public static final int MSG_CANNED_REQUEST_2 = 0x22;
+    public static final int MSG_CANNED_RESPONSE_2 = 0x23;
+
+    private void sendResponse(Channel channel, int type, ChannelBuffer content) {
+        if (channel != null) {
+            ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
+            response.writeByte(0x02); response.writeByte(0x55); // header
+            response.writeByte(type);
+            response.writeShort(content != null ? content.readableBytes() : 0);
+            if (content != null) {
+                response.writeBytes(content);
+            }
+            channel.write(response);
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -62,26 +80,26 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
             DeviceSession deviceSession = getDeviceSession(
                     channel, remoteAddress, buf.readBytes(15).toString(StandardCharsets.US_ASCII));
 
-            if (channel != null) {
-                ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
-                response.writeByte(0x02); response.writeByte(0x55); // header
-                response.writeByte(MSG_HELLO_RESPONSE);
-                response.writeShort(4 + 4);
-                response.writeInt((int) (System.currentTimeMillis() / 1000));
-                response.writeInt(deviceSession != null ? 0 : 1); // flags
-                channel.write(response);
-            }
+            ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
+            response.writeInt((int) (System.currentTimeMillis() / 1000));
+            response.writeInt(deviceSession != null ? 0 : 1); // flags
+            sendResponse(channel, MSG_HELLO_RESPONSE, response);
 
         } else if (type == MSG_COMMIT) {
 
-            if (channel != null) {
-                ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
-                response.writeByte(0x02); response.writeByte(0x55); // header
-                response.writeByte(MSG_COMMIT_RESPONSE);
-                response.writeShort(1);
-                response.writeByte(1); // flags (success)
-                channel.write(response);
-            }
+            ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
+            response.writeByte(1); // flags (success)
+            sendResponse(channel, MSG_COMMIT_RESPONSE, response);
+
+        } else if (type == MSG_CANNED_REQUEST_1) {
+
+            ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
+            response.writeBytes(new byte[12]);
+            sendResponse(channel, MSG_CANNED_RESPONSE_1, response);
+
+        } else if (type == MSG_CANNED_REQUEST_2) {
+
+            sendResponse(channel, MSG_CANNED_RESPONSE_2, null);
 
         } else if (type == MSG_DATA_RECORD) {
 
