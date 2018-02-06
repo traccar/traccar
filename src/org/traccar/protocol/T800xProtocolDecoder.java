@@ -105,8 +105,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
         if (type == MSG_GPS || type == MSG_ALARM) {
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             position.set(Position.KEY_INDEX, index);

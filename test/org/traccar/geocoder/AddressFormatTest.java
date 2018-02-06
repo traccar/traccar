@@ -1,12 +1,13 @@
 package org.traccar.geocoder;
 
-import org.junit.Assert;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class AddressFormatTest {
 
     private void test(Address address, String format, String expected) {
-        Assert.assertEquals(expected, new AddressFormat(format).format(address));
+        assertEquals(expected, new AddressFormat(format).format(address));
     }
 
     @Test

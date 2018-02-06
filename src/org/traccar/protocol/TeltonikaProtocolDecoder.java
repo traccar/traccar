@@ -69,6 +69,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
     public static final int CODEC_GH3000 = 0x07;
     public static final int CODEC_FM4X00 = 0x08;
     public static final int CODEC_12 = 0x0C;
+    public static final int CODEC_16 = 0x10;
 
     private void decodeSerial(Position position, ChannelBuffer buf) {
 
@@ -344,7 +345,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Read 8 byte data
-        if (codec == CODEC_FM4X00) {
+        if (codec == CODEC_FM4X00 || codec == CODEC_16) {
             int cnt = buf.readUnsignedByte();
             for (int j = 0; j < cnt; j++) {
                 decodeOtherParameter(position, buf.readUnsignedByte(), buf, 8);
@@ -381,8 +382,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         }
 
         for (int i = 0; i < count; i++) {
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
 
             position.setDeviceId(deviceSession.getDeviceId());
 

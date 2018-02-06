@@ -49,8 +49,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_EXTENDED_RECORDS = 68;
 
     private Position decodeCommandResponse(DeviceSession deviceSession, int type, ChannelBuffer buf) {
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         getLastLocation(position, null);
@@ -135,8 +134,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
             int count = buf.readUnsignedByte();
 
             for (int i = 0; i < count; i++) {
-                Position position = new Position();
-                position.setProtocol(getProtocolName());
+                Position position = new Position(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());
 
                 position.setTime(new Date(buf.readUnsignedInt() * 1000));
@@ -210,8 +208,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
             int count = buf.readUnsignedByte();
 
             for (int i = 0; i < count; i++) {
-                Position position = new Position();
-                position.setProtocol(getProtocolName());
+                Position position = new Position(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());
 
                 buf.readUnsignedByte(); // reserved

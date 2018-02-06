@@ -37,4 +37,8 @@
     <entry key='ldap.url'>ldap://ldap.forumsys.com:389</entry>
     <entry key='ldap.context'>dc=example,dc=com</entry>-->
 
+    <!--<entry key='ldap.enable'>true</entry>
+    <entry key='ldap.url'>ldap://ldap.forumsys.com:389</entry>
+    <entry key='ldap.context'>dc=example,dc=com</entry>-->
+
 </properties>

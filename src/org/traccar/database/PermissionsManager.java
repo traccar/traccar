@@ -57,7 +57,7 @@ public class PermissionsManager {
     }
 
     public User getUser(long userId) {
-        return (User) usersManager.getById(userId);
+        return usersManager.getById(userId);
     }
 
     public Set<Long> getGroupPermissions(long userId) {

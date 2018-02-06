@@ -101,8 +101,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
     private Position decodeBinary(ChannelBuffer buf, Channel channel, SocketAddress remoteAddress) {
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
 
         buf.readByte(); // marker
 
@@ -267,8 +266,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         if (parser.hasNext()) {
@@ -348,8 +346,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         DateBuilder dateBuilder = new DateBuilder()
@@ -388,8 +385,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         DateBuilder dateBuilder = new DateBuilder()
@@ -422,8 +418,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         DateBuilder dateBuilder = new DateBuilder()

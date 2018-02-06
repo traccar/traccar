@@ -110,8 +110,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
 
         if (deviceSession != null) {
             position.setDeviceId(deviceSession.getDeviceId());
@@ -165,8 +164,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         DateBuilder dateBuilder = new DateBuilder()
@@ -188,8 +186,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.setTime(new Date());
@@ -209,8 +206,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.setTime(parser.nextDateTime());

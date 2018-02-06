@@ -125,8 +125,7 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {

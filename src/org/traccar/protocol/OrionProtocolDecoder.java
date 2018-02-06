@@ -79,9 +79,8 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
 
             for (int i = 0; i < (header & 0x0f); i++) {
 
-                Position position = new Position();
+                Position position = new Position(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());
-                position.setProtocol(getProtocolName());
 
                 position.set(Position.KEY_EVENT, buf.readUnsignedByte());
                 buf.readUnsignedByte(); // length

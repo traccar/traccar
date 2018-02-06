@@ -94,8 +94,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
 
         String type = parser.next();
 

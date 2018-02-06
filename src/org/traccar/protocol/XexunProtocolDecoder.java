@@ -106,8 +106,7 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
 
         if (full) {
             position.set("serial", parser.next());

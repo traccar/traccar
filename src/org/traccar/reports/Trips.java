@@ -41,11 +41,9 @@ public final class Trips {
         boolean ignoreOdometer = Context.getDeviceManager()
                 .lookupAttributeBoolean(deviceId, "report.ignoreOdometer", false, true);
 
-        Collection<TripReport> result = ReportUtils.detectTripsAndStops(
+        return ReportUtils.detectTripsAndStops(
                 Context.getDataManager().getPositions(deviceId, from, to),
                 Context.getTripsConfig(), ignoreOdometer, TripReport.class);
-
-        return result;
     }
 
     public static Collection<TripReport> getObjects(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,

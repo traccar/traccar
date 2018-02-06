@@ -1,5 +1,6 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,23 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar;
+package org.traccar.model;
 
-import org.traccar.helper.Log;
-import org.traccar.model.Position;
+public class GroupedModel extends ExtendedModel {
 
-public class DefaultDataHandler extends BaseDataHandler {
+    private long groupId;
 
-    @Override
-    protected Position handlePosition(Position position) {
+    public long getGroupId() {
+        return groupId;
+    }
 
-        try {
-            Context.getDataManager().addObject(position);
-        } catch (Exception error) {
-            Log.warning(error);
-        }
-
-        return position;
+    public void setGroupId(long groupId) {
+        this.groupId = groupId;
     }
 
 }

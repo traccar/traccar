@@ -80,8 +80,7 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
                 newFormat = true;
             }
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
 
             if (type == MSG_CONTROL_RESPONSE) {
                 buf.readUnsignedInt(); // GIS ip

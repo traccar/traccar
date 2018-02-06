@@ -146,8 +146,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
 
         while (buf.readableBytes() > 2) {
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             int end = buf.readerIndex() + buf.readUnsignedByte();

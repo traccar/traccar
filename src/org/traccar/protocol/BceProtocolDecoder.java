@@ -67,8 +67,7 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
 
             while (buf.readerIndex() < dataEnd) {
 
-                Position position = new Position();
-                position.setProtocol(getProtocolName());
+                Position position = new Position(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());
 
                 int structEnd = buf.readUnsignedByte() + buf.readerIndex();

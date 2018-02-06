@@ -17,7 +17,7 @@ package org.traccar.notification;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.traccar.Context;
@@ -73,7 +73,7 @@ public abstract class EventForwarder {
         for (String paramLine: paramsLines) {
             splitedLine = paramLine.split(separator, 2);
             if (splitedLine.length == 2) {
-                paramsMap.put(splitedLine[0].trim(), Arrays.asList(splitedLine[1].trim()));
+                paramsMap.put(splitedLine[0].trim(), Collections.singletonList(splitedLine[1].trim()));
             }
         }
         return paramsMap;
@@ -92,7 +92,7 @@ public abstract class EventForwarder {
             }
         }
         if (event.getGeofenceId() != 0) {
-            Geofence geofence = (Geofence) Context.getGeofenceManager().getById(event.getGeofenceId());
+            Geofence geofence = Context.getGeofenceManager().getById(event.getGeofenceId());
             if (geofence != null) {
                 data.put(KEY_GEOFENCE, geofence);
             }

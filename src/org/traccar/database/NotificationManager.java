@@ -1,6 +1,6 @@
 /*
- * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
- * Copyright 2016 - 2017 Andrey Kunitsyn (andrey@traccar.org)
+ * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.traccar.database;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -26,6 +27,7 @@ import java.util.Set;
 
 import org.traccar.Context;
 import org.traccar.helper.Log;
+import org.traccar.model.Calendar;
 import org.traccar.model.Event;
 import org.traccar.model.Notification;
 import org.traccar.model.Position;
@@ -42,12 +44,16 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
         geocodeOnRequest = Context.getConfig().getBoolean("geocoder.onRequest");
     }
 
-    private Set<Long> getEffectiveNotifications(long userId, long deviceId) {
+    private Set<Long> getEffectiveNotifications(long userId, long deviceId, Date time) {
         Set<Long> result = new HashSet<>();
         Set<Long> deviceNotifications = getAllDeviceItems(deviceId);
         for (long itemId : getUserItems(userId)) {
             if (getById(itemId).getAlways() || deviceNotifications.contains(itemId)) {
-                result.add(itemId);
+                long calendarId = getById(itemId).getCalendarId();
+                Calendar calendar = calendarId != 0 ? Context.getCalendarManager().getById(calendarId) : null;
+                if (calendar == null || calendar.checkMoment(time)) {
+                    result.add(itemId);
+                }
             }
         }
         return result;
@@ -73,7 +79,7 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
                 boolean sentWeb = false;
                 boolean sentMail = false;
                 boolean sentSms = Context.getSmppManager() == null;
-                for (long notificationId : getEffectiveNotifications(userId, deviceId)) {
+                for (long notificationId : getEffectiveNotifications(userId, deviceId, event.getServerTime())) {
                     Notification notification = getById(notificationId);
                     if (getById(notificationId).getType().equals(event.getType())) {
                         if (!sentWeb && notification.getWeb()) {

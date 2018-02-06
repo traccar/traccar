@@ -120,8 +120,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
 
         try {
             while (buf.readable()) {
-                Position position = new Position();
-                position.setProtocol(getProtocolName());
+                Position position = new Position(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());
 
                 short flags = buf.readUnsignedByte();
@@ -200,9 +199,8 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private Position parseFormatA1(DeviceSession deviceSession, ChannelBuffer buf) {
-        Position position = new Position();
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
-        position.setProtocol(getProtocolName());
 
         short flags = buf.readUnsignedByte();
 

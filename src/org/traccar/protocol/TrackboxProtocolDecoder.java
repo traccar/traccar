@@ -77,8 +77,7 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
         }
         sendResponse(channel);
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         DateBuilder dateBuilder = new DateBuilder()

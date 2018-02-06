@@ -93,8 +93,7 @@ public class Gps056ProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type.startsWith("GPSL")) {
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             DateBuilder dateBuilder = new DateBuilder()
@@ -116,8 +115,7 @@ public class Gps056ProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type.startsWith("SYNC")) {
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             getLastLocation(position, null);

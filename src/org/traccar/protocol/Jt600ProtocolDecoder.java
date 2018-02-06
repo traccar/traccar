@@ -73,8 +73,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         while (buf.readableBytes() > 1) {
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             DateBuilder dateBuilder = new DateBuilder()
@@ -215,8 +214,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.setLongitude(parser.nextCoordinate());
@@ -274,8 +272,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         String type = parser.next();
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));

@@ -85,8 +85,7 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.set(Position.KEY_ARCHIVE, parser.next().equals("%"));
         position.setValid(true);
 

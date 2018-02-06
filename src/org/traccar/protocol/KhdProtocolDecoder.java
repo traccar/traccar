@@ -71,8 +71,7 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
         if (type == MSG_ON_DEMAND || type == MSG_POSITION_UPLOAD || type == MSG_POSITION_REUPLOAD
                 || type == MSG_ALARM || type == MSG_REPLY || type == MSG_PERIPHERAL) {
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
 
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, readSerialNumber(buf));
             if (deviceSession == null) {

@@ -126,8 +126,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
@@ -287,8 +286,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
         while (buf.readableBytes() >= 0x34) {
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             position.set(Position.KEY_EVENT, buf.readUnsignedByte());
@@ -361,8 +359,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         int count = buf.readUnsignedShort();
 
         for (int i = 0; i < count; i++) {
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             buf.readUnsignedShort(); // length
@@ -475,8 +472,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                 photo.writeBytes(buf.readBytes(buf.readableBytes() - 1 - 2 - 2));
 
                 if (current == total - 1) {
-                    Position position = new Position();
-                    position.setProtocol(getProtocolName());
+                    Position position = new Position(getProtocolName());
                     position.setDeviceId(getDeviceSession(channel, remoteAddress, imei).getDeviceId());
 
                     getLastLocation(position, null);

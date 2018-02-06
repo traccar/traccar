@@ -242,12 +242,16 @@ public class DataManager {
 
     public String getQuery(String action, Class<?> owner, Class<?> property) {
         String queryName;
-        if (action.equals(ACTION_SELECT_ALL)) {
-            queryName = "database.select" + owner.getSimpleName() + property.getSimpleName() + "s";
-        } else if (action.equals(ACTION_INSERT)) {
-            queryName = "database.link" + owner.getSimpleName() + property.getSimpleName();
-        } else {
-            queryName = "database.unlink" + owner.getSimpleName() + property.getSimpleName();
+        switch (action) {
+            case ACTION_SELECT_ALL:
+                queryName = "database.select" + owner.getSimpleName() + property.getSimpleName() + "s";
+                break;
+            case ACTION_INSERT:
+                queryName = "database.link" + owner.getSimpleName() + property.getSimpleName();
+                break;
+            default:
+                queryName = "database.unlink" + owner.getSimpleName() + property.getSimpleName();
+                break;
         }
         String query = config.getString(queryName);
         if (query == null) {
@@ -328,19 +332,11 @@ public class DataManager {
     }
 
     public Collection<Position> getPositions(long deviceId, Date from, Date to) throws SQLException {
-        QueryBuilder queryBuilder = QueryBuilder.create(dataSource, getQuery("database.selectPositions"))
-                                                .setLong("deviceId", deviceId)
-                                                .setDate("from", from)
-                                                .setDate("to", to);
-        Log.info("GET POSITIONS QUERY: " + queryBuilder.getQueryStatement());
-        return queryBuilder.executeQuery(Position.class);
-    }
-
-    public void addPosition(Position position) throws SQLException {
-        position.setId(QueryBuilder.create(dataSource, getQuery(ACTION_INSERT, Position.class), true)
-                .setObject(position)
-                .setDate("serverTime", new Date())
-                .executeUpdate());
+        return QueryBuilder.create(dataSource, getQuery("database.selectPositions"))
+                .setLong("deviceId", deviceId)
+                .setDate("from", from)
+                .setDate("to", to)
+                .executeQuery(Position.class);
     }
 
     public void updateLatestPosition(Position position) throws SQLException {

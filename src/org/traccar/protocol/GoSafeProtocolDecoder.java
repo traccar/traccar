@@ -135,8 +135,7 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
 
     private Position decodePosition(DeviceSession deviceSession, Parser parser, Date time) {
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         if (time != null) {
@@ -226,8 +225,7 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
 
         if (pattern == PATTERN_OLD) {
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             DateBuilder dateBuilder = new DateBuilder()

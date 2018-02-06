@@ -100,8 +100,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
 
     private Position readPosition(DeviceSession deviceSession, ChannelBuffer buf) {
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         DateBuilder dateBuilder = new DateBuilder()
@@ -131,8 +130,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
 
     private Position createPosition(DeviceSession deviceSession) {
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         getLastLocation(position, null);

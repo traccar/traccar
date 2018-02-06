@@ -356,8 +356,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                     channel.write("+SACK:GTHBD," + protocolVersion + "," + parser.next() + "$", remoteAddress);
                 }
             } else {
-                Position position = new Position();
-                position.setProtocol(getProtocolName());
+                Position position = new Position(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());
                 getLastLocation(position, parser.nextDateTime());
                 position.setValid(false);
@@ -372,8 +371,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (parser.matches()) {
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
             if (deviceSession != null) {
-                Position position = new Position();
-                position.setProtocol(getProtocolName());
+                Position position = new Position(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());
                 return position;
             }
@@ -528,8 +526,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private Object decodeCan(Channel channel, SocketAddress remoteAddress, String sentence) throws ParseException {
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
 
         int index = 0;
         String[] values = sentence.split(",");
@@ -681,8 +678,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         Parser itemParser = new Parser(PATTERN_LOCATION, parser.next());
         while (itemParser.find()) {
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             position.set(Position.KEY_VIN, vin);
@@ -741,8 +737,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         Parser itemParser = new Parser(PATTERN_LOCATION, parser.next());
         while (itemParser.find()) {
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             decodeLocation(position, itemParser);

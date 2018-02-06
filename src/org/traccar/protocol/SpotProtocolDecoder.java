@@ -72,14 +72,15 @@ public class SpotProtocolDecoder extends BaseHttpProtocolDecoder {
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, xPath.evaluate("esnName", node));
             if (deviceSession != null) {
 
-                Position position = new Position();
-                position.setProtocol(getProtocolName());
+                Position position = new Position(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());
 
                 position.setValid(true);
                 position.setTime(DateUtil.parseDate(xPath.evaluate("timestamp", node)));
                 position.setLatitude(Double.parseDouble(xPath.evaluate("latitude", node)));
                 position.setLongitude(Double.parseDouble(xPath.evaluate("longitude", node)));
+
+                position.set(Position.KEY_EVENT, xPath.evaluate("messageType", node));
 
                 positions.add(position);
 

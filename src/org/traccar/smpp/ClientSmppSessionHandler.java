@@ -25,6 +25,7 @@ import com.cloudhopper.smpp.impl.DefaultSmppSessionHandler;
 import com.cloudhopper.smpp.pdu.DeliverSm;
 import com.cloudhopper.smpp.pdu.PduRequest;
 import com.cloudhopper.smpp.pdu.PduResponse;
+import com.cloudhopper.smpp.util.SmppUtil;
 
 public class ClientSmppSessionHandler extends DefaultSmppSessionHandler {
 
@@ -44,16 +45,12 @@ public class ClientSmppSessionHandler extends DefaultSmppSessionHandler {
         PduResponse response = null;
         try {
             if (request instanceof DeliverSm) {
-                if (request.getOptionalParameters() != null) {
-                    Log.debug("SMS Message Delivered: "
-                            + request.getOptionalParameter(SmppConstants.TAG_RECEIPTED_MSG_ID).getValueAsString()
-                            + ", State: "
-                            + request.getOptionalParameter(SmppConstants.TAG_MSG_STATE).getValueAsByte());
-                } else {
-                    String sourceAddress = ((DeliverSm) request).getSourceAddress().getAddress();
-                    String message = CharsetUtil.decode(((DeliverSm) request).getShortMessage(),
-                            smppClient.mapDataCodingToCharset(((DeliverSm) request).getDataCoding()));
-                    Log.debug("SMS Message Received: " + message.trim() + ", Source Address: " + sourceAddress);
+                String sourceAddress = ((DeliverSm) request).getSourceAddress().getAddress();
+                String message = CharsetUtil.decode(((DeliverSm) request).getShortMessage(),
+                        smppClient.mapDataCodingToCharset(((DeliverSm) request).getDataCoding()));
+                Log.debug("SMS Message Received: " + message.trim() + ", Source Address: " + sourceAddress);
+
+                if (!SmppUtil.isMessageTypeAnyDeliveryReceipt(((DeliverSm) request).getEsmClass())) {
                     TextMessageEventHandler.handleTextMessage(sourceAddress, message);
                 }
             }

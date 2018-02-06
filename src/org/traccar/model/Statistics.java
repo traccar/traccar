@@ -22,19 +22,11 @@ public class Statistics extends ExtendedModel {
     private Date captureTime;
 
     public Date getCaptureTime() {
-        if (captureTime != null) {
-            return new Date(captureTime.getTime());
-        } else {
-            return null;
-        }
+        return captureTime;
     }
 
     public void setCaptureTime(Date captureTime) {
-        if (captureTime != null) {
-            this.captureTime = new Date(captureTime.getTime());
-        } else {
-            this.captureTime = null;
-        }
+        this.captureTime = captureTime;
     }
 
     private int activeUsers;

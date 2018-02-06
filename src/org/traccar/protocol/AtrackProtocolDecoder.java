@@ -217,8 +217,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private Position decodeString(Channel channel, SocketAddress remoteAddress, String sentence) {
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
 
         getLastLocation(position, null);
 
@@ -288,8 +287,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
         while (buf.readableBytes() >= MIN_DATA_LENGTH) {
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             if (longDate) {

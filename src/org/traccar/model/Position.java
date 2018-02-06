@@ -131,6 +131,14 @@ public class Position extends Message {
     public static final String ALARM_TAMPERING = "tampering";
     public static final String ALARM_REMOVING = "removing";
 
+    public Position() {
+    }
+
+    public Position(String protocol) {
+        this.protocol = protocol;
+        this.serverTime = new Date();
+    }
+
     private String protocol;
 
     public String getProtocol() {
@@ -144,55 +152,31 @@ public class Position extends Message {
     private Date serverTime;
 
     public Date getServerTime() {
-        if (serverTime != null) {
-            return new Date(serverTime.getTime());
-        } else {
-            return null;
-        }
+        return serverTime;
     }
 
     public void setServerTime(Date serverTime) {
-        if (serverTime != null) {
-            this.serverTime = new Date(serverTime.getTime());
-        } else {
-            this.serverTime = null;
-        }
+        this.serverTime = serverTime;
     }
 
     private Date deviceTime;
 
     public Date getDeviceTime() {
-        if (deviceTime != null) {
-            return new Date(deviceTime.getTime());
-        } else {
-            return null;
-        }
+        return deviceTime;
     }
 
     public void setDeviceTime(Date deviceTime) {
-        if (deviceTime != null) {
-            this.deviceTime = new Date(deviceTime.getTime());
-        } else {
-            this.deviceTime = null;
-        }
+        this.deviceTime = deviceTime;
     }
 
     private Date fixTime;
 
     public Date getFixTime() {
-        if (fixTime != null) {
-            return new Date(fixTime.getTime());
-        } else {
-            return null;
-        }
+        return fixTime;
     }
 
     public void setFixTime(Date fixTime) {
-        if (fixTime != null) {
-            this.fixTime = new Date(fixTime.getTime());
-        } else {
-            this.fixTime = null;
-        }
+        this.fixTime = fixTime;
     }
 
     public void setTime(Date time) {

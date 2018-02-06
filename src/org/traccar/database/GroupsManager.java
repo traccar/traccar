@@ -47,7 +47,7 @@ public class GroupsManager extends BaseObjectManager<Group> implements Managable
         }
     }
 
-    private void updateGroupCache(boolean force) throws SQLException {
+    public void updateGroupCache(boolean force) throws SQLException {
         long lastUpdate = groupsLastUpdate.get();
         if ((force || System.currentTimeMillis() - lastUpdate > dataRefreshDelay)
                 && groupsLastUpdate.compareAndSet(lastUpdate, System.currentTimeMillis())) {

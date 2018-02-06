@@ -1,7 +1,5 @@
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.junit.Assert;
 import org.junit.Test;
 import org.traccar.ProtocolTest;
 

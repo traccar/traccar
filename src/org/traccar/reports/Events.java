@@ -77,7 +77,7 @@ public final class Events {
                     long geofenceId = event.getGeofenceId();
                     if (geofenceId != 0) {
                         if (Context.getGeofenceManager().checkItemPermission(userId, geofenceId)) {
-                            Geofence geofence = (Geofence) Context.getGeofenceManager().getById(geofenceId);
+                            Geofence geofence = Context.getGeofenceManager().getById(geofenceId);
                             if (geofence != null) {
                                 geofenceNames.put(geofenceId, geofence.getName());
                             }

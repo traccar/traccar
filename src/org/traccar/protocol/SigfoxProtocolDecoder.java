@@ -55,8 +55,7 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.setTime(new Date(json.getInt("time") * 1000L));
