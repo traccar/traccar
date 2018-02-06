@@ -692,9 +692,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         decodeLocation(position, parser);
 
-        // power value only on some devices
         if (power > 10) {
-            position.set(Position.KEY_POWER, power);
+            position.set(Position.KEY_POWER, power * 0.001); // only on some devices
         }
 
         position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1000);
@@ -749,7 +748,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         decodeLocation(position, parser);
 
-        position.set(Position.KEY_POWER, power);
+        position.set(Position.KEY_POWER, power * 0.001);
         position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1000);
         position.set(Position.KEY_HOURS, parser.next());
         position.set(Position.PREFIX_ADC + 1, parser.next());
