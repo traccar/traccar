@@ -25,8 +25,10 @@ public class FCMPushNotificationTypeManager extends ExtendedObjectManager<FCMPus
                     Context.getDataManager().getFCMPushNotificationTypes();
 
             for (FCMPushNotificationType fcmPushNotificationType : fcmPushNotificationTypes) {
-                fcmPushNotificationTypeToIdMap.put(fcmPushNotificationType.getEventType(), fcmPushNotificationType.getId());
-                fcmPushNotificationTypeToStringMap.put(fcmPushNotificationType.getEventType(), fcmPushNotificationType.getNotificationString());
+                fcmPushNotificationTypeToIdMap.put(fcmPushNotificationType.getEventType(),
+                        fcmPushNotificationType.getId());
+                fcmPushNotificationTypeToStringMap.put(fcmPushNotificationType.getEventType(),
+                        fcmPushNotificationType.getNotificationString());
             }
         } catch (SQLException error) {
             Log.warning(error);

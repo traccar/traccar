@@ -14,7 +14,9 @@ import java.util.Collection;
 @Path("fcmnotificationtypes")
 public class FCMNotificationTypeResource extends BaseObjectResource<FCMPushNotificationType> {
 
-    public FCMNotificationTypeResource() { super(FCMPushNotificationType.class); }
+    public FCMNotificationTypeResource() {
+        super(FCMPushNotificationType.class);
+    }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

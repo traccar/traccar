@@ -8,7 +8,8 @@ public final class PushNotifications {
 
     private static PushNotifications instance;
 
-    private PushNotifications() {}
+    private PushNotifications() {
+    }
 
     static {
         instance = new PushNotifications();

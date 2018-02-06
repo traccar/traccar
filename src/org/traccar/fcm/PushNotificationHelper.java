@@ -11,9 +11,12 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class PushNotificationHelper {
-    private final static String FCM_SERVER_TOKEN = Context.getConfig().getString("fcm.servertoken");
-    private final static String FCM_URL = Context.getConfig().getString("fcm.url");
+public final class PushNotificationHelper {
+    private static final String FCM_SERVER_TOKEN = Context.getConfig().getString("fcm.servertoken");
+    private static final String FCM_URL = Context.getConfig().getString("fcm.url");
+
+    private PushNotificationHelper() {
+    }
 
     public static void sendPushNotification(String deviceToken, String title, String body) throws IOException {
 

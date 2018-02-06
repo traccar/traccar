@@ -208,7 +208,9 @@ public final class Context {
 
     private static FCMUserTokenManager fcmUserTokenManager;
 
-    public static FCMUserTokenManager getFcmUserTokenManager() { return fcmUserTokenManager; }
+    public static FCMUserTokenManager getFcmUserTokenManager() {
+        return fcmUserTokenManager;
+    }
 
     private static VelocityEngine velocityEngine;
 

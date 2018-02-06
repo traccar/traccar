@@ -17,25 +17,24 @@ import java.sql.SQLException;
 @Consumes(MediaType.APPLICATION_JSON)
 public class FCMUserTokenResource extends BaseObjectResource<FCMUserToken> {
 
-    public FCMUserTokenResource() { super(FCMUserToken.class); }
+    public FCMUserTokenResource() {
+        super(FCMUserToken.class);
+    }
 
     @POST
     public Response add(FCMUserToken entity) throws SQLException {
-
         if (entity.getUserId() == getUserId()) {
-            FCMUserTokenManager fcmUserTokenManager= Context.getFcmUserTokenManager();
+            FCMUserTokenManager fcmUserTokenManager = Context.getFcmUserTokenManager();
             fcmUserTokenManager.addItem(entity);
             fcmUserTokenManager.refreshFCMUserTokens();
         }
-
         return Response.ok().build();
     }
 
     @PUT
     public Response update(FCMUserToken entity) throws SQLException {
-
         if (entity.getUserId() == getUserId()) {
-            FCMUserTokenManager fcmUserTokenManager= Context.getFcmUserTokenManager();
+            FCMUserTokenManager fcmUserTokenManager = Context.getFcmUserTokenManager();
             fcmUserTokenManager.updateItem(entity);
             fcmUserTokenManager.refreshFCMUserTokens();
         }

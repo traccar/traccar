@@ -6,7 +6,9 @@ public class FCMPushNotificationType extends BaseModel {
     private String prettyName;
     private String notificationString;
 
-    public String getEventType() { return eventType; }
+    public String getEventType() {
+        return eventType;
+    }
 
     public void setEventType(String eventType) {
         this.eventType = eventType;

@@ -11,7 +11,11 @@ import org.traccar.model.FCMPushNotification;
 import org.traccar.model.Position;
 
 import java.sql.SQLException;
-import java.util.*;
+
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class FCMPushNotificationManager extends ExtendedObjectManager<FCMPushNotification> {
@@ -26,7 +30,8 @@ public class FCMPushNotificationManager extends ExtendedObjectManager<FCMPushNot
     public void refreshFCMNotificationsMap() {
 
         try {
-            Collection<FCMPushNotification> fcmPushNotifications = Context.getDataManager().getFCMPushNotifications();
+            Collection<FCMPushNotification> fcmPushNotifications =
+                    Context.getDataManager().getFCMPushNotifications();
 
             for (FCMPushNotification fcmPushNotification : fcmPushNotifications) {
                 long deviceId = fcmPushNotification.getDeviceId();
@@ -98,7 +103,7 @@ public class FCMPushNotificationManager extends ExtendedObjectManager<FCMPushNot
         }
 
         Device device = Context.getDeviceManager().getById(deviceId);
-        String title = String.format("%s (%s)", device.getName(), device.getRegistrationNumber()) ;
+        String title = String.format("%s (%s)", device.getName(), device.getRegistrationNumber());
         String body = String.format("[%s]: Vehicle %s",
                 event.getServerTime().toString(),
                 FCMPushNotificationTypeManager.getFcmPushNotificationTypeToStringMap().get(eventType));

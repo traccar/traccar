@@ -31,7 +31,11 @@ public class FCMPushNotification extends BaseModel {
         this.eventTypeId = eventTypeId;
     }
 
-    public boolean getEnabled() { return enabled; }
+    public boolean getEnabled() {
+        return enabled;
+    }
 
-    public void setEnabled(boolean enabled) { this.enabled = enabled; }
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 }

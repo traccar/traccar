@@ -28,7 +28,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.management.Query;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
