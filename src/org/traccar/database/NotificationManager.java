@@ -47,7 +47,8 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
     private Set<Long> getEffectiveNotifications(long userId, long deviceId, Date time) {
         Set<Long> result = new HashSet<>();
         Set<Long> deviceNotifications = getAllDeviceItems(deviceId);
-        for (long itemId : getUserItems(userId)) {
+        Set<Long> userItems = getUserItems(userId);
+        for (long itemId : userItems) {
             if (getById(itemId).getAlways() || deviceNotifications.contains(itemId)) {
                 long calendarId = getById(itemId).getCalendarId();
                 Calendar calendar = calendarId != 0 ? Context.getCalendarManager().getById(calendarId) : null;
@@ -81,7 +82,7 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
                 boolean sentSms = Context.getSmppManager() == null;
                 for (long notificationId : getEffectiveNotifications(userId, deviceId, event.getServerTime())) {
                     Notification notification = getById(notificationId);
-                    if (getById(notificationId).getType().equals(event.getType())) {
+                    if (notification.getType().equals(event.getType())) {
                         if (!sentWeb && notification.getWeb()) {
                             Context.getConnectionManager().updateEvent(userId, event);
                             sentWeb = true;

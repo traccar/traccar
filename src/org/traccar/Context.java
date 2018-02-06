@@ -37,6 +37,8 @@ import org.traccar.database.IdentityManager;
 import org.traccar.database.LdapProvider;
 import org.traccar.database.MediaManager;
 import org.traccar.database.NotificationManager;
+import org.traccar.database.FCMPushNotificationManager;
+import org.traccar.database.FCMUserTokenManager;
 import org.traccar.database.PermissionsManager;
 import org.traccar.database.GeofenceManager;
 import org.traccar.database.GroupsManager;
@@ -56,16 +58,18 @@ import org.traccar.geocoder.OpenCageGeocoder;
 import org.traccar.geocoder.Geocoder;
 import org.traccar.geolocation.UnwiredGeolocationProvider;
 import org.traccar.helper.Log;
-import org.traccar.model.Attribute;
 import org.traccar.model.BaseModel;
-import org.traccar.model.Calendar;
-import org.traccar.model.Command;
 import org.traccar.model.Device;
-import org.traccar.model.Driver;
-import org.traccar.model.Geofence;
+import org.traccar.model.Attribute;
+import org.traccar.model.Calendar;
 import org.traccar.model.Group;
-import org.traccar.model.Notification;
 import org.traccar.model.User;
+import org.traccar.model.Geofence;
+import org.traccar.model.Driver;
+import org.traccar.model.Command;
+import org.traccar.model.Notification;
+import org.traccar.model.FCMPushNotification;
+import org.traccar.model.FCMUserToken;
 import org.traccar.geolocation.GoogleGeolocationProvider;
 import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.geolocation.MozillaGeolocationProvider;
@@ -194,6 +198,18 @@ public final class Context {
 
     public static NotificationManager getNotificationManager() {
         return notificationManager;
+    }
+
+    private static FCMPushNotificationManager fcmPushNotificationManager;
+
+    public static FCMPushNotificationManager getFcmPushNotificationManager() {
+        return fcmPushNotificationManager;
+    }
+
+    private static FCMUserTokenManager fcmUserTokenManager;
+
+    public static FCMUserTokenManager getFcmUserTokenManager() {
+        return fcmUserTokenManager;
     }
 
     private static VelocityEngine velocityEngine;
@@ -420,6 +436,9 @@ public final class Context {
         geofenceManager = new GeofenceManager(dataManager);
         calendarManager = new CalendarManager(dataManager);
         notificationManager = new NotificationManager(dataManager);
+        fcmPushNotificationManager = new FCMPushNotificationManager(dataManager);
+        fcmUserTokenManager = new FCMUserTokenManager(dataManager);
+
         Properties velocityProperties = new Properties();
         velocityProperties.setProperty("file.resource.loader.path",
                 Context.getConfig().getString("templates.rootPath", "templates") + "/");
@@ -471,8 +490,11 @@ public final class Context {
             return (BaseObjectManager<T>) commandsManager;
         } else if (clazz.equals(Notification.class)) {
             return (BaseObjectManager<T>) notificationManager;
+        } else if (clazz.equals(FCMPushNotification.class)) {
+            return (BaseObjectManager<T>) fcmPushNotificationManager;
+        } else if (clazz.equals(FCMUserToken.class)) {
+            return (BaseObjectManager<T>) fcmUserTokenManager;
         }
         return null;
     }
-
 }

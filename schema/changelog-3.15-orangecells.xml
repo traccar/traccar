@@ -11,4 +11,10 @@
             <column name="registrationnumber" type="VARCHAR(20)" />
         </addColumn>
     </changeSet>
+    <changeSet id="changelog-3.15-orangecells-trucks" author="saurako">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="trucks" />
+        </preConditions>
+        <dropTable tableName="trucks" />
+    </changeSet>
 </databaseChangeLog>

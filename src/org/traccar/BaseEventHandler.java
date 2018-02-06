@@ -26,9 +26,16 @@ public abstract class BaseEventHandler extends BaseDataHandler {
     protected Position handlePosition(Position position) {
 
         Map<Event, Position> events = analyzePosition(position);
-        if (events != null && Context.getNotificationManager() != null) {
-            Context.getNotificationManager().updateEvents(events);
+        if (events != null) {
+            if (Context.getNotificationManager() != null) {
+                Context.getNotificationManager().updateEvents(events);
+            }
+
+            if (Context.getFcmPushNotificationManager() != null) {
+                Context.getFcmPushNotificationManager().updateEvents(events);
+            }
         }
+
         return position;
     }
 
