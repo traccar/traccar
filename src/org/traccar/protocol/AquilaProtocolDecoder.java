@@ -42,6 +42,7 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd)(dd)(dd)")              // date (yymmdd)
             .number("(dd)(dd)(dd),")             // time (hhmmss)
             .expression("([AV]),")               // validity
+            .groupBegin()
             .number("(d+),")                     // gsm
             .number("(d+),")                     // speed
             .number("(d+),")                     // distance
@@ -120,6 +121,10 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // external voltage
             .number("(d+),")                     // internal voltage
             .groupEnd()
+            .or()
+            .number("(d+),")                     // sensor id
+            .expression("([^,]+),")              // sensor data
+            .groupEnd()
             .text("*")
             .number("xx")                        // checksum
             .compile();
@@ -150,11 +155,11 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
 
         position.setValid(parser.next().equals("A"));
 
-        position.set(Position.KEY_RSSI, parser.nextInt(0));
-
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
-
-        position.set(Position.KEY_ODOMETER, parser.nextInt(0));
+        if (parser.hasNext(3)) {
+            position.set(Position.KEY_RSSI, parser.nextInt(0));
+            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
+            position.set(Position.KEY_ODOMETER, parser.nextInt(0));
+        }
 
         if (parser.hasNext(9)) {
 
@@ -186,7 +191,7 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
             String dtcs = parser.next();
             position.set(Position.KEY_DTCS, dtcs.substring(1, dtcs.length() - 1).replace('|', ' '));
 
-        } else {
+        } else if (parser.hasNext(10)) {
 
             position.setCourse(parser.nextInt(0));
 
@@ -199,6 +204,11 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_IGNITION, parser.nextInt(0) == 1);
             position.set(Position.KEY_POWER, parser.nextInt(0));
             position.set(Position.KEY_BATTERY, parser.nextInt(0));
+
+        } else if (parser.hasNext(2)) {
+
+            position.set("sensorId", parser.nextInt());
+            position.set("sensorData", parser.next());
 
         }
 
