@@ -30,7 +30,7 @@ public class WebDataHandlerTest extends ProtocolTest {
         WebDataHandler handler = new WebDataHandler("http://localhost/", true);
 
         assertEquals(
-                "{\"position\":{\"id\":0,\"attributes\":{},\"deviceId\":0,\"type\":null,\"protocol\":null,\"serverTime\":null,\"deviceTime\":1451610123000,\"fixTime\":1451610123000,\"outdated\":false,\"valid\":true,\"latitude\":20.0,\"longitude\":30.0,\"altitude\":0.0,\"speed\":0.0,\"course\":0.0,\"address\":null,\"accuracy\":0.0,\"network\":null}}",
+                "{\"position\":{\"id\":0,\"attributes\":{},\"deviceId\":0,\"type\":null,\"protocol\":null,\"serverTime\":null,\"deviceTime\":1451610123000,\"fixTime\":1451610123000,\"outdated\":false,\"valid\":true,\"latitude\":20.0,\"longitude\":30.0,\"altitude\":0.0,\"speed\":0.0,\"course\":0.0,\"address\":null,\"accuracy\":0.0,\"network\":null},\"device\":{\"id\":1,\"attributes\":{},\"groupId\":0,\"name\":\"test\",\"uniqueId\":\"123456789012345\",\"status\":\"offline\",\"lastUpdate\":null,\"positionId\":0,\"geofenceIds\":null,\"phone\":null,\"model\":null,\"contact\":null,\"category\":null,\"disabled\":false}}",
                 handler.prepareJsonPayload(p));
 
     }
