@@ -146,17 +146,10 @@ public class WebDataHandler extends BaseDataHandler {
     protected String prepareJsonPayload(Position position) {
 
         Map<String, Object> data = new HashMap<>();
+        Device device = Context.getIdentityManager().getById(position.getDeviceId());
 
-        if (position != null) {
-            data.put(KEY_POSITION, position);
-        }
-
-        if (position.getDeviceId() != 0) {
-            Device device = Context.getIdentityManager().getById(position.getDeviceId());
-            if (device != null) {
-                data.put(KEY_DEVICE, device);
-            }
-        }
+        data.put(KEY_POSITION, position);
+        data.put(KEY_DEVICE, device);
 
         try {
             return Context.getObjectMapper().writeValueAsString(data);
