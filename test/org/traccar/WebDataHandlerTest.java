@@ -23,7 +23,7 @@ public class WebDataHandlerTest extends ProtocolTest {
     }
 
     @Test
-    public void testBuilderRequest() throws ParseException {
+    public void testPrepareJsonPayload() throws ParseException {
 
         Position p = position("2016-01-01 01:02:03.000", true, 20, 30);
 
