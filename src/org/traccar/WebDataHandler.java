@@ -148,8 +148,13 @@ public class WebDataHandler extends BaseDataHandler {
         Map<String, Object> data = new HashMap<>();
         Device device = Context.getIdentityManager().getById(position.getDeviceId());
 
-        data.put(KEY_POSITION, position);
-        data.put(KEY_DEVICE, device);
+        if (position != null) {
+            data.put(KEY_POSITION, position);
+        }
+
+        if (device != null) {
+            data.put(KEY_DEVICE, device);
+        }
 
         try {
             return Context.getObjectMapper().writeValueAsString(data);
