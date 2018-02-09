@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,11 +85,9 @@ public abstract class EventForwarder {
         if (position != null) {
             data.put(KEY_POSITION, position);
         }
-        if (event.getDeviceId() != 0) {
-            Device device = Context.getIdentityManager().getById(event.getDeviceId());
-            if (device != null) {
-                data.put(KEY_DEVICE, device);
-            }
+        Device device = Context.getIdentityManager().getById(event.getDeviceId());
+        if (device != null) {
+            data.put(KEY_DEVICE, device);
         }
         if (event.getGeofenceId() != 0) {
             Geofence geofence = Context.getGeofenceManager().getById(event.getGeofenceId());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,9 +148,7 @@ public class WebDataHandler extends BaseDataHandler {
         Map<String, Object> data = new HashMap<>();
         Device device = Context.getIdentityManager().getById(position.getDeviceId());
 
-        if (position != null) {
-            data.put(KEY_POSITION, position);
-        }
+        data.put(KEY_POSITION, position);
 
         if (device != null) {
             data.put(KEY_DEVICE, device);
