@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
@@ -39,11 +38,8 @@ import java.util.regex.Pattern;
 
 public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
 
-    private final long timeZone;
-
     public UlbotechProtocolDecoder(UlbotechProtocol protocol) {
         super(protocol);
-        timeZone = Context.getConfig().getInteger(getProtocolName() + ".timezone", 0);
     }
 
     private static final short DATA_GPS = 0x01;
@@ -215,12 +211,16 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
+        if (deviceSession.getTimeZone() == null) {
+            deviceSession.setTimeZone(getTimeZone(deviceSession.getDeviceId()));
+        }
+
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         long seconds = buf.readUnsignedInt() & 0x7fffffffL;
         seconds += 946684800L; // 2000-01-01 00:00
-        seconds -= timeZone;
+        seconds -= deviceSession.getTimeZone().getRawOffset() / 1000;
         Date time = new Date(seconds * 1000);
 
         boolean hasLocation = false;
