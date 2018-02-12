@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -554,14 +554,14 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(reportMask, 3)) {
             position.set("totalFuelConsumption", Double.parseDouble(values[index++]));
         }
-        if (BitUtil.check(reportMask, 5)) {
-            position.set(Position.KEY_RPM, Integer.parseInt(values[index++]));
+        if (BitUtil.check(reportMask, 5) && !values[index++].isEmpty()) {
+            position.set(Position.KEY_RPM, Integer.parseInt(values[index - 1]));
         }
-        if (BitUtil.check(reportMask, 4)) {
-            position.set(Position.KEY_OBD_SPEED, UnitsConverter.knotsFromKph(Integer.parseInt(values[index++])));
+        if (BitUtil.check(reportMask, 4) && !values[index++].isEmpty()) {
+            position.set(Position.KEY_OBD_SPEED, UnitsConverter.knotsFromKph(Integer.parseInt(values[index - 1])));
         }
-        if (BitUtil.check(reportMask, 6)) {
-            position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(values[index++]));
+        if (BitUtil.check(reportMask, 6) && !values[index++].isEmpty()) {
+            position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(values[index - 1]));
         }
         if (BitUtil.check(reportMask, 7) && !values[index++].isEmpty()) {
             position.set(Position.KEY_FUEL_CONSUMPTION, Double.parseDouble(values[index - 1].substring(1)));
