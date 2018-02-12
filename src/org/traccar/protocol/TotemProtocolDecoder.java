@@ -167,12 +167,26 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         switch (value) {
             case 0x01:
                 return Position.ALARM_SOS;
+            case 0x02:
+                return Position.ALARM_OVERSPEED;
+            case 0x04:
+                return Position.ALARM_GEOFENCE_EXIT;
+            case 0x05:
+                return Position.ALARM_GEOFENCE_ENTER;
+            case 0x06:
+                return Position.ALARM_TOW;
             case 0x10:
                 return Position.ALARM_LOW_BATTERY;
             case 0x11:
                 return Position.ALARM_OVERSPEED;
+            case 0x12:
+                return Position.ALARM_LOW_POWER;
+            case 0x13:
+                return Position.ALARM_LOW_BATTERY;
             case 0x30:
                 return Position.ALARM_PARKING;
+            case 0x40:
+                return Position.ALARM_SHOCK;
             case 0x42:
                 return Position.ALARM_GEOFENCE_EXIT;
             case 0x43:
@@ -245,7 +259,11 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
     private boolean decode3(Position position, Parser parser) {
 
         if (parser.hasNext()) {
-            position.set(Position.KEY_ALARM, decodeAlarm(Short.parseShort(parser.next(), 16)));
+            short alarm = Short.parseShort(parser.next(), 16);
+            position.set(Position.KEY_ALARM, decodeAlarm(alarm));
+            if (alarm >= 0x21 && alarm <= 0x28) {
+                position.set(Position.PREFIX_IN + ((alarm - 0x21) / 2 + 1), alarm % 2 > 0);
+            }
         }
 
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
