@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ public class Ivt401ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // speed
             .number("(d+),")                     // course
             .number("(-?d+.?d*),")               // altitude
-            .number("(d+),")                     // satellites
+            .number("d+,")                       // satellites or battery status
             .number("(d),")                      // gps status
             .number("(d+),")                     // rssi
             .number("(d+),")                     // input
@@ -51,6 +51,13 @@ public class Ivt401ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d+),")                  // adc
             .number("(d+.d+),")                  // power
             .number("(d+.d+),")                  // battery
+            .number("(-?d+.?d*),")               // pcb temp
+            .expression("([^,]+),")              // temp
+            .number("(d+),")                     // movement
+            .number("(d+.d+),")                  // acceleration
+            .number("(-?d+),")                   // tilt
+            .number("(d+),")                     // trip
+            .number("(d+),")                     // odometer
             .any()
             .compile();
 
@@ -78,17 +85,58 @@ public class Ivt401ProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt()));
         position.setCourse(parser.nextInt());
         position.setAltitude(parser.nextDouble());
-
-        position.set(Position.KEY_SATELLITES, parser.nextInt());
-
         position.setValid(parser.nextInt() > 0);
 
         position.set(Position.KEY_RSSI, parser.nextInt());
-        position.set(Position.KEY_INPUT, parser.nextBinInt());
-        position.set(Position.KEY_OUTPUT, parser.nextBinInt());
+
+        String input = parser.next();
+        for (int i = 0; i < input.length(); i++) {
+            int value = Character.getNumericValue(input.charAt(i));
+            if (value < 2) {
+                position.set(Position.PREFIX_IN + (i + 1), value > 0);
+            }
+        }
+
+        String output = parser.next();
+        for (int i = 0; i < output.length(); i++) {
+            position.set(Position.PREFIX_OUT + (i + 1), Character.getNumericValue(output.charAt(i)) > 0);
+        }
+
         position.set(Position.PREFIX_ADC + 1, parser.nextDouble());
         position.set(Position.KEY_POWER, parser.nextDouble());
         position.set(Position.KEY_BATTERY, parser.nextDouble());
+        position.set(Position.KEY_DEVICE_TEMP, parser.nextDouble());
+
+        String temp = parser.next();
+        if (temp.startsWith("M")) {
+            int index = 1;
+            int startIndex = 1;
+            int endIndex;
+            while (startIndex < temp.length()) {
+                endIndex = temp.indexOf('-', startIndex + 1);
+                if (endIndex < 0) {
+                    endIndex = temp.indexOf('+', startIndex + 1);
+                }
+                if (endIndex < 0) {
+                    endIndex = temp.length();
+                }
+                if (endIndex > 0) {
+                    double value = Double.parseDouble(temp.substring(startIndex, endIndex));
+                    position.set(Position.PREFIX_TEMP + index++, value);
+                }
+                startIndex = endIndex;
+            }
+        } else {
+            position.set(Position.PREFIX_TEMP + 1, Double.parseDouble(temp));
+        }
+
+        position.set(Position.KEY_MOTION, parser.nextInt() > 0);
+        position.set(Position.KEY_ACCELERATION, parser.nextDouble());
+
+        parser.nextInt(); // tilt
+        parser.nextInt(); // trip state
+
+        position.set(Position.KEY_ODOMETER, parser.nextLong());
 
         return position;
     }
