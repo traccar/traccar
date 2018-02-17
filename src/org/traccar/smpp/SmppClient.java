@@ -83,6 +83,7 @@ public class SmppClient {
         sessionConfig.setHost(Context.getConfig().getString("sms.smpp.host", "localhost"));
         sessionConfig.setPort(Context.getConfig().getInteger("sms.smpp.port", 2775));
         sessionConfig.setSystemId(Context.getConfig().getString("sms.smpp.username", "user"));
+        sessionConfig.setSystemType(Context.getConfig().getString("sms.smpp.systemType", null));
         sessionConfig.setPassword(Context.getConfig().getString("sms.smpp.password", "password"));
         sessionConfig.getLoggingOptions().setLogBytes(false);
         sessionConfig.getLoggingOptions().setLogPdu(Context.getConfig().getBoolean("sms.smpp.logPdu"));
