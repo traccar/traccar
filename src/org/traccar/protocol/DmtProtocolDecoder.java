@@ -81,7 +81,7 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
                     channel, remoteAddress, buf.readBytes(15).toString(StandardCharsets.US_ASCII));
 
             ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
-            response.writeInt((int) (System.currentTimeMillis() / 1000));
+            response.writeInt((int) ((System.currentTimeMillis() - 1356998400000L) / 1000));
             response.writeInt(deviceSession != null ? 0 : 1); // flags
             sendResponse(channel, MSG_HELLO_RESPONSE, response);
 
