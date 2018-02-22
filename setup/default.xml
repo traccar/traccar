@@ -226,5 +226,6 @@
     <entry key='t57.port'>5155</entry>
     <entry key='spot.port'>5156</entry>
     <entry key='m2c.port'>5157</entry>
+    <entry key='globekeeper.port'>5158</entry>
 
 </properties>
