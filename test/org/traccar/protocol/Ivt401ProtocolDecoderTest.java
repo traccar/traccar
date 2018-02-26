@@ -11,6 +11,9 @@ public class Ivt401ProtocolDecoderTest extends ProtocolTest {
         Ivt401ProtocolDecoder decoder = new Ivt401ProtocolDecoder(new Ivt401Protocol());
 
         verifyPosition(decoder, text(
+                "(TLN,862107032006249,230218,180500,+18.479728,+73.896339,30,0,944,13,1,5,111,11,0.00,10.88,6.31,29.55,0.00,0,0.99,66,0,0,88,95)"));
+
+        verifyPosition(decoder, text(
                 "(TLN,865933030026336,250118,063827,+18.598098,+73.806518,0,79,0,1,1,5,1200,0,0.0,11.50,4.00,36,0,0,1.00,0,0,12702,202,0)"));
 
         verifyPosition(decoder, text(
