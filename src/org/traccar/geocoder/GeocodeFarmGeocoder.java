@@ -41,23 +41,27 @@ public class GeocodeFarmGeocoder extends JsonGeocoder {
         JsonObject result = json
                 .getJsonObject("geocoding_results")
                 .getJsonArray("RESULTS")
-                .getJsonObject(0)
-                .getJsonObject("ADDRESS");
+                .getJsonObject(0);
 
-        if (result.containsKey("street_number")) {
-            address.setStreet(result.getString("street_number"));
+        JsonObject resultAddress = result.getJsonObject("ADDRESS");
+
+        if (result.containsKey("formatted_address")) {
+            address.setFormattedAddress(result.getString("formatted_address"));
         }
-        if (result.containsKey("street_name")) {
-            address.setStreet(result.getString("street_name"));
+        if (resultAddress.containsKey("street_number")) {
+            address.setStreet(resultAddress.getString("street_number"));
         }
-        if (result.containsKey("locality")) {
-            address.setSettlement(result.getString("locality"));
+        if (resultAddress.containsKey("street_name")) {
+            address.setStreet(resultAddress.getString("street_name"));
         }
-        if (result.containsKey("admin_1")) {
-            address.setState(result.getString("admin_1"));
+        if (resultAddress.containsKey("locality")) {
+            address.setSettlement(resultAddress.getString("locality"));
         }
-        if (result.containsKey("country")) {
-            address.setCountry(result.getString("country"));
+        if (resultAddress.containsKey("admin_1")) {
+            address.setState(resultAddress.getString("admin_1"));
+        }
+        if (resultAddress.containsKey("country")) {
+            address.setCountry(resultAddress.getString("country"));
         }
 
         return address;
