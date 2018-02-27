@@ -378,6 +378,9 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     case 0x06:
                         position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                         break;
+                    case 0x07:
+                        position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+                        break;
                     default:
                         buf.readUnsignedByte();
                         break;
@@ -397,6 +400,12 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     case 0x0B:
                         position.setAltitude(buf.readShort());
                         break;
+                    case 0x19:
+                        position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.01);
+                        break;
+                    case 0x1A:
+                        position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
+                        break;
                     default:
                         buf.readUnsignedShort();
                         break;
@@ -415,6 +424,9 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                         break;
                     case 0x04:
                         position.setTime(new Date((946684800 + buf.readUnsignedInt()) * 1000)); // 2000-01-01
+                        break;
+                    case 0x0D:
+                        position.set("runtime", buf.readUnsignedInt());
                         break;
                     default:
                         buf.readUnsignedInt();
