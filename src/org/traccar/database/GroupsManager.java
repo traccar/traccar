@@ -78,7 +78,8 @@ public class GroupsManager extends BaseObjectManager<Group> implements Managable
     @Override
     public void updateItem(Group group) throws SQLException {
         checkGroupCycles(group);
-        super.updateItem(group);
+        getDataManager().updateObject(group);
+        super.updateCachedItem(group);
     }
 
     @Override
