@@ -47,7 +47,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             .groupEnd("?")
             .number("(d{5})")                    // seconds
             .or()
-            .expression("(?:RGP|RCQ|RBR)")       // type
+            .expression("(?:RGP|RCQ|RCV|RBR)")   // type
             .number("(dd)?")                     // event
             .number("(dd)(dd)(dd)")              // date (mmddyy)
             .number("(dd)(dd)(dd)")              // time (hhmmss)
