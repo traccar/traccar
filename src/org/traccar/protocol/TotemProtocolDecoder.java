@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -276,7 +277,26 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
 
     private boolean decode4(Position position, Parser parser) {
 
-        position.set(Position.KEY_STATUS, parser.next());
+        long status = parser.nextHexLong();
+
+        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 1) ? Position.ALARM_SOS : null);
+        position.set(Position.KEY_IGNITION, BitUtil.check(status, 32 - 2));
+        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 3) ? Position.ALARM_OVERSPEED : null);
+        position.set(Position.KEY_CHARGE, BitUtil.check(status, 32 - 4));
+        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 5) ? Position.ALARM_GEOFENCE_EXIT : null);
+        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 6) ? Position.ALARM_GEOFENCE_ENTER : null);
+        position.set(Position.PREFIX_OUT + 1, BitUtil.check(status, 32 - 9));
+        position.set(Position.PREFIX_OUT + 2, BitUtil.check(status, 32 - 10));
+        position.set(Position.PREFIX_OUT + 3, BitUtil.check(status, 32 - 11));
+        position.set(Position.PREFIX_OUT + 4, BitUtil.check(status, 32 - 12));
+        position.set(Position.PREFIX_IN + 2, BitUtil.check(status, 32 - 13));
+        position.set(Position.PREFIX_IN + 3, BitUtil.check(status, 32 - 14));
+        position.set(Position.PREFIX_IN + 4, BitUtil.check(status, 32 - 15));
+        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 16) ? Position.ALARM_SHOCK : null);
+        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 18) ? Position.ALARM_LOW_BATTERY : null);
+        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 22) ? Position.ALARM_JAMMING : null);
+
+        position.setValid(BitUtil.check(status, 32 - 20));
 
         position.setTime(parser.nextDateTime());
 
@@ -300,7 +320,6 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_HDOP, parser.nextDouble(0));
         position.set(Position.KEY_ODOMETER, parser.nextInt(0) * 1000);
 
-        position.setValid(true);
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
 
