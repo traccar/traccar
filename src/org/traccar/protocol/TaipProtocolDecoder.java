@@ -67,6 +67,19 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             .number("(ddd)")                     // battery
             .number("(x{8})")                    // odometer
             .number("[01]")                      // gps power
+            .groupBegin()
+            .number("[23]")                      // fix mode
+            .number("(dd)")                      // pdop
+            .number("dd")                        // satellites
+            .number("xxxx")                      // seconds from last
+            .number("[01]")                      // modem power
+            .number("[0-5]")                     // gsm status
+            .number("(dd)")                      // rssi
+            .number("([-+]dddd)")                // temperature 1
+            .number("xx")                        // seconds from last
+            .number("([-+]dddd)")                // temperature 2
+            .number("xx")                        // seconds from last
+            .groupEnd("?")
             .groupEnd("?")
             .any()
             .compile();
@@ -158,6 +171,13 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_SATELLITES, parser.nextHexInt(0));
             position.set(Position.KEY_BATTERY, parser.nextInt(0));
             position.set(Position.KEY_ODOMETER, parser.nextLong(16, 0));
+        }
+
+        if (parser.hasNext(4)) {
+            position.set(Position.KEY_PDOP, parser.nextInt());
+            position.set(Position.KEY_RSSI, parser.nextInt());
+            position.set(Position.PREFIX_TEMP + 1, parser.nextInt() * 0.01);
+            position.set(Position.PREFIX_TEMP + 2, parser.nextInt() * 0.01);
         }
 
         position.setValid(true);
