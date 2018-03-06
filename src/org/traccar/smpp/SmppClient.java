@@ -61,7 +61,8 @@ public class SmppClient {
     private String sourceAddress;
     private String commandSourceAddress;
     private int submitTimeout;
-    private boolean requestDrl;
+    private boolean requestDlr;
+    private boolean detectDlrByOpts;
     private String notificationsCharsetName;
     private byte notificationsDataCoding;
     private String commandsCharsetName;
@@ -92,7 +93,8 @@ public class SmppClient {
         commandSourceAddress = Context.getConfig().getString("sms.smpp.commandSourceAddress", sourceAddress);
         submitTimeout = Context.getConfig().getInteger("sms.smpp.submitTimeout", 10000);
 
-        requestDrl = Context.getConfig().getBoolean("sms.smpp.requestDrl");
+        requestDlr = Context.getConfig().getBoolean("sms.smpp.requestDlr");
+        detectDlrByOpts = Context.getConfig().getBoolean("sms.smpp.detectDlrByOpts");
 
         notificationsCharsetName = Context.getConfig().getString("sms.smpp.notificationsCharset",
                 CharsetUtil.NAME_UCS_2);
@@ -151,6 +153,10 @@ public class SmppClient {
             default:
                 return CharsetUtil.NAME_GSM;
         }
+    }
+
+    public boolean getDetectDlrByOpts() {
+        return detectDlrByOpts;
     }
 
     protected synchronized void reconnect() {
@@ -213,7 +219,7 @@ public class SmppClient {
             byte[] textBytes;
             textBytes = CharsetUtil.encode(message, command ? commandsCharsetName : notificationsCharsetName);
             submit.setDataCoding(command ? commandsDataCoding : notificationsDataCoding);
-            if (requestDrl) {
+            if (requestDlr) {
                 submit.setRegisteredDelivery(SmppConstants.REGISTERED_DELIVERY_SMSC_RECEIPT_REQUESTED);
             }
             submit.setShortMessage(textBytes);

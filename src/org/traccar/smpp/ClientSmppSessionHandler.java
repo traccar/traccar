@@ -50,7 +50,14 @@ public class ClientSmppSessionHandler extends DefaultSmppSessionHandler {
                         smppClient.mapDataCodingToCharset(((DeliverSm) request).getDataCoding()));
                 Log.debug("SMS Message Received: " + message.trim() + ", Source Address: " + sourceAddress);
 
-                if (!SmppUtil.isMessageTypeAnyDeliveryReceipt(((DeliverSm) request).getEsmClass())) {
+                boolean isDeliveryReceipt = false;
+                if (smppClient.getDetectDlrByOpts()) {
+                    isDeliveryReceipt = request.getOptionalParameters() != null;
+                } else {
+                    isDeliveryReceipt = SmppUtil.isMessageTypeAnyDeliveryReceipt(((DeliverSm) request).getEsmClass());
+                }
+
+                if (!isDeliveryReceipt) {
                     TextMessageEventHandler.handleTextMessage(sourceAddress, message);
                 }
             }
