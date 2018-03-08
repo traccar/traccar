@@ -210,7 +210,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
             .number("(d{15}|x{14}),")            // imei
             .expression("[^,]*,")                // device name
-            .number("x{8},")                     // mask
+            .number("(x{8}),")                   // mask
             .number("(d+)?,")                    // power
             .number("d{1,2},")                   // report type
             .number("d{1,2},")                   // count
@@ -730,6 +730,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
+        long mask = parser.nextHexLong();
+
         LinkedList<Position> positions = new LinkedList<>();
 
         int power = parser.nextInt(0);
@@ -759,14 +761,35 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         int index = 0;
         String[] data = parser.next().split(",");
-        if (data.length > 1) {
-            int deviceType = Integer.parseInt(data[index++]);
-            if (deviceType == 2) {
-                int deviceCount = Integer.parseInt(data[index++]);
-                for (int i = 1; i <= deviceCount; i++) {
-                    index++; // id
-                    index++; // type
-                    position.set(Position.PREFIX_TEMP + i, (short) Integer.parseInt(data[index++], 16) * 0.0625);
+
+        index += 1; // device type
+
+        if (BitUtil.check(mask, 0)) {
+            index += 1; // digital fuel sensor data
+        }
+
+        if (BitUtil.check(mask, 1)) {
+            int deviceCount = Integer.parseInt(data[index++]);
+            for (int i = 1; i <= deviceCount; i++) {
+                index += 1; // id
+                index += 1; // type
+                position.set(Position.PREFIX_TEMP + i, (short) Integer.parseInt(data[index++], 16) * 0.0625);
+            }
+        }
+
+        if (BitUtil.check(mask, 2)) {
+            index += 1; // can data
+        }
+
+        if (BitUtil.check(mask, 3) || BitUtil.check(mask, 4)) {
+            int deviceCount = Integer.parseInt(data[index++]);
+            for (int i = 1; i <= deviceCount; i++) {
+                index += 1; // type
+                if (BitUtil.check(mask, 3)) {
+                    position.set(Position.KEY_FUEL_LEVEL, Double.parseDouble(data[index++]));
+                }
+                if (BitUtil.check(mask, 4)) {
+                    index += 1; // volume
                 }
             }
         }
