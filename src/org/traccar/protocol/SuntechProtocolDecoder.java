@@ -192,7 +192,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             if (protocol.equals("ST600")) {
                 position.setNetwork(new Network(CellTower.from(
                         Integer.parseInt(values[index++]), Integer.parseInt(values[index++]),
-                        Integer.parseInt(values[index++]), cid, Integer.parseInt(values[index++]))));
+                        Integer.parseInt(values[index++], 16), cid, Integer.parseInt(values[index++]))));
             }
         }
 
