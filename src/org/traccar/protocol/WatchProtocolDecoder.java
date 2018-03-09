@@ -48,7 +48,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             .expression("([NS]),")
             .number(" *(-?d+.d+),")              // longitude
             .expression("([EW])?,")
-            .number("(d+.d+),")                  // speed
+            .number("(d+.?d*),")                 // speed
             .number("(d+.?d*),")                 // course
             .number("(d+.?d*),")                 // altitude
             .number("(d+),")                     // satellites
@@ -139,7 +139,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
         String manufacturer = buf.readBytes(2).toString(StandardCharsets.US_ASCII);
         buf.skipBytes(1); // delimiter
 
-        int idLength = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '*');
+        int idLength = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '*') - buf.readerIndex();
         String id = buf.readBytes(idLength).toString(StandardCharsets.US_ASCII);
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
         if (deviceSession == null) {
@@ -150,7 +150,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
         String index = null;
         if (idLength > 10) {
-            int indexLength = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '*');
+            int indexLength = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '*') - buf.readerIndex();
             index = buf.readBytes(indexLength).toString(StandardCharsets.US_ASCII);
             buf.skipBytes(1); // delimiter
         }
