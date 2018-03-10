@@ -16,10 +16,10 @@
 package org.traccar.protocol;
 
 import org.traccar.StringProtocolEncoder;
+import org.traccar.helper.DataConverter;
 import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
-import javax.xml.bind.DatatypeConverter;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -68,7 +68,7 @@ public class WatchProtocolEncoder extends StringProtocolEncoder implements Strin
     }
 
     private String getBinaryData(Command command) {
-        byte[] data = DatatypeConverter.parseHexBinary(command.getString(Command.KEY_DATA));
+        byte[] data = DataConverter.parseHex(command.getString(Command.KEY_DATA));
 
         int encodedLength = data.length;
         for (byte b : data) {

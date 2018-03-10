@@ -20,10 +20,10 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
+import org.traccar.helper.DataConverter;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
-import javax.xml.bind.DatatypeConverter;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -95,7 +95,7 @@ public class Xt2400ProtocolDecoder extends BaseProtocolDecoder {
         Pattern pattern = Pattern.compile(":wycfg pcr\\[\\d+\\] ([0-9a-fA-F]{2})[0-9a-fA-F]{2}([0-9a-fA-F]+)");
         Matcher matcher = pattern.matcher(configString);
         while (matcher.find()) {
-            formats.put(Short.parseShort(matcher.group(1), 16), DatatypeConverter.parseHexBinary(matcher.group(2)));
+            formats.put(Short.parseShort(matcher.group(1), 16), DataConverter.parseHex(matcher.group(2)));
         }
     }
 
