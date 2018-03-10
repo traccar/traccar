@@ -9,7 +9,8 @@ then
     rm -r ../out
     rm /opt/traccar/setup.sh
     chmod -R go+rX /opt/traccar
-    /opt/traccar/bin/installDaemon.sh
+    cd /opt/traccar/bin/
+    . /opt/traccar/bin/installDaemon.sh
   else
     echo 'Java 7 or higher is required'
   fi
