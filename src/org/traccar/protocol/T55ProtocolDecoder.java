@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -250,9 +250,11 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         } else if (sentence.startsWith("$PCPTI")) {
             getDeviceSession(channel, remoteAddress, sentence.substring(7, sentence.indexOf(",", 7)));
         } else if (sentence.startsWith("IMEI")) {
-            getDeviceSession(channel, remoteAddress, sentence.substring(5, sentence.length()));
+            getDeviceSession(channel, remoteAddress, sentence.substring(5));
+        } else if (sentence.startsWith("$IMEI")) {
+            getDeviceSession(channel, remoteAddress, sentence.substring(6));
         } else if (sentence.startsWith("$GPFID")) {
-            deviceSession = getDeviceSession(channel, remoteAddress, sentence.substring(7, sentence.length()));
+            deviceSession = getDeviceSession(channel, remoteAddress, sentence.substring(7));
             if (deviceSession != null && position != null) {
                 Position position = this.position;
                 position.setDeviceId(deviceSession.getDeviceId());
