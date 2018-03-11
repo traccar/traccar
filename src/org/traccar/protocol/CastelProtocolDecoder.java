@@ -96,6 +96,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
     public static final short MSG_CC_LOGIN = 0x4001;
     public static final short MSG_CC_LOGIN_RESPONSE = (short) 0x8001;
     public static final short MSG_CC_HEARTBEAT = 0x4206;
+    public static final short MSG_CC_PETROL_CONTROL = 0x4583;
     public static final short MSG_CC_HEARTBEAT_RESPONSE = (short) 0x8206;
 
     private Position readPosition(DeviceSession deviceSession, ChannelBuffer buf) {
