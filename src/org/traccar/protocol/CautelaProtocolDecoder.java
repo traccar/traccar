@@ -36,8 +36,8 @@ public class CautelaProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // type
             .number("(d+),")                     // imei
             .number("(dd),(dd),(dd),")           // date (ddmmyy)
-            .number("(-?d+.d+),")                // longitude
             .number("(-?d+.d+),")                // latitude
+            .number("(-?d+.d+),")                // longitude
             .number("(dd)(dd),")                 // time (hhmm)
             .any()
             .compile();
@@ -65,8 +65,8 @@ public class CautelaProtocolDecoder extends BaseProtocolDecoder {
         dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
 
         position.setValid(true);
-        position.setLongitude(parser.nextDouble());
         position.setLatitude(parser.nextDouble());
+        position.setLongitude(parser.nextDouble());
 
         dateBuilder.setHour(parser.nextInt()).setMinute(parser.nextInt());
         position.setTime(dateBuilder.getDate());
