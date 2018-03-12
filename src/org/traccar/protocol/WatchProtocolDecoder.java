@@ -97,8 +97,38 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
-    private void decodeTail(Position position, String data) {
-        String[] values = data.split(",");
+    private Position decodePosition(DeviceSession deviceSession, String data) {
+
+        Parser parser = new Parser(PATTERN_POSITION, data);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
+
+        position.setValid(parser.next().equals("A"));
+        position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
+        position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
+        position.setCourse(parser.nextDouble(0));
+        position.setAltitude(parser.nextDouble(0));
+
+        position.set(Position.KEY_SATELLITES, parser.nextInt(0));
+        position.set(Position.KEY_RSSI, parser.nextInt(0));
+        position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt(0));
+
+        position.set(Position.KEY_STEPS, parser.nextInt(0));
+
+        int status = parser.nextHexInt(0);
+        position.set(Position.KEY_ALARM, decodeAlarm(status));
+        if (BitUtil.check(status, 4)) {
+            position.set(Position.KEY_MOTION, true);
+        }
+
+        String[] values = parser.next().split(",");
         int index = 0;
 
         Network network = new Network();
@@ -127,6 +157,8 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
         if (network.getCellTowers() != null || network.getWifiAccessPoints() != null) {
             position.setNetwork(network);
         }
+
+        return position;
     }
 
     @Override
@@ -200,38 +232,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
                 sendResponse(channel, manufacturer, id, index, "AL");
             }
 
-            Parser parser = new Parser(PATTERN_POSITION, buf.toString(StandardCharsets.US_ASCII));
-            if (!parser.matches()) {
-                return null;
-            }
-
-            Position position = new Position(getProtocolName());
-            position.setDeviceId(deviceSession.getDeviceId());
-
-            position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
-
-            position.setValid(parser.next().equals("A"));
-            position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
-            position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
-            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
-            position.setCourse(parser.nextDouble(0));
-            position.setAltitude(parser.nextDouble(0));
-
-            position.set(Position.KEY_SATELLITES, parser.nextInt(0));
-            position.set(Position.KEY_RSSI, parser.nextInt(0));
-            position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt(0));
-
-            position.set(Position.KEY_STEPS, parser.nextInt(0));
-
-            int status = parser.nextHexInt(0);
-            position.set(Position.KEY_ALARM, decodeAlarm(status));
-            if (BitUtil.check(status, 4)) {
-                position.set(Position.KEY_MOTION, true);
-            }
-
-            decodeTail(position, parser.next());
-
-            return position;
+            return decodePosition(deviceSession, buf.toString(StandardCharsets.US_ASCII));
 
         } else if (type.equals("TKQ")) {
 
