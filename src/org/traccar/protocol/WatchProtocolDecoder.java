@@ -171,7 +171,11 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             buf.readerIndex(contentIndex + 1);
         }
 
-        if (type.equals("LK")) {
+        if (type.equals("INIT")) {
+
+            sendResponse(channel, manufacturer, id, index, "INIT,1");
+
+        } else if (type.equals("LK")) {
 
             sendResponse(channel, manufacturer, id, index, "LK");
 
