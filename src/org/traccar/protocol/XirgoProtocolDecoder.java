@@ -100,6 +100,18 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_EVENT, event);
 
         switch (event) {
+            case 4001:
+            case 4003:
+            case 6011:
+            case 6013:
+                position.set(Position.KEY_IGNITION, true);
+                break;
+            case 4002:
+            case 4004:
+            case 6012:
+            case 6014:
+                position.set(Position.KEY_IGNITION, false);
+                break;
             case 4005:
                 position.set(Position.KEY_CHARGE, false);
                 break;
@@ -120,14 +132,6 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
                 break;
             case 6010:
                 position.set(Position.KEY_ALARM, Position.ALARM_POWER_RESTORED);
-                break;
-            case 6011:
-            case 6013:
-                position.set(Position.KEY_IGNITION, true);
-                break;
-            case 6012:
-            case 6014:
-                position.set(Position.KEY_IGNITION, false);
                 break;
             case 6016:
                 position.set(Position.KEY_ALARM, Position.ALARM_IDLE);
