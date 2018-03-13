@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,7 +133,10 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.PREFIX_TEMP + 3, readValue(buf, length, true) * 0.1);
                 break;
             case 78:
-                position.set(Position.KEY_DRIVER_UNIQUE_ID, String.format("%016X", readValue(buf, length, false)));
+                long driverUniqueId = readValue(buf, length, false);
+                if (driverUniqueId != 0) {
+                    position.set(Position.KEY_DRIVER_UNIQUE_ID, String.format("%016X", driverUniqueId));
+                }
                 break;
             case 80:
                 position.set("workMode", readValue(buf, length, false));
