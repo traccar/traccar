@@ -238,7 +238,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
             sendResponse(channel, manufacturer, id, index, "TKQ");
 
-        } else if (type.equals("PULSE") || type.equals("heart")) {
+        } else if (type.equals("PULSE") || type.equals("heart") || type.equals("bphrt")) {
 
             if (buf.readable()) {
 
@@ -247,10 +247,14 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
                 getLastLocation(position, new Date());
 
-                position.setValid(false);
-                String pulse = buf.toString(StandardCharsets.US_ASCII);
-                position.set("pulse", pulse);
-                position.set(Position.KEY_RESULT, pulse);
+                String[] values = buf.toString(StandardCharsets.US_ASCII).split(",");
+                int valueIndex = 0;
+
+                if (type.equals("bphrt")) {
+                    position.set("pressureLow", values[valueIndex++]);
+                    position.set("pressureHigh", values[valueIndex++]);
+                }
+                position.set("pulse", values[valueIndex]);
 
                 return position;
 
