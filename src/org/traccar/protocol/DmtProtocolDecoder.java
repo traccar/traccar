@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,8 +70,7 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
         buf.skipBytes(2); // header
 
         int type = buf.readUnsignedByte();
-
-        buf.readUnsignedShort(); // length
+        int length = buf.readUnsignedShort();
 
         if (type == MSG_HELLO) {
 
@@ -81,8 +80,14 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
                     channel, remoteAddress, buf.readBytes(15).toString(StandardCharsets.US_ASCII));
 
             ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
-            response.writeInt((int) ((System.currentTimeMillis() - 1356998400000L) / 1000));
-            response.writeInt(deviceSession != null ? 0 : 1); // flags
+            if (length == 51) {
+                response.writeByte(0); // reserved
+                response.writeInt(0); // reserved
+            } else {
+                response.writeInt((int) ((System.currentTimeMillis() - 1356998400000L) / 1000));
+                response.writeInt(deviceSession != null ? 0 : 1); // flags
+            }
+
             sendResponse(channel, MSG_HELLO_RESPONSE, response);
 
         } else if (type == MSG_COMMIT) {

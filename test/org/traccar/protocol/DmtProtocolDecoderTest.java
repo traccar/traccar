@@ -13,6 +13,9 @@ public class DmtProtocolDecoderTest extends ProtocolTest {
         DmtProtocolDecoder decoder = new DmtProtocolDecoder(new DmtProtocol());
 
         verifyNull(decoder, binary(ByteOrder.LITTLE_ENDIAN,
+                "0255003300001b00003335333232393032373533393235310038393931353030303030303030313330343539340000000403041910780603"));
+
+        verifyNull(decoder, binary(ByteOrder.LITTLE_ENDIAN,
                 "025500310038f90100333533333233303831363639373330003839363130313835303031383234383434363330002202010900000000"));
 
         verifyNull(decoder, binary(ByteOrder.LITTLE_ENDIAN,
