@@ -25,10 +25,10 @@ import org.traccar.TrackerServer;
 
 import java.util.List;
 
-public class Laipac2Protocol extends BaseProtocol {
+public class LaipacSFKamelProtocol extends BaseProtocol {
 
-    public Laipac2Protocol() {
-        super("laipac2");
+    public LaipacSFKamelProtocol() {
+        super("laipacsfkamel");
     }
 
     @Override
@@ -39,7 +39,7 @@ public class Laipac2Protocol extends BaseProtocol {
                 pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
                 pipeline.addLast("stringEncoder", new StringEncoder());
                 pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectDecoder", new Laipac2ProtocolDecoder(Laipac2Protocol.this));
+                pipeline.addLast("objectDecoder", new LaipacSFKamelProtocolDecoder(LaipacSFKamelProtocol.this));
             }
         });
     }

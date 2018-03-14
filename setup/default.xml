@@ -116,7 +116,8 @@
     <entry key='pt3000.port'>5045</entry>
     <entry key='ruptela.port'>5046</entry>
     <entry key='topflytech.port'>5047</entry>
-    <entry key='laipac.port'>5048</entry>
+    <!--<entry key='laipac.port'>5048</entry>-->
+    <entry key='laipacsfkamel.port'>5048</entry>
     <entry key='aplicom.port'>5049</entry>
     <entry key='gotop.port'>5050</entry>
     <entry key='sanav.port'>5051</entry>

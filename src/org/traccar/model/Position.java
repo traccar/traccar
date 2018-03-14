@@ -52,6 +52,8 @@ public class Position extends Message {
     public static final String KEY_BATTERY_LEVEL = "batteryLevel"; // percentage
     public static final String KEY_FUEL_LEVEL = "fuel"; // liters
     public static final String KEY_FUEL_CONSUMPTION = "fuelConsumption"; // liters/hour
+    public static final String KEY_ANALOG_1 = "analog 1"; // volts
+    public static final String KEY_ANALOG_2 = "analog 2"; // volts
 
     public static final String KEY_VERSION_FW = "versionFw";
     public static final String KEY_VERSION_HW = "versionHw";
@@ -87,6 +89,10 @@ public class Position extends Message {
     public static final String KEY_RESULT = "result";
 
     public static final String KEY_DRIVER_UNIQUE_ID = "driverUniqueId";
+
+    public static final String KEY_CELL_NET_CODE = "cellNetCode";
+    public static final String KEY_CELL_ID_CODE = "cellIdCode";
+    public static final String KEY_COUNTRY_CODE = "countryCode";
 
     // Start with 1 not 0
     public static final String PREFIX_TEMP = "temp";
@@ -290,5 +296,4 @@ public class Position extends Message {
     public String getType() {
         return super.getType();
     }
-
 }

@@ -27,9 +27,9 @@ import org.traccar.model.Position;
 import java.net.SocketAddress;
 import java.util.regex.Pattern;
 
-public class Laipac2ProtocolDecoder extends BaseProtocolDecoder {
+public class LaipacSFKamelProtocolDecoder extends BaseProtocolDecoder {
 
-    public Laipac2ProtocolDecoder(Laipac2Protocol protocol) {
+    public LaipacSFKamelProtocolDecoder(LaipacSFKamelProtocol protocol) {
         super(protocol);
     }
 
@@ -49,11 +49,12 @@ public class Laipac2ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                    // battery voltage
             .number("(d+),")                    // current mileage
             .number("(d),")                     // GPS on/off (1 = on, 0 = off)
-            .number("(d),")                     // Analog port 1
+            .number("(d+),")                    // Analog port 1
             .number("(d+),")                    // Analog port 2
             .expression("([0-9a-fA-F]{4})")     // Cell 1 - Cell Net Code
             .expression("([0-9a-fA-F]{4}),")    // Cell 1 - Cell ID Code
-            .number("(d+)")                     // Cell 2
+            .number("(d{3})")                   // Cell 2 - Country Code
+            .number("(d{3})")                   // Cell 2 - Operator Code
             .text("*")
             .number("(xx)")                     // checksum
             .compile();
@@ -94,27 +95,31 @@ public class Laipac2ProtocolDecoder extends BaseProtocolDecoder {
         dateBuilder.setDateReverse(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
         position.setTime(dateBuilder.getDate());
 
-        String type = parser.next();
-        position.set(Position.KEY_BATTERY_LEVEL, parser.nextDouble());
-        //position.set(Position.KEY_, parser.nextDouble());
+        String eventCode = parser.next();
+        position.set(Position.KEY_EVENT, eventCode);
+        position.set(Position.KEY_BATTERY, parser.nextDouble() * 0.001);
+        position.set(Position.KEY_TOTAL_DISTANCE, parser.nextDouble());
+        position.set(Position.KEY_GPS, parser.nextInt());
+        position.set(Position.KEY_ANALOG_1, parser.nextDouble() * 0.001);
+        position.set(Position.KEY_ANALOG_2, parser.nextDouble() * 0.001);
+        position.set(Position.KEY_CELL_NET_CODE, parser.next());
+        position.set(Position.KEY_CELL_ID_CODE, parser.next());
+        position.set(Position.KEY_COUNTRY_CODE, parser.next());
+        position.set(Position.KEY_OPERATOR, parser.next());
         String checksum = parser.next();
 
         if (channel != null) {
-
             if (Character.isLowerCase(status.charAt(0))) {
-                String response = "$EAVACK," + type + "," + checksum;
+                String response = "$EAVACK," + eventCode + "," + checksum;
                 response += Checksum.nmea(response);
                 channel.write(response);
             }
 
-            if (type.equals("S") || type.equals("T")) {
-                channel.write("$AVCFG,00000000,t*21");
-            } else if (type.equals("3")) {
+            if (eventCode.equals("3")) {
                 channel.write("$AVCFG,00000000,d*31");
-            } else if (type.equals("X") || type.equals("4")) {
+            } else if (eventCode.equals("X") || eventCode.equals("4")) {
                 channel.write("$AVCFG,00000000,x*2D");
             }
-
         }
 
         return position;
