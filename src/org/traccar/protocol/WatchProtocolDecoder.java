@@ -251,8 +251,8 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
                 int valueIndex = 0;
 
                 if (type.equals("bphrt")) {
-                    position.set("pressureLow", values[valueIndex++]);
                     position.set("pressureHigh", values[valueIndex++]);
+                    position.set("pressureLow", values[valueIndex++]);
                 }
                 position.set("pulse", values[valueIndex]);
 
