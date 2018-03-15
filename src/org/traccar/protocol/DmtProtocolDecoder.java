@@ -90,8 +90,8 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
                     .setSecond((int) (time >> 26) & 0x3F)
                     .getDate());
 
-            position.setLatitude(buf.readInt() * 0.0000001);
             position.setLongitude(buf.readInt() * 0.0000001);
+            position.setLatitude(buf.readInt() * 0.0000001);
             position.setSpeed(UnitsConverter.knotsFromCps(buf.readUnsignedShort()));
             position.setCourse(buf.readUnsignedByte() * 2);
             position.setAltitude(buf.readShort());
