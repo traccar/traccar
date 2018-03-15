@@ -55,6 +55,7 @@ public class LaipacSFKamelProtocolDecoder extends BaseProtocolDecoder {
             .expression("([0-9a-fA-F]{4}),")    // Cell 1 - Cell ID Code
             .number("(d{3})")                   // Cell 2 - Country Code
             .number("(d{3})")                   // Cell 2 - Operator Code
+            .optional(4)
             .text("*")
             .number("(xx)")                     // checksum
             .compile();
@@ -102,27 +103,35 @@ public class LaipacSFKamelProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_GPS, parser.nextInt());
         position.set(Position.KEY_ANALOG_1, parser.nextDouble() * 0.001);
         position.set(Position.KEY_ANALOG_2, parser.nextDouble() * 0.001);
-        position.set(Position.KEY_CELL_NET_CODE, parser.next());
-        position.set(Position.KEY_CELL_ID_CODE, parser.next());
-        position.set(Position.KEY_COUNTRY_CODE, parser.next());
-        position.set(Position.KEY_OPERATOR, parser.next());
+
         String checksum = parser.next();
+        if (parser.hasNext()) {
+            position.set(Position.KEY_CELL_NET_CODE, checksum);
+            position.set(Position.KEY_CELL_ID_CODE, parser.next());
+            position.set(Position.KEY_COUNTRY_CODE, parser.next());
+            position.set(Position.KEY_OPERATOR, parser.next());
+            checksum = parser.next();
+        }
+
+        String result = sentence.replaceAll("^\\$(.*)\\*[0-9a-fA-F]{2}$", "$1");
+        if (Integer.parseInt(checksum, 16) != Checksum.xor(result))
+        {
+            return null;
+        }
 
         if (channel != null) {
-            if (Character.isLowerCase(status.charAt(0))) {
+            if (eventCode.equals("3")) {
+                channel.write("$AVCFG,00000000,d*31\r\n");
+            } else if (eventCode.equals("X") || eventCode.equals("4")) {
+                channel.write("$AVCFG,00000000,x*2D\r\n");
+            } else if (Character.isLowerCase(status.charAt(0))) {
                 String response = "$EAVACK," + eventCode + "," + checksum;
                 response += Checksum.nmea(response);
+                response += "\r\n";
                 channel.write(response);
-            }
-
-            if (eventCode.equals("3")) {
-                channel.write("$AVCFG,00000000,d*31");
-            } else if (eventCode.equals("X") || eventCode.equals("4")) {
-                channel.write("$AVCFG,00000000,x*2D");
             }
         }
 
         return position;
     }
-
 }
