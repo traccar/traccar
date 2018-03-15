@@ -83,9 +83,9 @@ public class GeocoderTest {
             public void onFailure(Throwable e) {
             }
         });
-        assertEquals("Rue du Jardinet, Paris, FR", waitAddress());
+        assertEquals("Rue du Jardinet, Paris, Île-de-France, FR", waitAddress());
 
-        assertEquals("Rue du Jardinet, Paris, FR", geocoder.getAddress(48.8530000, 2.3400000, null));
+        assertEquals("Rue du Jardinet, Paris, Île-de-France, FR", geocoder.getAddress(48.8530000, 2.3400000, null));
     }
 
     public void testOpenCage() throws InterruptedException {
