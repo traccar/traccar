@@ -118,8 +118,9 @@ public class LaipacSFKamelProtocolDecoder extends BaseProtocolDecoder {
             checksum = parser.next();
         }
 
+
         String result = sentence.replaceAll("^\\$(.*)\\*[0-9a-fA-F]{2}$", "$1");
-        if (Integer.parseInt(checksum, 16) != Checksum.xor(result))
+        if (checksum == null || Integer.parseInt(checksum, 16) != Checksum.xor(result))
         {
             return null;
         }

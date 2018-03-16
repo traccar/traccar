@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.helper.Checksum;
 
 public class LaipacSFKamelProtocolDecoderTest extends ProtocolTest {
 
@@ -11,7 +12,7 @@ public class LaipacSFKamelProtocolDecoderTest extends ProtocolTest {
         LaipacSFKamelProtocolDecoder decoder = new LaipacSFKamelProtocolDecoder(new LaipacSFKamelProtocol());
 
         verifyPosition(decoder, text(
-                "$AVRMC,358174067149865,084514,r,5050.1314,N,00419.9719,E,0.68,306.39,120318,0,3882,84,1,0,0,3EE4A617,020610*4E"));
+                "$AVRMC,999999999999999,084514,r,5050.1314,N,00419.9719,E,0.68,306.39,120318,0,3882,84,1,0,0,3EE4A617,020610*4D"));
 
         verifyNull(decoder, text(
                 "$AVSYS,99999999,V1.50,SN0000103,32768*15"));
@@ -29,7 +30,6 @@ public class LaipacSFKamelProtocolDecoderTest extends ProtocolTest {
                 "$ECHK,MSG00002,0*5E"));
 
         verifyPosition(decoder, text(
-                "$AVRMC,358174067149865,111602,r,5050.1262,N,00419.9660,E,0.00,0.00,120318,0,3843,95,1,0,0,3EE4A617,020610*44"));
+                "$AVRMC,999999999999999,111602,r,5050.1262,N,00419.9660,E,0.00,0.00,120318,0,3843,95,1,0,0,3EE4A617,020610*47"));
     }
-
 }
