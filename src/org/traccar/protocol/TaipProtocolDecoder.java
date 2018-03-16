@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,16 +62,23 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             .number("(ddd)")                     // speed
             .number("(ddd)")                     // course
             .groupBegin()
+            .number("([023])")                   // fix mode
+            .number("xx")                        // data age
+            .number("(xx)")                      // input
+            .number("(dd)")                      // event
+            .number("(dd)")                      // hdop
+            .or()
+            .groupBegin()
             .number("(xx)")                      // input
             .number("(xx)")                      // satellites
             .number("(ddd)")                     // battery
             .number("(x{8})")                    // odometer
             .number("[01]")                      // gps power
             .groupBegin()
-            .number("[23]")                      // fix mode
+            .number("([023])")                   // fix mode
             .number("(dd)")                      // pdop
             .number("dd")                        // satellites
-            .number("xxxx")                      // seconds from last
+            .number("xxxx")                      // data age
             .number("[01]")                      // modem power
             .number("[0-5]")                     // gsm status
             .number("(dd)")                      // rssi
@@ -81,6 +88,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             .number("xx")                        // seconds from last
             .groupEnd("?")
             .groupEnd("?")
+            .groupEnd()
             .any()
             .compile();
 
@@ -116,6 +124,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position(getProtocolName());
 
+        Boolean valid = null;
         Integer event = null;
 
         if (parser.hasNext(3)) {
@@ -127,27 +136,6 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext()) {
             event = parser.nextInt();
-        }
-
-        if (event != null) {
-            switch (event) {
-                case 22:
-                    position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
-                    break;
-                case 23:
-                    position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
-                    break;
-                case 24:
-                    position.set(Position.KEY_ALARM, Position.ALARM_ACCIDENT);
-                    break;
-                case 26:
-                case 28:
-                    position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
-                    break;
-                default:
-                    position.set(Position.KEY_EVENT, event);
-                    break;
-            }
         }
 
         if (parser.hasNext(6)) {
@@ -167,6 +155,15 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(parser.nextDouble(0));
 
         if (parser.hasNext(4)) {
+            valid = parser.nextInt() > 0;
+            int input = parser.nextHexInt();
+            position.set(Position.KEY_IGNITION, BitUtil.check(input, 7));
+            position.set(Position.KEY_INPUT, input);
+            event = parser.nextInt();
+            position.set(Position.KEY_HDOP, parser.nextInt());
+        }
+
+        if (parser.hasNext(4)) {
             position.set(Position.KEY_INPUT, parser.nextHexInt(0));
             position.set(Position.KEY_SATELLITES, parser.nextHexInt(0));
             position.set(Position.KEY_BATTERY, parser.nextInt(0));
@@ -174,13 +171,35 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (parser.hasNext(4)) {
+            valid = parser.nextInt() > 0;
             position.set(Position.KEY_PDOP, parser.nextInt());
             position.set(Position.KEY_RSSI, parser.nextInt());
             position.set(Position.PREFIX_TEMP + 1, parser.nextInt() * 0.01);
             position.set(Position.PREFIX_TEMP + 2, parser.nextInt() * 0.01);
         }
 
-        position.setValid(true);
+        position.setValid(valid != null ? valid : true);
+
+        if (event != null) {
+            position.set(Position.KEY_EVENT, event);
+            switch (event) {
+                case 22:
+                    position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+                    break;
+                case 23:
+                    position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+                    break;
+                case 24:
+                    position.set(Position.KEY_ALARM, Position.ALARM_ACCIDENT);
+                    break;
+                case 26:
+                case 28:
+                    position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
+                    break;
+                default:
+                    break;
+            }
+        }
 
         String[] attributes = null;
         beginIndex = sentence.indexOf(';');
@@ -250,14 +269,13 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         if (deviceSession != null) {
             if (channel != null) {
                 if (messageIndex != null) {
-                    String response = ">ACK;" + messageIndex + ";ID=" + uniqueId + ";*";
+                    String response = ">ACK;ID=" + uniqueId + ";" + messageIndex + ";*";
                     response += String.format("%02X", Checksum.xor(response)) + "<";
                     channel.write(response, remoteAddress);
                 } else {
                     channel.write(uniqueId, remoteAddress);
                 }
             }
-
             return position;
         }
 

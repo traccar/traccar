@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class AtrackProtocolDecoder extends BaseProtocolDecoder {
@@ -43,6 +44,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
     private static final int MIN_DATA_LENGTH = 40;
 
     private boolean longDate;
+    private boolean decimalFuel;
     private boolean custom;
     private String form;
 
@@ -52,6 +54,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
 
         longDate = Context.getConfig().getBoolean(getProtocolName() + ".longDate");
+        decimalFuel = Context.getConfig().getBoolean(getProtocolName() + ".decimalFuel");
 
         custom = Context.getConfig().getBoolean(getProtocolName() + ".custom");
         form = Context.getConfig().getString(getProtocolName() + ".form");
@@ -330,7 +333,17 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.PREFIX_TEMP + 1, buf.readShort() * 0.1);
             position.set(Position.PREFIX_TEMP + 2, buf.readShort() * 0.1);
 
-            position.set("message", readString(buf));
+            String message = readString(buf);
+            if (message != null && !message.isEmpty()) {
+                Pattern pattern = Pattern.compile("FULS:F=(\\p{XDigit}+) t=(\\p{XDigit}+) N=(\\p{XDigit}+)");
+                Matcher matcher = pattern.matcher(message);
+                if (matcher.find()) {
+                    int value = Integer.parseInt(matcher.group(3), decimalFuel ? 10 : 16);
+                    position.set(Position.KEY_FUEL_LEVEL, value * 0.1);
+                } else {
+                    position.set("message", message);
+                }
+            }
 
             if (custom) {
                 String form = this.form;

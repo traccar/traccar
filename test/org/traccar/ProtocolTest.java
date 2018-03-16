@@ -5,11 +5,11 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpVersion;
+import org.traccar.helper.DataConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Command;
 import org.traccar.model.Position;
 
-import javax.xml.bind.DatatypeConverter;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
@@ -56,7 +56,7 @@ public class ProtocolTest extends BaseTest {
 
     protected ChannelBuffer binary(ByteOrder endianness, String... data) {
         return ChannelBuffers.wrappedBuffer(
-                endianness, DatatypeConverter.parseHexBinary(concatenateStrings(data)));
+                endianness, DataConverter.parseHex(concatenateStrings(data)));
     }
 
     protected String text(String... data) {

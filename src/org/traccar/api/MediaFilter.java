@@ -43,7 +43,7 @@ public class MediaFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
-        HttpServletResponse httpResponse = ((HttpServletResponse) response);
+        HttpServletResponse httpResponse = (HttpServletResponse) response;
         try {
             HttpSession session = ((HttpServletRequest) request).getSession(false);
             Long userId = null;
