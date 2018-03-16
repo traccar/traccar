@@ -28,7 +28,7 @@ import java.nio.charset.StandardCharsets;
 
 public class CastelProtocolEncoder extends BaseProtocolEncoder {
 
-    private ChannelBuffer encodeContent(long deviceId, int type, ChannelBuffer content) {
+    private ChannelBuffer encodeContent(long deviceId, short type, ChannelBuffer content) {
         ChannelBuffer buf = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
         String uniqueId = Context.getIdentityManager().getById(deviceId).getUniqueId();
 
@@ -42,7 +42,7 @@ public class CastelProtocolEncoder extends BaseProtocolEncoder {
         buf.writeBytes(uniqueId.getBytes(StandardCharsets.US_ASCII));
         buf.writeZero(20 - uniqueId.length());
 
-        buf.writeShort(type);
+        buf.writeShort(ChannelBuffers.swapShort(type));
         buf.writeBytes(content);
 
         buf.writeShort(Checksum.crc16(Checksum.CRC16_X25, buf.toByteBuffer()));
