@@ -20,13 +20,13 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.helper.DataConverter;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import javax.xml.bind.DatatypeConverter;
 import java.net.SocketAddress;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
@@ -84,7 +84,7 @@ public class At2000ProtocolDecoder extends BaseProtocolDecoder {
                 IvParameterSpec ivSpec = new IvParameterSpec(iv);
 
                 SecretKeySpec keySpec = new SecretKeySpec(
-                        DatatypeConverter.parseHexBinary("000102030405060708090a0b0c0d0e0f"), "AES");
+                        DataConverter.parseHex("000102030405060708090a0b0c0d0e0f"), "AES");
 
                 cipher = Cipher.getInstance("AES/CBC/NoPadding");
                 cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec);

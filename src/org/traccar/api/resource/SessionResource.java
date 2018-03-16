@@ -17,6 +17,7 @@ package org.traccar.api.resource;
 
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
+import org.traccar.helper.DataConverter;
 import org.traccar.helper.LogAction;
 import org.traccar.model.User;
 
@@ -34,7 +35,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.xml.bind.DatatypeConverter;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -63,11 +63,11 @@ public class SessionResource extends BaseResource {
             if (cookies != null) {
                 for (Cookie cookie : cookies) {
                     if (cookie.getName().equals(USER_COOKIE_KEY)) {
-                        byte[] emailBytes = DatatypeConverter.parseBase64Binary(
+                        byte[] emailBytes = DataConverter.parseBase64(
                                 URLDecoder.decode(cookie.getValue(), StandardCharsets.US_ASCII.name()));
                         email = new String(emailBytes, StandardCharsets.UTF_8);
                     } else if (cookie.getName().equals(PASS_COOKIE_KEY)) {
-                        byte[] passwordBytes = DatatypeConverter.parseBase64Binary(
+                        byte[] passwordBytes = DataConverter.parseBase64(
                                 URLDecoder.decode(cookie.getValue(), StandardCharsets.US_ASCII.name()));
                         password = new String(passwordBytes, StandardCharsets.UTF_8);
                     }
