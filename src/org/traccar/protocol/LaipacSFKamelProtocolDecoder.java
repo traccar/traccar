@@ -120,8 +120,7 @@ public class LaipacSFKamelProtocolDecoder extends BaseProtocolDecoder {
 
 
         String result = sentence.replaceAll("^\\$(.*)\\*[0-9a-fA-F]{2}$", "$1");
-        if (checksum == null || Integer.parseInt(checksum, 16) != Checksum.xor(result))
-        {
+        if (checksum == null || Integer.parseInt(checksum, 16) != Checksum.xor(result)) {
             return null;
         }
 
@@ -150,7 +149,7 @@ public class LaipacSFKamelProtocolDecoder extends BaseProtocolDecoder {
             return Position.ALARM_GEOFENCE_ENTER;
         } else if (event.equals('T')) {
             return Position.ALARM_TAMPERING;
-        } else if(event.equals("H")) {
+        } else if (event.equals("H")) {
             return Position.ALARM_POWER_OFF;
         } else if (event.equals('X')) {
             return Position.ALARM_GEOFENCE_ENTER;
