@@ -35,25 +35,34 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN = new PatternBuilder()
             .text("$AVRMC,")
-            .expression("([^,]+),")              // identifier
-            .number("(dd)(dd)(dd),")             // time (hhmmss)
-            .expression("([AVRPavrp]),")         // validity
-            .number("(dd)(dd.d+),")              // latitude
+            .expression("([^,]+),")             // identifier
+            .number("(dd)(dd)(dd),")            // time (hhmmss)
+            .expression("([AVRPavrp]),")        // validity
+            .number("(dd)(dd.d+),")             // latitude
             .expression("([NS]),")
-            .number("(ddd)(dd.d+),")             // longitude
+            .number("(ddd)(dd.d+),")            // longitude
             .number("([EW]),")
-            .number("(d+.d+),")                  // speed
-            .number("(d+.d+),")                  // course
-            .number("(dd)(dd)(dd),")             // date (ddmmyy)
-            .expression("(.),")                  // type
-            .expression("[^*]+").text("*")
-            .number("(xx)")                      // checksum
+            .number("(d+.d+),")                 // speed
+            .number("(d+.d+),")                 // course
+            .number("(dd)(dd)(dd),")            // date (ddmmyy)
+            .expression("([abZXTSMHFE86430]),")                        // event code
+            .number("(d+)").expression("(\\.?)").number("(d*),")    // battery voltage
+            .number("(d+),")                    // current mileage
+            .number("(d),")                     // GPS on/off (1 = on, 0 = off)
+            .number("(d+),")                    // Analog port 1
+            .number("(d+)")                     // Analog port 2
+            .expression(",([0-9a-fA-F]{4})")    // Cell 1 - Cell Net Code
+            .expression("([0-9a-fA-F]{4}),")    // Cell 1 - Cell ID Code
+            .number("(d{3})")                   // Cell 2 - Country Code
+            .number("(d{3})")                   // Cell 2 - Operator Code
+            .optional(4)
+            .text("*")
+            .number("(xx)")                     // checksum
             .compile();
 
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
-
         String sentence = (String) msg;
 
         if (sentence.startsWith("$ECHK") && channel != null) {
@@ -79,6 +88,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
         String status = parser.next();
         position.setValid(status.toUpperCase().equals("A"));
+        position.set(Position.KEY_STATUS, status);
 
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
@@ -88,28 +98,84 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         dateBuilder.setDateReverse(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
         position.setTime(dateBuilder.getDate());
 
-        String type = parser.next();
+        String eventCode = parser.next();
+        String decodedAlarm = decodeAlarm(eventCode);
+        if (decodedAlarm != null) {
+            position.set(Position.KEY_ALARM, decodeAlarm(eventCode));
+        }
+        position.set(Position.KEY_EVENT, eventCode);
+
+        double batteryVoltage = parser.nextDouble();
+        if (parser.next().isEmpty()) {
+            parser.next();
+            batteryVoltage *= 0.001;
+        } else {
+            batteryVoltage += parser.nextDouble() * 0.001;
+        }
+        position.set(Position.KEY_BATTERY, batteryVoltage);
+
+        position.set(Position.KEY_TOTAL_DISTANCE, parser.nextDouble());
+        position.set(Position.KEY_GPS, parser.nextInt());
+        position.set(Position.PREFIX_ADC + 1, parser.nextDouble() * 0.001);
+        position.set(Position.PREFIX_ADC + 2, parser.nextDouble() * 0.001);
+
+        setNextValue(parser, position, Position.KEY_CELL_NET_CODE);
+        setNextValue(parser, position, Position.KEY_CELL_ID_CODE);
+        setNextValue(parser, position, Position.KEY_COUNTRY_CODE);
+        setNextValue(parser, position, Position.KEY_OPERATOR);
+
         String checksum = parser.next();
+        String result = sentence.replaceAll("^\\$(.*)\\*[0-9a-fA-F]{2}$", "$1");
+        if (checksum == null || Integer.parseInt(checksum, 16) != Checksum.xor(result)) {
+            return null;
+        }
 
         if (channel != null) {
-
-            if (Character.isLowerCase(status.charAt(0))) {
-                String response = "$EAVACK," + type + "," + checksum;
+            if (eventCode.equals("3")) {
+                channel.write("$AVCFG,00000000,d*31\r\n");
+            } else if (eventCode.equals("X") || eventCode.equals("4")) {
+                channel.write("$AVCFG,00000000,x*2D\r\n");
+            } else if (eventCode.equals("Z")) {
+                channel.write("$AVCFG,00000000,z*2F\r\n");
+            } else if (Character.isLowerCase(status.charAt(0))) {
+                String response = "$EAVACK," + eventCode + "," + checksum;
                 response += Checksum.nmea(response);
+                response += "\r\n";
                 channel.write(response);
             }
-
-            if (type.equals("S") || type.equals("T")) {
-                channel.write("$AVCFG,00000000,t*21");
-            } else if (type.equals("3")) {
-                channel.write("$AVCFG,00000000,d*31");
-            } else if (type.equals("X") || type.equals("4")) {
-                channel.write("$AVCFG,00000000,x*2D");
-            }
-
         }
 
         return position;
     }
 
+    private void setNextValue(Parser parser, Position position, String key)
+    {
+        String value = parser.next();
+        if (value != null) {
+            position.set(key, value);
+        }
+    }
+
+    private String decodeAlarm(String event) {
+        if (event.equals('Z')) {
+            return Position.ALARM_LOW_BATTERY;
+        } else if (event.equals('X')) {
+            return Position.ALARM_GEOFENCE_ENTER;
+        } else if (event.equals('T')) {
+            return Position.ALARM_TAMPERING;
+        } else if (event.equals("H")) {
+            return Position.ALARM_POWER_OFF;
+        } else if (event.equals('X')) {
+            return Position.ALARM_GEOFENCE_ENTER;
+        } else if (event.equals('8')) {
+            return Position.ALARM_SHOCK;
+        } else if (event.equals('7') && event.equals('4')) {
+            return Position.ALARM_GEOFENCE_EXIT;
+        } else if (event.equals('6')) {
+            return Position.ALARM_OVERSPEED;
+        } else if (event.equals('3')) {
+            return Position.ALARM_SOS;
+        }
+        return null;
+    }
 }
