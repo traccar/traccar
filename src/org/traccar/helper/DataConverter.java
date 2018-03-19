@@ -26,7 +26,7 @@ public final class DataConverter {
 
     public static byte[] parseHex(String string) {
         try {
-            return Hex.decodeHex(string.toCharArray());
+            return Hex.decodeHex(string);
         } catch (DecoderException e) {
             throw new RuntimeException(e);
         }
