@@ -148,8 +148,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private void setNextValue(Parser parser, Position position, String key)
-    {
+    private void setNextValue(Parser parser, Position position, String key) {
         String value = parser.next();
         if (value != null) {
             position.set(key, value);
