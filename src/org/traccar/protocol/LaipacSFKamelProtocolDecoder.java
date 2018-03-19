@@ -61,7 +61,8 @@ public class LaipacSFKamelProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     @Override
-    protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+    protected Object decode(
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
         String sentence = (String) msg;
 
         if (sentence.startsWith("$ECHK") && channel != null) {
@@ -106,8 +107,8 @@ public class LaipacSFKamelProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_BATTERY, parser.nextDouble() * 0.001);
         position.set(Position.KEY_TOTAL_DISTANCE, parser.nextDouble());
         position.set(Position.KEY_GPS, parser.nextInt());
-        position.set(Position.KEY_ANALOG_1, parser.nextDouble() * 0.001);
-        position.set(Position.KEY_ANALOG_2, parser.nextDouble() * 0.001);
+        position.set(Position.PREFIX_ADC + 1, parser.nextDouble() * 0.001);
+        position.set(Position.PREFIX_ADC + 2, parser.nextDouble() * 0.001);
 
         String checksum = parser.next();
         if (parser.hasNext()) {
