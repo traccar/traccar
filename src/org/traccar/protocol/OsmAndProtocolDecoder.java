@@ -42,7 +42,8 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
     }
 
     @Override
-    protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+    protected Object decode(
+       Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         HttpRequest request = (HttpRequest) msg;
         QueryStringDecoder decoder = new QueryStringDecoder(request.getUri());
