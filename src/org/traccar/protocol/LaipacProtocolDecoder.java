@@ -22,6 +22,8 @@ import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -120,9 +122,12 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.PREFIX_ADC + 1, parser.nextDouble() * 0.001);
         position.set(Position.PREFIX_ADC + 2, parser.nextDouble() * 0.001);
 
-        setNextValue(parser, position, Position.KEY_CELL_NET_CODE);
-        setNextValue(parser, position, Position.KEY_CELL_ID_CODE);
-        setNextValue(parser, position, Position.KEY_COUNTRY_CODE);
+        int cellNetCode = Integer.parseInt(parser.next(), 16);
+        Long cellId = Long.parseLong(parser.next(), 16);
+        int countryCode = parser.nextInt();
+
+        position.setNetwork(new Network(CellTower.from(countryCode, cellNetCode, 0, cellId)));
+
         setNextValue(parser, position, Position.KEY_OPERATOR);
 
         String checksum = parser.next();

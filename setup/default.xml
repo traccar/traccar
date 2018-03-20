@@ -33,7 +33,7 @@
     <entry key='database.generateQueries'>true</entry>
 
     <entry key='database.changelog'>./schema/changelog-master.xml</entry>
- 
+
     <entry key='database.loginUser'>
         SELECT * FROM users
         WHERE email = :email OR login = :email
@@ -231,4 +231,5 @@
     <entry key='opengts.port'>5159</entry>
     <entry key='cautela.port'>5160</entry>
     <entry key='continental'>5161</entry>
+
 </properties>
