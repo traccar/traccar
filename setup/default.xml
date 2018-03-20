@@ -230,6 +230,6 @@
     <entry key='globekeeper.port'>5158</entry>
     <entry key='opengts.port'>5159</entry>
     <entry key='cautela.port'>5160</entry>
-    <entry key='continental'>5161</entry>
+    <entry key='continental.port'>5161</entry>
 
 </properties>
