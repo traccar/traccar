@@ -35,34 +35,35 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN = new PatternBuilder()
             .text("$AVRMC,")
-            .expression("([^,]+),")             // identifier
-            .number("(dd)(dd)(dd),")            // time (hhmmss)
-            .expression("([AVRPavrp]),")        // validity
-            .number("(dd)(dd.d+),")             // latitude
+            .expression("([^,]+),")              // identifier
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
+            .expression("([AVRPavrp]),")         // validity
+            .number("(dd)(dd.d+),")              // latitude
             .expression("([NS]),")
-            .number("(ddd)(dd.d+),")            // longitude
+            .number("(ddd)(dd.d+),")             // longitude
             .number("([EW]),")
-            .number("(d+.d+),")                 // speed
-            .number("(d+.d+),")                 // course
-            .number("(dd)(dd)(dd),")            // date (ddmmyy)
-            .expression("([abZXTSMHFE86430]),")                        // event code
+            .number("(d+.d+),")                  // speed
+            .number("(d+.d+),")                  // course
+            .number("(dd)(dd)(dd),")             // date (ddmmyy)
+            .expression("([abZXTSMHFE86430]),")  // event code
             .number("(d+)").expression("(\\.?)").number("(d*),")    // battery voltage
-            .number("(d+),")                    // current mileage
-            .number("(d),")                     // GPS on/off (1 = on, 0 = off)
-            .number("(d+),")                    // Analog port 1
-            .number("(d+)")                     // Analog port 2
-            .expression(",([0-9a-fA-F]{4})")    // Cell 1 - Cell Net Code
-            .expression("([0-9a-fA-F]{4}),")    // Cell 1 - Cell ID Code
-            .number("(d{3})")                   // Cell 2 - Country Code
-            .number("(d{3})")                   // Cell 2 - Operator Code
+            .number("(d+),")                     // current mileage
+            .number("(d),")                      // GPS on/off (1 = on, 0 = off)
+            .number("(d+),")                     // Analog port 1
+            .number("(d+)")                      // Analog port 2
+            .expression(",([0-9a-fA-F]{4})")     // Cell 1 - Cell Net Code
+            .expression("([0-9a-fA-F]{4}),")     // Cell 1 - Cell ID Code
+            .number("(d{3})")                    // Cell 2 - Country Code
+            .number("(d{3})")                    // Cell 2 - Operator Code
             .optional(4)
             .text("*")
-            .number("(xx)")                     // checksum
+            .number("(xx)")                      // checksum
             .compile();
 
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+
         String sentence = (String) msg;
 
         if (sentence.startsWith("$ECHK") && channel != null) {
