@@ -3,6 +3,7 @@ package org.traccar.notification;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 
 import org.traccar.Context;
@@ -28,7 +29,7 @@ public class MultiPartEventForwarder extends EventForwarder {
     }
 
     @Override
-    protected void setContent(Event event, Position position, BoundRequestBuilder requestBuilder) {
+    protected void setContent(Event event, Position position, Set<Long> users, BoundRequestBuilder requestBuilder) {
 
         if (additionalParams != null && !additionalParams.isEmpty()) {
             Map<String, List<String>> paramsToAdd = splitIntoKeyValues(additionalParams, "=");
@@ -41,6 +42,6 @@ public class MultiPartEventForwarder extends EventForwarder {
             }
         }
         requestBuilder.addBodyPart(new StringPart(payloadParamName,
-                prepareJsonPayload(event, position), "application/json", StandardCharsets.UTF_8));
+                prepareJsonPayload(event, position, users), "application/json", StandardCharsets.UTF_8));
     }
 }
