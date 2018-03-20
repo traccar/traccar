@@ -126,8 +126,10 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         String cellIdString = parser.next();
         String countryCodeString = parser.next();
         String operatorCodeString = parser.next();
-        if (cellNetCodeString != null && cellIdString != null &&
-                countryCodeString != null && operatorCodeString != null) {
+        if (cellNetCodeString != null
+                && cellIdString != null
+                && countryCodeString != null
+                && operatorCodeString != null) {
             int cellNetCode = Integer.parseInt(cellNetCodeString, 16);
             Long cellId = Long.parseLong(cellIdString, 16);
             int countryCode = Integer.parseInt(countryCodeString);
