@@ -28,7 +28,8 @@ public class LaipacProtocolDecoderTest extends ProtocolTest {
         verifyNull(decoder, text(
                 "$ECHK,MSG00002,0*5E"));
 
-        verifyPosition(decoder, text("$AVRMC,99999999,164339,A,4351.0542,N,07923.5445,W,0.29,78.66,180703,0,3.727,17,1,0,0*37"),
+        verifyPosition(decoder, text(
+                "$AVRMC,99999999,164339,A,4351.0542,N,07923.5445,W,0.29,78.66,180703,0,3.727,17,1,0,0*37"),
                 position("2003-07-18 16:43:39.000", true, 43.85090, -79.39241));
 
         verifyPosition(decoder, text(
