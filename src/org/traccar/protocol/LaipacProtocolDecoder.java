@@ -122,13 +122,17 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.PREFIX_ADC + 1, parser.nextDouble() * 0.001);
         position.set(Position.PREFIX_ADC + 2, parser.nextDouble() * 0.001);
 
-        int cellNetCode = Integer.parseInt(parser.next(), 16);
-        Long cellId = Long.parseLong(parser.next(), 16);
-        int countryCode = parser.nextInt();
-
-        position.setNetwork(new Network(CellTower.from(countryCode, cellNetCode, 0, cellId)));
-
-        setNextValue(parser, position, Position.KEY_OPERATOR);
+        String cellNetCodeString = parser.next();
+        String cellIdString = parser.next();
+        String countryCodeString = parser.next();
+        String operatorCodeString = parser.next();
+        if (cellNetCodeString != null && cellIdString != null && countryCodeString != null && operatorCodeString != null) {
+            int cellNetCode = Integer.parseInt(cellNetCodeString, 16);
+            Long cellId = Long.parseLong(cellIdString, 16);
+            int countryCode = Integer.parseInt(countryCodeString);
+            int operatorCode = Integer.parseInt(operatorCodeString);
+            position.setNetwork(new Network(CellTower.from(countryCode, operatorCode, cellNetCode, cellId)));
+        }
 
         String checksum = parser.next();
         String result = sentence.replaceAll("^\\$(.*)\\*[0-9a-fA-F]{2}$", "$1");
@@ -152,13 +156,6 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         }
 
         return position;
-    }
-
-    private void setNextValue(Parser parser, Position position, String key) {
-        String value = parser.next();
-        if (value != null) {
-            position.set(key, value);
-        }
     }
 
     private String decodeAlarm(String event) {
