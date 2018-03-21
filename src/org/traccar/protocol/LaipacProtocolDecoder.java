@@ -106,7 +106,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_EVENT, eventCode);
 
         String batteryVoltage = parser.next();
-        batteryVoltage = batteryVoltage.replaceAll("\\.","");
+        batteryVoltage = batteryVoltage.replaceAll("\\.", "");
         position.set(Position.KEY_BATTERY, Double.parseDouble(batteryVoltage) * 0.001);
 
         position.set(Position.KEY_ODOMETER, parser.nextDouble());
