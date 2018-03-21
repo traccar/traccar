@@ -48,7 +48,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d+),")                  // course
             .number("(dd)(dd)(dd),")             // date (ddmmyy)
             .expression("([abZXTSMHFE86430]),")  // event code
-            .expression("([\\d.]+),")                    // battery voltage
+            .expression("([\\d.]+),")            // battery voltage
             .number("(d+),")                     // current mileage
             .number("(d),")                      // GPS on/off (1 = on, 0 = off)
             .number("(d+),")                     // Analog port 1
