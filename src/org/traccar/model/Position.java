@@ -291,4 +291,5 @@ public class Position extends Message {
     public String getType() {
         return super.getType();
     }
+
 }

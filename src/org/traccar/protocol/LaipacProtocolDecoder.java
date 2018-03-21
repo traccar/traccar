@@ -102,10 +102,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(dateBuilder.getDate());
 
         String eventCode = parser.next();
-        String decodedAlarm = decodeAlarm(eventCode);
-        if (decodedAlarm != null) {
-            position.set(Position.KEY_ALARM, decodeAlarm(eventCode));
-        }
+        position.set(Position.KEY_ALARM, decodeAlarm(eventCode));
         position.set(Position.KEY_EVENT, eventCode);
 
         double batteryVoltage = parser.nextDouble();
@@ -117,31 +114,24 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         }
         position.set(Position.KEY_BATTERY, batteryVoltage);
 
-        position.set(Position.KEY_TOTAL_DISTANCE, parser.nextDouble());
+        position.set(Position.KEY_ODOMETER, parser.nextDouble());
         position.set(Position.KEY_GPS, parser.nextInt());
         position.set(Position.PREFIX_ADC + 1, parser.nextDouble() * 0.001);
         position.set(Position.PREFIX_ADC + 2, parser.nextDouble() * 0.001);
 
-        String cellNetCodeString = parser.next();
-        String cellIdString = parser.next();
-        String countryCodeString = parser.next();
-        String operatorCodeString = parser.next();
-        if (cellNetCodeString != null
-                && cellIdString != null
-                && countryCodeString != null
-                && operatorCodeString != null) {
-            int cellNetCode = Integer.parseInt(cellNetCodeString, 16);
-            Long cellId = Long.parseLong(cellIdString, 16);
-            int countryCode = Integer.parseInt(countryCodeString);
-            int operatorCode = Integer.parseInt(operatorCodeString);
-            position.setNetwork(new Network(CellTower.from(countryCode, operatorCode, cellNetCode, cellId)));
+        String lac = parser.next();
+        String cid = parser.next();
+        String mcc = parser.next();
+        String mnc = parser.next();
+        if (lac != null
+                && cid != null
+                && mcc != null
+                && mnc != null) {
+            position.setNetwork(new Network(CellTower.from(Integer.parseInt(mcc), Integer.parseInt(mnc),
+                    Integer.parseInt(lac, 16), Long.parseLong(cid, 16))));
         }
 
         String checksum = parser.next();
-        String result = sentence.replaceAll("^\\$(.*)\\*[0-9a-fA-F]{2}$", "$1");
-        if (checksum == null || Integer.parseInt(checksum, 16) != Checksum.xor(result)) {
-            return null;
-        }
 
         if (channel != null) {
             if (eventCode.equals("3")) {
@@ -162,25 +152,27 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private String decodeAlarm(String event) {
-        if (event.equals('Z')) {
-            return Position.ALARM_LOW_BATTERY;
-        } else if (event.equals('X')) {
-            return Position.ALARM_GEOFENCE_ENTER;
-        } else if (event.equals('T')) {
-            return Position.ALARM_TAMPERING;
-        } else if (event.equals("H")) {
-            return Position.ALARM_POWER_OFF;
-        } else if (event.equals('X')) {
-            return Position.ALARM_GEOFENCE_ENTER;
-        } else if (event.equals('8')) {
-            return Position.ALARM_SHOCK;
-        } else if (event.equals('7') && event.equals('4')) {
-            return Position.ALARM_GEOFENCE_EXIT;
-        } else if (event.equals('6')) {
-            return Position.ALARM_OVERSPEED;
-        } else if (event.equals('3')) {
-            return Position.ALARM_SOS;
+        switch (event)
+        {
+            case "Z":
+                return Position.ALARM_LOW_BATTERY;
+            case "X":
+                return Position.ALARM_GEOFENCE_ENTER;
+            case "T":
+                return Position.ALARM_TAMPERING;
+            case "H":
+                return Position.ALARM_POWER_OFF;
+            case "8":
+                return Position.ALARM_SHOCK;
+            case "7":
+            case "4":
+                return Position.ALARM_GEOFENCE_EXIT;
+            case "6":
+                return Position.ALARM_OVERSPEED;
+            case "3":
+                return Position.ALARM_SOS;
+            default:
+                return null;
         }
-        return null;
     }
 }
