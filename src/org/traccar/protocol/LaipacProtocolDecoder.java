@@ -48,7 +48,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d+),")                  // course
             .number("(dd)(dd)(dd),")             // date (ddmmyy)
             .expression("([abZXTSMHFE86430]),")  // event code
-            .number("(d+)").expression("(\\.?)").number("(d*),")    // battery voltage
+            .number("(d.+),")                    // battery voltage
             .number("(d+),")                     // current mileage
             .number("(d),")                      // GPS on/off (1 = on, 0 = off)
             .number("(d+),")                     // Analog port 1
@@ -105,14 +105,9 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_ALARM, decodeAlarm(eventCode));
         position.set(Position.KEY_EVENT, eventCode);
 
-        double batteryVoltage = parser.nextDouble();
-        if (parser.next().isEmpty()) {
-            parser.next();
-            batteryVoltage *= 0.001;
-        } else {
-            batteryVoltage += parser.nextDouble() * 0.001;
-        }
-        position.set(Position.KEY_BATTERY, batteryVoltage);
+        String batteryVoltage = parser.next();
+        batteryVoltage = batteryVoltage.replaceAll("\\.","");
+        position.set(Position.KEY_BATTERY, Double.parseDouble(batteryVoltage) * 0.001);
 
         position.set(Position.KEY_ODOMETER, parser.nextDouble());
         position.set(Position.KEY_GPS, parser.nextInt());
