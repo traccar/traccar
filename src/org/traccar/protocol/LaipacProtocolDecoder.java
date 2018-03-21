@@ -152,8 +152,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private String decodeAlarm(String event) {
-        switch (event)
-        {
+        switch (event) {
             case "Z":
                 return Position.ALARM_LOW_BATTERY;
             case "X":
