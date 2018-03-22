@@ -77,9 +77,9 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
 
             buf.readUnsignedShort(); // index
 
-            int flags = buf.readUnsignedByte();
+            int recordFlags = buf.readUnsignedByte();
 
-            if (BitUtil.check(flags, 0)) {
+            if (BitUtil.check(recordFlags, 0)) {
                 String deviceId = String.valueOf(buf.readUnsignedInt());
                 if (deviceSession == null) {
                     deviceSession = getDeviceSession(channel, remoteAddress, deviceId);
@@ -90,10 +90,10 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
                 deviceSession = getDeviceSession(channel, remoteAddress);
             }
 
-            if (BitUtil.check(flags, 1)) {
+            if (BitUtil.check(recordFlags, 1)) {
                 buf.readUnsignedInt(); // event id
             }
-            if (BitUtil.check(flags, 2)) {
+            if (BitUtil.check(recordFlags, 2)) {
                 buf.readUnsignedInt(); // time
             }
 
@@ -102,24 +102,25 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
 
             int recordEnd = buf.readerIndex() + length;
 
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
             while (buf.readerIndex() < recordEnd) {
                 int type = buf.readUnsignedByte();
                 int end = buf.readUnsignedShort() + buf.readerIndex();
 
                 if (type == MSG_POS_DATA) {
-                    Position position = new Position(getProtocolName());
-                    position.setDeviceId(deviceSession.getDeviceId());
 
                     position.setTime(new Date((buf.readUnsignedInt() + 1262304000) * 1000)); // since 2010-01-01
                     position.setLatitude(buf.readUnsignedInt() * 90.0 / 0xFFFFFFFFL);
                     position.setLongitude(buf.readUnsignedInt() * 180.0 / 0xFFFFFFFFL);
 
-                    int positionFlags = buf.readUnsignedByte();
-                    position.setValid(BitUtil.check(positionFlags, 0));
-                    if (BitUtil.check(positionFlags, 5)) {
+                    int flags = buf.readUnsignedByte();
+                    position.setValid(BitUtil.check(flags, 0));
+                    if (BitUtil.check(flags, 5)) {
                         position.setLatitude(-position.getLatitude());
                     }
-                    if (BitUtil.check(positionFlags, 6)) {
+                    if (BitUtil.check(flags, 6)) {
                         position.setLongitude(-position.getLongitude());
                     }
 
@@ -131,16 +132,41 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_INPUT, buf.readUnsignedByte());
                     position.set(Position.KEY_EVENT, buf.readUnsignedByte());
 
-                    if (BitUtil.check(positionFlags, 7)) {
+                    if (BitUtil.check(flags, 7)) {
                         position.setAltitude(buf.readMedium());
                     }
 
-                    positions.add(position);
+                } else if (type == MSG_EXT_POS_DATA) {
+
+                    int flags = buf.readUnsignedByte();
+
+                    if (BitUtil.check(flags, 0)) {
+                        position.set(Position.KEY_VDOP, buf.readUnsignedShort());
+                    }
+                    if (BitUtil.check(flags, 1)) {
+                        position.set(Position.KEY_HDOP, buf.readUnsignedShort());
+                    }
+                    if (BitUtil.check(flags, 2)) {
+                        position.set(Position.KEY_PDOP, buf.readUnsignedShort());
+                    }
+                    if (BitUtil.check(flags, 3)) {
+                        position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+                    }
+
+                } else if (type == MSG_AD_SENSORS_DATA) {
+
+                    buf.readUnsignedByte(); // inputs flags
+
+                    position.set(Position.KEY_OUTPUT, buf.readUnsignedByte());
+
+                    buf.readUnsignedByte(); // adc flags
+
                 }
 
                 buf.readerIndex(end);
             }
 
+            positions.add(position);
         }
 
         return positions.isEmpty() ? null : positions;
