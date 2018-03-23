@@ -15,7 +15,7 @@ public class CastelProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_ENGINE_STOP);
 
-        verifyCommand(encoder, command, binary("40401a00043132333435363738393031323334350000000000458301fe6a0d0a"));
+        verifyCommand(encoder, command, binary("40402000013132333435363738393031323334350000000000458301a94a0d0a"));
 
     }
 
