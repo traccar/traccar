@@ -20,6 +20,7 @@ import org.jboss.netty.channel.ChannelPipeline;
 import org.traccar.BaseProtocol;
 import org.traccar.TrackerServer;
 
+import java.nio.ByteOrder;
 import java.util.List;
 
 public class EgtsProtocol extends BaseProtocol {
@@ -30,13 +31,15 @@ public class EgtsProtocol extends BaseProtocol {
 
     @Override
     public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(new ServerBootstrap(), getName()) {
+        TrackerServer server = new TrackerServer(new ServerBootstrap(), getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new EgtsFrameDecoder());
                 pipeline.addLast("objectDecoder", new EgtsProtocolDecoder(EgtsProtocol.this));
             }
-        });
+        };
+        server.setEndianness(ByteOrder.LITTLE_ENDIAN);
+        serverList.add(server);
     }
 
 }

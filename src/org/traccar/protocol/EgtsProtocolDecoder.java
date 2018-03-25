@@ -16,13 +16,17 @@
 package org.traccar.protocol;
 
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.Checksum;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,6 +36,10 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
     public EgtsProtocolDecoder(EgtsProtocol protocol) {
         super(protocol);
     }
+
+    public static final int PT_RESPONSE = 0;
+    public static final int PT_APPDATA = 1;
+    public static final int PT_SIGNED_APPDATA = 2;
 
     public static final int SERVICE_AUTH = 1;
     public static final int SERVICE_TELEDATA = 2;
@@ -60,6 +68,44 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_LIQUID_LEVEL_SENSOR = 27;
     public static final int MSG_PASSENGERS_COUNTERS  = 28;
 
+    private int packetId;
+
+    private void sendResponse(
+            Channel channel, int packetType, int index, int serviceType, int type, ChannelBuffer content) {
+        if (channel != null) {
+
+            ChannelBuffer data = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
+            data.writeByte(type);
+            data.writeShort(content.readableBytes());
+            data.writeBytes(content);
+
+            ChannelBuffer record = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
+            record.writeShort(data.readableBytes());
+            record.writeShort(index);
+            record.writeByte(1 << 6); // flags
+            record.writeByte(serviceType);
+            record.writeByte(serviceType);
+            record.writeBytes(data);
+            int recordChecksum = Checksum.crc16(Checksum.CRC16_CCITT_FALSE, record.toByteBuffer());
+
+            ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
+            response.writeByte(1); // protocol version
+            response.writeByte(0); // security key id
+            response.writeByte(0); // flags
+            response.writeByte(5 + 2 + 2 + 2); // header length
+            response.writeByte(0); // encoding
+            response.writeShort(record.readableBytes());
+            response.writeShort(packetId++);
+            response.writeByte(packetType);
+            response.writeByte(Checksum.crc8(response.toByteBuffer()));
+            response.writeBytes(record);
+            response.writeShort(recordChecksum);
+
+            channel.write(response);
+
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -68,26 +114,16 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
 
         buf.skipBytes(buf.getUnsignedByte(buf.readerIndex() + 3));
 
-        DeviceSession deviceSession = null;
         List<Position> positions = new LinkedList<>();
 
         while (buf.readableBytes() > 2) {
 
             int length = buf.readUnsignedShort();
-
-            buf.readUnsignedShort(); // index
-
+            int index = buf.readUnsignedShort();
             int recordFlags = buf.readUnsignedByte();
 
             if (BitUtil.check(recordFlags, 0)) {
-                String deviceId = String.valueOf(buf.readUnsignedInt());
-                if (deviceSession == null) {
-                    deviceSession = getDeviceSession(channel, remoteAddress, deviceId);
-                }
-            }
-
-            if (deviceSession == null) {
-                deviceSession = getDeviceSession(channel, remoteAddress);
+                buf.readUnsignedInt(); // object id
             }
 
             if (BitUtil.check(recordFlags, 1)) {
@@ -97,19 +133,58 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedInt(); // time
             }
 
-            buf.readUnsignedByte(); // source service type
+            int serviceType = buf.readUnsignedByte();
             buf.readUnsignedByte(); // recipient service type
 
             int recordEnd = buf.readerIndex() + length;
 
             Position position = new Position(getProtocolName());
-            position.setDeviceId(deviceSession.getDeviceId());
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+            if (deviceSession != null) {
+                position.setDeviceId(deviceSession.getDeviceId());
+            }
+
+            ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
+            response.writeShort(index);
+            response.writeByte(0); // success
+            sendResponse(channel, PT_RESPONSE, index, serviceType, MSG_RECORD_RESPONSE, response);
 
             while (buf.readerIndex() < recordEnd) {
                 int type = buf.readUnsignedByte();
                 int end = buf.readUnsignedShort() + buf.readerIndex();
 
-                if (type == MSG_POS_DATA) {
+                if (type == MSG_TERM_IDENTITY) {
+
+                    buf.readUnsignedInt(); // object id
+                    int flags = buf.readUnsignedByte();
+
+                    if (BitUtil.check(flags, 0)) {
+                        buf.readUnsignedShort(); // home dispatcher identifier
+                    }
+                    if (BitUtil.check(flags, 1)) {
+                        getDeviceSession(channel, remoteAddress, buf.readBytes(15).toString(StandardCharsets.US_ASCII));
+                    }
+                    if (BitUtil.check(flags, 2)) {
+                        getDeviceSession(channel, remoteAddress, buf.readBytes(16).toString(StandardCharsets.US_ASCII));
+                    }
+                    if (BitUtil.check(flags, 3)) {
+                        buf.skipBytes(3); // language identifier
+                    }
+                    if (BitUtil.check(flags, 5)) {
+                        buf.skipBytes(3); // network identifier
+                    }
+                    if (BitUtil.check(flags, 6)) {
+                        buf.readUnsignedShort(); // buffer size
+                    }
+                    if (BitUtil.check(flags, 7)) {
+                        getDeviceSession(channel, remoteAddress, buf.readBytes(15).toString(StandardCharsets.US_ASCII));
+                    }
+
+                    response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
+                    response.writeByte(0); // success
+                    sendResponse(channel, PT_APPDATA, index, serviceType, MSG_RESULT_CODE, response);
+
+                } else if (type == MSG_POS_DATA) {
 
                     position.setTime(new Date((buf.readUnsignedInt() + 1262304000) * 1000)); // since 2010-01-01
                     position.setLatitude(buf.readUnsignedInt() * 90.0 / 0xFFFFFFFFL);
@@ -166,7 +241,9 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
                 buf.readerIndex(end);
             }
 
-            positions.add(position);
+            if (deviceSession != null) {
+                positions.add(position);
+            }
         }
 
         return positions.isEmpty() ? null : positions;

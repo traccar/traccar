@@ -12,6 +12,9 @@ public class EgtsProtocolDecoderTest extends ProtocolTest {
 
         EgtsProtocolDecoder decoder = new EgtsProtocolDecoder(new EgtsProtocol());
 
+        verifyNull(decoder, binary(ByteOrder.LITTLE_ENDIAN,
+                "0100000b002400a0d601f01900030081030000000101011600030000004238363434393530333436343333373600014cdc"));
+
         verifyPositions(decoder, binary(ByteOrder.LITTLE_ENDIAN,
                 "0100020B0025003A5701C91A003A5701CD6E68490202101700CBB4740F7617FD924364104F116A0000000000010300001EC2"),
                 position("2018-03-21 05:38:19.000", true, 51.67569, 55.59189));
