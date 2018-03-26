@@ -45,7 +45,7 @@ public class WatchFrameDecoder extends FrameDecoder {
         }
 
         if (payloadIndex + 5 < buf.writerIndex() && buf.getByte(payloadIndex + 5) == '*'
-                && buf.toString(payloadIndex + 1, 4, StandardCharsets.US_ASCII).matches("[0-9A-F]+")) {
+                && buf.toString(payloadIndex + 1, 4, StandardCharsets.US_ASCII).matches("\\p{XDigit}+")) {
             lengthIndex = payloadIndex + 1;
             payloadIndex = buf.indexOf(lengthIndex, buf.writerIndex(), (byte) '*');
             if (payloadIndex < 0) {

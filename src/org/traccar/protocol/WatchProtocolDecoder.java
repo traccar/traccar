@@ -171,8 +171,8 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
         String manufacturer = buf.readBytes(2).toString(StandardCharsets.US_ASCII);
         buf.skipBytes(1); // delimiter
 
-        int idLength = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '*') - buf.readerIndex();
-        String id = buf.readBytes(idLength).toString(StandardCharsets.US_ASCII);
+        int idIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '*');
+        String id = buf.readBytes(idIndex - buf.readerIndex()).toString(StandardCharsets.US_ASCII);
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
         if (deviceSession == null) {
             return null;
@@ -181,7 +181,9 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
         buf.skipBytes(1); // delimiter
 
         String index = null;
-        if (idLength > 10) {
+        int contentIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '*');
+        if (contentIndex + 5 < buf.writerIndex() && buf.getByte(contentIndex + 5) == '*'
+                && buf.toString(contentIndex + 1, 4, StandardCharsets.US_ASCII).matches("\\p{XDigit}+")) {
             int indexLength = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '*') - buf.readerIndex();
             index = buf.readBytes(indexLength).toString(StandardCharsets.US_ASCII);
             buf.skipBytes(1); // delimiter
@@ -192,7 +194,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
         buf.writerIndex(buf.writerIndex() - 1); // ignore ending
 
-        int contentIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ',');
+        contentIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ',');
         if (contentIndex < 0) {
             contentIndex = buf.writerIndex();
         }
