@@ -15,6 +15,9 @@
  */
 package org.traccar.model;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class Notification extends ScheduledModel {
 
     private boolean always;
@@ -66,4 +69,19 @@ public class Notification extends ScheduledModel {
     public void setSms(boolean sms) {
         this.sms = sms;
     }
+
+    public Set<String> getMethods() {
+        final Set<String> set = new HashSet<>();
+        if (web) {
+            set.add("web");
+        }
+        if (mail) {
+            set.add("mail");
+        }
+        if (sms) {
+            set.add("sms");
+        }
+        return set;
+    }
+
 }
