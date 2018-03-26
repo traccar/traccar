@@ -32,8 +32,7 @@ import org.traccar.model.Event;
 import org.traccar.model.Notification;
 import org.traccar.model.Position;
 import org.traccar.model.Typed;
-import org.traccar.notification.NotificationMail;
-import org.traccar.notification.NotificationSms;
+import org.traccar.notification.NotificatorManager;
 
 public class NotificationManager extends ExtendedObjectManager<Notification> {
 
@@ -85,20 +84,20 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
                 }
                 boolean sentWeb = false;
                 boolean sentMail = false;
-                boolean sentSms = Context.getSmppManager() == null;
+                boolean sentSms = Context.getSmsManager() == null;
                 for (long notificationId : getEffectiveNotifications(userId, deviceId, event.getServerTime())) {
                     Notification notification = getById(notificationId);
                     if (getById(notificationId).getType().equals(event.getType())) {
                         if (!sentWeb && notification.getWeb()) {
-                            Context.getConnectionManager().updateEvent(userId, event);
+                            NotificatorManager.getWeb().sendAsync(userId, event, position);
                             sentWeb = true;
                         }
                         if (!sentMail && notification.getMail()) {
-                            NotificationMail.sendMailAsync(userId, event, position);
+                            NotificatorManager.getMail().sendAsync(userId, event, position);
                             sentMail = true;
                         }
                         if (!sentSms && notification.getSms()) {
-                            NotificationSms.sendSmsAsync(userId, event, position);
+                            NotificatorManager.getSms().sendAsync(userId, event, position);
                             sentSms = true;
                         }
                     }

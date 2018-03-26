@@ -20,32 +20,27 @@ import org.traccar.Context;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
+import org.traccar.sms.SMSException;
 
-import com.cloudhopper.smpp.type.RecoverablePduException;
-import com.cloudhopper.smpp.type.SmppChannelException;
-import com.cloudhopper.smpp.type.SmppTimeoutException;
-import com.cloudhopper.smpp.type.UnrecoverablePduException;
+public final class NotificationSms extends Notificator {
 
-public final class NotificationSms {
-
-    private NotificationSms() {
-    }
-
-    public static void sendSmsAsync(long userId, Event event, Position position) {
+    @Override
+    public void sendAsync(long userId, Event event, Position position) {
         User user = Context.getPermissionsManager().getUser(userId);
-        if (Context.getSmppManager() != null && user.getPhone() != null) {
+        if (Context.getSmsManager() != null && user.getPhone() != null) {
             Context.getStatisticsManager().registerSms();
-            Context.getSmppManager().sendMessageAsync(user.getPhone(),
+            Context.getSmsManager().sendMessageAsync(user.getPhone(),
                     NotificationFormatter.formatSmsMessage(userId, event, position), false);
         }
     }
 
-    public static void sendSmsSync(long userId, Event event, Position position) throws RecoverablePduException,
-            UnrecoverablePduException, SmppTimeoutException, SmppChannelException, InterruptedException {
+    @Override
+    public void sendSync(long userId, Event event, Position position) throws SMSException,
+            InterruptedException {
         User user = Context.getPermissionsManager().getUser(userId);
-        if (Context.getSmppManager() != null && user.getPhone() != null) {
+        if (Context.getSmsManager() != null && user.getPhone() != null) {
             Context.getStatisticsManager().registerSms();
-            Context.getSmppManager().sendMessageSync(user.getPhone(),
+            Context.getSmsManager().sendMessageSync(user.getPhone(),
                     NotificationFormatter.formatSmsMessage(userId, event, position), false);
         }
     }
