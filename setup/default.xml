@@ -235,5 +235,6 @@
     <entry key='cautela.port'>5160</entry>
     <entry key='continental.port'>5161</entry>
     <entry key='egts.port'>5162</entry>
+    <entry key='robotrack.port'>5163</entry>
 
 </properties>
