@@ -85,7 +85,7 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
                 }
                 boolean sentWeb = false;
                 boolean sentMail = false;
-                boolean sentSms = Context.getSmppManager() == null;
+                boolean sentSms = Context.getSmsManager() == null;
                 for (long notificationId : getEffectiveNotifications(userId, deviceId, event.getServerTime())) {
                     Notification notification = getById(notificationId);
                     if (getById(notificationId).getType().equals(event.getType())) {

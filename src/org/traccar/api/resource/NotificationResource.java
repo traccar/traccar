@@ -33,11 +33,8 @@ import org.traccar.model.Notification;
 import org.traccar.model.Typed;
 import org.traccar.notification.NotificationMail;
 import org.traccar.notification.NotificationSms;
+import org.traccar.sms.SMSException;
 
-import com.cloudhopper.smpp.type.RecoverablePduException;
-import com.cloudhopper.smpp.type.SmppChannelException;
-import com.cloudhopper.smpp.type.SmppTimeoutException;
-import com.cloudhopper.smpp.type.UnrecoverablePduException;
 
 @Path("notifications")
 @Produces(MediaType.APPLICATION_JSON)
@@ -56,8 +53,7 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
 
     @POST
     @Path("test")
-    public Response testMessage() throws MessagingException, RecoverablePduException,
-            UnrecoverablePduException, SmppTimeoutException, SmppChannelException, InterruptedException {
+    public Response testMessage() throws SMSException, MessagingException, InterruptedException {
         NotificationMail.sendMailSync(getUserId(), new Event("test", 0), null);
         NotificationSms.sendSmsSync(getUserId(), new Event("test", 0), null);
         return Response.noContent().build();
