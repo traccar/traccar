@@ -37,16 +37,20 @@ public class WatchFrameDecoder extends FrameDecoder {
         int lengthIndex = buf.indexOf(idIndex, buf.writerIndex(), (byte) '*') + 1;
         if (lengthIndex <= 0) {
             return null;
-        } else if (lengthIndex - idIndex > 10 + 1) {
-            lengthIndex = buf.indexOf(lengthIndex, buf.writerIndex(), (byte) '*') + 1;
-            if (lengthIndex <= 0) {
-                return null;
-            }
         }
 
         int payloadIndex = buf.indexOf(lengthIndex, buf.writerIndex(), (byte) '*');
         if (payloadIndex < 0) {
             return null;
+        }
+
+        if (payloadIndex + 5 < buf.writerIndex() && buf.getByte(payloadIndex + 5) == '*'
+                && buf.toString(payloadIndex + 1, 4, StandardCharsets.US_ASCII).matches("[0-9A-F]+")) {
+            lengthIndex = payloadIndex + 1;
+            payloadIndex = buf.indexOf(lengthIndex, buf.writerIndex(), (byte) '*');
+            if (payloadIndex < 0) {
+                return null;
+            }
         }
 
         int length = Integer.parseInt(

@@ -11,6 +11,10 @@ public class WatchFrameDecoderTest extends ProtocolTest {
         WatchFrameDecoder decoder = new WatchFrameDecoder();
 
         verifyFrame(
+                binary("5b33472a3335323636313039303134333135302a303030412a4c4b2c302c302c3130305d"),
+                decoder.decode(null, null, binary("5b33472a3335323636313039303134333135302a303030412a4c4b2c302c302c3130305d")));
+
+        verifyFrame(
                 binary("5b33472a383330383430363237392a303030382a72636170747572655d"),
                 decoder.decode(null, null, binary("5b33472a383330383430363237392a303030382a72636170747572655d")));
 
