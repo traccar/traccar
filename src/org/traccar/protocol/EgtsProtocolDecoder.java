@@ -97,7 +97,7 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
             response.writeShort(record.readableBytes());
             response.writeShort(packetId++);
             response.writeByte(packetType);
-            response.writeByte(Checksum.crc8(response.toByteBuffer()));
+            response.writeByte(Checksum.crc8(Checksum.CRC8_EGTS, response.toByteBuffer()));
             response.writeBytes(record);
             response.writeShort(recordChecksum);
 
