@@ -162,10 +162,12 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
                         buf.readUnsignedShort(); // home dispatcher identifier
                     }
                     if (BitUtil.check(flags, 1)) {
-                        getDeviceSession(channel, remoteAddress, buf.readBytes(15).toString(StandardCharsets.US_ASCII));
+                        getDeviceSession(
+                                channel, remoteAddress, buf.readBytes(15).toString(StandardCharsets.US_ASCII).trim());
                     }
                     if (BitUtil.check(flags, 2)) {
-                        getDeviceSession(channel, remoteAddress, buf.readBytes(16).toString(StandardCharsets.US_ASCII));
+                        getDeviceSession(
+                                channel, remoteAddress, buf.readBytes(16).toString(StandardCharsets.US_ASCII).trim());
                     }
                     if (BitUtil.check(flags, 3)) {
                         buf.skipBytes(3); // language identifier
@@ -177,7 +179,8 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
                         buf.readUnsignedShort(); // buffer size
                     }
                     if (BitUtil.check(flags, 7)) {
-                        getDeviceSession(channel, remoteAddress, buf.readBytes(15).toString(StandardCharsets.US_ASCII));
+                        getDeviceSession(
+                                channel, remoteAddress, buf.readBytes(15).toString(StandardCharsets.US_ASCII).trim());
                     }
 
                     response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
@@ -241,7 +244,7 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
                 buf.readerIndex(end);
             }
 
-            if (deviceSession != null) {
+            if (serviceType == SERVICE_TELEDATA && deviceSession != null) {
                 positions.add(position);
             }
         }
