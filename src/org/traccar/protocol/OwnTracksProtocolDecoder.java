@@ -22,10 +22,11 @@ import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.DeviceSession;
-//import org.traccar.Context;
+import org.traccar.Context;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 import org.traccar.model.Event;
+import org.traccar.model.Device;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -69,7 +70,6 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
         } else {
             uniqueId = root.getString("tid");
         }
-
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, uniqueId);
         if (deviceSession == null) {
             sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
@@ -77,9 +77,8 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
         }
 
         if (root.getString("_type").equals("lwt")) {
-            //if (Context.getConnectionManager() != null) {
-            //   Context.getConnectionManager().removeActiveDevice(channel);
-            //}
+            Context.getConnectionManager().updateDevice(deviceSession.getDeviceId(), Device.STATUS_OFFLINE, new Date());
+
             sendResponse(channel, HttpResponseStatus.OK);
             return null;
         }
