@@ -28,6 +28,7 @@ import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
@@ -60,9 +61,9 @@ public class RoboTrackProtocolDecoder extends BaseProtocolDecoder {
             String imei = buf.readBytes(15).toString(StandardCharsets.US_ASCII);
 
             if (getDeviceSession(channel, remoteAddress, imei) != null && channel != null) {
-                ChannelBuffer response = ChannelBuffers.dynamicBuffer();
-                buf.writeByte(MSG_ACK);
-                buf.writeByte(0x01); // success
+                ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
+                response.writeByte(MSG_ACK);
+                response.writeByte(0x01); // success
                 response.writeByte(Checksum.crc8(Checksum.CRC8_ROHC, response.toByteBuffer()));
                 channel.write(response);
             }
