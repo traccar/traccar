@@ -22,6 +22,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -203,7 +204,7 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
                     }
 
                     int speed = buf.readUnsignedShort();
-                    position.setSpeed(BitUtil.to(speed, 14));
+                    position.setSpeed(UnitsConverter.knotsFromKph(BitUtil.to(speed, 14) * 0.1));
                     position.setCourse(buf.readUnsignedByte() + (BitUtil.check(speed, 15) ? 0x100 : 0));
 
                     position.set(Position.KEY_ODOMETER, buf.readUnsignedMedium() * 100);
