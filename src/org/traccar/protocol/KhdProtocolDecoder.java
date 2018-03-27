@@ -36,17 +36,10 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
 
     private String readSerialNumber(ChannelBuffer buf) {
         int b1 = buf.readUnsignedByte();
-        int b2 = buf.readUnsignedByte();
-        if (b2 > 0x80) {
-            b2 -= 0x80;
-        }
-        int b3 = buf.readUnsignedByte();
-        if (b3 > 0x80) {
-            b3 -= 0x80;
-        }
+        int b2 = buf.readUnsignedByte() - 0x80;
+        int b3 = buf.readUnsignedByte() - 0x80;
         int b4 = buf.readUnsignedByte();
-        String serialNumber = String.format("%02d%02d%02d%02d", b1, b2, b3, b4);
-        return String.valueOf(Long.parseLong(serialNumber));
+        return String.format("%02d%02d%02d%02d", b1, b2, b3, b4);
     }
 
     public static final int MSG_LOGIN = 0xB1;
