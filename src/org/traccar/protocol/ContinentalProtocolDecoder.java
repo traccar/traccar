@@ -16,6 +16,7 @@
 package org.traccar.protocol;
 
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
@@ -36,6 +37,22 @@ public class ContinentalProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_ACK = 0x06;
     public static final int MSG_NACK = 0x15;
 
+    private void sendResponse(Channel channel, long serialNumber) {
+        if (channel != null) {
+            ChannelBuffer response = ChannelBuffers.dynamicBuffer();
+
+            response.writeByte('S');
+            response.writeByte('V');
+            response.writeShort(2 + 2 + 1 + 4 + 2); // length
+            response.writeByte(1); // version
+            response.writeInt((int) serialNumber);
+            response.writeByte(0); // product
+            response.writeByte(MSG_ACK);
+
+            channel.write(response);
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -46,10 +63,13 @@ public class ContinentalProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedShort(); // length
         buf.readUnsignedByte(); // software version
 
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, String.valueOf(buf.readUnsignedInt()));
+        long serialNumber = buf.readUnsignedInt();
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, String.valueOf(serialNumber));
         if (deviceSession == null) {
             return null;
         }
+
+        sendResponse(channel, serialNumber);
 
         buf.readUnsignedByte(); // product
 
