@@ -64,7 +64,7 @@ public class RoboTrackProtocolDecoder extends BaseProtocolDecoder {
                 ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
                 response.writeByte(MSG_ACK);
                 response.writeByte(0x01); // success
-                response.writeByte(Checksum.crc8(Checksum.CRC8_ROHC, response.toByteBuffer()));
+                response.writeByte(0x66); // checksum
                 channel.write(response);
             }
 
