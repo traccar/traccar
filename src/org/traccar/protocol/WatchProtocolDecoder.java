@@ -60,7 +60,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             .expression("(.*)")                  // cell and wifi
             .compile();
 
-    private void sendResponse(Channel channel, String manufacturer, String id, String index, String content) {
+    private void sendResponse(Channel channel, String id, String index, String content) {
         if (channel != null) {
             if (index != null) {
                 channel.write(String.format(
@@ -161,6 +161,17 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private boolean hasIndex;
+    private String manufacturer;
+
+    public boolean getHasIndex() {
+        return hasIndex;
+    }
+
+    public String getManufacturer() {
+        return manufacturer;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -168,7 +179,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
         ChannelBuffer buf = (ChannelBuffer) msg;
 
         buf.skipBytes(1); // header
-        String manufacturer = buf.readBytes(2).toString(StandardCharsets.US_ASCII);
+        manufacturer = buf.readBytes(2).toString(StandardCharsets.US_ASCII);
         buf.skipBytes(1); // delimiter
 
         int idIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '*');
@@ -185,6 +196,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
         if (contentIndex + 5 < buf.writerIndex() && buf.getByte(contentIndex + 5) == '*'
                 && buf.toString(contentIndex + 1, 4, StandardCharsets.US_ASCII).matches("\\p{XDigit}+")) {
             int indexLength = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '*') - buf.readerIndex();
+            hasIndex = true;
             index = buf.readBytes(indexLength).toString(StandardCharsets.US_ASCII);
             buf.skipBytes(1); // delimiter
         }
@@ -207,11 +219,11 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
         if (type.equals("INIT")) {
 
-            sendResponse(channel, manufacturer, id, index, "INIT,1");
+            sendResponse(channel, id, index, "INIT,1");
 
         } else if (type.equals("LK")) {
 
-            sendResponse(channel, manufacturer, id, index, "LK");
+            sendResponse(channel, id, index, "LK");
 
             if (buf.readable()) {
                 String[] values = buf.toString(StandardCharsets.US_ASCII).split(",");
@@ -231,14 +243,14 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
                 || type.equals("AL") || type.equals("WT")) {
 
             if (type.equals("AL")) {
-                sendResponse(channel, manufacturer, id, index, "AL");
+                sendResponse(channel, id, index, "AL");
             }
 
             return decodePosition(deviceSession, buf.toString(StandardCharsets.US_ASCII));
 
         } else if (type.equals("TKQ")) {
 
-            sendResponse(channel, manufacturer, id, index, "TKQ");
+            sendResponse(channel, id, index, "TKQ");
 
         } else if (type.equals("PULSE") || type.equals("heart") || type.equals("bphrt")) {
 

@@ -15,6 +15,7 @@
  */
 package org.traccar.protocol;
 
+import org.jboss.netty.channel.Channel;
 import org.traccar.StringProtocolEncoder;
 import org.traccar.helper.DataConverter;
 import org.traccar.helper.Log;
@@ -41,12 +42,27 @@ public class WatchProtocolEncoder extends StringProtocolEncoder implements Strin
         return null;
     }
 
+    protected String formatCommand(Channel channel, Command command, String format, String... keys) {
 
-    @Override
-    protected String formatCommand(Command command, String format, String... keys) {
+        boolean hasIndex = false;
+        String manufacturer = "CS";
+        if (channel != null) {
+            WatchProtocolDecoder decoder = channel.getPipeline().get(WatchProtocolDecoder.class);
+            if (decoder != null) {
+                hasIndex = decoder.getHasIndex();
+                manufacturer = decoder.getManufacturer();
+            }
+        }
+
         String content = formatCommand(command, format, this, keys);
-        return String.format("[CS*%s*%04x*%s]",
-                getUniqueId(command.getDeviceId()), content.length(), content);
+
+        if (hasIndex) {
+            return String.format("[%s*%s*0001*%04x*%s]",
+                    manufacturer, getUniqueId(command.getDeviceId()), content.length(), content);
+        } else {
+            return String.format("[%s*%s*%04x*%s]",
+                    manufacturer, getUniqueId(command.getDeviceId()), content.length(), content);
+        }
     }
 
     private int getEnableFlag(Command command) {
@@ -96,37 +112,37 @@ public class WatchProtocolEncoder extends StringProtocolEncoder implements Strin
     }
 
     @Override
-    protected Object encodeCommand(Command command) {
+    protected Object encodeCommand(Channel channel, Command command) {
 
         switch (command.getType()) {
             case Command.TYPE_CUSTOM:
-                return formatCommand(command, command.getString(Command.KEY_DATA));
+                return formatCommand(channel, command, command.getString(Command.KEY_DATA));
             case Command.TYPE_POSITION_SINGLE:
-                return formatCommand(command, "RG");
+                return formatCommand(channel, command, "RG");
             case Command.TYPE_SOS_NUMBER:
-                return formatCommand(command, "SOS{%s},{%s}", Command.KEY_INDEX, Command.KEY_PHONE);
+                return formatCommand(channel, command, "SOS{%s},{%s}", Command.KEY_INDEX, Command.KEY_PHONE);
             case Command.TYPE_ALARM_SOS:
-                return formatCommand(command, "SOSSMS," + getEnableFlag(command));
+                return formatCommand(channel, command, "SOSSMS," + getEnableFlag(command));
             case Command.TYPE_ALARM_BATTERY:
-                return formatCommand(command, "LOWBAT," + getEnableFlag(command));
+                return formatCommand(channel, command, "LOWBAT," + getEnableFlag(command));
             case Command.TYPE_REBOOT_DEVICE:
-                return formatCommand(command, "RESET");
+                return formatCommand(channel, command, "RESET");
             case Command.TYPE_ALARM_REMOVE:
-                return formatCommand(command, "REMOVE," + getEnableFlag(command));
+                return formatCommand(channel, command, "REMOVE," + getEnableFlag(command));
             case Command.TYPE_SILENCE_TIME:
-                return formatCommand(command, "SILENCETIME,{%s}", Command.KEY_DATA);
+                return formatCommand(channel, command, "SILENCETIME,{%s}", Command.KEY_DATA);
             case Command.TYPE_ALARM_CLOCK:
-                return formatCommand(command, "REMIND,{%s}", Command.KEY_DATA);
+                return formatCommand(channel, command, "REMIND,{%s}", Command.KEY_DATA);
             case Command.TYPE_SET_PHONEBOOK:
-                return formatCommand(command, "PHB,{%s}", Command.KEY_DATA);
+                return formatCommand(channel, command, "PHB,{%s}", Command.KEY_DATA);
             case Command.TYPE_VOICE_MESSAGE:
-                return formatCommand(command, "TK," + getBinaryData(command));
+                return formatCommand(channel, command, "TK," + getBinaryData(command));
             case Command.TYPE_POSITION_PERIODIC:
-                return formatCommand(command, "UPLOAD,{%s}", Command.KEY_FREQUENCY);
+                return formatCommand(channel, command, "UPLOAD,{%s}", Command.KEY_FREQUENCY);
             case Command.TYPE_SET_TIMEZONE:
-                return formatCommand(command, "LZ,,{%s}", Command.KEY_TIMEZONE);
+                return formatCommand(channel, command, "LZ,,{%s}", Command.KEY_TIMEZONE);
             case Command.TYPE_SET_INDICATOR:
-                return formatCommand(command, "FLOWER,{%s}", Command.KEY_DATA);
+                return formatCommand(channel, command, "FLOWER,{%s}", Command.KEY_DATA);
             default:
                 Log.warning(new UnsupportedOperationException(command.getType()));
                 break;

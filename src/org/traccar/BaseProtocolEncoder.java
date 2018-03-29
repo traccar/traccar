@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ public abstract class BaseProtocolEncoder extends OneToOneEncoder {
 
         if (msg instanceof Command) {
             Command command = (Command) msg;
-            Object encodedCommand = encodeCommand(command);
+            Object encodedCommand = encodeCommand(channel, command);
 
             // Log command
             StringBuilder s = new StringBuilder();
@@ -65,6 +65,12 @@ public abstract class BaseProtocolEncoder extends OneToOneEncoder {
         return msg;
     }
 
-    protected abstract Object encodeCommand(Command command);
+    protected Object encodeCommand(Channel channel, Command command) {
+        return encodeCommand(command);
+    }
+
+    protected Object encodeCommand(Command command) {
+        return null;
+    }
 
 }
