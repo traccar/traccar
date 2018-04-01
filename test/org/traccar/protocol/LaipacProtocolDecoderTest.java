@@ -95,6 +95,31 @@ public class LaipacProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "$AVRMC,96414215,170046,p,4310.7965,N,07652.0816,E,0.00,0.00,071016,0,4069,98,1,0,0*04"));
 
+        verifyPosition(decoder, text(
+                "$AVRMC,999999999999999,111602,r,5050.1262,N,00419.9660,E,0.00,0.00,120318,0,3843,95,1,0,0,3EE4A617,020610*47"));
+
+        verifyPosition(decoder, text(
+                "$AVRMC,358174067149865,143456,R,5050.1285,N,00420.0620,E,0.00,309.27,190318,0,3455,119,1,0,0,3EE4A617,020610*54"));
+
+        verifyPosition(decoder, text(
+                "$AVRMC,999999999999999,084514,r,5050.1314,N,00419.9719,E,0.68,306.39,120318,0,3882,84,1,0,0,3EE4A617,020610*4D"));
+
+        //Alarm button
+        verifyPosition(decoder, text(
+                "$AVRMC,358174067149865,142945,R,5050.1254,N,00420.0490,E,0.00,0.00,190318,3,3455,119,1,0,0,3EE4A617,020610*53"));
+
+        //G-Sensor
+        verifyPosition(decoder, text(
+                "$AVRMC,358174067149865,143407,R,5050.1254,N,00420.0490,E,0.00,0.00,190318,8,3455,119,1,0,0,3EE4A617,020610*52"));
+
+        //Powered off
+        verifyPosition(decoder, text(
+                "$AVRMC,358174067149865,143648,A,5050.1141,N,00420.0525,E,1.24,174.38,190318,H,3455,119,1,0,0,3EE4A617,020610*3E"));
+
+        //No network
+        verifyPosition(decoder, text(
+                "$AVRMC,358174067149865,143747,R,5050.1124,N,00420.0542,E,1.34,161.96,190318,a,3416,119,1,0,0*7D"));
+
     }
 
 }

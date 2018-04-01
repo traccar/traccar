@@ -486,7 +486,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
                     position.set("vehicleSpeed", buf.readUnsignedShort() / 256.0);
                     break;
                 case 0x03:
-                    position.set("axleLoadSum", buf.readUnsignedShort() * 2);
+                    position.set(Position.KEY_AXLE_WEIGHT, buf.readUnsignedShort() * 2);
                     break;
                 case 0x04:
                     position.set("tyrePressure", buf.readUnsignedByte() * 10);
@@ -608,8 +608,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             selector = buf.readUnsignedMedium();
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
         if (deviceSession == null) {
             return null;

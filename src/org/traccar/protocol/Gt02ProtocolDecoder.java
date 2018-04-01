@@ -47,8 +47,7 @@ public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
         buf.skipBytes(2); // header
         buf.readByte(); // size
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
 
         // Zero for location messages
         int power = buf.readUnsignedByte();

@@ -10,6 +10,9 @@ public class OsmAndProtocolDecoderTest extends ProtocolTest {
 
         OsmAndProtocolDecoder decoder = new OsmAndProtocolDecoder(new OsmAndProtocol());
 
+        verifyNotNull(decoder, request(
+                "/?id=123456&timestamp=1377177267&cell=257,02,16,2224&cell=257,02,16,2223,-90&wifi=00-14-22-01-23-45,-80&wifi=00-1C-B3-09-85-15,-70"));
+
         verifyNull(decoder, request(
                 "/?timestamp=1377177267&lat=60.0&lon=30.0"));
 

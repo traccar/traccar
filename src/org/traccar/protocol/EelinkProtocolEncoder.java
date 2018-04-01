@@ -18,10 +18,10 @@ package org.traccar.protocol;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.traccar.BaseProtocolEncoder;
+import org.traccar.helper.DataConverter;
 import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
-import javax.xml.bind.DatatypeConverter;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
@@ -47,7 +47,7 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
         ChannelBuffer buf = ChannelBuffers.dynamicBuffer();
 
         if (connectionless) {
-            buf.writeBytes(ChannelBuffers.wrappedBuffer(DatatypeConverter.parseHexBinary('0' + uniqueId)));
+            buf.writeBytes(ChannelBuffers.wrappedBuffer(DataConverter.parseHex('0' + uniqueId)));
         }
 
         buf.writeByte(0x67);

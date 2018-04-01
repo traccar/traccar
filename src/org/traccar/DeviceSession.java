@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 package org.traccar;
 
+import java.util.TimeZone;
+
 public class DeviceSession {
 
     private final long deviceId;
@@ -25,6 +27,16 @@ public class DeviceSession {
 
     public long getDeviceId() {
         return deviceId;
+    }
+
+    private TimeZone timeZone;
+
+    public void setTimeZone(TimeZone timeZone) {
+        this.timeZone = timeZone;
+    }
+
+    public TimeZone getTimeZone() {
+        return timeZone;
     }
 
 }

@@ -11,6 +11,9 @@ public class OigoProtocolDecoderTest extends ProtocolTest {
         OigoProtocolDecoder decoder = new OigoProtocolDecoder(new OigoProtocol());
 
         verifyPosition(decoder, binary(
+                "7e002e000000146310002523830400001bfb000369150f310c0591594d062ac0c0141508011303cd63101604fd00000000"));
+
+        verifyPosition(decoder, binary(
                 "0103537820628365110310410790660962521813380026EE4EFF8593AA0065003E00794C020600100500000000"));
 
         verifyPosition(decoder, binary(

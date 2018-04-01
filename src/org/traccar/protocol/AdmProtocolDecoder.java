@@ -46,8 +46,7 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.to(type, 2) == 0) {
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             position.set(Position.KEY_VERSION_FW, buf.readUnsignedByte());
@@ -124,8 +123,7 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         getLastLocation(position, null);

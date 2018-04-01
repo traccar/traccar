@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.server.session.HashSessionManager;
+import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.webapp.WebAppContext;
@@ -35,6 +36,7 @@ import org.traccar.Config;
 import org.traccar.Context;
 import org.traccar.api.AsyncSocketServlet;
 import org.traccar.api.CorsResponseFilter;
+import org.traccar.api.MediaFilter;
 import org.traccar.api.ObjectMapperProvider;
 import org.traccar.api.ResourceErrorHandler;
 import org.traccar.api.SecurityRequestFilter;
@@ -42,6 +44,7 @@ import org.traccar.api.resource.ServerResource;
 import org.traccar.helper.Log;
 
 import javax.naming.InitialContext;
+import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -49,6 +52,7 @@ import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.InetSocketAddress;
+import java.util.EnumSet;
 
 public class WebServer {
 
@@ -163,11 +167,19 @@ public class WebServer {
 
         servletHandler.addServlet(new ServletHolder(new AsyncSocketServlet()), "/socket");
 
+        if (config.hasKey("media.path")) {
+            ServletHolder servletHolder = new ServletHolder("media", DefaultServlet.class);
+            servletHolder.setInitParameter("resourceBase", config.getString("media.path"));
+            servletHolder.setInitParameter("dirAllowed", config.getString("media.dirAllowed", "false"));
+            servletHolder.setInitParameter("pathInfoOnly", "true");
+            servletHandler.addServlet(servletHolder, "/media/*");
+            servletHandler.addFilter(MediaFilter.class, "/media/*", EnumSet.allOf(DispatcherType.class));
+        }
+
         ResourceConfig resourceConfig = new ResourceConfig();
         resourceConfig.registerClasses(JacksonFeature.class, ObjectMapperProvider.class, ResourceErrorHandler.class);
         resourceConfig.registerClasses(SecurityRequestFilter.class, CorsResponseFilter.class);
         resourceConfig.packages(ServerResource.class.getPackage().getName());
-
         servletHandler.addServlet(new ServletHolder(new ServletContainer(resourceConfig)), "/*");
 
         handlers.addHandler(servletHandler);

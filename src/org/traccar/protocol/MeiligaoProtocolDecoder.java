@@ -73,7 +73,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             .expression("(.*)")                  // driver
             .groupEnd("?")
             .or()
-            .number("|(x{9})")                   // odometer
+            .number("|(d{1,9})")                 // odometer
             .groupBegin()
             .number("|(x{5,})")                  // rfid
             .groupEnd("?")
@@ -262,7 +262,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_ODOMETER, parser.nextHexLong());
         position.set(Position.KEY_SATELLITES, parser.nextHexInt());
         position.set("driverLicense", parser.next());
-        position.set(Position.KEY_ODOMETER, parser.nextHexLong());
+        position.set(Position.KEY_ODOMETER, parser.nextLong());
         position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
 
         return position;
@@ -346,8 +346,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
             String sentence = buf.readBytes(endIndex - buf.readerIndex()).toString(StandardCharsets.US_ASCII);
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             position = decodeRegular(position, sentence);
@@ -403,8 +402,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
         } else {
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
 
             if (command == MSG_ALARM) {
                 short alarmCode = buf.readUnsignedByte();

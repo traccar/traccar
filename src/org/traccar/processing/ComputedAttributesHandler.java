@@ -102,10 +102,12 @@ public class ComputedAttributesHandler extends BaseDataHandler {
                     try {
                         switch (attribute.getType()) {
                             case "number":
-                                position.getAttributes().put(attribute.getAttribute(), (Number) result);
+                                Number numberValue = (Number) result;
+                                position.getAttributes().put(attribute.getAttribute(), numberValue);
                                 break;
                             case "boolean":
-                                position.getAttributes().put(attribute.getAttribute(), (Boolean) result);
+                                Boolean booleanValue = (Boolean) result;
+                                position.getAttributes().put(attribute.getAttribute(), booleanValue);
                                 break;
                             default:
                                 position.getAttributes().put(attribute.getAttribute(), result.toString());

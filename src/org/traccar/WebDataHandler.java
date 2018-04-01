@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,14 @@
 package org.traccar;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.ning.http.client.AsyncHttpClient;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -32,9 +35,13 @@ import java.util.TimeZone;
 public class WebDataHandler extends BaseDataHandler {
 
     private final String url;
+    private final boolean json;
+    private static final String KEY_POSITION = "position";
+    private static final String KEY_DEVICE = "device";
 
-    public WebDataHandler(String url) {
+    public WebDataHandler(String url, boolean json) {
         this.url = url;
+        this.json = json;
     }
 
     private static String formatSentence(Position position) {
@@ -80,6 +87,7 @@ public class WebDataHandler extends BaseDataHandler {
         String request = url
                 .replace("{name}", device.getName())
                 .replace("{uniqueId}", device.getUniqueId())
+                .replace("{status}", device.getStatus())
                 .replace("{deviceId}", String.valueOf(position.getDeviceId()))
                 .replace("{protocol}", String.valueOf(position.getProtocol()))
                 .replace("{deviceTime}", String.valueOf(position.getDeviceTime().getTime()))
@@ -120,10 +128,37 @@ public class WebDataHandler extends BaseDataHandler {
 
     @Override
     protected Position handlePosition(Position position) {
+        if (json) {
+            AsyncHttpClient.BoundRequestBuilder requestBuilder = Context.getAsyncHttpClient().preparePost(url);
+            requestBuilder.setBodyEncoding(StandardCharsets.UTF_8.name());
 
-        Context.getAsyncHttpClient().prepareGet(formatRequest(position)).execute();
+            requestBuilder.addHeader("Content-Type", "application/json; charset=utf-8");
 
+            requestBuilder.setBody(prepareJsonPayload(position));
+            requestBuilder.execute();
+
+        } else {
+            Context.getAsyncHttpClient().prepareGet(formatRequest(position)).execute();
+        }
         return position;
     }
 
+    protected String prepareJsonPayload(Position position) {
+
+        Map<String, Object> data = new HashMap<>();
+        Device device = Context.getIdentityManager().getById(position.getDeviceId());
+
+        data.put(KEY_POSITION, position);
+
+        if (device != null) {
+            data.put(KEY_DEVICE, device);
+        }
+
+        try {
+            return Context.getObjectMapper().writeValueAsString(data);
+        } catch (JsonProcessingException e) {
+            Log.warning(e);
+            return null;
+        }
+    }
 }

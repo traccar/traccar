@@ -72,8 +72,7 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
@@ -109,7 +108,7 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.PREFIX_TEMP + 1, parser.nextInt(0));
         position.set("chargerPressure", parser.nextInt(0));
         position.set("tpl", parser.nextInt(0));
-        position.set("axle", parser.nextInt(0));
+        position.set(Position.KEY_AXLE_WEIGHT, parser.nextInt(0));
         position.set(Position.KEY_OBD_ODOMETER, parser.nextInt(0));
 
         return position;

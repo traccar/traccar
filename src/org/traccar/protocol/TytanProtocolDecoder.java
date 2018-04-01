@@ -84,7 +84,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                     }
                     break;
                 case 28:
-                    position.set("weight", buf.readUnsignedShort());
+                    position.set(Position.KEY_AXLE_WEIGHT, buf.readUnsignedShort());
                     buf.readUnsignedByte();
                     break;
                 case 90:
@@ -146,8 +146,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
 
         while (buf.readableBytes() > 2) {
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             int end = buf.readerIndex() + buf.readUnsignedByte();

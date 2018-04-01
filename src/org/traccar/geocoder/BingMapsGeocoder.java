@@ -51,6 +51,9 @@ public class BingMapsGeocoder extends JsonGeocoder {
                 if (location.containsKey("postalCode")) {
                     address.setPostcode(location.getString("postalCode"));
                 }
+                if (location.containsKey("formattedAddress")) {
+                    address.setFormattedAddress(location.getString("formattedAddress"));
+                }
                 return address;
             }
         }

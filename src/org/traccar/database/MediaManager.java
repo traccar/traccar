@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 package org.traccar.database;
 
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.traccar.Config;
 import org.traccar.helper.Log;
 
 import java.io.File;
@@ -34,8 +33,8 @@ public class MediaManager {
 
     private String path;
 
-    public MediaManager(Config config) {
-        path = config.getString("media.path");
+    public MediaManager(String path) {
+        this.path = path;
     }
 
     private File createFile(String uniqueId, String name) throws IOException {
@@ -48,19 +47,21 @@ public class MediaManager {
     }
 
     public String writeFile(String uniqueId, ChannelBuffer buf, String extension) {
-        int size = buf.readableBytes();
-        String name = new SimpleDateFormat("yyyyMMddhhmmss").format(new Date()) + "." + extension;
-        try (FileOutputStream output = new FileOutputStream(createFile(uniqueId, name));
-                FileChannel fileChannel = output.getChannel()) {
-            ByteBuffer byteBuffer = buf.toByteBuffer();
-            int written = 0;
-            while (written < size) {
-                written += fileChannel.write(byteBuffer);
+        if (path != null) {
+            int size = buf.readableBytes();
+            String name = new SimpleDateFormat("yyyyMMddhhmmss").format(new Date()) + "." + extension;
+            try (FileOutputStream output = new FileOutputStream(createFile(uniqueId, name));
+                    FileChannel fileChannel = output.getChannel()) {
+                ByteBuffer byteBuffer = buf.toByteBuffer();
+                int written = 0;
+                while (written < size) {
+                    written += fileChannel.write(byteBuffer);
+                }
+                fileChannel.force(false);
+                return name;
+            } catch (IOException e) {
+                Log.warning(e);
             }
-            fileChannel.force(false);
-            return name;
-        } catch (IOException e) {
-            Log.warning(e);
         }
         return null;
     }

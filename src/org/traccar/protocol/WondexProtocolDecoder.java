@@ -70,17 +70,17 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
             return null;
         } else if (buf.toString(StandardCharsets.US_ASCII).startsWith("$OK:")
                 || buf.toString(StandardCharsets.US_ASCII).startsWith("$ERR:")
-                  || buf.toString(StandardCharsets.US_ASCII).startsWith("$MSG:")) {
+                || buf.toString(StandardCharsets.US_ASCII).startsWith("$MSG:")) {
 
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
             getLastLocation(position, new Date());
             position.set(Position.KEY_RESULT, buf.toString(StandardCharsets.US_ASCII));
 
             return position;
+
         } else {
 
             Parser parser = new Parser(PATTERN, buf.toString(StandardCharsets.US_ASCII));
@@ -88,8 +88,7 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
                 return null;
             }
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
 
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
             if (deviceSession == null) {
@@ -120,6 +119,7 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_OUTPUT, parser.next());
 
             return position;
+
         }
 
     }

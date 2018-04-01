@@ -100,8 +100,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
 
         if (type == MSG_CLIENT_STATUS) {
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
 
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, String.valueOf(deviceUniqueId));
             if (deviceSession == null) {

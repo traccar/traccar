@@ -76,8 +76,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private ParseResult parsePosition(DeviceSession deviceSession, ChannelBuffer buf) {
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
 
         position.setDeviceId(deviceSession.getDeviceId());
 

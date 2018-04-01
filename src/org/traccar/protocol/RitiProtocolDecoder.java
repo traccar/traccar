@@ -56,8 +56,7 @@ public class RitiProtocolDecoder extends BaseProtocolDecoder {
 
         buf.skipBytes(2); // header
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, String.valueOf(buf.readUnsignedShort()));
         if (deviceSession == null) {

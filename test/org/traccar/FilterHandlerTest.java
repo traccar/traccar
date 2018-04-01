@@ -3,8 +3,6 @@ package org.traccar;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.traccar.database.IdentityManager;
-import org.traccar.model.Device;
 import org.traccar.model.Position;
 
 import java.util.Date;

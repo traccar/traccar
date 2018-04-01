@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 import java.sql.SQLException;
 
 public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
@@ -81,16 +82,36 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
         }
     }
 
+    protected TimeZone getTimeZone(long deviceId) {
+        TimeZone result = TimeZone.getTimeZone("UTC");
+        String timeZoneName = null;
+        if (Context.getDeviceManager() != null) {
+            timeZoneName = Context.getDeviceManager().lookupAttributeString(
+                    deviceId, "decoder.timezone", null, true);
+        }
+        if (timeZoneName != null) {
+            result = TimeZone.getTimeZone(timeZoneName);
+        } else {
+            int timeZoneOffset = Context.getConfig().getInteger(getProtocolName() + ".timezone", 0);
+            if (timeZoneOffset != 0) {
+                result.setRawOffset(timeZoneOffset * 1000);
+                Log.warning("Config parameter " + getProtocolName() + ".timezone is deprecated");
+            }
+        }
+        return result;
+    }
+
     private DeviceSession channelDeviceSession; // connection-based protocols
     private Map<SocketAddress, DeviceSession> addressDeviceSessions = new HashMap<>(); // connectionless protocols
 
     private long findDeviceId(SocketAddress remoteAddress, String... uniqueIds) {
-        long deviceId = 0;
         if (uniqueIds.length > 0) {
+            long deviceId = 0;
+            Device device = null;
             try {
                 for (String uniqueId : uniqueIds) {
                     if (uniqueId != null) {
-                        Device device = Context.getIdentityManager().getByUniqueId(uniqueId);
+                        device = Context.getIdentityManager().getByUniqueId(uniqueId);
                         if (device != null) {
                             deviceId = device.getId();
                             break;
@@ -100,22 +121,27 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
             } catch (Exception e) {
                 Log.warning(e);
             }
-            if (deviceId == 0) {
-                if (Context.getConfig().getBoolean("database.registerUnknown")) {
-                    return addUnknownDevice(uniqueIds[0]);
-                }
-
-                StringBuilder message = new StringBuilder("Unknown device -");
-                for (String uniqueId : uniqueIds) {
-                    message.append(" ").append(uniqueId);
-                }
-                if (remoteAddress != null) {
-                    message.append(" (").append(((InetSocketAddress) remoteAddress).getHostString()).append(")");
-                }
-                Log.warning(message.toString());
+            if (deviceId == 0 && Context.getConfig().getBoolean("database.registerUnknown")) {
+                return addUnknownDevice(uniqueIds[0]);
             }
+            if (device != null && !device.getDisabled() || Context.getConfig().getBoolean("database.storeDisabled")) {
+                return deviceId;
+            }
+            StringBuilder message = new StringBuilder();
+            if (deviceId == 0) {
+                message.append("Unknown device -");
+            } else {
+                message.append("Disabled device -");
+            }
+            for (String uniqueId : uniqueIds) {
+                message.append(" ").append(uniqueId);
+            }
+            if (remoteAddress != null) {
+                message.append(" (").append(((InetSocketAddress) remoteAddress).getHostString()).append(")");
+            }
+            Log.warning(message.toString());
         }
-        return deviceId;
+        return 0;
     }
 
     public DeviceSession getDeviceSession(Channel channel, SocketAddress remoteAddress, String... uniqueIds) {
@@ -223,8 +249,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     protected Object handleEmptyMessage(Channel channel, SocketAddress remoteAddress, Object msg) {
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
         if (Context.getConfig().getBoolean("database.saveEmpty") && deviceSession != null) {
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
             getLastLocation(position, null);
             return position;

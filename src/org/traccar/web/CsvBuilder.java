@@ -51,7 +51,7 @@ public class CsvBuilder {
 
     private SortedSet<Method> getSortedMethods(Object object) {
         Method[] methodArray = object.getClass().getMethods();
-        SortedSet<Method> methods = new TreeSet<Method>(new Comparator<Method>() {
+        SortedSet<Method> methods = new TreeSet<>(new Comparator<Method>() {
             @Override
             public int compare(Method m1, Method m2) {
                 if (m1.getName().equals("getAttributes") && !m1.getName().equals(m2.getName())) {
@@ -75,16 +75,16 @@ public class CsvBuilder {
             if (method.getName().startsWith("get") && method.getParameterTypes().length == 0) {
                 try {
                     if (method.getReturnType().equals(boolean.class)) {
-                        builder.append((Boolean) method.invoke(object));
+                        builder.append(method.invoke(object));
                         addSeparator();
                     } else if (method.getReturnType().equals(int.class)) {
-                        builder.append((Integer) method.invoke(object));
+                        builder.append(method.invoke(object));
                         addSeparator();
                     } else if (method.getReturnType().equals(long.class)) {
-                        builder.append((Long) method.invoke(object));
+                        builder.append(method.invoke(object));
                         addSeparator();
                     } else if (method.getReturnType().equals(double.class)) {
-                        builder.append((Double) method.invoke(object));
+                        builder.append(method.invoke(object));
                         addSeparator();
                     } else if (method.getReturnType().equals(String.class)) {
                         builder.append((String) method.invoke(object));

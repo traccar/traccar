@@ -18,10 +18,6 @@ package org.traccar.protocol;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.jboss.netty.handler.codec.http.multipart.Attribute;
-import org.jboss.netty.handler.codec.http.multipart.DefaultHttpDataFactory;
-import org.jboss.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
-import org.jboss.netty.handler.codec.http.multipart.InterfaceHttpData;
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.model.Position;
@@ -34,6 +30,7 @@ import javax.json.JsonString;
 import javax.json.JsonValue;
 import java.io.StringReader;
 import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -50,16 +47,8 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         HttpRequest request = (HttpRequest) msg;
-        HttpPostRequestDecoder decoder = new HttpPostRequestDecoder(new DefaultHttpDataFactory(false), request);
-        InterfaceHttpData data = decoder.getBodyHttpData("data");
-        if (data.getHttpDataType() != InterfaceHttpData.HttpDataType.Attribute) {
-            sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
-            return null;
-        }
-
-        Attribute attribute = (Attribute) data;
-        String value = attribute.getValue();
-        JsonArray result = Json.createReader(new StringReader(value)).readArray();
+        JsonArray result = Json.createReader(new StringReader(request.getContent().toString(StandardCharsets.UTF_8)))
+                .readArray();
         List<Position> positions = new LinkedList<>();
         for (int i = 0; i < result.size(); i++) {
             JsonObject message = result.getJsonObject(i);
@@ -71,9 +60,8 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
             if (deviceSession == null) {
                 continue;
             }
-            Position position = new Position();
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
-            position.setProtocol(getProtocolName());
             decodePosition(message, position);
             positions.add(position);
         }
@@ -135,14 +123,8 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
                 return true;
             case "din":
             case "dout":
-                String key = name.equals("din") ? Position.KEY_INPUT : Position.KEY_OUTPUT;
-                if (value == JsonValue.TRUE && index <= 32 && index >= 1) {
-                    if (position.getInteger(key) == 0) {
-                        position.set(key, 1 << (index - 1));
-                    } else {
-                        position.set(key, position.getInteger(key) | 1 << (index - 1));
-                    }
-                }
+                position.set(name.equals("din") ? Position.KEY_INPUT : Position.KEY_OUTPUT,
+                        ((JsonNumber) value).intValue());
                 return true;
             case "gps.vehicle.mileage":
                 position.set(Position.KEY_ODOMETER, ((JsonNumber) value).doubleValue());
