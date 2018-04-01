@@ -19,6 +19,8 @@ package org.traccar.notification;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.traccar.Context;
+
 public class NotificatorManager {
 
     protected NotificatorManager() {
@@ -29,7 +31,9 @@ public class NotificatorManager {
     private static final Notificator NULL_NOTIFICATOR = new NotificationNull();
 
     static {
-        NOTIFICATORS.put("sms", new NotificationSms());
+        if (Context.getSmsManager() != null) {
+            NOTIFICATORS.put("sms", new NotificationSms());
+        }
         NOTIFICATORS.put("mail", new NotificationMail());
         NOTIFICATORS.put("web", new NotificationWeb());
     }

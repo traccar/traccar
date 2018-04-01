@@ -27,7 +27,7 @@ public final class NotificationSms extends Notificator {
     @Override
     public void sendAsync(long userId, Event event, Position position) {
         User user = Context.getPermissionsManager().getUser(userId);
-        if (Context.getSmsManager() != null && user.getPhone() != null) {
+        if (user.getPhone() != null) {
             Context.getStatisticsManager().registerSms();
             Context.getSmsManager().sendMessageAsync(user.getPhone(),
                     NotificationFormatter.formatSmsMessage(userId, event, position), false);
@@ -38,7 +38,7 @@ public final class NotificationSms extends Notificator {
     public void sendSync(long userId, Event event, Position position) throws SMSException,
             InterruptedException {
         User user = Context.getPermissionsManager().getUser(userId);
-        if (Context.getSmsManager() != null && user.getPhone() != null) {
+        if (user.getPhone() != null) {
             Context.getStatisticsManager().registerSms();
             Context.getSmsManager().sendMessageSync(user.getPhone(),
                     NotificationFormatter.formatSmsMessage(userId, event, position), false);
