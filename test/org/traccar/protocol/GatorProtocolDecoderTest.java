@@ -1,15 +1,16 @@
 package org.traccar.protocol;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.traccar.ProtocolTest;
+
+import static org.junit.Assert.assertEquals;
 
 public class GatorProtocolDecoderTest extends ProtocolTest {
     
     @Test
     public void testDecodeId() {
         
-        Assert.assertEquals("3512345006", GatorProtocolDecoder.decodeId(12, 162, 50, 134));
+        assertEquals("3512345006", GatorProtocolDecoder.decodeId(12, 162, 50, 134));
         
     }
 

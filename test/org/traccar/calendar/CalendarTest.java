@@ -7,11 +7,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.traccar.model.Calendar;
 
 import net.fortuna.ical4j.data.ParserException;
+
+import static org.junit.Assert.assertTrue;
 
 public class CalendarTest {
     
@@ -46,13 +47,13 @@ public class CalendarTest {
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ssX");
 
         Date date = format.parse("2016-12-13 22:59:59+05");
-        Assert.assertTrue(!calendar.checkMoment(date));
+        assertTrue(!calendar.checkMoment(date));
         date = format.parse("2016-12-13 23:00:01+05");
-        Assert.assertTrue(calendar.checkMoment(date));
+        assertTrue(calendar.checkMoment(date));
 
         date = format.parse("2016-12-13 06:59:59+05");
-        Assert.assertTrue(calendar.checkMoment(date));
+        assertTrue(calendar.checkMoment(date));
         date = format.parse("2016-12-13 07:00:01+05");
-        Assert.assertTrue(!calendar.checkMoment(date));
+        assertTrue(!calendar.checkMoment(date));
     }
 }

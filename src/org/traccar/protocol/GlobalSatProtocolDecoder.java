@@ -76,8 +76,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
         }
         String[] values = sentence.split(",");
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
 
         for (int formatIndex = 0, valueIndex = 1; formatIndex < format.length()
                 && valueIndex < values.length; formatIndex++) {
@@ -207,8 +206,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {

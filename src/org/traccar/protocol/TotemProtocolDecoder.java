@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -131,7 +132,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN4 = new PatternBuilder()
             .text("$$")                          // header
             .number("dddd")                      // length
-            .expression("A[ABC]")                // type
+            .number("(xx)")                      // type
             .number("(d+)|")                     // imei
             .number("(x{8})")                    // status
             .number("(dd)(dd)(dd)")              // date (yymmdd)
@@ -163,7 +164,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
-    private String decodeAlarm(Short value) {
+    private String decodeAlarm123(int value) {
         switch (value) {
             case 0x01:
                 return Position.ALARM_SOS;
@@ -182,10 +183,31 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private String decodeAlarm4(int value) {
+        switch (value) {
+            case 0x01:
+                return Position.ALARM_SOS;
+            case 0x02:
+                return Position.ALARM_OVERSPEED;
+            case 0x04:
+                return Position.ALARM_GEOFENCE_EXIT;
+            case 0x05:
+                return Position.ALARM_GEOFENCE_ENTER;
+            case 0x40:
+                return Position.ALARM_SHOCK;
+            case 0x42:
+                return Position.ALARM_ACCELERATION;
+            case 0x43:
+                return Position.ALARM_BRAKING;
+            default:
+                return null;
+        }
+    }
+
     private boolean decode12(Position position, Parser parser, Pattern pattern) {
 
         if (parser.hasNext()) {
-            position.set(Position.KEY_ALARM, decodeAlarm(Short.parseShort(parser.next(), 16)));
+            position.set(Position.KEY_ALARM, decodeAlarm123(Short.parseShort(parser.next(), 16)));
         }
         DateBuilder dateBuilder = new DateBuilder();
         int year = 0, month = 0, day = 0;
@@ -245,7 +267,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
     private boolean decode3(Position position, Parser parser) {
 
         if (parser.hasNext()) {
-            position.set(Position.KEY_ALARM, decodeAlarm(Short.parseShort(parser.next(), 16)));
+            position.set(Position.KEY_ALARM, decodeAlarm123(Short.parseShort(parser.next(), 16)));
         }
 
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
@@ -276,7 +298,26 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
 
     private boolean decode4(Position position, Parser parser) {
 
-        position.set(Position.KEY_STATUS, parser.next());
+        long status = parser.nextHexLong();
+
+        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 1) ? Position.ALARM_SOS : null);
+        position.set(Position.KEY_IGNITION, BitUtil.check(status, 32 - 2));
+        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 3) ? Position.ALARM_OVERSPEED : null);
+        position.set(Position.KEY_CHARGE, BitUtil.check(status, 32 - 4));
+        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 5) ? Position.ALARM_GEOFENCE_EXIT : null);
+        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 6) ? Position.ALARM_GEOFENCE_ENTER : null);
+        position.set(Position.PREFIX_OUT + 1, BitUtil.check(status, 32 - 9));
+        position.set(Position.PREFIX_OUT + 2, BitUtil.check(status, 32 - 10));
+        position.set(Position.PREFIX_OUT + 3, BitUtil.check(status, 32 - 11));
+        position.set(Position.PREFIX_OUT + 4, BitUtil.check(status, 32 - 12));
+        position.set(Position.PREFIX_IN + 2, BitUtil.check(status, 32 - 13));
+        position.set(Position.PREFIX_IN + 3, BitUtil.check(status, 32 - 14));
+        position.set(Position.PREFIX_IN + 4, BitUtil.check(status, 32 - 15));
+        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 16) ? Position.ALARM_SHOCK : null);
+        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 18) ? Position.ALARM_LOW_BATTERY : null);
+        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 22) ? Position.ALARM_JAMMING : null);
+
+        position.setValid(BitUtil.check(status, 32 - 20));
 
         position.setTime(parser.nextDateTime());
 
@@ -300,7 +341,6 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_HDOP, parser.nextDouble(0));
         position.set(Position.KEY_ODOMETER, parser.nextInt(0) * 1000);
 
-        position.setValid(true);
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
 
@@ -329,8 +369,11 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
+
+        if (pattern == PATTERN4) {
+            position.set(Position.KEY_ALARM, decodeAlarm4(parser.nextHexInt()));
+        }
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {

@@ -53,8 +53,7 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
             params = decoder.getParameters();
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setValid(true);
 
         Network network = new Network();

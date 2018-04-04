@@ -38,9 +38,6 @@ public class GlobalSatProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "$353681041893264,9,3,240913,100833,E08513.0122,N5232.9395,181.3,22.02,251.30,9,1.00"));
 
-        /*verifyPosition(decoder, text(
-                "$353681041893264,9,4,230913,052449,\"250,99,B443,422E,42,37\",\"250,99,B443,4232,43,44\",\"250,99,B443,7910,40,32\",\"250,99,B443,B456,40,28\",\"250,99,B443,B455,40,27\""));*/
-
         decoder.setFormat0("SPRXYAB27GHKLMmnaefghiotuvwb*U!");
         
         verifyPosition(decoder, text(

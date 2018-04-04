@@ -17,6 +17,7 @@ package org.traccar.api.resource;
 
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
+import org.traccar.helper.DataConverter;
 import org.traccar.helper.LogAction;
 import org.traccar.model.User;
 
@@ -34,7 +35,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.xml.bind.DatatypeConverter;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -61,15 +61,14 @@ public class SessionResource extends BaseResource {
             Cookie[] cookies = request.getCookies();
             String email = null, password = null;
             if (cookies != null) {
-                for (int i = 0; i < cookies.length; i++) {
-                    if (cookies[i].getName().equals(USER_COOKIE_KEY)) {
-                        byte[] emailBytes = DatatypeConverter.parseBase64Binary(
-                                URLDecoder.decode(cookies[i].getValue(), StandardCharsets.US_ASCII.name()));
+                for (Cookie cookie : cookies) {
+                    if (cookie.getName().equals(USER_COOKIE_KEY)) {
+                        byte[] emailBytes = DataConverter.parseBase64(
+                                URLDecoder.decode(cookie.getValue(), StandardCharsets.US_ASCII.name()));
                         email = new String(emailBytes, StandardCharsets.UTF_8);
-                    }
-                    if (cookies[i].getName().equals(PASS_COOKIE_KEY)) {
-                        byte[] passwordBytes = DatatypeConverter.parseBase64Binary(
-                                URLDecoder.decode(cookies[i].getValue(), StandardCharsets.US_ASCII.name()));
+                    } else if (cookie.getName().equals(PASS_COOKIE_KEY)) {
+                        byte[] passwordBytes = DataConverter.parseBase64(
+                                URLDecoder.decode(cookie.getValue(), StandardCharsets.US_ASCII.name()));
                         password = new String(passwordBytes, StandardCharsets.UTF_8);
                     }
                 }

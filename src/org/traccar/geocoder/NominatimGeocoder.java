@@ -44,6 +44,10 @@ public class NominatimGeocoder extends JsonGeocoder {
         if (result != null) {
             Address address = new Address();
 
+            if (json.containsKey("display_name")) {
+                address.setFormattedAddress(json.getString("display_name"));
+            }
+
             if (result.containsKey("house_number")) {
                 address.setHouse(result.getString("house_number"));
             }

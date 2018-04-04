@@ -67,8 +67,7 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
         // Binary position report
         if (apiNumber == 5 && commandType == 2 && messageType == 1 && BitUtil.check(mask, 0)) {
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
 
             if (BitUtil.check(mask, 1)) {
                 position.set(Position.KEY_STATUS, buf.readUnsignedInt());

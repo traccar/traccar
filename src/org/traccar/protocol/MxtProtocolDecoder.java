@@ -82,8 +82,7 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
 
         if (type == MSG_POSITION) {
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             buf.readUnsignedByte(); // protocol

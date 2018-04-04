@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             .groupBegin()
             .text("COT:")
             .number("(d+)")                      // odometer
-            .number("(?:;d+:d+:d+)?")            // engine hours
+            .number("(?:;d+-d+-d+)?")            // engine hours
             .expression(",?")
             .groupEnd("?")
             .groupBegin()
@@ -135,8 +135,7 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
 
     private Position decodePosition(DeviceSession deviceSession, Parser parser, Date time) {
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         if (time != null) {
@@ -226,8 +225,7 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
 
         if (pattern == PATTERN_OLD) {
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             DateBuilder dateBuilder = new DateBuilder()

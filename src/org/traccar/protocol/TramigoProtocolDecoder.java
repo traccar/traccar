@@ -61,8 +61,7 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
         long id = buf.readUnsignedInt();
         buf.readUnsignedInt(); // time
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.set(Position.KEY_INDEX, index);
         position.setValid(true);
 

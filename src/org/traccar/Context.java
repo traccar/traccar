@@ -337,9 +337,7 @@ public final class Context {
             ldapProvider = new LdapProvider(config);
         }
 
-        if (config.hasKey("media.path")) {
-            mediaManager = new MediaManager(config);
-        }
+        mediaManager = new MediaManager(config.getString("media.path"));
 
         if (dataManager != null) {
             usersManager = new UsersManager(dataManager);

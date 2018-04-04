@@ -20,10 +20,10 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.helper.DataConverter;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
-import javax.xml.bind.DatatypeConverter;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -49,8 +49,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_EXTENDED_RECORDS = 68;
 
     private Position decodeCommandResponse(DeviceSession deviceSession, int type, ChannelBuffer buf) {
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         getLastLocation(position, null);
@@ -135,8 +134,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
             int count = buf.readUnsignedByte();
 
             for (int i = 0; i < count; i++) {
-                Position position = new Position();
-                position.setProtocol(getProtocolName());
+                Position position = new Position(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());
 
                 position.setTime(new Date(buf.readUnsignedInt() * 1000));
@@ -198,7 +196,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (channel != null) {
-                channel.write(ChannelBuffers.wrappedBuffer(DatatypeConverter.parseHexBinary("0002640113bc")));
+                channel.write(ChannelBuffers.wrappedBuffer(DataConverter.parseHex("0002640113bc")));
             }
 
             return positions;
@@ -210,8 +208,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
             int count = buf.readUnsignedByte();
 
             for (int i = 0; i < count; i++) {
-                Position position = new Position();
-                position.setProtocol(getProtocolName());
+                Position position = new Position(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());
 
                 buf.readUnsignedByte(); // reserved
@@ -232,7 +229,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (channel != null) {
-                channel.write(ChannelBuffers.wrappedBuffer(DatatypeConverter.parseHexBinary("00026d01c4a4")));
+                channel.write(ChannelBuffers.wrappedBuffer(DataConverter.parseHex("00026d01c4a4")));
             }
 
             return positions;

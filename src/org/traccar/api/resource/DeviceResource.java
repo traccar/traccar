@@ -65,9 +65,13 @@ public class DeviceResource extends BaseObjectResource<Device> {
                 userId = getUserId();
             }
             Context.getPermissionsManager().checkUser(getUserId(), userId);
-            result = deviceManager.getUserItems(userId);
+            if (Context.getPermissionsManager().getUserAdmin(getUserId())) {
+                result = deviceManager.getAllUserItems(userId);
+            } else {
+                result = deviceManager.getUserItems(userId);
+            }
         } else {
-            result = new HashSet<Long>();
+            result = new HashSet<>();
             for (String uniqueId : uniqueIds) {
                 Device device = deviceManager.getByUniqueId(uniqueId);
                 Context.getPermissionsManager().checkDevice(getUserId(), device.getId());
@@ -84,7 +88,10 @@ public class DeviceResource extends BaseObjectResource<Device> {
     @Path("{id}/distance")
     @PUT
     public Response updateTotalDistance(DeviceTotalDistance entity) throws SQLException {
-        Context.getPermissionsManager().checkAdmin(getUserId());
+        if (!Context.getPermissionsManager().getUserAdmin(getUserId())) {
+            Context.getPermissionsManager().checkManager(getUserId());
+            Context.getPermissionsManager().checkPermission(Device.class, getUserId(), entity.getDeviceId());
+        }
         Context.getDeviceManager().resetTotalDistance(entity);
         LogAction.resetTotalDistance(getUserId(), entity.getDeviceId());
         return Response.noContent().build();

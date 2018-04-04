@@ -1,5 +1,7 @@
 package org.traccar.notification;
 
+import java.util.Set;
+
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -13,8 +15,8 @@ public class JsonTypeEventForwarder extends EventForwarder {
     }
 
     @Override
-    protected void setContent(Event event, Position position, BoundRequestBuilder requestBuilder) {
-        requestBuilder.setBody(prepareJsonPayload(event, position));
+    protected void setContent(Event event, Position position, Set<Long> users, BoundRequestBuilder requestBuilder) {
+        requestBuilder.setBody(prepareJsonPayload(event, position, users));
     }
 
 }

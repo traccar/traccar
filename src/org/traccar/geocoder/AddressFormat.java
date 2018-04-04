@@ -66,6 +66,7 @@ public class AddressFormat extends Format {
         result = replace(result, "%u", address.getSuburb());
         result = replace(result, "%r", address.getStreet());
         result = replace(result, "%h", address.getHouse());
+        result = replace(result, "%f", address.getFormattedAddress());
 
         result = result.replaceAll("^[, ]*", "");
 

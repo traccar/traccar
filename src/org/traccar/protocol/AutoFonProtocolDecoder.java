@@ -62,8 +62,7 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
 
     private Position decodePosition(DeviceSession deviceSession, ChannelBuffer buf, boolean history) {
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         if (!history) {
@@ -167,8 +166,7 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == MSG_45_LOCATION) {
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             short status = buf.readUnsignedByte();

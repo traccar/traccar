@@ -97,8 +97,7 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
 
                 if (type == MSG_GPS || type == MSG_GPS_SENSORS) {
 
-                    Position position = new Position();
-                    position.setProtocol(getProtocolName());
+                    Position position = new Position(getProtocolName());
                     position.setDeviceId(deviceSession.getDeviceId());
 
                     DateBuilder dateBuilder = new DateBuilder()
