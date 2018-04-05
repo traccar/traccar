@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,31 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
+    private String decodeAlarm(long status) {
+        if ((status & 0x02000000) > 0) {
+            return Position.ALARM_GEOFENCE_ENTER;
+        }
+        if ((status & 0x04000000) > 0) {
+            return Position.ALARM_GEOFENCE_EXIT;
+        }
+        if ((status & 0x08000000) > 0) {
+            return Position.ALARM_LOW_BATTERY;
+        }
+        if ((status & 0x20000000) > 0) {
+            return Position.ALARM_VIBRATION;
+        }
+        if ((status & 0x80000000) > 0) {
+            return Position.ALARM_OVERSPEED;
+        }
+        if ((status & 0x00010000) > 0) {
+            return Position.ALARM_SOS;
+        }
+        if ((status & 0x00040000) > 0) {
+            return Position.ALARM_POWER_CUT;
+        }
+        return null;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -95,7 +120,10 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextHexInt(0) / 100.0));
         position.setCourse(parser.nextHexInt(0) / 100.0);
 
-        position.set(Position.KEY_STATUS, parser.next());
+        long status = parser.nextHexLong();
+        position.set(Position.KEY_STATUS, status);
+        position.set(Position.KEY_ALARM, decodeAlarm(status));
+
         position.set("signal", parser.next());
         position.set(Position.KEY_POWER, parser.nextDouble(0));
         position.set("oil", parser.nextHexInt(0));
