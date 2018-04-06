@@ -196,9 +196,6 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
         addSpecificHandlers(pipeline);
 
-        if (geolocationHandler != null) {
-            pipeline.addLast("location", geolocationHandler);
-        }
         if (hemisphereHandler != null) {
             pipeline.addLast("hemisphere", hemisphereHandler);
         }
@@ -217,10 +214,6 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             pipeline.addLast("filter", filterHandler);
         }
 
-        if (geocoderHandler != null) {
-            pipeline.addLast("geocoder", geocoderHandler);
-        }
-
         if (motionHandler != null) {
             pipeline.addLast("motion", motionHandler);
         }
@@ -235,11 +228,6 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
         if (Context.getDataManager() != null) {
             pipeline.addLast("dataHandler", new DefaultDataHandler());
-        }
-
-        if (Context.getConfig().getBoolean("forward.enable")) {
-            pipeline.addLast("webHandler", new WebDataHandler(Context.getConfig().getString("forward.url"),
-                    Context.getConfig().getBoolean("forward.json")));
         }
 
         if (commandResultEventHandler != null) {
@@ -276,6 +264,25 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
         if (driverEventHandler != null) {
             pipeline.addLast("DriverEventHandler", driverEventHandler);
+        }
+
+        pipeline.addLast("lastPosition", new LastPositionHandler());
+
+        if (geolocationHandler != null || geocoderHandler != null) {
+            if (geolocationHandler != null) {
+                pipeline.addLast("location", geolocationHandler);
+            }
+
+            if (geocoderHandler != null) {
+                pipeline.addLast("geocoder", geocoderHandler);
+            }
+
+            pipeline.addLast("asyncDataHandler", new AsyncDataHandler());
+        }
+
+        if (Context.getConfig().getBoolean("forward.enable")) {
+            pipeline.addLast("webHandler", new WebDataHandler(Context.getConfig().getString("forward.url"),
+                    Context.getConfig().getBoolean("forward.json")));
         }
 
         pipeline.addLast("mainHandler", new MainEventHandler());
