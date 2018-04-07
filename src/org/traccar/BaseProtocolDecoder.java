@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 import java.sql.SQLException;
 
 public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
@@ -79,6 +80,25 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
             default:
                 return value;
         }
+    }
+
+    protected TimeZone getTimeZone(long deviceId) {
+        TimeZone result = TimeZone.getTimeZone("UTC");
+        String timeZoneName = null;
+        if (Context.getDeviceManager() != null) {
+            timeZoneName = Context.getDeviceManager().lookupAttributeString(
+                    deviceId, "decoder.timezone", null, true);
+        }
+        if (timeZoneName != null) {
+            result = TimeZone.getTimeZone(timeZoneName);
+        } else {
+            int timeZoneOffset = Context.getConfig().getInteger(getProtocolName() + ".timezone", 0);
+            if (timeZoneOffset != 0) {
+                result.setRawOffset(timeZoneOffset * 1000);
+                Log.warning("Config parameter " + getProtocolName() + ".timezone is deprecated");
+            }
+        }
+        return result;
     }
 
     private DeviceSession channelDeviceSession; // connection-based protocols

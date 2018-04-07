@@ -17,7 +17,6 @@ package org.traccar.helper;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-import javax.xml.bind.DatatypeConverter;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -75,13 +74,13 @@ public final class Hashing {
         RANDOM.nextBytes(salt);
         byte[] hash = function(password.toCharArray(), salt);
         return new HashingResult(
-                DatatypeConverter.printHexBinary(hash),
-                DatatypeConverter.printHexBinary(salt));
+                DataConverter.printHex(hash),
+                DataConverter.printHex(salt));
     }
 
     public static boolean validatePassword(String password, String hashHex, String saltHex) {
-        byte[] hash = DatatypeConverter.parseHexBinary(hashHex);
-        byte[] salt = DatatypeConverter.parseHexBinary(saltHex);
+        byte[] hash = DataConverter.parseHex(hashHex);
+        byte[] salt = DataConverter.parseHex(saltHex);
         return slowEquals(hash, function(password.toCharArray(), salt));
     }
 

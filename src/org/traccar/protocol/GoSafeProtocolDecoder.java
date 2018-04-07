@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,75 +45,7 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // imei
             .number("(dd)(dd)(dd)")              // time (hhmmss)
             .number("(dd)(dd)(dd),")             // date (ddmmyy)
-            .expression("(.*)#?")                // data
-            .compile();
-
-    private static final Pattern PATTERN_ITEM = new PatternBuilder()
-            .number("(x+)?,").optional()         // event
-            .groupBegin()
-            .text("SYS:")
-            .expression("[^,]*,")
-            .groupEnd("?")
-            .groupBegin()
-            .text("GPS:")
-            .expression("([AV]);")               // validity
-            .number("(d+);")                     // satellites
-            .number("([NS])(d+.d+);")            // latitude
-            .number("([EW])(d+.d+);")            // longitude
-            .number("(d+)?;")                    // speed
-            .number("(d+);")                     // course
-            .number("(d+);")                     // altitude
-            .number("(d+.d+)")                   // hdop
-            .number(";(d+.d+)").optional()       // vdop
-            .expression(",?")
-            .groupEnd()
-            .groupBegin()
-            .text("GSM:")
-            .number("d*;")                       // registration
-            .number("d*;")                       // gsm signal
-            .number("(d+);")                     // mcc
-            .number("(d+);")                     // mnc
-            .number("(x+);")                     // lac
-            .number("(x+);")                     // cid
-            .number("(-d+)")                     // rssi
-            .expression("[^,]*,?")
-            .groupEnd("?")
-            .groupBegin()
-            .text("COT:")
-            .number("(d+)")                      // odometer
-            .number("(?:;d+:d+:d+)?")            // engine hours
-            .expression(",?")
-            .groupEnd("?")
-            .groupBegin()
-            .text("ADC:")
-            .number("(d+.d+)")                   // power
-            .number("(?:;(d+.d+))?,?")           // battery
-            .groupEnd("?")
-            .groupBegin()
-            .text("DTT:")
-            .number("(x+);")                     // status
-            .number("(x+)?;")                    // io
-            .number("(x+);")                     // geo-fence 0-119
-            .number("(x+);")                     // geo-fence 120-155
-            .number("(x+)")                      // event status
-            .number("(?:;(x+))?,?")              // packet type
-            .groupEnd("?")
-            .groupBegin()
-            .text("ETD:").expression("([^,]+),?")
-            .groupEnd("?")
-            .groupBegin()
-            .text("OBD:")
-            .number("(x+),?")
-            .groupEnd("?")
-            .groupBegin()
-            .text("FUL:").expression("[^,]*,?")
-            .groupEnd("?")
-            .groupBegin()
-            .text("TRU:").expression("[^,]*,?")
-            .groupEnd("?")
-            .groupBegin()
-            .text("TAG:").expression("([^,]+),?")
-            .groupEnd("?")
+            .expression("([^#]*)#?")             // data
             .compile();
 
     private static final Pattern PATTERN_OLD = new PatternBuilder()
@@ -133,70 +65,138 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
-    private Position decodePosition(DeviceSession deviceSession, Parser parser, Date time) {
-
-        Position position = new Position(getProtocolName());
-        position.setDeviceId(deviceSession.getDeviceId());
-
-        if (time != null) {
-            position.setTime(time);
+    private void decodeFragment(Position position, String fragment) {
+        int dataIndex = fragment.indexOf(':');
+        int index = 0;
+        String[] values = fragment.substring(dataIndex + 1).split(";");
+        switch (fragment.substring(0, dataIndex)) {
+            case "GPS":
+                position.setValid(values[index++].equals("A"));
+                position.set(Position.KEY_SATELLITES, Integer.parseInt(values[index++]));
+                position.setLatitude(Double.parseDouble(values[index].substring(1)));
+                if (values[index++].charAt(0) == 'S') {
+                    position.setLatitude(-position.getLatitude());
+                }
+                position.setLongitude(Double.parseDouble(values[index].substring(1)));
+                if (values[index++].charAt(0) == 'W') {
+                    position.setLongitude(-position.getLongitude());
+                }
+                if (!values[index++].isEmpty()) {
+                    position.setSpeed(UnitsConverter.knotsFromKph(Integer.parseInt(values[index - 1])));
+                }
+                position.setCourse(Integer.parseInt(values[index++]));
+                position.setAltitude(Integer.parseInt(values[index++]));
+                if (index < values.length) {
+                    position.set(Position.KEY_HDOP, Double.parseDouble(values[index++]));
+                }
+                if (index < values.length) {
+                    position.set(Position.KEY_VDOP, Double.parseDouble(values[index++]));
+                }
+                break;
+            case "GSM":
+                index += 1; // registration status
+                index += 1; // signal strength
+                position.setNetwork(new Network(CellTower.from(
+                        Integer.parseInt(values[index++]), Integer.parseInt(values[index++]),
+                        Integer.parseInt(values[index++], 16), Integer.parseInt(values[index++], 16),
+                        Integer.parseInt(values[index++]))));
+                break;
+            case "COT":
+                if (index < values.length) {
+                    position.set(Position.KEY_ODOMETER, Integer.parseInt(values[index++]));
+                }
+                if (index < values.length) {
+                    String[] hours = values[index].split("-");
+                    position.set(Position.KEY_HOURS, Integer.parseInt(hours[0])
+                            + Integer.parseInt(hours[0]) / 60.0 + Integer.parseInt(hours[0]) / 3600.0);
+                }
+                break;
+            case "ADC":
+                position.set(Position.KEY_POWER, Double.parseDouble(values[index++]));
+                if (index < values.length) {
+                    position.set(Position.KEY_BATTERY, Double.parseDouble(values[index++]));
+                }
+                if (index < values.length) {
+                    position.set(Position.PREFIX_ADC + 1, Double.parseDouble(values[index++]));
+                }
+                if (index < values.length) {
+                    position.set(Position.PREFIX_ADC + 2, Double.parseDouble(values[index++]));
+                }
+                break;
+            case "DTT":
+                position.set(Position.KEY_STATUS, Integer.parseInt(values[index++], 16));
+                if (!values[index++].isEmpty()) {
+                    int io = Integer.parseInt(values[index - 1], 16);
+                    position.set(Position.KEY_IGNITION, BitUtil.check(io, 0));
+                    position.set(Position.PREFIX_IN + 1, BitUtil.check(io, 1));
+                    position.set(Position.PREFIX_IN + 2, BitUtil.check(io, 2));
+                    position.set(Position.PREFIX_IN + 3, BitUtil.check(io, 3));
+                    position.set(Position.PREFIX_IN + 4, BitUtil.check(io, 4));
+                    position.set(Position.PREFIX_OUT + 1, BitUtil.check(io, 5));
+                    position.set(Position.PREFIX_OUT + 2, BitUtil.check(io, 6));
+                    position.set(Position.PREFIX_OUT + 3, BitUtil.check(io, 7));
+                }
+                position.set(Position.KEY_GEOFENCE, values[index++] + values[index++]);
+                position.set("eventStatus", values[index++]);
+                if (index < values.length) {
+                    position.set("packetType", values[index++]);
+                }
+                break;
+            case "ETD":
+                position.set("eventData", values[index++]);
+                break;
+            case "OBD":
+                position.set("obd", values[index++]);
+                break;
+            case "TAG":
+                position.set("tagData", values[index++]);
+                break;
+            case "IWD":
+                if (index < values.length && values[index + 1].equals("0")) {
+                    position.set(Position.KEY_DRIVER_UNIQUE_ID, values[index + 2]);
+                }
+                break;
+            default:
+                break;
         }
+    }
 
-        position.set(Position.KEY_EVENT, parser.next());
+    private Object decodeData(DeviceSession deviceSession, Date time, String data) {
 
-        position.setValid(parser.next().equals("A"));
-        position.set(Position.KEY_SATELLITES, parser.nextInt());
+        List<Position> positions = new LinkedList<>();
+        Position position = null;
+        int index = 0;
+        String[] fragments = data.split(",");
 
-        position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG));
-        position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG));
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
-        position.setCourse(parser.nextDouble(0));
-        position.setAltitude(parser.nextDouble(0));
+        while (index < fragments.length) {
 
-        position.set(Position.KEY_HDOP, parser.nextDouble(0));
-        position.set(Position.KEY_VDOP, parser.nextDouble(0));
+            if (fragments[index].isEmpty() || Character.isDigit(fragments[index].charAt(0))) {
 
-        if (parser.hasNext(5)) {
-            position.setNetwork(new Network(CellTower.from(parser.nextInt(0), parser.nextInt(0),
-                    parser.nextHexInt(0), parser.nextHexInt(0), parser.nextInt(0))));
-        }
-        if (parser.hasNext()) {
-            position.set(Position.KEY_ODOMETER, parser.nextInt(0));
-        }
-        position.set(Position.KEY_POWER, parser.nextDouble());
-        position.set(Position.KEY_BATTERY, parser.nextDouble());
+                if (position != null) {
+                    positions.add(position);
+                }
 
-        if (parser.hasNext(6)) {
-            position.set(Position.KEY_STATUS, parser.nextHexLong());
-            Integer io = parser.nextHexInt();
-            if (io != null) {
-                position.set(Position.KEY_IGNITION, BitUtil.check(io, 0));
-                position.set(Position.PREFIX_IN + 1, BitUtil.check(io, 1));
-                position.set(Position.PREFIX_IN + 2, BitUtil.check(io, 2));
-                position.set(Position.PREFIX_IN + 3, BitUtil.check(io, 3));
-                position.set(Position.PREFIX_IN + 4, BitUtil.check(io, 4));
-                position.set(Position.PREFIX_OUT + 1, BitUtil.check(io, 5));
-                position.set(Position.PREFIX_OUT + 2, BitUtil.check(io, 6));
-                position.set(Position.PREFIX_OUT + 3, BitUtil.check(io, 7));
+                position = new Position(getProtocolName());
+                position.setDeviceId(deviceSession.getDeviceId());
+                position.setTime(time);
+
+                if (!fragments[index++].isEmpty()) {
+                    position.set(Position.KEY_EVENT, Integer.parseInt(fragments[index - 1]));
+                }
+
+            } else {
+
+                decodeFragment(position, fragments[index++]);
+
             }
-            position.set(Position.KEY_GEOFENCE, parser.next() + parser.next());
-            position.set("eventStatus", parser.next());
-            position.set("packetType", parser.next());
+
         }
 
-        if (parser.hasNext()) {
-            position.set("eventData", parser.next());
+        if (position != null) {
+            positions.add(position);
         }
 
-        if (parser.hasNext()) {
-            position.set("obd", parser.next());
-        }
-
-        if (parser.hasNext()) {
-            position.set("tagData", parser.next());
-        }
-
-        return position;
+        return positions;
     }
 
     @Override
@@ -246,18 +246,12 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
 
         } else {
 
-            Date time = null;
+            Date time = new Date();
             if (parser.hasNext(6)) {
                 time = parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY);
             }
 
-            List<Position> positions = new LinkedList<>();
-            Parser itemParser = new Parser(PATTERN_ITEM, parser.next());
-            while (itemParser.find()) {
-                positions.add(decodePosition(deviceSession, itemParser, time));
-            }
-
-            return positions;
+            return decodeData(deviceSession, time, parser.next());
 
         }
     }

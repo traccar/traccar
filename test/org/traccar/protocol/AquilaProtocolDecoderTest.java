@@ -6,7 +6,7 @@ import org.traccar.ProtocolTest;
 public class AquilaProtocolDecoderTest extends ProtocolTest {
 
     @Test
-    public void testDecode() throws Exception {
+    public void testDecodeA() throws Exception {
 
         AquilaProtocolDecoder decoder = new AquilaProtocolDecoder(new AquilaProtocol());
 
@@ -48,6 +48,22 @@ public class AquilaProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, text(
                 "$$CLIENT_1WP,141216511,3,12.963212,77.533989,150908164041,V,31,0,0,0,8,0,0,0,0,0,0,0,1,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,1,1,0,*2A"));
+
+    }
+
+    @Test
+    public void testDecodeB() throws Exception {
+
+        AquilaProtocolDecoder decoder = new AquilaProtocolDecoder(new AquilaProtocol());
+
+        verifyPosition(decoder, text(
+                "$Header,nliven,1_37T02B0164MAIS,BR,6,L,861693034634154,KA01I2000,1,09112017,160702,12.976593,N,77.549782,E,25.1,344,15,911.0,1.04,0.68,Airtel,1,1,11.8,3.8,1,C,24,404,45,61b4,9ad9,31,9adb,61b4,35,ffff,0000,33,ffff,0000,31,ffff,0000,0001,00,000014,0.0,0.1,4,()*1E"));
+
+        verifyPosition(decoder, text(
+                "$Header,iTriangle,1_37T02B0164MAIS_2,NR,1,L,864495034490141,KA01I2000,1,31032018,122247,22.845999,N,75.949005,E,0.0,44,16,545.0,1.19,0.65,AirTel,1,1,12.0,4.3,0,C,13,404,93,0456,16db,27,16dd,0456,22,3843,18ab,19,ebd8,0458,14,072c,18ab,0101,00,003735,0.0,0.0,0,()*48"));
+
+        verifyNull(decoder, text(
+                "$Header,nliven,KA01I2000,861693034634154,1_37T02B0164MAIS,AIS140,12.976545,N,77.549759,E*50"));
 
     }
 

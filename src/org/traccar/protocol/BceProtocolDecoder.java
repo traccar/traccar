@@ -21,6 +21,7 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
@@ -93,7 +94,7 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
                         position.setValid(true);
                         position.setLongitude(buf.readFloat());
                         position.setLatitude(buf.readFloat());
-                        position.setSpeed(buf.readUnsignedByte());
+                        position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
 
                         int gps = buf.readUnsignedByte();
                         position.set(Position.KEY_SATELLITES, gps & 0xf);

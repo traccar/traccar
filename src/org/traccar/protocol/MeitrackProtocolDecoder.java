@@ -256,7 +256,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
         if (values.length > 5 && !values[5].isEmpty()) {
             String[] data = values[5].split("\\|");
-            boolean started = data[0].charAt(0) == '0';
+            boolean started = data[0].charAt(1) == '0';
             position.set("taximeterOn", started);
             position.set("taximeterStart", data[1]);
             if (data.length > 2) {
@@ -378,6 +378,9 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     case 0x06:
                         position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                         break;
+                    case 0x07:
+                        position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+                        break;
                     default:
                         buf.readUnsignedByte();
                         break;
@@ -396,6 +399,12 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                         break;
                     case 0x0B:
                         position.setAltitude(buf.readShort());
+                        break;
+                    case 0x19:
+                        position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.01);
+                        break;
+                    case 0x1A:
+                        position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
                         break;
                     default:
                         buf.readUnsignedShort();
@@ -416,6 +425,9 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     case 0x04:
                         position.setTime(new Date((946684800 + buf.readUnsignedInt()) * 1000)); // 2000-01-01
                         break;
+                    case 0x0D:
+                        position.set("runtime", buf.readUnsignedInt());
+                        break;
                     default:
                         buf.readUnsignedInt();
                         break;
@@ -434,9 +446,9 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         return positions;
     }
 
-    private void requestPhotoPacket(Channel channel, String imei, int index) {
+    private void requestPhotoPacket(Channel channel, String imei, String file, int index) {
         if (channel != null) {
-            String content = "D00,camera_picture.jpg," + index;
+            String content = "D00," + file + "," + index;
             int length = 1 + imei.length() + 1 + content.length() + 5;
             String response = String.format("@@O%02d,%s,%s*", length, imei, content);
             response += Checksum.sum(response) + "\r\n";
@@ -458,11 +470,14 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         switch (type) {
             case "D00":
                 if (photo == null) {
-                    return null;
+                    photo = ChannelBuffers.dynamicBuffer();
                 }
 
-                index = buf.indexOf(index + 1 + type.length() + 1, buf.writerIndex(), (byte) ',') + 1;
+                index = index + 1 + type.length() + 1;
                 int endIndex =  buf.indexOf(index, buf.writerIndex(), (byte) ',');
+                String file = buf.toString(index, endIndex - index, StandardCharsets.US_ASCII);
+                index = endIndex + 1;
+                endIndex =  buf.indexOf(index, buf.writerIndex(), (byte) ',');
                 int total = Integer.parseInt(buf.toString(index, endIndex - index, StandardCharsets.US_ASCII));
                 index = endIndex + 1;
                 endIndex = buf.indexOf(index, buf.writerIndex(), (byte) ',');
@@ -483,13 +498,13 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     return position;
                 } else {
                     if ((current + 1) % 8 == 0) {
-                        requestPhotoPacket(channel, imei, current + 1);
+                        requestPhotoPacket(channel, imei, file, current + 1);
                     }
                     return null;
                 }
             case "D03":
                 photo = ChannelBuffers.dynamicBuffer();
-                requestPhotoPacket(channel, imei, 0);
+                requestPhotoPacket(channel, imei, "camera_picture.jpg", 0);
                 return null;
             case "CCC":
                 return decodeBinaryC(channel, remoteAddress, buf);

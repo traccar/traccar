@@ -19,7 +19,11 @@
     <entry key='logger.level'>all</entry>
     <entry key='logger.file'>./logs/tracker-server.log</entry>
 
+    <entry key='filter.enable'>true</entry>
+    <entry key='filter.future'>3600</entry>
+
     <entry key='event.enable'>true</entry>
+    <entry key='event.ignoreDuplicateAlerts'>true</entry>
     <entry key='processing.computedAttributes.enable'>true</entry>
 
     <entry key='media.path'>./media</entry>
@@ -243,5 +247,12 @@
     <entry key='t57.port'>5155</entry>
     <entry key='spot.port'>5156</entry>
     <entry key='m2c.port'>5157</entry>
+    <entry key='globekeeper.port'>5158</entry>
+    <entry key='opengts.port'>5159</entry>
+    <entry key='cautela.port'>5160</entry>
+    <entry key='continental.port'>5161</entry>
+    <entry key='egts.port'>5162</entry>
+    <entry key='robotrack.port'>5163</entry>
+    <entry key='pt60.port'>5164</entry>
 
 </properties>

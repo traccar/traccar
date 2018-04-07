@@ -58,6 +58,7 @@ public class Position extends Message {
     public static final String KEY_TYPE = "type";
     public static final String KEY_IGNITION = "ignition";
     public static final String KEY_FLAGS = "flags";
+    public static final String KEY_ANTENNA = "antenna";
     public static final String KEY_CHARGE = "charge";
     public static final String KEY_IP = "ip";
     public static final String KEY_ARCHIVE = "archive";
@@ -115,6 +116,7 @@ public class Position extends Message {
     public static final String ALARM_GPS_ANTENNA_CUT = "gpsAntennaCut";
     public static final String ALARM_ACCIDENT = "accident";
     public static final String ALARM_TOW = "tow";
+    public static final String ALARM_IDLE = "idle";
     public static final String ALARM_ACCELERATION = "hardAcceleration";
     public static final String ALARM_BRAKING = "hardBraking";
     public static final String ALARM_CORNERING = "hardCornering";

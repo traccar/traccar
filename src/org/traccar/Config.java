@@ -18,6 +18,7 @@ package org.traccar;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.InvalidPropertiesFormatException;
 import java.util.Properties;
 
 public class Config {
@@ -27,22 +28,26 @@ public class Config {
     private boolean useEnvironmentVariables;
 
     void load(String file) throws IOException {
-        Properties mainProperties = new Properties();
-        try (InputStream inputStream = new FileInputStream(file)) {
-            mainProperties.loadFromXML(inputStream);
-        }
-
-        String defaultConfigFile = mainProperties.getProperty("config.default");
-        if (defaultConfigFile != null) {
-            try (InputStream inputStream = new FileInputStream(defaultConfigFile)) {
-                properties.loadFromXML(inputStream);
+        try {
+            Properties mainProperties = new Properties();
+            try (InputStream inputStream = new FileInputStream(file)) {
+                mainProperties.loadFromXML(inputStream);
             }
+
+            String defaultConfigFile = mainProperties.getProperty("config.default");
+            if (defaultConfigFile != null) {
+                try (InputStream inputStream = new FileInputStream(defaultConfigFile)) {
+                    properties.loadFromXML(inputStream);
+                }
+            }
+
+            properties.putAll(mainProperties); // override defaults
+
+            useEnvironmentVariables = Boolean.parseBoolean(System.getenv("CONFIG_USE_ENVIRONMENT_VARIABLES"))
+                    || Boolean.parseBoolean(properties.getProperty("config.useEnvironmentVariables"));
+        } catch (InvalidPropertiesFormatException e) {
+            throw new RuntimeException("Configuration file is not a valid XML document", e);
         }
-
-        properties.putAll(mainProperties); // override defaults
-
-        useEnvironmentVariables = Boolean.parseBoolean(System.getenv("CONFIG_USE_ENVIRONMENT_VARIABLES"))
-                || Boolean.parseBoolean(properties.getProperty("config.useEnvironmentVariables"));
     }
 
     public boolean hasKey(String key) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,8 @@ import org.traccar.model.Position;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+
 import com.ning.http.client.FluentCaseInsensitiveStringsMap;
 
 public abstract class EventForwarder {
@@ -46,8 +48,9 @@ public abstract class EventForwarder {
     private static final String KEY_EVENT = "event";
     private static final String KEY_GEOFENCE = "geofence";
     private static final String KEY_DEVICE = "device";
+    private static final String KEY_USERS = "users";
 
-    public final void forwardEvent(Event event, Position position) {
+    public final void forwardEvent(Event event, Position position, Set<Long> users) {
 
         BoundRequestBuilder requestBuilder = Context.getAsyncHttpClient().preparePost(url);
         requestBuilder.setBodyEncoding(StandardCharsets.UTF_8.name());
@@ -60,7 +63,7 @@ public abstract class EventForwarder {
             requestBuilder.setHeaders(params);
         }
 
-        setContent(event, position, requestBuilder);
+        setContent(event, position, users, requestBuilder);
         requestBuilder.execute();
     }
 
@@ -79,17 +82,15 @@ public abstract class EventForwarder {
         return paramsMap;
     }
 
-    protected String prepareJsonPayload(Event event, Position position) {
+    protected String prepareJsonPayload(Event event, Position position, Set<Long> users) {
         Map<String, Object> data = new HashMap<>();
         data.put(KEY_EVENT, event);
         if (position != null) {
             data.put(KEY_POSITION, position);
         }
-        if (event.getDeviceId() != 0) {
-            Device device = Context.getIdentityManager().getById(event.getDeviceId());
-            if (device != null) {
-                data.put(KEY_DEVICE, device);
-            }
+        Device device = Context.getIdentityManager().getById(event.getDeviceId());
+        if (device != null) {
+            data.put(KEY_DEVICE, device);
         }
         if (event.getGeofenceId() != 0) {
             Geofence geofence = Context.getGeofenceManager().getById(event.getGeofenceId());
@@ -97,6 +98,7 @@ public abstract class EventForwarder {
                 data.put(KEY_GEOFENCE, geofence);
             }
         }
+        data.put(KEY_USERS, Context.getUsersManager().getItems(users));
         try {
             return Context.getObjectMapper().writeValueAsString(data);
         } catch (JsonProcessingException e) {
@@ -106,6 +108,7 @@ public abstract class EventForwarder {
     }
 
     protected abstract String getContentType();
-    protected abstract void setContent(Event event, Position position, BoundRequestBuilder requestBuilder);
+    protected abstract void setContent(
+            Event event, Position position, Set<Long> users, BoundRequestBuilder requestBuilder);
 
 }

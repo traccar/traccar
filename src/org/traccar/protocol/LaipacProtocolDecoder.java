@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -45,10 +47,44 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d+),")                  // speed
             .number("(d+.d+),")                  // course
             .number("(dd)(dd)(dd),")             // date (ddmmyy)
-            .expression("(.),")                  // type
-            .expression("[^*]+").text("*")
+            .expression("([abZXTSMHFE86430]),")  // event code
+            .expression("([\\d.]+),")            // battery voltage
+            .number("(d+),")                     // current mileage
+            .number("(d),")                      // gps status
+            .number("(d+),")                     // adc1
+            .number("(d+)")                      // adc2
+            .number(",(xxxx)")                   // lac
+            .number("(xxxx),")                   // cid
+            .number("(ddd)")                     // mcc
+            .number("(ddd)")                     // mnc
+            .optional(4)
+            .text("*")
             .number("(xx)")                      // checksum
             .compile();
+
+    private String decodeAlarm(String event) {
+        switch (event) {
+            case "Z":
+                return Position.ALARM_LOW_BATTERY;
+            case "X":
+                return Position.ALARM_GEOFENCE_ENTER;
+            case "T":
+                return Position.ALARM_TAMPERING;
+            case "H":
+                return Position.ALARM_POWER_OFF;
+            case "8":
+                return Position.ALARM_SHOCK;
+            case "7":
+            case "4":
+                return Position.ALARM_GEOFENCE_EXIT;
+            case "6":
+                return Position.ALARM_OVERSPEED;
+            case "3":
+                return Position.ALARM_SOS;
+            default:
+                return null;
+        }
+    }
 
     @Override
     protected Object decode(
@@ -79,6 +115,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
         String status = parser.next();
         position.setValid(status.toUpperCase().equals("A"));
+        position.set(Position.KEY_STATUS, status);
 
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
@@ -88,25 +125,37 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         dateBuilder.setDateReverse(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
         position.setTime(dateBuilder.getDate());
 
-        String type = parser.next();
+        String event = parser.next();
+        position.set(Position.KEY_ALARM, decodeAlarm(event));
+        position.set(Position.KEY_EVENT, event);
+        position.set(Position.KEY_BATTERY, Double.parseDouble(parser.next().replaceAll("\\.", "")) * 0.001);
+        position.set(Position.KEY_ODOMETER, parser.nextDouble());
+        position.set(Position.KEY_GPS, parser.nextInt());
+        position.set(Position.PREFIX_ADC + 1, parser.nextDouble() * 0.001);
+        position.set(Position.PREFIX_ADC + 2, parser.nextDouble() * 0.001);
+
+        Integer lac = parser.nextHexInt();
+        Integer cid = parser.nextHexInt();
+        Integer mcc = parser.nextInt();
+        Integer mnc = parser.nextInt();
+        if (lac != null && cid != null && mcc != null && mnc != null) {
+            position.setNetwork(new Network(CellTower.from(mcc, mnc, lac, cid)));
+        }
+
         String checksum = parser.next();
 
         if (channel != null) {
-
-            if (Character.isLowerCase(status.charAt(0))) {
-                String response = "$EAVACK," + type + "," + checksum;
-                response += Checksum.nmea(response);
+            if (event.equals("3")) {
+                channel.write("$AVCFG,00000000,d*31\r\n");
+            } else if (event.equals("X") || event.equals("4")) {
+                channel.write("$AVCFG,00000000,x*2D\r\n");
+            } else if (event.equals("Z")) {
+                channel.write("$AVCFG,00000000,z*2F\r\n");
+            } else if (Character.isLowerCase(status.charAt(0))) {
+                String response = "$EAVACK," + event + "," + checksum;
+                response += Checksum.nmea(response) + "\r\n";
                 channel.write(response);
             }
-
-            if (type.equals("S") || type.equals("T")) {
-                channel.write("$AVCFG,00000000,t*21");
-            } else if (type.equals("3")) {
-                channel.write("$AVCFG,00000000,d*31");
-            } else if (type.equals("X") || type.equals("4")) {
-                channel.write("$AVCFG,00000000,x*2D");
-            }
-
         }
 
         return position;
