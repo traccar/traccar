@@ -54,7 +54,7 @@
     </entry>
 
     <entry key="database.insertFCMUserToken">
-        INSERT INTO fcmUserTokens(userId, clientToken)
+        INSERT INTO FCMUserTokens(userId, clientToken)
         VALUES (:userId, :clientToken)
         ON DUPLICATE KEY UPDATE clientToken = :clientToken
     </entry>

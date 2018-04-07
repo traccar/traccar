@@ -16,7 +16,7 @@
             </column>
         </createTable>
 
-        <addForeignKeyConstraint baseTableName="fcmUserTokens" baseColumnNames="userid" constraintName="fk_fcmUserTokens_userid" referencedTableName="users" referencedColumnNames="id" onDelete="CASCADE" />
+        <addForeignKeyConstraint baseTableName="FCMUserTokens" baseColumnNames="userid" constraintName="fk_FCMUserTokens_userid" referencedTableName="users" referencedColumnNames="id" onDelete="CASCADE" />
 
         <createTable tableName="fcmpushnotificationtypes">
             <column name="id" type="INT" autoIncrement="true">
