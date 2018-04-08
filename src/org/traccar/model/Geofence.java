@@ -66,7 +66,7 @@ public class Geofence extends ScheduledModel {
             geometry = new GeofencePolygon(area);
         } else if (area.startsWith("LINESTRING")) {
             final double distance = getDouble("polylineDistance");
-            geometry = new GeofencePolyline(area, distance >= 1 ? distance
+            geometry = new GeofencePolyline(area, distance > 0 ? distance
                     : Context.getConfig().getDouble("geofence.polylineDistance", 25));
         } else {
             throw new ParseException("Unknown geometry type", 0);
