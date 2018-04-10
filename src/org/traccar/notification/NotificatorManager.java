@@ -16,30 +16,45 @@
  */
 package org.traccar.notification;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.traccar.Context;
+import org.traccar.helper.Log;
 
-public class NotificatorManager {
+public final class NotificatorManager {
 
-    protected NotificatorManager() {
-        //not called
+    private static final NotificatorManager INSTANCE = new NotificatorManager();
+
+    private NotificatorManager() {
+        final String[] types = Context.getConfig().getString("notificator.types", "").split(",");
+        for (String type : types) {
+            final String className = Context.getConfig().getString("notificator." + type + ".class", "");
+            if (className.length() > 0) {
+                try {
+                    final Class<Notificator> c = (Class<Notificator>) Class.forName(className);
+                    try {
+                        final Constructor<Notificator> constructor = c.getConstructor(new Class[]{String.class});
+                        notificators.put(type, constructor.newInstance(type));
+                    } catch (NoSuchMethodException e) {
+                        // No constructor with String argument
+                        notificators.put(type, c.newInstance());
+                    }
+                } catch (ClassNotFoundException | InstantiationException
+                        | IllegalAccessException | InvocationTargetException e) {
+                    Log.error("Unable to load notificator class for " + type + " " + className + " " + e.getMessage());
+                }
+            }
+        }
     }
 
-    private static final Map<String, Notificator> NOTIFICATORS = new HashMap<>();
+    private final Map<String, Notificator> notificators = new HashMap<>();
     private static final Notificator NULL_NOTIFICATOR = new NotificationNull();
 
-    static {
-        if (Context.getSmsManager() != null) {
-            NOTIFICATORS.put("sms", new NotificationSms());
-        }
-        NOTIFICATORS.put("mail", new NotificationMail());
-        NOTIFICATORS.put("web", new NotificationWeb());
-    }
-
     public static Notificator getNotificator(String type) {
-        return NOTIFICATORS.getOrDefault(type, NULL_NOTIFICATOR);
+        return INSTANCE.notificators.getOrDefault(type, NULL_NOTIFICATOR);
     }
 
     public static Notificator getSms() {
