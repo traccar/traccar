@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -243,22 +243,22 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_HDOP, parser.nextDouble());
         }
 
-        String io = parser.next();
+        int io = parser.nextBinInt();
         if (pattern == PATTERN1) {
             for (int i = 1; i <= 4; i++) {
-                position.set(Position.PREFIX_IN + i, io.charAt(3 + i) == '1');
+                position.set(Position.PREFIX_IN + i, BitUtil.check(io, 3 + i));
             }
             position.set(Position.KEY_BATTERY, parser.nextDouble(0) * 0.01);
         } else {
-            position.set(Position.KEY_ANTENNA, io.charAt(0) == '1');
-            position.set(Position.KEY_CHARGE, io.charAt(1) == '1');
+            position.set(Position.KEY_ANTENNA, BitUtil.check(io, 0));
+            position.set(Position.KEY_CHARGE, BitUtil.check(io, 1));
             for (int i = 1; i <= 6; i++) {
-                position.set(Position.PREFIX_IN + i, io.charAt(1 + i) == '1');
+                position.set(Position.PREFIX_IN + i, BitUtil.check(io, 1 + i));
             }
             position.set(Position.KEY_BATTERY, parser.nextDouble(0) * 0.1);
         }
         for (int i = 1; i <= 4; i++) {
-            position.set(Position.PREFIX_OUT + i, io.charAt(7 + i) == '1');
+            position.set(Position.PREFIX_OUT + i, BitUtil.check(io, 7 + i));
         }
         position.set(Position.KEY_POWER, parser.nextDouble(0));
         position.set(Position.PREFIX_ADC + 1, parser.next());
