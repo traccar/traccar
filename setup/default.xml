@@ -47,7 +47,15 @@
         SELECT * FROM positions WHERE deviceId = :deviceId AND fixTime BETWEEN :from AND :to ORDER BY fixTime
     </entry>
 
-    <entry key='database.database.selectFCMPushNotificationsByUserId'>
+    <entry key='database.selectPeripheralSensors'>
+        SELECT p.id AS peripheralSensorId, d.id AS deviceId, dt.typename as typeName, p.calibrationdata as calibrationData
+        FROM peripheralsensors AS p
+        JOIN peripheralsensortypes AS dt ON p.sensortypeid = dt.id
+        JOIN device_peripheralsensors AS dp ON p.id = dp.peripheralsensorid
+        JOIN devices AS d ON dp.deviceid = d.id;
+    </entry>
+
+    <entry key='database.selectFCMPushNotificationsByUserId'>
         SELECT deviceId, eventTypeId, enabled FROM fcmpushnotifications WHERE userId = :userId
     </entry>
 

@@ -61,6 +61,7 @@ import org.traccar.model.Position;
 import org.traccar.model.Server;
 import org.traccar.model.Statistics;
 import org.traccar.model.User;
+import org.traccar.model.PeripheralSensor;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -359,9 +360,14 @@ public class DataManager {
     }
 
     public Collection<FCMPushNotification> getFCMPushNotificationsForUser(long userId) throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.database.selectFCMPushNotificationsByUserId"))
+        return QueryBuilder.create(dataSource, getQuery("database.selectFCMPushNotificationsByUserId"))
                            .setLong("userId", userId)
                            .executeQuery(FCMPushNotification.class);
+    }
+
+    public Collection<PeripheralSensor> getPeripheralSensors() throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.selectPeripheralSensors"))
+                           .executeQuery(PeripheralSensor.class);
     }
 
     public void addPosition(Position position) throws SQLException {

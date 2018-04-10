@@ -73,7 +73,7 @@ public class FCMPushNotificationManager extends ExtendedObjectManager<FCMPushNot
         }
     }
 
-    private void updateEvent(Event event, Position position) {
+    public void updateEvent(Event event, Position position) {
         String eventType = event.getType();
         if (StringUtils.isBlank(eventType)) {
             return;

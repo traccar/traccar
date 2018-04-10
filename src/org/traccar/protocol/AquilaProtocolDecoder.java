@@ -207,7 +207,7 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (parser.hasNext(2)) {
 
-            position.set("sensorId", parser.nextInt());
+            position.set("sensorsensorId", parser.nextInt());
             position.set("sensorData", parser.next());
 
         }
