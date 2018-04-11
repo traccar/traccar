@@ -13,6 +13,7 @@ import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.model.Event;
 import org.traccar.model.Geofence;
+import org.traccar.model.Maintenance;
 
 @Path("events")
 @Produces(MediaType.APPLICATION_JSON)
@@ -27,6 +28,9 @@ public class EventResource extends BaseResource {
         Context.getPermissionsManager().checkDevice(getUserId(), event.getDeviceId());
         if (event.getGeofenceId() != 0) {
             Context.getPermissionsManager().checkPermission(Geofence.class, getUserId(), event.getGeofenceId());
+        }
+        if (event.getMaintenanceId() != 0) {
+            Context.getPermissionsManager().checkPermission(Maintenance.class, getUserId(), event.getMaintenanceId());
         }
         return event;
     }

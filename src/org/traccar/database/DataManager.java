@@ -48,6 +48,7 @@ import org.traccar.model.Driver;
 import org.traccar.model.Event;
 import org.traccar.model.Geofence;
 import org.traccar.model.Group;
+import org.traccar.model.Maintenance;
 import org.traccar.model.ManagedUser;
 import org.traccar.model.Notification;
 import org.traccar.model.Permission;
@@ -405,6 +406,8 @@ public class DataManager {
                 return Calendar.class;
             case "command":
                 return Command.class;
+            case "maintenance":
+                return Maintenance.class;
             case "notification":
                 return Notification.class;
             default:

@@ -91,4 +91,14 @@ public class Event extends Message {
         this.geofenceId = geofenceId;
     }
 
+    private long maintenanceId = 0;
+
+    public long getMaintenanceId() {
+        return maintenanceId;
+    }
+
+    public void setMaintenanceId(long maintenanceId) {
+        this.maintenanceId = maintenanceId;
+    }
+
 }
