@@ -41,6 +41,7 @@ import org.traccar.events.AlertEventHandler;
 import org.traccar.helper.Log;
 import org.traccar.processing.ComputedAttributesHandler;
 import org.traccar.processing.CopyAttributesHandler;
+import org.traccar.processing.PeripheralSensorDataHandler;
 
 import java.net.InetSocketAddress;
 
@@ -58,6 +59,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
     private HemisphereHandler hemisphereHandler;
     private CopyAttributesHandler copyAttributesHandler;
     private ComputedAttributesHandler computedAttributesHandler;
+    private PeripheralSensorDataHandler peripheralSensorDataHandler;
 
     private CommandResultEventHandler commandResultEventHandler;
     private OverspeedEventHandler overspeedEventHandler;
@@ -168,6 +170,10 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             computedAttributesHandler = new ComputedAttributesHandler();
         }
 
+        if (Context.getConfig().getBoolean("processing.peripheralSensorData.enable")) {
+            peripheralSensorDataHandler = new PeripheralSensorDataHandler();
+        }
+
         if (Context.getConfig().getBoolean("event.enable")) {
             commandResultEventHandler = new CommandResultEventHandler();
             overspeedEventHandler = Context.getOverspeedEventHandler();
@@ -231,6 +237,10 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
         if (computedAttributesHandler != null) {
             pipeline.addLast("computedAttributes", computedAttributesHandler);
+        }
+
+        if (peripheralSensorDataHandler != null) {
+            pipeline.addLast("peripheralSensorData", peripheralSensorDataHandler);
         }
 
         if (Context.getDataManager() != null) {

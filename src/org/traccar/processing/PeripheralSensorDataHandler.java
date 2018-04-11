@@ -12,18 +12,16 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class SensorDataHandler extends BaseDataHandler {
+public class PeripheralSensorDataHandler extends BaseDataHandler {
 
     public static final int MIN_VALUES_FOR_MOVING_AVERAGE = 2;
-    private final Map<Long, List<Double>> fuelSensorPreviousReadings =
+    private final Map<Integer, List<Double>> fuelSensorPreviousReadings =
             new ConcurrentHashMap<>();
 
     @Override
     protected Position handlePosition(Position position) {
-        Optional<List<PeripheralSensor>> peripheralSensorsOnDevice = PeripheralSensorManager.getMockList();
-        Context.getPeripheralSensorManager().getLinkedPeripheralSensors(position.getDeviceId());
-
-
+        Optional<List<PeripheralSensor>> peripheralSensorsOnDevice =
+                Context.getPeripheralSensorManager().getLinkedPeripheralSensors(position.getDeviceId());
 
         if (position.getAttributes().containsKey("sensorId") &&
                 peripheralSensorsOnDevice.isPresent()) {
@@ -38,7 +36,7 @@ public class SensorDataHandler extends BaseDataHandler {
     private void handleDigitalFuelSensorData(Position position,
                                              List<PeripheralSensor> digitalFuelSensorsOnDevice) {
 
-        Long sensorId = (Long) position.getAttributes().get("sensorId");
+        Integer sensorId = (Integer) position.getAttributes().get("sensorId");
         String sensorDataString = (String) position.getAttributes().get("sensorData");
 
         Optional<Long> fuelLevel = getFuelLevelFromSensorData(sensorDataString);
@@ -55,7 +53,7 @@ public class SensorDataHandler extends BaseDataHandler {
     }
 
     private void handleSensorData(Position position,
-                                  Long sensorId,
+                                  Integer sensorId,
                                   Optional<Long> fuelLevel) {
 
         if (!fuelLevel.isPresent()) {
@@ -77,9 +75,10 @@ public class SensorDataHandler extends BaseDataHandler {
 
         // Calculate current level based on moving average. And factor in calibration data.
 
-        position.set(Position.KEY_FUEL_LEVEL, getAverageValue(fuelSensorPreviousReadings.get(sensorId)));
+        double currentFuelLevelAverage = getAverageValue(fuelSensorPreviousReadings.get(sensorId));
         fuelSensorPreviousReadings.get(sensorId).remove(0); // remove the first value in the list
-        fuelSensorPreviousReadings.put()
+        fuelSensorPreviousReadings.get(sensorId).add(currentFuelLevelAverage);
+        position.set(Position.KEY_FUEL_LEVEL, currentFuelLevelAverage);
     }
 
     private Double getAverageValue(List<Double> fuelLevelReadings) {

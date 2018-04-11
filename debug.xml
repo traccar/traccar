@@ -17,6 +17,7 @@
 
     <entry key='coordinates.filter'>true</entry>
     <entry key='coordinates.minError'>20</entry>
+    <entry key='processing.peripheralSensorData.enable'>true</entry>
 
     <!--<entry key='database.driver'>org.h2.Driver</entry>-->
     <!--<entry key='database.url'>jdbc:h2:./target/database</entry>-->
