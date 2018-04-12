@@ -34,25 +34,25 @@ public class MaintenanceEventHandler extends BaseEventHandler {
             return null;
         }
 
-        double oldTotalDistance = 0.0;
-        double newTotalDistance = 0.0;
-
         Position lastPosition = Context.getIdentityManager().getLastPosition(position.getDeviceId());
-        if (lastPosition != null) {
-            oldTotalDistance = lastPosition.getDouble(Position.KEY_TOTAL_DISTANCE);
+        if (lastPosition == null) {
+            return null;
         }
-        newTotalDistance = position.getDouble(Position.KEY_TOTAL_DISTANCE);
 
         Map<Event, Position> events = new HashMap<>();
         for (long maintenanceId : Context.getMaintenancesManager().getAllDeviceItems(position.getDeviceId())) {
             Maintenance maintenance = Context.getMaintenancesManager().getById(maintenanceId);
-            if (maintenance.getLapse() != 0
-                    && (long) ((oldTotalDistance - maintenance.getStart()) / maintenance.getLapse())
-                    < (long) ((newTotalDistance - maintenance.getStart()) / maintenance.getLapse())) {
-                Event event = new Event(Event.TYPE_MAINTENANCE, position.getDeviceId(), position.getId());
-                event.setMaintenanceId(maintenanceId);
-                event.set(Position.KEY_TOTAL_DISTANCE, newTotalDistance);
-                events.put(event, position);
+            if (maintenance.getLapse() != 0) {
+                double oldValue = lastPosition.getDouble(maintenance.getType());
+                double newValue = position.getDouble(maintenance.getType());
+                if (oldValue != 0.0 && newValue != 0.0
+                        && (long) ((oldValue - maintenance.getStart()) / maintenance.getLapse())
+                        < (long) ((newValue - maintenance.getStart()) / maintenance.getLapse())) {
+                    Event event = new Event(Event.TYPE_MAINTENANCE, position.getDeviceId(), position.getId());
+                    event.setMaintenanceId(maintenanceId);
+                    event.set(maintenance.getType(), newValue);
+                    events.put(event, position);
+                }
             }
         }
 

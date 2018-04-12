@@ -19,10 +19,13 @@
       <column name="name" type="VARCHAR(4000)">
         <constraints nullable="false" />
       </column>
-      <column name="start" type="FLOAT" defaultValueNumeric="0">
+      <column name="type" type="VARCHAR(128)">
         <constraints nullable="false" />
       </column>
-      <column name="lapse" type="FLOAT" defaultValueNumeric="0">
+      <column name="start" type="DOUBLE" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="lapse" type="DOUBLE" defaultValueNumeric="0">
         <constraints nullable="false" />
       </column>
       <column name="attributes" type="VARCHAR(4000)">

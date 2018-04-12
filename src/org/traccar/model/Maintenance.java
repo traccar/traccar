@@ -28,6 +28,16 @@ public class Maintenance extends ExtendedModel {
         this.name = name;
     }
 
+    private String type;
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
     private double start;
 
     public double getStart() {
