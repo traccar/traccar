@@ -25,9 +25,9 @@ import org.traccar.model.Position;
 import java.net.SocketAddress;
 import java.util.regex.Pattern;
 
-public class GlobeKeeperProtocolDecoder extends BaseProtocolDecoder {
+public class AustinNBProtocolDecoder extends BaseProtocolDecoder {
 
-    public GlobeKeeperProtocolDecoder(GlobeKeeperProtocol protocol) {
+    public AustinNBProtocolDecoder(AustinNBProtocol protocol) {
         super(protocol);
     }
 
@@ -60,8 +60,8 @@ public class GlobeKeeperProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(parser.nextDateTime());
 
         position.setValid(true);
-        position.setLongitude(Double.parseDouble(parser.next().replace(',', '.')));
         position.setLatitude(Double.parseDouble(parser.next().replace(',', '.')));
+        position.setLongitude(Double.parseDouble(parser.next().replace(',', '.')));
 
         return position;
     }

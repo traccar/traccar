@@ -24,10 +24,10 @@ import org.traccar.TrackerServer;
 
 import java.util.List;
 
-public class GlobeKeeperProtocol extends BaseProtocol {
+public class AustinNBProtocol extends BaseProtocol {
 
-    public GlobeKeeperProtocol() {
-        super("globekeeper");
+    public AustinNBProtocol() {
+        super("austinnb");
     }
 
     @Override
@@ -37,7 +37,7 @@ public class GlobeKeeperProtocol extends BaseProtocol {
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("stringEncoder", new StringEncoder());
                 pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectDecoder", new GlobeKeeperProtocolDecoder(GlobeKeeperProtocol.this));
+                pipeline.addLast("objectDecoder", new AustinNBProtocolDecoder(AustinNBProtocol.this));
             }
         });
     }
