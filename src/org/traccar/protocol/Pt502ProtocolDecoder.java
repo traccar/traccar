@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
  * Copyright 2012 Luis Parada (luis.parada@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +16,8 @@
  */
 package org.traccar.protocol;
 
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
@@ -25,13 +27,14 @@ import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
 public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
 
     private static final int MAX_CHUNK_SIZE = 960;
 
-    private byte[] photo;
+    private ChannelBuffer photo;
 
     public Pt502ProtocolDecoder(Pt502Protocol protocol) {
         super(protocol);
@@ -85,25 +88,15 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    @Override
-    protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+    private Position decodePosition(Channel channel, SocketAddress remoteAddress, String sentence) {
 
-        Parser parser = new Parser(PATTERN, (String) msg);
+        Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
             return null;
         }
 
         Position position = new Position(getProtocolName());
-
-        String type = parser.next();
-
-        if (type.startsWith("PHO") && channel != null) {
-            photo = new byte[Integer.parseInt(type.substring(3))];
-            channel.write("#PHD0," + Math.min(photo.length, MAX_CHUNK_SIZE) + "\r\n");
-        }
-
-        position.set(Position.KEY_ALARM, decodeAlarm(type));
+        position.set(Position.KEY_ALARM, decodeAlarm(parser.next()));
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
@@ -144,6 +137,33 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         return position;
+    }
+
+    @Override
+    protected Object decode(
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+
+        ChannelBuffer buf = (ChannelBuffer) msg;
+
+        int typeEndIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ',');
+        String type = buf.toString(buf.readerIndex(), typeEndIndex - buf.readerIndex(), StandardCharsets.US_ASCII);
+
+        if (type.startsWith("$PHD")) {
+
+            // TODO decode photo
+
+        } else {
+
+            if (type.startsWith("$PHO") && channel != null) {
+                photo = ChannelBuffers.buffer(Integer.parseInt(type.substring(4, type.indexOf('-'))));
+                channel.write("#PHD0," + Math.min(photo.capacity(), MAX_CHUNK_SIZE) + "\r\n");
+            }
+
+            return decodePosition(channel, remoteAddress, buf.toString(StandardCharsets.US_ASCII));
+
+        }
+
+        return null;
     }
 
 }
