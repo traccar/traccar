@@ -20,6 +20,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
@@ -139,6 +140,14 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private void requestPhotoFragment(Channel channel) {
+        if (channel != null) {
+            int offset = photo.writerIndex();
+            int size = Math.min(photo.writableBytes(), MAX_CHUNK_SIZE);
+            channel.write("#PHD" + offset + "," + size + "\r\n");
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -150,13 +159,45 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
 
         if (type.startsWith("$PHD")) {
 
-            // TODO decode photo
+            int dataIndex = buf.indexOf(typeEndIndex + 1, buf.writerIndex(), (byte) ',') + 1;
+            buf.readerIndex(dataIndex);
+
+            if (photo != null) {
+
+                photo.writeBytes(buf.readBytes(buf.readableBytes()));
+
+                if (photo.writableBytes() > 0) {
+
+                    requestPhotoFragment(channel);
+
+                } else {
+
+                    DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+                    String uniqueId = Context.getIdentityManager().getById(deviceSession.getDeviceId()).getUniqueId();
+
+                    Position position = new Position(getProtocolName());
+                    position.setDeviceId(deviceSession.getDeviceId());
+
+                    getLastLocation(position, null);
+
+                    position.set(Position.KEY_IMAGE, Context.getMediaManager().writeFile(uniqueId, photo, "jpg"));
+
+                    photo = null;
+
+                    return position;
+
+                }
+
+            }
 
         } else {
 
-            if (type.startsWith("$PHO") && channel != null) {
-                photo = ChannelBuffers.buffer(Integer.parseInt(type.substring(4, type.indexOf('-'))));
-                channel.write("#PHD0," + Math.min(photo.capacity(), MAX_CHUNK_SIZE) + "\r\n");
+            if (type.startsWith("$PHO")) {
+                int size = Integer.parseInt(type.split("-")[0].substring(4));
+                if (size > 0) {
+                    photo = ChannelBuffers.buffer(size);
+                    requestPhotoFragment(channel);
+                }
             }
 
             return decodePosition(channel, remoteAddress, buf.toString(StandardCharsets.US_ASCII));
