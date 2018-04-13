@@ -18,9 +18,9 @@ package org.traccar;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.traccar.database.ActiveDevice;
+import org.traccar.helper.DataConverter;
 import org.traccar.model.Command;
 
-import javax.xml.bind.DatatypeConverter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -79,7 +79,7 @@ public abstract class BaseProtocol implements Protocol {
             if (activeDevice.getChannel().getPipeline().get(StringEncoder.class) != null) {
                 activeDevice.write(data);
             } else {
-                activeDevice.write(ChannelBuffers.wrappedBuffer(DatatypeConverter.parseHexBinary(data)));
+                activeDevice.write(ChannelBuffers.wrappedBuffer(DataConverter.parseHex(data)));
             }
         } else {
             throw new RuntimeException("Command " + command.getType() + " is not supported in protocol " + getName());

@@ -15,7 +15,7 @@ public class KhdProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_ENGINE_STOP);
 
-        verifyCommand(encoder, command, binary("2929390006000000003F0D"));
+        verifyCommand(encoder, command, binary("29293900065981972d5d0d"));
 
     }
 

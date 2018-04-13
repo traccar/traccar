@@ -58,6 +58,23 @@ public class Ivt401ProtocolDecoder extends BaseProtocolDecoder {
             .number("(-?d+),")                   // tilt
             .number("(d+),")                     // trip
             .number("(d+),")                     // odometer
+            .groupBegin()
+            .number("([01]),")                   // overspeed
+            .number("[01],")                     // input 2 misuse
+            .number("[01],")                     // immobilizer
+            .number("[01],")                     // temperature alert
+            .number("[0-2]+,")                   // geofence
+            .number("([0-3]),")                  // harsh driving
+            .number("[01],")                     // reconnect
+            .number("([01]),")                   // low battery
+            .number("([01]),")                   // power disconnected
+            .number("[01],")                     // gps failure
+            .number("([01]),")                   // towing
+            .number("[01],")                     // server unreachable
+            .number("[128],")                    // sleep mode
+            .expression("([^,]+)?,")             // driver id
+            .number("d+,")                       // sms count
+            .groupEnd("?")
             .any()
             .compile();
 
@@ -137,6 +154,27 @@ public class Ivt401ProtocolDecoder extends BaseProtocolDecoder {
         parser.nextInt(); // trip state
 
         position.set(Position.KEY_ODOMETER, parser.nextLong());
+
+        if (parser.hasNext(6)) {
+            position.set(Position.KEY_ALARM, parser.nextInt() == 1 ? Position.ALARM_OVERSPEED : null);
+            switch (parser.nextInt()) {
+                case 1:
+                    position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+                    break;
+                case 2:
+                    position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+                    break;
+                case 3:
+                    position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
+                    break;
+                default:
+                    break;
+            }
+            position.set(Position.KEY_ALARM, parser.nextInt() == 1 ? Position.ALARM_LOW_BATTERY : null);
+            position.set(Position.KEY_ALARM, parser.nextInt() == 1 ? Position.ALARM_POWER_CUT : null);
+            position.set(Position.KEY_ALARM, parser.nextInt() == 1 ? Position.ALARM_TOW : null);
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
+        }
 
         return position;
     }

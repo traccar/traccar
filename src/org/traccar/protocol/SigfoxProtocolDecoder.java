@@ -22,12 +22,12 @@ import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.helper.DataConverter;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import javax.json.Json;
 import javax.json.JsonObject;
-import javax.xml.bind.DatatypeConverter;
 import java.io.StringReader;
 import java.net.SocketAddress;
 import java.net.URLDecoder;
@@ -61,7 +61,7 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
         position.setTime(new Date(json.getInt("time") * 1000L));
 
         ChannelBuffer buf = ChannelBuffers.wrappedBuffer(
-                ByteOrder.LITTLE_ENDIAN, DatatypeConverter.parseHexBinary(json.getString("data")));
+                ByteOrder.LITTLE_ENDIAN, DataConverter.parseHex(json.getString("data")));
 
         int type = buf.readUnsignedByte() >> 4;
         if (type == 0) {

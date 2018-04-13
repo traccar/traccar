@@ -456,7 +456,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
         switch (marker) {
             case "*":
-                String sentence = buf.toString(StandardCharsets.US_ASCII);
+                String sentence = buf.toString(StandardCharsets.US_ASCII).trim();
                 int typeStart = sentence.indexOf(',', sentence.indexOf(',') + 1) + 1;
                 int typeEnd = sentence.indexOf(',', typeStart);
                 if (typeEnd > 0) {

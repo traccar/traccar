@@ -13,6 +13,15 @@ public class DmtProtocolDecoderTest extends ProtocolTest {
         DmtProtocolDecoder decoder = new DmtProtocolDecoder(new DmtProtocol());
 
         verifyNull(decoder, binary(ByteOrder.LITTLE_ENDIAN,
+                "0255003300001b00003335333232393032373533393235310038393931353030303030303030313330343539340000000403041910780603"));
+
+        verifyPositions(decoder, false, binary(ByteOrder.LITTLE_ENDIAN,
+                "02551040000eaca40d00d2b8e562c51f9912f39a6bee00007e420091090903070100000000008b1065360000000000007fd401c4fcf2feffffffffffffffffee0000003f1b"));
+
+        verifyPositions(decoder, false, binary(ByteOrder.LITTLE_ENDIAN,
+                "02551080000eada40d00d2b8e58ac51f9912f39a6bee00007e42007e090709070000000000009010fc330000000000007fc201a0fc04ffffffffffffffffffe5000000c5d00eaea40d00d2b8e58ac51f9912f39a6bee00007e42007e09070207000000000000851008340000000000007fc201a0fc04ff0000000000000000e5000000c96d"));
+
+        verifyNull(decoder, binary(ByteOrder.LITTLE_ENDIAN,
                 "025500310038f90100333533333233303831363639373330003839363130313835303031383234383434363330002202010900000000"));
 
         verifyNull(decoder, binary(ByteOrder.LITTLE_ENDIAN,

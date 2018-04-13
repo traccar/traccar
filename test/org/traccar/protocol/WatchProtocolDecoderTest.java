@@ -11,6 +11,15 @@ public class WatchProtocolDecoderTest extends ProtocolTest {
         WatchProtocolDecoder decoder = new WatchProtocolDecoder(new WatchProtocol());
 
         verifyPosition(decoder, buffer(
+                "[ZJ*014111001332708*0075*0064*AL,040418,052156,A,22.536207,N,113.938673,E,0,0,0,5,100,82,1000,50,00100000,1,255,460,0,9340,3663,35]"));
+
+        verifyPosition(decoder, buffer(
+                "[SG*352661090143150*006C*UD,150817,132115,V,28.435142,N,81.354333,W,2.2038,000,99,00,70,100,0,50,00000000,1,1,310,260,1091,30082,139,,00]"));
+
+        verifyAttributes(decoder, buffer(
+                "[3G*4700609403*0013*bphrt,120,79,73,,,,]"));
+
+        verifyPosition(decoder, buffer(
                 "[3G*8308373902*0080*AL,230817,095346,A,47.083950,N,15.4821850,E,7.60,273.8,0.0,4,15,44,0,0,00200010,2,255,232,1,7605,42530,118,7605,58036,119,0,65.8]"));
 
         verifyPosition(decoder, buffer(
@@ -83,6 +92,15 @@ public class WatchProtocolDecoderTest extends ProtocolTest {
 
         verifyAttributes(decoder, buffer(
                 "[3G*6005412902*0008*heart,71]"));
+
+        verifyPosition(decoder, buffer(
+                "[ZJ*014111001350304*0033*0064*UD,070318,020827,V,00.000000,N,000.000000,E,0,0,0,0,100,19,1000,50,00000000,1,255,460,0,9346,5223,42]"));
+
+        verifyPosition(decoder, buffer(
+                "[ZJ*014111001350304*0035*0097*UD,070318,020857,V,00.000000,N,000.000000,E,0,0,0,0,100,19,1000,50,00000000,5,255,460,0,9346,5223,42,9346,5214,21,9784,4083,13,9346,5222,11,9346,5221,8]"));
+
+        verifyPosition(decoder, buffer(
+                "[ZJ*014111001350304*0038*008a*UD,070318,021027,V,00.000000,N,000.000000,E,0,0,0,0,100,18,1000,50,00000000,4,255,460,0,9346,5223,42,9346,5214,20,9784,4083,11,9346,5221,5]"));
 
     }
 

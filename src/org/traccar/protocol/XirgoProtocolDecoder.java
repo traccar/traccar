@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,6 +95,71 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
+    private void decodeEvent(Position position, int event) {
+
+        position.set(Position.KEY_EVENT, event);
+
+        switch (event) {
+            case 4001:
+            case 4003:
+            case 6011:
+            case 6013:
+                position.set(Position.KEY_IGNITION, true);
+                break;
+            case 4002:
+            case 4004:
+            case 6012:
+            case 6014:
+                position.set(Position.KEY_IGNITION, false);
+                break;
+            case 4005:
+                position.set(Position.KEY_CHARGE, false);
+                break;
+            case 6002:
+                position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+                break;
+            case 6006:
+                position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+                break;
+            case 6007:
+                position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+                break;
+            case 6008:
+                position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
+                break;
+            case 6009:
+                position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
+                break;
+            case 6010:
+                position.set(Position.KEY_ALARM, Position.ALARM_POWER_RESTORED);
+                break;
+            case 6016:
+                position.set(Position.KEY_ALARM, Position.ALARM_IDLE);
+                break;
+            case 6017:
+                position.set(Position.KEY_ALARM, Position.ALARM_TOW);
+                break;
+            case 6030:
+            case 6071:
+                position.set(Position.KEY_MOTION, true);
+                break;
+            case 6031:
+                position.set(Position.KEY_MOTION, false);
+                break;
+            case 6032:
+                position.set(Position.KEY_ALARM, Position.ALARM_PARKING);
+                break;
+            case 6090:
+                position.set(Position.KEY_ALARM, Position.ALARM_REMOVING);
+                break;
+            case 6091:
+                position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                break;
+            default:
+                break;
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -133,7 +198,7 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.set(Position.KEY_EVENT, parser.next());
+        decodeEvent(position, parser.nextInt());
 
         position.setTime(parser.nextDateTime());
 
