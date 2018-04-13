@@ -25,7 +25,7 @@
       <column name="start" type="DOUBLE" defaultValueNumeric="0">
         <constraints nullable="false" />
       </column>
-      <column name="lapse" type="DOUBLE" defaultValueNumeric="0">
+      <column name="period" type="DOUBLE" defaultValueNumeric="0">
         <constraints nullable="false" />
       </column>
       <column name="attributes" type="VARCHAR(4000)">

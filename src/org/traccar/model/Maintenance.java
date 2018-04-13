@@ -48,14 +48,14 @@ public class Maintenance extends ExtendedModel {
         this.start = start;
     }
 
-    private double lapse;
+    private double period;
 
-    public double getLapse() {
-        return lapse;
+    public double getPeriod() {
+        return period;
     }
 
-    public void setLapse(double lapse) {
-        this.lapse = lapse;
+    public void setPeriod(double period) {
+        this.period = period;
     }
 
 }

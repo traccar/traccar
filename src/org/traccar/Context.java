@@ -393,8 +393,6 @@ public final class Context {
 
         commandsManager = new CommandsManager(dataManager);
 
-        maintenancesManager = new MaintenancesManager(dataManager);
-
         statisticsManager = new StatisticsManager();
 
         if (config.getBoolean("sms.smpp.enable")) {
@@ -429,6 +427,7 @@ public final class Context {
 
         geofenceManager = new GeofenceManager(dataManager);
         calendarManager = new CalendarManager(dataManager);
+        maintenancesManager = new MaintenancesManager(dataManager);
         notificationManager = new NotificationManager(dataManager);
         Properties velocityProperties = new Properties();
         velocityProperties.setProperty("file.resource.loader.path",
