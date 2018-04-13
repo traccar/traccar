@@ -2,20 +2,24 @@ package org.traccar.processing;
 
 import org.traccar.BaseDataHandler;
 import org.traccar.Context;
-import org.traccar.database.PeripheralSensorManager;
 import org.traccar.model.PeripheralSensor;
 import org.traccar.model.Position;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class PeripheralSensorDataHandler extends BaseDataHandler {
 
     public static final int MIN_VALUES_FOR_MOVING_AVERAGE = 2;
     private final Map<Integer, List<Double>> fuelSensorPreviousReadings =
+            new ConcurrentHashMap<>();
+
+    private final Map<Integer, List<Position>> previousPositions =
             new ConcurrentHashMap<>();
 
     @Override
@@ -60,16 +64,29 @@ public class PeripheralSensorDataHandler extends BaseDataHandler {
             return;
         }
 
+        if (!isPositionTimestampWithinWindow(position)) {
+            return;
+        }
+
         int previousReadings = fuelSensorPreviousReadings.containsKey(sensorId)? fuelSensorPreviousReadings.get(sensorId).size() : 0;
         double calibratedFuelLevel = getCalibratedFuelLevel(fuelLevel.get());
 
         if (previousReadings == 0) {
             List<Double> fuelReadingsForSensor = new ArrayList<>();
+            List<Position> positionForSensor = new ArrayList<>();
             fuelReadingsForSensor.add(calibratedFuelLevel);
+            positionForSensor.add(position);
+
             fuelSensorPreviousReadings.put(sensorId, fuelReadingsForSensor);
+            previousPositions.put(sensorId, positionForSensor);
             return;
-        } else if (previousReadings < MIN_VALUES_FOR_MOVING_AVERAGE) {
+        } else if (previousReadings < MIN_VALUES_FOR_MOVING_AVERAGE &&
+                   isPositionTimestampWithinWindow(position,
+                                                   previousPositions.get(sensorId)
+                                                           .get(previousPositions.get(sensorId).size() - 1)
+                                                           .getDeviceTime())) {
             fuelSensorPreviousReadings.get(sensorId).add(calibratedFuelLevel);
+            previousPositions.get(sensorId).add(position);
             return;
         }
 
@@ -81,6 +98,19 @@ public class PeripheralSensorDataHandler extends BaseDataHandler {
         position.set(Position.KEY_FUEL_LEVEL, currentFuelLevelAverage);
     }
 
+    private boolean isPositionTimestampWithinWindow(Position position) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MINUTE, -5);
+        Date fiveMinutesBack = calendar.getTime();
+
+        return isPositionTimestampWithinWindow(position, fiveMinutesBack);
+
+    }
+
+    private boolean isPositionTimestampWithinWindow(Position position, Date sometimeBack) {
+        return position.getDeviceTime().compareTo(sometimeBack) >= 0;
+    }
+    
     private Double getAverageValue(List<Double> fuelLevelReadings) {
 
         Double total = 0.0;
