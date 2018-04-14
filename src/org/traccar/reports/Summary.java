@@ -62,6 +62,17 @@ public final class Summary {
             result.setDistance(ReportUtils.calculateDistance(firstPosition, previousPosition, !ignoreOdometer));
             result.setAverageSpeed(speedSum / positions.size());
             result.setSpentFuel(ReportUtils.calculateFuel(firstPosition, previousPosition));
+
+            if (!ignoreOdometer
+                    && firstPosition.getDouble(Position.KEY_ODOMETER) != 0
+                    && previousPosition.getDouble(Position.KEY_ODOMETER) != 0) {
+                result.setStartOdometer(firstPosition.getDouble(Position.KEY_ODOMETER));
+                result.setEndOdometer(previousPosition.getDouble(Position.KEY_ODOMETER));
+            } else {
+                result.setStartOdometer(firstPosition.getDouble(Position.KEY_TOTAL_DISTANCE));
+                result.setEndOdometer(previousPosition.getDouble(Position.KEY_TOTAL_DISTANCE));
+            }
+
         }
         return result;
     }
