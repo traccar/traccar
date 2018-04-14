@@ -16,16 +16,27 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PeripheralSensorDataHandler extends BaseDataHandler {
 
     public static final int MIN_VALUES_FOR_MOVING_AVERAGE = 2;
-    private final Map<Integer, List<Double>> fuelSensorPreviousReadings =
-            new ConcurrentHashMap<>();
+    public static final int MAX_VALUES_FOR_ALERTS = 180; // 30 minutes of data, with a payload coming in every 10 seconds.
+    public static final int FUEL_THEFT_THRESHOLD_LITRES = 5;
+    public static final int FUEL_THEFT_DISTANCE_THRESHOLD = 10;
 
+    // TODO: Load previous readings from DB on startup
     private final Map<Integer, List<Position>> previousPositions =
             new ConcurrentHashMap<>();
+
+    private final Map<Long, List<Long>> previousOdometerReadings =
+            new ConcurrentHashMap<>();
+
 
     @Override
     protected Position handlePosition(Position position) {
         Optional<List<PeripheralSensor>> peripheralSensorsOnDevice =
-                Context.getPeripheralSensorManager().getLinkedPeripheralSensors(position.getDeviceId());
+                Context.getPeripheralSensorManager()
+                       .getLinkedPeripheralSensors(position.getDeviceId());
+
+        if (position.getAttributes().containsKey("odometer")) {
+            handleFuelConsumption(position);
+        }
 
         if (position.getAttributes().containsKey("sensorId") &&
                 peripheralSensorsOnDevice.isPresent()) {
@@ -35,6 +46,47 @@ public class PeripheralSensorDataHandler extends BaseDataHandler {
         }
 
         return position;
+    }
+
+    private void handleFuelConsumption(final Position position) {
+        Long deviceId = position.getDeviceId();
+        Long odometerReading = (Long) position.getAttributes().get("odometer");
+
+        if (!previousOdometerReadings.containsKey(deviceId)) {
+            List<Long> deviceOdometerReadings = new ArrayList<>();
+            deviceOdometerReadings.add(odometerReading);
+            previousOdometerReadings.put(deviceId, deviceOdometerReadings);
+            return;
+        }
+
+        List<Long> deviceOdometerReadings = previousOdometerReadings.get(deviceId);
+
+        if (deviceOdometerReadings.size() == MAX_VALUES_FOR_ALERTS) {
+            deviceOdometerReadings.remove(0);
+        }
+
+        deviceOdometerReadings.add(odometerReading);
+        int totalReadingsIndex = deviceOdometerReadings.size() - 1;
+
+        Long distanceSinceLast = deviceOdometerReadings.get(totalReadingsIndex) - deviceOdometerReadings.get(0);
+
+        if (distanceSinceLast < 0) {
+            // Negative distance could mean we got an older position than we already had
+            return;
+        }
+
+        List<Position> devicePreviousPositions = previousPositions.get(deviceId);
+        int devicePositionsTotalIndex = devicePreviousPositions.size() - 1;
+        Double fuelLevelDifference = (Double) devicePreviousPositions.get(devicePositionsTotalIndex)
+                                                           .getAttributes().get("fuel") -
+                                     (Double) devicePreviousPositions.get(0).getAttributes().get("fuel");
+
+        if (distanceSinceLast >= 0 &&
+            distanceSinceLast < FUEL_THEFT_DISTANCE_THRESHOLD  &&
+            fuelLevelDifference >= FUEL_THEFT_THRESHOLD_LITRES) {
+
+            // TODO send alert!
+        }
     }
 
     private void handleDigitalFuelSensorData(Position position,
@@ -68,34 +120,39 @@ public class PeripheralSensorDataHandler extends BaseDataHandler {
             return;
         }
 
-        int previousReadings = fuelSensorPreviousReadings.containsKey(sensorId)? fuelSensorPreviousReadings.get(sensorId).size() : 0;
+        int previousReadings = previousPositions.containsKey(sensorId)? previousPositions.get(sensorId).size() : 0;
         double calibratedFuelLevel = getCalibratedFuelLevel(fuelLevel.get());
 
         if (previousReadings == 0) {
-            List<Double> fuelReadingsForSensor = new ArrayList<>();
-            List<Position> positionForSensor = new ArrayList<>();
-            fuelReadingsForSensor.add(calibratedFuelLevel);
-            positionForSensor.add(position);
+            List<Position> positionsForSensor = new ArrayList<>();
+            positionsForSensor.add(position);
 
-            fuelSensorPreviousReadings.put(sensorId, fuelReadingsForSensor);
-            previousPositions.put(sensorId, positionForSensor);
+            previousPositions.put(sensorId, positionsForSensor);
             return;
-        } else if (previousReadings < MIN_VALUES_FOR_MOVING_AVERAGE &&
-                   isPositionTimestampWithinWindow(position,
-                                                   previousPositions.get(sensorId)
-                                                           .get(previousPositions.get(sensorId).size() - 1)
-                                                           .getDeviceTime())) {
-            fuelSensorPreviousReadings.get(sensorId).add(calibratedFuelLevel);
-            previousPositions.get(sensorId).add(position);
+        }
+
+        if (!isPositionTimestampWithinWindow(position,
+                                            previousPositions.get(sensorId)
+                                                             .get(previousPositions.get(sensorId).size() - 1)
+                                                             .getDeviceTime())) {
+
             return;
         }
 
         // Calculate current level based on moving average. And factor in calibration data.
 
-        double currentFuelLevelAverage = getAverageValue(fuelSensorPreviousReadings.get(sensorId));
-        fuelSensorPreviousReadings.get(sensorId).remove(0); // remove the first value in the list
-        fuelSensorPreviousReadings.get(sensorId).add(currentFuelLevelAverage);
+        int maxReadingsIndex = previousPositions.get(sensorId).size() - 1;
+        double currentFuelLevelAverage = getAverageValue(
+                previousPositions.get(sensorId)
+                                 .subList(maxReadingsIndex - MIN_VALUES_FOR_MOVING_AVERAGE, maxReadingsIndex));
+
+        List<Position> devicePreviousPositions = previousPositions.get(sensorId);
+        if (devicePreviousPositions.size() == MAX_VALUES_FOR_ALERTS) {
+            devicePreviousPositions.remove(0);
+        }
+
         position.set(Position.KEY_FUEL_LEVEL, currentFuelLevelAverage);
+        devicePreviousPositions.add(position);
     }
 
     private boolean isPositionTimestampWithinWindow(Position position) {
@@ -110,18 +167,18 @@ public class PeripheralSensorDataHandler extends BaseDataHandler {
     private boolean isPositionTimestampWithinWindow(Position position, Date sometimeBack) {
         return position.getDeviceTime().compareTo(sometimeBack) >= 0;
     }
-    
-    private Double getAverageValue(List<Double> fuelLevelReadings) {
+
+    private Double getAverageValue(List<Position> fuelLevelReadings) {
 
         Double total = 0.0;
-        for (Double value : fuelLevelReadings) {
-            total += value;
+        for (Position position : fuelLevelReadings) {
+            total += (Double) position.getAttributes().get(Position.KEY_FUEL_LEVEL);
         }
         return total / fuelLevelReadings.size();
     }
 
     private Double getCalibratedFuelLevel(Long sensorFuelLevel) {
-        // Have to use the calibration data, once we know what it means. For now return a pre-determined number :D
+        // TODO: Have to use the calibration data, once we know what it means. For now return a pre-determined number :D
         return sensorFuelLevel / 10.47;
     }
 
