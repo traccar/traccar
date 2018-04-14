@@ -9,6 +9,20 @@ import static org.junit.Assert.assertEquals;
 public class Tk103ProtocolEncoderTest extends ProtocolTest {
 
     @Test
+    public void testEncodeOutputControl() {
+
+        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder();
+
+        Command command = new Command();
+        command.setDeviceId(1);
+        command.setType(Command.TYPE_OUTPUT_CONTROL);
+        command.set(Command.KEY_DATA, "1");
+
+        assertEquals("(123456789012345AV001)", encoder.encodeCommand(command));
+
+    }
+
+    @Test
     public void testEncodeEngineStop() throws Exception {
 
         Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder();
