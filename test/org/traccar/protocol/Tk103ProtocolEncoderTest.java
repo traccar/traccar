@@ -16,7 +16,6 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
         Command command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_OUTPUT_CONTROL);
-        command.set(Command.KEY_INDEX, 0);
         command.set(Command.KEY_DATA, "1");
 
         assertEquals("(123456789012345AV001)", encoder.encodeCommand(command));
