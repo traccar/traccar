@@ -236,5 +236,6 @@
     <entry key='continental.port'>5161</entry>
     <entry key='egts.port'>5162</entry>
     <entry key='robotrack.port'>5163</entry>
+    <entry key='pt60.port'>5164</entry>
 
 </properties>
