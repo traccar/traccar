@@ -53,30 +53,9 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
         }
 
         Position position = new Position();
-        String uniqueId;
-
-        if (root.containsKey("topic")) {
-            uniqueId = root.getString("topic");
-            if (root.containsKey("tid")) {
-                position.set("tid", root.getString("tid"));
-            }
-        } else {
-            uniqueId = root.getString("tid");
-        }
-
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, uniqueId);
-        if (deviceSession == null) {
-            sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
-            return null;
-        }
-        position.setDeviceId(deviceSession.getDeviceId());
         position.setProtocol(getProtocolName());
-        //position.set(Position.KEY_ORIGINAL, request.getContent().toString(StandardCharsets.US_ASCII));
 
-        position.setTime(new Date(root.getJsonNumber("tst").longValue() * 1000));
-        if (root.containsKey("sent")) {
-            position.setDeviceTime(new Date(root.getJsonNumber("sent").longValue() * 1000));
-        }
+        //position.set(Position.KEY_ORIGINAL, request.getContent().toString(StandardCharsets.US_ASCII));
 
         position.setValid(true);
 
@@ -98,11 +77,33 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
         if (root.containsKey("t")) {
             String t = root.getString("t");
             position.set("t", t);
-            Integer rty = -1;
-            if (root.containsKey("rty")) {
-                 rty = root.getInt("rty");
+
+            if (t == "9") {
+                position.set(Position.KEY_EVENT, Event.TYPE_ALARM);
+                position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+            } else if (t == "1") {
+                position.set(Position.KEY_EVENT, Event.TYPE_ALARM);
+                position.set(Position.KEY_ALARM, Position.ALARM_POWER_ON);
+            } else if (t == "i") {
+                position.set(Position.KEY_EVENT, Event.TYPE_IGNITION_ON);
+            } else if (t == "I") {
+                position.set(Position.KEY_EVENT, Event.TYPE_IGNITION_OFF);
+            } else if (t == "e") {
+                position.set(Position.KEY_EVENT, Event.TYPE_ALARM);
+                position.set(Position.KEY_ALARM, Position.ALARM_POWER_RESTORED);
+            } else if (t == "E") {
+                position.set(Position.KEY_EVENT, Event.TYPE_ALARM);
+                position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
+            } else if (t == "e" || t == "k") {
+                position.set(Position.KEY_EVENT, Event.TYPE_ALARM);
+                position.set(Position.KEY_ALARM, Position.ALARM_PARKING);
+            } else if (t == "v") {
+                position.set(Position.KEY_EVENT, Event.TYPE_ALARM);
+                position.set(Position.KEY_ALARM, Position.ALARM_MOVEMENT);
+            } else if (t == "!") {
+                position.set(Position.KEY_EVENT, Event.TYPE_ALARM);
+                position.set(Position.KEY_ALARM, Position.ALARM_TOW);
             }
-            setEventOrAlarm(position, t, rty);
         }
         if (root.containsKey("batt")) {
             position.set(Position.KEY_BATTERY_LEVEL, root.getInt("batt"));
@@ -149,50 +150,30 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
             }
         }
 
+        position.setTime(new Date(root.getJsonNumber("tst").longValue() * 1000));
+        if (root.containsKey("sent")) {
+            position.setDeviceTime(new Date(root.getJsonNumber("sent").longValue() * 1000));
+        }
+
+        String uniqueId;
+
+        if (root.containsKey("topic")) {
+            uniqueId = root.getString("topic");
+            if (root.containsKey("tid")) {
+                position.set("tid", root.getString("tid"));
+            }
+        } else {
+            uniqueId = root.getString("tid");
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, uniqueId);
+        if (deviceSession == null) {
+            sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
+            return null;
+        }
+        position.setDeviceId(deviceSession.getDeviceId());
+
         sendResponse(channel, HttpResponseStatus.OK);
         return position;
-    }
-
-    private void setEventOrAlarm(Position position, String t, Integer rty) {
-        if (t.equals("9")) {
-            position.set(Position.KEY_EVENT, Event.TYPE_ALARM);
-            position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
-        } else if (t.equals("1")) {
-            position.set(Position.KEY_EVENT, Event.TYPE_ALARM);
-            position.set(Position.KEY_ALARM, Position.ALARM_POWER_ON);
-        } else if (t.equals("i")) {
-            position.set(Position.KEY_EVENT, Event.TYPE_IGNITION_ON);
-        } else if (t.equals("I")) {
-            position.set(Position.KEY_EVENT, Event.TYPE_IGNITION_OFF);
-        } else if (t.equals("e")) {
-            position.set(Position.KEY_EVENT, Event.TYPE_ALARM);
-            position.set(Position.KEY_ALARM, Position.ALARM_POWER_RESTORED);
-        } else if (t.equals("E")) {
-            position.set(Position.KEY_EVENT, Event.TYPE_ALARM);
-            position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
-        } else if (t.equals("!")) {
-            position.set(Position.KEY_EVENT, Event.TYPE_ALARM);
-            position.set(Position.KEY_ALARM, Position.ALARM_TOW);
-        } else if (t.equals("s")) {
-            position.set(Position.KEY_EVENT, Event.TYPE_ALARM);
-            position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
-        } else if (t.equals("h")) {
-            position.set(Position.KEY_EVENT, Event.TYPE_ALARM);
-            switch (rty) {
-                case 0:
-                case 3:
-                    position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
-                    break;
-                case 1:
-                case 4:
-                    position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
-                    break;
-                case 2:
-                case 5:
-                default:
-                    position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
-                    break;
-            }
-        }
     }
 }
