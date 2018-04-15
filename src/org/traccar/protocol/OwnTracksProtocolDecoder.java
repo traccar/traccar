@@ -22,7 +22,7 @@ import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.DeviceSession;
-//import org.traccar.Context;
+import org.traccar.Context;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 import org.traccar.model.Event;
@@ -77,9 +77,9 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
         }
 
         if (root.getString("_type").equals("lwt")) {
-            //if (Context.getConnectionManager() != null) {
-            //   Context.getConnectionManager().removeActiveDevice(channel);
-            //}
+            if (Context.getConnectionManager() != null) {
+                Context.getConnectionManager().removeActiveDevice(channel);
+            }
             sendResponse(channel, HttpResponseStatus.OK);
             return null;
         }
