@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.traccar.database.DeviceManager;
 import org.traccar.database.DriversManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.database.LdapProvider;
+import org.traccar.database.MaintenancesManager;
 import org.traccar.database.MediaManager;
 import org.traccar.database.NotificationManager;
 import org.traccar.database.PermissionsManager;
@@ -64,6 +65,7 @@ import org.traccar.model.Device;
 import org.traccar.model.Driver;
 import org.traccar.model.Geofence;
 import org.traccar.model.Group;
+import org.traccar.model.Maintenance;
 import org.traccar.model.Notification;
 import org.traccar.model.User;
 import org.traccar.geolocation.GoogleGeolocationProvider;
@@ -230,6 +232,12 @@ public final class Context {
 
     public static CommandsManager getCommandsManager() {
         return commandsManager;
+    }
+
+    private static MaintenancesManager maintenancesManager;
+
+    public static MaintenancesManager getMaintenancesManager() {
+        return maintenancesManager;
     }
 
     private static StatisticsManager statisticsManager;
@@ -419,6 +427,7 @@ public final class Context {
 
         geofenceManager = new GeofenceManager(dataManager);
         calendarManager = new CalendarManager(dataManager);
+        maintenancesManager = new MaintenancesManager(dataManager);
         notificationManager = new NotificationManager(dataManager);
         Properties velocityProperties = new Properties();
         velocityProperties.setProperty("file.resource.loader.path",
@@ -469,6 +478,8 @@ public final class Context {
             return (BaseObjectManager<T>) driversManager;
         } else if (clazz.equals(Command.class)) {
             return (BaseObjectManager<T>) commandsManager;
+        } else if (clazz.equals(Maintenance.class)) {
+            return (BaseObjectManager<T>) maintenancesManager;
         } else if (clazz.equals(Notification.class)) {
             return (BaseObjectManager<T>) notificationManager;
         }

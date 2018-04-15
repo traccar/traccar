@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.traccar.model.Device;
 import org.traccar.model.Driver;
 import org.traccar.model.Geofence;
 import org.traccar.model.Group;
+import org.traccar.model.Maintenance;
 import org.traccar.model.ManagedUser;
 import org.traccar.model.Notification;
 import org.traccar.model.Permission;
@@ -337,6 +338,8 @@ public class PermissionsManager {
             manager = Context.getCalendarManager();
         } else if (object.equals(Command.class)) {
             manager = Context.getCommandsManager();
+        } else if (object.equals(Maintenance.class)) {
+            manager = Context.getMaintenancesManager();
         } else if (object.equals(Notification.class)) {
             manager = Context.getNotificationManager();
         } else {
@@ -362,6 +365,7 @@ public class PermissionsManager {
         Context.getDriversManager().refreshUserItems();
         Context.getAttributesManager().refreshUserItems();
         Context.getCommandsManager().refreshUserItems();
+        Context.getMaintenancesManager().refreshUserItems();
         if (Context.getNotificationManager() != null) {
             Context.getNotificationManager().refreshUserItems();
         }
@@ -374,6 +378,7 @@ public class PermissionsManager {
         Context.getDriversManager().refreshExtendedPermissions();
         Context.getAttributesManager().refreshExtendedPermissions();
         Context.getCommandsManager().refreshExtendedPermissions();
+        Context.getMaintenancesManager().refreshExtendedPermissions();
     }
 
     public void refreshPermissions(Permission permission) {
@@ -394,6 +399,8 @@ public class PermissionsManager {
                 Context.getCalendarManager().refreshUserItems();
             } else if (permission.getPropertyClass().equals(Command.class)) {
                 Context.getCommandsManager().refreshUserItems();
+            } else if (permission.getPropertyClass().equals(Maintenance.class)) {
+                Context.getMaintenancesManager().refreshUserItems();
             } else if (permission.getPropertyClass().equals(Notification.class)
                     && Context.getNotificationManager() != null) {
                 Context.getNotificationManager().refreshUserItems();
@@ -407,6 +414,8 @@ public class PermissionsManager {
                 Context.getAttributesManager().refreshExtendedPermissions();
             } else if (permission.getPropertyClass().equals(Command.class)) {
                 Context.getCommandsManager().refreshExtendedPermissions();
+            } else if (permission.getPropertyClass().equals(Maintenance.class)) {
+                Context.getMaintenancesManager().refreshExtendedPermissions();
             } else if (permission.getPropertyClass().equals(Notification.class)
                     && Context.getNotificationManager() != null) {
                 Context.getNotificationManager().refreshExtendedPermissions();
