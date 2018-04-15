@@ -22,7 +22,6 @@ import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.DeviceSession;
-import org.traccar.Context;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 import org.traccar.model.Event;
@@ -48,13 +47,8 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
         JsonObject root = Json.createReader(
                 new StringReader(request.getContent().toString(StandardCharsets.US_ASCII))).readObject();
 
-        if (!root.containsKey("_type")) {
+        if (!root.containsKey("_type") || !root.getString("_type").equals("location")) {
             sendResponse(channel, HttpResponseStatus.OK);
-            return null;
-        }
-        if (!root.getString("_type").equals("location")
-            && !root.getString("_type").equals("lwt")) {
-            sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
             return null;
         }
 
@@ -75,20 +69,6 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
             sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
             return null;
         }
-
-        if (root.getString("_type").equals("lwt")) {
-            if (Context.getConnectionManager() != null) {
-                Context.getConnectionManager().removeActiveDevice(channel);
-            }
-            sendResponse(channel, HttpResponseStatus.OK);
-            return null;
-        }
-
-        if (root.containsKey("t") && root.getString("t").equals("p")) {
-            sendResponse(channel, HttpResponseStatus.OK);
-            return null;
-        }
-
         position.setDeviceId(deviceSession.getDeviceId());
         position.setProtocol(getProtocolName());
         //position.set(Position.KEY_ORIGINAL, request.getContent().toString(StandardCharsets.US_ASCII));
