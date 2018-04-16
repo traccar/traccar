@@ -217,10 +217,21 @@ public final class ReportUtils {
         trip.setDriverUniqueId(findDriver(startTrip, endTrip));
         trip.setDriverName(findDriverName(trip.getDriverUniqueId()));
 
+        if (!ignoreOdometer
+                && startTrip.getDouble(Position.KEY_ODOMETER) != 0
+                && endTrip.getDouble(Position.KEY_ODOMETER) != 0) {
+            trip.setStartOdometer(startTrip.getDouble(Position.KEY_ODOMETER));
+            trip.setEndOdometer(endTrip.getDouble(Position.KEY_ODOMETER));
+        } else {
+            trip.setStartOdometer(startTrip.getDouble(Position.KEY_TOTAL_DISTANCE));
+            trip.setEndOdometer(endTrip.getDouble(Position.KEY_TOTAL_DISTANCE));
+        }
+
         return trip;
     }
 
-    private static StopReport calculateStop(ArrayList<Position> positions, int startIndex, int endIndex) {
+    private static StopReport calculateStop(ArrayList<Position> positions, int startIndex, int endIndex,
+            boolean ignoreOdometer) {
         Position startStop = positions.get(startIndex);
         Position endStop = positions.get(endIndex);
 
@@ -256,6 +267,16 @@ public final class ReportUtils {
         }
         stop.setEngineHours(engineHours);
 
+        if (!ignoreOdometer
+                && startStop.getDouble(Position.KEY_ODOMETER) != 0
+                && endStop.getDouble(Position.KEY_ODOMETER) != 0) {
+            stop.setStartOdometer(startStop.getDouble(Position.KEY_ODOMETER));
+            stop.setEndOdometer(endStop.getDouble(Position.KEY_ODOMETER));
+        } else {
+            stop.setStartOdometer(startStop.getDouble(Position.KEY_TOTAL_DISTANCE));
+            stop.setEndOdometer(endStop.getDouble(Position.KEY_TOTAL_DISTANCE));
+        }
+
         return stop;
 
     }
@@ -265,7 +286,7 @@ public final class ReportUtils {
         if (reportClass.equals(TripReport.class)) {
             return (T) calculateTrip(positions, startIndex, endIndex, ignoreOdometer);
         } else {
-            return (T) calculateStop(positions, startIndex, endIndex);
+            return (T) calculateStop(positions, startIndex, endIndex, ignoreOdometer);
         }
     }
 
