@@ -1,6 +1,5 @@
 package org.traccar.protocol;
 
-import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
 import org.traccar.ProtocolTest;
 

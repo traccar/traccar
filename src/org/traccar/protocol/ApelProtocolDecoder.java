@@ -136,8 +136,7 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
             }
 
             for (int j = 0; j < recordCount; j++) {
-                Position position = new Position();
-                position.setProtocol(getProtocolName());
+                Position position = new Position(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());
 
                 int subtype = type;

@@ -23,9 +23,9 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelUpstreamHandler;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.MessageEvent;
+import org.traccar.helper.DataConverter;
 import org.traccar.model.Position;
 
-import javax.xml.bind.DatatypeConverter;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
@@ -39,7 +39,7 @@ public abstract class ExtendedObjectDecoder implements ChannelUpstreamHandler {
                 ChannelBuffer buf = (ChannelBuffer) originalMessage;
                 position.set(Position.KEY_ORIGINAL, ChannelBuffers.hexDump(buf, 0, buf.writerIndex()));
             } else if (originalMessage instanceof String) {
-                position.set(Position.KEY_ORIGINAL, DatatypeConverter.printHexBinary(
+                position.set(Position.KEY_ORIGINAL, DataConverter.printHex(
                                 ((String) originalMessage).getBytes(StandardCharsets.US_ASCII)));
             }
         }

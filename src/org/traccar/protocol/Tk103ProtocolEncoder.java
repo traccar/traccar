@@ -97,6 +97,8 @@ public class Tk103ProtocolEncoder extends StringProtocolEncoder {
                     return formatCommand(command, "({%s}AV010)", Command.KEY_UNIQUE_ID);
                 case Command.TYPE_ENGINE_RESUME:
                     return formatCommand(command, "({%s}AV011)", Command.KEY_UNIQUE_ID);
+                case Command.TYPE_OUTPUT_CONTROL:
+                    return formatCommand(command, "({%s}AV00{%s})", Command.KEY_UNIQUE_ID, Command.KEY_DATA);
                 default:
                     Log.warning(new UnsupportedOperationException(command.getType()));
                     return null;

@@ -95,7 +95,7 @@ public abstract class ExtendedObjectManager<T extends BaseModel> extends SimpleO
                     long groupId = device.getGroupId();
                     while (groupId != 0) {
                         getAllDeviceItems(device.getId()).addAll(getGroupItems(groupId));
-                        Group group = (Group) Context.getGroupsManager().getById(groupId);
+                        Group group = Context.getGroupsManager().getById(groupId);
                         if (group != null) {
                             groupId = group.getGroupId();
                         } else {

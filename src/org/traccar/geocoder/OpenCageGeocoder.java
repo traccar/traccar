@@ -33,6 +33,9 @@ public class OpenCageGeocoder extends JsonGeocoder {
             if (location != null) {
                 Address address = new Address();
 
+                if (result.getJsonObject(0).containsKey("formatted")) {
+                    address.setFormattedAddress(result.getJsonObject(0).getString("formatted"));
+                }
                 if (location.containsKey("building")) {
                     address.setHouse(location.getString("building"));
                 }

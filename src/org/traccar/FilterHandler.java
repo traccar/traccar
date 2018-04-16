@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2014 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,11 @@ public class FilterHandler extends BaseDataHandler {
     private boolean filterDuplicate;
     private long filterFuture;
     private boolean filterApproximate;
+    private int filterAccuracy;
     private boolean filterStatic;
     private int filterDistance;
     private int filterMaxSpeed;
+    private long filterMinPeriod;
     private long skipLimit;
     private boolean skipAttributes;
 
@@ -48,6 +50,10 @@ public class FilterHandler extends BaseDataHandler {
         this.filterFuture = filterFuture;
     }
 
+    public void setFilterAccuracy(int filterAccuracy) {
+        this.filterAccuracy = filterAccuracy;
+    }
+
     public void setFilterApproximate(boolean filterApproximate) {
         this.filterApproximate = filterApproximate;
     }
@@ -62,6 +68,10 @@ public class FilterHandler extends BaseDataHandler {
 
     public void setFilterMaxSpeed(int filterMaxSpeed) {
         this.filterMaxSpeed = filterMaxSpeed;
+    }
+
+    public void setFilterMinPeriod(int filterMinPeriod) {
+        this.filterMinPeriod = filterMinPeriod;
     }
 
     public void setSkipLimit(long skipLimit) {
@@ -79,10 +89,12 @@ public class FilterHandler extends BaseDataHandler {
             filterZero = config.getBoolean("filter.zero");
             filterDuplicate = config.getBoolean("filter.duplicate");
             filterFuture = config.getLong("filter.future") * 1000;
+            filterAccuracy = config.getInteger("filter.accuracy");
             filterApproximate = config.getBoolean("filter.approximate");
             filterStatic = config.getBoolean("filter.static");
             filterDistance = config.getInteger("filter.distance");
             filterMaxSpeed = config.getInteger("filter.maxSpeed");
+            filterMinPeriod = config.getInteger("filter.minPeriod") * 1000;
             skipLimit = config.getLong("filter.skipLimit") * 1000;
             skipAttributes = config.getBoolean("filter.skipAttributes.enable");
         }
@@ -114,6 +126,10 @@ public class FilterHandler extends BaseDataHandler {
         return filterFuture != 0 && position.getFixTime().getTime() > System.currentTimeMillis() + filterFuture;
     }
 
+    private boolean filterAccuracy(Position position) {
+        return filterAccuracy != 0 && position.getAccuracy() > filterAccuracy;
+    }
+
     private boolean filterApproximate(Position position) {
         return filterApproximate && position.getBoolean(Position.KEY_APPROXIMATE);
     }
@@ -138,9 +154,17 @@ public class FilterHandler extends BaseDataHandler {
         return false;
     }
 
+    private boolean filterMinPeriod(Position position, Position last) {
+        if (filterMinPeriod != 0 && last != null) {
+            long time = position.getFixTime().getTime() - last.getFixTime().getTime();
+            return time > 0 && time < filterMinPeriod;
+        }
+        return false;
+    }
+
     private boolean skipLimit(Position position, Position last) {
         if (skipLimit != 0 && last != null) {
-            return (position.getFixTime().getTime() - last.getFixTime().getTime()) > skipLimit;
+            return (position.getServerTime().getTime() - last.getServerTime().getTime()) > skipLimit;
         }
         return false;
     }
@@ -183,6 +207,9 @@ public class FilterHandler extends BaseDataHandler {
         if (filterFuture(position)) {
             filterType.append("Future ");
         }
+        if (filterAccuracy(position)) {
+            filterType.append("Accuracy ");
+        }
         if (filterApproximate(position)) {
             filterType.append("Approximate ");
         }
@@ -195,6 +222,9 @@ public class FilterHandler extends BaseDataHandler {
         if (filterMaxSpeed(position, last)) {
             filterType.append("MaxSpeed ");
         }
+        if (filterMinPeriod(position, last)) {
+            filterType.append("MinPeriod ");
+        }
 
         if (filterType.length() > 0) {
 
@@ -203,8 +233,6 @@ public class FilterHandler extends BaseDataHandler {
             message.append(filterType.toString());
             message.append("filters from device: ");
             message.append(Context.getIdentityManager().getById(position.getDeviceId()).getUniqueId());
-            message.append(" with id: ");
-            message.append(position.getDeviceId());
 
             Log.info(message.toString());
             return true;

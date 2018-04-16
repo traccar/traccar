@@ -90,8 +90,7 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
         if (type == MSG_POSITION_DATA || type == MSG_ROLLCALL_RESPONSE
                 || type == MSG_ALARM_DATA || type == MSG_BLIND_AREA) {
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
 
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, "1" + id, id);
             if (deviceSession == null) {

@@ -13,6 +13,9 @@ public class GalileoProtocolDecoderTest extends ProtocolTest {
         GalileoProtocolDecoder decoder = new GalileoProtocolDecoder(new GalileoProtocol());
 
         verifyPositions(decoder, false, binary(ByteOrder.LITTLE_ENDIAN,
+                "01560003383636303530303338343337353836044701e000000000e13c494e414c4c3a696e303d31313230362c696e313d302c696e323d302c696e333d302c696e343d302c696e353d302c4163633d3536363932343732353bfdef"));
+
+        verifyPositions(decoder, false, binary(ByteOrder.LITTLE_ENDIAN,
                 "012a0003383633353931303233353137333732046600e000000000e1104f555428332e2e3029203d2031313130bb29"));
 
         verifyPositions(decoder, binary(ByteOrder.LITTLE_ENDIAN,

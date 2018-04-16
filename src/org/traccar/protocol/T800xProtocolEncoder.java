@@ -18,10 +18,10 @@ package org.traccar.protocol;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.traccar.BaseProtocolEncoder;
+import org.traccar.helper.DataConverter;
 import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
-import javax.xml.bind.DatatypeConverter;
 import java.nio.charset.StandardCharsets;
 
 public class T800xProtocolEncoder extends BaseProtocolEncoder {
@@ -39,7 +39,7 @@ public class T800xProtocolEncoder extends BaseProtocolEncoder {
         buf.writeByte(T800xProtocolDecoder.MSG_COMMAND);
         buf.writeShort(7 + 8 + 1 + content.length());
         buf.writeShort(1); // serial number
-        buf.writeBytes(DatatypeConverter.parseHexBinary("0" + getUniqueId(command.getDeviceId())));
+        buf.writeBytes(DataConverter.parseHex("0" + getUniqueId(command.getDeviceId())));
         buf.writeByte(MODE_SETTING);
         buf.writeBytes(content.getBytes(StandardCharsets.US_ASCII));
 

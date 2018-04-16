@@ -1,6 +1,6 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
- * Copyright 2016 Andrey Kunitsyn (andrey@traccar.org)
+ * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,54 +16,47 @@
  */
 package org.traccar.events;
 
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.traccar.BaseEventHandler;
 import org.traccar.Context;
-import org.traccar.model.Device;
 import org.traccar.model.Event;
+import org.traccar.model.Maintenance;
 import org.traccar.model.Position;
 
 public class MaintenanceEventHandler extends BaseEventHandler {
 
-    public static final String ATTRIBUTE_MAINTENANCE_START = "maintenance.start";
-    public static final String ATTRIBUTE_MAINTENANCE_INTERVAL = "maintenance.interval";
-
     @Override
     protected Map<Event, Position> analyzePosition(Position position) {
-        Device device = Context.getIdentityManager().getById(position.getDeviceId());
-        if (device == null || !Context.getIdentityManager().isLatestPosition(position)) {
+        if (Context.getIdentityManager().getById(position.getDeviceId()) == null
+                || !Context.getIdentityManager().isLatestPosition(position)) {
             return null;
         }
-
-        double maintenanceInterval = Context.getDeviceManager()
-                .lookupAttributeDouble(device.getId(), ATTRIBUTE_MAINTENANCE_INTERVAL, 0, false);
-        if (maintenanceInterval == 0) {
-            return null;
-        }
-        double maintenanceStart = Context.getDeviceManager()
-                .lookupAttributeDouble(device.getId(), ATTRIBUTE_MAINTENANCE_START, 0, false);
-
-        double oldTotalDistance = 0.0;
-        double newTotalDistance = 0.0;
 
         Position lastPosition = Context.getIdentityManager().getLastPosition(position.getDeviceId());
-        if (lastPosition != null) {
-            oldTotalDistance = lastPosition.getDouble(Position.KEY_TOTAL_DISTANCE);
-        }
-        newTotalDistance = position.getDouble(Position.KEY_TOTAL_DISTANCE);
-
-        oldTotalDistance -= maintenanceStart;
-        newTotalDistance -= maintenanceStart;
-
-        if ((long) (oldTotalDistance / maintenanceInterval) < (long) (newTotalDistance / maintenanceInterval)) {
-            Event event = new Event(Event.TYPE_MAINTENANCE, position.getDeviceId(), position.getId());
-            event.set(Position.KEY_TOTAL_DISTANCE, newTotalDistance);
-            return Collections.singletonMap(event, position);
+        if (lastPosition == null) {
+            return null;
         }
 
-        return null;
+        Map<Event, Position> events = new HashMap<>();
+        for (long maintenanceId : Context.getMaintenancesManager().getAllDeviceItems(position.getDeviceId())) {
+            Maintenance maintenance = Context.getMaintenancesManager().getById(maintenanceId);
+            if (maintenance.getPeriod() != 0) {
+                double oldValue = lastPosition.getDouble(maintenance.getType());
+                double newValue = position.getDouble(maintenance.getType());
+                if (oldValue != 0.0 && newValue != 0.0
+                        && (long) ((oldValue - maintenance.getStart()) / maintenance.getPeriod())
+                        < (long) ((newValue - maintenance.getStart()) / maintenance.getPeriod())) {
+                    Event event = new Event(Event.TYPE_MAINTENANCE, position.getDeviceId(), position.getId());
+                    event.setMaintenanceId(maintenanceId);
+                    event.set(maintenance.getType(), newValue);
+                    events.put(event, position);
+                }
+            }
+        }
+
+        return events;
     }
 
 }

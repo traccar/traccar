@@ -60,9 +60,8 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
             if (deviceSession == null) {
                 continue;
             }
-            Position position = new Position();
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
-            position.setProtocol(getProtocolName());
             decodePosition(message, position);
             positions.add(position);
         }
@@ -124,7 +123,7 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
                 return true;
             case "din":
             case "dout":
-                position.set((name.equals("din") ? Position.KEY_INPUT : Position.KEY_OUTPUT),
+                position.set(name.equals("din") ? Position.KEY_INPUT : Position.KEY_OUTPUT,
                         ((JsonNumber) value).intValue());
                 return true;
             case "gps.vehicle.mileage":

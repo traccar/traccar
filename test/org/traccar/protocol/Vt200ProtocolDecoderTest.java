@@ -10,6 +10,9 @@ public class Vt200ProtocolDecoderTest extends ProtocolTest {
 
         Vt200ProtocolDecoder decoder = new Vt200ProtocolDecoder(new Vt200Protocol());
 
+        verifyPosition(decoder, binary(
+                "28192030961807208200210101b919011818375801245774036424612500160917000003aa008800007b00aa3429"));
+
         verifyNull(decoder, binary(
                 "286310373094563082002701033d010817143327c68a14841e00c27f550e9a000000000c000000084700200120007d01af260b29"));
 

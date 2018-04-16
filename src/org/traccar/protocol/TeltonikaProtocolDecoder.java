@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,6 +69,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
     public static final int CODEC_GH3000 = 0x07;
     public static final int CODEC_FM4X00 = 0x08;
     public static final int CODEC_12 = 0x0C;
+    public static final int CODEC_16 = 0x10;
 
     private void decodeSerial(Position position, ChannelBuffer buf) {
 
@@ -132,7 +133,10 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.PREFIX_TEMP + 3, readValue(buf, length, true) * 0.1);
                 break;
             case 78:
-                position.set(Position.KEY_DRIVER_UNIQUE_ID, String.format("%016X", readValue(buf, length, false)));
+                long driverUniqueId = readValue(buf, length, false);
+                if (driverUniqueId != 0) {
+                    position.set(Position.KEY_DRIVER_UNIQUE_ID, String.format("%016X", driverUniqueId));
+                }
                 break;
             case 80:
                 position.set("workMode", readValue(buf, length, false));
@@ -344,7 +348,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Read 8 byte data
-        if (codec == CODEC_FM4X00) {
+        if (codec == CODEC_FM4X00 || codec == CODEC_16) {
             int cnt = buf.readUnsignedByte();
             for (int j = 0; j < cnt; j++) {
                 decodeOtherParameter(position, buf.readUnsignedByte(), buf, 8);
@@ -381,8 +385,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         }
 
         for (int i = 0; i < count; i++) {
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
 
             position.setDeviceId(deviceSession.getDeviceId());
 

@@ -64,19 +64,11 @@ public class Event extends Message {
     private Date serverTime;
 
     public Date getServerTime() {
-        if (serverTime != null) {
-            return new Date(serverTime.getTime());
-        } else {
-            return null;
-        }
+        return serverTime;
     }
 
     public void setServerTime(Date serverTime) {
-        if (serverTime != null) {
-            this.serverTime = new Date(serverTime.getTime());
-        } else {
-            this.serverTime = null;
-        }
+        this.serverTime = serverTime;
     }
 
     private long positionId;
@@ -97,6 +89,16 @@ public class Event extends Message {
 
     public void setGeofenceId(long geofenceId) {
         this.geofenceId = geofenceId;
+    }
+
+    private long maintenanceId = 0;
+
+    public long getMaintenanceId() {
+        return maintenanceId;
+    }
+
+    public void setMaintenanceId(long maintenanceId) {
+        this.maintenanceId = maintenanceId;
     }
 
 }

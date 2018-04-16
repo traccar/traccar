@@ -50,8 +50,7 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setValid(true);
 
         position.setLatitude(root.getJsonNumber("lat").doubleValue());

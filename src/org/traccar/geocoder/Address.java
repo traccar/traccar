@@ -97,4 +97,14 @@ public class Address {
         this.house = house;
     }
 
+    private String formattedAddress;
+
+    public String getFormattedAddress() {
+        return formattedAddress;
+    }
+
+    public void setFormattedAddress(String formattedAddress) {
+        this.formattedAddress = formattedAddress;
+    }
+
 }

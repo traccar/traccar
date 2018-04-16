@@ -1,8 +1,9 @@
 package org.traccar.protocol;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.traccar.ProtocolTest;
+
+import static org.junit.Assert.assertEquals;
 
 public class HuabaoFrameDecoderTest extends ProtocolTest {
 
@@ -11,7 +12,7 @@ public class HuabaoFrameDecoderTest extends ProtocolTest {
 
         HuabaoFrameDecoder decoder = new HuabaoFrameDecoder();
 
-        Assert.assertEquals(
+        assertEquals(
                 binary("7e307e087d557e"),
                 decoder.decode(null, null, binary("7e307d02087d01557e")));
 

@@ -1,5 +1,6 @@
 package org.traccar.notification;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.mail.Message;
@@ -24,7 +25,8 @@ public class NotificiationMailTest {
 
     private static final int PORT = 25;
 
-    //@Test
+    @Ignore
+    @Test
     public void test() throws Exception {
 
         Properties props = System.getProperties();

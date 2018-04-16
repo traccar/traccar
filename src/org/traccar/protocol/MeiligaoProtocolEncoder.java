@@ -19,10 +19,10 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.helper.Checksum;
+import org.traccar.helper.DataConverter;
 import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
-import javax.xml.bind.DatatypeConverter;
 import java.nio.charset.StandardCharsets;
 import java.util.TimeZone;
 
@@ -44,7 +44,7 @@ public class MeiligaoProtocolEncoder extends BaseProtocolEncoder {
 
         buf.writeShort(2 + 2 + 7 + 2 + content.readableBytes() + 2 + 2); // message length
 
-        buf.writeBytes(DatatypeConverter.parseHexBinary((getUniqueId(deviceId) + "FFFFFFFFFFFFFF").substring(0, 14)));
+        buf.writeBytes(DataConverter.parseHex((getUniqueId(deviceId) + "FFFFFFFFFFFFFF").substring(0, 14)));
 
         buf.writeShort(type);
 

@@ -60,13 +60,18 @@ public class MainEventHandler extends IdleStateAwareChannelHandler {
             // Log position
             StringBuilder s = new StringBuilder();
             s.append(formatChannel(e.getChannel())).append(" ");
-            s.append("id: ").append(uniqueId).append(", ");
-            s.append("time: ").append(
-                    new SimpleDateFormat(Log.DATE_FORMAT).format(position.getFixTime())).append(", ");
-            s.append("lat: ").append(String.format("%.5f", position.getLatitude())).append(", ");
-            s.append("lon: ").append(String.format("%.5f", position.getLongitude())).append(", ");
-            s.append("speed: ").append(String.format("%.1f", position.getSpeed())).append(", ");
-            s.append("course: ").append(String.format("%.1f", position.getCourse()));
+            s.append("id: ").append(uniqueId);
+            s.append(", time: ").append(
+                    new SimpleDateFormat(Log.DATE_FORMAT).format(position.getFixTime()));
+            s.append(", lat: ").append(String.format("%.5f", position.getLatitude()));
+            s.append(", lon: ").append(String.format("%.5f", position.getLongitude()));
+            if (position.getSpeed() > 0) {
+                s.append(", speed: ").append(String.format("%.1f", position.getSpeed()));
+            }
+            s.append(", course: ").append(String.format("%.1f", position.getCourse()));
+            if (position.getAccuracy() > 0) {
+                s.append(", accuracy: ").append(String.format("%.1f", position.getAccuracy()));
+            }
             Object cmdResult = position.getAttributes().get(Position.KEY_RESULT);
             if (cmdResult != null) {
                 s.append(", result: ").append(cmdResult);

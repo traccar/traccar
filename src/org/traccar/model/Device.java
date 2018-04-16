@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import java.util.List;
 import org.traccar.database.QueryExtended;
 import org.traccar.database.QueryIgnore;
 
-public class Device extends ExtendedModel {
+public class Device extends GroupedModel {
 
     private String name;
 
@@ -86,16 +86,6 @@ public class Device extends ExtendedModel {
 
     public void setPositionId(long positionId) {
         this.positionId = positionId;
-    }
-
-    private long groupId;
-
-    public long getGroupId() {
-        return groupId;
-    }
-
-    public void setGroupId(long groupId) {
-        this.groupId = groupId;
     }
 
     private List<Long> geofenceIds;

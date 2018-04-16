@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,12 +96,12 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
     public static final short MSG_CC_LOGIN = 0x4001;
     public static final short MSG_CC_LOGIN_RESPONSE = (short) 0x8001;
     public static final short MSG_CC_HEARTBEAT = 0x4206;
+    public static final short MSG_CC_PETROL_CONTROL = 0x4583;
     public static final short MSG_CC_HEARTBEAT_RESPONSE = (short) 0x8206;
 
     private Position readPosition(DeviceSession deviceSession, ChannelBuffer buf) {
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         DateBuilder dateBuilder = new DateBuilder()
@@ -131,8 +131,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
 
     private Position createPosition(DeviceSession deviceSession) {
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         getLastLocation(position, null);
@@ -401,7 +400,6 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
-
     private Object decodeCc(
             Channel channel, SocketAddress remoteAddress, ChannelBuffer buf,
             int version, ChannelBuffer id, int type, DeviceSession deviceSession) {
@@ -459,6 +457,47 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
+    private Object decodeMpip(
+            Channel channel, SocketAddress remoteAddress, ChannelBuffer buf,
+            int version, ChannelBuffer id, int type, DeviceSession deviceSession) {
+
+        if (type == 0x4001) {
+
+            sendResponse(channel, remoteAddress, version, id, (short) type, null);
+
+            return readPosition(deviceSession, buf);
+
+        } else if (type == 0x2001) {
+
+            sendResponse(channel, remoteAddress, id, (short) 0x1001);
+
+            buf.readUnsignedInt(); // index
+            buf.readUnsignedInt(); // unix time
+            buf.readUnsignedByte();
+
+            return readPosition(deviceSession, buf);
+
+        } else if (type == 0x4201 || type == 0x4202 || type == 0x4206) {
+
+            return readPosition(deviceSession, buf);
+
+        } else if (type == 0x4204) {
+
+            List<Position> positions = new LinkedList<>();
+
+            for (int i = 0; i < 8; i++) {
+                Position position = readPosition(deviceSession, buf);
+                buf.skipBytes(31);
+                positions.add(position);
+            }
+
+            return positions;
+
+        }
+
+        return null;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -482,31 +521,15 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        if (version == -1) {
-
-            if (type == 0x2001) {
-
-                sendResponse(channel, remoteAddress, id, (short) 0x1001);
-
-                buf.readUnsignedInt(); // index
-                buf.readUnsignedInt(); // unix time
-                buf.readUnsignedByte();
-
-                return readPosition(deviceSession, buf);
-
-            }
-
-        } else if (version == 3 || version == 4) {
-
-            return decodeSc(channel, remoteAddress, buf, version, id, type, deviceSession);
-
-        } else {
-
-            return decodeCc(channel, remoteAddress, buf, version, id, type, deviceSession);
-
+        switch (version) {
+            case -1:
+                return decodeMpip(channel, remoteAddress, buf, version, id, type, deviceSession);
+            case 3:
+            case 4:
+                return decodeSc(channel, remoteAddress, buf, version, id, type, deviceSession);
+            default:
+                return decodeCc(channel, remoteAddress, buf, version, id, type, deviceSession);
         }
-
-        return null;
     }
 
 }

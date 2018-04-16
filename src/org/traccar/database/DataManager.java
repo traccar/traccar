@@ -48,6 +48,7 @@ import org.traccar.model.Driver;
 import org.traccar.model.Event;
 import org.traccar.model.Geofence;
 import org.traccar.model.Group;
+import org.traccar.model.Maintenance;
 import org.traccar.model.ManagedUser;
 import org.traccar.model.Notification;
 import org.traccar.model.Permission;
@@ -242,12 +243,16 @@ public class DataManager {
 
     public String getQuery(String action, Class<?> owner, Class<?> property) {
         String queryName;
-        if (action.equals(ACTION_SELECT_ALL)) {
-            queryName = "database.select" + owner.getSimpleName() + property.getSimpleName() + "s";
-        } else if (action.equals(ACTION_INSERT)) {
-            queryName = "database.link" + owner.getSimpleName() + property.getSimpleName();
-        } else {
-            queryName = "database.unlink" + owner.getSimpleName() + property.getSimpleName();
+        switch (action) {
+            case ACTION_SELECT_ALL:
+                queryName = "database.select" + owner.getSimpleName() + property.getSimpleName() + "s";
+                break;
+            case ACTION_INSERT:
+                queryName = "database.link" + owner.getSimpleName() + property.getSimpleName();
+                break;
+            default:
+                queryName = "database.unlink" + owner.getSimpleName() + property.getSimpleName();
+                break;
         }
         String query = config.getString(queryName);
         if (query == null) {
@@ -335,13 +340,6 @@ public class DataManager {
                 .executeQuery(Position.class);
     }
 
-    public void addPosition(Position position) throws SQLException {
-        position.setId(QueryBuilder.create(dataSource, getQuery(ACTION_INSERT, Position.class), true)
-                .setObject(position)
-                .setDate("serverTime", new Date())
-                .executeUpdate());
-    }
-
     public void updateLatestPosition(Position position) throws SQLException {
         QueryBuilder.create(dataSource, getQuery("database.updateLatestPosition"))
                 .setDate("now", new Date())
@@ -408,6 +406,8 @@ public class DataManager {
                 return Calendar.class;
             case "command":
                 return Command.class;
+            case "maintenance":
+                return Maintenance.class;
             case "notification":
                 return Notification.class;
             default:

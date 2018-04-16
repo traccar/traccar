@@ -62,8 +62,7 @@ public class AuroProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
 
         position.set(Position.KEY_INDEX, parser.nextInt(0));
 

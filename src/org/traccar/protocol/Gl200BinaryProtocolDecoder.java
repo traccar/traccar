@@ -108,8 +108,7 @@ public class Gl200BinaryProtocolDecoder extends BaseProtocolDecoder {
                     time += 1;
                 }
 
-                Position position = new Position();
-                position.setProtocol(getProtocolName());
+                Position position = new Position(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());
 
                 switch (BitUtil.from(buf.getUnsignedByte(buf.readerIndex()), 8 - 2)) {
@@ -156,8 +155,7 @@ public class Gl200BinaryProtocolDecoder extends BaseProtocolDecoder {
 
             for (int i = 0; i < count; i++) {
 
-                Position position = new Position();
-                position.setProtocol(getProtocolName());
+                Position position = new Position(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());
 
                 position.set(Position.KEY_BATTERY_LEVEL, battery);
@@ -206,8 +204,7 @@ public class Gl200BinaryProtocolDecoder extends BaseProtocolDecoder {
 
     private Position decodeEvent(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
 
         int type = buf.readUnsignedByte();
 
@@ -313,8 +310,7 @@ public class Gl200BinaryProtocolDecoder extends BaseProtocolDecoder {
 
     private Position decodeInformation(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
 
         int type = buf.readUnsignedByte();
 

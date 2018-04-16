@@ -1,10 +1,11 @@
 package org.traccar.helper;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
 
 public class LocationTreeTest {
     
@@ -19,10 +20,10 @@ public class LocationTreeTest {
 
         LocationTree tree = new LocationTree(items);
 
-        Assert.assertEquals("a", tree.findNearest(new LocationTree.Item(1f, 1f)).getData());
-        Assert.assertEquals("d", tree.findNearest(new LocationTree.Item(10f, 10f)).getData());
-        Assert.assertEquals("c", tree.findNearest(new LocationTree.Item(1f, 2.5f)).getData());
-        Assert.assertEquals("a", tree.findNearest(new LocationTree.Item(1.5f, 1.5f)).getData());
+        assertEquals("a", tree.findNearest(new LocationTree.Item(1f, 1f)).getData());
+        assertEquals("d", tree.findNearest(new LocationTree.Item(10f, 10f)).getData());
+        assertEquals("c", tree.findNearest(new LocationTree.Item(1f, 2.5f)).getData());
+        assertEquals("a", tree.findNearest(new LocationTree.Item(1.5f, 1.5f)).getData());
 
     }
 

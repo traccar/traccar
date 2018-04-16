@@ -18,10 +18,10 @@ package org.traccar.protocol;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.traccar.BaseProtocolEncoder;
+import org.traccar.helper.DataConverter;
 import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
-import javax.xml.bind.DatatypeConverter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -31,10 +31,10 @@ public class HuabaoProtocolEncoder extends BaseProtocolEncoder {
     protected Object encodeCommand(Command command) {
 
         ChannelBuffer id =  ChannelBuffers.wrappedBuffer(
-                DatatypeConverter.parseHexBinary(getUniqueId(command.getDeviceId())));
+                DataConverter.parseHex(getUniqueId(command.getDeviceId())));
 
         ChannelBuffer data = ChannelBuffers.dynamicBuffer();
-        byte[] time = DatatypeConverter.parseHexBinary(new SimpleDateFormat("yyMMddHHmmss").format(new Date()));
+        byte[] time = DataConverter.parseHex(new SimpleDateFormat("yyMMddHHmmss").format(new Date()));
 
         switch (command.getType()) {
             case Command.TYPE_ENGINE_STOP:

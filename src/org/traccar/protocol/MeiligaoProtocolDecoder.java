@@ -346,8 +346,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
             String sentence = buf.readBytes(endIndex - buf.readerIndex()).toString(StandardCharsets.US_ASCII);
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             position = decodeRegular(position, sentence);
@@ -403,8 +402,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
         } else {
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
 
             if (command == MSG_ALARM) {
                 short alarmCode = buf.readUnsignedByte();

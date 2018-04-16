@@ -1,6 +1,6 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
- * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
+ * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,12 @@ import org.traccar.database.ManagableObjects;
 import org.traccar.database.SimpleObjectManager;
 import org.traccar.helper.LogAction;
 import org.traccar.model.BaseModel;
+import org.traccar.model.Calendar;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
+import org.traccar.model.GroupedModel;
+import org.traccar.model.ScheduledModel;
 import org.traccar.model.User;
 
 public abstract class BaseObjectResource<T extends BaseModel> extends BaseResource {
@@ -77,6 +80,12 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
             Context.getPermissionsManager().checkDeviceLimit(getUserId());
         } else if (baseClass.equals(Command.class)) {
             Context.getPermissionsManager().checkLimitCommands(getUserId());
+        } else if (entity instanceof GroupedModel && ((GroupedModel) entity).getGroupId() != 0) {
+            Context.getPermissionsManager().checkPermission(
+                    Group.class, getUserId(), ((GroupedModel) entity).getGroupId());
+        } else if (entity instanceof ScheduledModel && ((ScheduledModel) entity).getCalendarId() != 0) {
+            Context.getPermissionsManager().checkPermission(
+                    Calendar.class, getUserId(), ((ScheduledModel) entity).getCalendarId());
         }
 
         BaseObjectManager<T> manager = Context.getManager(baseClass);
@@ -106,6 +115,12 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
             Context.getPermissionsManager().checkUserUpdate(getUserId(), before, (User) entity);
         } else if (baseClass.equals(Command.class)) {
             Context.getPermissionsManager().checkLimitCommands(getUserId());
+        } else if (entity instanceof GroupedModel && ((GroupedModel) entity).getGroupId() != 0) {
+            Context.getPermissionsManager().checkPermission(
+                    Group.class, getUserId(), ((GroupedModel) entity).getGroupId());
+        } else if (entity instanceof ScheduledModel && ((ScheduledModel) entity).getCalendarId() != 0) {
+            Context.getPermissionsManager().checkPermission(
+                    Calendar.class, getUserId(), ((ScheduledModel) entity).getCalendarId());
         }
         Context.getPermissionsManager().checkPermission(baseClass, getUserId(), entity.getId());
 
@@ -141,12 +156,19 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
             }
         }
         if (baseClass.equals(Group.class) || baseClass.equals(Device.class) || baseClass.equals(User.class)) {
+            if (baseClass.equals(Group.class)) {
+                Context.getGroupsManager().updateGroupCache(true);
+                Context.getDeviceManager().updateDeviceCache(true);
+            }
             Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
             if (baseClass.equals(User.class)) {
                 Context.getPermissionsManager().refreshAllUsersPermissions();
             } else {
                 Context.getPermissionsManager().refreshAllExtendedPermissions();
             }
+        } else if (baseClass.equals(Calendar.class)) {
+            Context.getGeofenceManager().refreshItems();
+            Context.getNotificationManager().refreshItems();
         }
         return Response.noContent().build();
     }

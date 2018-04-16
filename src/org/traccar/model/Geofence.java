@@ -26,7 +26,7 @@ import org.traccar.geofence.GeofencePolyline;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class Geofence extends ExtendedModel {
+public class Geofence extends ScheduledModel {
 
     public static final String TYPE_GEOFENCE_CILCLE = "geofenceCircle";
     public static final String TYPE_GEOFENCE_POLYGON = "geofencePolygon";
@@ -65,7 +65,9 @@ public class Geofence extends ExtendedModel {
         } else if (area.startsWith("POLYGON")) {
             geometry = new GeofencePolygon(area);
         } else if (area.startsWith("LINESTRING")) {
-            geometry = new GeofencePolyline(area, Context.getConfig().getDouble("geofence.polylineDistance", 25));
+            final double distance = getDouble("polylineDistance");
+            geometry = new GeofencePolyline(area, distance > 0 ? distance
+                    : Context.getConfig().getDouble("geofence.polylineDistance", 25));
         } else {
             throw new ParseException("Unknown geometry type", 0);
         }
@@ -86,15 +88,5 @@ public class Geofence extends ExtendedModel {
     public void setGeometry(GeofenceGeometry geometry) {
         area = geometry.toWkt();
         this.geometry = geometry;
-    }
-
-    private long calendarId;
-
-    public long getCalendarId() {
-        return calendarId;
-    }
-
-    public void setCalendarId(long calendarId) {
-        this.calendarId = calendarId;
     }
 }

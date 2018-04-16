@@ -12,5 +12,19 @@
       <column name="disabled" type="BOOLEAN" defaultValueBoolean="false" />
     </addColumn>
 
+    <addColumn tableName="users">
+        <column name="poilayer" type="VARCHAR(512)" />
+    </addColumn>
+
+    <addColumn tableName="servers">
+        <column name="poilayer" type="VARCHAR(512)" />
+    </addColumn>
+
+    <addColumn tableName="notifications">
+      <column name="calendarid" type="INT" />
+    </addColumn>
+
+    <addForeignKeyConstraint baseColumnNames="calendarid" baseTableName="notifications" constraintName="fk_notification_calendar_calendarid" onDelete="SET NULL" onUpdate="RESTRICT" referencedColumnNames="id" referencedTableName="calendars" />
+
   </changeSet>
 </databaseChangeLog>

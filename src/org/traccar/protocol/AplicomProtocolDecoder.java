@@ -608,8 +608,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             selector = buf.readUnsignedMedium();
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
         if (deviceSession == null) {
             return null;
