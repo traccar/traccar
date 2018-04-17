@@ -141,6 +141,16 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             case 80:
                 position.set("workMode", readValue(buf, length, false));
                 break;
+            case 129:
+            case 130:
+            case 131:
+            case 132:
+            case 133:
+            case 134:
+                String driver = id == 129 || id == 132 ? "" : position.getString("driver1");
+                position.set("driver" + (id >= 132 ? 2 : 1),
+                        driver + buf.readBytes(length).toString(StandardCharsets.US_ASCII).trim());
+                break;
             case 179:
                 position.set(Position.PREFIX_OUT + 1, readValue(buf, length, false) == 1);
                 break;
