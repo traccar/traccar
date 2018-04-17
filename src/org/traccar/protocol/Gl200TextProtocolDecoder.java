@@ -828,6 +828,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         decodeLocation(position, parser);
 
+        position.set(Position.KEY_IGNITION, sentence.contains("IGN"));
         position.set(Position.KEY_HOURS, parser.next());
         position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
 
@@ -918,6 +919,10 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_MOTION, reportType == 1);
         } else if (type.equals("SOS")) {
             position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+        } else if (type.equals("DIS")) {
+            position.set(Position.PREFIX_IN + reportType / 10, reportType % 10 == 1);
+        } else if (type.equals("IGL")) {
+            position.set(Position.KEY_IGNITION, reportType % 10 == 0);
         }
 
         decodeLocation(position, parser);
