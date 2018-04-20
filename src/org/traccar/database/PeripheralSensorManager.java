@@ -1,13 +1,10 @@
 package org.traccar.database;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.json.JSONObject;
 import org.traccar.helper.Log;
 import org.traccar.model.PeripheralSensor;
+import org.traccar.transforms.model.FuelSensorCalibration;
 
-import javax.json.Json;
-import javax.json.JsonObject;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Map;
@@ -22,7 +19,7 @@ public class PeripheralSensorManager extends ExtendedObjectManager<PeripheralSen
     private final Map<Long, List<PeripheralSensor>> deviceToPeripheralSensorMap =
             new ConcurrentHashMap();
 
-    private final Map<String, String> deviceSensorToCalibrationDataMap =
+    private final Map<String, FuelSensorCalibration> deviceSensorToCalibrationDataMap =
             new ConcurrentHashMap<>();
 
     public PeripheralSensorManager(DataManager dataManager) {
@@ -41,10 +38,13 @@ public class PeripheralSensorManager extends ExtendedObjectManager<PeripheralSen
                     }
                     linkedPeripheralSensors.add(p);
                     deviceToPeripheralSensorMap.put(p.getDeviceId(), linkedPeripheralSensors);
-                    deviceSensorToCalibrationDataMap.put(p.getDeviceId() + "_" + p.getPeripheralSensorId(), p.getCalibrationData());
+
+                    ObjectMapper calibrationDataMapper = new ObjectMapper();
+                    FuelSensorCalibration fuelSensorCalibration = calibrationDataMapper.readValue(p.getCalibrationData(), FuelSensorCalibration.class);
+                    deviceSensorToCalibrationDataMap.put(buildDeviceSensorMapKey(p.getDeviceId(), p.getPeripheralSensorId()), fuelSensorCalibration);
                 }
                 Log.info("Created linked peripheral devices info: " + deviceToPeripheralSensorMap.size());
-            } catch (SQLException e) {
+            } catch (SQLException | IOException e) {
                 e.printStackTrace();
             }
         }
@@ -58,12 +58,18 @@ public class PeripheralSensorManager extends ExtendedObjectManager<PeripheralSen
         return Optional.empty();
     }
 
-    // Remove this function when ready to commit
-    public static Optional<List<PeripheralSensor>> getMockList() {
-        PeripheralSensor p = new PeripheralSensor();
-        p.setPeripheralSensorId(1);
-        ArrayList l = new ArrayList();
-        l.add(p);
-        return Optional.of(l);
+    public Optional<FuelSensorCalibration> getDeviceSensorCalibrationData(long deviceId, long peripheralSensorId) {
+        String lookupKey = buildDeviceSensorMapKey(deviceId, peripheralSensorId);
+
+        if (deviceSensorToCalibrationDataMap.containsKey(lookupKey)) {
+            return Optional.of(deviceSensorToCalibrationDataMap.get(lookupKey));
+        }
+
+        return Optional.empty();
     }
+
+    private String buildDeviceSensorMapKey(long deviceId, long sensorId) {
+        return deviceId + "_" + sensorId;
+    }
+
 }

@@ -17,6 +17,12 @@
             </column>
         </createTable>
 
+        <insert tableName="peripheralsensortypes">
+            <column name="typename" value="FUEL_DIGITAL" />
+            <column name="typename" value="FUEL_ANALOG" />
+            <column name="typename" value="WEIGHT_ANALOG" />
+        </insert>
+
         <createTable tableName="peripheralsensors">
             <column name="id" type="INT" autoIncrement="true">
                 <constraints primaryKey="true" />
@@ -45,6 +51,8 @@
                                  referencedColumnNames="id" />
         <addForeignKeyConstraint baseTableName="device_peripheralsensors" baseColumnNames="peripheralsensorid" constraintName="fk_device_peripheralsensors_peripheralsensorid" referencedTableName="peripheralsensors"
                                  referencedColumnNames="id" />
+
+
 
     </changeSet>
 </databaseChangeLog>

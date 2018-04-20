@@ -68,6 +68,16 @@
             <column name="prettyName" value="Ignition Off" />
             <column name="notificationString" value="ignition has been switched off" />
         </insert>
+        <insert tableName="fcmpushnotificationtypes">
+            <column name="evettype" value="fuelDrain" />
+            <column name="prettyName" value="Fuel Drain" />
+            <column name="notificationString" value="Fuel drain detected"/>
+        </insert>
+        <insert tableName="fcmpushnotificationtypes">
+            <column name="evettype" value="fuelFill" />
+            <column name="prettyName" value="Fuel Fill" />
+            <column name="notificationString" value="Fuel filling detected"/>
+        </insert>
 
         <createTable tableName="fcmpushnotifications">
             <column name="id" type="INT" autoIncrement="true">
