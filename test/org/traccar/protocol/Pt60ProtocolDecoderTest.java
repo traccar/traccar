@@ -10,6 +10,12 @@ public class Pt60ProtocolDecoderTest extends ProtocolTest {
 
         Pt60ProtocolDecoder decoder = new Pt60ProtocolDecoder(new Pt60Protocol());
 
+        verifyAttributes(decoder, text(
+                "@G#@,V01,14,357653051059785,9404223001501310,20180419165604,101,26,"));
+
+        verifyAttributes(decoder, text(
+                "@G#@,V01,13,357653051059785,9404223001501310,20180419112656,1180,"));
+
         verifyPosition(decoder, text(
                 "@G#@,V01,6,111112222233333,8888888888888888,20150312010203,23.2014050;104.235212,"));
 

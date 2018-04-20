@@ -273,7 +273,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
                     position.set("pressureHigh", values[valueIndex++]);
                     position.set("pressureLow", values[valueIndex++]);
                 }
-                position.set("pulse", values[valueIndex]);
+                position.set(Position.KEY_HEART_RATE, Integer.parseInt(values[valueIndex]));
 
                 return position;
 
