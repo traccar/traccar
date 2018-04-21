@@ -55,9 +55,9 @@ public class PeripheralSensorDataHandler extends BaseDataHandler {
                 Context.getPeripheralSensorManager()
                        .getLinkedPeripheralSensors(position.getDeviceId());
 
-        if (position.getAttributes().containsKey(ODOMETER)) {
-            handleFuelConsumption(position);
-        }
+//        if (position.getAttributes().containsKey(ODOMETER)) {
+//            handleFuelConsumption(position);
+//        }
 
         if (position.getAttributes().containsKey(SENSOR_ID) &&
                 position.getAttributes().containsKey(SENSOR_DATA) &&
@@ -167,7 +167,6 @@ public class PeripheralSensorDataHandler extends BaseDataHandler {
         }
 
         long deviceId = position.getDeviceId();
-        int previousReadings = previousPositions.containsKey(sensorId)? previousPositions.get(deviceId).size() : 0;
         Optional<Double> maybeCalibratedFuelLevel = getCalibratedFuelLevel(deviceId, sensorId, fuelLevelPoints);
 
         if (!maybeCalibratedFuelLevel.isPresent()) {
@@ -178,7 +177,7 @@ public class PeripheralSensorDataHandler extends BaseDataHandler {
         double calibratedFuelLevel = maybeCalibratedFuelLevel.get();
         position.set(Position.KEY_FUEL_LEVEL, calibratedFuelLevel);
 
-        if (previousReadings == 0) {
+        if (!previousPositions.containsKey(deviceId)) {
             List<Position> positionsForSensor = new ArrayList<>();
             positionsForSensor.add(position);
             previousPositions.put(position.getDeviceId(), positionsForSensor);
@@ -186,15 +185,19 @@ public class PeripheralSensorDataHandler extends BaseDataHandler {
         }
 
         List<Position> readingsForDevice = previousPositions.get(deviceId);
+
+        // Add the current position into list only if it is within a certain
+        // timeframe of the last position recorded in the list
         if (!isPositionTimestampWithinWindow(position,
                 readingsForDevice
-                        .get(previousPositions.get(deviceId).size() - 1)
+                        .get(readingsForDevice.size() - 1)
                         .getDeviceTime())) {
 
             return;
         }
 
-        if (previousReadings < MIN_VALUES_FOR_MOVING_AVERAGE) {
+        // Take average of existing values if we have less than MIN_VALUES_FOR_MOVING_AVERAGE
+        if (readingsForDevice.size() < MIN_VALUES_FOR_MOVING_AVERAGE) {
             double currentFuelLevelAverage = getAverageValue(
                     calibratedFuelLevel, readingsForDevice);
 
@@ -203,29 +206,28 @@ public class PeripheralSensorDataHandler extends BaseDataHandler {
             return;
         }
 
-        // Calculate current level based on moving average. And factor in calibration data.
-
         int maxReadingsIndex = readingsForDevice.size();
 
+        // Get average of the last MIN_VALUES_FOR_MOVING_AVERAGE values.
         double currentFuelLevelAverage = getAverageValue(
                 calibratedFuelLevel,
                 previousPositions.get(deviceId)
                                  .subList(maxReadingsIndex - MIN_VALUES_FOR_MOVING_AVERAGE, maxReadingsIndex - 1));
 
-        if (readingsForDevice.size() == MAX_VALUES_FOR_ALERTS) {
-            checkForActivity(readingsForDevice, fuelTheftThreshold);
+        position.set(Position.KEY_FUEL_LEVEL, currentFuelLevelAverage);
+        readingsForDevice.add(position);
+
+        if (readingsForDevice.size() >= MAX_VALUES_FOR_ALERTS) {
+            checkForActivity(readingsForDevice, fuelTheftThreshold, currentFuelLevelAverage);
             readingsForDevice.remove(0);
         }
-
-        position.set(Position.KEY_FUEL_LEVEL, currentFuelLevelAverage);
-        System.out.println("FUEL LEVEL: " + currentFuelLevelAverage);
-        readingsForDevice.add(position);
     }
 
-    private void checkForActivity(List<Position> readingsForDevice, double fuelTheftThreshold) {
-
+    private void checkForActivity(List<Position> readingsForDevice, double fuelTheftThreshold, final double currentFuelLevelAverage) {
 
         int midPoint = (readingsForDevice.size() - 1) / 2;
+
+        System.out.println("SIZE: " + readingsForDevice.size() + " : MIDPOINT: " + midPoint);
 
         double leftSum = 0, rightSum = 0;
 
@@ -240,14 +242,16 @@ public class PeripheralSensorDataHandler extends BaseDataHandler {
         double diffInMeans = Math.abs(leftMean - rightMean);
 
         long deviceId = readingsForDevice.get(0).getDeviceId();
+
+        System.out.println("FUEL LEVEL: " + currentFuelLevelAverage + ", diff in means: " + diffInMeans + ", theft threshold: " + fuelTheftThreshold);
         if (diffInMeans > fuelTheftThreshold) {
             if (!deviceFuelEventMetadata.containsKey(deviceId)) {
                 deviceFuelEventMetadata.put(deviceId, new FuelEventMetadata());
+                FuelEventMetadata fuelEventMetadata = deviceFuelEventMetadata.get(deviceId);
+                fuelEventMetadata.startLevel = (double) readingsForDevice.get(midPoint).getAttributes().get(Position.KEY_FUEL_LEVEL);
+                fuelEventMetadata.errorCheckStart = (double) readingsForDevice.get(0).getAttributes().get(Position.KEY_FUEL_LEVEL);
+                System.out.println("START: " + fuelEventMetadata.startLevel + " : " + fuelEventMetadata.errorCheckStart);
             }
-
-            FuelEventMetadata fuelEventMetadata = deviceFuelEventMetadata.get(deviceId);
-            fuelEventMetadata.startLevel = (double) readingsForDevice.get(midPoint).getAttributes().get(Position.KEY_FUEL_LEVEL);
-            fuelEventMetadata.errorCheckStart = (double) readingsForDevice.get(0).getAttributes().get(Position.KEY_FUEL_LEVEL);
         }
 
         if (diffInMeans < fuelTheftThreshold && deviceFuelEventMetadata.containsKey(deviceId)) {
@@ -259,17 +263,24 @@ public class PeripheralSensorDataHandler extends BaseDataHandler {
             double errorCheckFuelChange = fuelEventMetadata.errorCheckEnd - fuelEventMetadata.errorCheckStart;
             double errorCheck = fuelChangeVolume * FUEL_ERROR_THRESHOLD;
 
+            System.out.println("Fuel change volume: " + fuelChangeVolume + ", errorCheckFuelChange: " + errorCheckFuelChange + ", errorCheck" + errorCheck);
+
             // TODO: send meaningful info in notification.
             if (fuelChangeVolume < 0 && errorCheckFuelChange < errorCheck) {
 //                Event fuelDrainEvent = new Event(Event.TYPE_FUEL_DRAIN, deviceId);
 //                Context.getFcmPushNotificationManager().updateEvent(fuelDrainEvent, readingsForDevice.get(midPoint));
-                System.out.println("FUEL DRAIN DETECTED: " + fuelChangeVolume);
+                System.out.println("FUEL DRAIN DETECTED: " + fuelChangeVolume + " : " + readingsForDevice.get(midPoint).getServerTime());
+                deviceFuelEventMetadata.remove(deviceId);
+
             }
 
             if (fuelChangeVolume > 0 && errorCheckFuelChange > errorCheck) {
 //                Event fuelFill = new Event(Event.TYPE_FUEL_FILL, deviceId);
 //                Context.getFcmPushNotificationManager().updateEvent(fuelFill, readingsForDevice.get(midPoint));
-                System.out.println("FUEL FILL DETECTED: " + fuelChangeVolume);
+                System.out.println("FUEL FILL DETECTED: " + fuelChangeVolume + " : " + readingsForDevice.get(midPoint).getServerTime());
+                System.out.println("START: " + fuelEventMetadata.startLevel + " : " + fuelEventMetadata.errorCheckStart);
+                System.out.println("END: " + fuelEventMetadata.endLevel + " : " + fuelEventMetadata.errorCheckEnd);
+                deviceFuelEventMetadata.remove(deviceId);
             }
         }
     }
