@@ -190,19 +190,19 @@ public class DataManager {
 
     public static String constructPermissionQuery(String action, Class<?> owner, Class<?> property) {
         switch (action) {
-        case ACTION_SELECT_ALL:
-            return "SELECT " + makeNameId(owner) + ", " + makeNameId(property) + " FROM "
-                    + getPermissionsTableName(owner, property);
-        case ACTION_INSERT:
-            return "INSERT INTO " + getPermissionsTableName(owner, property)
-                    + " (" + makeNameId(owner) + ", " + makeNameId(property) + ") VALUES (:"
-                    + makeNameId(owner) + ", :" + makeNameId(property) + ")";
-        case ACTION_DELETE:
-            return "DELETE FROM " + getPermissionsTableName(owner, property)
-                    + " WHERE " + makeNameId(owner) + " = :" + makeNameId(owner)
-                    + " AND " + makeNameId(property) + " = :" + makeNameId(property);
-        default:
-            throw new IllegalArgumentException("Unknown action");
+            case ACTION_SELECT_ALL:
+                return "SELECT " + makeNameId(owner) + ", " + makeNameId(property) + " FROM "
+                        + getPermissionsTableName(owner, property);
+            case ACTION_INSERT:
+                return "INSERT INTO " + getPermissionsTableName(owner, property)
+                        + " (" + makeNameId(owner) + ", " + makeNameId(property) + ") VALUES (:"
+                        + makeNameId(owner) + ", :" + makeNameId(property) + ")";
+            case ACTION_DELETE:
+                return "DELETE FROM " + getPermissionsTableName(owner, property)
+                        + " WHERE " + makeNameId(owner) + " = :" + makeNameId(owner)
+                        + " AND " + makeNameId(property) + " = :" + makeNameId(property);
+            default:
+                throw new IllegalArgumentException("Unknown action");
         }
     }
 
