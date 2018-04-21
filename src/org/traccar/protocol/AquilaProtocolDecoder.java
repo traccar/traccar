@@ -242,7 +242,7 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
             .number("([01]),")                   // charge
             .number("(d+.d+),")                  // power
             .number("(d+.d+),")                  // battery
-            .number("[01],")                     // emergency
+            .number("([01]),")                   // emergency
             .expression("[CO],")                 // tamper
             .number("(d+),")                     // rssi
             .number("(d+),")                     // mcc
@@ -294,6 +294,10 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_CHARGE, parser.nextInt() == 1);
         position.set(Position.KEY_POWER, parser.nextDouble());
         position.set(Position.KEY_BATTERY, parser.nextDouble());
+
+        if (parser.nextInt() == 1) {
+            position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+        }
 
         Network network = new Network();
 
