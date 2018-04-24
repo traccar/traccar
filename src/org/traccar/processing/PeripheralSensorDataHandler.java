@@ -31,6 +31,7 @@ public class PeripheralSensorDataHandler extends BaseDataHandler {
     private static final String SENSOR_DATA = "sensorData";
     private static final String ADC_1 = "adc1";
     private static final String FUEL = "fuel";
+    private static final String EVENT = "event";
     private static final String FREQUENCY_PREFIX = "F=";
     private static final String FUEL_PART_PREFIX = "N=";
 
@@ -46,10 +47,6 @@ public class PeripheralSensorDataHandler extends BaseDataHandler {
 
     @Override
     protected Position handlePosition(Position position) {
-
-        if (!position.getValid()) {
-            return position;
-        }
 
         Optional<List<PeripheralSensor>> peripheralSensorsOnDevice =
                 Context.getPeripheralSensorManager()
@@ -163,7 +160,12 @@ public class PeripheralSensorDataHandler extends BaseDataHandler {
                                   double fuelTheftThreshold) {
 
         if (!isPositionTimestampWithinWindow(position)) {
-            return;
+            if ((int) position.getAttributes().get(EVENT) == 101) {
+                // Handle old packet --> do we care, if we're calculating slopes of lines?
+            }
+            else {
+                return;
+            }
         }
 
         long deviceId = position.getDeviceId();
@@ -218,16 +220,19 @@ public class PeripheralSensorDataHandler extends BaseDataHandler {
         readingsForDevice.add(position);
 
         if (readingsForDevice.size() >= MAX_VALUES_FOR_ALERTS) {
-            checkForActivity(readingsForDevice, fuelTheftThreshold, currentFuelLevelAverage);
+            checkForActivity(readingsForDevice, deviceFuelEventMetadata, fuelTheftThreshold, currentFuelLevelAverage);
             readingsForDevice.remove(0);
         }
     }
 
-    private void checkForActivity(List<Position> readingsForDevice, double fuelTheftThreshold, final double currentFuelLevelAverage) {
+    public void checkForActivity(List<Position> readingsForDevice,
+                                 Map<Long, FuelEventMetadata> deviceFuelEventMetadata,
+                                 double fuelTheftThreshold,
+                                 final double currentFuelLevelAverage) {
 
         int midPoint = (readingsForDevice.size() - 1) / 2;
 
-        System.out.println("SIZE: " + readingsForDevice.size() + " : MIDPOINT: " + midPoint);
+//        System.out.println("SIZE: " + readingsForDevice.size() + " : MIDPOINT: " + midPoint);
 
         double leftSum = 0, rightSum = 0;
 
@@ -243,7 +248,7 @@ public class PeripheralSensorDataHandler extends BaseDataHandler {
 
         long deviceId = readingsForDevice.get(0).getDeviceId();
 
-        System.out.println("FUEL LEVEL: " + currentFuelLevelAverage + ", diff in means: " + diffInMeans + ", theft threshold: " + fuelTheftThreshold);
+        System.out.println("diff in means: " + diffInMeans + ", theft threshold: " + fuelTheftThreshold);
         if (diffInMeans > fuelTheftThreshold) {
             if (!deviceFuelEventMetadata.containsKey(deviceId)) {
                 deviceFuelEventMetadata.put(deviceId, new FuelEventMetadata());
@@ -364,7 +369,7 @@ public class PeripheralSensorDataHandler extends BaseDataHandler {
         return Optional.of(fuelSensorPoints);
     }
 
-    private class FuelEventMetadata {
+    public class FuelEventMetadata {
         double startLevel;
         double endLevel;
         double errorCheckStart;

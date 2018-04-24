@@ -183,6 +183,11 @@
             <artifactId>json</artifactId>
             <version>20171018</version>
         </dependency>
+        <dependency>
+            <groupId>org.numenta</groupId>
+            <artifactId>htm.java</artifactId>
+            <version>0.6.12</version>
+        </dependency>
     </dependencies>
 
     <build>
