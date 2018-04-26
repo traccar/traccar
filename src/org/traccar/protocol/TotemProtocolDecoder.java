@@ -367,7 +367,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
 
         String sentence = (String) msg;
         Pattern pattern = PATTERN3;
-        if (sentence.indexOf("A") == 6) {
+        if (sentence.charAt(2) == '0') {
             pattern = PATTERN4;
         } else if (sentence.contains("$GPRMC")) {
             pattern = PATTERN1;
