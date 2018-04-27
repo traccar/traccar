@@ -27,11 +27,19 @@ public class DistanceHandler extends BaseDataHandler {
     private final boolean filter;
     private final int coordinatesMinError;
     private final int coordinatesMaxError;
+    private final int coordinatesMinErrorStatic;
 
-    public DistanceHandler(boolean filter, int coordinatesMinError, int coordinatesMaxError) {
+    public DistanceHandler(boolean filter, int coordinatesMinError,
+                int coordinatesMaxError, int coordinatesMinErrorStatic) {
         this.filter = filter;
         this.coordinatesMinError = coordinatesMinError;
         this.coordinatesMaxError = coordinatesMaxError;
+        if (coordinatesMinErrorStatic == -1) {
+            // use a default value
+            this.coordinatesMinErrorStatic = coordinatesMinError;
+        } else {
+            this.coordinatesMinErrorStatic = coordinatesMinErrorStatic;
+        }
     }
 
     private Position getLastPosition(long deviceId) {
@@ -71,7 +79,14 @@ public class DistanceHandler extends BaseDataHandler {
                         last.getLatitude(), last.getLongitude());
             }
             if (filter && last.getValid() && last.getLatitude() != 0 && last.getLongitude() != 0) {
-                boolean satisfiesMin = coordinatesMinError == 0 || distance > coordinatesMinError;
+                double speed = position.getSpeed();
+                boolean satisfiesMin;
+                if (speed < 0.01) {
+                    satisfiesMin = coordinatesMinErrorStatic == 0 || distance > coordinatesMinErrorStatic;
+                } else {
+                    satisfiesMin = coordinatesMinError == 0 || distance > coordinatesMinError;
+                }
+
                 boolean satisfiesMax = coordinatesMaxError == 0
                         || distance < coordinatesMaxError || position.getValid();
                 if (!satisfiesMin || !satisfiesMax) {
