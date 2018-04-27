@@ -75,14 +75,14 @@ public class User extends ExtendedModel {
         this.readonly = readonly;
     }
 
-    private boolean admin;
+    private boolean administrator;
 
-    public boolean getAdmin() {
-        return admin;
+    public boolean getAdministrator() {
+        return administrator;
     }
 
-    public void setAdmin(boolean admin) {
-        this.admin = admin;
+    public void setAdministrator(boolean administrator) {
+        this.administrator = administrator;
     }
 
     private String map;

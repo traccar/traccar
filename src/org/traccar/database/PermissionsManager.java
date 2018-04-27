@@ -156,7 +156,7 @@ public class PermissionsManager {
 
     public boolean getUserAdmin(long userId) {
         User user = getUser(userId);
-        return user != null && user.getAdmin();
+        return user != null && user.getAdministrator();
     }
 
     public void checkAdmin(long userId) throws SecurityException {
@@ -258,7 +258,7 @@ public class PermissionsManager {
     }
 
     public void checkUserUpdate(long userId, User before, User after) throws SecurityException {
-        if (before.getAdmin() != after.getAdmin()
+        if (before.getAdministrator() != after.getAdministrator()
                 || before.getDeviceLimit() != after.getDeviceLimit()
                 || before.getUserLimit() != after.getUserLimit()) {
             checkAdmin(userId);

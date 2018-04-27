@@ -150,7 +150,7 @@ public class LdapProvider {
                     user.setEmail(accountName);
                 }
             }
-            user.setAdmin(isAdmin(accountName));
+            user.setAdministrator(isAdmin(accountName));
         } catch (NamingException e) {
             user.setLogin(accountName);
             user.setName(accountName);

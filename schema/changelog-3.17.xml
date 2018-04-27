@@ -6,6 +6,18 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
   logicalFilePath="changelog-3.17">
 
+  <changeSet author="author" id="changelog-3.3-admin">
+
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <columnExists tableName="administrator" columnName="admin" />
+      </not>
+    </preConditions>
+
+    <renameColumn tableName="users" columnDataType="BOOLEAN" oldColumnName="admin" newColumnName="administrator" />
+
+  </changeSet>
+
   <changeSet author="author" id="changelog-3.17">
 
     <addColumn tableName="events">
