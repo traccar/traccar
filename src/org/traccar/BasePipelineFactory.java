@@ -204,6 +204,10 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             pipeline.addLast("hemisphere", hemisphereHandler);
         }
 
+        if (motionHandler != null) {
+            pipeline.addLast("motion", motionHandler);
+        }
+
         if (distanceHandler != null) {
             pipeline.addLast("distance", distanceHandler);
         }
@@ -220,10 +224,6 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
         if (geocoderHandler != null) {
             pipeline.addLast("geocoder", geocoderHandler);
-        }
-
-        if (motionHandler != null) {
-            pipeline.addLast("motion", motionHandler);
         }
 
         if (copyAttributesHandler != null) {
