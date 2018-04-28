@@ -204,13 +204,9 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             pipeline.addLast("hemisphere", hemisphereHandler);
         }
 
-        if (motionHandler != null) {
-            pipeline.addLast("motion", motionHandler);
-        }
+        pipeline.addLast("motion", motionHandler);
 
-        if (distanceHandler != null) {
-            pipeline.addLast("distance", distanceHandler);
-        }
+        pipeline.addLast("distance", distanceHandler);
 
         if (remoteAddressHandler != null) {
             pipeline.addLast("remoteAddress", remoteAddressHandler);
