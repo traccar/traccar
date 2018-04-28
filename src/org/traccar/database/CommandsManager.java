@@ -37,8 +37,11 @@ public class CommandsManager  extends ExtendedObjectManager<Command> {
 
     private final Map<Long, Queue<Command>> deviceQueues = new ConcurrentHashMap<>();
 
-    public CommandsManager(DataManager dataManager) {
+    private boolean queueing;
+
+    public CommandsManager(DataManager dataManager, boolean queueing) {
         super(dataManager, Command.class);
+        this.queueing = queueing;
     }
 
     public boolean checkDeviceCommand(long deviceId, long commandId) {
@@ -70,6 +73,8 @@ public class CommandsManager  extends ExtendedObjectManager<Command> {
             ActiveDevice activeDevice = Context.getConnectionManager().getActiveDevice(deviceId);
             if (activeDevice != null) {
                 activeDevice.sendCommand(command);
+            } else if (!queueing) {
+                throw new RuntimeException("Device is not online");
             } else {
                 getDeviceQueue(deviceId).add(command);
                 return false;

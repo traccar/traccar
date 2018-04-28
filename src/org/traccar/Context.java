@@ -391,7 +391,7 @@ public final class Context {
 
         driversManager = new DriversManager(dataManager);
 
-        commandsManager = new CommandsManager(dataManager);
+        commandsManager = new CommandsManager(dataManager, config.getBoolean("commands.queueing"));
 
         statisticsManager = new StatisticsManager();
 

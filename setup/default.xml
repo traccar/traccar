@@ -29,6 +29,8 @@
 
     <entry key='server.statistics'>https://www.traccar.org/analytics/</entry>
 
+    <entry key='commands.queueing'>true</entry>
+
     <!-- DATABASE CONFIG -->
 
     <entry key='database.ignoreUnknown'>true</entry>
