@@ -79,9 +79,10 @@ public class DistanceHandler extends BaseDataHandler {
                         last.getLatitude(), last.getLongitude());
             }
             if (filter && last.getValid() && last.getLatitude() != 0 && last.getLongitude() != 0) {
-                double speed = position.getSpeed();
                 boolean satisfiesMin;
-                if (speed < 0.01) {
+                boolean isInMotion = position.getBoolean(Position.KEY_MOTION);
+                boolean isStatic = !isInMotion;
+                if (isStatic) {
                     satisfiesMin = coordinatesMinErrorStatic == 0 || distance > coordinatesMinErrorStatic;
                 } else {
                     satisfiesMin = coordinatesMinError == 0 || distance > coordinatesMinError;
