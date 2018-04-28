@@ -74,7 +74,7 @@ public class CommandsManager  extends ExtendedObjectManager<Command> {
             if (activeDevice != null) {
                 activeDevice.sendCommand(command);
             } else if (!queueing) {
-                throw new RuntimeException("Commands queueing is not enabled");
+                throw new RuntimeException("Device is not online");
             } else {
                 getDeviceQueue(deviceId).add(command);
                 return false;
