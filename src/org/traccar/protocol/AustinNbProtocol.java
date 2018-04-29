@@ -24,9 +24,9 @@ import org.traccar.TrackerServer;
 
 import java.util.List;
 
-public class AustinNBProtocol extends BaseProtocol {
+public class AustinNbProtocol extends BaseProtocol {
 
-    public AustinNBProtocol() {
+    public AustinNbProtocol() {
         super("austinnb");
     }
 
@@ -37,7 +37,7 @@ public class AustinNBProtocol extends BaseProtocol {
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("stringEncoder", new StringEncoder());
                 pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectDecoder", new AustinNBProtocolDecoder(AustinNBProtocol.this));
+                pipeline.addLast("objectDecoder", new AustinNbProtocolDecoder(AustinNbProtocol.this));
             }
         });
     }
