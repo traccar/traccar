@@ -45,10 +45,8 @@ public class GeocoderTest {
             public void onFailure(final Throwable e) {
             }
         });
-        assertEquals("1 Ibn Shaprut St, Jerusalem, Jerusalem District, IL", waitAddress());
 
-        assertEquals("1 Ibn Shaprut St, Jerusalem, Jerusalem District, IL",
-                geocoder.getAddress(31.776797, 35.211489, null));
+        assertEquals("1 Ibn Shaprut St, Jerusalem, Jerusalem District, IL", waitAddress());
     }
 
     public void testNominatim() throws InterruptedException {
@@ -64,10 +62,8 @@ public class GeocoderTest {
             public void onFailure(Throwable e) {
             }
         });
-        assertEquals("35 West 9th Street, NYC, New York, US", waitAddress());
 
-        assertEquals("35 West 9th Street, NYC, New York, US",
-                geocoder.getAddress(40.7337807, -73.9974401, null));
+        assertEquals("35 West 9th Street, NYC, New York, US", waitAddress());
     }
 
     public void testGisgraphy() throws InterruptedException {
@@ -83,9 +79,8 @@ public class GeocoderTest {
             public void onFailure(Throwable e) {
             }
         });
-        assertEquals("Rue du Jardinet, Paris, Île-de-France, FR", waitAddress());
 
-        assertEquals("Rue du Jardinet, Paris, Île-de-France, FR", geocoder.getAddress(48.8530000, 2.3400000, null));
+        assertEquals("Rue du Jardinet, Paris, Île-de-France, FR", waitAddress());
     }
 
     public void testOpenCage() throws InterruptedException {
@@ -102,9 +97,8 @@ public class GeocoderTest {
             public void onFailure(Throwable e) {
             }
         });
-        assertEquals("Charleston Road, California, US", waitAddress());
 
-        assertEquals("Charleston Road, California, US", geocoder.getAddress(34.116302, -118.051519, null));
+        assertEquals("Charleston Road, California, US", waitAddress());
     }
 
     public void testGeocodeFarm() throws InterruptedException {
@@ -120,10 +114,25 @@ public class GeocoderTest {
             public void onFailure(Throwable e) {
             }
         });
-        assertEquals("Estrella Avenue, Arcadia, California, United States", waitAddress());
 
-        assertEquals("Estrella Avenue, Arcadia, California, United States",
-                geocoder.getAddress(34.116302, -118.051519, null));
+        assertEquals("Estrella Avenue, Arcadia, California, United States", waitAddress());
+    }
+
+    public void testGeocodeXyz() throws InterruptedException {
+        Geocoder geocoder = new GeocodeXyzGeocoder(null, 0, new AddressFormat());
+
+        geocoder.getAddress(34.116302, -118.051519, new Geocoder.ReverseGeocoderCallback() {
+            @Override
+            public void onSuccess(String address) {
+                setAddress(address);
+            }
+
+            @Override
+            public void onFailure(Throwable e) {
+            }
+        });
+
+        assertEquals("605 ESTRELLA AVE, ARCADIA, California United States of America, US", waitAddress());
     }
 
 }

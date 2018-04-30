@@ -23,6 +23,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Properties;
 
+import com.ning.http.client.AsyncHttpClientConfigDefaults;
 import org.apache.velocity.app.VelocityEngine;
 import org.eclipse.jetty.util.URIUtil;
 import org.traccar.database.CalendarManager;
@@ -49,6 +50,7 @@ import org.traccar.geocoder.AddressFormat;
 import org.traccar.geocoder.BingMapsGeocoder;
 import org.traccar.geocoder.FactualGeocoder;
 import org.traccar.geocoder.GeocodeFarmGeocoder;
+import org.traccar.geocoder.GeocodeXyzGeocoder;
 import org.traccar.geocoder.GisgraphyGeocoder;
 import org.traccar.geocoder.GoogleGeocoder;
 import org.traccar.geocoder.MapQuestGeocoder;
@@ -80,6 +82,9 @@ import org.traccar.smpp.SmppClient;
 import org.traccar.web.WebServer;
 
 public final class Context {
+
+    private static final String USER_AGENT =
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0";
 
     private Context() {
     }
@@ -204,10 +209,15 @@ public final class Context {
         return velocityEngine;
     }
 
-    private static final AsyncHttpClient ASYNC_HTTP_CLIENT = new AsyncHttpClient();
+    private static AsyncHttpClient asyncHttpClient;
+
+    static {
+        System.setProperty(AsyncHttpClientConfigDefaults.ASYNC_CLIENT + "userAgent", USER_AGENT);
+        asyncHttpClient = new AsyncHttpClient();
+    }
 
     public static AsyncHttpClient getAsyncHttpClient() {
-        return ASYNC_HTTP_CLIENT;
+        return asyncHttpClient;
     }
 
     private static EventForwarder eventForwarder;
@@ -311,6 +321,8 @@ public final class Context {
                 return new FactualGeocoder(url, key, cacheSize, addressFormat);
             case "geocodefarm":
                 return new GeocodeFarmGeocoder(key, language, cacheSize, addressFormat);
+            case "geocodexyz":
+                return new GeocodeXyzGeocoder(key, cacheSize, addressFormat);
             default:
                 return new GoogleGeocoder(key, language, cacheSize, addressFormat);
         }
