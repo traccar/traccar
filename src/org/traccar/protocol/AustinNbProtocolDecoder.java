@@ -42,7 +42,7 @@ public class AustinNbProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+);")                     // angle
             .number("(d+);")                     // range
             .number("(d+);")                     // out of range
-            .expression("(.*)")                          // operator
+            .expression("(.*)")                  // operator
             .any()
             .compile();
 
@@ -71,7 +71,7 @@ public class AustinNbProtocolDecoder extends BaseProtocolDecoder {
         position.set("azimuth", parser.nextInt());
         position.set("angle", parser.nextInt());
         position.set("range", parser.nextInt());
-        position.set("out_of_range", parser.nextInt());
+        position.set("outOfRange", parser.nextInt());
         position.set("currier", parser.next());
 
         return position;
