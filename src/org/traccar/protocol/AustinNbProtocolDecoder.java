@@ -23,11 +23,12 @@ import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 
-public class GlobeKeeperProtocolDecoder extends BaseProtocolDecoder {
+public class AustinNbProtocolDecoder extends BaseProtocolDecoder {
 
-    public GlobeKeeperProtocolDecoder(GlobeKeeperProtocol protocol) {
+    public AustinNbProtocolDecoder(AustinNbProtocol protocol) {
         super(protocol);
     }
 
@@ -37,6 +38,11 @@ public class GlobeKeeperProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd):(dd):(dd);")           // time
             .number("(-?d+,d+);")                // latitude
             .number("(-?d+,d+);")                // longitude
+            .number("(d+);")                     // azimuth
+            .number("(d+);")                     // angle
+            .number("(d+);")                     // range
+            .number("(d+);")                     // out of range
+            .expression("(.*)")                  // operator
             .any()
             .compile();
 
@@ -57,11 +63,16 @@ public class GlobeKeeperProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.setTime(parser.nextDateTime());
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.YMD_HMS, TimeZone.getDefault().getID()));
 
         position.setValid(true);
-        position.setLongitude(Double.parseDouble(parser.next().replace(',', '.')));
         position.setLatitude(Double.parseDouble(parser.next().replace(',', '.')));
+        position.setLongitude(Double.parseDouble(parser.next().replace(',', '.')));
+        position.setCourse(parser.nextInt());
+        position.set("angle", parser.nextInt());
+        position.set("range", parser.nextInt());
+        position.set("outOfRange", parser.nextInt());
+        position.set("carrier", parser.next());
 
         return position;
     }
