@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,7 +148,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN = new PatternBuilder()
             .text("*")
             .expression("..,")                   // manufacturer
-            .number("(d+),")                     // imei
+            .number("(d+)?,")                    // imei
             .groupBegin()
             .text("VP1,")
             .or()
