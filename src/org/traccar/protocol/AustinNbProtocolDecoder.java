@@ -68,11 +68,11 @@ public class AustinNbProtocolDecoder extends BaseProtocolDecoder {
         position.setValid(true);
         position.setLatitude(Double.parseDouble(parser.next().replace(',', '.')));
         position.setLongitude(Double.parseDouble(parser.next().replace(',', '.')));
-        position.set("azimuth", parser.nextInt());
+        position.setCourse(parser.nextInt());
         position.set("angle", parser.nextInt());
         position.set("range", parser.nextInt());
         position.set("outOfRange", parser.nextInt());
-        position.set("currier", parser.next());
+        position.set("carrier", parser.next());
 
         return position;
     }
