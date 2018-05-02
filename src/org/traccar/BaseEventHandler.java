@@ -30,10 +30,6 @@ public abstract class BaseEventHandler extends BaseDataHandler {
             if (Context.getNotificationManager() != null) {
                 Context.getNotificationManager().updateEvents(events);
             }
-
-            if (Context.getFcmPushNotificationManager() != null) {
-                Context.getFcmPushNotificationManager().updateEvents(events);
-            }
         }
 
         return position;

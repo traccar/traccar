@@ -41,7 +41,7 @@ import org.traccar.events.AlertEventHandler;
 import org.traccar.helper.Log;
 import org.traccar.processing.ComputedAttributesHandler;
 import org.traccar.processing.CopyAttributesHandler;
-import org.traccar.processing.PeripheralSensorDataHandler;
+import org.traccar.processing.peripheralsensorprocessors.PeripheralSensorDataHandler;
 
 import java.net.InetSocketAddress;
 

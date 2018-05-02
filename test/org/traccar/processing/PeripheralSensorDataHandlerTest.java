@@ -1,18 +1,18 @@
 package org.traccar.processing;
 
-import javafx.geometry.Pos;
 import org.junit.Test;
 import org.traccar.model.Position;
+import org.traccar.processing.peripheralsensorprocessors.FuelActivity;
+import org.traccar.processing.peripheralsensorprocessors.PeripheralSensorDataHandler;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class PeripheralSensorDataHandlerTest {
 
-    @Test
-    public void testActivity() {
+    public void testFuelFillActivity() {
+
+        long sensorId = 1;
         PeripheralSensorDataHandler peripheralSensorDataHandler =
                 new PeripheralSensorDataHandler();
 
@@ -24,16 +24,57 @@ public class PeripheralSensorDataHandlerTest {
         deviceBeforeFillPositions.addAll(deviceFillPositions);
         deviceBeforeFillPositions.addAll(deviceAfterFillPositions);
 
-        Map<Long, PeripheralSensorDataHandler.FuelEventMetadata> fuelEventMetadataMap = new ConcurrentHashMap<>();
+        Map<String, PeripheralSensorDataHandler.FuelEventMetadata> fuelEventMetadataMap = new ConcurrentHashMap<>();
 
         double threshold = 5.31;
 
+        List<FuelActivity> activities = new LinkedList<>();
         for (int start = 0, end = 9; end < deviceBeforeFillPositions.size(); start++, end++) {
             List<Position> subListToPass = deviceBeforeFillPositions.subList(start, end);
-            subListToPass.forEach(d -> System.out.print(d.getAttributes().get(Position.KEY_FUEL_LEVEL) + " "));
-            System.out.println();
-            peripheralSensorDataHandler.checkForActivity(subListToPass, fuelEventMetadataMap, threshold, 10);
+            activities.add(peripheralSensorDataHandler.checkForActivity(subListToPass, fuelEventMetadataMap, sensorId, threshold));
         }
+
+        int fuelFills = 0;
+        for (FuelActivity activity : activities) {
+            if (activity.getActivityType() == FuelActivity.FuelActivityType.FUEL_FILL) {
+                fuelFills++;
+            }
+        }
+
+        assert fuelFills == 1;
+    }
+
+    public void testFuelDrainActivity() {
+        long sensorId = 1;
+        PeripheralSensorDataHandler peripheralSensorDataHandler =
+                new PeripheralSensorDataHandler();
+
+        // Fuel is getting consumed before and after we fill.
+        List<Position> deviceBeforeDrainPositions = generatePositions(20, 80, 60);
+        List<Position> deviceDrainPositions = generatePositions(10, 60, 50);
+        List<Position> deviceAfterDrainPositions = generatePositions(20, 50, 55);
+
+        deviceBeforeDrainPositions.addAll(deviceDrainPositions);
+        deviceBeforeDrainPositions.addAll(deviceAfterDrainPositions);
+
+        Map<String, PeripheralSensorDataHandler.FuelEventMetadata> fuelEventMetadataMap = new ConcurrentHashMap<>();
+
+        double threshold = 3.00;
+
+        List<FuelActivity> activities = new LinkedList<>();
+        for (int start = 0, end = 9; end < deviceBeforeDrainPositions.size(); start++, end++) {
+            List<Position> subListToPass = deviceBeforeDrainPositions.subList(start, end);
+            activities.add(peripheralSensorDataHandler.checkForActivity(subListToPass, fuelEventMetadataMap, sensorId, threshold));
+        }
+
+        int fuelDrains = 0;
+        for (FuelActivity activity : activities) {
+            if (activity.getActivityType() == FuelActivity.FuelActivityType.FUEL_DRAIN) {
+                fuelDrains++;
+            }
+        }
+
+        assert fuelDrains == 1;
     }
 
     private List<Position> generatePositions(int size,
@@ -45,13 +86,16 @@ public class PeripheralSensorDataHandlerTest {
             Position position = new Position();
             double fuelIncrement = i * ((endFuelLevel - startFuelLevel)/size);
             position.set(Position.KEY_FUEL_LEVEL, startFuelLevel + fuelIncrement);
+            position.setDeviceTime(getAdjustedTime(30 *(size - i)));
             positions.add(position);
         }
 
         return positions;
     }
 
-
-
-
+    private Date getAdjustedTime(int secondsBehind) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.SECOND, -secondsBehind);
+        return calendar.getTime();
+    }
 }
