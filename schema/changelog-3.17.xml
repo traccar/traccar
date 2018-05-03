@@ -10,7 +10,7 @@
 
     <preConditions onFail="MARK_RAN">
       <not>
-        <columnExists tableName="administrator" columnName="admin" />
+        <columnExists tableName="users" columnName="administrator" />
       </not>
     </preConditions>
 
