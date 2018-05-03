@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,7 +116,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedShort(); // distance compensation
             buf.readUnsignedShort(); // speed alarm
 
-            int locationStatus = buf.readUnsignedByte();
+            int status = buf.readUnsignedByte();
 
             buf.readUnsignedByte(); // gsensor manager status
             buf.readUnsignedByte(); // other flags
@@ -151,9 +151,9 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
                     .setMinute(BcdUtil.readInteger(buf, 2))
                     .setSecond(BcdUtil.readInteger(buf, 2));
 
-            if (BitUtil.check(locationStatus, 6)) {
+            if (BitUtil.check(status, 6)) {
 
-                position.setValid(!BitUtil.check(locationStatus, 7));
+                position.setValid(!BitUtil.check(status, 7));
                 position.setTime(dateBuilder.getDate());
                 position.setAltitude(readSwappedFloat(buf));
                 position.setLongitude(readSwappedFloat(buf));
@@ -170,12 +170,22 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
                 buf.readBytes(array);
                 ChannelBuffer swapped = ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, array);
 
-                position.setNetwork(new Network(CellTower.from(
-                        swapped.readUnsignedShort(), swapped.readUnsignedShort(),
-                        swapped.readUnsignedShort(), swapped.readUnsignedShort())));
+                int mcc = swapped.readUnsignedShort();
+                int mnc = swapped.readUnsignedShort();
 
-                // two more cell towers
+                if (mcc != 0xffff && mnc != 0xffff) {
+                    Network network = new Network();
+                    for (int i = 0; i < 3; i++) {
+                        network.addCellTower(CellTower.from(
+                                mcc, mnc, swapped.readUnsignedShort(), swapped.readUnsignedShort()));
+                    }
+                    position.setNetwork(network);
+                }
 
+            }
+
+            if (buf.readableBytes() >= 2) {
+                position.set(Position.KEY_POWER, BcdUtil.readInteger(buf, 4) * 0.01);
             }
 
             return position;
