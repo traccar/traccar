@@ -100,7 +100,7 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.KEY_SATELLITES, BitUtil.to(status, 4));
                         position.set(Position.KEY_HDOP, BitUtil.from(status, 4));
 
-                        position.setCourse(buf.readUnsignedByte());
+                        position.setCourse(buf.readUnsignedByte()*2);
                         position.setAltitude(buf.readUnsignedShort());
 
                         position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
