@@ -49,11 +49,10 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
         return ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, bytes).readFloat();
     }
 
-    private void sendResponse(Channel channel, int type, ChannelBuffer imei) {
+    private void sendResponse(Channel channel, short header, int type, ChannelBuffer imei) {
         if (channel != null) {
             ChannelBuffer response = ChannelBuffers.directBuffer(15);
-            response.writeByte(0x23);
-            response.writeByte(0x23); // header
+            response.writeShort(header);
             response.writeByte(type);
             response.writeShort(response.capacity()); // length
             response.writeShort(0x0001); // index
@@ -87,7 +86,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
-        buf.skipBytes(2);
+        short header = buf.readShort();
         int type = buf.readUnsignedByte();
         buf.readUnsignedShort(); // length
         int index = buf.readUnsignedShort();
@@ -100,7 +99,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (type == MSG_LOGIN || type == MSG_ALARM || type == MSG_HEARTBEAT) {
-            sendResponse(channel, type, imei);
+            sendResponse(channel, header, type, imei);
         }
 
         if (type == MSG_GPS || type == MSG_ALARM) {
