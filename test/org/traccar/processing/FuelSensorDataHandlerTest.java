@@ -1,20 +1,30 @@
 package org.traccar.processing;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.traccar.model.Position;
-import org.traccar.processing.peripheralsensorprocessors.FuelActivity;
-import org.traccar.processing.peripheralsensorprocessors.PeripheralSensorDataHandler;
+import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.FuelActivity;
+import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.FuelSensorDataHandler;
+import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.FuelSensorHelper;
+import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.FuelEventMetadata;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class PeripheralSensorDataHandlerTest {
+public class FuelSensorDataHandlerTest {
 
+    @Before
+    public void setup() {
+
+    }
+
+    @Test
     public void testFuelFillActivity() {
 
         long sensorId = 1;
-        PeripheralSensorDataHandler peripheralSensorDataHandler =
-                new PeripheralSensorDataHandler();
+
+        FuelSensorDataHandler fuelSensorDataHandler =
+                new FuelSensorDataHandler(false);
 
         // Fuel is getting consumed before and after we fill.
         List<Position> deviceBeforeFillPositions = generatePositions(10, 40, 30);
@@ -24,53 +34,60 @@ public class PeripheralSensorDataHandlerTest {
         deviceBeforeFillPositions.addAll(deviceFillPositions);
         deviceBeforeFillPositions.addAll(deviceAfterFillPositions);
 
-        Map<String, PeripheralSensorDataHandler.FuelEventMetadata> fuelEventMetadataMap = new ConcurrentHashMap<>();
+        Map<String, FuelEventMetadata> fuelEventMetadataMap = new ConcurrentHashMap<>();
 
-        double threshold = 5.31;
+        double threshold = 3.00;
+        double fuelErrorThreshold = 0.75;
 
         List<FuelActivity> activities = new LinkedList<>();
         for (int start = 0, end = 9; end < deviceBeforeFillPositions.size(); start++, end++) {
             List<Position> subListToPass = deviceBeforeFillPositions.subList(start, end);
-            activities.add(peripheralSensorDataHandler.checkForActivity(subListToPass, fuelEventMetadataMap, sensorId, threshold));
+            activities.add(fuelSensorDataHandler.checkForActivity(subListToPass, fuelEventMetadataMap, sensorId, threshold));
         }
 
         int fuelFills = 0;
         for (FuelActivity activity : activities) {
             if (activity.getActivityType() == FuelActivity.FuelActivityType.FUEL_FILL) {
                 fuelFills++;
+                System.out.println(activity.getChangeVolume());
             }
         }
 
         assert fuelFills == 1;
     }
 
+    @Test
     public void testFuelDrainActivity() {
+
         long sensorId = 1;
-        PeripheralSensorDataHandler peripheralSensorDataHandler =
-                new PeripheralSensorDataHandler();
+
+        FuelSensorDataHandler fuelSensorDataHandler =
+                new FuelSensorDataHandler(false);
 
         // Fuel is getting consumed before and after we fill.
         List<Position> deviceBeforeDrainPositions = generatePositions(20, 80, 60);
         List<Position> deviceDrainPositions = generatePositions(10, 60, 50);
-        List<Position> deviceAfterDrainPositions = generatePositions(20, 50, 55);
+        List<Position> deviceAfterDrainPositions = generatePositions(20, 50, 45);
 
         deviceBeforeDrainPositions.addAll(deviceDrainPositions);
         deviceBeforeDrainPositions.addAll(deviceAfterDrainPositions);
 
-        Map<String, PeripheralSensorDataHandler.FuelEventMetadata> fuelEventMetadataMap = new ConcurrentHashMap<>();
+        Map<String, FuelEventMetadata> fuelEventMetadataMap = new ConcurrentHashMap<>();
 
         double threshold = 3.00;
+        double fuelErrorThreshold = 0.75;
 
         List<FuelActivity> activities = new LinkedList<>();
         for (int start = 0, end = 9; end < deviceBeforeDrainPositions.size(); start++, end++) {
             List<Position> subListToPass = deviceBeforeDrainPositions.subList(start, end);
-            activities.add(peripheralSensorDataHandler.checkForActivity(subListToPass, fuelEventMetadataMap, sensorId, threshold));
+            activities.add(fuelSensorDataHandler.checkForActivity(subListToPass, fuelEventMetadataMap, sensorId, threshold));
         }
 
         int fuelDrains = 0;
         for (FuelActivity activity : activities) {
             if (activity.getActivityType() == FuelActivity.FuelActivityType.FUEL_DRAIN) {
                 fuelDrains++;
+                System.out.println(activity.getChangeVolume());
             }
         }
 

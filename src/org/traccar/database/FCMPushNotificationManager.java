@@ -2,7 +2,6 @@ package org.traccar.database;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jetty.util.ConcurrentHashSet;
-import org.eclipse.jetty.util.StringUtil;
 import org.traccar.Context;
 import org.traccar.fcm.PushNotifications;
 import org.traccar.helper.Log;
@@ -10,7 +9,8 @@ import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.FCMPushNotification;
 import org.traccar.model.Position;
-import org.traccar.processing.peripheralsensorprocessors.FuelActivity;
+import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.FuelActivity;
+import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.FuelActivity.FuelActivityType;
 
 import java.sql.SQLException;
 
@@ -97,29 +97,29 @@ public class FCMPushNotificationManager extends ExtendedObjectManager<FCMPushNot
         PushNotifications.getInstance().sendEventNotification(tokens, title, body);
     }
 
+    public void updateFuelActivity(FuelActivity fuelActivity) {
 
-    public void updateFuelActivity(FuelActivity fuelActivity, Position position) {
-
-        String eventType = fuelActivity.getActivityType().name();
-        if (StringUtils.isBlank(eventType) || StringUtils.equals("NONE", eventType)) {
+        FuelActivityType eventType = fuelActivity.getActivityType();
+        if (eventType == FuelActivityType.NONE) {
             return;
         }
 
-        long deviceId = position.getDeviceId();
-        Set<String> tokens = getEffectiveFCMTokens(eventType, deviceId);
+        long deviceId = fuelActivity.getActivitystartPosition().getDeviceId();
+        Set<String> tokens = getEffectiveFCMTokens(eventType.name(), deviceId);
 
         if (tokens.isEmpty()) {
             return;
         }
 
         Device device = Context.getDeviceManager().getById(deviceId);
-        String title = String.format("[%s]: on vehicle %s", eventType, device.getRegistrationNumber());
+        String title = String.format("[%s] detected on vehicle %s", eventType, device.getRegistrationNumber());
 
-        String body = String.format("Volume: %s, Time range: %s - %s", fuelActivity.getChangeVolume(),
-                fuelActivity.getActivityStartTime(),
-                fuelActivity.getActivityEndTime());
+        String messageBody = String.format("Volume: %s, %n", fuelActivity.getChangeVolume()) +
+                             String.format("Time range: %s - %s",
+                                           fuelActivity.getActivityStartTime(),
+                                           fuelActivity.getActivityEndTime());
 
-        PushNotifications.getInstance().sendEventNotification(tokens, title, body);
+        PushNotifications.getInstance().sendEventNotification(tokens, title, messageBody);
     }
 
     private ConcurrentHashSet<String> getEffectiveFCMTokens(String eventType, long deviceId) {

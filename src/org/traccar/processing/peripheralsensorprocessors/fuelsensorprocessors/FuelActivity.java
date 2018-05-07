@@ -1,8 +1,12 @@
-package org.traccar.processing.peripheralsensorprocessors;
+package org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors;
+
+import org.traccar.model.Position;
 
 import java.util.Date;
 
 public class FuelActivity {
+
+    public FuelActivity() {}
 
     public enum FuelActivityType {
         NONE,
@@ -14,6 +18,8 @@ public class FuelActivity {
     private double changeVolume = 0;
     private Date activityStartTime;
     private Date activityEndTime;
+    private Position activitystartPosition;
+    private Position activityEndPosition;
 
     public FuelActivityType getActivityType() {
         return activityType;
@@ -45,5 +51,21 @@ public class FuelActivity {
 
     public void setActivityEndTime(Date activityEndTime) {
         this.activityEndTime = activityEndTime;
+    }
+
+    public Position getActivitystartPosition() {
+        return activitystartPosition;
+    }
+
+    public void setActivitystartPosition(final Position activitystartPosition) {
+        this.activitystartPosition = activitystartPosition;
+    }
+
+    public Position getActivityEndPosition() {
+        return activityEndPosition;
+    }
+
+    public void setActivityEndPosition(final Position activityEndPosition) {
+        this.activityEndPosition = activityEndPosition;
     }
 }
