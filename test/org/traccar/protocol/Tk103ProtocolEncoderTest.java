@@ -221,6 +221,20 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
+    public void testEncodeCustom() throws Exception {
+
+        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder();
+
+        Command command = new Command();
+        command.setDeviceId(1);
+        command.setType(Command.TYPE_CUSTOM);
+        command.set(Command.KEY_DATA, "AA00");
+
+        assertEquals("(123456789012345AA00)", encoder.encodeCommand(command));
+
+    }
+
+    @Test
     public void testEncodeCustomAlternative() throws Exception {
 
         Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(true);

@@ -47,6 +47,8 @@ public class Tk103ProtocolEncoder extends StringProtocolEncoder {
 
         if (alternative) {
             switch (command.getType()) {
+                case Command.TYPE_CUSTOM:
+                    return formatAlt(command, "{%s}", Command.KEY_DATA);
                 case Command.TYPE_GET_VERSION:
                     return formatAlt(command, "*about*");
                 case Command.TYPE_REBOOT_DEVICE:
@@ -57,8 +59,6 @@ public class Tk103ProtocolEncoder extends StringProtocolEncoder {
                     return formatAlt(command, "*routetrack*99*");
                 case Command.TYPE_POSITION_STOP:
                     return formatAlt(command, "*routetrackoff*");
-                case Command.TYPE_CUSTOM:
-                    return formatAlt(command, "{%s}", Command.KEY_DATA);
                 case Command.TYPE_GET_DEVICE_STATUS:
                     return formatAlt(command, "*status*");
                 case Command.TYPE_IDENTIFICATION:
@@ -80,6 +80,8 @@ public class Tk103ProtocolEncoder extends StringProtocolEncoder {
             }
         } else {
             switch (command.getType()) {
+                case Command.TYPE_CUSTOM:
+                    return formatCommand(command, "({%s}{%s})", Command.KEY_UNIQUE_ID, Command.KEY_DATA);
                 case Command.TYPE_GET_VERSION:
                     return formatCommand(command, "({%s}AP07)", Command.KEY_UNIQUE_ID);
                 case Command.TYPE_REBOOT_DEVICE:
