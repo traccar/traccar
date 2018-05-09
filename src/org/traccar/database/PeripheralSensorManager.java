@@ -40,8 +40,12 @@ public class PeripheralSensorManager extends ExtendedObjectManager<PeripheralSen
                     deviceToPeripheralSensorMap.put(p.getDeviceId(), linkedPeripheralSensors);
 
                     ObjectMapper calibrationDataMapper = new ObjectMapper();
-                    FuelSensorCalibration fuelSensorCalibration = calibrationDataMapper.readValue(p.getCalibrationData(), FuelSensorCalibration.class);
-                    deviceSensorToCalibrationDataMap.put(buildDeviceSensorMapKey(p.getDeviceId(), p.getPeripheralSensorId()), fuelSensorCalibration);
+                    FuelSensorCalibration fuelSensorCalibration =
+                            calibrationDataMapper.readValue(p.getCalibrationData(),
+                                                            FuelSensorCalibration.class);
+                    deviceSensorToCalibrationDataMap.put(buildDeviceSensorMapKey(p.getDeviceId(),
+                                                                                 p.getPeripheralSensorId()),
+                                                         fuelSensorCalibration);
                 }
                 Log.info("Created linked peripheral devices info: " + deviceToPeripheralSensorMap.size());
             } catch (SQLException | IOException e) {

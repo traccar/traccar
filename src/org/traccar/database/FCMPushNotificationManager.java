@@ -120,14 +120,15 @@ public class FCMPushNotificationManager extends ExtendedObjectManager<FCMPushNot
         String title = String.format("[%s] detected on vehicle %s", eventType, device.getRegistrationNumber());
 
         DecimalFormat formatFuelLevel = new DecimalFormat(".#");
-        DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("dd-MM-yyyy HH:mm:ss").withZone(DateTimeZone.forID("Asia/Kolkata"));
+        DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("dd-MM-yyyy HH:mm:ss")
+                                                            .withZone(DateTimeZone.forID("Asia/Kolkata"));
 
         String volumeChanged = formatFuelLevel.format(fuelActivity.getChangeVolume());
         String startTime = dateTimeFormatter.print(new DateTime(fuelActivity.getActivityStartTime()));
         String endTime = dateTimeFormatter.print(new DateTime(fuelActivity.getActivityEndTime()));
 
-        String messageBody = String.format("Volume: %s, %n", volumeChanged) +
-                             String.format("Time range: %s - %s", startTime, endTime);
+        String messageBody = String.format("Volume: %s, %n", volumeChanged)
+                             + String.format("Time range: %s - %s", startTime, endTime);
 
         PushNotifications.getInstance().sendEventNotification(tokens, title, messageBody);
     }

@@ -6,7 +6,7 @@ import java.util.Date;
 
 public class FuelActivity {
 
-    public FuelActivity() {}
+    public FuelActivity() { }
 
     public enum FuelActivityType {
         NONE,

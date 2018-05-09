@@ -1,6 +1,5 @@
 package org.traccar.transforms.model;
 
-import com.fasterxml.jackson.annotation.JsonClassDescription;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class SensorPointsMap {

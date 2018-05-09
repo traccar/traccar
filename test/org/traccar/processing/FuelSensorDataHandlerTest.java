@@ -1,8 +1,6 @@
 package org.traccar.processing;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.traccar.Context;
 import org.traccar.model.Position;
 import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.FuelActivity;
 import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.FuelSensorDataHandler;
@@ -44,7 +42,6 @@ public class FuelSensorDataHandlerTest {
         for (FuelActivity activity : activities) {
             if (activity.getActivityType() == FuelActivity.FuelActivityType.FUEL_FILL) {
                 fuelFills++;
-                System.out.println(activity.getChangeVolume());
             }
         }
 
@@ -82,7 +79,6 @@ public class FuelSensorDataHandlerTest {
         for (FuelActivity activity : activities) {
             if (activity.getActivityType() == FuelActivity.FuelActivityType.FUEL_DRAIN) {
                 fuelDrains++;
-                System.out.println(activity.getChangeVolume());
             }
         }
 

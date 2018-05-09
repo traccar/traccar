@@ -1,9 +1,5 @@
 package org.traccar.model;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Queue;
-
 public class PeripheralSensor extends BaseModel {
 
     private long deviceId;
