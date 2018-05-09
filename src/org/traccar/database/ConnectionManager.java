@@ -108,7 +108,6 @@ public class ConnectionManager {
             }
             events.put(new Event(eventType, deviceId), null);
             Context.getNotificationManager().updateEvents(events);
-            Context.getFcmPushNotificationManager().updateEvents(events);
         }
 
         Timeout timeout = timeouts.remove(deviceId);

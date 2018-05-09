@@ -18,6 +18,18 @@
     <entry key='coordinates.filter'>true</entry>
     <entry key='coordinates.minError'>20</entry>
 
+    <!-- Peripheral sensor processing entries-->
+    <entry key='processing.peripheralSensorData.enable'>true</entry>
+    <entry key='processing.peripheralSensorData.minValuesForMovingAverage'>9</entry>
+    <entry key='processing.peripheralSensorData.messageFrequency'>30</entry>
+    <entry key='processing.peripheralSensorData.hoursOfDataToLoad'>24</entry>
+    <entry key='processing.peripheralSensorData.maxValuesForAlerts'>27</entry>
+    <entry key='processing.peripheralSensorData.storedEventLookAroundSeconds'>450</entry>
+    <entry key='processing.peripheralSensorData.currentEventLookBackSeconds'>900</entry>
+    <entry key='processing.peripheralSensorData.fuelLevelChangeThresholdLitersDigital'>3.00</entry>
+    <entry key='processing.peripheralSensorData.fuelLevelChangeThresholdLitersAnalog'>12.00</entry>
+    <entry key='processing.peripheralSensorData.fuelErrorThreshold'>0.75</entry>
+
     <!--<entry key='database.driver'>org.h2.Driver</entry>-->
     <!--<entry key='database.url'>jdbc:h2:./target/database</entry>-->
     <!--<entry key='database.user'>sa</entry>-->
@@ -30,8 +42,8 @@
     <entry key='database.password'></entry>
 
     <entry key='aquila.port'>5089</entry>
-    <entry key='intellitrac.port'>6037</entry>
-    <entry key='osmandprotocol.port'>5055</entry>
+    <!--<entry key='intellitrac.port'>6037</entry>-->
+    <!--<entry key='osmandprotocol.port'>5055</entry>-->
 
     <!--<entry key='ldap.enable'>true</entry>
     <entry key='ldap.url'>ldap://ldap.forumsys.com:389</entry>

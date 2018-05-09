@@ -61,6 +61,9 @@ public class Event extends Message {
 
     public static final String TYPE_DRIVER_CHANGED = "driverChanged";
 
+    public static final String TYPE_FUEL_DRAIN = "fuelDrain";
+    public static final String TYPE_FUEL_FILL = "fuelFill";
+
     private Date serverTime;
 
     public Date getServerTime() {

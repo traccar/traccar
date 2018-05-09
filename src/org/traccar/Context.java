@@ -39,6 +39,7 @@ import org.traccar.database.MediaManager;
 import org.traccar.database.NotificationManager;
 import org.traccar.database.FCMPushNotificationManager;
 import org.traccar.database.FCMUserTokenManager;
+import org.traccar.database.PeripheralSensorManager;
 import org.traccar.database.PermissionsManager;
 import org.traccar.database.GeofenceManager;
 import org.traccar.database.GroupsManager;
@@ -210,6 +211,12 @@ public final class Context {
 
     public static FCMUserTokenManager getFcmUserTokenManager() {
         return fcmUserTokenManager;
+    }
+
+    private static PeripheralSensorManager peripheralSensorManager;
+
+    public static PeripheralSensorManager getPeripheralSensorManager() {
+        return peripheralSensorManager;
     }
 
     private static VelocityEngine velocityEngine;
@@ -438,6 +445,7 @@ public final class Context {
         notificationManager = new NotificationManager(dataManager);
         fcmPushNotificationManager = new FCMPushNotificationManager(dataManager);
         fcmUserTokenManager = new FCMUserTokenManager(dataManager);
+        peripheralSensorManager = new PeripheralSensorManager(dataManager);
 
         Properties velocityProperties = new Properties();
         velocityProperties.setProperty("file.resource.loader.path",
