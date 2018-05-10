@@ -32,13 +32,13 @@ public class OverspeedEventHandler extends BaseEventHandler {
     public static final String ATTRIBUTE_SPEED_LIMIT = "speedLimit";
 
     private boolean notRepeat;
-    private boolean geofenceMinimal;
+    private boolean preferLowest;
     private long minimalDuration;
 
-    public OverspeedEventHandler(long minimalDuration, boolean notRepeat, boolean geofenceMinimal) {
+    public OverspeedEventHandler(long minimalDuration, boolean notRepeat, boolean preferLowest) {
         this.notRepeat = notRepeat;
         this.minimalDuration = minimalDuration;
-        this.geofenceMinimal = geofenceMinimal;
+        this.preferLowest = preferLowest;
     }
 
     private Map<Event, Position> newEvent(DeviceState deviceState, double speedLimit) {
@@ -121,8 +121,8 @@ public class OverspeedEventHandler extends BaseEventHandler {
                 if (geofence != null) {
                     double currentSpeedLimit = geofence.getDouble(ATTRIBUTE_SPEED_LIMIT);
                     if (currentSpeedLimit > 0 && geofenceSpeedLimit == 0
-                            || geofenceMinimal && currentSpeedLimit < geofenceSpeedLimit
-                            || !geofenceMinimal && currentSpeedLimit > geofenceSpeedLimit) {
+                            || preferLowest && currentSpeedLimit < geofenceSpeedLimit
+                            || !preferLowest && currentSpeedLimit > geofenceSpeedLimit) {
                         geofenceSpeedLimit = currentSpeedLimit;
                         overspeedGeofenceId = geofenceId;
                     }
