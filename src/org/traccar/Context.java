@@ -464,7 +464,8 @@ public final class Context {
         motionEventHandler = new MotionEventHandler(tripsConfig);
         overspeedEventHandler = new OverspeedEventHandler(
                 Context.getConfig().getLong("event.overspeed.minimalDuration") * 1000,
-                Context.getConfig().getBoolean("event.overspeed.notRepeat"));
+                Context.getConfig().getBoolean("event.overspeed.notRepeat"),
+                Context.getConfig().getBoolean("event.overspeed.preferLowest"));
     }
 
     public static void init(IdentityManager testIdentityManager) {

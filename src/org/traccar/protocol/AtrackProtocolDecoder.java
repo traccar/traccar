@@ -21,7 +21,6 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
-import org.traccar.helper.DataConverter;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -411,21 +410,16 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         return positions;
     }
 
-    private void sendResponse(Channel channel, SocketAddress remoteAddress) {
-        if (channel != null) {
-            channel.write(ChannelBuffers.wrappedBuffer(DataConverter.parseHex("fe02")), remoteAddress);
-        }
-    }
-
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
-        sendResponse(channel, remoteAddress);
-
         if (buf.getUnsignedShort(buf.readerIndex()) == 0xfe02) {
+            if (channel != null) {
+                channel.write(buf, remoteAddress); // keep-alive message
+            }
             return null;
         } else if (buf.getByte(buf.readerIndex()) == '$') {
             return decodeInfo(channel, remoteAddress, buf.toString(StandardCharsets.US_ASCII).trim());

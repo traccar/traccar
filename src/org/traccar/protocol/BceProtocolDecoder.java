@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,11 +96,11 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
                         position.setLatitude(buf.readFloat());
                         position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
 
-                        int gps = buf.readUnsignedByte();
-                        position.set(Position.KEY_SATELLITES, gps & 0xf);
-                        position.set(Position.KEY_HDOP, gps >> 4);
+                        int status = buf.readUnsignedByte();
+                        position.set(Position.KEY_SATELLITES, BitUtil.to(status, 4));
+                        position.set(Position.KEY_HDOP, BitUtil.from(status, 4));
 
-                        position.setCourse(buf.readUnsignedByte());
+                        position.setCourse(buf.readUnsignedByte() * 2);
                         position.setAltitude(buf.readUnsignedShort());
 
                         position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());

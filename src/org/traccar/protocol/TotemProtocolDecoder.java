@@ -245,12 +245,13 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
 
         int io = parser.nextBinInt();
         if (pattern == PATTERN1) {
-            if (BitUtil.check(io, 0)) {
-                position.set(Position.KEY_ALARM, Position.ALARM_SOS);
-            }
-            for (int i = 1; i <= 4; i++) {
-                position.set(Position.PREFIX_IN + i, BitUtil.check(io, 3 + i));
-            }
+            position.set(Position.KEY_ALARM, BitUtil.check(io, 0) ? Position.ALARM_SOS : null);
+            position.set(Position.PREFIX_IN + 3, BitUtil.check(io, 4));
+            position.set(Position.PREFIX_IN + 4, BitUtil.check(io, 5));
+            position.set(Position.PREFIX_IN + 1, BitUtil.check(io, 6));
+            position.set(Position.PREFIX_IN + 2, BitUtil.check(io, 7));
+            position.set(Position.PREFIX_OUT + 1, BitUtil.check(io, 8));
+            position.set(Position.PREFIX_OUT + 2, BitUtil.check(io, 9));
             position.set(Position.KEY_BATTERY, parser.nextDouble(0) * 0.01);
         } else {
             position.set(Position.KEY_ANTENNA, BitUtil.check(io, 0));
@@ -258,11 +259,12 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             for (int i = 1; i <= 6; i++) {
                 position.set(Position.PREFIX_IN + i, BitUtil.check(io, 1 + i));
             }
+            for (int i = 1; i <= 4; i++) {
+                position.set(Position.PREFIX_OUT + i, BitUtil.check(io, 7 + i));
+            }
             position.set(Position.KEY_BATTERY, parser.nextDouble(0) * 0.1);
         }
-        for (int i = 1; i <= 4; i++) {
-            position.set(Position.PREFIX_OUT + i, BitUtil.check(io, 7 + i));
-        }
+
         position.set(Position.KEY_POWER, parser.nextDouble(0));
         position.set(Position.PREFIX_ADC + 1, parser.next());
 

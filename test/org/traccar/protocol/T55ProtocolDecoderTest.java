@@ -20,6 +20,12 @@ public class T55ProtocolDecoderTest extends ProtocolTest {
                 "358244017671308"));
 
         verifyPosition(decoder, text(
+                "$GPGGA,082350.000,5355.0314,N,01044.1271,E,1,10,0.7,-46.0,M,0.0,M,0.0,0000"));
+
+        verifyPosition(decoder, text(
+                "$GPRMC,082350.000,A,5355.0314,N,01044.1271,E,26.20,184.27,080518,,"));
+
+        verifyPosition(decoder, text(
                 "$GPRMC,192350.000,V,0000.0000,N,00000.0000,E,,,110318,,*12"));
 
         verifyPosition(decoder, text(
