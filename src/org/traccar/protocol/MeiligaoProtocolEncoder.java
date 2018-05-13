@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,13 +27,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.TimeZone;
 
 public class MeiligaoProtocolEncoder extends BaseProtocolEncoder {
-
-    public static final int MSG_TRACK_ON_DEMAND = 0x4101;
-    public static final int MSG_TRACK_BY_INTERVAL = 0x4102;
-    public static final int MSG_MOVEMENT_ALARM = 0x4106;
-    public static final int MSG_OUTPUT_CONTROL = 0x4115;
-    public static final int MSG_TIME_ZONE = 0x4132;
-    public static final int MSG_REBOOT_GPS = 0x4902;
 
     private ChannelBuffer encodeContent(long deviceId, int type, ChannelBuffer content) {
 
@@ -65,25 +58,27 @@ public class MeiligaoProtocolEncoder extends BaseProtocolEncoder {
 
         switch (command.getType()) {
             case Command.TYPE_POSITION_SINGLE:
-                return encodeContent(command.getDeviceId(), MSG_TRACK_ON_DEMAND, content);
+                return encodeContent(command.getDeviceId(), MeiligaoProtocolDecoder.MSG_TRACK_ON_DEMAND, content);
             case Command.TYPE_POSITION_PERIODIC:
                 content.writeShort(command.getInteger(Command.KEY_FREQUENCY) / 10);
-                return encodeContent(command.getDeviceId(), MSG_TRACK_BY_INTERVAL, content);
+                return encodeContent(command.getDeviceId(), MeiligaoProtocolDecoder.MSG_TRACK_BY_INTERVAL, content);
             case Command.TYPE_ENGINE_STOP:
                 content.writeByte(0x01);
-                return encodeContent(command.getDeviceId(), MSG_OUTPUT_CONTROL, content);
+                return encodeContent(command.getDeviceId(), MeiligaoProtocolDecoder.MSG_OUTPUT_CONTROL, content);
             case Command.TYPE_ENGINE_RESUME:
                 content.writeByte(0x00);
-                return encodeContent(command.getDeviceId(), MSG_OUTPUT_CONTROL, content);
+                return encodeContent(command.getDeviceId(), MeiligaoProtocolDecoder.MSG_OUTPUT_CONTROL, content);
             case Command.TYPE_ALARM_GEOFENCE:
                 content.writeShort(command.getInteger(Command.KEY_RADIUS));
-                return encodeContent(command.getDeviceId(), MSG_MOVEMENT_ALARM, content);
+                return encodeContent(command.getDeviceId(), MeiligaoProtocolDecoder.MSG_MOVEMENT_ALARM, content);
             case Command.TYPE_SET_TIMEZONE:
                 int offset = TimeZone.getTimeZone(command.getString(Command.KEY_TIMEZONE)).getRawOffset() / 60000;
                 content.writeBytes(String.valueOf(offset).getBytes(StandardCharsets.US_ASCII));
-                return encodeContent(command.getDeviceId(), MSG_TIME_ZONE, content);
+                return encodeContent(command.getDeviceId(), MeiligaoProtocolDecoder.MSG_TIME_ZONE, content);
+            case Command.TYPE_REQUEST_PHOTO:
+                return encodeContent(command.getDeviceId(), MeiligaoProtocolDecoder.MSG_TAKE_PHOTO, content);
             case Command.TYPE_REBOOT_DEVICE:
-                return encodeContent(command.getDeviceId(), MSG_REBOOT_GPS, content);
+                return encodeContent(command.getDeviceId(), MeiligaoProtocolDecoder.MSG_REBOOT_GPS, content);
             default:
                 Log.warning(new UnsupportedOperationException(command.getType()));
                 break;
