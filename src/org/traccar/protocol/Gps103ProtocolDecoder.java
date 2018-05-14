@@ -65,14 +65,14 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             .expression("([EW]),").optional()
             .number("(d+)(dd.d+),")              // longitude (dddmm.mmmm)
             .expression("([EW])?,").optional()
-            .number("(d+.?d*)?,?")               // speed
-            .number("(d+.?d*)?,?")               // course
-            .number("(d+.?d*)?,?")               // altitude
-            .expression("([^,;]+)?,?")
-            .expression("([^,;]+)?,?")
-            .expression("([^,;]+)?,?")
-            .expression("([^,;]+)?,?")
-            .expression("([^,;]+)?,?")
+            .number("(d+.?d*)?,").optional()     // speed
+            .number("(d+.?d*)?,").optional()     // course
+            .number("(d+.?d*)?,").optional()     // altitude
+            .number("([01])?,").optional()       // ignition
+            .number("([01])?,").optional()       // door
+            .number("(?:(d+.d+)%)?,").optional() // fuel 1
+            .number("(?:(d+.d+)%)?,").optional() // fuel 2
+            .number("(-?d+)?")                   // temperature
             .groupEnd()
             .any()
             .compile();
@@ -168,7 +168,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         } else if (alarm.startsWith("T:")) {
             position.set(Position.PREFIX_TEMP + 1, alarm.substring(2));
         } else if (alarm.startsWith("oil ")) {
-            position.set("oil", alarm.substring(4));
+            position.set(Position.KEY_FUEL_LEVEL, Double.parseDouble(alarm.substring(4)));
         } else if (!position.getAttributes().containsKey(Position.KEY_ALARM) && !alarm.equals("tracker")) {
             position.set(Position.KEY_EVENT, alarm);
         }
@@ -218,9 +218,15 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             position.setCourse(parser.nextDouble(0));
             position.setAltitude(parser.nextDouble(0));
 
-            for (int i = 1; i <= 5; i++) {
-                position.set(Position.PREFIX_IO + i, parser.next());
+            if (parser.hasNext()) {
+                position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
             }
+            if (parser.hasNext()) {
+                position.set(Position.KEY_DOOR, parser.nextInt() == 1);
+            }
+            position.set("fuel1", parser.nextDouble());
+            position.set("fuel2", parser.nextDouble());
+            position.set(Position.PREFIX_TEMP + 1, parser.nextInt());
 
         }
 
