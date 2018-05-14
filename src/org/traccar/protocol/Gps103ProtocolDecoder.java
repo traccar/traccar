@@ -101,7 +101,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         if (value.startsWith("T:")) {
             return Position.ALARM_TEMPERATURE;
         } else if (value.startsWith("oil")) {
-            return Position.ALARM_OIL_LEAK;
+            return Position.ALARM_FUEL_LEAK;
         }
         switch (value) {
             case "tracker":
