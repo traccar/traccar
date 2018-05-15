@@ -243,7 +243,6 @@ public class FuelSensorDataHandler extends BaseDataHandler {
     private void handleAnalogFuelSensorData(Position position,
                                             int sensorId, double fuelLevelChangeThreshold) {
 
-        // Handle sudden drops in voltage.
         Long fuelLevel = (Long) position.getAttributes().get(ADC_1);
 
         handleSensorData(position,
@@ -485,6 +484,8 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
                 fuelEventMetadata.setStartTime(readingsForDevice.get(midPoint).getDeviceTime());
                 fuelEventMetadata.setActivityStartPosition(readingsForDevice.get(midPoint));
+                Log.info("Activity start detected: deviceId" + deviceId + " at: "
+                         + readingsForDevice.get(midPoint).getDeviceTime());
             }
         }
 
@@ -521,6 +522,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             }
             // The start may have been detected as a false positive. In any case, remove after we determine the kind
             // of activity.
+            Log.info("Removing event metadata from list to avoid false positives: " + lookupKey);
             deviceFuelEventMetadata.remove(lookupKey);
         }
 
