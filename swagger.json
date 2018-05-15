@@ -1350,6 +1350,90 @@
                     }
                 }
             }
+        },
+        "/maintenances": {
+            "get": {
+                "summary": "Fetch a list of Maintenances",
+                "description": "Without params, it returns a list of Maintenances the user has access to",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/all"
+                    },
+                    {
+                        "$ref": "#/parameters/userId"
+                    },
+                    {
+                        "$ref": "#/parameters/deviceId"
+                    },
+                    {
+                        "$ref": "#/parameters/groupId"
+                    },
+                    {
+                        "$ref": "#/parameters/refresh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Maintenance"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create a Maintenance",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/Maintenance"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Maintenance"
+                        }
+                    }
+                }
+            }
+        },
+        "/maintenances/{id}": {
+            "put": {
+                "summary": "Update a Maintenance",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/entityId"
+                    },
+                    {
+                        "$ref": "#/parameters/Maintenance"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Maintenance"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete a Maintenance",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/entityId"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -1427,7 +1511,7 @@
                 "readonly": {
                     "type": "boolean"
                 },
-                "admin": {
+                "administrator": {
                     "type": "boolean"
                 },
                 "map": {
@@ -1471,6 +1555,9 @@
                 "limitCommands": {
                     "type": "boolean"
                 },
+                "poiLayer": {
+                    "type": "string"
+                },
                 "token": {
                     "type": "string"
                 },
@@ -1501,6 +1588,9 @@
                     "type": "string"
                 },
                 "mapUrl": {
+                    "type": "string"
+                },
+                "poiLayer": {
                     "type": "string"
                 },
                 "latitude": {
@@ -1557,6 +1647,9 @@
                 },
                 "status": {
                     "type": "string"
+                },
+                "disabled": {
+                    "type": "boolean"
                 },
                 "lastUpdate": {
                     "type": "string",
@@ -1688,6 +1781,9 @@
                 "sms": {
                     "type": "boolean"
                 },
+                "calendarId": {
+                    "type": "integer"
+                },
                 "attributes": {}
             }
         },
@@ -1718,6 +1814,9 @@
                     "type": "integer"
                 },
                 "geofenceId": {
+                    "type": "integer"
+                },
+                "maintenanceId": {
                     "type": "integer"
                 },
                 "attributes": {}
@@ -1937,6 +2036,26 @@
                 },
                 "atributes": {}
             }
+        },
+        "Maintenance": {
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "start": {
+                    "type": "number"
+                },
+                "period": {
+                    "type": "number"
+                },
+                "atributes": {}
+            }
         }
     },
     "parameters": {
@@ -2054,6 +2173,14 @@
             "required": true,
             "schema": {
                 "$ref": "#/definitions/Notification"
+            }
+        },
+        "Maintenance": {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+                "$ref": "#/definitions/Maintenance"
             }
         },
         "deviceIdArray": {
