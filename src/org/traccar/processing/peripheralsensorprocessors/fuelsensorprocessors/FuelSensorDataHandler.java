@@ -128,6 +128,10 @@ public class FuelSensorDataHandler extends BaseDataHandler {
     }
 
     private void updateWithLastAvailable(final Position position) {
+        // Update non fuel data packets with the last known fuel level. This will NOT affect calculating the averages
+        // OR looking for activities. This is done only to make this data available on the client side, when device
+        // metadata is sent thru on first load.
+
         long deviceId = position.getDeviceId();
         if (!previousPositions.containsKey(deviceId)) {
             return;
@@ -337,12 +341,23 @@ public class FuelSensorDataHandler extends BaseDataHandler {
     private Double getAverageValue(Position currentPosition,
                                    List<Position> fuelLevelReadings) {
 
+        // Omit values that are 0s, to avoid skewing the average. This is mostly useful in handling 0s from the
+        // analog sensor, which are noise.
         Double total = (Double) currentPosition.getAttributes().get(Position.KEY_FUEL_LEVEL);
+        double size = total > 0.0 ? 1.0 : 0.0;
         for (Position position : fuelLevelReadings) {
-            total += (Double) position.getAttributes().get(Position.KEY_FUEL_LEVEL);
+            double level = (Double) position.getAttributes().get(Position.KEY_FUEL_LEVEL);
+            if (level > 0.0) {
+                total += level;
+                size += 1.0;
+            }
         }
 
-        return total / (fuelLevelReadings.size() + 1.0);
+        if (size == 0.0) {
+            return 0.0;
+        }
+
+        return total / size;
     }
 
 
@@ -486,7 +501,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             double fuelChangeVolume = fuelEventMetadata.getEndLevel() - fuelEventMetadata.getStartLevel();
             double errorCheckFuelChange = fuelEventMetadata.getErrorCheckEnd() - fuelEventMetadata.getErrorCheckStart();
             double errorCheck = fuelChangeVolume * fuelErrorThreshold;
-            // TODO: If there are individual 0s remove them all.
+
             if (fuelChangeVolume < 0.0 && errorCheckFuelChange < errorCheck) {
                 fuelActivity.setActivityType(FuelActivityType.FUEL_DRAIN);
                 fuelActivity.setChangeVolume(fuelChangeVolume);
