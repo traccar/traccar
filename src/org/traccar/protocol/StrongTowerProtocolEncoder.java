@@ -16,6 +16,10 @@ public class StrongTowerProtocolEncoder extends JsonProtocolEncoder {
 
     @Override
     protected Object encodeCommand(Command command) {
-        return super.encodeCommand(command);
+        String json = (String) super.encodeCommand(command);
+        if (json != null) {
+            return json + "\r\n";
+        }
+        return null;
     }
 }

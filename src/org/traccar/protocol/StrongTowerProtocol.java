@@ -6,7 +6,6 @@
 package org.traccar.protocol;
 
 import java.util.List;
-import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.handler.codec.string.StringDecoder;
@@ -72,17 +71,8 @@ public class StrongTowerProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(new ServerBootstrap(), getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(2048, "\r\n", "\n", ";"));
+                pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(2048, "\r\n", "\n"));
                 //would be nice to have a JsonObjectEncoder of netty 4/5
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectEncoder", new StrongTowerProtocolEncoder());
-                pipeline.addLast("objectDecoder", new StrongTowerProtocolDecoder(StrongTowerProtocol.this));
-            }
-        });
-        serverList.add(new TrackerServer(new ConnectionlessBootstrap(), getName()) {
-            @Override
-            protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("stringEncoder", new StringEncoder());
                 pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("objectEncoder", new StrongTowerProtocolEncoder());

@@ -18,7 +18,7 @@ public class StrongTowerProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_POSITION_PERIODIC);
         command.set(Command.KEY_FREQUENCY, 300);
 
-        assertEquals("{\"id\":1,\"cmd\":\"" + Command.TYPE_POSITION_PERIODIC + "\",\"" + Command.KEY_FREQUENCY + "\":300}", encoder.encodeCommand(command));
+        assertEquals("{\"id\":1,\"cmd\":\"" + Command.TYPE_POSITION_PERIODIC + "\",\"" + Command.KEY_FREQUENCY + "\":300}\r\n", encoder.encodeCommand(command));
 
     }
 
@@ -32,7 +32,7 @@ public class StrongTowerProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_CUSTOM);
         command.set(Command.KEY_DATA, "hello");
 
-        assertEquals("{\"data\":\"hello\",\"id\":1,\"cmd\":\"" + Command.TYPE_CUSTOM + "\"}", encoder.encodeCommand(command));
+        assertEquals("{\"data\":\"hello\",\"id\":1,\"cmd\":\"" + Command.TYPE_CUSTOM + "\"}\r\n", encoder.encodeCommand(command));
 
     }
 

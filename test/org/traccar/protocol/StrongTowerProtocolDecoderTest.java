@@ -13,20 +13,20 @@ public class StrongTowerProtocolDecoderTest extends ProtocolTest {
         StrongTowerProtocolDecoder decoder = new StrongTowerProtocolDecoder(new StrongTowerProtocol());
 
         verifyNotNull(decoder, text(
-                "{\"id\":\"864895030279986\",\"timestamp\":\"2018-05-13 12:00:00\",\"lat\":3.24,\"lon\":6.5,\"speed\":234}")
+                "{\"id\":\"864895030279986\",\"timestamp\":\"2018-05-13 12:00:00\",\"lat\":3.24,\"lon\":6.5,\"speed\":234,\"valid\":true}")
         );
 
         verifyAttributes(decoder, text(
-                "{\"id\":\"864895030279986\",\"timestamp\":\"2018-05-13 12:00:00\",\"lat\":3.24,\"lon\":6.5,\"speed\":234,\"alarm\":\"general\"}")
+                "{\"id\":\"864895030279986\",\"timestamp\":\"2018-05-13 12:00:00\",\"lat\":3.24,\"lon\":6.5,\"speed\":234,\"valid\":true,\"alarm\":\"general\"}")
         );
 
         verifyPosition(decoder, text(
-                "{\"id\":\"864895030279986\",\"timestamp\":\"2018-05-13 12:00:00\",\"lat\":3.24,\"lon\":6.5,\"speed\":234}"),
+                "{\"id\":\"864895030279986\",\"timestamp\":\"2018-05-13 12:00:00\",\"lat\":3.24,\"lon\":6.5,\"speed\":234,\"valid\":true}"),
                 position("2018-05-13 12:00:00.0", true, 3.24, 6.5)
         );
 
         verifyPosition(decoder, text(
-                "{\"id\":\"864895030279986\",\"timestamp\":\"2018-05-13 12:00:00\",\"lat\":3.24,\"lon\":6.5,\"speed\":234}")
+                "{\"id\":\"864895030279986\",\"timestamp\":\"2018-05-13 12:00:00\",\"lat\":3.24,\"lon\":6.5,\"speed\":234,\"valid\":true}")
         );
 
         try {

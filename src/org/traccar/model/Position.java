@@ -46,7 +46,7 @@ public class Position extends Message {
     public static final String KEY_VIDEO = "video";
     public static final String KEY_AUDIO = "audio";
 
-    // The units for the below four KEYs currently vary.
+    // The units for the below five KEYs currently vary.
     // The preferred units of measure are specified in the comment for each.
     public static final String KEY_POWER = "power"; // volts
     public static final String KEY_BATTERY = "battery"; // volts
