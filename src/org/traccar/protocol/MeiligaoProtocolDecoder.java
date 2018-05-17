@@ -319,7 +319,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         position.set("drivingRange", parser.nextDouble());
         position.set(Position.KEY_ODOMETER, parser.nextDouble());
         position.set("singleFuelConsumption", parser.nextDouble());
-        position.set("totalFuelConsumption", parser.nextDouble());
+        position.set(Position.KEY_FUEL_USED, parser.nextDouble());
         position.set(Position.KEY_DTCS, parser.nextInt());
         position.set("hardAccelerationCount", parser.nextInt());
         position.set("hardBrakingCount", parser.nextInt());

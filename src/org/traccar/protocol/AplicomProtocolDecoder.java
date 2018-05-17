@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -557,7 +557,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if ((selector & 0x0040) != 0) {
-            position.set("totalFuelUsed", buf.readUnsignedInt());
+            position.set(Position.KEY_FUEL_USED, buf.readUnsignedInt());
         }
 
         if ((selector & 0x0080) != 0) {
@@ -577,6 +577,58 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             position.set("driver2State", buf.readUnsignedByte());
             position.set("tachographStatus", buf.readUnsignedByte());
             position.set("overspeedCount", buf.readUnsignedByte());
+        }
+
+        if ((selector & 0x0800) != 0) {
+            position.set(Position.KEY_HOURS, buf.readUnsignedInt() * 0.05);
+            position.set(Position.KEY_RPM, buf.readUnsignedShort() * 0.125);
+            position.set(Position.KEY_OBD_SPEED, buf.readUnsignedShort() / 256.0);
+            position.set(Position.KEY_FUEL_USED, buf.readUnsignedInt() * 0.5);
+            position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte() * 0.4);
+        }
+
+        if ((selector & 0x1000) != 0) {
+            position.set("ambientTemperature", buf.readUnsignedShort() * 0.03125 - 273);
+            buf.readUnsignedShort(); // fuel rate
+            position.set("fuelEconomy", buf.readUnsignedShort() / 512.0);
+            position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedInt() * 0.001);
+            buf.readUnsignedByte(); // pto drive engagement
+        }
+
+        if ((selector & 0x2000) != 0) {
+            buf.skipBytes(buf.readUnsignedByte()); // driver identification
+        }
+
+        if ((selector & 0x4000) != 0) {
+            position.set("torque", buf.readUnsignedByte());
+            position.set("brakePressure1", buf.readUnsignedByte() * 8);
+            position.set("brakePressure2", buf.readUnsignedByte() * 8);
+            position.set("grossWeight", buf.readUnsignedShort() * 10);
+            position.set("exhaustFluid", buf.readUnsignedByte() * 0.4);
+            buf.readUnsignedByte(); // retarder torque mode
+            position.set("retarderTorque", buf.readUnsignedByte());
+            position.set("retarderSelection", buf.readUnsignedByte() * 0.4);
+            buf.skipBytes(8); // tell tale status block 1
+            buf.skipBytes(8); // tell tale status block 2
+            buf.skipBytes(8); // tell tale status block 3
+            buf.skipBytes(8); // tell tale status block 4
+        }
+
+        if ((selector & 0x8000) != 0) {
+            position.set("parkingBrakeStatus", buf.readUnsignedByte());
+            position.set("doorStatus", buf.readUnsignedByte());
+            buf.skipBytes(8); // status per door
+            position.set("alternatorStatus", buf.readUnsignedByte());
+            position.set("selectedGear", buf.readUnsignedByte());
+            position.set("currentGear", buf.readUnsignedByte());
+            buf.skipBytes(4 * 2); // air suspension pressure
+        }
+
+        if ((selector & 0x0400) != 0) {
+            int count = buf.readUnsignedByte();
+            for (int i = 0; i < count; i++) {
+                position.set("axle" + i, buf.readUnsignedShort());
+            }
         }
 
     }

@@ -557,10 +557,10 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_IGNITION, Integer.parseInt(values[index++]) > 0);
         }
         if (BitUtil.check(reportMask, 2)) {
-            position.set("totalVehicleDistance", values[index++]);
+            position.set(Position.KEY_OBD_ODOMETER, values[index++]);
         }
         if (BitUtil.check(reportMask, 3)) {
-            position.set("totalFuelConsumption", Double.parseDouble(values[index++]));
+            position.set(Position.KEY_FUEL_USED, Double.parseDouble(values[index++]));
         }
         if (BitUtil.check(reportMask, 5) && !values[index++].isEmpty()) {
             position.set(Position.KEY_RPM, Integer.parseInt(values[index - 1]));
