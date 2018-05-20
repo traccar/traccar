@@ -21,10 +21,11 @@ public final class PushNotifications {
 
     public void sendEventNotification(Set<String> clientTokens,
                                       String messageTitle,
-                                      String messageBody) {
+                                      String messageBody,
+                                      int ttl) {
         try {
             for (String clientToken : clientTokens) {
-                PushNotificationHelper.sendPushNotification(clientToken, messageTitle, messageBody);
+                PushNotificationHelper.sendPushNotification(clientToken, messageTitle, messageBody, ttl);
             }
         } catch (Exception e) {
             Log.error("ERROR ON SEND: " + e.getMessage());

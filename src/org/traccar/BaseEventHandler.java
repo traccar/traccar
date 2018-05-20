@@ -32,7 +32,7 @@ public abstract class BaseEventHandler extends BaseDataHandler {
             }
 
             if (Context.getFcmPushNotificationManager() != null) {
-                Context.getNotificationManager().updateEvents(events);
+                Context.getFcmPushNotificationManager().updateGenericEvents(events);
             }
         }
 

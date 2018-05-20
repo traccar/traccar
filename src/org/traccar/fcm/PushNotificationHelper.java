@@ -14,11 +14,12 @@ import java.net.URL;
 public final class PushNotificationHelper {
     private static final String FCM_SERVER_TOKEN = Context.getConfig().getString("fcm.servertoken");
     private static final String FCM_URL = Context.getConfig().getString("fcm.url");
+    private static final boolean FCM_DRY_RUN = Context.getConfig().getBoolean("fcm.dry_run");
 
     private PushNotificationHelper() {
     }
 
-    public static void sendPushNotification(String deviceToken, String title, String body) throws IOException {
+    public static void sendPushNotification(String deviceToken, String title, String body, int ttl) throws IOException {
 
         URL url = new URL(FCM_URL);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -31,34 +32,37 @@ public final class PushNotificationHelper {
         conn.setRequestProperty("Authorization", "key=" + FCM_SERVER_TOKEN);
         conn.setRequestProperty("Content-Type", "application/json");
 
-        String notificationJsonString = buildNotificationJsonString(deviceToken, title, body);
+        String notificationJsonString = buildNotificationJsonString(deviceToken, title, body, ttl);
 
         try {
-            OutputStreamWriter wr = new OutputStreamWriter(
-                    conn.getOutputStream());
-            wr.write(notificationJsonString);
-            wr.flush();
+            Log.debug("Sending FCM notification: " + notificationJsonString);
 
-            BufferedReader br = new BufferedReader(new InputStreamReader(
-                    (conn.getInputStream())));
+            OutputStreamWriter writerStream = new OutputStreamWriter(conn.getOutputStream());
+            writerStream.write(notificationJsonString);
+            writerStream.flush();
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            StringBuilder fcmResult = new StringBuilder();
+            fcmResult.append("Result from FCM: ");
 
             String resultLine;
-            StringBuilder result = new StringBuilder();
-            result.append("Result from FCM: ");
-            while ((resultLine = br.readLine()) != null) {
-                result.append('\n' + resultLine);
+            while ((resultLine = reader.readLine()) != null) {
+                fcmResult.append(System.lineSeparator());
+                fcmResult.append(resultLine);
             }
-            Log.info(result.toString());
+            Log.debug(fcmResult.toString());
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private static String buildNotificationJsonString(String deviceToken, String title, String body) {
+    private static String buildNotificationJsonString(String deviceToken, String title, String body, int ttl) {
         JSONObject json = new JSONObject();
         json.put("to", deviceToken.trim());
         json.put("priority", "high"); // Important for IoS apps that are closed
+        json.put("dry_run", FCM_DRY_RUN);
+        json.put("time_to_live", ttl);
 
         JSONObject info = new JSONObject();
         info.put("title", title);
