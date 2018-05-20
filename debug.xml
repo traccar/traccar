@@ -15,18 +15,26 @@
     <entry key='geocoder.enable'>false</entry>
     <entry key='logger.file'>target/tracker-server.log</entry>
 
+    <!-- FCM Entries -->
+    <entry key="fcm.dry_run">true</entry>
+    <entry key="fcm.event.generic.ttl">1800</entry> <!-- Half hour -->
+    <entry key="fcm.event.fuel.ttl">86400</entry> <!-- 24 hours -->
+
     <entry key='coordinates.filter'>true</entry>
     <entry key='coordinates.minError'>20</entry>
 
     <!-- Peripheral sensor processing entries-->
     <entry key='processing.peripheralSensorData.enable'>true</entry>
-    <entry key='processing.peripheralSensorData.minValuesForMovingAverage'>9</entry>
     <entry key='processing.peripheralSensorData.messageFrequency'>30</entry>
     <entry key='processing.peripheralSensorData.hoursOfDataToLoad'>24</entry>
-    <entry key='processing.peripheralSensorData.maxValuesForAlerts'>27</entry>
-    <entry key='processing.peripheralSensorData.storedEventLookAroundSeconds'>450</entry>
-    <entry key='processing.peripheralSensorData.currentEventLookBackSeconds'>900</entry>
-    <entry key='processing.peripheralSensorData.fuelLevelChangeThresholdLitersDigital'>3.00</entry>
+    <entry key='processing.peripheralSensorData.minHoursOfDataInMemory'>24</entry>
+    <entry key='processing.peripheralSensorData.storedEventLookAroundSeconds'>300</entry>
+    <entry key='processing.peripheralSensorData.currentEventLookBackSeconds'>300</entry>
+
+    <entry key='processing.peripheralSensorData.minValuesForMovingAverage'>9</entry>
+    <entry key='processing.peripheralSensorData.maxValuesForAlerts'>9</entry>
+    <entry key='processing.peripheralSensorData.fuelLevelChangeThresholdLitersDigital'>5.34</entry>
+
     <entry key='processing.peripheralSensorData.fuelLevelChangeThresholdLitersAnalog'>12.00</entry>
     <entry key='processing.peripheralSensorData.fuelErrorThreshold'>0.75</entry>
 

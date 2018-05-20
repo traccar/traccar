@@ -35,12 +35,12 @@ public class FuelSensorDataHandler extends BaseDataHandler {
     private static final String FREQUENCY_PREFIX = "F=";
     private static final String FUEL_PART_PREFIX = "N=";
 
-    public static final int SECONDS_IN_ONE_HOUR = 3600;
-    public static final int MIN_HOURS_OF_DATA_IN_MEMORY = 1;
+    private static final int SECONDS_IN_ONE_HOUR = 3600;
 
     private int minValuesForMovingAvg;
     private int maxInMemoryPreviousPositionsListSize;
     private int hoursOfDataToLoad;
+    private int minHoursOfDataInMemory;
     private int maxValuesForAlerts;
     private int storedEventLookAroundSeconds;
     private int currentEventLookBackSeconds;
@@ -75,10 +75,13 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         minValuesForMovingAvg = Context.getConfig()
                                        .getInteger("processing.peripheralSensorData.minValuesForMovingAverage");
 
-        // If hoursOfDataToLoad = 0, then keep at least MIN_HOURS_OF_DATA_IN_MEMORY hours of data in memory
+        minHoursOfDataInMemory = Context.getConfig()
+                                        .getInteger("processing.peripheralSensorData.minHoursOfDataInMemory");
+
+        // If hoursOfDataToLoad = 0, then keep at least minHoursOfDataInMemory hours of data in memory
         maxInMemoryPreviousPositionsListSize =
                 (SECONDS_IN_ONE_HOUR * (hoursOfDataToLoad > 0
-                        ? hoursOfDataToLoad : MIN_HOURS_OF_DATA_IN_MEMORY)) / messageFrequencyInSeconds;
+                        ? hoursOfDataToLoad : minHoursOfDataInMemory)) / messageFrequencyInSeconds;
 
         maxValuesForAlerts = Context.getConfig()
                                     .getInteger("processing.peripheralSensorData.maxValuesForAlerts");
@@ -468,13 +471,6 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         if (previousFuelLevelInfo == null) {
             Log.debug("Null previousFuelLevelInfo - deviceID: " + deviceId
                      + " sensorId: " + sensorId);
-
-            Log.debug("fuel calibration: ");
-            fuelSensorCalibration.ifPresent(fuelSensorCalibration1 -> fuelSensorCalibration1
-                    .getSensorPointsMap()
-                    .entrySet().forEach(e -> Log.debug(e.getKey() + " -> " + e.getValue())));
-
-
             return Optional.empty();
         }
 
@@ -487,25 +483,11 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                     ? ((sensorFuelLevelPoints - previousPoint) / currentAveragePointsPerLitre) + previousFuelLevel
                     : 0.0;
 
-            Log.debug("previousFuelLevelInfo - deviceID: " + deviceId
-                     + " sensorId: " + sensorId
-                     + " reporte sensorFuelLevelPoints" + sensorFuelLevelPoints
-                     + " currentAveragePointsPerLitre: " + currentAveragePointsPerLitre
-                     + " previousPoint: " + previousPoint
-                     + " previousFuelLevel: " + previousFuelLevel
-                     + " fuelLevel " + fuelLevel);
-
-            Log.debug("fuel calibration: ");
-            fuelSensorCalibration.ifPresent(fuelSensorCalibration1 -> fuelSensorCalibration1
-                    .getSensorPointsMap()
-                    .entrySet().forEach(e -> Log.debug(e.getKey() + " -> " + e.getValue().getFuelLevel()
-                                                      + " , " + e.getValue().getPointsPerLitre())));
-
             return Optional.of(fuelLevel);
         } catch (Exception ex) {
             Log.debug("Null previousFuelLevelInfo - deviceID: " + deviceId
                      + " sensorId: " + sensorId
-                    + " reporte sensorFuelLevelPoints" + sensorFuelLevelPoints);
+                    + " reported sensorFuelLevelPoints" + sensorFuelLevelPoints);
 
             Log.debug("fuel calibration: ");
             fuelSensorCalibration.ifPresent(fuelSensorCalibration1 -> fuelSensorCalibration1
