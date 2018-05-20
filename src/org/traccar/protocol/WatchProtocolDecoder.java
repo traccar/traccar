@@ -242,11 +242,16 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
         } else if (type.equals("UD") || type.equals("UD2") || type.equals("UD3")
                 || type.equals("AL") || type.equals("WT")) {
 
+            Position position = decodePosition(deviceSession, buf.toString(StandardCharsets.US_ASCII));
+
             if (type.equals("AL")) {
+                if (position != null) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+                }
                 sendResponse(channel, id, index, "AL");
             }
 
-            return decodePosition(deviceSession, buf.toString(StandardCharsets.US_ASCII));
+            return position;
 
         } else if (type.equals("TKQ")) {
 
@@ -268,7 +273,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
                     position.set("pressureHigh", values[valueIndex++]);
                     position.set("pressureLow", values[valueIndex++]);
                 }
-                position.set("pulse", values[valueIndex]);
+                position.set(Position.KEY_HEART_RATE, Integer.parseInt(values[valueIndex]));
 
                 return position;
 

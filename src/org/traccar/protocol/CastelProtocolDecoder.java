@@ -91,6 +91,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
     public static final short MSG_SC_GPS_SLEEP = 0x4009;
     public static final short MSG_SC_FUEL = 0x400E;
     public static final short MSG_SC_AGPS_REQUEST = 0x5101;
+    public static final short MSG_SC_QUERY_RESPONSE = (short) 0xA002;
     public static final short MSG_SC_CURRENT_LOCATION = (short) 0xB001;
 
     public static final short MSG_CC_LOGIN = 0x4001;
@@ -272,7 +273,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodeSc(
             Channel channel, SocketAddress remoteAddress, ChannelBuffer buf,
-            int version, ChannelBuffer id, int type, DeviceSession deviceSession) {
+            int version, ChannelBuffer id, short type, DeviceSession deviceSession) {
 
         if (type == MSG_SC_HEARTBEAT) {
 
@@ -395,6 +396,28 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
 
             return position;
 
+        } else if (type == MSG_SC_QUERY_RESPONSE) {
+
+            Position position = createPosition(deviceSession);
+
+            buf.readUnsignedShort(); // index
+            buf.readUnsignedByte(); // response count
+            buf.readUnsignedByte(); // response index
+
+            int failureCount = buf.readUnsignedByte();
+            for (int i = 0; i < failureCount; i++) {
+                buf.readUnsignedShort(); // tag
+            }
+
+            int successCount = buf.readUnsignedByte();
+            for (int i = 0; i < successCount; i++) {
+                buf.readUnsignedShort(); // tag
+                position.set(Position.KEY_RESULT,
+                        buf.readBytes(buf.readUnsignedShort()).toString(StandardCharsets.US_ASCII));
+            }
+
+            return position;
+
         }
 
         return null;
@@ -402,7 +425,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodeCc(
             Channel channel, SocketAddress remoteAddress, ChannelBuffer buf,
-            int version, ChannelBuffer id, int type, DeviceSession deviceSession) {
+            int version, ChannelBuffer id, short type, DeviceSession deviceSession) {
 
         if (type == MSG_CC_HEARTBEAT) {
 
@@ -459,7 +482,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodeMpip(
             Channel channel, SocketAddress remoteAddress, ChannelBuffer buf,
-            int version, ChannelBuffer id, int type, DeviceSession deviceSession) {
+            int version, ChannelBuffer id, short type, DeviceSession deviceSession) {
 
         if (type == 0x4001) {
 
@@ -513,7 +536,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
         }
 
         ChannelBuffer id = buf.readBytes(20);
-        int type = ChannelBuffers.swapShort(buf.readShort());
+        short type = ChannelBuffers.swapShort(buf.readShort());
 
         DeviceSession deviceSession = getDeviceSession(
                 channel, remoteAddress, id.toString(StandardCharsets.US_ASCII).trim());

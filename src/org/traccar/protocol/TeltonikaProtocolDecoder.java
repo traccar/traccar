@@ -141,6 +141,16 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             case 80:
                 position.set("workMode", readValue(buf, length, false));
                 break;
+            case 129:
+            case 130:
+            case 131:
+            case 132:
+            case 133:
+            case 134:
+                String driver = id == 129 || id == 132 ? "" : position.getString("driver1");
+                position.set("driver" + (id >= 132 ? 2 : 1),
+                        driver + buf.readBytes(length).toString(StandardCharsets.US_ASCII).trim());
+                break;
             case 179:
                 position.set(Position.PREFIX_OUT + 1, readValue(buf, length, false) == 1);
                 break;
@@ -152,6 +162,29 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 break;
             case 182:
                 position.set(Position.KEY_HDOP, readValue(buf, length, false) * 0.1);
+                break;
+            case 236:
+                if (readValue(buf, length, false) == 1) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+                }
+                break;
+            case 237:
+                position.set(Position.KEY_MOTION, readValue(buf, length, false) == 0);
+                break;
+            case 238:
+                switch ((int) readValue(buf, length, false)) {
+                    case 1:
+                        position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+                        break;
+                    case 2:
+                        position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+                        break;
+                    case 3:
+                        position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
+                        break;
+                    default:
+                        break;
+                }
                 break;
             case 239:
                 position.set(Position.KEY_IGNITION, readValue(buf, length, false) == 1);

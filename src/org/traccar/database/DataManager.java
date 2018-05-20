@@ -48,6 +48,7 @@ import org.traccar.model.Driver;
 import org.traccar.model.Event;
 import org.traccar.model.Geofence;
 import org.traccar.model.Group;
+import org.traccar.model.Maintenance;
 import org.traccar.model.ManagedUser;
 import org.traccar.model.Notification;
 import org.traccar.model.FCMPushNotificationType;
@@ -193,19 +194,19 @@ public class DataManager {
 
     public static String constructPermissionQuery(String action, Class<?> owner, Class<?> property) {
         switch (action) {
-        case ACTION_SELECT_ALL:
-            return "SELECT " + makeNameId(owner) + ", " + makeNameId(property) + " FROM "
-                    + getPermissionsTableName(owner, property);
-        case ACTION_INSERT:
-            return "INSERT INTO " + getPermissionsTableName(owner, property)
-                    + " (" + makeNameId(owner) + ", " + makeNameId(property) + ") VALUES (:"
-                    + makeNameId(owner) + ", :" + makeNameId(property) + ")";
-        case ACTION_DELETE:
-            return "DELETE FROM " + getPermissionsTableName(owner, property)
-                    + " WHERE " + makeNameId(owner) + " = :" + makeNameId(owner)
-                    + " AND " + makeNameId(property) + " = :" + makeNameId(property);
-        default:
-            throw new IllegalArgumentException("Unknown action");
+            case ACTION_SELECT_ALL:
+                return "SELECT " + makeNameId(owner) + ", " + makeNameId(property) + " FROM "
+                        + getPermissionsTableName(owner, property);
+            case ACTION_INSERT:
+                return "INSERT INTO " + getPermissionsTableName(owner, property)
+                        + " (" + makeNameId(owner) + ", " + makeNameId(property) + ") VALUES (:"
+                        + makeNameId(owner) + ", :" + makeNameId(property) + ")";
+            case ACTION_DELETE:
+                return "DELETE FROM " + getPermissionsTableName(owner, property)
+                        + " WHERE " + makeNameId(owner) + " = :" + makeNameId(owner)
+                        + " AND " + makeNameId(property) + " = :" + makeNameId(property);
+            default:
+                throw new IllegalArgumentException("Unknown action");
         }
     }
 
@@ -443,6 +444,8 @@ public class DataManager {
                 return Calendar.class;
             case "command":
                 return Command.class;
+            case "maintenance":
+                return Maintenance.class;
             case "notification":
                 return Notification.class;
             default:

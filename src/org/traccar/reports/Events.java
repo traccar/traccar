@@ -1,6 +1,6 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
- * Copyright 2016 Andrey Kunitsyn (andrey@traccar.org)
+ * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Geofence;
 import org.traccar.model.Group;
+import org.traccar.model.Maintenance;
 import org.traccar.reports.model.DeviceReport;
 
 public final class Events {
@@ -51,7 +52,10 @@ public final class Events {
             for (Event event : events) {
                 if (all || types.contains(event.getType())) {
                     long geofenceId = event.getGeofenceId();
-                    if (geofenceId == 0 || Context.getGeofenceManager().checkItemPermission(userId, geofenceId)) {
+                    long maintenanceId = event.getMaintenanceId();
+                    if ((geofenceId == 0 || Context.getGeofenceManager().checkItemPermission(userId, geofenceId))
+                            && (maintenanceId == 0
+                            || Context.getMaintenancesManager().checkItemPermission(userId, maintenanceId))) {
                        result.add(event);
                     }
                 }
@@ -67,6 +71,7 @@ public final class Events {
         ArrayList<DeviceReport> devicesEvents = new ArrayList<>();
         ArrayList<String> sheetNames = new ArrayList<>();
         HashMap<Long, String> geofenceNames = new HashMap<>();
+        HashMap<Long, String> maintenanceNames = new HashMap<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
             Collection<Event> events = Context.getDataManager().getEvents(deviceId, from, to);
@@ -75,11 +80,21 @@ public final class Events {
                 Event event = iterator.next();
                 if (all || types.contains(event.getType())) {
                     long geofenceId = event.getGeofenceId();
+                    long maintenanceId = event.getMaintenanceId();
                     if (geofenceId != 0) {
                         if (Context.getGeofenceManager().checkItemPermission(userId, geofenceId)) {
                             Geofence geofence = Context.getGeofenceManager().getById(geofenceId);
                             if (geofence != null) {
                                 geofenceNames.put(geofenceId, geofence.getName());
+                            }
+                        } else {
+                            iterator.remove();
+                        }
+                    } else if (maintenanceId != 0) {
+                        if (Context.getMaintenancesManager().checkItemPermission(userId, maintenanceId)) {
+                            Maintenance maintenance = Context.getMaintenancesManager().getById(maintenanceId);
+                            if (maintenance != null) {
+                                maintenanceNames.put(maintenanceId, maintenance.getName());
                             }
                         } else {
                             iterator.remove();
@@ -109,6 +124,7 @@ public final class Events {
             jxlsContext.putVar("devices", devicesEvents);
             jxlsContext.putVar("sheetNames", sheetNames);
             jxlsContext.putVar("geofenceNames", geofenceNames);
+            jxlsContext.putVar("maintenanceNames", maintenanceNames);
             jxlsContext.putVar("from", from);
             jxlsContext.putVar("to", to);
             ReportUtils.processTemplateWithSheets(inputStream, outputStream, jxlsContext);

@@ -58,4 +58,14 @@ public class DeviceState {
         return overspeedPosition;
     }
 
+    private long overspeedGeofenceId;
+
+    public void setOverspeedGeofenceId(long overspeedGeofenceId) {
+        this.overspeedGeofenceId = overspeedGeofenceId;
+    }
+
+    public long getOverspeedGeofenceId() {
+        return overspeedGeofenceId;
+    }
+
 }

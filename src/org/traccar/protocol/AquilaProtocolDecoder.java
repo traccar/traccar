@@ -17,6 +17,7 @@ package org.traccar.protocol;
 
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -242,7 +243,7 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
             .number("([01]),")                   // charge
             .number("(d+.d+),")                  // power
             .number("(d+.d+),")                  // battery
-            .number("[01],")                     // emergency
+            .number("([01]),")                   // emergency
             .expression("[CO],")                 // tamper
             .number("(d+),")                     // rssi
             .number("(d+),")                     // mcc
@@ -269,7 +270,8 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        String id = parser.next();
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
         if (deviceSession == null) {
             return null;
         }
@@ -278,7 +280,7 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.setValid(parser.nextInt() == 1);
-        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.YMD_HMS, "GMT"));
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS, "GMT"));
         position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
         position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
@@ -294,6 +296,15 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_CHARGE, parser.nextInt() == 1);
         position.set(Position.KEY_POWER, parser.nextDouble());
         position.set(Position.KEY_BATTERY, parser.nextDouble());
+
+        if (parser.nextInt() == 1) {
+            position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+            if (channel != null) {
+                String password = Context.getIdentityManager().lookupAttributeString(
+                        position.getDeviceId(), getProtocolName() + ".language", "aquila123", true);
+                channel.write("#set$" + id + "@" + password + "#EMR_MODE:0*");
+            }
+        }
 
         Network network = new Network();
 

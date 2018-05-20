@@ -26,8 +26,8 @@ public class OverspeedEventHandlerTest  extends BaseTest {
         return dateFormat.parse(time);
     }
 
-    private void testOverspeedWithPosition(boolean notRepeat) throws Exception {
-        OverspeedEventHandler overspeedEventHandler = new OverspeedEventHandler(15000, notRepeat);
+    private void testOverspeedWithPosition(boolean notRepeat, long geofenceId) throws Exception {
+        OverspeedEventHandler overspeedEventHandler = new OverspeedEventHandler(15000, notRepeat, false);
 
         Position position = new Position();
         position.setTime(date("2017-01-01 00:00:00"));
@@ -35,52 +35,58 @@ public class OverspeedEventHandlerTest  extends BaseTest {
         DeviceState deviceState = new DeviceState();
         deviceState.setOverspeedState(false);
 
-        Map<Event, Position> events = overspeedEventHandler.updateOverspeedState(deviceState, position, 40);
+        Map<Event, Position> events = overspeedEventHandler.updateOverspeedState(deviceState, position, 40, geofenceId);
         assertNull(events);
         assertFalse(deviceState.getOverspeedState());
         assertEquals(position, deviceState.getOverspeedPosition());
+        assertEquals(geofenceId, deviceState.getOverspeedGeofenceId());
 
         Position nextPosition = new Position();
         nextPosition.setTime(date("2017-01-01 00:00:10"));
         nextPosition.setSpeed(55);
 
-        events = overspeedEventHandler.updateOverspeedState(deviceState, nextPosition, 40);
+        events = overspeedEventHandler.updateOverspeedState(deviceState, nextPosition, 40, geofenceId);
         assertNull(events);
 
         nextPosition.setTime(date("2017-01-01 00:00:20"));
 
-        events = overspeedEventHandler.updateOverspeedState(deviceState, nextPosition, 40);
+        events = overspeedEventHandler.updateOverspeedState(deviceState, nextPosition, 40, geofenceId);
         assertNotNull(events);
         Event event = events.keySet().iterator().next();
         assertEquals(Event.TYPE_DEVICE_OVERSPEED, event.getType());
         assertEquals(50, event.getDouble("speed"), 0.1);
         assertEquals(40, event.getDouble(OverspeedEventHandler.ATTRIBUTE_SPEED_LIMIT), 0.1);
+        assertEquals(geofenceId, event.getGeofenceId());
 
         assertEquals(notRepeat, deviceState.getOverspeedState());
         assertNull(deviceState.getOverspeedPosition());
+        assertEquals(0, deviceState.getOverspeedGeofenceId());
 
         nextPosition.setTime(date("2017-01-01 00:00:30"));
-        events = overspeedEventHandler.updateOverspeedState(deviceState, nextPosition, 40);
+        events = overspeedEventHandler.updateOverspeedState(deviceState, nextPosition, 40, geofenceId);
         assertNull(events);
         assertEquals(notRepeat, deviceState.getOverspeedState());
 
         if (notRepeat) {
             assertNull(deviceState.getOverspeedPosition());
+            assertEquals(0, deviceState.getOverspeedGeofenceId());
         } else {
             assertNotNull(deviceState.getOverspeedPosition());
+            assertEquals(geofenceId, deviceState.getOverspeedGeofenceId());
         }
 
         nextPosition.setTime(date("2017-01-01 00:00:40"));
         nextPosition.setSpeed(30);
 
-        events = overspeedEventHandler.updateOverspeedState(deviceState, nextPosition, 40);
+        events = overspeedEventHandler.updateOverspeedState(deviceState, nextPosition, 40, geofenceId);
         assertNull(events);
         assertFalse(deviceState.getOverspeedState());
         assertNull(deviceState.getOverspeedPosition());
+        assertEquals(0, deviceState.getOverspeedGeofenceId());
     }
 
     private void testOverspeedWithStatus(boolean notRepeat) throws Exception {
-        OverspeedEventHandler overspeedEventHandler = new OverspeedEventHandler(15000, notRepeat);
+        OverspeedEventHandler overspeedEventHandler = new OverspeedEventHandler(15000, notRepeat, false);
 
         Position position = new Position();
         position.setTime(new Date(System.currentTimeMillis() - 30000));
@@ -99,8 +105,11 @@ public class OverspeedEventHandlerTest  extends BaseTest {
 
     @Test
     public void testOverspeedEventHandler() throws Exception {
-        testOverspeedWithPosition(false);
-        testOverspeedWithPosition(true);
+        testOverspeedWithPosition(false, 0);
+        testOverspeedWithPosition(true, 0);
+        
+        testOverspeedWithPosition(false, 1);
+        testOverspeedWithPosition(true, 1);
 
         testOverspeedWithStatus(false);
         testOverspeedWithStatus(true);

@@ -25,6 +25,7 @@ import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Geofence;
+import org.traccar.model.Maintenance;
 import org.traccar.model.Position;
 
 import java.nio.charset.StandardCharsets;
@@ -48,6 +49,7 @@ public abstract class EventForwarder {
     private static final String KEY_EVENT = "event";
     private static final String KEY_GEOFENCE = "geofence";
     private static final String KEY_DEVICE = "device";
+    private static final String KEY_MAINTENANCE = "maintenance";
     private static final String KEY_USERS = "users";
 
     public final void forwardEvent(Event event, Position position, Set<Long> users) {
@@ -96,6 +98,12 @@ public abstract class EventForwarder {
             Geofence geofence = Context.getGeofenceManager().getById(event.getGeofenceId());
             if (geofence != null) {
                 data.put(KEY_GEOFENCE, geofence);
+            }
+        }
+        if (event.getMaintenanceId() != 0) {
+            Maintenance maintenance = Context.getMaintenancesManager().getById(event.getMaintenanceId());
+            if (maintenance != null) {
+                data.put(KEY_MAINTENANCE, maintenance);
             }
         }
         data.put(KEY_USERS, Context.getUsersManager().getItems(users));

@@ -41,7 +41,10 @@ public class L100FrameDecoder extends FrameDecoder {
         index += 2; // checksum
 
         if (buf.readableBytes() >= index - buf.readerIndex()) {
-            return buf.readBytes(index - buf.readerIndex());
+            buf.skipBytes(2); // header
+            ChannelBuffer frame = buf.readBytes(index - buf.readerIndex() - 2);
+            buf.skipBytes(2); // footer
+            return frame;
         }
 
         return null;

@@ -47,7 +47,8 @@ public class Tk103Protocol extends BaseProtocol {
                 Command.TYPE_REBOOT_DEVICE,
                 Command.TYPE_SET_ODOMETER,
                 Command.TYPE_ENGINE_STOP,
-                Command.TYPE_ENGINE_RESUME);
+                Command.TYPE_ENGINE_RESUME,
+                Command.TYPE_OUTPUT_CONTROL);
     }
 
     @Override

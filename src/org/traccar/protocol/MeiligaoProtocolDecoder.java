@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,11 +30,15 @@ import org.traccar.model.Position;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
+
+    private Map<Byte, ChannelBuffer> photos = new HashMap<>();
 
     public MeiligaoProtocolDecoder(MeiligaoProtocol protocol) {
         super(protocol);
@@ -135,6 +139,19 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_OBD_RT = 0x9901;
     public static final int MSG_OBD_RTA = 0x9902;
 
+    public static final int MSG_TRACK_ON_DEMAND = 0x4101;
+    public static final int MSG_TRACK_BY_INTERVAL = 0x4102;
+    public static final int MSG_MOVEMENT_ALARM = 0x4106;
+    public static final int MSG_OUTPUT_CONTROL = 0x4115;
+    public static final int MSG_TIME_ZONE = 0x4132;
+    public static final int MSG_TAKE_PHOTO = 0x4151;
+    public static final int MSG_UPLOAD_PHOTO = 0x0800;
+    public static final int MSG_UPLOAD_PHOTO_RESPONSE = 0x8801;
+    public static final int MSG_DATA_PHOTO = 0x9988;
+    public static final int MSG_POSITION_IMAGE = 0x9977;
+    public static final int MSG_UPLOAD_COMPLETE = 0x0f80;
+    public static final int MSG_REBOOT_GPS = 0x4902;
+
     private DeviceSession identify(ChannelBuffer buf, Channel channel, SocketAddress remoteAddress) {
         StringBuilder builder = new StringBuilder();
 
@@ -188,7 +205,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
     private String getServer(Channel channel) {
         String server = Context.getConfig().getString(getProtocolName() + ".server");
-        if (server == null) {
+        if (server == null && channel != null) {
             InetSocketAddress address = (InetSocketAddress) channel.getLocalAddress();
             server = address.getAddress().getHostAddress() + ":" + address.getPort();
         }
@@ -302,7 +319,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         position.set("drivingRange", parser.nextDouble());
         position.set(Position.KEY_ODOMETER, parser.nextDouble());
         position.set("singleFuelConsumption", parser.nextDouble());
-        position.set("totalFuelConsumption", parser.nextDouble());
+        position.set(Position.KEY_FUEL_USED, parser.nextDouble());
         position.set(Position.KEY_DTCS, parser.nextInt());
         position.set("hardAccelerationCount", parser.nextInt());
         position.set("hardBrakingCount", parser.nextInt());
@@ -375,20 +392,29 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         int command = buf.readUnsignedShort();
         ChannelBuffer response;
 
-        if (channel != null) {
-            if (command == MSG_LOGIN) {
-                response = ChannelBuffers.wrappedBuffer(new byte[]{0x01});
-                sendResponse(channel, remoteAddress, id, MSG_LOGIN_RESPONSE, response);
-                return null;
-            } else if (command == MSG_HEARTBEAT) {
-                response = ChannelBuffers.wrappedBuffer(new byte[]{0x01});
-                sendResponse(channel, remoteAddress, id, MSG_HEARTBEAT, response);
-                return null;
-            } else if (command == MSG_SERVER) {
-                response = ChannelBuffers.copiedBuffer(getServer(channel), StandardCharsets.US_ASCII);
-                sendResponse(channel, remoteAddress, id, MSG_SERVER, response);
-                return null;
-            }
+        if (command == MSG_LOGIN) {
+            response = ChannelBuffers.wrappedBuffer(new byte[]{0x01});
+            sendResponse(channel, remoteAddress, id, MSG_LOGIN_RESPONSE, response);
+            return null;
+        } else if (command == MSG_HEARTBEAT) {
+            response = ChannelBuffers.wrappedBuffer(new byte[]{0x01});
+            sendResponse(channel, remoteAddress, id, MSG_HEARTBEAT, response);
+            return null;
+        } else if (command == MSG_SERVER) {
+            response = ChannelBuffers.copiedBuffer(getServer(channel), StandardCharsets.US_ASCII);
+            sendResponse(channel, remoteAddress, id, MSG_SERVER, response);
+            return null;
+        } else if (command == MSG_UPLOAD_PHOTO) {
+            byte imageIndex = buf.readByte();
+            photos.put(imageIndex, ChannelBuffers.dynamicBuffer());
+            response = ChannelBuffers.copiedBuffer(new byte[]{imageIndex});
+            sendResponse(channel, remoteAddress, id, MSG_UPLOAD_PHOTO_RESPONSE, response);
+            return null;
+        } else if (command == MSG_UPLOAD_COMPLETE) {
+            byte imageIndex = buf.readByte();
+            response = ChannelBuffers.copiedBuffer(new byte[]{imageIndex, 0, 0});
+            sendResponse(channel, remoteAddress, id, MSG_RETRANSMISSION, response);
+            return null;
         }
 
         DeviceSession deviceSession = identify(id, channel, remoteAddress);
@@ -396,13 +422,26 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        if (command == MSG_RETRANSMISSION) {
+        if (command == MSG_DATA_PHOTO) {
+
+            byte imageIndex = buf.readByte();
+            buf.readUnsignedShort(); // image footage
+            buf.readUnsignedByte(); // total packets
+            buf.readUnsignedByte(); // packet index
+
+            photos.get(imageIndex).writeBytes(buf, buf.readableBytes() - 2 - 2);
+
+            return null;
+
+        } else if (command == MSG_RETRANSMISSION) {
 
             return decodeRetransmission(buf, deviceSession);
 
         } else {
 
             Position position = new Position(getProtocolName());
+
+            position.setDeviceId(deviceSession.getDeviceId());
 
             if (command == MSG_ALARM) {
                 short alarmCode = buf.readUnsignedByte();
@@ -414,11 +453,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
                 }
             } else if (command == MSG_POSITION_LOGGED) {
                 buf.skipBytes(6);
-            }
-
-            position.setDeviceId(deviceSession.getDeviceId());
-
-            if (command == MSG_RFID) {
+            } else if (command == MSG_RFID) {
                 for (int i = 0; i < 15; i++) {
                     long rfid = buf.readUnsignedInt();
                     if (rfid != 0) {
@@ -427,23 +462,33 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.KEY_DRIVER_UNIQUE_ID, card);
                     }
                 }
+            } else if (command == MSG_POSITION_IMAGE) {
+                byte imageIndex = buf.readByte();
+                buf.readUnsignedByte(); // image upload type
+                String uniqueId = Context.getIdentityManager().getById(deviceSession.getDeviceId()).getUniqueId();
+                String file = Context.getMediaManager().writeFile(uniqueId, photos.remove(imageIndex), "jpg");
+                position.set(Position.KEY_IMAGE, file);
             }
 
             String sentence = buf.toString(buf.readerIndex(), buf.readableBytes() - 4, StandardCharsets.US_ASCII);
 
-            if (command == MSG_POSITION || command == MSG_POSITION_LOGGED || command == MSG_ALARM) {
-                return decodeRegular(position, sentence);
-            } else if (command == MSG_RFID) {
-                return decodeRfid(position, sentence);
-            } else if (command == MSG_OBD_RT) {
-                return decodeObd(position, sentence);
-            } else if (command == MSG_OBD_RTA) {
-                return decodeObdA(position, sentence);
+            switch (command) {
+                case MSG_POSITION:
+                case MSG_POSITION_LOGGED:
+                case MSG_ALARM:
+                case MSG_POSITION_IMAGE:
+                    return decodeRegular(position, sentence);
+                case MSG_RFID:
+                    return decodeRfid(position, sentence);
+                case MSG_OBD_RT:
+                    return decodeObd(position, sentence);
+                case MSG_OBD_RTA:
+                    return decodeObdA(position, sentence);
+                default:
+                    return null;
             }
 
         }
-
-        return null;
     }
 
 }

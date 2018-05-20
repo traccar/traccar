@@ -81,9 +81,13 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
             data.writeBytes(content);
 
             ChannelBuffer record = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
+            if (packetType == PT_RESPONSE) {
+                record.writeShort(index);
+                record.writeByte(0); // success
+            }
             record.writeShort(data.readableBytes());
-            record.writeShort(index);
-            record.writeByte(1 << 6); // flags
+            record.writeShort(0);
+            record.writeByte(0); // flags (possibly 1 << 6)
             record.writeByte(serviceType);
             record.writeByte(serviceType);
             record.writeBytes(data);
@@ -113,6 +117,7 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
+        int index = buf.getUnsignedShort(buf.readerIndex() + 5 + 2);
         buf.skipBytes(buf.getUnsignedByte(buf.readerIndex() + 3));
 
         List<Position> positions = new LinkedList<>();
@@ -120,7 +125,7 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
         while (buf.readableBytes() > 2) {
 
             int length = buf.readUnsignedShort();
-            int index = buf.readUnsignedShort();
+            int recordIndex = buf.readUnsignedShort();
             int recordFlags = buf.readUnsignedByte();
 
             if (BitUtil.check(recordFlags, 0)) {
@@ -146,7 +151,7 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
             }
 
             ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
-            response.writeShort(index);
+            response.writeShort(recordIndex);
             response.writeByte(0); // success
             sendResponse(channel, PT_RESPONSE, index, serviceType, MSG_RECORD_RESPONSE, response);
 
@@ -186,7 +191,7 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
 
                     response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
                     response.writeByte(0); // success
-                    sendResponse(channel, PT_APPDATA, index, serviceType, MSG_RESULT_CODE, response);
+                    sendResponse(channel, PT_APPDATA, 0, serviceType, MSG_RESULT_CODE, response);
 
                 } else if (type == MSG_POS_DATA) {
 

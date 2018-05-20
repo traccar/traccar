@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2014 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -170,7 +170,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private Position decodeNew(DeviceSession deviceSession, ChannelBuffer buf, int index) {
+    private Position decodeNew(DeviceSession deviceSession, ChannelBuffer buf, int type, int index) {
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
@@ -218,43 +218,59 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             buf.skipBytes(7); // bss2
         }
 
-        if (buf.readableBytes() >= 2) {
+        if (type == MSG_WARNING) {
+
+            position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
+
+        } else if (type == MSG_REPORT) {
+
+            buf.readUnsignedByte(); // report type
+
+        }
+
+        if (type == MSG_NORMAL || type == MSG_WARNING || type == MSG_REPORT) {
+
             int status = buf.readUnsignedShort();
             position.setValid(BitUtil.check(status, 0));
             if (BitUtil.check(status, 1)) {
                 position.set(Position.KEY_IGNITION, BitUtil.check(status, 2));
             }
             position.set(Position.KEY_STATUS, status);
+
         }
 
-        if (buf.readableBytes() >= 2) {
-            position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
-        }
+        if (type == MSG_NORMAL) {
 
-        if (buf.readableBytes() >= 4) {
-            position.set(Position.PREFIX_ADC + 0, buf.readUnsignedShort());
-            position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
-        }
+            if (buf.readableBytes() >= 2) {
+                position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
+            }
 
-        if (buf.readableBytes() >= 4) {
-            position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
-        }
+            if (buf.readableBytes() >= 4) {
+                position.set(Position.PREFIX_ADC + 0, buf.readUnsignedShort());
+                position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
+            }
 
-        if (buf.readableBytes() >= 4) {
-            buf.readUnsignedShort(); // gsm counter
-            buf.readUnsignedShort(); // gps counter
-        }
+            if (buf.readableBytes() >= 4) {
+                position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+            }
 
-        if (buf.readableBytes() >= 4) {
-            position.set(Position.KEY_STEPS, buf.readUnsignedShort());
-            buf.readUnsignedShort(); // walking time
-        }
+            if (buf.readableBytes() >= 4) {
+                buf.readUnsignedShort(); // gsm counter
+                buf.readUnsignedShort(); // gps counter
+            }
 
-        if (buf.readableBytes() >= 12) {
-            position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedShort() / 256.0);
-            position.set("humidity", buf.readUnsignedShort() * 0.1);
-            position.set("illuminance", buf.readUnsignedInt() / 256.0);
-            position.set("co2", buf.readUnsignedInt());
+            if (buf.readableBytes() >= 4) {
+                position.set(Position.KEY_STEPS, buf.readUnsignedShort());
+                buf.readUnsignedShort(); // walking time
+            }
+
+            if (buf.readableBytes() >= 12) {
+                position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedShort() / 256.0);
+                position.set("humidity", buf.readUnsignedShort() * 0.1);
+                position.set("illuminance", buf.readUnsignedInt() / 256.0);
+                position.set("co2", buf.readUnsignedInt());
+            }
+
         }
 
         return position;
@@ -355,7 +371,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
             } else if (type >= MSG_NORMAL && type <= MSG_OBD_CODE) {
 
-                return decodeNew(deviceSession, buf, index);
+                return decodeNew(deviceSession, buf, type, index);
 
             } else if (type == MSG_HEARTBEAT && buf.readableBytes() >= 2) {
 

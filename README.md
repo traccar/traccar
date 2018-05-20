@@ -1,5 +1,5 @@
 # [Traccar](https://www.traccar.org)
-[![Build Status](https://travis-ci.org/tananaev/traccar.svg?branch=master)](https://travis-ci.org/tananaev/traccar)
+[![Build Status](https://travis-ci.org/traccar/traccar.svg?branch=master)](https://travis-ci.org/tananaev/traccar)
 
 ## Overview
 
@@ -8,8 +8,6 @@ Traccar is open source server for various GPS tracking devices. Project is writt
 ## Build
 
 Please read [build from source documentation](https://www.traccar.org/build/) on the official website.
-
-[Docker documentation](https://www.traccar.org/docker/) is also available of the website.
 
 ## Team
 

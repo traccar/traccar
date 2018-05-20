@@ -53,7 +53,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             .number(",(d+)")                     // imei
             .expression(",([01])")               // ignition
             .number(",(d+)")                     // fuel
-            .number(",(d+)").optional(5)         // battery
+            .number(",(d+)").optional(7)         // battery
             .number("((?:,d+)+)?")               // parameters
             .any()
             .compile();

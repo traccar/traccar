@@ -7,3 +7,5 @@ nbactions.xml
 *.iml
 .DS_Store
 .checkstyle
+test.jar
+README.txt

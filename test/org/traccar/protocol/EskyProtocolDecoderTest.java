@@ -10,6 +10,9 @@ public class EskyProtocolDecoderTest extends ProtocolTest {
 
         EskyProtocolDecoder decoder = new EskyProtocolDecoder(new EskyProtocol());
 
+        verifyPosition(decoder, text(
+                "EO;0;861311006461908;R;6;180420104751;2.97896;101.65091;0.75;320;3398;1;|"));
+
         verifyNull(decoder, text(
                 "EL;1;864906029196626;170822143426;"));
 

@@ -39,6 +39,7 @@ public class Position extends Message {
     public static final String KEY_ODOMETER_TRIP = "tripOdometer"; // meters
     public static final String KEY_HOURS = "hours";
     public static final String KEY_STEPS = "steps";
+    public static final String KEY_HEART_RATE = "heartRate";
     public static final String KEY_INPUT = "input";
     public static final String KEY_OUTPUT = "output";
     public static final String KEY_IMAGE = "image";
@@ -52,6 +53,7 @@ public class Position extends Message {
     public static final String KEY_BATTERY_LEVEL = "batteryLevel"; // percentage
     public static final String KEY_CALIBRATED_FUEL_LEVEL = "calib_fuel"; // liters
     public static final String KEY_FUEL_LEVEL = "fuel"; // liters
+    public static final String KEY_FUEL_USED = "fuelUsed"; // liters
     public static final String KEY_FUEL_CONSUMPTION = "fuelConsumption"; // liters/hour
 
     public static final String KEY_VERSION_FW = "versionFw";
@@ -130,7 +132,7 @@ public class Position extends Message {
     public static final String ALARM_SHOCK = "shock";
     public static final String ALARM_BONNET = "bonnet";
     public static final String ALARM_FOOT_BRAKE = "footBrake";
-    public static final String ALARM_OIL_LEAK = "oilLeak";
+    public static final String ALARM_FUEL_LEAK = "fuelLeak";
     public static final String ALARM_TAMPERING = "tampering";
     public static final String ALARM_REMOVING = "removing";
 

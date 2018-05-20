@@ -116,6 +116,9 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
         decoder.setProtocolType(1);
 
         verifyPosition(decoder, text(
+                "ST910;Location;907510186;552;20180504;23:15:45;3af54e5331;+19.301833;-099.190657;000.246;000.00;1;28462;80;1;0;0423;02;334;05;-215;20051;1;4;100"));
+
+        verifyPosition(decoder, text(
                 "ST910;Alert;485195;20170409;22:37:41;3be0133057;+24.882410;-107.509152;000.070;000.00;1;286734;72;02;295;05;-415;4912;255;10;10"));
 
         verifyPosition(decoder, text(
