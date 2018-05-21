@@ -21,6 +21,7 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
@@ -269,7 +270,15 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             position.setAltitude(parser.nextDouble(0));
         }
 
-        position.set(Position.KEY_STATUS, parser.next());
+        if (parser.hasNext()) {
+            int status = parser.nextHexInt();
+            for (int i = 1; i <= 5; i++) {
+                position.set(Position.PREFIX_OUT + i, BitUtil.check(status, i - 1));
+            }
+            for (int i = 1; i <= 5; i++) {
+                position.set(Position.PREFIX_IN + i, BitUtil.check(status, i - 1 + 8));
+            }
+        }
 
         for (int i = 1; i <= 8; i++) {
             position.set(Position.PREFIX_ADC + i, parser.nextHexInt());
