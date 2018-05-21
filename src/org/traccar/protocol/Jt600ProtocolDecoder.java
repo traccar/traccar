@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,41 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         int degrees = raw / 1000000;
         double minutes = (raw % 1000000) / 10000.0;
         return degrees + minutes / 60;
+    }
+
+    private void decodeStatus(Position position, ChannelBuffer buf) {
+
+        int value = buf.readUnsignedByte();
+
+        position.set(Position.KEY_IGNITION, BitUtil.check(value, 0));
+        position.set(Position.KEY_DOOR, BitUtil.check(value, 6));
+
+        value = buf.readUnsignedByte();
+
+        position.set(Position.KEY_CHARGE, BitUtil.check(value, 0));
+        position.set(Position.KEY_BLOCKED, BitUtil.check(value, 1));
+
+        if (BitUtil.check(value, 2)) {
+            position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+        }
+        if (BitUtil.check(value, 3) || BitUtil.check(value, 4)) {
+            position.set(Position.KEY_ALARM, Position.ALARM_GPS_ANTENNA_CUT);
+        }
+        if (BitUtil.check(value, 4)) {
+            position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+        }
+
+        value = buf.readUnsignedByte();
+
+        if (BitUtil.check(value, 2)) {
+            position.set(Position.KEY_ALARM, Position.ALARM_FATIGUE_DRIVING);
+        }
+        if (BitUtil.check(value, 3)) {
+            position.set(Position.KEY_ALARM, Position.ALARM_TOW);
+        }
+
+        buf.readUnsignedByte(); // reserved
+
     }
 
     private List<Position> decodeBinary(ChannelBuffer buf, Channel channel, SocketAddress remoteAddress) {
@@ -152,7 +187,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
                 int fuel = buf.readUnsignedByte() << 8;
 
-                position.set(Position.KEY_STATUS, buf.readUnsignedInt());
+                decodeStatus(position, buf);
                 position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 1000);
 
                 fuel += buf.readUnsignedByte();
