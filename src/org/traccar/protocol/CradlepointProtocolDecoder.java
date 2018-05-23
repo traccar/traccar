@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,9 +83,9 @@ public class CradlepointProtocolDecoder extends BaseProtocolDecoder {
 
         position.set("carrid", parser.next());
         position.set("serdis", parser.next());
-        position.set("rsrp", parser.next());
-        position.set("dbm", parser.next());
-        position.set("rsrq", parser.next());
+        position.set("rsrp", parser.nextInt());
+        position.set(Position.KEY_RSSI, parser.nextInt());
+        position.set("rsrq", parser.nextInt());
         position.set("ecio", parser.next());
 
         return position;
