@@ -119,9 +119,11 @@ public class Position extends Message {
     public static final String ALARM_ACCIDENT = "accident";
     public static final String ALARM_TOW = "tow";
     public static final String ALARM_IDLE = "idle";
+    public static final String ALARM_HIGH_RPM = "highRpm";
     public static final String ALARM_ACCELERATION = "hardAcceleration";
     public static final String ALARM_BRAKING = "hardBraking";
     public static final String ALARM_CORNERING = "hardCornering";
+    public static final String ALARM_LANE_CHANGE = "laneChange";
     public static final String ALARM_FATIGUE_DRIVING = "fatigueDriving";
     public static final String ALARM_POWER_CUT = "powerCut";
     public static final String ALARM_POWER_RESTORED = "powerRestored";
