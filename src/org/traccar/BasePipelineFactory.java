@@ -131,7 +131,8 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
         distanceHandler = new DistanceHandler(
                 Context.getConfig().getBoolean("coordinates.filter"),
                 Context.getConfig().getInteger("coordinates.minError"),
-                Context.getConfig().getInteger("coordinates.maxError"));
+                Context.getConfig().getInteger("coordinates.maxError"),
+                Context.getConfig().getInteger("coordinates.minErrorStatic", -1));
 
         if (Context.getConfig().getBoolean("processing.remoteAddress.enable")) {
             remoteAddressHandler = new RemoteAddressHandler();
@@ -203,9 +204,9 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             pipeline.addLast("hemisphere", hemisphereHandler);
         }
 
-        if (distanceHandler != null) {
-            pipeline.addLast("distance", distanceHandler);
-        }
+        pipeline.addLast("motion", motionHandler);
+
+        pipeline.addLast("distance", distanceHandler);
 
         if (remoteAddressHandler != null) {
             pipeline.addLast("remoteAddress", remoteAddressHandler);
@@ -219,10 +220,6 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
         if (geocoderHandler != null) {
             pipeline.addLast("geocoder", geocoderHandler);
-        }
-
-        if (motionHandler != null) {
-            pipeline.addLast("motion", motionHandler);
         }
 
         if (copyAttributesHandler != null) {

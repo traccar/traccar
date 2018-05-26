@@ -10,7 +10,7 @@ public class DistanceHandlerTest {
     @Test
     public void testCalculateDistance() throws Exception {
 
-        DistanceHandler distanceHandler = new DistanceHandler(false, 0, 0);
+        DistanceHandler distanceHandler = new DistanceHandler(false, 0, 0, -1);
 
         Position position = distanceHandler.handlePosition(new Position());
 

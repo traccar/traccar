@@ -20,7 +20,7 @@ import org.traccar.model.Position;
 
 public class MotionHandler extends BaseDataHandler {
 
-    private double speedThreshold;
+    private final double speedThreshold;
 
     public MotionHandler(double speedThreshold) {
         this.speedThreshold = speedThreshold;
