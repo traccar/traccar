@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.traccar</groupId>
     <artifactId>traccar</artifactId>
-    <version>3.16-SNAPSHOT</version>
+    <version>3.17-SNAPSHOT</version>
 
     <name>traccar</name>
     <url>https://www.traccar.org</url>
@@ -40,17 +40,17 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>1.4.196</version>
+            <version>1.4.197</version>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.45</version> <!-- Version 6 required Java 8 -->
+            <version>5.1.46</version> <!-- Version 6 required Java 8 -->
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.2.1.jre7</version>
+            <version>42.2.2.jre7</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
@@ -131,7 +131,7 @@
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
-            <version>3.5.5</version>
+            <version>3.6.1</version>
         </dependency>
         <dependency>
             <groupId>javax.mail</groupId>
