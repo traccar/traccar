@@ -295,7 +295,8 @@ public class DataManager {
                     config.getString("database.url"),
                     config.getString("database.user"),
                     config.getString("database.password"),
-                    null, resourceAccessor);
+                    config.getString("database.driver"),
+                    null, null, null, resourceAccessor);
 
             Liquibase liquibase = new Liquibase(
                     config.getString("database.changelog"), resourceAccessor, database);

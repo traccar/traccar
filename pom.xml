@@ -45,7 +45,7 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.45</version> <!-- Version 6 required Java 8 + issue in 46 -->
+            <version>5.1.46</version> <!-- Version 6 required Java 8 -->
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
