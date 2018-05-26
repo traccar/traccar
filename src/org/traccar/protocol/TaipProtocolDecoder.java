@@ -178,7 +178,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.PREFIX_TEMP + 2, parser.nextInt() * 0.01);
         }
 
-        position.setValid(valid != null ? valid : true);
+        position.setValid(valid == null || valid);
 
         if (event != null) {
             position.set(Position.KEY_EVENT, event);

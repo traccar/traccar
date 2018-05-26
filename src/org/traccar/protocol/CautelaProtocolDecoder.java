@@ -51,7 +51,7 @@ public class CautelaProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        String type = parser.next();
+        parser.next(); // type
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
