@@ -25,6 +25,7 @@ import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
+import org.traccar.helper.Log;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
@@ -67,17 +68,21 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
     private void processStatus(Position position, long status) {
 
-        if (!BitUtil.check(status, 0)) {
+        if (!BitUtil.check(status, 17)) {
             position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
         } else if (!BitUtil.check(status, 1)) {
             position.set(Position.KEY_ALARM, Position.ALARM_SOS);
         } else if (!BitUtil.check(status, 2)) {
             position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
-        } else if (!BitUtil.check(status, 19)) {
+        } else if (!BitUtil.check(status, 23)) {
+            position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+        } else if (!BitUtil.check(status, 28)) {
             position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
         }
 
-        position.set(Position.KEY_IGNITION, BitUtil.check(status, 10));
+        position.set(Position.KEY_ARMED, !BitUtil.check(status, 9)); // check this with LK910 tracker
+        position.set(Position.KEY_CHARGE, BitUtil.check(status, 20));
+        position.set(Position.KEY_IGNITION, !BitUtil.check(status, 10));
         position.set(Position.KEY_STATUS, status);
 
     }
@@ -214,9 +219,10 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // mnc
             .number("d+,")                       // gsm delay time
             .number("d+,")                       // count
-            .number("((?:d+,d+,d+,)+)")          // cells
+            .number("((?:d+,d+,-?d+,)+)")        // cells
             .number("(dd)(dd)(dd),")             // date (ddmmyy)
             .number("(x{8})")                    // status
+            .number(",(d+)").optional()          // battery
             .any()
             .compile();
 
@@ -329,6 +335,11 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             for (int i = 0; i < values.length; i++) {
                 position.set(Position.PREFIX_IO + (i + 1), values[i].trim());
             }
+            try {
+                position.set(Position.KEY_BATTERY_LEVEL, decodeBattery(Integer.parseInt(values[values.length - 1])));
+            } catch (Exception e) {
+                Log.warning("Failed parsing battery", e);
+            }
         }
 
         return position;
@@ -369,6 +380,8 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         getLastLocation(position, dateBuilder.getDate());
 
         processStatus(position, parser.nextLong(16, 0));
+
+        position.set(Position.KEY_BATTERY_LEVEL, decodeBattery(parser.nextInt(0)));
 
         return position;
     }
