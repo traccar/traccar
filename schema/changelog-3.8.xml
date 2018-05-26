@@ -121,10 +121,4 @@
     </addColumn>
 
   </changeSet>
-
-  <changeSet author="author" id="changelog-3.8-dropuniquetoken" failOnError="false">
-
-    <dropUniqueConstraint tableName="users" uniqueColumns="token" constraintName="uk_user_token" />
-
-  </changeSet>
 </databaseChangeLog>
