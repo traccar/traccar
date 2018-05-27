@@ -80,4 +80,14 @@ public class FuelEventMetadata {
     public void setActivityEndPosition(final Position activityEndPosition) {
         this.activityEndPosition = activityEndPosition;
     }
+
+    @Override
+    public String toString() {
+        return " startLevel: " + startLevel
+                + " endLevel: " + endLevel
+                + " errorCheckStart: " + errorCheckStart
+                + " errorCheckEnd: " + errorCheckEnd
+                + " startTime: " + startTime
+                + " endTime: " + endTime;
+    }
 }

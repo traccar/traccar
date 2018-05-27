@@ -176,7 +176,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                                                  .firstEntry()
                                                  .getElement()
                                                  .getAttributes()
-                                                 .get(Position.KEY_CALIBRATED_FUEL_LEVEL);
+                                                 .get(Position.KEY_FUEL_LEVEL);
 
         position.set(Position.KEY_FUEL_LEVEL,
                      lastKnownFuelLevelPosition);
@@ -336,7 +336,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                                      fuelErrorThreshold);
 
             if (fuelActivity.getActivityType() != FuelActivity.FuelActivityType.NONE) {
-                Log.debug("FUEL ACTIVITY DETECTED: " + fuelActivity.getActivityType()
+                Log.debug("[FUEL_ACTIVITY]  DETECTED: " + fuelActivity.getActivityType()
                          + " starting at: " + fuelActivity.getActivityStartTime()
                          + " ending at: " + fuelActivity.getActivityEndTime()
                          + " volume: " + fuelActivity.getChangeVolume()
@@ -373,6 +373,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         // analog sensor, which are noise.
         Double total = (Double) currentPosition.getAttributes().get(Position.KEY_CALIBRATED_FUEL_LEVEL);
         double size = total > 0.0 ? 1.0 : 0.0;
+
         for (Position position : fuelLevelReadings) {
             double level = (Double) position.getAttributes().get(Position.KEY_CALIBRATED_FUEL_LEVEL);
             if (level > 0.0 && !Double.isNaN(level)) {
@@ -385,7 +386,13 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             return 0.0;
         }
 
-        return total / size;
+        double avg = total / size;
+
+        Log.debug("[FUEL_ACTIVITY_AVERAGES] deviceId: " + currentPosition.getDeviceId()
+                  + " average: " + avg
+                  + " averages list size: " + fuelLevelReadings.size());
+
+        return avg;
     }
 
 
@@ -414,7 +421,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                                                             .collect(Collectors.toList());
 
             if (listToReturn.size() <= minListSize) {
-                Log.debug("STORED DATA relevant list size: " + listToReturn.size());
+                Log.debug("[RELEVANT_SUBLIST] STORED DATA relevant list size: " + listToReturn.size());
                 return listToReturn;
             }
 
@@ -423,7 +430,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             int listEndIndex = listMidIndex + (minListSize / 2);
 
             List<Position> sublist = listToReturn.subList(listStartIndex, listEndIndex);
-            Log.debug("STORED DATA relevant list size: " + sublist.size());
+            Log.debug("[RELEVANT_SUBLIST] STORED DATA relevant list size: " + sublist.size());
             return sublist;
         }
 
@@ -441,15 +448,21 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                 positionsForSensor.subMultiset(fromPosition, BoundType.OPEN, position, BoundType.CLOSED);
 
         if (positionsSubset.size() <= minListSize) {
-            return positionsForSensor.stream()
-                                     .collect(Collectors.toList());
+            Log.debug("[RELEVANT_SUBLIST] sublist is lesser than "
+                      + minListSize + " returning " + positionsSubset.size());
+            return positionsSubset.stream()
+                                  .collect(Collectors.toList());
         }
 
         int listMaxIndex = positionsSubset.size() - 1;
 
-        return positionsSubset.stream()
-                              .collect(Collectors.toList())
-                              .subList(listMaxIndex - minListSize, listMaxIndex);
+        List<Position> sublistToReturn =  positionsSubset.stream()
+                                                         .collect(Collectors.toList())
+                                                         .subList(listMaxIndex - minListSize, listMaxIndex);
+
+        Log.debug("[RELEVANT_SUBLIST] sublist size: " + sublistToReturn.size());
+
+        return sublistToReturn;
     }
 
     private Optional<Double> getCalibratedFuelLevel(Long deviceId, Integer sensorId, Long sensorFuelLevelPoints) {
@@ -520,39 +533,87 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
         long deviceId = readingsForDevice.get(0).getDeviceId();
         String lookupKey = deviceId + "_" + sensorId;
+        Log.debug("[FUEL_ACTIVITY] deviceId: " + deviceId + "diffInMeans: " + diffInMeans
+                  + " fuelLevelChangeThreshold: " + fuelLevelChangeThreshold
+                  + " diffInMeans > fuelLevelChangeThreshold: " + (diffInMeans > fuelLevelChangeThreshold));
+
         if (diffInMeans > fuelLevelChangeThreshold) {
+
             if (!deviceFuelEventMetadata.containsKey(lookupKey)) {
+
+                Position midPointPosition = readingsForDevice.get(midPoint);
 
                 deviceFuelEventMetadata.put(lookupKey, new FuelEventMetadata());
 
                 FuelEventMetadata fuelEventMetadata = deviceFuelEventMetadata.get(lookupKey);
-                fuelEventMetadata.setStartLevel((double) readingsForDevice.get(midPoint).getAttributes()
+                fuelEventMetadata.setStartLevel((double) midPointPosition.getAttributes()
                                                                           .get(Position.KEY_FUEL_LEVEL));
 
                 fuelEventMetadata.setErrorCheckStart((double) readingsForDevice.get(0)
                                                                                .getAttributes()
                                                                                .get(Position.KEY_FUEL_LEVEL));
 
-                fuelEventMetadata.setStartTime(readingsForDevice.get(midPoint).getDeviceTime());
-                fuelEventMetadata.setActivityStartPosition(readingsForDevice.get(midPoint));
-                Log.debug("Activity start detected: deviceId" + deviceId + " at: "
-                         + readingsForDevice.get(midPoint).getDeviceTime());
+                fuelEventMetadata.setStartTime(midPointPosition.getDeviceTime());
+                fuelEventMetadata.setActivityStartPosition(midPointPosition);
+
+                Log.debug("[FUEL_ACTIVITY_START] Activity start detected: deviceId" + deviceId + " at: "
+                         + midPointPosition.getDeviceTime());
+
+                StringBuilder rawFuelValuesInReadings = new StringBuilder();
+                StringBuilder timestamps = new StringBuilder();
+                readingsForDevice.forEach(p -> {
+                    rawFuelValuesInReadings.append((double) p.getAttributes()
+                                                             .get(Position.KEY_CALIBRATED_FUEL_LEVEL) + ", ");
+                    timestamps.append(p.getDeviceTime());
+                });
+                Log.debug("[FUEL_ACTIVITY_START] rawFuelValues that crossed threshold for deviceId: " + deviceId
+                          + " - " + rawFuelValuesInReadings);
+                Log.debug("[FUEL_ACTIVITY_START] corresponding timestamps: " + timestamps);
+                Log.debug("[FUEL_ACTIVITY_START] Midpoint: "
+                          + midPointPosition.getAttributes()
+                                            .get(Position.KEY_CALIBRATED_FUEL_LEVEL));
+                Log.debug("[FUEL_ACTIVITY_START] metadata: " + fuelEventMetadata);
+
             }
         }
 
         if (diffInMeans < fuelLevelChangeThreshold && deviceFuelEventMetadata.containsKey(lookupKey)) {
+
+            Position midPointPosition = readingsForDevice.get(midPoint);
+
             FuelEventMetadata fuelEventMetadata = deviceFuelEventMetadata.get(lookupKey);
-            fuelEventMetadata.setEndLevel((double) readingsForDevice.get(midPoint).getAttributes()
+            fuelEventMetadata.setEndLevel((double) midPointPosition.getAttributes()
                                                                     .get(Position.KEY_FUEL_LEVEL));
             fuelEventMetadata.setErrorCheckEnd((double) readingsForDevice.get(readingsForDevice.size() - 1)
                                                                          .getAttributes()
                                                                          .get(Position.KEY_FUEL_LEVEL));
-            fuelEventMetadata.setEndTime(readingsForDevice.get(midPoint).getDeviceTime());
-            fuelEventMetadata.setActivityEndPosition(readingsForDevice.get(midPoint));
+            fuelEventMetadata.setEndTime(midPointPosition.getDeviceTime());
+            fuelEventMetadata.setActivityEndPosition(midPointPosition);
 
             double fuelChangeVolume = fuelEventMetadata.getEndLevel() - fuelEventMetadata.getStartLevel();
             double errorCheckFuelChange = fuelEventMetadata.getErrorCheckEnd() - fuelEventMetadata.getErrorCheckStart();
             double errorCheck = fuelChangeVolume * fuelErrorThreshold;
+
+            Log.debug("[FUEL_ACTIVITY_END] Activity end detected: deviceId" + deviceId + " at: "
+                      + midPointPosition.getDeviceTime());
+
+            StringBuilder rawFuelValuesInReadings = new StringBuilder();
+            StringBuilder timestamps = new StringBuilder();
+            readingsForDevice.forEach(p -> {
+                rawFuelValuesInReadings.append((double) p.getAttributes()
+                                                         .get(Position.KEY_CALIBRATED_FUEL_LEVEL) + ", ");
+                timestamps.append(p.getDeviceTime());
+            });
+            Log.debug("[FUEL_ACTIVITY_END] rawFuelValues that crossed threshold for deviceId: " + deviceId
+                      + " - " + rawFuelValuesInReadings);
+            Log.debug("[FUEL_ACTIVITY_END] corresponding timestamps: " + timestamps);
+            Log.debug("[FUEL_ACTIVITY_END] Midpoint: " + midPointPosition.getAttributes()
+                                                                         .get(Position.KEY_CALIBRATED_FUEL_LEVEL));
+            Log.debug("[FUEL_ACTIVITY_END] metadata: " + fuelEventMetadata);
+            Log.debug("[FUEL_ACTIVITY_END] fuelErrorThreshold: " + fuelErrorThreshold);
+            Log.debug("[FUEL_ACTIVITY_END] fuelChangeVolume: " + fuelChangeVolume);
+            Log.debug("[FUEL_ACTIVITY_END] errorCheckFuelChange: " + errorCheckFuelChange);
+            Log.debug("[FUEL_ACTIVITY_END] errorCheck: " + errorCheck);
 
             if (fuelChangeVolume < 0.0 && errorCheckFuelChange < errorCheck) {
                 fuelActivity.setActivityType(FuelActivityType.FUEL_DRAIN);
@@ -573,7 +634,8 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             } else {
                 // The start may have been detected as a false positive. In any case, remove after we determine the kind
                 // of activity.
-                Log.debug("Removing event metadata from list to avoid false positives: " + lookupKey);
+                Log.debug("[FUEL_ACTIVITY] Removing event metadata from list to avoid false positives: "
+                          + lookupKey);
                 deviceFuelEventMetadata.remove(lookupKey);
             }
         }

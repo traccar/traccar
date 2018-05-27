@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class FuelSensorDataHandlerTest {
 
-    @Test
+
     public void testFuelFillActivity() {
 
         long sensorId = 1;
@@ -48,7 +48,7 @@ public class FuelSensorDataHandlerTest {
         assert fuelFills == 1;
     }
 
-    @Test
+
     public void testFuelDrainActivity() {
 
         long sensorId = 1;
