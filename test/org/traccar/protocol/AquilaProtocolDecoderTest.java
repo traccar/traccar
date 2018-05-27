@@ -53,6 +53,11 @@ public class AquilaProtocolDecoderTest extends ProtocolTest {
                 "$$CLIENT_1ZF,12345,20,25.102083,88.130257,180420040816,A,1,F=09F1 t=28 N=060E.0,*92"
         ));
 
+        // [saurako] sample position with values we care about set to true
+        verifyPosition(decoder, text(
+                "$$CLIENT_1NS,170404086,1,24.473482,87.131424,180524230438,A,15,0,5490518,89,12,0.72,0,0,2509,0,1,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,1,0,0,1,0,25332,4062,*02"
+        ));
+
     }
 
     @Test

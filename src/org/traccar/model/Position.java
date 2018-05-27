@@ -135,6 +135,13 @@ public class Position extends Message {
     public static final String ALARM_FUEL_LEAK = "fuelLeak";
     public static final String ALARM_TAMPERING = "tampering";
     public static final String ALARM_REMOVING = "removing";
+    public static final String KEY_CASE_OPEN = "caseOpen";
+    public static final String KEY_OVERSPEED_START = "overspeedStart";
+    public static final String KEY_OVERSPEED_END = "overspeedEnd";
+    public static final String KEY_INTERNAL_BATTERY_LOW = "internalBatteryLow";
+    public static final String KEY_HARD_ACCELERATION = "hardAccelDetect";
+    public static final String KEY_HARD_BRAKING = "hardBrakeDetect";
+    public static final String KEY_EXTERNAL_BATTERY_DISCONNECT = "extBatteryCut";
 
     public Position() {
     }

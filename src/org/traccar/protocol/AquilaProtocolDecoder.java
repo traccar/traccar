@@ -31,6 +31,8 @@ import java.util.regex.Pattern;
 
 public class AquilaProtocolDecoder extends BaseProtocolDecoder {
 
+    public static final int EXTERNAL_BATTERY_DISCONNECT_EVENT_ID = 3;
+
     public AquilaProtocolDecoder(AquilaProtocol protocol) {
         super(protocol);
     }
@@ -103,9 +105,9 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
             .number("(?:d+,){2}")                // reserved
             .number("(d+),")                     // adc 1
             .number("([01]),")                   // di 1
-            .number("[01],")                     // case open
-            .number("[01],")                     // over speed start
-            .number("[01],")                     // over speed end
+            .number("([01]),")                     // case open
+            .number("([01]),")                     // over speed start
+            .number("([01]),")                     // over speed end
             .number("(?:[01],){2}")              // reserved
             .number("[01],")                     // immobilizer
             .number("([01]),")                   // power status
@@ -113,13 +115,13 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
             .number("(?:[01],){2}")              // reserved
             .number("([01]),")                   // ignition
             .number("(?:[01],){6}")              // reserved
-            .number("[01],")                     // low battery
+            .number("([01]),")                     // low battery
             .number("[01],")                     // corner packet
             .number("(?:[01],){4}")              // reserved
             .number("[01],")                     // do 1
             .number("[01],")                     // reserved
-            .number("[01],")                     // hard acceleration
-            .number("[01],")                     // hard braking
+            .number("([01]),")                     // hard acceleration
+            .number("([01]),")                     // hard braking
             .number("(?:[01],){4}")              // reserved
             .number("(d+),")                     // external voltage
             .number("(d+),")                     // internal voltage
@@ -147,7 +149,11 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.set(Position.KEY_EVENT, parser.nextInt(0));
+        int event = parser.nextInt(0);
+        position.set(Position.KEY_EVENT, event);
+        if (event == EXTERNAL_BATTERY_DISCONNECT_EVENT_ID) {
+            position.set(Position.KEY_EXTERNAL_BATTERY_DISCONNECT, true);
+        }
 
         position.setLatitude(parser.nextDouble(0));
         position.setLongitude(parser.nextDouble(0));
@@ -192,7 +198,7 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
             String dtcs = parser.next();
             position.set(Position.KEY_DTCS, dtcs.substring(1, dtcs.length() - 1).replace('|', ' '));
 
-        } else if (parser.hasNext(10)) {
+        } else if (parser.hasNext(16)) {
 
             position.setCourse(parser.nextInt(0));
 
@@ -200,9 +206,15 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_HDOP, parser.nextDouble(0));
             position.set(Position.PREFIX_ADC + 1, parser.nextInt(0));
             position.set(Position.PREFIX_IN + 1, parser.nextInt(0));
-            position.set(Position.KEY_CHARGE, parser.next().equals("1"));
+            position.set(Position.KEY_CASE_OPEN, parser.nextInt(0) == 1); // case open
+            position.set(Position.KEY_OVERSPEED_START, parser.nextInt(0) == 1); // over speed start
+            position.set(Position.KEY_OVERSPEED_END, parser.nextInt(0) == 1); // over speed end
+            position.set(Position.KEY_CHARGE, parser.next().equals("1")); // power status -> 1 = internal battery
             position.set(Position.PREFIX_IN + 2, parser.nextInt(0));
             position.set(Position.KEY_IGNITION, parser.nextInt(0) == 1);
+            position.set(Position.KEY_INTERNAL_BATTERY_LOW, parser.nextInt(0) == 1); // 1 == internal battery low
+            position.set(Position.KEY_HARD_ACCELERATION, parser.nextInt(0) == 1); // 1 =- hard acceleration detected
+            position.set(Position.KEY_HARD_BRAKING, parser.nextInt(0) == 1); // 1 == hard braking detected
             position.set(Position.KEY_POWER, parser.nextInt(0));
             position.set(Position.KEY_BATTERY, parser.nextInt(0));
 

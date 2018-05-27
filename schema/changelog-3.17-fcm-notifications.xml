@@ -69,12 +69,12 @@
             <column name="notificationString" value="ignition has been switched off" />
         </insert>
         <insert tableName="fcmpushnotificationtypes">
-            <column name="evettype" value="fuelDrain" />
+            <column name="eventtype" value="FUEL_DRAIN" />
             <column name="prettyName" value="Fuel Drain" />
             <column name="notificationString" value="Fuel drain detected"/>
         </insert>
         <insert tableName="fcmpushnotificationtypes">
-            <column name="evettype" value="fuelFill" />
+            <column name="eventtype" value="FUEL_FILL" />
             <column name="prettyName" value="Fuel Fill" />
             <column name="notificationString" value="Fuel filling detected"/>
         </insert>
@@ -101,6 +101,46 @@
         <addForeignKeyConstraint baseTableName="fcmpushnotifications" baseColumnNames="userid" constraintName="fk_fcmpushnotifications_userid" referencedTableName="users" referencedColumnNames="id" onDelete="CASCADE" />
         <addForeignKeyConstraint baseTableName="fcmpushnotifications" baseColumnNames="eventtypeid" constraintName="fk_fcmpushnotifications_eventtypeid" referencedTableName="fcmpushnotificationtypes" referencedColumnNames="id" onDelete="CASCADE" />
         <addUniqueConstraint tableName="fcmpushnotifications" columnNames="deviceid, userid, eventtypeid" constraintName="uk_deviceid_userid_eventtypeid" />
-
     </changeSet>
+
+    <changeSet author="saurako" id="changelog-3.17-fcm-notifications-update-alerts">
+        <insert tableName="fcmpushnotificationtypes">
+            <column name="eventtype" value="caseOpen" />
+            <column name="prettyName" value="Case Open" />
+            <column name="notificationString" value="GPS Device Case Opened" />
+        </insert>
+        <insert tableName="fcmpushnotificationtypes">
+            <column name="eventtype" value="overspeedStart" />
+            <column name="prettyName" value="Overspeed Start detected" />
+            <column name="notificationString" value="Overspeed Start detected" />
+        </insert>
+        <insert tableName="fcmpushnotificationtypes">
+            <column name="eventtype" value="overspeedEnd" />
+            <column name="prettyName" value="Overspeed End" />
+            <column name="notificationString" value="Overspeed End detected" />
+        </insert>
+        <insert tableName="fcmpushnotificationtypes">
+            <column name="eventtype" value="internalBatteryLow" />
+            <column name="prettyName" value="Internal Battery Low" />
+            <column name="notificationString" value="GPS Device internal battery is low" />
+        </insert>
+        <insert tableName="fcmpushnotificationtypes">
+            <column name="eventtype" value="hardAcceleration" />
+            <column name="prettyName" value="Hard Acceleration" />
+            <column name="notificationString" value="Hard acceleration detected" />
+        </insert>
+        <insert tableName="fcmpushnotificationtypes">
+            <column name="eventtype" value="hardBraking" />
+            <column name="prettyName" value="Hard Braking" />
+            <column name="notificationString" value="Hard braking detected" />
+        </insert>
+        <insert tableName="fcmpushnotificationtypes">
+            <column name="eventtype" value="extBatteryCut" />
+            <column name="prettyName" value="External Battery Disconnected" />
+            <column name="notificationString" value="External Battery Disconnected" />
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>
+
+

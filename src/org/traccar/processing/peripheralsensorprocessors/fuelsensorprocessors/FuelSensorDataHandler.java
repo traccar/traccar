@@ -8,12 +8,14 @@ import org.traccar.BaseDataHandler;
 import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
+import org.traccar.model.Event;
 import org.traccar.model.PeripheralSensor;
 import org.traccar.model.Position;
 import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.FuelActivity.FuelActivityType;
 import org.traccar.transforms.model.FuelSensorCalibration;
 import org.traccar.transforms.model.SensorPointsMap;
 
+import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Comparator;
@@ -24,6 +26,8 @@ import java.util.Date;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+
+import static org.traccar.Context.getDataManager;
 
 public class FuelSensorDataHandler extends BaseDataHandler {
 
@@ -198,7 +202,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
             try {
                 Collection<Position> devicePositionsInLastDay =
-                        Context.getDataManager().getPositions(device.getId(), hoursAgo, new Date());
+                        getDataManager().getPositions(device.getId(), hoursAgo, new Date());
 
                 for (Position position : devicePositionsInLastDay) {
                     handlePosition(position);
@@ -344,6 +348,20 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                          + ", " + fuelActivity.getActivitystartPosition().getLongitude()
                          + " end lat, long " + fuelActivity.getActivityEndPosition().getLatitude()
                          + ", " + fuelActivity.getActivityEndPosition().getLongitude());
+
+                // Add event to events table
+                Event event = new Event(Event.TYPE_FUEL_FILL, position.getDeviceId(),
+                                        fuelActivity.getActivitystartPosition().getId());
+                event.set("startTime", fuelActivity.getActivityStartTime().getTime());
+                event.set("endTime", fuelActivity.getActivityEndTime().getTime());
+                event.set("volume", fuelActivity.getChangeVolume());
+                event.set("endPositionId", fuelActivity.getActivityEndPosition().getId());
+
+                try {
+                    getDataManager().addObject(event);
+                } catch (SQLException error) {
+                    Log.warning(error);
+                }
 
                 Context.getFcmPushNotificationManager().updateFuelActivity(fuelActivity);
             }

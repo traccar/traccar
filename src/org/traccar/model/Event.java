@@ -64,6 +64,14 @@ public class Event extends Message {
     public static final String TYPE_FUEL_DRAIN = "fuelDrain";
     public static final String TYPE_FUEL_FILL = "fuelFill";
 
+    public static final String TYPE_CASE_OPEN = "caseOpen";
+    public static final String TYPE_OVERSPEED_START = "overspeedStart";
+    public static final String TYPE_OVERSPEED_END = "overspeedEnd";
+    public static final String TYPE_INTERNAL_BATTERY_LOW = "internalBatteryLow";
+    public static final String TYPE_HARD_ACCELERATION = "hardAcceleration";
+    public static final String TYPE_HARD_BRAKING = "hardBraking";
+    public static final String TYPE_EXTERNAL_BATTERY_DISCONNECT = "extBatteryCut";
+
     private Date serverTime;
 
     public Date getServerTime() {
