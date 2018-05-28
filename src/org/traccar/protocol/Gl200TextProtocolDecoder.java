@@ -404,6 +404,16 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private Long parseHours(String hoursString) {
+        if (hoursString != null) {
+            String[] hours = hoursString.split(":");
+            return (long) (Integer.parseInt(hours[0]) * 3600
+                    + (hours.length > 1 ? Integer.parseInt(hours[1]) * 60 : 0)
+                    + (hours.length > 2 ? Integer.parseInt(hours[2]) : 0)) * 1000;
+        }
+        return null;
+    }
+
     private Object decodeInf(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_INF, sentence);
         Position position = initPosition(parser, channel, remoteAddress);
@@ -599,7 +609,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_THROTTLE, Integer.parseInt(values[index - 1]));
         }
         if (BitUtil.check(reportMask, 11)) {
-            position.set(Position.KEY_HOURS, Double.parseDouble(values[index++]));
+            position.set(Position.KEY_HOURS, (long) Double.parseDouble(values[index++]) * 3600000);
         }
         if (BitUtil.check(reportMask, 12)) {
             position.set("drivingHours", Double.parseDouble(values[index++]));
@@ -727,7 +737,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (parser.hasNext()) {
             position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
         }
-        position.set(Position.KEY_HOURS, parser.next());
+        position.set(Position.KEY_HOURS, parseHours(parser.next()));
         position.set(Position.PREFIX_ADC + 1, parser.next());
         position.set(Position.PREFIX_ADC + 2, parser.next());
         position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
@@ -781,7 +791,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_POWER, power * 0.001);
         }
         position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
-        position.set(Position.KEY_HOURS, parser.next());
+        position.set(Position.KEY_HOURS, parseHours(parser.next()));
         position.set(Position.PREFIX_ADC + 1, parser.next());
         position.set(Position.PREFIX_ADC + 2, parser.next());
         position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
@@ -844,7 +854,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         decodeLocation(position, parser);
 
         position.set(Position.KEY_IGNITION, sentence.contains("IGN"));
-        position.set(Position.KEY_HOURS, parser.next());
+        position.set(Position.KEY_HOURS, parseHours(parser.next()));
         position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
 
         decodeDeviceTime(position, parser);
