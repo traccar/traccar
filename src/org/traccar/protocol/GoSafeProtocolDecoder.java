@@ -107,8 +107,9 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
                 }
                 if (index < values.length) {
                     String[] hours = values[index].split("-");
-                    position.set(Position.KEY_HOURS, Integer.parseInt(hours[0])
-                            + Integer.parseInt(hours[0]) / 60.0 + Integer.parseInt(hours[0]) / 3600.0);
+                    position.set(Position.KEY_HOURS, (Integer.parseInt(hours[0]) * 3600
+                            + (hours.length > 1 ? Integer.parseInt(hours[1]) * 60 : 0)
+                            + (hours.length > 2 ? Integer.parseInt(hours[2]) : 0)) * 1000);
                 }
                 break;
             case "ADC":

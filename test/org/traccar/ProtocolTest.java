@@ -268,6 +268,10 @@ public class ProtocolTest extends BaseTest {
             assertTrue(attributes.get(Position.KEY_ROAMING) instanceof Boolean);
         }
 
+        if (attributes.containsKey(Position.KEY_HOURS)) {
+            assertTrue(attributes.get(Position.KEY_HOURS) instanceof Number);
+        }
+
         if (position.getNetwork() != null && position.getNetwork().getCellTowers() != null) {
             for (CellTower cellTower : position.getNetwork().getCellTowers()) {
                 checkInteger(cellTower.getMobileCountryCode(), 0, 999);
