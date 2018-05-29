@@ -29,6 +29,7 @@ import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Log;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -231,7 +232,8 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
 
         if (BitUtil.check(flags, 1)) {
             position.set(Position.KEY_FUEL_CONSUMPTION, new FloatReader().readFloat(buf));
-            position.set(Position.KEY_HOURS, (long) (new FloatReader().readFloat(buf) * 3600000));
+            position.set(
+                    Position.KEY_HOURS, UnitsConverter.millisecondsFromHours(new FloatReader().readFloat(buf)));
             position.set("tank", buf.readUnsignedByte() * 0.4);
         }
 

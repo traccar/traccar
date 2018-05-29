@@ -609,7 +609,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_THROTTLE, Integer.parseInt(values[index - 1]));
         }
         if (BitUtil.check(reportMask, 11)) {
-            position.set(Position.KEY_HOURS, (long) Double.parseDouble(values[index++]) * 3600000);
+            position.set(
+                    Position.KEY_HOURS, UnitsConverter.millisecondsFromHours(Double.parseDouble(values[index++])));
         }
         if (BitUtil.check(reportMask, 12)) {
             position.set("drivingHours", Double.parseDouble(values[index++]));

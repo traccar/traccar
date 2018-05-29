@@ -21,6 +21,7 @@ import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
@@ -255,7 +256,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_FUEL_CONSUMPTION, parser.nextDouble(0));
         Integer hours = parser.nextInt();
         if (hours != null) {
-            position.set(Position.KEY_HOURS, hours * 3600000);
+            position.set(Position.KEY_HOURS, UnitsConverter.millisecondsFromHours(hours));
         }
         position.set(Position.KEY_OBD_SPEED, parser.nextInt(0));
         position.set(Position.KEY_ENGINE_LOAD, parser.next());
