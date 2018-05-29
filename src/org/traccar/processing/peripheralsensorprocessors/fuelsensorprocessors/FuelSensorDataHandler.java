@@ -497,26 +497,26 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         TreeMap<Long, SensorPointsMap> sensorPointsToVolumeMap =
                 new TreeMap<>(fuelSensorCalibration.get().getSensorPointsMap());
 
-        SensorPointsMap previousFuelLevelInfo = sensorPointsToVolumeMap.floorEntry(sensorFuelLevelPoints).getValue();
+        SensorPointsMap nextFuelLevelInfo = sensorPointsToVolumeMap.ceilingEntry(sensorFuelLevelPoints).getValue();
 
-        if (previousFuelLevelInfo == null) {
-            Log.debug("Null previousFuelLevelInfo - deviceID: " + deviceId
+        if (nextFuelLevelInfo == null) {
+            Log.debug("Null nextFuelLevelInfo - deviceID: " + deviceId
                      + " sensorId: " + sensorId);
             return Optional.empty();
         }
 
         try {
-            double currentAveragePointsPerLitre = previousFuelLevelInfo.getPointsPerLitre();
+            double currentAveragePointsPerLitre = nextFuelLevelInfo.getPointsPerLitre();
             long previousPoint = sensorPointsToVolumeMap.floorKey(sensorFuelLevelPoints);
-            long previousFuelLevel = previousFuelLevelInfo.getFuelLevel();
+            long nextFuelLevel = nextFuelLevelInfo.getFuelLevel();
 
             double fuelLevel = currentAveragePointsPerLitre > 0.0
-                    ? ((sensorFuelLevelPoints - previousPoint) / currentAveragePointsPerLitre) + previousFuelLevel
+                    ? ((sensorFuelLevelPoints - previousPoint) / currentAveragePointsPerLitre) + nextFuelLevel
                     : 0.0;
 
             return Optional.of(fuelLevel);
         } catch (Exception ex) {
-            Log.debug("Null previousFuelLevelInfo - deviceID: " + deviceId
+            Log.debug("Null nextFuelLevelInfo - deviceID: " + deviceId
                      + " sensorId: " + sensorId
                     + " reported sensorFuelLevelPoints" + sensorFuelLevelPoints);
 
