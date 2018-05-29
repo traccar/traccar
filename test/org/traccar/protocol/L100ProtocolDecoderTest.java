@@ -11,6 +11,9 @@ public class L100ProtocolDecoderTest extends ProtocolTest {
         L100ProtocolDecoder decoder = new L100ProtocolDecoder(new L100Protocol());
 
         verifyPosition(decoder, text(
+                "ATL861693039769518,$GPRMC,074930.000,A,2838.0112,N,07713.3602,E,0000,223.36,290518,,,A*7E,#01111011000100,0.012689,0,0,2.572415,0,4.015,22,404,4,88,3ad5,0,0.01,1.4_800F_VTS3D3_gen_peri_myn,,internet,00000000,ATL"));
+
+        verifyPosition(decoder, text(
                 "ATL867857039216564,$GPRMC,131101,A,2838.010010,N,7713.354980,E,0,0,240418,,,*09,#00011011000000,0,0,0,10.70,24.31,3.8,0,0,0,0,0ATL"));
 
         verifyPosition(decoder, text(

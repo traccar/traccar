@@ -54,14 +54,15 @@ public class L100ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.?d*|N.C),")             // adc
             .expression("[^,]*,")                // reserved
             .expression("[^,]*,")                // reserved
-            .number("(d+.d+),")                  // odometer
-            .number("(d+.d+),")                  // temperature
-            .number("(d+.d+),")                  // battery
+            .number("(d+.?d*),")                 // odometer
+            .number("(d+.?d*),")                 // temperature
+            .number("(d+.?d*),")                 // battery
             .number("(d+),")                     // rssi
             .number("(d+),")                     // mcc
             .number("(d+),")                     // mnc
             .number("(x+),")                     // lac
             .number("(x+)")                      // cid
+            .any()
             .text("ATL")
             .compile();
 
