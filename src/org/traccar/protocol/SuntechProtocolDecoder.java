@@ -239,7 +239,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         if (hbm) {
 
             if (index < values.length) {
-                position.set(Position.KEY_HOURS, Integer.parseInt(values[index++]));
+                position.set(Position.KEY_HOURS, Integer.parseInt(values[index++]) * 60000);
             }
 
             if (index < values.length) {

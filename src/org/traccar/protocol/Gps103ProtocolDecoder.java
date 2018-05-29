@@ -253,7 +253,10 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_ODOMETER, parser.nextInt(0));
         parser.nextDouble(0); // instant fuel consumption
         position.set(Position.KEY_FUEL_CONSUMPTION, parser.nextDouble(0));
-        position.set(Position.KEY_HOURS, parser.nextInt());
+        Integer hours = parser.nextInt();
+        if (hours != null) {
+            position.set(Position.KEY_HOURS, hours * 3600000);
+        }
         position.set(Position.KEY_OBD_SPEED, parser.nextInt(0));
         position.set(Position.KEY_ENGINE_LOAD, parser.next());
         position.set(Position.KEY_COOLANT_TEMP, parser.nextInt());
