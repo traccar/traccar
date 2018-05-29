@@ -549,7 +549,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if ((selector & 0x0020) != 0) {
-            position.set(Position.KEY_HOURS, UnitsConverter.millisecondsFromHours(buf.readUnsignedInt()));
+            position.set(Position.KEY_HOURS, UnitsConverter.msFromHours(buf.readUnsignedInt()));
             position.set("serviceDistance", buf.readInt());
             position.set("driverActivity", buf.readUnsignedByte());
             position.set(Position.KEY_THROTTLE, buf.readUnsignedByte());

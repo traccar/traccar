@@ -232,8 +232,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
 
         if (BitUtil.check(flags, 1)) {
             position.set(Position.KEY_FUEL_CONSUMPTION, new FloatReader().readFloat(buf));
-            position.set(
-                    Position.KEY_HOURS, UnitsConverter.millisecondsFromHours(new FloatReader().readFloat(buf)));
+            position.set(Position.KEY_HOURS, UnitsConverter.msFromHours(new FloatReader().readFloat(buf)));
             position.set("tank", buf.readUnsignedByte() * 0.4);
         }
 

@@ -72,11 +72,11 @@ public final class UnitsConverter {
         return value * METERS_TO_MILE_RATIO;
     }
 
-    public static long millisecondsFromHours(int value) {
+    public static long msFromHours(long value) {
         return value * MILLISECONDS_TO_HOURS_RATIO;
     }
 
-    public static long millisecondsFromHours(double value) {
+    public static long msFromHours(double value) {
         return (long) (value * MILLISECONDS_TO_HOURS_RATIO);
     }
 

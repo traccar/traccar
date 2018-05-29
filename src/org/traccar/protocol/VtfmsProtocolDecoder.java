@@ -133,7 +133,7 @@ public class VtfmsProtocolDecoder extends BaseProtocolDecoder {
 
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
 
-        position.set(Position.KEY_HOURS, UnitsConverter.millisecondsFromHours(parser.nextInt()));
+        position.set(Position.KEY_HOURS, UnitsConverter.msFromHours(parser.nextInt()));
         position.set("idleHours", parser.nextInt());
         position.set(Position.KEY_ODOMETER, parser.nextInt() * 100);
         position.set(Position.KEY_CHARGE, parser.next().equals("1"));
