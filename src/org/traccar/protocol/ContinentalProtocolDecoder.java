@@ -94,7 +94,7 @@ public class ContinentalProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (buf.readableBytes() > 4) {
-                position.set(Position.KEY_HOURS, buf.readUnsignedInt());
+                position.set(Position.KEY_HOURS, UnitsConverter.msFromHours(buf.readUnsignedInt()));
             }
 
             return position;
