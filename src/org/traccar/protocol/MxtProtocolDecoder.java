@@ -145,7 +145,7 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (BitUtil.check(infoGroups, 4)) {
-                position.set(Position.KEY_HOURS, buf.readUnsignedInt() * 60000);
+                position.set(Position.KEY_HOURS, UnitsConverter.msFromMinutes(buf.readUnsignedInt()));
             }
 
             if (BitUtil.check(infoGroups, 5)) {
