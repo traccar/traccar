@@ -66,13 +66,13 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             .expression("([EW]),").optional()
             .number("(d+)(dd.d+),")              // longitude (dddmm.mmmm)
             .expression("([EW])?,").optional()
-            .number("(d+.?d*)?,").optional()     // speed
-            .number("(d+.?d*)?,").optional()     // course
-            .number("(d+.?d*)?,").optional()     // altitude
-            .number("([01])?,").optional()       // ignition
-            .number("([01])?,").optional()       // door
-            .number("(?:(d+.d+)%)?,").optional() // fuel 1
-            .number("(?:(d+.d+)%)?,").optional() // fuel 2
+            .number("(d+.?d*)?").optional()      // speed
+            .number(",(d+.?d*)?").optional()     // course
+            .number(",(d+.?d*)?").optional()     // altitude
+            .number(",([01])?").optional()       // ignition
+            .number(",([01])?").optional()       // door
+            .number(",(?:(d+.d+)%)?").optional() // fuel 1
+            .number(",(?:(d+.d+)%)?").optional() // fuel 2
             .number("(-?d+)?")                   // temperature
             .groupEnd()
             .any()
