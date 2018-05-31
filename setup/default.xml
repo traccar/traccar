@@ -24,6 +24,7 @@
     <entry key='event.enable'>true</entry>
     <entry key='event.ignoreDuplicateAlerts'>true</entry>
     <entry key='processing.computedAttributes.enable'>true</entry>
+    <entry key='processing.engineHours.enable'>true</entry>
 
     <entry key='media.path'>./media</entry>
 

@@ -44,12 +44,15 @@ public final class Summary {
             Position firstPosition = null;
             Position previousPosition = null;
             double speedSum = 0;
+            boolean engineHoursEnabled = Context.getConfig().getBoolean("processing.engineHours.enable");
             for (Position position : positions) {
                 if (firstPosition == null) {
                     firstPosition = position;
                 }
-                if (previousPosition != null && position.getBoolean(Position.KEY_IGNITION)
+                if (engineHoursEnabled && previousPosition != null
+                        && position.getBoolean(Position.KEY_IGNITION)
                         && previousPosition.getBoolean(Position.KEY_IGNITION)) {
+                    // Temporary fallback for old data, to be removed in May 2019
                     result.addEngineHours(position.getFixTime().getTime()
                             - previousPosition.getFixTime().getTime());
                 }
@@ -62,6 +65,13 @@ public final class Summary {
             result.setDistance(ReportUtils.calculateDistance(firstPosition, previousPosition, !ignoreOdometer));
             result.setAverageSpeed(speedSum / positions.size());
             result.setSpentFuel(ReportUtils.calculateFuel(firstPosition, previousPosition));
+
+            if (engineHoursEnabled
+                    && firstPosition.getAttributes().containsKey(Position.KEY_HOURS)
+                    && previousPosition.getAttributes().containsKey(Position.KEY_HOURS)) {
+                result.setEngineHours(
+                        previousPosition.getLong(Position.KEY_HOURS) - firstPosition.getLong(Position.KEY_HOURS));
+            }
 
             if (!ignoreOdometer
                     && firstPosition.getDouble(Position.KEY_ODOMETER) != 0

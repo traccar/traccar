@@ -51,6 +51,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
     private FilterHandler filterHandler;
     private DistanceHandler distanceHandler;
+    private EngineHoursHandler engineHoursHandler;
     private RemoteAddressHandler remoteAddressHandler;
     private MotionHandler motionHandler;
     private GeocoderHandler geocoderHandler;
@@ -155,6 +156,10 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
         motionHandler = new MotionHandler(Context.getTripsConfig().getSpeedThreshold());
 
+        if (Context.getConfig().getBoolean("processing.engineHours.enable")) {
+            engineHoursHandler = new EngineHoursHandler();
+        }
+
         if (Context.getConfig().hasKey("location.latitudeHemisphere")
                 || Context.getConfig().hasKey("location.longitudeHemisphere")) {
             hemisphereHandler = new HemisphereHandler();
@@ -223,6 +228,10 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
         if (motionHandler != null) {
             pipeline.addLast("motion", motionHandler);
+        }
+
+        if (engineHoursHandler != null) {
+            pipeline.addLast("engineHours", engineHoursHandler);
         }
 
         if (copyAttributesHandler != null) {
