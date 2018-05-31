@@ -156,7 +156,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
         motionHandler = new MotionHandler(Context.getTripsConfig().getSpeedThreshold());
 
-        if (Context.getConfig().getBoolean("engineHours.enable")) {
+        if (Context.getConfig().getBoolean("processing.engineHours.enable")) {
             engineHoursHandler = new EngineHoursHandler();
         }
 

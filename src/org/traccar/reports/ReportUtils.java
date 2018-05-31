@@ -266,7 +266,8 @@ public final class ReportUtils {
         if (startStop.getAttributes().containsKey(Position.KEY_HOURS)
                 && endStop.getAttributes().containsKey(Position.KEY_HOURS)) {
             engineHours = endStop.getLong(Position.KEY_HOURS) - startStop.getLong(Position.KEY_HOURS);
-        } else if (Context.getConfig().getBoolean("engineHours.enable")) {
+        } else if (Context.getConfig().getBoolean("processing.engineHours.enable")) {
+            // Temporary fallback for old data, to be removed in May 2019
             for (int i = startIndex + 1; i <= endIndex; i++) {
                 if (positions.get(i).getBoolean(Position.KEY_IGNITION)
                         && positions.get(i - 1).getBoolean(Position.KEY_IGNITION)) {
