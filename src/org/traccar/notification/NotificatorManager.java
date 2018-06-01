@@ -54,7 +54,12 @@ public final class NotificatorManager {
     private static final Notificator NULL_NOTIFICATOR = new NotificationNull();
 
     public static Notificator getNotificator(String type) {
-        return INSTANCE.notificators.getOrDefault(type, NULL_NOTIFICATOR);
+        final Notificator n = INSTANCE.notificators.get(type);
+        if (n == null) {
+            Log.error("No notificator configured for type : " + type);
+            return NULL_NOTIFICATOR;
+        }
+        return n;
     }
 
     public static Notificator getSms() {
