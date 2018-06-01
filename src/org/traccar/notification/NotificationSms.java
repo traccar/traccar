@@ -20,16 +20,30 @@ import org.traccar.Context;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
+import org.traccar.sms.SMSManager;
 import org.traccar.sms.SMSException;
 
 public final class NotificationSms extends Notificator {
 
+    private final SMSManager sms;
+
+    public NotificationSms(String methodId) throws ClassNotFoundException,
+            InstantiationException, IllegalAccessException {
+        final String smsClass = Context.getConfig().getString("notificator." + methodId + ".sms.class", "");
+        if (smsClass.length() > 0) {
+            sms = (SMSManager) Class.forName(smsClass).newInstance();
+        } else {
+            sms = Context.getSmsManager();
+        }
+    }
+
+
     @Override
     public void sendAsync(long userId, Event event, Position position) {
-        User user = Context.getPermissionsManager().getUser(userId);
+        final User user = Context.getPermissionsManager().getUser(userId);
         if (user.getPhone() != null) {
             Context.getStatisticsManager().registerSms();
-            Context.getSmsManager().sendMessageAsync(user.getPhone(),
+            sms.sendMessageAsync(user.getPhone(),
                     NotificationFormatter.formatShortMessage(userId, event, position), false);
         }
     }
@@ -37,10 +51,10 @@ public final class NotificationSms extends Notificator {
     @Override
     public void sendSync(long userId, Event event, Position position) throws SMSException,
             InterruptedException {
-        User user = Context.getPermissionsManager().getUser(userId);
+        final User user = Context.getPermissionsManager().getUser(userId);
         if (user.getPhone() != null) {
             Context.getStatisticsManager().registerSms();
-            Context.getSmsManager().sendMessageSync(user.getPhone(),
+            sms.sendMessageSync(user.getPhone(),
                     NotificationFormatter.formatShortMessage(userId, event, position), false);
         }
     }

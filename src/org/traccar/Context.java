@@ -372,6 +372,15 @@ public final class Context {
 
         tripsConfig = initTripsConfig();
 
+        if (config.getBoolean("sms.smpp.enable")) {
+            final String smsManagerClass = config.getString("sms.manager.class", "org.traccar.smpp.SmppClient");
+            try {
+                smsManager = (SMSManager) Class.forName(smsManagerClass).newInstance();
+            } catch (ClassNotFoundException e) {
+                Log.warning("Error loading SMS Manager class : " + smsManagerClass, e);
+            }
+        }
+
         if (config.getBoolean("event.enable")) {
             initEventsModule();
         }
@@ -393,15 +402,6 @@ public final class Context {
         commandsManager = new CommandsManager(dataManager);
 
         statisticsManager = new StatisticsManager();
-
-        if (config.getBoolean("sms.smpp.enable")) {
-            final String smsManagerClass = config.getString("sms.manager.class", "org.traccar.smpp.SmppClient");
-            try {
-                smsManager = (SMSManager) Class.forName(smsManagerClass).newInstance();
-            } catch (ClassNotFoundException e) {
-                Log.warning("Error loading SMS Manager class : " + smsManagerClass, e);
-            }
-        }
 
     }
 
