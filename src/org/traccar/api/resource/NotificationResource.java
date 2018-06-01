@@ -21,6 +21,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -51,9 +52,25 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
     @POST
     @Path("test")
     public Response testMessage() throws NotificationException, InterruptedException {
-        Context.getNotificatorManager().getMail().sendSync(getUserId(), new Event("test", 0), null);
-        Context.getNotificatorManager().getSms().sendSync(getUserId(), new Event("test", 0), null);
+        for (String method : Context.getNotificatorManager().getNotificatorTypes()) {
+            Context.getNotificatorManager().getNotificator(method).sendSync(getUserId(), new Event("test", 0), null);
+        }
         return Response.noContent().build();
     }
+
+    @POST
+    @Path("test/{method}")
+    public Response testMessage(@PathParam("method") String method) throws NotificationException, InterruptedException {
+        Context.getNotificatorManager().getNotificator(method).sendSync(getUserId(), new Event("test", 0), null);
+        return Response.noContent().build();
+    }
+
+
+    @GET
+    @Path("notificators")
+    public Collection<String> getNotificators() {
+        return Context.getNotificatorManager().getNotificatorTypes();
+    }
+
 
 }

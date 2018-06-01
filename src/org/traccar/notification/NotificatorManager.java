@@ -20,6 +20,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.traccar.Context;
 import org.traccar.helper.Log;
@@ -60,12 +61,9 @@ public final class NotificatorManager {
         return n;
     }
 
-    public Notificator getSms() {
-        return getNotificator("sms");
-    }
 
-    public Notificator getMail() {
-        return getNotificator("mail");
+    public Set<String> getNotificatorTypes() {
+        return notificators.keySet();
     }
 
 
