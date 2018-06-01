@@ -108,7 +108,7 @@ public final class NotificationMail extends Notificator {
             }
 
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(user.getEmail()));
-            MailMessage mailMessage = NotificationFormatter.formatMailMessage(userId, event, position);
+            MailMessage mailMessage = NotificationFormatter.formatFullMessage(userId, event, position);
             message.setSubject(mailMessage.getSubject());
             message.setSentDate(new Date());
             message.setContent(mailMessage.getBody(), "text/html; charset=utf-8");

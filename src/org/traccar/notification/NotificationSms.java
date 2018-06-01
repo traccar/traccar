@@ -30,7 +30,7 @@ public final class NotificationSms extends Notificator {
         if (user.getPhone() != null) {
             Context.getStatisticsManager().registerSms();
             Context.getSmsManager().sendMessageAsync(user.getPhone(),
-                    NotificationFormatter.formatSmsMessage(userId, event, position), false);
+                    NotificationFormatter.formatShortMessage(userId, event, position), false);
         }
     }
 
@@ -41,7 +41,7 @@ public final class NotificationSms extends Notificator {
         if (user.getPhone() != null) {
             Context.getStatisticsManager().registerSms();
             Context.getSmsManager().sendMessageSync(user.getPhone(),
-                    NotificationFormatter.formatSmsMessage(userId, event, position), false);
+                    NotificationFormatter.formatShortMessage(userId, event, position), false);
         }
     }
 }
