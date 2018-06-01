@@ -32,7 +32,6 @@ import org.traccar.model.Event;
 import org.traccar.model.Notification;
 import org.traccar.model.Position;
 import org.traccar.model.Typed;
-import org.traccar.notification.NotificatorManager;
 
 public class NotificationManager extends ExtendedObjectManager<Notification> {
 
@@ -90,7 +89,7 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
                     }
                 }
                 for (String nm : notificationMethods) {
-                    NotificatorManager.getNotificator(nm).sendAsync(userId, event, position);
+                    Context.getNotificatorManager().getNotificator(nm).sendAsync(userId, event, position);
                 }
             }
         }

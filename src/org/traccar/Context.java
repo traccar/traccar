@@ -73,6 +73,7 @@ import org.traccar.geolocation.OpenCellIdGeolocationProvider;
 import org.traccar.notification.EventForwarder;
 import org.traccar.notification.JsonTypeEventForwarder;
 import org.traccar.notification.MultiPartEventForwarder;
+import org.traccar.notification.NotificatorManager;
 import org.traccar.reports.model.TripsConfig;
 import org.traccar.sms.SMSManager;
 import org.traccar.web.WebServer;
@@ -194,6 +195,12 @@ public final class Context {
 
     public static NotificationManager getNotificationManager() {
         return notificationManager;
+    }
+
+    private static NotificatorManager notificatorManager;
+
+    public static NotificatorManager getNotificatorManager() {
+        return notificatorManager;
     }
 
     private static VelocityEngine velocityEngine;
@@ -425,6 +432,7 @@ public final class Context {
         geofenceManager = new GeofenceManager(dataManager);
         calendarManager = new CalendarManager(dataManager);
         notificationManager = new NotificationManager(dataManager);
+        notificatorManager = new NotificatorManager();
         Properties velocityProperties = new Properties();
         velocityProperties.setProperty("file.resource.loader.path",
                 Context.getConfig().getString("templates.rootPath", "templates") + "/");

@@ -26,9 +26,7 @@ import org.traccar.helper.Log;
 
 public final class NotificatorManager {
 
-    private static final NotificatorManager INSTANCE = new NotificatorManager();
-
-    private NotificatorManager() {
+    public NotificatorManager() {
         final String[] types = Context.getConfig().getString("notificator.types", "").split(",");
         for (String type : types) {
             final String className = Context.getConfig().getString("notificator." + type + ".class", "");
@@ -53,8 +51,8 @@ public final class NotificatorManager {
     private final Map<String, Notificator> notificators = new HashMap<>();
     private static final Notificator NULL_NOTIFICATOR = new NotificationNull();
 
-    public static Notificator getNotificator(String type) {
-        final Notificator n = INSTANCE.notificators.get(type);
+    public Notificator getNotificator(String type) {
+        final Notificator n = notificators.get(type);
         if (n == null) {
             Log.error("No notificator configured for type : " + type);
             return NULL_NOTIFICATOR;
@@ -62,11 +60,11 @@ public final class NotificatorManager {
         return n;
     }
 
-    public static Notificator getSms() {
+    public Notificator getSms() {
         return getNotificator("sms");
     }
 
-    public static Notificator getMail() {
+    public Notificator getMail() {
         return getNotificator("mail");
     }
 
