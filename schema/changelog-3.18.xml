@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+  logicalFilePath="changelog-3.18">
+
+  <changeSet author="author" id="changelog-3.18">
+
+    <addColumn tableName="notifications">
+      <column name="transports" type="VARCHAR(128)" />
+    </addColumn>
+
+    <update tableName="notifications">
+        <column name="transports" value="web, mail, sms" />
+        <where>web = 1 AND mail = 1 AND sms = 1</where>
+    </update>
+    
+    <update tableName="notifications">
+        <column name="transports" value="web, mail" />
+        <where>web = 1 AND mail = 1 AND sms = 0</where>
+    </update>
+    
+    <update tableName="notifications">
+        <column name="transports" value="web" />
+        <where>web = 1 AND mail = 0 AND sms = 0</where>
+    </update>
+
+    <update tableName="notifications">
+        <column name="transports" value="web, sms" />
+        <where>web = 1 AND mail = 0 AND sms = 1</where>
+    </update>
+
+    <update tableName="notifications">
+        <column name="transports" value="mail, sms" />
+        <where>web = 0 AND mail = 1 AND sms = 1</where>
+    </update>
+
+    <update tableName="notifications">
+        <column name="transports" value="mail" />
+        <where>web = 0 AND mail = 1 AND sms = 0</where>
+    </update>
+
+    <update tableName="notifications">
+        <column name="transports" value="sms" />
+        <where>web = 0 AND mail = 0 AND sms = 1</where>
+    </update>
+    
+    <!-- 
+    <dropColumn tableName="notifications" columnName="web" />
+    <dropColumn tableName="notifications" columnName="mail" />
+    <dropColumn tableName="notifications" columnName="sms" />
+     -->
+
+  </changeSet>
+</databaseChangeLog>

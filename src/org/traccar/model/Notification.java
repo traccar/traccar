@@ -40,46 +40,23 @@ public class Notification extends ScheduledModel {
         this.type = type;
     }
 
-    private boolean web;
 
-    public boolean getWeb() {
-        return web;
+    private String transports;
+
+    public String getTransports() {
+        return transports;
     }
 
-    public void setWeb(boolean web) {
-        this.web = web;
+    public void setTransports(String transports) {
+        this.transports = transports;
     }
 
-    private boolean mail;
 
-    public boolean getMail() {
-        return mail;
-    }
-
-    public void setMail(boolean mail) {
-        this.mail = mail;
-    }
-
-    private boolean sms;
-
-    public boolean getSms() {
-        return sms;
-    }
-
-    public void setSms(boolean sms) {
-        this.sms = sms;
-    }
-
-    public Set<String> getMethods() {
+    public Set<String> getTransportMethods() {
         final Set<String> set = new HashSet<>();
-        if (web) {
-            set.add("web");
-        }
-        if (mail) {
-            set.add("mail");
-        }
-        if (sms) {
-            set.add("sms");
+        final String[] tmp = transports.split(",");
+        for (String t : tmp) {
+            set.add(t.trim());
         }
         return set;
     }

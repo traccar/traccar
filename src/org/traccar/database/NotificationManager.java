@@ -86,7 +86,7 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
                 for (long notificationId : getEffectiveNotifications(userId, deviceId, event.getServerTime())) {
                     Notification notification = getById(notificationId);
                     if (getById(notificationId).getType().equals(event.getType())) {
-                        notificationMethods.addAll(notification.getMethods());
+                        notificationMethods.addAll(notification.getTransportMethods());
                     }
                 }
                 for (String nm : notificationMethods) {
