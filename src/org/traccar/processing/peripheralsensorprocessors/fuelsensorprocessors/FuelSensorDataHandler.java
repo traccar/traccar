@@ -350,7 +350,12 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                          + ", " + fuelActivity.getActivityEndPosition().getLongitude());
 
                 // Add event to events table
-                Event event = new Event(Event.TYPE_FUEL_FILL, position.getDeviceId(),
+                String eventType =
+                        fuelActivity.getActivityType() == FuelActivityType.FUEL_FILL
+                                ? Event.TYPE_FUEL_FILL
+                                : Event.TYPE_FUEL_DRAIN;
+
+                Event event = new Event(eventType, position.getDeviceId(),
                                         fuelActivity.getActivitystartPosition().getId());
                 event.set("startTime", fuelActivity.getActivityStartTime().getTime());
                 event.set("endTime", fuelActivity.getActivityEndTime().getTime());
@@ -472,11 +477,11 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                                   .collect(Collectors.toList());
         }
 
-        int listMaxIndex = positionsSubset.size() - 1;
+        int listMaxIndex = positionsSubset.size();
 
         List<Position> sublistToReturn =  positionsSubset.stream()
                                                          .collect(Collectors.toList())
-                                                         .subList(listMaxIndex - minListSize, listMaxIndex);
+                                                         .subList(listMaxIndex - minListSize + 1, listMaxIndex);
 
         Log.debug("[RELEVANT_SUBLIST] sublist size: " + sublistToReturn.size());
 
@@ -498,15 +503,16 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                 new TreeMap<>(fuelSensorCalibration.get().getSensorPointsMap());
 
         SensorPointsMap previousFuelLevelInfo = sensorPointsToVolumeMap.floorEntry(sensorFuelLevelPoints).getValue();
+        SensorPointsMap nextFuelLevelInfo = sensorPointsToVolumeMap.ceilingEntry(sensorFuelLevelPoints).getValue();
 
-        if (previousFuelLevelInfo == null) {
-            Log.debug("Null previousFuelLevelInfo - deviceID: " + deviceId
+        if (nextFuelLevelInfo == null) {
+            Log.debug("Null nextFuelLevelInfo - deviceID: " + deviceId
                      + " sensorId: " + sensorId);
             return Optional.empty();
         }
 
         try {
-            double currentAveragePointsPerLitre = previousFuelLevelInfo.getPointsPerLitre();
+            double currentAveragePointsPerLitre = nextFuelLevelInfo.getPointsPerLitre();
             long previousPoint = sensorPointsToVolumeMap.floorKey(sensorFuelLevelPoints);
             long previousFuelLevel = previousFuelLevelInfo.getFuelLevel();
 
@@ -516,7 +522,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
             return Optional.of(fuelLevel);
         } catch (Exception ex) {
-            Log.debug("Null previousFuelLevelInfo - deviceID: " + deviceId
+            Log.debug("Null nextFuelLevelInfo - deviceID: " + deviceId
                      + " sensorId: " + sensorId
                     + " reported sensorFuelLevelPoints" + sensorFuelLevelPoints);
 
