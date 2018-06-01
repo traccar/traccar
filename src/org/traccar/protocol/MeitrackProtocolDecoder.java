@@ -395,7 +395,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                         position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
                         break;
                     case 0x09:
-                        position.setCourse(buf.readUnsignedShort() * 0.1);
+                        position.setCourse(buf.readUnsignedShort());
                         break;
                     case 0x0B:
                         position.setAltitude(buf.readShort());
