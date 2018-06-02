@@ -18,11 +18,11 @@ package org.traccar;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.socket.DatagramChannel;
 import io.netty.handler.timeout.IdleStateEvent;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
-import java.nio.channels.DatagramChannel;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -101,7 +101,7 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        Log.warning(formatChannel(ctx.channel()) + " error", cause.getCause());
+        Log.warning(formatChannel(ctx.channel()) + " error", cause);
         closeChannel(ctx.channel());
     }
 

@@ -43,14 +43,16 @@ public abstract class ExtendedObjectDecoder extends ChannelInboundHandlerAdapter
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object originalMessage) throws Exception {
-        Object decodedMessage = decode(ctx.channel(), ctx.channel().remoteAddress(), originalMessage);
-        onMessageEvent(ctx.channel(), ctx.channel().remoteAddress(), originalMessage, decodedMessage);
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        NetworkMessage networkMessage = (NetworkMessage) msg;
+        Object originalMessage = networkMessage.getMessage();
+        Object decodedMessage = decode(ctx.channel(), networkMessage.getRemoteAddress(), originalMessage);
+        onMessageEvent(ctx.channel(), networkMessage.getRemoteAddress(), originalMessage, decodedMessage);
         if (originalMessage == decodedMessage) {
             ctx.fireChannelRead(originalMessage);
         } else {
             if (decodedMessage == null) {
-                decodedMessage = handleEmptyMessage(ctx.channel(), ctx.channel().remoteAddress(), originalMessage);
+                decodedMessage = handleEmptyMessage(ctx.channel(), networkMessage.getRemoteAddress(), originalMessage);
             }
             if (decodedMessage != null) {
                 if (decodedMessage instanceof Collection) {

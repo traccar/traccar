@@ -16,6 +16,7 @@
 package org.traccar;
 
 import io.netty.channel.Channel;
+import io.netty.channel.socket.DatagramChannel;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import org.traccar.helper.Log;
 import org.traccar.helper.UnitsConverter;
@@ -24,7 +25,6 @@ import org.traccar.model.Position;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.nio.channels.DatagramChannel;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;

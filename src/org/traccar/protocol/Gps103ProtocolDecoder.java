@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -160,7 +161,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_ALARM, decodeAlarm(alarm));
         if (alarm.equals("help me")) {
             if (channel != null) {
-                channel.write("**,imei:" + imei + ",E;");
+                channel.writeAndFlush(new NetworkMessage("**,imei:" + imei + ",E;", remoteAddress));
             }
         } else if (alarm.equals("acc on")) {
             position.set(Position.KEY_IGNITION, true);
@@ -276,7 +277,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
         if (sentence.contains("##")) {
             if (channel != null) {
-                channel.write("LOAD");
+                channel.writeAndFlush(new NetworkMessage("LOAD", remoteAddress));
                 Matcher matcher = Pattern.compile("##,imei:(\\d+),A").matcher(sentence);
                 if (matcher.matches()) {
                     getDeviceSession(channel, remoteAddress, matcher.group(1));
@@ -287,7 +288,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
         if (!sentence.isEmpty() && Character.isDigit(sentence.charAt(0))) {
             if (channel != null) {
-                channel.write("ON");
+                channel.writeAndFlush(new NetworkMessage("ON", remoteAddress));
             }
             int start = sentence.indexOf("imei:");
             if (start >= 0) {

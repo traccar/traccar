@@ -44,8 +44,11 @@ public abstract class BaseProtocolEncoder extends ChannelOutboundHandlerAdapter 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
 
-        if (msg instanceof Command) {
-            Command command = (Command) msg;
+        NetworkMessage networkMessage = (NetworkMessage) msg;
+
+        if (networkMessage.getMessage() instanceof Command) {
+
+            Command command = (Command) networkMessage.getMessage();
             Object encodedCommand = encodeCommand(ctx.channel(), command);
 
             StringBuilder s = new StringBuilder();
@@ -59,10 +62,13 @@ public abstract class BaseProtocolEncoder extends ChannelOutboundHandlerAdapter 
             }
             Log.info(s.toString());
 
-            super.write(ctx, encodedCommand, promise);
-        }
+            ctx.write(new NetworkMessage(encodedCommand, networkMessage.getRemoteAddress()), promise);
 
-        super.write(ctx, msg, promise);
+        } else {
+
+            super.write(ctx, msg, promise);
+
+        }
     }
 
     protected Object encodeCommand(Channel channel, Command command) {

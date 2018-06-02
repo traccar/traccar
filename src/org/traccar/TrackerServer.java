@@ -45,8 +45,8 @@ public abstract class TrackerServer {
 
         BasePipelineFactory pipelineFactory = new BasePipelineFactory(this, protocol) {
             @Override
-            protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                TrackerServer.this.addSpecificHandlers(pipeline);
+            protected void addProtocolHandlers(ChannelPipeline pipeline) {
+                TrackerServer.this.addProtocolHandlers(pipeline);
             }
         };
 
@@ -67,7 +67,7 @@ public abstract class TrackerServer {
         }
     }
 
-    protected abstract void addSpecificHandlers(ChannelPipeline pipeline);
+    protected abstract void addProtocolHandlers(ChannelPipeline pipeline);
 
     private int port;
 
