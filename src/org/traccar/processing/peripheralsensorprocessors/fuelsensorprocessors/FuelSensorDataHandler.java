@@ -481,7 +481,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
         List<Position> sublistToReturn =  positionsSubset.stream()
                                                          .collect(Collectors.toList())
-                                                         .subList(listMaxIndex - minListSize + 1, listMaxIndex);
+                                                         .subList(listMaxIndex - minListSize, listMaxIndex);
 
         Log.debug("[RELEVANT_SUBLIST] sublist size: " + sublistToReturn.size());
 
