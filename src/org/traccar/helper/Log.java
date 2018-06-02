@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,6 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.varia.NullAppender;
-import org.jboss.netty.logging.AbstractInternalLogger;
-import org.jboss.netty.logging.InternalLogger;
-import org.jboss.netty.logging.InternalLoggerFactory;
 import org.traccar.Config;
 
 import java.io.IOException;
@@ -66,14 +63,6 @@ public final class Log {
         logger = Logger.getLogger(LOGGER_NAME);
         logger.addAppender(appender);
         logger.setLevel(Level.toLevel(config.getString("logger.level"), Level.ALL));
-
-        // Workaround for "Bug 745866 - (EDG-45) Possible netty logging config problem"
-        InternalLoggerFactory.setDefaultFactory(new InternalLoggerFactory() {
-            @Override
-            public InternalLogger newInstance(String string) {
-                return new NettyInternalLogger();
-            }
-        });
 
         Log.logSystemInfo();
         Log.info("Version: " + getAppVersion());
@@ -198,71 +187,6 @@ public final class Log {
             s.append(")");
         }
         return s.toString();
-    }
-
-    /**
-     * Netty logger implementation
-     */
-    private static class NettyInternalLogger extends AbstractInternalLogger {
-
-        @Override
-        public boolean isDebugEnabled() {
-            return false;
-        }
-
-        @Override
-        public boolean isInfoEnabled() {
-            return false;
-        }
-
-        @Override
-        public boolean isWarnEnabled() {
-            return true;
-        }
-
-        @Override
-        public boolean isErrorEnabled() {
-            return true;
-        }
-
-        @Override
-        public void debug(String string) {
-            debug(string, null);
-        }
-
-        @Override
-        public void debug(String string, Throwable thrwbl) {
-        }
-
-        @Override
-        public void info(String string) {
-            info(string, null);
-        }
-
-        @Override
-        public void info(String string, Throwable thrwbl) {
-        }
-
-        @Override
-        public void warn(String string) {
-            warn(string, null);
-        }
-
-        @Override
-        public void warn(String string, Throwable thrwbl) {
-            getLogger().warn("netty warning: " + string);
-        }
-
-        @Override
-        public void error(String string) {
-            error(string, null);
-        }
-
-        @Override
-        public void error(String string, Throwable thrwbl) {
-            getLogger().error("netty error: " + string);
-        }
-
     }
 
 }

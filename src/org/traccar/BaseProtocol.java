@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  */
 package org.traccar;
 
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.handler.codec.string.StringEncoder;
+import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.database.ActiveDevice;
 import org.traccar.helper.DataConverter;
 import org.traccar.model.Command;
@@ -76,10 +76,10 @@ public abstract class BaseProtocol implements Protocol {
             activeDevice.write(command);
         } else if (command.getType().equals(Command.TYPE_CUSTOM)) {
             String data = command.getString(Command.KEY_DATA);
-            if (activeDevice.getChannel().getPipeline().get(StringEncoder.class) != null) {
+            if (activeDevice.getChannel().pipeline().get(StringEncoder.class) != null) {
                 activeDevice.write(data);
             } else {
-                activeDevice.write(ChannelBuffers.wrappedBuffer(DataConverter.parseHex(data)));
+                activeDevice.write(Unpooled.wrappedBuffer(DataConverter.parseHex(data)));
             }
         } else {
             throw new RuntimeException("Command " + command.getType() + " is not supported in protocol " + getName());

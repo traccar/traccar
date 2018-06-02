@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,11 @@
  */
 package org.traccar;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelEvent;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelUpstreamHandler;
-import org.jboss.netty.channel.Channels;
-import org.jboss.netty.channel.MessageEvent;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.traccar.helper.DataConverter;
 import org.traccar.model.Position;
 
@@ -30,14 +27,14 @@ import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 
-public abstract class ExtendedObjectDecoder implements ChannelUpstreamHandler {
+public abstract class ExtendedObjectDecoder extends ChannelInboundHandlerAdapter {
 
     private void saveOriginal(Object decodedMessage, Object originalMessage) {
         if (Context.getConfig().getBoolean("database.saveOriginal") && decodedMessage instanceof Position) {
             Position position = (Position) decodedMessage;
-            if (originalMessage instanceof ChannelBuffer) {
-                ChannelBuffer buf = (ChannelBuffer) originalMessage;
-                position.set(Position.KEY_ORIGINAL, ChannelBuffers.hexDump(buf, 0, buf.writerIndex()));
+            if (originalMessage instanceof ByteBuf) {
+                ByteBuf buf = (ByteBuf) originalMessage;
+                position.set(Position.KEY_ORIGINAL, ByteBufUtil.hexDump(buf));
             } else if (originalMessage instanceof String) {
                 position.set(Position.KEY_ORIGINAL, DataConverter.printHex(
                                 ((String) originalMessage).getBytes(StandardCharsets.US_ASCII)));
@@ -46,32 +43,24 @@ public abstract class ExtendedObjectDecoder implements ChannelUpstreamHandler {
     }
 
     @Override
-    public void handleUpstream(
-            ChannelHandlerContext ctx, ChannelEvent evt) throws Exception {
-        if (!(evt instanceof MessageEvent)) {
-            ctx.sendUpstream(evt);
-            return;
-        }
-
-        MessageEvent e = (MessageEvent) evt;
-        Object originalMessage = e.getMessage();
-        Object decodedMessage = decode(e.getChannel(), e.getRemoteAddress(), originalMessage);
-        onMessageEvent(e.getChannel(), e.getRemoteAddress(), originalMessage, decodedMessage);
+    public void channelRead(ChannelHandlerContext ctx, Object originalMessage) throws Exception {
+        Object decodedMessage = decode(ctx.channel(), ctx.channel().remoteAddress(), originalMessage);
+        onMessageEvent(ctx.channel(), ctx.channel().remoteAddress(), originalMessage, decodedMessage);
         if (originalMessage == decodedMessage) {
-            ctx.sendUpstream(evt);
+            ctx.fireChannelRead(originalMessage);
         } else {
             if (decodedMessage == null) {
-                decodedMessage = handleEmptyMessage(e.getChannel(), e.getRemoteAddress(), originalMessage);
+                decodedMessage = handleEmptyMessage(ctx.channel(), ctx.channel().remoteAddress(), originalMessage);
             }
             if (decodedMessage != null) {
                 if (decodedMessage instanceof Collection) {
                     for (Object o : (Collection) decodedMessage) {
                         saveOriginal(o, originalMessage);
-                        Channels.fireMessageReceived(ctx, o, e.getRemoteAddress());
+                        ctx.fireChannelRead(o);
                     }
                 } else {
                     saveOriginal(decodedMessage, originalMessage);
-                    Channels.fireMessageReceived(ctx, decodedMessage, e.getRemoteAddress());
+                    ctx.fireChannelRead(decodedMessage);
                 }
             }
         }

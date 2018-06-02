@@ -15,10 +15,12 @@
  */
 package org.traccar;
 
+import io.netty.channel.ChannelHandler;
 import org.traccar.helper.Log;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
+@ChannelHandler.Sharable
 public class FilterHandler extends BaseDataHandler {
 
     private boolean filterInvalid;

@@ -1,7 +1,7 @@
 package org.traccar.helper;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -12,22 +12,22 @@ public class ChecksumTest {
 
     @Test
     public void testCrc8() {
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer("123456789", StandardCharsets.US_ASCII);
+        ByteBuf buf = Unpooled.copiedBuffer("123456789", StandardCharsets.US_ASCII);
 
-        assertEquals(0xF7, Checksum.crc8(Checksum.CRC8_EGTS, buf.toByteBuffer()));
-        assertEquals(0xD0, Checksum.crc8(Checksum.CRC8_ROHC, buf.toByteBuffer()));
+        assertEquals(0xF7, Checksum.crc8(Checksum.CRC8_EGTS, buf.nioBuffer()));
+        assertEquals(0xD0, Checksum.crc8(Checksum.CRC8_ROHC, buf.nioBuffer()));
     }
 
     @Test
     public void testCrc16() {
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer("123456789", StandardCharsets.US_ASCII);
+        ByteBuf buf = Unpooled.copiedBuffer("123456789", StandardCharsets.US_ASCII);
 
-        assertEquals(0xBB3D, Checksum.crc16(Checksum.CRC16_IBM, buf.toByteBuffer()));
-        assertEquals(0x4B37, Checksum.crc16(Checksum.CRC16_MODBUS, buf.toByteBuffer()));
-        assertEquals(0x906e, Checksum.crc16(Checksum.CRC16_X25, buf.toByteBuffer()));
-        assertEquals(0x29b1, Checksum.crc16(Checksum.CRC16_CCITT_FALSE, buf.toByteBuffer()));
-        assertEquals(0x2189, Checksum.crc16(Checksum.CRC16_KERMIT, buf.toByteBuffer()));
-        assertEquals(0x31c3, Checksum.crc16(Checksum.CRC16_XMODEM, buf.toByteBuffer()));
+        assertEquals(0xBB3D, Checksum.crc16(Checksum.CRC16_IBM, buf.nioBuffer()));
+        assertEquals(0x4B37, Checksum.crc16(Checksum.CRC16_MODBUS, buf.nioBuffer()));
+        assertEquals(0x906e, Checksum.crc16(Checksum.CRC16_X25, buf.nioBuffer()));
+        assertEquals(0x29b1, Checksum.crc16(Checksum.CRC16_CCITT_FALSE, buf.nioBuffer()));
+        assertEquals(0x2189, Checksum.crc16(Checksum.CRC16_KERMIT, buf.nioBuffer()));
+        assertEquals(0x31c3, Checksum.crc16(Checksum.CRC16_XMODEM, buf.nioBuffer()));
     }
 
     @Test

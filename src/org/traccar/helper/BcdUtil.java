@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,14 @@
  */
 package org.traccar.helper;
 
-import org.jboss.netty.buffer.ChannelBuffer;
+import io.netty.buffer.ByteBuf;
 
 public final class BcdUtil {
 
     private BcdUtil() {
     }
 
-    public static int readInteger(ChannelBuffer buf, int digits) {
+    public static int readInteger(ByteBuf buf, int digits) {
         int result = 0;
 
         for (int i = 0; i < digits / 2; i++) {
@@ -42,7 +42,7 @@ public final class BcdUtil {
         return result;
     }
 
-    public static double readCoordinate(ChannelBuffer buf) {
+    public static double readCoordinate(ByteBuf buf) {
         int b1 = buf.readUnsignedByte();
         int b2 = buf.readUnsignedByte();
         int b3 = buf.readUnsignedByte();

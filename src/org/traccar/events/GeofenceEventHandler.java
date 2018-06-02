@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.netty.channel.ChannelHandler;
 import org.traccar.BaseEventHandler;
 import org.traccar.Context;
 import org.traccar.database.GeofenceManager;
@@ -28,6 +29,7 @@ import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
+@ChannelHandler.Sharable
 public class GeofenceEventHandler extends BaseEventHandler {
 
     private GeofenceManager geofenceManager;

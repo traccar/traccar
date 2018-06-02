@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,27 +15,27 @@
  */
 package org.traccar;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.handler.codec.frame.DelimiterBasedFrameDecoder;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 
 public class CharacterDelimiterFrameDecoder extends DelimiterBasedFrameDecoder {
 
-    private static ChannelBuffer createDelimiter(char delimiter) {
+    private static ByteBuf createDelimiter(char delimiter) {
         byte[] buf = {(byte) delimiter};
-        return ChannelBuffers.wrappedBuffer(buf);
+        return Unpooled.wrappedBuffer(buf);
     }
 
-    private static ChannelBuffer createDelimiter(String delimiter) {
+    private static ByteBuf createDelimiter(String delimiter) {
         byte[] buf = new byte[delimiter.length()];
         for (int i = 0; i < delimiter.length(); i++) {
             buf[i] = (byte) delimiter.charAt(i);
         }
-        return ChannelBuffers.wrappedBuffer(buf);
+        return Unpooled.wrappedBuffer(buf);
     }
 
-    private static ChannelBuffer[] convertDelimiters(String[] delimiters) {
-        ChannelBuffer[] result = new ChannelBuffer[delimiters.length];
+    private static ByteBuf[] convertDelimiters(String[] delimiters) {
+        ByteBuf[] result = new ByteBuf[delimiters.length];
         for (int i = 0; i < delimiters.length; i++) {
             result[i] = createDelimiter(delimiters[i]);
         }

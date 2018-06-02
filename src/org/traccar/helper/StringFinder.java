@@ -15,14 +15,11 @@
  */
 package org.traccar.helper;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBufferIndexFinder;
-
 import java.nio.charset.StandardCharsets;
 
-public class StringFinder implements ChannelBufferIndexFinder {
+public class StringFinder /*implements ChannelBufferIndexFinder*/ { // TODO handle this
 
-    private String string;
+    /*private String string;
 
     public StringFinder(String string) {
         this.string = string;
@@ -36,6 +33,6 @@ public class StringFinder implements ChannelBufferIndexFinder {
         }
 
         return string.equals(buffer.toString(guessedIndex, string.length(), StandardCharsets.US_ASCII));
-    }
+    }*/
 
 }

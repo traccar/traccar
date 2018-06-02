@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,52 +15,56 @@
  */
 package org.traccar;
 
-import org.jboss.netty.bootstrap.Bootstrap;
-import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
-import org.jboss.netty.bootstrap.ServerBootstrap;
-import org.jboss.netty.buffer.HeapChannelBufferFactory;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.ChannelPipelineFactory;
-import org.jboss.netty.channel.group.ChannelGroup;
-import org.jboss.netty.channel.group.ChannelGroupFuture;
-import org.jboss.netty.channel.group.DefaultChannelGroup;
+import io.netty.bootstrap.AbstractBootstrap;
+import io.netty.bootstrap.Bootstrap;
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.group.ChannelGroup;
+import io.netty.channel.group.DefaultChannelGroup;
+import io.netty.channel.socket.nio.NioDatagramChannel;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.util.concurrent.GlobalEventExecutor;
 
 import java.net.InetSocketAddress;
-import java.nio.ByteOrder;
 
 public abstract class TrackerServer {
 
-    private final Bootstrap bootstrap;
-    private final String protocol;
+    private final boolean datagram;
+    private final AbstractBootstrap bootstrap;
 
-    public boolean isConnectionless() {
-        return bootstrap instanceof ConnectionlessBootstrap;
+    public boolean isDatagram() {
+        return datagram;
     }
 
-    public String getProtocol() {
-        return protocol;
-    }
-
-    public TrackerServer(Bootstrap bootstrap, String protocol) {
-        this.bootstrap = bootstrap;
-        this.protocol = protocol;
-
-        if (bootstrap instanceof ServerBootstrap) {
-            bootstrap.setFactory(GlobalChannelFactory.getFactory());
-        } else if (bootstrap instanceof ConnectionlessBootstrap) {
-            bootstrap.setFactory(GlobalChannelFactory.getDatagramFactory());
-        }
+    public TrackerServer(boolean datagram, String protocol) {
+        this.datagram = datagram;
 
         address = Context.getConfig().getString(protocol + ".address");
         port = Context.getConfig().getInteger(protocol + ".port");
 
-        bootstrap.setPipelineFactory(new BasePipelineFactory(this, protocol) {
+        BasePipelineFactory pipelineFactory = new BasePipelineFactory(this, protocol) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 TrackerServer.this.addSpecificHandlers(pipeline);
             }
-        });
+        };
+
+        if (datagram) {
+
+            this.bootstrap = new Bootstrap()
+                    .group(GlobalChannelFactory.getWorkerGroup())
+                    .channel(NioDatagramChannel.class)
+                    .handler(pipelineFactory);
+
+        } else {
+
+            this.bootstrap = new ServerBootstrap()
+                    .group(GlobalChannelFactory.getBossGroup(), GlobalChannelFactory.getWorkerGroup())
+                    .channel(NioServerSocketChannel.class)
+                    .childHandler(pipelineFactory);
+
+        }
     }
 
     protected abstract void addSpecificHandlers(ChannelPipeline pipeline);
@@ -85,23 +89,10 @@ public abstract class TrackerServer {
         this.address = address;
     }
 
-    public void setEndianness(ByteOrder byteOrder) {
-        bootstrap.setOption("bufferFactory", new HeapChannelBufferFactory(byteOrder));
-        bootstrap.setOption("child.bufferFactory", new HeapChannelBufferFactory(byteOrder));
-    }
-
-    private final ChannelGroup allChannels = new DefaultChannelGroup();
+    private final ChannelGroup channelGroup = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
     public ChannelGroup getChannelGroup() {
-        return allChannels;
-    }
-
-    public void setPipelineFactory(ChannelPipelineFactory pipelineFactory) {
-        bootstrap.setPipelineFactory(pipelineFactory);
-    }
-
-    public ChannelPipelineFactory getPipelineFactory() {
-        return bootstrap.getPipelineFactory();
+        return channelGroup;
     }
 
     public void start() {
@@ -112,12 +103,7 @@ public abstract class TrackerServer {
             endpoint = new InetSocketAddress(address, port);
         }
 
-        Channel channel = null;
-        if (bootstrap instanceof ServerBootstrap) {
-            channel = ((ServerBootstrap) bootstrap).bind(endpoint);
-        } else if (bootstrap instanceof ConnectionlessBootstrap) {
-            channel = ((ConnectionlessBootstrap) bootstrap).bind(endpoint);
-        }
+        Channel channel = bootstrap.bind(endpoint).channel();
 
         if (channel != null) {
             getChannelGroup().add(channel);
@@ -125,8 +111,7 @@ public abstract class TrackerServer {
     }
 
     public void stop() {
-        ChannelGroupFuture future = getChannelGroup().close();
-        future.awaitUninterruptibly();
+        channelGroup.close().awaitUninterruptibly();
     }
 
 }

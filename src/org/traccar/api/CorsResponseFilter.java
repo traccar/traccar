@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 package org.traccar.api;
 
-import org.jboss.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import org.traccar.Context;
 
 import javax.ws.rs.container.ContainerRequestContext;
@@ -31,26 +31,26 @@ public class CorsResponseFilter implements ContainerResponseFilter {
 
     @Override
     public void filter(ContainerRequestContext request, ContainerResponseContext response) throws IOException {
-        if (!response.getHeaders().containsKey(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_HEADERS)) {
-            response.getHeaders().add(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_HEADERS, HEADERS_ALL);
+        if (!response.getHeaders().containsKey(HttpHeaderNames.ACCESS_CONTROL_ALLOW_HEADERS.toString())) {
+            response.getHeaders().add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_HEADERS.toString(), HEADERS_ALL);
         }
 
-        if (!response.getHeaders().containsKey(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_CREDENTIALS)) {
-            response.getHeaders().add(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_CREDENTIALS, true);
+        if (!response.getHeaders().containsKey(HttpHeaderNames.ACCESS_CONTROL_ALLOW_CREDENTIALS.toString())) {
+            response.getHeaders().add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_CREDENTIALS.toString(), true);
         }
 
-        if (!response.getHeaders().containsKey(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_METHODS)) {
-            response.getHeaders().add(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_METHODS, METHODS_ALL);
+        if (!response.getHeaders().containsKey(HttpHeaderNames.ACCESS_CONTROL_ALLOW_METHODS.toString())) {
+            response.getHeaders().add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_METHODS.toString(), METHODS_ALL);
         }
 
-        if (!response.getHeaders().containsKey(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN)) {
-            String origin = request.getHeaderString(HttpHeaders.Names.ORIGIN);
+        if (!response.getHeaders().containsKey(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN.toString())) {
+            String origin = request.getHeaderString(HttpHeaderNames.ORIGIN.toString());
             String allowed = Context.getConfig().getString("web.origin");
 
             if (origin == null) {
-                response.getHeaders().add(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN, ORIGIN_ALL);
+                response.getHeaders().add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN.toString(), ORIGIN_ALL);
             } else if (allowed == null || allowed.equals(ORIGIN_ALL) || allowed.contains(origin)) {
-                response.getHeaders().add(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN, origin);
+                response.getHeaders().add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN.toString(), origin);
             }
         }
     }

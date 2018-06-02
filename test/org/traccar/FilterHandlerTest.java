@@ -67,22 +67,22 @@ public class FilterHandlerTest {
 
         Position position = createPosition(0, new Date(), true, 10, 10, 10, 10, 10);
 
-        assertNotNull(filtingHandler.decode(null, null, position));
-        assertNotNull(passingHandler.decode(null, null, position));
+        assertNotNull(filtingHandler.handlePosition(position));
+        assertNotNull(passingHandler.handlePosition(position));
 
         position = createPosition(0, new Date(Long.MAX_VALUE), true, 10, 10, 10, 10, 10);
 
-        assertNull(filtingHandler.decode(null, null, position));
-        assertNotNull(passingHandler.decode(null, null, position));
+        assertNull(filtingHandler.handlePosition(position));
+        assertNotNull(passingHandler.handlePosition(position));
 
         position = createPosition(0, new Date(), false, 10, 10, 10, 10, 10);
 
-        assertNull(filtingHandler.decode(null, null, position));
-        assertNotNull(passingHandler.decode(null, null, position));
+        assertNull(filtingHandler.handlePosition(position));
+        assertNotNull(passingHandler.handlePosition(position));
 
         position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
         filtingHandler.setSkipAttributes(true);
-        assertNotNull(filtingHandler.decode(null, null, position));
+        assertNotNull(filtingHandler.handlePosition(position));
     }
 
 }

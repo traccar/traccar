@@ -1,16 +1,13 @@
 package org.traccar;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
-import org.jboss.netty.handler.codec.http.HttpMethod;
-import org.jboss.netty.handler.codec.http.HttpVersion;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
 import org.traccar.helper.DataConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Command;
 import org.traccar.model.Position;
 
-import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -50,24 +47,20 @@ public class ProtocolTest extends BaseTest {
         return builder.toString();
     }
 
-    protected ChannelBuffer binary(String... data) {
-        return binary(ByteOrder.BIG_ENDIAN, data);
-    }
-
-    protected ChannelBuffer binary(ByteOrder endianness, String... data) {
-        return ChannelBuffers.wrappedBuffer(
-                endianness, DataConverter.parseHex(concatenateStrings(data)));
+    protected ByteBuf binary(String... data) {
+        return Unpooled.wrappedBuffer(DataConverter.parseHex(concatenateStrings(data)));
     }
 
     protected String text(String... data) {
         return concatenateStrings(data);
     }
 
-    protected ChannelBuffer buffer(String... data) {
-        return ChannelBuffers.copiedBuffer(concatenateStrings(data), StandardCharsets.ISO_8859_1);
+    protected ByteBuf buffer(String... data) {
+        return Unpooled.copiedBuffer(concatenateStrings(data), StandardCharsets.ISO_8859_1);
     }
 
-    protected DefaultHttpRequest request(String url) {
+    // TODO handle HTTP methods
+    /*protected DefaultHttpRequest request(String url) {
         return request(HttpMethod.GET, url);
     }
 
@@ -75,11 +68,11 @@ public class ProtocolTest extends BaseTest {
         return new DefaultHttpRequest(HttpVersion.HTTP_1_1, method, url);
     }
 
-    protected DefaultHttpRequest request(HttpMethod method, String url, ChannelBuffer data) {
+    protected DefaultHttpRequest request(HttpMethod method, String url, ByteBuf data) {
         DefaultHttpRequest request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, method, url);
         request.setContent(data);
         return request;
-    }
+    }*/
 
     protected void verifyNotNull(BaseProtocolDecoder decoder, Object object) throws Exception {
         assertNotNull(decoder.decode(null, null, object));
@@ -292,14 +285,14 @@ public class ProtocolTest extends BaseTest {
     }
 
     protected void verifyCommand(
-            BaseProtocolEncoder encoder, Command command, ChannelBuffer expected) throws Exception {
+            BaseProtocolEncoder encoder, Command command, ByteBuf expected) throws Exception {
         verifyFrame(expected, encoder.encodeCommand(command));
     }
 
-    protected void verifyFrame(ChannelBuffer expected, Object object) {
+    protected void verifyFrame(ByteBuf expected, Object object) {
         assertNotNull("buffer is null", object);
-        assertTrue("not a buffer", object instanceof ChannelBuffer);
-        assertEquals(ChannelBuffers.hexDump(expected), ChannelBuffers.hexDump((ChannelBuffer) object));
+        assertTrue("not a buffer", object instanceof ByteBuf);
+        assertEquals(ByteBufUtil.hexDump(expected), ByteBufUtil.hexDump((ByteBuf) object));
     }
 
 }

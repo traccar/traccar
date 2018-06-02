@@ -15,6 +15,7 @@
  */
 package org.traccar.events;
 
+import io.netty.channel.ChannelHandler;
 import org.traccar.BaseEventHandler;
 import org.traccar.Context;
 import org.traccar.model.Device;
@@ -24,6 +25,7 @@ import org.traccar.model.Position;
 import java.util.Collections;
 import java.util.Map;
 
+@ChannelHandler.Sharable
 public class FuelDropEventHandler extends BaseEventHandler {
 
     public static final String ATTRIBUTE_FUEL_DROP_THRESHOLD = "fuelDropThreshold";

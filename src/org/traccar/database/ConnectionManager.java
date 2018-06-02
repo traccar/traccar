@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
  */
 package org.traccar.database;
 
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.util.Timeout;
-import org.jboss.netty.util.TimerTask;
+import io.netty.channel.Channel;
+import io.netty.util.Timeout;
+import io.netty.util.TimerTask;
 import org.traccar.Context;
 import org.traccar.GlobalTimer;
 import org.traccar.Protocol;

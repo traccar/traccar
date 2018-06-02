@@ -15,11 +15,9 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
-import org.jboss.netty.bootstrap.ServerBootstrap;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.handler.codec.string.StringDecoder;
-import org.jboss.netty.handler.codec.string.StringEncoder;
+import io.netty.channel.ChannelPipeline;
+import io.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.TrackerServer;
@@ -45,7 +43,7 @@ public class Gps103Protocol extends BaseProtocol {
 
     @Override
     public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(new ServerBootstrap(), getName()) {
+        serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(2048, "\r\n", "\n", ";"));
@@ -55,7 +53,7 @@ public class Gps103Protocol extends BaseProtocol {
                 pipeline.addLast("objectDecoder", new Gps103ProtocolDecoder(Gps103Protocol.this));
             }
         });
-        serverList.add(new TrackerServer(new ConnectionlessBootstrap(), getName()) {
+        serverList.add(new TrackerServer(true, getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("stringEncoder", new StringEncoder());

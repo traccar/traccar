@@ -15,42 +15,20 @@
  */
 package org.traccar;
 
-import org.jboss.netty.channel.ChannelFactory;
-import org.jboss.netty.channel.socket.DatagramChannelFactory;
-import org.jboss.netty.channel.socket.nio.NioDatagramChannelFactory;
-import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
 
-public final class GlobalChannelFactory {
+public final class GlobalChannelFactory { // TODO rename class
 
-    private static ChannelFactory channelFactory = null;
-    private static DatagramChannelFactory datagramChannelFactory = null;
+    private static EventLoopGroup bossGroup = new NioEventLoopGroup();
+    private static EventLoopGroup workerGroup = new NioEventLoopGroup();
 
-    private GlobalChannelFactory() {
+    public static EventLoopGroup getBossGroup() {
+        return bossGroup;
     }
 
-    public static void release() {
-        if (channelFactory != null) {
-            channelFactory.releaseExternalResources();
-        }
-        if (datagramChannelFactory != null) {
-            datagramChannelFactory.releaseExternalResources();
-        }
-        channelFactory = null;
-        datagramChannelFactory = null;
-    }
-
-    public static ChannelFactory getFactory() {
-        if (channelFactory == null) {
-            channelFactory = new NioServerSocketChannelFactory();
-        }
-        return channelFactory;
-    }
-
-    public static DatagramChannelFactory getDatagramFactory() {
-        if (datagramChannelFactory == null) {
-            datagramChannelFactory = new NioDatagramChannelFactory();
-        }
-        return datagramChannelFactory;
+    public static EventLoopGroup getWorkerGroup() {
+        return workerGroup;
     }
 
 }

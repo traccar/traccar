@@ -15,7 +15,7 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;
@@ -160,7 +160,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_ALARM, decodeAlarm(alarm));
         if (alarm.equals("help me")) {
             if (channel != null) {
-                channel.write("**,imei:" + imei + ",E;", remoteAddress);
+                channel.write("**,imei:" + imei + ",E;");
             }
         } else if (alarm.equals("acc on")) {
             position.set(Position.KEY_IGNITION, true);
@@ -276,7 +276,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
         if (sentence.contains("##")) {
             if (channel != null) {
-                channel.write("LOAD", remoteAddress);
+                channel.write("LOAD");
                 Matcher matcher = Pattern.compile("##,imei:(\\d+),A").matcher(sentence);
                 if (matcher.matches()) {
                     getDeviceSession(channel, remoteAddress, matcher.group(1));
@@ -287,7 +287,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
         if (!sentence.isEmpty() && Character.isDigit(sentence.charAt(0))) {
             if (channel != null) {
-                channel.write("ON", remoteAddress);
+                channel.write("ON");
             }
             int start = sentence.indexOf("imei:");
             if (start >= 0) {

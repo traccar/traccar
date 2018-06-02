@@ -16,10 +16,12 @@
  */
 package org.traccar.processing;
 
+import io.netty.channel.ChannelHandler;
 import org.traccar.BaseDataHandler;
 import org.traccar.Context;
 import org.traccar.model.Position;
 
+@ChannelHandler.Sharable
 public class CopyAttributesHandler extends BaseDataHandler {
 
     private Position getLastPosition(long deviceId) {

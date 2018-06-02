@@ -48,7 +48,7 @@ public class SmppClient {
     private SmppSession smppSession;
     private DefaultSmppSessionHandler sessionHandler = new ClientSmppSessionHandler(this);
     private ExecutorService executorService = Executors.newCachedThreadPool();
-    private DefaultSmppClient clientBootstrap = new DefaultSmppClient(executorService, 1);
+    private DefaultSmppClient clientBootstrap = new DefaultSmppClient();
 
     private ScheduledExecutorService enquireLinkExecutor;
     private ScheduledFuture<?> enquireLinkTask;

@@ -16,8 +16,10 @@
  */
 package org.traccar;
 
+import io.netty.channel.ChannelHandler;
 import org.traccar.model.Position;
 
+@ChannelHandler.Sharable
 public class MotionHandler extends BaseDataHandler {
 
     private double speedThreshold;

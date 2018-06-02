@@ -15,11 +15,13 @@
  */
 package org.traccar;
 
-import org.jboss.netty.channel.Channel;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
 
+@ChannelHandler.Sharable
 public class HemisphereHandler extends ExtendedObjectDecoder {
 
     private int latitudeFactor;
@@ -45,8 +47,7 @@ public class HemisphereHandler extends ExtendedObjectDecoder {
     }
 
     @Override
-    protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+    protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         if (msg instanceof Position) {
             Position position = (Position) msg;

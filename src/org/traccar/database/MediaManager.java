@@ -15,7 +15,7 @@
  */
 package org.traccar.database;
 
-import org.jboss.netty.buffer.ChannelBuffer;
+import io.netty.buffer.ByteBuf;
 import org.traccar.helper.Log;
 
 import java.io.File;
@@ -46,13 +46,13 @@ public class MediaManager {
         return filePath.toFile();
     }
 
-    public String writeFile(String uniqueId, ChannelBuffer buf, String extension) {
+    public String writeFile(String uniqueId, ByteBuf buf, String extension) {
         if (path != null) {
             int size = buf.readableBytes();
             String name = new SimpleDateFormat("yyyyMMddhhmmss").format(new Date()) + "." + extension;
             try (FileOutputStream output = new FileOutputStream(createFile(uniqueId, name));
                     FileChannel fileChannel = output.getChannel()) {
-                ByteBuffer byteBuffer = buf.toByteBuffer();
+                    ByteBuffer byteBuffer = buf.nioBuffer();
                 int written = 0;
                 while (written < size) {
                     written += fileChannel.write(byteBuffer);

@@ -15,9 +15,8 @@
  */
 package org.traccar;
 
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.socket.DatagramChannel;
-import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
+import io.netty.channel.Channel;
+import io.netty.handler.codec.http.HttpRequestDecoder;
 import org.traccar.helper.Log;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Device;
@@ -25,6 +24,7 @@ import org.traccar.model.Position;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.nio.channels.DatagramChannel;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -145,7 +145,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     }
 
     public DeviceSession getDeviceSession(Channel channel, SocketAddress remoteAddress, String... uniqueIds) {
-        if (channel != null && channel.getPipeline().get(HttpRequestDecoder.class) != null
+        if (channel != null && channel.pipeline().get(HttpRequestDecoder.class) != null
                 || Context.getConfig().getBoolean("decoder.ignoreSessionCache")) {
             long deviceId = findDeviceId(remoteAddress, uniqueIds);
             if (deviceId != 0) {

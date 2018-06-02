@@ -16,12 +16,14 @@
  */
 package org.traccar;
 
+import io.netty.channel.ChannelHandler;
 import org.traccar.helper.DistanceCalculator;
 import org.traccar.model.Position;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+@ChannelHandler.Sharable
 public class DistanceHandler extends BaseDataHandler {
 
     private final boolean filter;

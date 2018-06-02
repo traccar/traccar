@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,24 +15,21 @@
  */
 package org.traccar;
 
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelStateEvent;
-import org.jboss.netty.channel.ExceptionEvent;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.socket.DatagramChannel;
-import org.jboss.netty.handler.timeout.IdleStateAwareChannelHandler;
-import org.jboss.netty.handler.timeout.IdleStateEvent;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.handler.timeout.IdleStateEvent;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
+import java.nio.channels.DatagramChannel;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class MainEventHandler extends IdleStateAwareChannelHandler {
+public class MainEventHandler extends ChannelInboundHandlerAdapter {
 
     private final Set<String> connectionlessProtocols = new HashSet<>();
 
@@ -44,11 +41,10 @@ public class MainEventHandler extends IdleStateAwareChannelHandler {
     }
 
     @Override
-    public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        if (msg instanceof Position) {
 
-        if (e.getMessage() != null && e.getMessage() instanceof Position) {
-
-            Position position = (Position) e.getMessage();
+            Position position = (Position) msg;
             try {
                 Context.getDeviceManager().updateLatestPosition(position);
             } catch (SQLException error) {
@@ -59,7 +55,7 @@ public class MainEventHandler extends IdleStateAwareChannelHandler {
 
             // Log position
             StringBuilder s = new StringBuilder();
-            s.append(formatChannel(e.getChannel())).append(" ");
+            s.append(formatChannel(ctx.channel())).append(" ");
             s.append("id: ").append(uniqueId);
             s.append(", time: ").append(
                     new SimpleDateFormat(Log.DATE_FORMAT).format(position.getFixTime()));
@@ -83,36 +79,38 @@ public class MainEventHandler extends IdleStateAwareChannelHandler {
     }
 
     private static String formatChannel(Channel channel) {
-        return String.format("[%08X]", channel.getId());
+        return String.format("[%s]", channel.id().asShortText());
     }
 
     @Override
-    public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) {
-        Log.info(formatChannel(e.getChannel()) + " connected");
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        Log.info(formatChannel(ctx.channel()) + " connected");
     }
 
     @Override
-    public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) {
-        Log.info(formatChannel(e.getChannel()) + " disconnected");
-        closeChannel(e.getChannel());
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        Log.info(formatChannel(ctx.channel()) + " disconnected");
+        closeChannel(ctx.channel());
 
-        BaseProtocolDecoder protocolDecoder = (BaseProtocolDecoder) ctx.getPipeline().get("objectDecoder");
-        if (ctx.getPipeline().get("httpDecoder") == null
+        BaseProtocolDecoder protocolDecoder = (BaseProtocolDecoder) ctx.pipeline().get("objectDecoder");
+        if (ctx.pipeline().get("httpDecoder") == null
                 && !connectionlessProtocols.contains(protocolDecoder.getProtocolName())) {
-            Context.getConnectionManager().removeActiveDevice(e.getChannel());
+            Context.getConnectionManager().removeActiveDevice(ctx.channel());
         }
     }
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) {
-        Log.warning(formatChannel(e.getChannel()) + " error", e.getCause());
-        closeChannel(e.getChannel());
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        Log.warning(formatChannel(ctx.channel()) + " error", cause.getCause());
+        closeChannel(ctx.channel());
     }
 
     @Override
-    public void channelIdle(ChannelHandlerContext ctx, IdleStateEvent e) {
-        Log.info(formatChannel(e.getChannel()) + " timed out");
-        closeChannel(e.getChannel());
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        if (evt instanceof IdleStateEvent) {
+            Log.info(formatChannel(ctx.channel()) + " timed out");
+            closeChannel(ctx.channel());
+        }
     }
 
     private void closeChannel(Channel channel) {

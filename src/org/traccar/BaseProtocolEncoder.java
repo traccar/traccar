@@ -15,14 +15,15 @@
  */
 package org.traccar;
 
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.oneone.OneToOneEncoder;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelOutboundHandlerAdapter;
+import io.netty.channel.ChannelPromise;
 import org.traccar.helper.Log;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
 
-public abstract class BaseProtocolEncoder extends OneToOneEncoder {
+public abstract class BaseProtocolEncoder extends ChannelOutboundHandlerAdapter {
 
     protected String getUniqueId(long deviceId) {
         return Context.getIdentityManager().getById(deviceId).getUniqueId();
@@ -41,15 +42,14 @@ public abstract class BaseProtocolEncoder extends OneToOneEncoder {
     }
 
     @Override
-    protected Object encode(ChannelHandlerContext ctx, Channel channel, Object msg) throws Exception {
+    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
 
         if (msg instanceof Command) {
             Command command = (Command) msg;
-            Object encodedCommand = encodeCommand(channel, command);
+            Object encodedCommand = encodeCommand(ctx.channel(), command);
 
-            // Log command
             StringBuilder s = new StringBuilder();
-            s.append(String.format("[%08X] ", channel.getId()));
+            s.append("[").append(ctx.channel().id().asShortText()).append("] ");
             s.append("id: ").append(getUniqueId(command.getDeviceId())).append(", ");
             s.append("command type: ").append(command.getType()).append(" ");
             if (encodedCommand != null) {
@@ -59,10 +59,10 @@ public abstract class BaseProtocolEncoder extends OneToOneEncoder {
             }
             Log.info(s.toString());
 
-            return encodedCommand;
+            super.write(ctx, encodedCommand, promise);
         }
 
-        return msg;
+        super.write(ctx, msg, promise);
     }
 
     protected Object encodeCommand(Channel channel, Command command) {

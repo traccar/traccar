@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,15 @@
  */
 package org.traccar;
 
-import org.jboss.netty.channel.ChannelEvent;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelUpstreamHandler;
-import org.jboss.netty.channel.Channels;
-import org.jboss.netty.channel.MessageEvent;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.traccar.geocoder.Geocoder;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
-public class GeocoderHandler implements ChannelUpstreamHandler {
+@ChannelHandler.Sharable
+public class GeocoderHandler extends ChannelInboundHandlerAdapter {
 
     private final Geocoder geocoder;
     private final boolean processInvalidPositions;
@@ -38,14 +37,7 @@ public class GeocoderHandler implements ChannelUpstreamHandler {
     }
 
     @Override
-    public void handleUpstream(final ChannelHandlerContext ctx, ChannelEvent evt) throws Exception {
-        if (!(evt instanceof MessageEvent)) {
-            ctx.sendUpstream(evt);
-            return;
-        }
-
-        final MessageEvent event = (MessageEvent) evt;
-        Object message = event.getMessage();
+    public void channelRead(final ChannelHandlerContext ctx, Object message) throws Exception {
         if (message instanceof Position) {
             final Position position = (Position) message;
             if (processInvalidPositions || position.getValid()) {
@@ -54,7 +46,7 @@ public class GeocoderHandler implements ChannelUpstreamHandler {
                     if (lastPosition != null && lastPosition.getAddress() != null
                             && position.getDouble(Position.KEY_DISTANCE) <= geocoderReuseDistance) {
                         position.setAddress(lastPosition.getAddress());
-                        Channels.fireMessageReceived(ctx, position, event.getRemoteAddress());
+                        ctx.fireChannelRead(position);
                         return;
                     }
                 }
@@ -66,20 +58,20 @@ public class GeocoderHandler implements ChannelUpstreamHandler {
                     @Override
                     public void onSuccess(String address) {
                         position.setAddress(address);
-                        Channels.fireMessageReceived(ctx, position, event.getRemoteAddress());
+                        ctx.fireChannelRead(position);
                     }
 
                     @Override
                     public void onFailure(Throwable e) {
                         Log.warning("Geocoding failed", e);
-                        Channels.fireMessageReceived(ctx, position, event.getRemoteAddress());
+                        ctx.fireChannelRead(position);
                     }
                 });
             } else {
-                Channels.fireMessageReceived(ctx, position, event.getRemoteAddress());
+                ctx.fireChannelRead(position);
             }
         } else {
-            Channels.fireMessageReceived(ctx, message, event.getRemoteAddress());
+            ctx.fireChannelRead(message);
         }
     }
 

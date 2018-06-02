@@ -15,16 +15,9 @@
  */
 package org.traccar;
 
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
-import org.jboss.netty.handler.codec.http.HttpHeaders;
-import org.jboss.netty.handler.codec.http.HttpResponse;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.jboss.netty.handler.codec.http.HttpVersion;
+public abstract class BaseHttpProtocolDecoder /*extends BaseProtocolDecoder*/ { // TODO implement later
 
-public abstract class BaseHttpProtocolDecoder extends BaseProtocolDecoder {
-
-    public BaseHttpProtocolDecoder(Protocol protocol) {
+    /*public BaseHttpProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
@@ -34,6 +27,6 @@ public abstract class BaseHttpProtocolDecoder extends BaseProtocolDecoder {
             response.headers().add(HttpHeaders.Names.CONTENT_LENGTH, 0);
             channel.write(response);
         }
-    }
+    }*/
 
 }

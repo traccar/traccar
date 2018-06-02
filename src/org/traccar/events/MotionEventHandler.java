@@ -19,6 +19,7 @@ package org.traccar.events;
 import java.util.Collections;
 import java.util.Map;
 
+import io.netty.channel.ChannelHandler;
 import org.traccar.BaseEventHandler;
 import org.traccar.Context;
 import org.traccar.model.Device;
@@ -28,6 +29,7 @@ import org.traccar.model.Position;
 import org.traccar.reports.ReportUtils;
 import org.traccar.reports.model.TripsConfig;
 
+@ChannelHandler.Sharable
 public class MotionEventHandler extends BaseEventHandler {
 
     private TripsConfig tripsConfig;
