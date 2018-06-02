@@ -5,18 +5,14 @@ import java.util.Set;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
-import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
+import javax.ws.rs.client.AsyncInvoker;
+import javax.ws.rs.client.Entity;
 
 public class JsonTypeEventForwarder extends EventForwarder {
 
     @Override
-    protected String getContentType() {
-        return "application/json; charset=utf-8";
-    }
-
-    @Override
-    protected void setContent(Event event, Position position, Set<Long> users, BoundRequestBuilder requestBuilder) {
-        requestBuilder.setBody(prepareJsonPayload(event, position, users));
+    protected void executeRequest(Event event, Position position, Set<Long> users, AsyncInvoker invoker) {
+        invoker.post(Entity.json(preparePayload(event, position, users)));
     }
 
 }

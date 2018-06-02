@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,12 @@
  */
 package org.traccar.geolocation;
 
-import com.ning.http.client.AsyncCompletionHandler;
-import com.ning.http.client.Response;
 import org.traccar.Context;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 
-import javax.json.Json;
 import javax.json.JsonObject;
-import javax.json.JsonReader;
+import javax.ws.rs.client.InvocationCallback;
 
 public class OpenCellIdGeolocationProvider implements GeolocationProvider {
 
@@ -45,25 +42,21 @@ public class OpenCellIdGeolocationProvider implements GeolocationProvider {
             String request = String.format(url, cellTower.getMobileCountryCode(), cellTower.getMobileNetworkCode(),
                     cellTower.getLocationAreaCode(), cellTower.getCellId());
 
-            Context.getAsyncHttpClient().prepareGet(request).execute(new AsyncCompletionHandler() {
+            Context.getClient().target(request).request().async().get(new InvocationCallback<JsonObject>() {
                 @Override
-                public Object onCompleted(Response response) throws Exception {
-                    try (JsonReader reader = Json.createReader(response.getResponseBodyAsStream())) {
-                        JsonObject json = reader.readObject();
-                        if (json.containsKey("lat") && json.containsKey("lon")) {
-                            callback.onSuccess(
-                                    json.getJsonNumber("lat").doubleValue(),
-                                    json.getJsonNumber("lon").doubleValue(), 0);
-                        } else {
-                            callback.onFailure(new GeolocationException("Coordinates are missing"));
-                        }
+                public void completed(JsonObject json) {
+                    if (json.containsKey("lat") && json.containsKey("lon")) {
+                        callback.onSuccess(
+                                json.getJsonNumber("lat").doubleValue(),
+                                json.getJsonNumber("lon").doubleValue(), 0);
+                    } else {
+                        callback.onFailure(new GeolocationException("Coordinates are missing"));
                     }
-                    return null;
                 }
 
                 @Override
-                public void onThrowable(Throwable t) {
-                    callback.onFailure(t);
+                public void failed(Throwable throwable) {
+                    callback.onFailure(throwable);
                 }
             });
 

@@ -17,13 +17,14 @@ package org.traccar;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.ning.http.client.AsyncHttpClient;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Properties;
 
-import com.ning.http.client.AsyncHttpClientConfigDefaults;
+import com.fasterxml.jackson.datatype.jsr353.JSR353Module;
+import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import org.apache.velocity.app.VelocityEngine;
 import org.eclipse.jetty.util.URIUtil;
 import org.traccar.database.CalendarManager;
@@ -76,10 +77,12 @@ import org.traccar.geolocation.MozillaGeolocationProvider;
 import org.traccar.geolocation.OpenCellIdGeolocationProvider;
 import org.traccar.notification.EventForwarder;
 import org.traccar.notification.JsonTypeEventForwarder;
-import org.traccar.notification.MultiPartEventForwarder;
 import org.traccar.reports.model.TripsConfig;
 import org.traccar.smpp.SmppClient;
 import org.traccar.web.WebServer;
+
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
 
 public final class Context {
 
@@ -209,15 +212,10 @@ public final class Context {
         return velocityEngine;
     }
 
-    private static AsyncHttpClient asyncHttpClient;
+    private static Client client = ClientBuilder.newClient();
 
-    static {
-        System.setProperty(AsyncHttpClientConfigDefaults.ASYNC_CLIENT + "userAgent", USER_AGENT);
-        asyncHttpClient = new AsyncHttpClient();
-    }
-
-    public static AsyncHttpClient getAsyncHttpClient() {
-        return asyncHttpClient;
+    public static Client getClient() {
+        return client;
     }
 
     private static EventForwarder eventForwarder;
@@ -343,11 +341,17 @@ public final class Context {
         }
 
         objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JSR353Module());
         objectMapper.setConfig(
                 objectMapper.getSerializationConfig().without(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS));
         if (Context.getConfig().getBoolean("mapper.prettyPrintedJson")) {
             objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         }
+
+        JacksonJsonProvider jsonProvider =
+                new JacksonJaxbJsonProvider(objectMapper, JacksonJaxbJsonProvider.DEFAULT_ANNOTATIONS);
+        client = ClientBuilder.newClient().register(jsonProvider);
+
 
         if (config.hasKey("database.url")) {
             dataManager = new DataManager(config);
@@ -392,11 +396,7 @@ public final class Context {
         serverManager = new ServerManager();
 
         if (config.getBoolean("event.forward.enable")) {
-            if (Context.getConfig().getBoolean("event.forward.payloadAsParamMode")) {
-                eventForwarder = new MultiPartEventForwarder();
-            } else {
-                eventForwarder = new JsonTypeEventForwarder();
-            }
+            eventForwarder = new JsonTypeEventForwarder();
         }
 
         attributesManager = new AttributesManager(dataManager);
@@ -471,6 +471,10 @@ public final class Context {
     public static void init(IdentityManager testIdentityManager) {
         config = new Config();
         objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JSR353Module());
+        JacksonJsonProvider jsonProvider =
+                new JacksonJaxbJsonProvider(objectMapper, JacksonJaxbJsonProvider.DEFAULT_ANNOTATIONS);
+        client = ClientBuilder.newClient().register(jsonProvider);
         identityManager = testIdentityManager;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,13 @@
  */
 package org.traccar.geolocation;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.ning.http.client.AsyncCompletionHandler;
-import com.ning.http.client.Response;
 import org.traccar.Context;
 import org.traccar.model.Network;
 
-import javax.json.Json;
 import javax.json.JsonObject;
-import javax.json.JsonReader;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
+import javax.ws.rs.client.AsyncInvoker;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.InvocationCallback;
 
 public class UniversalGeolocationProvider implements GeolocationProvider {
 
@@ -37,38 +33,26 @@ public class UniversalGeolocationProvider implements GeolocationProvider {
 
     @Override
     public void getLocation(Network network, final LocationProviderCallback callback) {
-        try {
-            String request = Context.getObjectMapper().writeValueAsString(network);
-            Context.getAsyncHttpClient().preparePost(url)
-                    .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
-                    .setHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(request.length()))
-                    .setBody(request).execute(new AsyncCompletionHandler() {
-                @Override
-                public Object onCompleted(Response response) throws Exception {
-                    try (JsonReader reader = Json.createReader(response.getResponseBodyAsStream())) {
-                        JsonObject json = reader.readObject();
-                        if (json.containsKey("error")) {
-                            callback.onFailure(
-                                    new GeolocationException(json.getJsonObject("error").getString("message")));
-                        } else {
-                            JsonObject location = json.getJsonObject("location");
-                            callback.onSuccess(
-                                    location.getJsonNumber("lat").doubleValue(),
-                                    location.getJsonNumber("lng").doubleValue(),
-                                    json.getJsonNumber("accuracy").doubleValue());
-                        }
-                    }
-                    return null;
+        AsyncInvoker invoker = Context.getClient().target(url).request().async();
+        invoker.post(Entity.json(network), new InvocationCallback<JsonObject>() {
+            @Override
+            public void completed(JsonObject json) {
+                if (json.containsKey("error")) {
+                    callback.onFailure(new GeolocationException(json.getJsonObject("error").getString("message")));
+                } else {
+                    JsonObject location = json.getJsonObject("location");
+                    callback.onSuccess(
+                            location.getJsonNumber("lat").doubleValue(),
+                            location.getJsonNumber("lng").doubleValue(),
+                            json.getJsonNumber("accuracy").doubleValue());
                 }
+            }
 
-                @Override
-                public void onThrowable(Throwable t) {
-                    callback.onFailure(t);
-                }
-            });
-        } catch (JsonProcessingException e) {
-            callback.onFailure(e);
-        }
+            @Override
+            public void failed(Throwable throwable) {
+                callback.onFailure(throwable);
+            }
+        });
     }
 
 }
