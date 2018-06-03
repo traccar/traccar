@@ -317,7 +317,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         List<Position> relevantPositionsListForAverages =
                 getRelevantPositionsSubList(positionsForDeviceSensor,
                                             position,
-                                            minValuesForMovingAvg);
+                                            minValuesForMovingAvg - 1);
 
         double currentFuelLevelAverage = getAverageValue(position, relevantPositionsListForAverages);
 
@@ -420,42 +420,8 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
 
     private List<Position> getRelevantPositionsSubList(TreeMultiset<Position> positionsForSensor,
-                                                                       Position position,
-                                                                       int minListSize) {
-
-        // Very specific to iTriangle. Make this more generic.
-        if ((int) position.getAttributes().get("event") >= 100) {
-
-            Position fromPosition = new Position();
-            fromPosition.setDeviceTime(getAdjustedDate(position.getDeviceTime(),
-                                                       Calendar.SECOND,
-                                                       -storedEventLookAroundSeconds));
-
-            Position toPosition = new Position();
-            toPosition.setDeviceTime(getAdjustedDate(position.getDeviceTime(),
-                                                     Calendar.SECOND,
-                                                     storedEventLookAroundSeconds));
-
-            List<Position> listToReturn = positionsForSensor.subMultiset(fromPosition,
-                                                                         BoundType.OPEN,
-                                                                         toPosition,
-                                                                         BoundType.CLOSED)
-                                                            .stream()
-                                                            .collect(Collectors.toList());
-
-            if (listToReturn.size() <= minListSize) {
-                Log.debug("[RELEVANT_SUBLIST] STORED DATA relevant list size: " + listToReturn.size());
-                return listToReturn;
-            }
-
-            int listMidIndex = (listToReturn.size() - 1) / 2;
-            int listStartIndex = listMidIndex - (minListSize / 2);
-            int listEndIndex = listMidIndex + (minListSize / 2);
-
-            List<Position> sublist = listToReturn.subList(listStartIndex, listEndIndex);
-            Log.debug("[RELEVANT_SUBLIST] STORED DATA relevant list size: " + sublist.size());
-            return sublist;
-        }
+                                                       Position position,
+                                                       int minListSize) {
 
         if (positionsForSensor.size() <= minListSize) {
             return positionsForSensor.stream()
@@ -481,7 +447,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
         List<Position> sublistToReturn =  positionsSubset.stream()
                                                          .collect(Collectors.toList())
-                                                         .subList(listMaxIndex - minListSize + 1, listMaxIndex);
+                                                         .subList(listMaxIndex - minListSize, listMaxIndex);
 
         Log.debug("[RELEVANT_SUBLIST] sublist size: " + sublistToReturn.size());
 
