@@ -29,31 +29,23 @@ import org.traccar.helper.UnitsConverter;
 
 public class SviasProtocolDecoder extends BaseProtocolDecoder {
 
+    public static final String MSG_KEEPALIVE = "@";
+
     public SviasProtocolDecoder(SviasProtocol protocol) {
         super(protocol);
     }
 
-    private void sendResponse(Channel channel, String prefix) {
-        if (channel != null) {
-            channel.write(prefix);
-        }
+    private double convertCoordinates(long v) {
+        return Double.valueOf(((float) ((((float) v / 1.0E7F)
+                - ((int) (v / 10000000L))) * 1.6666666666666667D)) + ((int) (v / 10000000L)));
     }
 
-    private double convertCoordinates(long v) {
-        float a = (float) v / 1.0E7F;
-        int b = (int) (v / 10000000L);
-        float c = a - b;
-        float d = (float) (c * 1.6666666666666667D);
-        int e = (int) (v / 10000000L);
-        float f = d + e;
-
-        return Double.valueOf(f);
-
+    private String toBin(String v) {
+        return Integer.toString(Integer.parseInt(v), 2);
     }
 
     private Position decodePosition(Channel channel, SocketAddress remoteAddress, String substring)
             throws ParseException {
-        int index = 0;
 
         String[] values = substring.split(",");
 
@@ -66,57 +58,40 @@ public class SviasProtocolDecoder extends BaseProtocolDecoder {
         position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        String versionHw = values[index++].replaceAll("[^0-9]", "");
-        String versionSw = values[index++];
+        position.set(Position.KEY_INDEX, Integer.valueOf(values[2]));
 
-        position.set(Position.KEY_INDEX, Integer.valueOf(values[index++]));
-
-        String imei = values[index++];
-        position.set(Position.KEY_TYPE, values[index++]);
+        position.set(Position.KEY_TYPE, values[4]);
 
         DateFormat dateFormat = new SimpleDateFormat("ddMMyyHHmmss");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
-        String date = String.format("%06d", Integer.parseInt(values[index++]));
-        String time = String.format("%06d", Integer.parseInt(values[index++]));
+        String date = String.format("%06d", Integer.parseInt(values[5]));
+        String time = String.format("%06d", Integer.parseInt(values[6]));
 
         position.setTime(dateFormat.parse(date + time));
 
-        position.setLatitude(convertCoordinates(Long.valueOf(values[index++])));
-        position.setLongitude(convertCoordinates(Long.valueOf(values[index++])));
+        position.setLatitude(convertCoordinates(Long.valueOf(values[7])));
+        position.setLongitude(convertCoordinates(Long.valueOf(values[8])));
 
-        position.setSpeed(UnitsConverter.knotsFromKph(Integer.valueOf(values[index++]) / 100));
-        position.setCourse(Integer.valueOf(values[index++]) / 100);
+        position.setSpeed(UnitsConverter.knotsFromKph(Integer.valueOf(values[9]) / 100));
+        position.setCourse(Integer.valueOf(values[10]) / 100);
 
-        position.set(Position.KEY_ODOMETER, Integer.valueOf(values[index++]));
+        position.set(Position.KEY_ODOMETER, Integer.valueOf(values[11]));
 
         String input = new StringBuilder(String.format("%08d",
-                Integer.parseInt(values[index++]))).reverse().toString();
+                Integer.parseInt(toBin(values[12])))).reverse().toString();
 
         String output = new StringBuilder(String.format("%08d",
-                Integer.parseInt(values[index++]))).reverse().toString();
+                Integer.parseInt(toBin(values[13])))).reverse().toString();
 
-        if (input.substring(0).equals("1")) {
-            position.set(Position.KEY_ALARM, Position.ALARM_SOS);
-        }
-        position.set(Position.KEY_IGNITION, input.substring(4).equals("1"));
+        position.set(Position.KEY_ALARM, (input.substring(0, 1).equals("1") ? Position.ALARM_SOS : null));
 
-        position.setValid(output.substring(0).equals("1"));
+        position.set(Position.KEY_IGNITION, input.substring(4, 5).equals("1"));
 
-        position.set(Position.KEY_POWER, Integer.valueOf(values[index++]) / 100);
-
-        position.set(Position.KEY_BATTERY_LEVEL, Double.parseDouble(values[index++]));
-
-        position.set(Position.KEY_RSSI, Integer.valueOf(values[index++]));
-
-        if (values.length == 22) {
-            String driverUniqueId = values[index++];
-            if (!driverUniqueId.isEmpty()) {
-                position.set(Position.KEY_DRIVER_UNIQUE_ID, driverUniqueId);
-            }
-        }
+        position.setValid(output.substring(0, 1).equals("1"));
 
         return position;
+
     }
 
     @Override
@@ -125,24 +100,17 @@ public class SviasProtocolDecoder extends BaseProtocolDecoder {
 
         String sentence = (String) msg;
 
-        if (sentence.contains(":")) {
-
-            String[] values = sentence.substring(1).split(":");
-
-            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, values[1]);
-
-            if (deviceSession != null) {
-                sendResponse(channel, "@");
-            }
-
-        } else {
+        if (!sentence.contains(":")) {
 
             Position position = decodePosition(channel, remoteAddress, sentence.substring(1));
 
             if (position != null) {
-                sendResponse(channel, "@");
                 return position;
             }
+        }
+
+        if (channel != null) {
+            channel.write(MSG_KEEPALIVE);
         }
 
         return null;
