@@ -19,7 +19,7 @@
     <entry key='logger.file'>./logs/tracker-server.log</entry>
 
     <entry key='filter.enable'>true</entry>
-    <entry key='filter.future'>3600</entry>
+    <entry key='filter.future'>86400</entry>
 
     <entry key='event.enable'>true</entry>
     <entry key='event.ignoreDuplicateAlerts'>true</entry>
