@@ -317,7 +317,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         List<Position> relevantPositionsListForAverages =
                 getRelevantPositionsSubList(positionsForDeviceSensor,
                                             position,
-                                            minValuesForMovingAvg);
+                                            minValuesForMovingAvg - 1);
 
         double currentFuelLevelAverage = getAverageValue(position, relevantPositionsListForAverages);
 
