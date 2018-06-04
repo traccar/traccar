@@ -21,10 +21,9 @@ import org.jboss.netty.handler.codec.string.StringDecoder;
 import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.TrackerServer;
-import org.traccar.model.Command;
 
 import java.util.List;
-import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
+import org.traccar.model.Command;
 
 public class SviasProtocol extends BaseProtocol {
 
@@ -41,18 +40,9 @@ public class SviasProtocol extends BaseProtocol {
                 Command.TYPE_ALARM_REMOVE);
     }
 
-   @Override
+    @Override
     public void initTrackerServers(List<TrackerServer> serverList) {
         serverList.add(new TrackerServer(new ServerBootstrap(), getName()) {
-            @Override
-            protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectEncoder", new SviasProtocolEncoder());
-                pipeline.addLast("objectDecoder", new SviasProtocolDecoder(SviasProtocol.this));
-            }
-        });
-        serverList.add(new TrackerServer(new ConnectionlessBootstrap(), getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("stringEncoder", new StringEncoder());
