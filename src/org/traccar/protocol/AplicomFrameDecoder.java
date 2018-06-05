@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,25 +15,25 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.frame.FrameDecoder;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.ByteToMessageDecoder;
 
-public class AplicomFrameDecoder extends FrameDecoder {
+import java.util.List;
+
+public class AplicomFrameDecoder extends ByteToMessageDecoder {
 
     @Override
-    protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
+    protected void decode(ChannelHandlerContext ctx, ByteBuf buf, List<Object> out) throws Exception {
 
         // Skip Alive message
-        while (buf.readable() && Character.isDigit(buf.getByte(buf.readerIndex()))) {
+        while (buf.isReadable() && Character.isDigit(buf.getByte(buf.readerIndex()))) {
             buf.readByte();
         }
 
         // Check minimum length
         if (buf.readableBytes() < 11) {
-            return null;
+            return;
         }
 
         // Read flags
@@ -53,10 +53,8 @@ public class AplicomFrameDecoder extends FrameDecoder {
 
         // Return buffer
         if (buf.readableBytes() >= length) {
-            return buf.readBytes(length);
+            out.add(buf.readBytes(length));
         }
-
-        return null;
     }
 
 }
