@@ -3,6 +3,9 @@ package org.traccar;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.http.DefaultFullHttpRequest;
+import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.HttpVersion;
 import org.traccar.helper.DataConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Command;
@@ -59,20 +62,17 @@ public class ProtocolTest extends BaseTest {
         return Unpooled.copiedBuffer(concatenateStrings(data), StandardCharsets.ISO_8859_1);
     }
 
-    // TODO handle HTTP methods
-    /*protected DefaultHttpRequest request(String url) {
+    protected DefaultFullHttpRequest request(String url) {
         return request(HttpMethod.GET, url);
     }
 
-    protected DefaultHttpRequest request(HttpMethod method, String url) {
-        return new DefaultHttpRequest(HttpVersion.HTTP_1_1, method, url);
+    protected DefaultFullHttpRequest request(HttpMethod method, String url) {
+        return new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, url);
     }
 
-    protected DefaultHttpRequest request(HttpMethod method, String url, ByteBuf data) {
-        DefaultHttpRequest request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, method, url);
-        request.setContent(data);
-        return request;
-    }*/
+    protected DefaultFullHttpRequest request(HttpMethod method, String url, ByteBuf data) {
+        return new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, url, data);
+    }
 
     protected void verifyNotNull(BaseProtocolDecoder decoder, Object object) throws Exception {
         assertNotNull(decoder.decode(null, null, object));

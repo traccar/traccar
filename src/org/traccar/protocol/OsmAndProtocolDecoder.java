@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,10 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.jboss.netty.handler.codec.http.QueryStringDecoder;
+import io.netty.channel.Channel;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.QueryStringDecoder;
 import org.joda.time.format.ISODateTimeFormat;
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.DeviceSession;
@@ -42,15 +42,14 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
     }
 
     @Override
-    protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+    protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        HttpRequest request = (HttpRequest) msg;
-        QueryStringDecoder decoder = new QueryStringDecoder(request.getUri());
-        Map<String, List<String>> params = decoder.getParameters();
+        FullHttpRequest request = (FullHttpRequest) msg;
+        QueryStringDecoder decoder = new QueryStringDecoder(request.uri());
+        Map<String, List<String>> params = decoder.parameters();
         if (params.isEmpty()) {
-            decoder = new QueryStringDecoder(request.getContent().toString(StandardCharsets.US_ASCII), false);
-            params = decoder.getParameters();
+            decoder = new QueryStringDecoder(request.content().toString(StandardCharsets.US_ASCII), false);
+            params = decoder.parameters();
         }
 
         Position position = new Position(getProtocolName());
