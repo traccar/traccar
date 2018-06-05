@@ -15,20 +15,10 @@
  */
 package org.traccar;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.ChannelHandler;
 
-import java.nio.charset.StandardCharsets;
+public interface PipelineBuilder {
 
-public class AdvancedStringDecoder extends ChannelInboundHandlerAdapter {
-
-    @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        NetworkMessage networkMessage = (NetworkMessage) msg;
-        ByteBuf buf = (ByteBuf) networkMessage.getMessage();
-        ctx.fireChannelRead(new NetworkMessage(
-                buf.toString(StandardCharsets.US_ASCII), networkMessage.getRemoteAddress()));
-    }
+    void addLast(String name, ChannelHandler handler);
 
 }

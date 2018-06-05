@@ -21,7 +21,9 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandler;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOutboundHandler;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.ChannelPromise;
 import io.netty.channel.socket.DatagramChannel;
@@ -226,11 +228,11 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
         }
     }
 
-    protected abstract void addProtocolHandlers(ChannelPipeline pipeline);
+    protected abstract void addProtocolHandlers(PipelineBuilder pipeline);
 
     @Override
     protected void initChannel(Channel channel) throws Exception {
-        ChannelPipeline pipeline = channel.pipeline();
+        final ChannelPipeline pipeline = channel.pipeline();
         if (timeout > 0 && !server.isDatagram()) {
             pipeline.addLast("idleHandler", new IdleStateHandler(timeout, 0, 0));
         }
@@ -240,7 +242,19 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
             pipeline.addLast("logger", new StandardLoggingHandler());
         }
 
-        addProtocolHandlers(pipeline);
+        addProtocolHandlers(new PipelineBuilder() {
+            @Override
+            public void addLast(String name, ChannelHandler handler) {
+                if (!(handler instanceof BaseProtocolDecoder || handler instanceof BaseProtocolEncoder)) {
+                    if (handler instanceof ChannelInboundHandler) {
+                        handler = new WrapperInboundHandler((ChannelInboundHandler) handler);
+                    } else {
+                        handler = new WrapperOutboundHandler((ChannelOutboundHandler) handler);
+                    }
+                }
+                pipeline.addLast(name, handler);
+            }
+        });
 
         if (geolocationHandler != null) {
             pipeline.addLast("location", geolocationHandler);

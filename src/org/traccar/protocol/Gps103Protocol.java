@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,14 @@
  */
 package org.traccar.protocol;
 
-import io.netty.channel.ChannelPipeline;
-import org.traccar.AdvancedStringDecoder;
-import org.traccar.AdvancedStringEncoder;
+import io.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.CharacterDelimiterFrameDecoder;
+import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.WrapperInboundHandler;
+import org.traccar.WrapperOutboundHandler;
 import org.traccar.model.Command;
 
 import java.util.List;
@@ -45,19 +47,19 @@ public class Gps103Protocol extends BaseProtocol {
     public void initTrackerServers(List<TrackerServer> serverList) {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(ChannelPipeline pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(2048, "\r\n", "\n", ";"));
-                pipeline.addLast("stringEncoder", new AdvancedStringEncoder());
-                pipeline.addLast("stringDecoder", new AdvancedStringDecoder());
+                pipeline.addLast("stringEncoder", new WrapperOutboundHandler(new StringEncoder()));
+                pipeline.addLast("stringDecoder", new WrapperInboundHandler(new StringDecoder()));
                 pipeline.addLast("objectEncoder", new Gps103ProtocolEncoder());
                 pipeline.addLast("objectDecoder", new Gps103ProtocolDecoder(Gps103Protocol.this));
             }
         });
         serverList.add(new TrackerServer(true, getName()) {
             @Override
-            protected void addProtocolHandlers(ChannelPipeline pipeline) {
-                pipeline.addLast("stringEncoder", new AdvancedStringEncoder());
-                pipeline.addLast("stringDecoder", new AdvancedStringDecoder());
+            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+                pipeline.addLast("stringEncoder", new StringEncoder());
+                pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("objectEncoder", new Gps103ProtocolEncoder());
                 pipeline.addLast("objectDecoder", new Gps103ProtocolDecoder(Gps103Protocol.this));
             }
