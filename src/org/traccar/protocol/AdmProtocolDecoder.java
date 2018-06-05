@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
@@ -38,7 +38,7 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_PHOTO = 0x0A;
     public static final int MSG_ADM5 = 0x01;
 
-    private Position decodeData(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf, int type) {
+    private Position decodeData(Channel channel, SocketAddress remoteAddress, ByteBuf buf, int type) {
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
         if (deviceSession == null) {
@@ -50,25 +50,25 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceId(deviceSession.getDeviceId());
 
             position.set(Position.KEY_VERSION_FW, buf.readUnsignedByte());
-            position.set(Position.KEY_INDEX, buf.readUnsignedShort());
+            position.set(Position.KEY_INDEX, buf.readUnsignedShortLE());
 
-            int status = buf.readUnsignedShort();
+            int status = buf.readUnsignedShortLE();
             position.set(Position.KEY_STATUS, status);
             position.setValid(!BitUtil.check(status, 5));
-            position.setLatitude(buf.readFloat());
-            position.setLongitude(buf.readFloat());
-            position.setCourse(buf.readUnsignedShort() * 0.1);
-            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort() * 0.1));
+            position.setLatitude(buf.readFloatLE());
+            position.setLongitude(buf.readFloatLE());
+            position.setCourse(buf.readUnsignedShortLE() * 0.1);
+            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShortLE() * 0.1));
 
             position.set(Position.KEY_ACCELERATION, buf.readUnsignedByte() * 0.1);
-            position.setAltitude(buf.readUnsignedShort());
+            position.setAltitude(buf.readUnsignedShortLE());
             position.set(Position.KEY_HDOP, buf.readUnsignedByte() * 0.1);
             position.set(Position.KEY_SATELLITES, buf.readUnsignedByte() & 0x0f);
 
-            position.setTime(new Date(buf.readUnsignedInt() * 1000));
+            position.setTime(new Date(buf.readUnsignedIntLE() * 1000));
 
-            position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.001);
-            position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
+            position.set(Position.KEY_POWER, buf.readUnsignedShortLE() * 0.001);
+            position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.001);
 
             if (BitUtil.check(type, 2)) {
                 buf.readUnsignedByte(); // vib
@@ -84,19 +84,19 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
 
             if (BitUtil.check(type, 3)) {
                 for (int i = 1; i <= 6; i++) {
-                    position.set(Position.PREFIX_ADC + i, buf.readUnsignedShort() * 0.001);
+                    position.set(Position.PREFIX_ADC + i, buf.readUnsignedShortLE() * 0.001);
                 }
             }
 
             if (BitUtil.check(type, 4)) {
                 for (int i = 1; i <= 2; i++) {
-                    position.set(Position.PREFIX_COUNT + i, buf.readUnsignedInt());
+                    position.set(Position.PREFIX_COUNT + i, buf.readUnsignedIntLE());
                 }
             }
 
             if (BitUtil.check(type, 5)) {
                 for (int i = 1; i <= 3; i++) {
-                    buf.readUnsignedShort(); // fuel level
+                    buf.readUnsignedShortLE(); // fuel level
                 }
                 for (int i = 1; i <= 3; i++) {
                     position.set(Position.PREFIX_TEMP + i, buf.readUnsignedByte());
@@ -108,7 +108,7 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (BitUtil.check(type, 7)) {
-                position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+                position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
             }
 
             return position;
@@ -117,7 +117,7 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
-    private Position parseCommandResponse(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
+    private Position parseCommandResponse(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
         if (deviceSession == null) {
             return null;
@@ -139,9 +139,9 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
 
     @Override
     protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
-        buf.readUnsignedShort(); // device id
+        buf.readUnsignedShortLE(); // device id
 
         int size = buf.readUnsignedByte();
         if (size != CMD_RESPONSE_SIZE) {

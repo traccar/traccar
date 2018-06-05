@@ -15,10 +15,11 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -302,7 +303,7 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
             if (channel != null) {
                 String password = Context.getIdentityManager().lookupAttributeString(
                         position.getDeviceId(), getProtocolName() + ".language", "aquila123", true);
-                channel.write("#set$" + id + "@" + password + "#EMR_MODE:0*");
+                channel.write(new NetworkMessage("#set$" + id + "@" + password + "#EMR_MODE:0*", remoteAddress));
             }
         }
 

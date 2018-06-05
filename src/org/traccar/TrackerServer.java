@@ -19,7 +19,6 @@ import io.netty.bootstrap.AbstractBootstrap;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelPipeline;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
@@ -53,14 +52,14 @@ public abstract class TrackerServer {
         if (datagram) {
 
             this.bootstrap = new Bootstrap()
-                    .group(GlobalChannelFactory.getWorkerGroup())
+                    .group(EventLoopGroupFactory.getWorkerGroup())
                     .channel(NioDatagramChannel.class)
                     .handler(pipelineFactory);
 
         } else {
 
             this.bootstrap = new ServerBootstrap()
-                    .group(GlobalChannelFactory.getBossGroup(), GlobalChannelFactory.getWorkerGroup())
+                    .group(EventLoopGroupFactory.getBossGroup(), EventLoopGroupFactory.getWorkerGroup())
                     .channel(NioServerSocketChannel.class)
                     .childHandler(pipelineFactory);
 

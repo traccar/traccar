@@ -15,19 +15,22 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.frame.FrameDecoder;
-import org.traccar.helper.StringFinder;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import org.traccar.BaseFrameDecoder;
 
-public class AtrackFrameDecoder extends FrameDecoder {
+import java.nio.charset.StandardCharsets;
+
+public class AtrackFrameDecoder extends BaseFrameDecoder {
 
     private static final int KEEPALIVE_LENGTH = 12;
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
+            ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
         if (buf.readableBytes() >= 2) {
 
@@ -48,7 +51,8 @@ public class AtrackFrameDecoder extends FrameDecoder {
 
             } else {
 
-                int endIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), new StringFinder("\r\n"));
+                ByteBuf delimiter = Unpooled.wrappedBuffer("\r\n".getBytes(StandardCharsets.US_ASCII));
+                int endIndex = ByteBufUtil.indexOf(delimiter, buf);
                 if (endIndex > 0) {
                     return buf.readBytes(endIndex - buf.readerIndex() + 2);
                 }

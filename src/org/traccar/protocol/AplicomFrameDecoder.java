@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,15 @@
 package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.ByteToMessageDecoder;
+import org.traccar.BaseFrameDecoder;
 
-import java.util.List;
-
-public class AplicomFrameDecoder extends ByteToMessageDecoder {
+public class AplicomFrameDecoder extends BaseFrameDecoder {
 
     @Override
-    protected void decode(ChannelHandlerContext ctx, ByteBuf buf, List<Object> out) throws Exception {
+    protected Object decode(
+            ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
         // Skip Alive message
         while (buf.isReadable() && Character.isDigit(buf.getByte(buf.readerIndex()))) {
@@ -33,7 +33,7 @@ public class AplicomFrameDecoder extends ByteToMessageDecoder {
 
         // Check minimum length
         if (buf.readableBytes() < 11) {
-            return;
+            return null;
         }
 
         // Read flags
@@ -53,8 +53,10 @@ public class AplicomFrameDecoder extends ByteToMessageDecoder {
 
         // Return buffer
         if (buf.readableBytes() >= length) {
-            out.add(buf.readBytes(length));
+            return buf.readBytes(length);
         }
+
+        return null;
     }
 
 }

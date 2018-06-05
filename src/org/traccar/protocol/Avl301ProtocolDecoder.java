@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,12 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.DateBuilder;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
@@ -33,7 +34,7 @@ public class Avl301ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private String readImei(ChannelBuffer buf) {
+    private String readImei(ByteBuf buf) {
         int b = buf.readUnsignedByte();
         StringBuilder imei = new StringBuilder();
         imei.append(b & 0x0F);
@@ -51,12 +52,12 @@ public class Avl301ProtocolDecoder extends BaseProtocolDecoder {
 
     private void sendResponse(Channel channel, int type) {
         if (channel != null) {
-            ChannelBuffer response = ChannelBuffers.directBuffer(5);
+            ByteBuf response = Unpooled.buffer(5);
             response.writeByte('$');
             response.writeByte(type);
             response.writeByte('#');
             response.writeByte('\r'); response.writeByte('\n');
-            channel.write(response);
+            channel.write(new NetworkMessage(response, channel.remoteAddress()));
         }
     }
 
@@ -64,7 +65,7 @@ public class Avl301ProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         buf.skipBytes(1); // header
         int type = buf.readUnsignedByte();

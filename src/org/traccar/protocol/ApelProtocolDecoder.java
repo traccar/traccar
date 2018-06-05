@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2014 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,17 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.LinkedList;
@@ -66,24 +66,24 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
     public static final short MSG_GPRS_COMMAND = 180;
 
     private void sendSimpleMessage(Channel channel, short type) {
-        ChannelBuffer request = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, 8);
-        request.writeShort(type);
-        request.writeShort(0);
-        request.writeInt(Checksum.crc32(request.toByteBuffer(0, 4)));
-        channel.write(request);
+        ByteBuf request = Unpooled.buffer(8);
+        request.writeShortLE(type);
+        request.writeShortLE(0);
+        request.writeIntLE(Checksum.crc32(request.nioBuffer(0, 4)));
+        channel.writeAndFlush(new NetworkMessage(request, channel.remoteAddress()));
     }
 
     private void requestArchive(Channel channel) {
         if (lastIndex == 0) {
             lastIndex = newIndex;
         } else if (newIndex > lastIndex) {
-            ChannelBuffer request = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, 14);
-            request.writeShort(MSG_REQUEST_LOG_RECORDS);
-            request.writeShort(6);
-            request.writeInt((int) lastIndex);
-            request.writeShort(512);
-            request.writeInt(Checksum.crc32(request.toByteBuffer(0, 10)));
-            channel.write(request);
+            ByteBuf request = Unpooled.buffer(14);
+            request.writeShortLE(MSG_REQUEST_LOG_RECORDS);
+            request.writeShortLE(6);
+            request.writeIntLE((int) lastIndex);
+            request.writeShortLE(512);
+            request.writeIntLE(Checksum.crc32(request.nioBuffer(0, 10)));
+            channel.writeAndFlush(new NetworkMessage(request, channel.remoteAddress()));
         }
     }
 
@@ -91,11 +91,11 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
-        int type = buf.readUnsignedShort();
+        ByteBuf buf = (ByteBuf) msg;
+        int type = buf.readUnsignedShortLE();
         boolean alarm = (type & 0x8000) != 0;
         type = type & 0x7FFF;
-        buf.readUnsignedShort(); // length
+        buf.readUnsignedShortLE(); // length
 
         if (alarm) {
             sendSimpleMessage(channel, MSG_ACK_ALARM);
@@ -107,15 +107,15 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
 
         if (type == MSG_TRACKER_ID_EXT) {
 
-            buf.readUnsignedInt(); // id
-            int length = buf.readUnsignedShort();
+            buf.readUnsignedIntLE(); // id
+            int length = buf.readUnsignedShortLE();
             buf.skipBytes(length);
-            length = buf.readUnsignedShort();
+            length = buf.readUnsignedShortLE();
             getDeviceSession(channel, remoteAddress, buf.readBytes(length).toString(StandardCharsets.US_ASCII));
 
         } else if (type == MSG_LAST_LOG_INDEX) {
 
-            long index = buf.readUnsignedInt();
+            long index = buf.readUnsignedIntLE();
             if (index > 0) {
                 newIndex = index;
                 requestArchive(channel);
@@ -132,7 +132,7 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
 
             int recordCount = 1;
             if (type == MSG_LOG_RECORDS) {
-                recordCount = buf.readUnsignedShort();
+                recordCount = buf.readUnsignedShortLE();
             }
 
             for (int j = 0; j < recordCount; j++) {
@@ -142,20 +142,20 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
                 int subtype = type;
                 if (type == MSG_LOG_RECORDS) {
                     position.set(Position.KEY_ARCHIVE, true);
-                    lastIndex = buf.readUnsignedInt() + 1;
+                    lastIndex = buf.readUnsignedIntLE() + 1;
                     position.set(Position.KEY_INDEX, lastIndex);
 
-                    subtype = buf.readUnsignedShort();
+                    subtype = buf.readUnsignedShortLE();
                     if (subtype != MSG_CURRENT_GPS_DATA && subtype != MSG_STATE_FULL_INFO_T104) {
-                        buf.skipBytes(buf.readUnsignedShort());
+                        buf.skipBytes(buf.readUnsignedShortLE());
                         continue;
                     }
-                    buf.readUnsignedShort(); // length
+                    buf.readUnsignedShortLE(); // length
                 }
 
-                position.setTime(new Date(buf.readUnsignedInt() * 1000));
-                position.setLatitude(buf.readInt() * 180.0 / 0x7FFFFFFF);
-                position.setLongitude(buf.readInt() * 180.0 / 0x7FFFFFFF);
+                position.setTime(new Date(buf.readUnsignedIntLE() * 1000));
+                position.setLatitude(buf.readIntLE() * 180.0 / 0x7FFFFFFF);
+                position.setLongitude(buf.readIntLE() * 180.0 / 0x7FFFFFFF);
 
                 if (subtype == MSG_STATE_FULL_INFO_T104) {
                     int speed = buf.readUnsignedByte();
@@ -163,36 +163,36 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
                     position.setSpeed(UnitsConverter.knotsFromKph(speed));
                     position.set(Position.KEY_HDOP, buf.readByte());
                 } else {
-                    int speed = buf.readShort();
+                    int speed = buf.readShortLE();
                     position.setValid(speed != -1);
                     position.setSpeed(UnitsConverter.knotsFromKph(speed * 0.01));
                 }
 
-                position.setCourse(buf.readShort() * 0.01);
-                position.setAltitude(buf.readShort());
+                position.setCourse(buf.readShortLE() * 0.01);
+                position.setAltitude(buf.readShortLE());
 
                 if (subtype == MSG_STATE_FULL_INFO_T104) {
 
                     position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());
-                    position.set(Position.KEY_EVENT, buf.readUnsignedShort());
-                    position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+                    position.set(Position.KEY_EVENT, buf.readUnsignedShortLE());
+                    position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
                     position.set(Position.KEY_INPUT, buf.readUnsignedByte());
                     position.set(Position.KEY_OUTPUT, buf.readUnsignedByte());
 
                     for (int i = 1; i <= 8; i++) {
-                        position.set(Position.PREFIX_ADC + i, buf.readUnsignedShort());
+                        position.set(Position.PREFIX_ADC + i, buf.readUnsignedShortLE());
                     }
 
-                    position.set(Position.PREFIX_COUNT + 1, buf.readUnsignedInt());
-                    position.set(Position.PREFIX_COUNT + 2, buf.readUnsignedInt());
-                    position.set(Position.PREFIX_COUNT + 3, buf.readUnsignedInt());
+                    position.set(Position.PREFIX_COUNT + 1, buf.readUnsignedIntLE());
+                    position.set(Position.PREFIX_COUNT + 2, buf.readUnsignedIntLE());
+                    position.set(Position.PREFIX_COUNT + 3, buf.readUnsignedIntLE());
                 }
 
                 positions.add(position);
             }
 
-            buf.readUnsignedInt(); // crc
+            buf.readUnsignedIntLE(); // crc
 
             if (type == MSG_LOG_RECORDS) {
                 requestArchive(channel);

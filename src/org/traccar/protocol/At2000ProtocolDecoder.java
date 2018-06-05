@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,12 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.DataConverter;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -28,7 +29,6 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.net.SocketAddress;
-import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.LinkedList;
@@ -52,11 +52,11 @@ public class At2000ProtocolDecoder extends BaseProtocolDecoder {
 
     private static void sendRequest(Channel channel) {
         if (channel != null) {
-            ChannelBuffer response = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, BLOCK_LENGTH);
+            ByteBuf response = Unpooled.buffer(BLOCK_LENGTH);
             response.writeByte(MSG_TRACK_REQUEST);
-            response.writeMedium(ChannelBuffers.swapMedium(0));
+            response.writeMedium(0);
             response.writerIndex(BLOCK_LENGTH);
-            channel.write(response);
+            channel.write(new NetworkMessage(response, channel.remoteAddress()));
         }
     }
 
@@ -64,14 +64,14 @@ public class At2000ProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         if (buf.getUnsignedByte(buf.readerIndex()) == 0x01) {
             buf.readUnsignedByte(); // codec id
         }
 
         int type = buf.readUnsignedByte();
-        buf.readUnsignedMedium(); // length
+        buf.readUnsignedMediumLE(); // length
         buf.skipBytes(BLOCK_LENGTH - 1 - 3);
 
         if (type == MSG_DEVICE_ID) {
@@ -108,7 +108,7 @@ public class At2000ProtocolDecoder extends BaseProtocolDecoder {
 
             byte[] data = new byte[buf.capacity() - BLOCK_LENGTH];
             buf.readBytes(data);
-            buf = ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, cipher.update(data));
+            buf = Unpooled.wrappedBuffer(cipher.update(data));
 
             List<Position> positions = new LinkedList<>();
 
@@ -117,31 +117,31 @@ public class At2000ProtocolDecoder extends BaseProtocolDecoder {
                 Position position = new Position(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());
 
-                buf.readUnsignedShort(); // index
-                buf.readUnsignedShort(); // reserved
+                buf.readUnsignedShortLE(); // index
+                buf.readUnsignedShortLE(); // reserved
 
                 position.setValid(true);
 
-                position.setTime(new Date(buf.readLong() * 1000));
+                position.setTime(new Date(buf.readLongLE() * 1000));
 
-                position.setLatitude(buf.readFloat());
-                position.setLongitude(buf.readFloat());
-                position.setAltitude(buf.readFloat());
-                position.setSpeed(UnitsConverter.knotsFromKph(buf.readFloat()));
-                position.setCourse(buf.readFloat());
+                position.setLatitude(buf.readFloatLE());
+                position.setLongitude(buf.readFloatLE());
+                position.setAltitude(buf.readFloatLE());
+                position.setSpeed(UnitsConverter.knotsFromKph(buf.readFloatLE()));
+                position.setCourse(buf.readFloatLE());
 
-                buf.readUnsignedInt(); // geozone event
-                buf.readUnsignedInt(); // io events
-                buf.readUnsignedInt(); // geozone value
-                buf.readUnsignedInt(); // io values
-                buf.readUnsignedShort(); // operator
+                buf.readUnsignedIntLE(); // geozone event
+                buf.readUnsignedIntLE(); // io events
+                buf.readUnsignedIntLE(); // geozone value
+                buf.readUnsignedIntLE(); // io values
+                buf.readUnsignedShortLE(); // operator
 
-                position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
-                position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
+                position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShortLE());
+                position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShortLE());
 
-                position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.001);
+                position.set(Position.KEY_POWER, buf.readUnsignedShortLE() * 0.001);
 
-                buf.readUnsignedShort(); // cid
+                buf.readUnsignedShortLE(); // cid
                 position.set(Position.KEY_RSSI, buf.readUnsignedByte());
                 buf.readUnsignedByte(); // current profile
 
