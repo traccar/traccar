@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,24 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.frame.FrameDecoder;
-import org.traccar.helper.StringFinder;
+import java.nio.charset.StandardCharsets;
 
-public class WondexFrameDecoder extends FrameDecoder {
+import org.traccar.BaseFrameDecoder;
+import org.traccar.NetworkMessage;
+
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+
+public class WondexFrameDecoder extends BaseFrameDecoder {
 
     private static final int KEEP_ALIVE_LENGTH = 8;
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
+            ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
         if (buf.readableBytes() < KEEP_ALIVE_LENGTH) {
             return null;
@@ -36,17 +41,18 @@ public class WondexFrameDecoder extends FrameDecoder {
         if (buf.getUnsignedByte(buf.readerIndex()) == 0xD0) {
 
             // Send response
-            ChannelBuffer frame = buf.readBytes(KEEP_ALIVE_LENGTH);
+            ByteBuf frame = buf.readBytes(KEEP_ALIVE_LENGTH);
             if (channel != null) {
-                channel.write(frame);
+                channel.writeAndFlush(new NetworkMessage(frame, channel.remoteAddress()));
             }
             return frame;
 
         } else {
 
-            int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), new StringFinder("\r\n"));
+            ByteBuf delimiter = Unpooled.wrappedBuffer("\r\n".getBytes(StandardCharsets.US_ASCII));
+            int index = ByteBufUtil.indexOf(delimiter, buf);
             if (index != -1) {
-                ChannelBuffer frame = buf.readBytes(index - buf.readerIndex());
+                ByteBuf frame = buf.readBytes(index - buf.readerIndex());
                 buf.skipBytes(2);
                 return frame;
             }
