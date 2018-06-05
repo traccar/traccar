@@ -21,8 +21,6 @@ import org.traccar.BaseProtocol;
 import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
-import org.traccar.WrapperInboundHandler;
-import org.traccar.WrapperOutboundHandler;
 import org.traccar.model.Command;
 
 import java.util.List;
@@ -49,8 +47,8 @@ public class Gps103Protocol extends BaseProtocol {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(2048, "\r\n", "\n", ";"));
-                pipeline.addLast("stringEncoder", new WrapperOutboundHandler(new StringEncoder()));
-                pipeline.addLast("stringDecoder", new WrapperInboundHandler(new StringDecoder()));
+                pipeline.addLast("stringEncoder", new StringEncoder());
+                pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("objectEncoder", new Gps103ProtocolEncoder());
                 pipeline.addLast("objectDecoder", new Gps103ProtocolDecoder(Gps103Protocol.this));
             }
