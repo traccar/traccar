@@ -31,19 +31,15 @@ import org.traccar.model.Position;
 
 public class SviasProtocolDecoder extends BaseProtocolDecoder {
 
-    private static final String MSG_KEEPALIVE = "@";
-
     public SviasProtocolDecoder(SviasProtocol protocol) {
         super(protocol);
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .text("[")       // delimiter init
-            .number("(dddd),") // version hardware
-            .number("(dddd),") // version software
-            .number("(d+),") // counter
-            .number("(d+),") // imei
-            .any()            // model or hourmeter
+            .text("[") // delimiter init
+            .any()
+            .number("(dddddddd),") // imei
+            .any()
             .number("(d+),") // date (yyyymmdd)
             .number("(d+),") // time (hhmmss)
             .number("(-?d+),") // longitude
@@ -53,9 +49,8 @@ public class SviasProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),") // odometer
             .number("(d+),") // input
             .number("(d+),") // output / status
-            .number("(d+),") // flag pack input 1
-            .number("(d+),") // flag pack input 2
-            .number("(d+),") // main power voltage
+            .any()
+            .number("(ddddd),") // main power voltage
             .number("(d+),") // percentual power internal battery
             .number("(d+),") // RSSID
             .any()
@@ -71,6 +66,7 @@ public class SviasProtocolDecoder extends BaseProtocolDecoder {
             throws Exception {
 
         String sentence = (String) msg;
+        Object result = null;
 
         if (!sentence.contains(":")) {
 
@@ -80,10 +76,6 @@ public class SviasProtocolDecoder extends BaseProtocolDecoder {
             }
 
             Position position = new Position(getProtocolName());
-
-            String versionHard = parser.next();
-            String versionSoft = parser.next();
-            String counterInternal = parser.next();
 
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
             if (deviceSession == null) {
@@ -102,8 +94,8 @@ public class SviasProtocolDecoder extends BaseProtocolDecoder {
 
             position.setLatitude(convertCoordinates(parser.nextLong()));
             position.setLongitude(convertCoordinates(parser.nextLong()));
-            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt() / 100));
-            position.setCourse(parser.nextInt() / 100);
+            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0) / 100));
+            position.setCourse(parser.nextDouble(0) / 100);
             position.setAltitude(0);
 
             position.set(Position.KEY_ODOMETER, parser.nextInt());
@@ -121,29 +113,21 @@ public class SviasProtocolDecoder extends BaseProtocolDecoder {
 
             position.setValid(output.substring(0, 1).equals("1"));
 
-            String pck1 = parser.next();
-            String pck2 = parser.next();
-
-            position.set(Position.KEY_POWER, parser.nextInt() / 1000);
+            position.set(Position.KEY_POWER, parser.nextDouble(0) / 1000);
 
             position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
 
             position.set(Position.KEY_RSSI, parser.nextInt());
 
-            if (channel != null) {
-                channel.write(MSG_KEEPALIVE);
-            }
+            result = position;
 
-            return position;
-
-        } else {
-            //send keepalive for message check
-            if (channel != null) {
-                channel.write(MSG_KEEPALIVE);
-            }
-
-            return null;
         }
+
+        if (channel != null) {
+            channel.write("@");
+        }
+
+        return result;
 
     }
 
