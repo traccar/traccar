@@ -15,14 +15,11 @@
  */
 package org.traccar.protocol;
 
-import java.nio.charset.StandardCharsets;
-
 import org.traccar.BaseFrameDecoder;
 import org.traccar.NetworkMessage;
+import org.traccar.helper.BufferUtil;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 
@@ -49,8 +46,7 @@ public class WondexFrameDecoder extends BaseFrameDecoder {
 
         } else {
 
-            ByteBuf delimiter = Unpooled.wrappedBuffer("\r\n".getBytes(StandardCharsets.US_ASCII));
-            int index = ByteBufUtil.indexOf(delimiter, buf);
+            int index = BufferUtil.indexOf("\r\n", buf);
             if (index != -1) {
                 ByteBuf frame = buf.readBytes(index - buf.readerIndex());
                 buf.skipBytes(2);

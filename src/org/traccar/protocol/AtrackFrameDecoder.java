@@ -16,13 +16,10 @@
 package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseFrameDecoder;
-
-import java.nio.charset.StandardCharsets;
+import org.traccar.helper.BufferUtil;
 
 public class AtrackFrameDecoder extends BaseFrameDecoder {
 
@@ -51,8 +48,7 @@ public class AtrackFrameDecoder extends BaseFrameDecoder {
 
             } else {
 
-                ByteBuf delimiter = Unpooled.wrappedBuffer("\r\n".getBytes(StandardCharsets.US_ASCII));
-                int endIndex = ByteBufUtil.indexOf(delimiter, buf);
+                int endIndex = BufferUtil.indexOf("\r\n", buf);
                 if (endIndex > 0) {
                     return buf.readBytes(endIndex - buf.readerIndex() + 2);
                 }

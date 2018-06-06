@@ -15,19 +15,20 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.frame.FrameDecoder;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
 
 import java.nio.charset.StandardCharsets;
 
-public class WatchFrameDecoder extends FrameDecoder {
+import org.traccar.BaseFrameDecoder;
+
+public class WatchFrameDecoder extends BaseFrameDecoder {
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
+            ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
         int idIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '*') + 1;
         if (idIndex <= 0) {
@@ -56,7 +57,7 @@ public class WatchFrameDecoder extends FrameDecoder {
         int length = Integer.parseInt(
                 buf.toString(lengthIndex, payloadIndex - lengthIndex, StandardCharsets.US_ASCII), 16);
         if (buf.readableBytes() >= payloadIndex + 1 + length + 1) {
-            ChannelBuffer frame = ChannelBuffers.dynamicBuffer();
+            ByteBuf frame = Unpooled.buffer();
             int endIndex = buf.readerIndex() + payloadIndex + 1 + length + 1;
             while (buf.readerIndex() < endIndex) {
                 byte b = buf.readByte();
