@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +15,21 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+
 import java.nio.charset.StandardCharsets;
 
 public class TeltonikaProtocolEncoder extends BaseProtocolEncoder {
 
-    private ChannelBuffer encodeContent(String content) {
+    private ByteBuf encodeContent(String content) {
 
-        ChannelBuffer buf = ChannelBuffers.dynamicBuffer();
+        ByteBuf buf = Unpooled.buffer();
 
         buf.writeInt(0);
         buf.writeInt(content.length() + 10);
@@ -40,7 +41,7 @@ public class TeltonikaProtocolEncoder extends BaseProtocolEncoder {
         buf.writeByte('\r');
         buf.writeByte('\n');
         buf.writeByte(1); // quantity
-        buf.writeInt(Checksum.crc16(Checksum.CRC16_IBM, buf.toByteBuffer(8, buf.writerIndex() - 8)));
+        buf.writeInt(Checksum.crc16(Checksum.CRC16_IBM, buf.nioBuffer(8, buf.writerIndex() - 8)));
 
         return buf;
     }

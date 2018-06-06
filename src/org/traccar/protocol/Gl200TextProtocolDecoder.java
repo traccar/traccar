@@ -15,11 +15,10 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -28,6 +27,9 @@ import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
 import org.traccar.model.WifiAccessPoint;
+
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -368,7 +370,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             if (type.equals("HBD")) {
                 if (channel != null) {
                     parser.skip(6);
-                    channel.write("+SACK:GTHBD," + protocolVersion + "," + parser.next() + "$", remoteAddress);
+                    channel.writeAndFlush(new NetworkMessage(
+                            "+SACK:GTHBD," + protocolVersion + "," + parser.next() + "$", remoteAddress));
                 }
             } else {
                 Position position = new Position(getProtocolName());
@@ -980,7 +983,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         decodeDeviceTime(position, parser);
 
         if (Context.getConfig().getBoolean(getProtocolName() + ".ack") && channel != null) {
-            channel.write("+SACK:" + parser.next() + "$", remoteAddress);
+            channel.writeAndFlush(new NetworkMessage("+SACK:" + parser.next() + "$", remoteAddress));
         }
 
         return position;
@@ -1060,7 +1063,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        String sentence = ((ChannelBuffer) msg).toString(StandardCharsets.US_ASCII);
+        String sentence = ((ByteBuf) msg).toString(StandardCharsets.US_ASCII);
 
         int typeIndex = sentence.indexOf(":GT");
         if (typeIndex < 0) {
