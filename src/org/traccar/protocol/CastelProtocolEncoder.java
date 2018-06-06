@@ -15,37 +15,36 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.Context;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
-import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 
 public class CastelProtocolEncoder extends BaseProtocolEncoder {
 
-    private ChannelBuffer encodeContent(long deviceId, short type, ChannelBuffer content) {
-        ChannelBuffer buf = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
+    private ByteBuf encodeContent(long deviceId, short type, ByteBuf content) {
+        ByteBuf buf = Unpooled.buffer(0);
         String uniqueId = Context.getIdentityManager().getById(deviceId).getUniqueId();
 
         buf.writeByte('@');
         buf.writeByte('@');
 
-        buf.writeShort(2 + 2 + 1 + 20 + 2 + content.readableBytes() + 2 + 2); // length
+        buf.writeShortLE(2 + 2 + 1 + 20 + 2 + content.readableBytes() + 2 + 2); // length
 
         buf.writeByte(1); // protocol version
 
         buf.writeBytes(uniqueId.getBytes(StandardCharsets.US_ASCII));
         buf.writeZero(20 - uniqueId.length());
 
-        buf.writeShort(ChannelBuffers.swapShort(type));
+        buf.writeShort(type);
         buf.writeBytes(content);
 
-        buf.writeShort(Checksum.crc16(Checksum.CRC16_X25, buf.toByteBuffer()));
+        buf.writeShortLE(Checksum.crc16(Checksum.CRC16_X25, buf.nioBuffer()));
 
         buf.writeByte('\r');
         buf.writeByte('\n');
@@ -55,7 +54,7 @@ public class CastelProtocolEncoder extends BaseProtocolEncoder {
 
     @Override
     protected Object encodeCommand(Command command) {
-        ChannelBuffer content = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
+        ByteBuf content = Unpooled.buffer(0);
         switch (command.getType()) {
             case Command.TYPE_ENGINE_STOP:
                 content.writeByte(1);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
  * Copyright 2015 Vijay Kumar (vijaykumar@zilogic.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,16 +16,16 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.BitUtil;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashSet;
@@ -56,11 +56,11 @@ public class BlackKiteProtocolDecoder extends BaseProtocolDecoder {
     private static final int TAG_XT3 = 0x62;
 
     private void sendReply(Channel channel, int checksum) {
-        ChannelBuffer reply = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, 3);
+        ByteBuf reply = Unpooled.buffer(3);
         reply.writeByte(0x02);
-        reply.writeShort((short) checksum);
+        reply.writeShortLE((short) checksum);
         if (channel != null) {
-            channel.write(reply);
+            channel.writeAndFlush(new NetworkMessage(reply, channel.remoteAddress()));
         }
     }
 
@@ -68,10 +68,10 @@ public class BlackKiteProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         buf.readUnsignedByte(); // header
-        int length = (buf.readUnsignedShort() & 0x7fff) + 3;
+        int length = (buf.readUnsignedShortLE() & 0x7fff) + 3;
 
         List<Position> positions = new LinkedList<>();
         Set<Integer> tags = new HashSet<>();
@@ -99,27 +99,27 @@ public class BlackKiteProtocolDecoder extends BaseProtocolDecoder {
                     break;
 
                 case TAG_DATE:
-                    position.setTime(new Date(buf.readUnsignedInt() * 1000));
+                    position.setTime(new Date(buf.readUnsignedIntLE() * 1000));
                     break;
 
                 case TAG_COORDINATES:
                     hasLocation = true;
                     position.setValid((buf.readUnsignedByte() & 0xf0) == 0x00);
-                    position.setLatitude(buf.readInt() / 1000000.0);
-                    position.setLongitude(buf.readInt() / 1000000.0);
+                    position.setLatitude(buf.readIntLE() / 1000000.0);
+                    position.setLongitude(buf.readIntLE() / 1000000.0);
                     break;
 
                 case TAG_SPEED_COURSE:
-                    position.setSpeed(buf.readUnsignedShort() * 0.0539957);
-                    position.setCourse(buf.readUnsignedShort() * 0.1);
+                    position.setSpeed(buf.readUnsignedShortLE() * 0.0539957);
+                    position.setCourse(buf.readUnsignedShortLE() * 0.1);
                     break;
 
                 case TAG_ALTITUDE:
-                    position.setAltitude(buf.readShort());
+                    position.setAltitude(buf.readShortLE());
                     break;
 
                 case TAG_STATUS:
-                    int status = buf.readUnsignedShort();
+                    int status = buf.readUnsignedShortLE();
                     position.set(Position.KEY_IGNITION, BitUtil.check(status, 9));
                     if (BitUtil.check(status, 15)) {
                         position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
@@ -128,33 +128,33 @@ public class BlackKiteProtocolDecoder extends BaseProtocolDecoder {
                     break;
 
                 case TAG_DIGITAL_INPUTS:
-                    int input = buf.readUnsignedShort();
+                    int input = buf.readUnsignedShortLE();
                     for (int i = 0; i < 16; i++) {
                         position.set(Position.PREFIX_IO + (i + 1), BitUtil.check(input, i));
                     }
                     break;
 
                 case TAG_DIGITAL_OUTPUTS:
-                    int output = buf.readUnsignedShort();
+                    int output = buf.readUnsignedShortLE();
                     for (int i = 0; i < 16; i++) {
                         position.set(Position.PREFIX_IO + (i + 17), BitUtil.check(output, i));
                     }
                     break;
 
                 case TAG_INPUT_VOLTAGE1:
-                    position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort() / 1000.0);
+                    position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShortLE() / 1000.0);
                     break;
 
                 case TAG_INPUT_VOLTAGE2:
-                    position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort() / 1000.0);
+                    position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShortLE() / 1000.0);
                     break;
 
                 case TAG_INPUT_VOLTAGE3:
-                    position.set(Position.PREFIX_ADC + 3, buf.readUnsignedShort() / 1000.0);
+                    position.set(Position.PREFIX_ADC + 3, buf.readUnsignedShortLE() / 1000.0);
                     break;
 
                 case TAG_INPUT_VOLTAGE4:
-                    position.set(Position.PREFIX_ADC + 4, buf.readUnsignedShort() / 1000.0);
+                    position.set(Position.PREFIX_ADC + 4, buf.readUnsignedShortLE() / 1000.0);
                     break;
 
                 case TAG_XT1:
@@ -178,7 +178,7 @@ public class BlackKiteProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        sendReply(channel, buf.readUnsignedShort());
+        sendReply(channel, buf.readUnsignedShortLE());
 
         for (Position p : positions) {
             p.setDeviceId(deviceSession.getDeviceId());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2014 - 2018 Anton Tananaev (anton@traccar.org)
  * Copyright 2014 Rohit
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,7 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;

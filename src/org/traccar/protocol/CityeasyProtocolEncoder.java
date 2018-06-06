@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@ package org.traccar.protocol;
 
 import java.util.TimeZone;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.Log;
@@ -26,9 +26,9 @@ import org.traccar.model.Command;
 
 public class CityeasyProtocolEncoder extends BaseProtocolEncoder {
 
-    private ChannelBuffer encodeContent(int type, ChannelBuffer content) {
+    private ByteBuf encodeContent(int type, ByteBuf content) {
 
-        ChannelBuffer buf = ChannelBuffers.dynamicBuffer();
+        ByteBuf buf = Unpooled.buffer();
 
         buf.writeByte('S');
         buf.writeByte('S');
@@ -36,7 +36,7 @@ public class CityeasyProtocolEncoder extends BaseProtocolEncoder {
         buf.writeShort(type);
         buf.writeBytes(content);
         buf.writeInt(0x0B);
-        buf.writeShort(Checksum.crc16(Checksum.CRC16_KERMIT, buf.toByteBuffer()));
+        buf.writeShort(Checksum.crc16(Checksum.CRC16_KERMIT, buf.nioBuffer()));
         buf.writeByte('\r');
         buf.writeByte('\n');
 
@@ -46,7 +46,7 @@ public class CityeasyProtocolEncoder extends BaseProtocolEncoder {
     @Override
     protected Object encodeCommand(Command command) {
 
-        ChannelBuffer content = ChannelBuffers.dynamicBuffer();
+        ByteBuf content = Unpooled.buffer();
 
         switch (command.getType()) {
             case Command.TYPE_POSITION_SINGLE:

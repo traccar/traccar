@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,29 +15,24 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.frame.FrameDecoder;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import org.traccar.BaseFrameDecoder;
 import org.traccar.helper.Log;
 
-public class CellocatorFrameDecoder extends FrameDecoder {
+public class CellocatorFrameDecoder extends BaseFrameDecoder {
 
     private static final int MESSAGE_MINIMUM_LENGTH = 15;
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx,
-            Channel channel,
-            ChannelBuffer buf) throws Exception {
+            ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
-        // Check minimum length
-        int available = buf.readableBytes();
-        if (available < MESSAGE_MINIMUM_LENGTH) {
+        if (buf.readableBytes() < MESSAGE_MINIMUM_LENGTH) {
             return null;
         }
 
-        // Size depending on message type
         int length = 0;
         int type = buf.getUnsignedByte(4);
         switch (type) {
@@ -51,8 +46,8 @@ public class CellocatorFrameDecoder extends FrameDecoder {
                 length = 70;
                 break;
             case CellocatorProtocolDecoder.MSG_CLIENT_SERIAL:
-                if (available >= 19) {
-                    length = 19 + buf.getUnsignedShort(16);
+                if (buf.readableBytes() >= 19) {
+                    length = 19 + buf.getUnsignedShortLE(16);
                 }
                 break;
             case CellocatorProtocolDecoder.MSG_CLIENT_MODULAR:
@@ -63,8 +58,7 @@ public class CellocatorFrameDecoder extends FrameDecoder {
                 break;
         }
 
-        // Read packet
-        if (length > 0 && available >= length) {
+        if (length > 0 && buf.readableBytes() >= length) {
             return buf.readBytes(length);
         }
 

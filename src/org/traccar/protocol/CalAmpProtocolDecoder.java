@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,13 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -52,7 +54,7 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
 
     private void sendResponse(Channel channel, SocketAddress remoteAddress, int type, int index, int result) {
         if (channel != null) {
-            ChannelBuffer response = ChannelBuffers.directBuffer(10);
+            ByteBuf response = Unpooled.buffer(10);
             response.writeByte(SERVICE_RESPONSE);
             response.writeByte(MSG_ACK);
             response.writeShort(index);
@@ -60,11 +62,11 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
             response.writeByte(result);
             response.writeByte(0);
             response.writeMedium(0);
-            channel.write(response, remoteAddress);
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
     }
 
-    private Position decodePosition(DeviceSession deviceSession, int type, ChannelBuffer buf) {
+    private Position decodePosition(DeviceSession deviceSession, int type, ByteBuf buf) {
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
@@ -143,14 +145,14 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         if (BitUtil.check(buf.getByte(buf.readerIndex()), 7)) {
 
             int content = buf.readUnsignedByte();
 
             if (BitUtil.check(content, 0)) {
-                String id = ChannelBuffers.hexDump(buf.readBytes(buf.readUnsignedByte()));
+                String id = ByteBufUtil.hexDump(buf.readBytes(buf.readUnsignedByte()));
                 getDeviceSession(channel, remoteAddress, id);
             }
 
