@@ -16,11 +16,10 @@
 package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.helper.BufferUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -83,8 +82,7 @@ public class EnforaProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Find NMEA sentence
-        ByteBuf header = Unpooled.wrappedBuffer("GPRMC".getBytes(StandardCharsets.US_ASCII));
-        int start = ByteBufUtil.indexOf(header, buf);
+        int start = BufferUtil.indexOf("GPRMC", buf);
         if (start == -1) {
             return null;
         }

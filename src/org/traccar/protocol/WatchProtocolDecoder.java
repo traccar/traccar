@@ -15,8 +15,8 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
@@ -176,7 +176,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         buf.skipBytes(1); // header
         manufacturer = buf.readBytes(2).toString(StandardCharsets.US_ASCII);
@@ -225,7 +225,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
             sendResponse(channel, id, index, "LK");
 
-            if (buf.readable()) {
+            if (buf.isReadable()) {
                 String[] values = buf.toString(StandardCharsets.US_ASCII).split(",");
                 if (values.length >= 3) {
                     Position position = new Position(getProtocolName());
@@ -259,7 +259,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type.equals("PULSE") || type.equals("heart") || type.equals("bphrt")) {
 
-            if (buf.readable()) {
+            if (buf.isReadable()) {
 
                 Position position = new Position(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());

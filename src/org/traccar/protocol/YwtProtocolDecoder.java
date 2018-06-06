@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2014 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
@@ -67,7 +68,7 @@ public class YwtProtocolDecoder extends BaseProtocolDecoder {
                 end = sentence.length();
             }
 
-            channel.write("%AT+SN=" + sentence.substring(start, end));
+            channel.writeAndFlush(new NetworkMessage("%AT+SN=" + sentence.substring(start, end), remoteAddress));
             return null;
         }
 
@@ -104,7 +105,7 @@ public class YwtProtocolDecoder extends BaseProtocolDecoder {
 
         // Send response
         if ((type.equals("KP") || type.equals("EP")) && channel != null) {
-            channel.write("%AT+" + type + "=" + reportId + "\r\n");
+            channel.writeAndFlush(new NetworkMessage("%AT+" + type + "=" + reportId + "\r\n", remoteAddress));
         }
 
         return position;
