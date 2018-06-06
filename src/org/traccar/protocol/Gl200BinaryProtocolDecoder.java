@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.BitBuffer;
@@ -39,7 +39,7 @@ public class Gl200BinaryProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private Date decodeTime(ChannelBuffer buf) {
+    private Date decodeTime(ByteBuf buf) {
         DateBuilder dateBuilder = new DateBuilder()
                 .setDate(buf.readUnsignedShort(), buf.readUnsignedByte(), buf.readUnsignedByte())
                 .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
@@ -50,7 +50,7 @@ public class Gl200BinaryProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_RSP_GEO = 8;
     public static final int MSG_RSP_COMPRESSED = 100;
 
-    private List<Position> decodeLocation(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
+    private List<Position> decodeLocation(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
 
         List<Position> positions = new LinkedList<>();
 
@@ -202,7 +202,7 @@ public class Gl200BinaryProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_EVT_CRA = 23;
     public static final int MSG_EVT_UPC = 34;
 
-    private Position decodeEvent(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
+    private Position decodeEvent(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
 
         Position position = new Position(getProtocolName());
 
@@ -308,7 +308,7 @@ public class Gl200BinaryProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_INF_TMZ = 9;
     public static final int MSG_INF_GIR = 10;
 
-    private Position decodeInformation(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
+    private Position decodeInformation(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
 
         Position position = new Position(getProtocolName());
 
@@ -385,7 +385,7 @@ public class Gl200BinaryProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         switch (buf.readBytes(4).toString(StandardCharsets.US_ASCII)) {
             case "+RSP":
