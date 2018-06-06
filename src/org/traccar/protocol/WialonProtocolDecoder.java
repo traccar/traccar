@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -57,14 +58,14 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             .groupEnd("?")
             .compile();
 
-    private void sendResponse(Channel channel, String prefix, Integer number) {
+    private void sendResponse(Channel channel, SocketAddress remoteAddress, String prefix, Integer number) {
         if (channel != null) {
             StringBuilder response = new StringBuilder(prefix);
             if (number != null) {
                 response.append(number);
             }
             response.append("\r\n");
-            channel.write(response.toString());
+            channel.writeAndFlush(new NetworkMessage(response.toString(), remoteAddress));
         }
     }
 
@@ -140,12 +141,12 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             String imei = values[0].indexOf('.') >= 0 ? values[1] : values[0];
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
             if (deviceSession != null) {
-                sendResponse(channel, "#AL#", 1);
+                sendResponse(channel, remoteAddress, "#AL#", 1);
             }
 
         } else if (sentence.startsWith("#P#")) {
 
-            sendResponse(channel, "#AP#", null); // heartbeat
+            sendResponse(channel, remoteAddress, "#AP#", null); // heartbeat
 
         } else if (sentence.startsWith("#SD#") || sentence.startsWith("#D#")) {
 
@@ -153,7 +154,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
                     channel, remoteAddress, sentence.substring(sentence.indexOf('#', 1) + 1));
 
             if (position != null) {
-                sendResponse(channel, "#AD#", 1);
+                sendResponse(channel, remoteAddress, "#AD#", 1);
                 return position;
             }
 
@@ -170,7 +171,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
 
-            sendResponse(channel, "#AB#", messages.length);
+            sendResponse(channel, remoteAddress, "#AB#", messages.length);
             if (!positions.isEmpty()) {
                 return positions;
             }
@@ -183,7 +184,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
                 getLastLocation(position, new Date());
                 position.setValid(false);
                 position.set(Position.KEY_RESULT, sentence.substring(sentence.indexOf('#', 1) + 1));
-                sendResponse(channel, "#AM#", 1);
+                sendResponse(channel, remoteAddress, "#AM#", 1);
                 return position;
             }
         }
