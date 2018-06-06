@@ -15,12 +15,13 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.socket.DatagramChannel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.channel.Channel;
+import io.netty.channel.socket.DatagramChannel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -62,8 +63,8 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
     private void sendResponse(Channel channel, SocketAddress remoteAddress, String uniqueId, int type, int index) {
         if (channel != null) {
-            channel.write(EelinkProtocolEncoder.encodeContent(
-                    channel instanceof DatagramChannel, uniqueId, type, index, null), remoteAddress);
+            channel.write(new NetworkMessage(EelinkProtocolEncoder.encodeContent(
+                    channel instanceof DatagramChannel, uniqueId, type, index, null), remoteAddress));
         }
     }
 
@@ -113,7 +114,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_STATUS, status);
     }
 
-    private Position decodeOld(DeviceSession deviceSession, ChannelBuffer buf, int type, int index) {
+    private Position decodeOld(DeviceSession deviceSession, ByteBuf buf, int type, int index) {
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
@@ -170,7 +171,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private Position decodeNew(DeviceSession deviceSession, ChannelBuffer buf, int type, int index) {
+    private Position decodeNew(DeviceSession deviceSession, ByteBuf buf, int type, int index) {
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
@@ -294,7 +295,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd):(dd):(dd)")            // time
             .compile();
 
-    private Position decodeResult(DeviceSession deviceSession, ChannelBuffer buf, int index) {
+    private Position decodeResult(DeviceSession deviceSession, ByteBuf buf, int index) {
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
@@ -331,14 +332,14 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         String uniqueId = null;
         DeviceSession deviceSession;
 
         if (buf.getByte(0) == 'E' && buf.getByte(1) == 'L') {
             buf.skipBytes(2 + 2 + 2); // udp header
-            uniqueId = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
+            uniqueId = ByteBufUtil.hexDump(buf.readBytes(8)).substring(1);
             deviceSession = getDeviceSession(channel, remoteAddress, uniqueId);
         } else {
             deviceSession = getDeviceSession(channel, remoteAddress);
@@ -356,7 +357,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         if (type == MSG_LOGIN) {
 
             if (deviceSession == null) {
-                getDeviceSession(channel, remoteAddress, ChannelBuffers.hexDump(buf.readBytes(8)).substring(1));
+                getDeviceSession(channel, remoteAddress, ByteBufUtil.hexDump(buf.readBytes(8)).substring(1));
             }
 
         } else {

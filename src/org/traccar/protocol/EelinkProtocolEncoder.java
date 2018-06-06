@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.helper.DataConverter;
 import org.traccar.helper.Log;
@@ -41,13 +41,13 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
         return sum;
     }
 
-    public static ChannelBuffer encodeContent(
-            boolean connectionless, String uniqueId, int type, int index, ChannelBuffer content) {
+    public static ByteBuf encodeContent(
+            boolean connectionless, String uniqueId, int type, int index, ByteBuf content) {
 
-        ChannelBuffer buf = ChannelBuffers.dynamicBuffer();
+        ByteBuf buf = Unpooled.buffer();
 
         if (connectionless) {
-            buf.writeBytes(ChannelBuffers.wrappedBuffer(DataConverter.parseHex('0' + uniqueId)));
+            buf.writeBytes(Unpooled.wrappedBuffer(DataConverter.parseHex('0' + uniqueId)));
         }
 
         buf.writeByte(0x67);
@@ -60,13 +60,13 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
             buf.writeBytes(content);
         }
 
-        ChannelBuffer result = ChannelBuffers.dynamicBuffer();
+        ByteBuf result = Unpooled.buffer();
 
         if (connectionless) {
             result.writeByte('E');
             result.writeByte('L');
             result.writeShort(2 + buf.readableBytes()); // length
-            result.writeShort(checksum(buf.toByteBuffer()));
+            result.writeShort(checksum(buf.nioBuffer()));
         }
 
         result.writeBytes(buf);
@@ -74,9 +74,9 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
         return result;
     }
 
-    private ChannelBuffer encodeContent(long deviceId, String content) {
+    private ByteBuf encodeContent(long deviceId, String content) {
 
-        ChannelBuffer buf = ChannelBuffers.dynamicBuffer();
+        ByteBuf buf = Unpooled.buffer();
 
         buf.writeByte(0x01); // command
         buf.writeInt(0); // server id

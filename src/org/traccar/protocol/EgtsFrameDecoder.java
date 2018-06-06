@@ -15,23 +15,23 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.frame.FrameDecoder;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import org.traccar.BaseFrameDecoder;
 
-public class EgtsFrameDecoder extends FrameDecoder {
+public class EgtsFrameDecoder extends BaseFrameDecoder {
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
+            ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
         if (buf.readableBytes() < 10) {
             return null;
         }
 
         int headerLength = buf.getUnsignedByte(buf.readerIndex() + 3);
-        int frameLength = buf.getUnsignedShort(buf.readerIndex() + 5);
+        int frameLength = buf.getUnsignedShortLE(buf.readerIndex() + 5);
 
         int length = headerLength + frameLength + (frameLength > 0 ? 2 : 0);
 

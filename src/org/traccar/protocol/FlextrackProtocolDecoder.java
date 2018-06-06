@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -65,9 +66,9 @@ public class FlextrackProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)")                      // odometer
             .compile();
 
-    private void sendAcknowledgement(Channel channel, String index) {
+    private void sendAcknowledgement(Channel channel, SocketAddress remoteAddress, String index) {
         if (channel != null) {
-            channel.write(index + ",ACK\r");
+            channel.write(new NetworkMessage(index + ",ACK\r", remoteAddress));
         }
     }
 
@@ -84,7 +85,7 @@ public class FlextrackProtocolDecoder extends BaseProtocolDecoder {
                 return null;
             }
 
-            sendAcknowledgement(channel, parser.next());
+            sendAcknowledgement(channel, remoteAddress, parser.next());
 
             String id = parser.next();
             String iccid = parser.next();
@@ -106,7 +107,7 @@ public class FlextrackProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
-            sendAcknowledgement(channel, parser.next());
+            sendAcknowledgement(channel, remoteAddress, parser.next());
 
             position.setTime(parser.nextDateTime());
 

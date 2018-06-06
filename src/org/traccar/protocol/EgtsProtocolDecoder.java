@@ -15,18 +15,18 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.LinkedList;
@@ -72,41 +72,41 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
     private int packetId;
 
     private void sendResponse(
-            Channel channel, int packetType, int index, int serviceType, int type, ChannelBuffer content) {
+            Channel channel, int packetType, int index, int serviceType, int type, ByteBuf content) {
         if (channel != null) {
 
-            ChannelBuffer data = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
+            ByteBuf data = Unpooled.buffer(0);
             data.writeByte(type);
-            data.writeShort(content.readableBytes());
+            data.writeShortLE(content.readableBytes());
             data.writeBytes(content);
 
-            ChannelBuffer record = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
+            ByteBuf record = Unpooled.buffer(0);
             if (packetType == PT_RESPONSE) {
-                record.writeShort(index);
+                record.writeShortLE(index);
                 record.writeByte(0); // success
             }
-            record.writeShort(data.readableBytes());
-            record.writeShort(0);
+            record.writeShortLE(data.readableBytes());
+            record.writeShortLE(0);
             record.writeByte(0); // flags (possibly 1 << 6)
             record.writeByte(serviceType);
             record.writeByte(serviceType);
             record.writeBytes(data);
-            int recordChecksum = Checksum.crc16(Checksum.CRC16_CCITT_FALSE, record.toByteBuffer());
+            int recordChecksum = Checksum.crc16(Checksum.CRC16_CCITT_FALSE, record.nioBuffer());
 
-            ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
+            ByteBuf response = Unpooled.buffer(0);
             response.writeByte(1); // protocol version
             response.writeByte(0); // security key id
             response.writeByte(0); // flags
             response.writeByte(5 + 2 + 2 + 2); // header length
             response.writeByte(0); // encoding
-            response.writeShort(record.readableBytes());
-            response.writeShort(packetId++);
+            response.writeShortLE(record.readableBytes());
+            response.writeShortLE(packetId++);
             response.writeByte(packetType);
-            response.writeByte(Checksum.crc8(Checksum.CRC8_EGTS, response.toByteBuffer()));
+            response.writeByte(Checksum.crc8(Checksum.CRC8_EGTS, response.nioBuffer()));
             response.writeBytes(record);
-            response.writeShort(recordChecksum);
+            response.writeShortLE(recordChecksum);
 
-            channel.write(response);
+            channel.write(new NetworkMessage(response, channel.remoteAddress()));
 
         }
     }
@@ -115,7 +115,7 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         int index = buf.getUnsignedShort(buf.readerIndex() + 5 + 2);
         buf.skipBytes(buf.getUnsignedByte(buf.readerIndex() + 3));
@@ -124,19 +124,19 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
 
         while (buf.readableBytes() > 2) {
 
-            int length = buf.readUnsignedShort();
-            int recordIndex = buf.readUnsignedShort();
+            int length = buf.readUnsignedShortLE();
+            int recordIndex = buf.readUnsignedShortLE();
             int recordFlags = buf.readUnsignedByte();
 
             if (BitUtil.check(recordFlags, 0)) {
-                buf.readUnsignedInt(); // object id
+                buf.readUnsignedIntLE(); // object id
             }
 
             if (BitUtil.check(recordFlags, 1)) {
-                buf.readUnsignedInt(); // event id
+                buf.readUnsignedIntLE(); // event id
             }
             if (BitUtil.check(recordFlags, 2)) {
-                buf.readUnsignedInt(); // time
+                buf.readUnsignedIntLE(); // time
             }
 
             int serviceType = buf.readUnsignedByte();
@@ -150,22 +150,22 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
                 position.setDeviceId(deviceSession.getDeviceId());
             }
 
-            ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
-            response.writeShort(recordIndex);
+            ByteBuf response = Unpooled.buffer(0);
+            response.writeShortLE(recordIndex);
             response.writeByte(0); // success
             sendResponse(channel, PT_RESPONSE, index, serviceType, MSG_RECORD_RESPONSE, response);
 
             while (buf.readerIndex() < recordEnd) {
                 int type = buf.readUnsignedByte();
-                int end = buf.readUnsignedShort() + buf.readerIndex();
+                int end = buf.readUnsignedShortLE() + buf.readerIndex();
 
                 if (type == MSG_TERM_IDENTITY) {
 
-                    buf.readUnsignedInt(); // object id
+                    buf.readUnsignedIntLE(); // object id
                     int flags = buf.readUnsignedByte();
 
                     if (BitUtil.check(flags, 0)) {
-                        buf.readUnsignedShort(); // home dispatcher identifier
+                        buf.readUnsignedShortLE(); // home dispatcher identifier
                     }
                     if (BitUtil.check(flags, 1)) {
                         getDeviceSession(
@@ -182,22 +182,22 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
                         buf.skipBytes(3); // network identifier
                     }
                     if (BitUtil.check(flags, 6)) {
-                        buf.readUnsignedShort(); // buffer size
+                        buf.readUnsignedShortLE(); // buffer size
                     }
                     if (BitUtil.check(flags, 7)) {
                         getDeviceSession(
                                 channel, remoteAddress, buf.readBytes(15).toString(StandardCharsets.US_ASCII).trim());
                     }
 
-                    response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
+                    response = Unpooled.buffer(0);
                     response.writeByte(0); // success
                     sendResponse(channel, PT_APPDATA, 0, serviceType, MSG_RESULT_CODE, response);
 
                 } else if (type == MSG_POS_DATA) {
 
-                    position.setTime(new Date((buf.readUnsignedInt() + 1262304000) * 1000)); // since 2010-01-01
-                    position.setLatitude(buf.readUnsignedInt() * 90.0 / 0xFFFFFFFFL);
-                    position.setLongitude(buf.readUnsignedInt() * 180.0 / 0xFFFFFFFFL);
+                    position.setTime(new Date((buf.readUnsignedIntLE() + 1262304000) * 1000)); // since 2010-01-01
+                    position.setLatitude(buf.readUnsignedIntLE() * 90.0 / 0xFFFFFFFFL);
+                    position.setLongitude(buf.readUnsignedIntLE() * 180.0 / 0xFFFFFFFFL);
 
                     int flags = buf.readUnsignedByte();
                     position.setValid(BitUtil.check(flags, 0));
@@ -208,16 +208,16 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
                         position.setLongitude(-position.getLongitude());
                     }
 
-                    int speed = buf.readUnsignedShort();
+                    int speed = buf.readUnsignedShortLE();
                     position.setSpeed(UnitsConverter.knotsFromKph(BitUtil.to(speed, 14) * 0.1));
                     position.setCourse(buf.readUnsignedByte() + (BitUtil.check(speed, 15) ? 0x100 : 0));
 
-                    position.set(Position.KEY_ODOMETER, buf.readUnsignedMedium() * 100);
+                    position.set(Position.KEY_ODOMETER, buf.readUnsignedMediumLE() * 100);
                     position.set(Position.KEY_INPUT, buf.readUnsignedByte());
                     position.set(Position.KEY_EVENT, buf.readUnsignedByte());
 
                     if (BitUtil.check(flags, 7)) {
-                        position.setAltitude(buf.readMedium());
+                        position.setAltitude(buf.readMediumLE());
                     }
 
                 } else if (type == MSG_EXT_POS_DATA) {
@@ -225,13 +225,13 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
                     int flags = buf.readUnsignedByte();
 
                     if (BitUtil.check(flags, 0)) {
-                        position.set(Position.KEY_VDOP, buf.readUnsignedShort());
+                        position.set(Position.KEY_VDOP, buf.readUnsignedShortLE());
                     }
                     if (BitUtil.check(flags, 1)) {
-                        position.set(Position.KEY_HDOP, buf.readUnsignedShort());
+                        position.set(Position.KEY_HDOP, buf.readUnsignedShortLE());
                     }
                     if (BitUtil.check(flags, 2)) {
-                        position.set(Position.KEY_PDOP, buf.readUnsignedShort());
+                        position.set(Position.KEY_PDOP, buf.readUnsignedShortLE());
                     }
                     if (BitUtil.check(flags, 3)) {
                         position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());

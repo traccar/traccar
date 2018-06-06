@@ -21,6 +21,7 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.model.Command;
 
+import java.nio.ByteOrder;
 import java.util.List;
 
 public class CastelProtocol extends BaseProtocol {
@@ -37,7 +38,8 @@ public class CastelProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 2, 2, -4, 0)); // TODO LE frame decoder
+                pipeline.addLast("frameDecoder",
+                        new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 1024, 2, 2, -4, 0, true));
                 pipeline.addLast("objectEncoder", new CastelProtocolEncoder());
                 pipeline.addLast("objectDecoder", new CastelProtocolDecoder(CastelProtocol.this));
             }

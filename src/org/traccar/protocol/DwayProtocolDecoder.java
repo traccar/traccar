@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -61,7 +62,7 @@ public class DwayProtocolDecoder extends BaseProtocolDecoder {
         String sentence = (String) msg;
         if (sentence.equals("AA55,HB")) {
             if (channel != null) {
-                channel.write("55AA,HB,OK\r\n");
+                channel.write(new NetworkMessage("55AA,HB,OK\r\n", remoteAddress));
             }
             return null;
         }

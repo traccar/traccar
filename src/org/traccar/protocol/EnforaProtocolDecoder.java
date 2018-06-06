@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,15 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBufferIndexFinder;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.helper.StringFinder;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -56,23 +56,22 @@ public class EnforaProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         // Find IMEI number
-        int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), new ChannelBufferIndexFinder() {
-            @Override
-            public boolean find(ChannelBuffer buffer, int guessedIndex) {
-                if (buffer.writerIndex() - guessedIndex >= IMEI_LENGTH) {
-                    for (int i = 0; i < IMEI_LENGTH; i++) {
-                        if (!Character.isDigit((char) buffer.getByte(guessedIndex + i))) {
-                            return false;
-                        }
-                    }
-                    return true;
+        int index = -1;
+        for (int i = buf.readerIndex(); i < buf.writerIndex() - IMEI_LENGTH; i++) {
+            index = i;
+            for (int j = i; j < i + IMEI_LENGTH; j++) {
+                if (!Character.isDigit((char) buf.getByte(j))) {
+                    index = -1;
+                    break;
                 }
-                return false;
             }
-        });
+            if (index > 0) {
+                break;
+            }
+        }
         if (index == -1) {
             return null;
         }
@@ -84,7 +83,8 @@ public class EnforaProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Find NMEA sentence
-        int start = buf.indexOf(buf.readerIndex(), buf.writerIndex(), new StringFinder("GPRMC"));
+        ByteBuf header = Unpooled.wrappedBuffer("GPRMC".getBytes(StandardCharsets.US_ASCII));
+        int start = ByteBufUtil.indexOf(header, buf);
         if (start == -1) {
             return null;
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.channel.Channel;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.model.Position;
@@ -46,8 +46,8 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        HttpRequest request = (HttpRequest) msg;
-        JsonArray result = Json.createReader(new StringReader(request.getContent().toString(StandardCharsets.UTF_8)))
+        FullHttpRequest request = (FullHttpRequest) msg;
+        JsonArray result = Json.createReader(new StringReader(request.content().toString(StandardCharsets.UTF_8)))
                 .readArray();
         List<Position> positions = new LinkedList<>();
         for (int i = 0; i < result.size(); i++) {

@@ -15,18 +15,18 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.LinkedList;
@@ -50,20 +50,20 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_CANNED_REQUEST_2 = 0x22;
     public static final int MSG_CANNED_RESPONSE_2 = 0x23;
 
-    private void sendResponse(Channel channel, int type, ChannelBuffer content) {
+    private void sendResponse(Channel channel, int type, ByteBuf content) {
         if (channel != null) {
-            ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
+            ByteBuf response = Unpooled.buffer(0);
             response.writeByte(0x02); response.writeByte(0x55); // header
             response.writeByte(type);
-            response.writeShort(content != null ? content.readableBytes() : 0);
+            response.writeShortLE(content != null ? content.readableBytes() : 0);
             if (content != null) {
                 response.writeBytes(content);
             }
-            channel.write(response);
+            channel.write(new NetworkMessage(response, channel.remoteAddress()));
         }
     }
 
-    private List<Position> decodeFixed64(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
+    private List<Position> decodeFixed64(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
         if (deviceSession == null) {
@@ -78,9 +78,9 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
 
             buf.readByte(); // type
 
-            position.set(Position.KEY_INDEX, buf.readUnsignedInt());
+            position.set(Position.KEY_INDEX, buf.readUnsignedIntLE());
 
-            long time = buf.readUnsignedInt();
+            long time = buf.readUnsignedIntLE();
             position.setTime(new DateBuilder()
                     .setYear((int) (2000 + (time & 0x3F)))
                     .setMonth((int) (time >> 6) & 0xF)
@@ -90,39 +90,39 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
                     .setSecond((int) (time >> 26) & 0x3F)
                     .getDate());
 
-            position.setLongitude(buf.readInt() * 0.0000001);
-            position.setLatitude(buf.readInt() * 0.0000001);
-            position.setSpeed(UnitsConverter.knotsFromCps(buf.readUnsignedShort()));
+            position.setLongitude(buf.readIntLE() * 0.0000001);
+            position.setLatitude(buf.readIntLE() * 0.0000001);
+            position.setSpeed(UnitsConverter.knotsFromCps(buf.readUnsignedShortLE()));
             position.setCourse(buf.readUnsignedByte() * 2);
-            position.setAltitude(buf.readShort());
+            position.setAltitude(buf.readShortLE());
 
-            buf.readUnsignedShort(); // position accuracy
+            buf.readUnsignedShortLE(); // position accuracy
             buf.readUnsignedByte(); // speed accuracy
 
             position.set(Position.KEY_EVENT, buf.readUnsignedByte());
 
             position.setValid(BitUtil.check(buf.readByte(), 0));
 
-            position.set(Position.KEY_INPUT, buf.readUnsignedInt());
-            position.set(Position.KEY_OUTPUT, buf.readUnsignedShort());
+            position.set(Position.KEY_INPUT, buf.readUnsignedIntLE());
+            position.set(Position.KEY_OUTPUT, buf.readUnsignedShortLE());
 
             for (int i = 1; i <= 5; i++) {
-                position.set(Position.PREFIX_ADC + i, buf.readShort());
+                position.set(Position.PREFIX_ADC + i, buf.readShortLE());
             }
 
             position.set(Position.KEY_DEVICE_TEMP, buf.readByte());
 
-            buf.readShort(); // accelerometer x
-            buf.readShort(); // accelerometer y
-            buf.readShort(); // accelerometer z
+            buf.readShortLE(); // accelerometer x
+            buf.readShortLE(); // accelerometer y
+            buf.readShortLE(); // accelerometer z
 
             buf.skipBytes(8); // device id
 
-            position.set(Position.KEY_PDOP, buf.readUnsignedShort() * 0.01);
+            position.set(Position.KEY_PDOP, buf.readUnsignedShortLE() * 0.01);
 
             buf.skipBytes(2); // reserved
 
-            buf.readUnsignedShort(); // checksum
+            buf.readUnsignedShortLE(); // checksum
 
             positions.add(position);
         }
@@ -130,7 +130,7 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
         return positions;
     }
 
-    private List<Position> decodeStandard(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
+    private List<Position> decodeStandard(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
         if (deviceSession == null) {
@@ -139,15 +139,15 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
 
         List<Position> positions = new LinkedList<>();
 
-        while (buf.readable()) {
-            int recordEnd = buf.readerIndex() + buf.readUnsignedShort();
+        while (buf.isReadable()) {
+            int recordEnd = buf.readerIndex() + buf.readUnsignedShortLE();
 
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
-            position.set(Position.KEY_INDEX, buf.readUnsignedInt());
+            position.set(Position.KEY_INDEX, buf.readUnsignedIntLE());
 
-            position.setDeviceTime(new Date(1356998400000L + buf.readUnsignedInt() * 1000)); // since 1 Jan 2013
+            position.setDeviceTime(new Date(1356998400000L + buf.readUnsignedIntLE() * 1000)); // since 1 Jan 2013
 
             position.set(Position.KEY_EVENT, buf.readUnsignedByte());
 
@@ -155,15 +155,15 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
 
                 int fieldId = buf.readUnsignedByte();
                 int fieldLength = buf.readUnsignedByte();
-                int fieldEnd = buf.readerIndex() + (fieldLength == 255 ? buf.readUnsignedShort() : fieldLength);
+                int fieldEnd = buf.readerIndex() + (fieldLength == 255 ? buf.readUnsignedShortLE() : fieldLength);
 
                 if (fieldId == 0) {
 
-                    position.setFixTime(new Date(1356998400000L + buf.readUnsignedInt() * 1000));
-                    position.setLatitude(buf.readInt() * 0.0000001);
-                    position.setLongitude(buf.readInt() * 0.0000001);
-                    position.setAltitude(buf.readShort());
-                    position.setSpeed(UnitsConverter.knotsFromCps(buf.readUnsignedShort()));
+                    position.setFixTime(new Date(1356998400000L + buf.readUnsignedIntLE() * 1000));
+                    position.setLatitude(buf.readIntLE() * 0.0000001);
+                    position.setLongitude(buf.readIntLE() * 0.0000001);
+                    position.setAltitude(buf.readShortLE());
+                    position.setSpeed(UnitsConverter.knotsFromCps(buf.readUnsignedShortLE()));
 
                     buf.readUnsignedByte(); // speed accuracy
 
@@ -176,9 +176,9 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
 
                 } else if (fieldId == 2) {
 
-                    int input = buf.readInt();
-                    int output = buf.readUnsignedShort();
-                    int status = buf.readUnsignedShort();
+                    int input = buf.readIntLE();
+                    int output = buf.readUnsignedShortLE();
+                    int status = buf.readUnsignedShortLE();
 
                     position.set(Position.KEY_IGNITION, BitUtil.check(input, 0));
 
@@ -191,19 +191,19 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
                     while (buf.readerIndex() < fieldEnd) {
                         switch (buf.readUnsignedByte()) {
                             case 1:
-                                position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
+                                position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.001);
                                 break;
                             case 2:
-                                position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
+                                position.set(Position.KEY_POWER, buf.readUnsignedShortLE() * 0.01);
                                 break;
                             case 3:
-                                position.set(Position.KEY_DEVICE_TEMP, buf.readShort() * 0.01);
+                                position.set(Position.KEY_DEVICE_TEMP, buf.readShortLE() * 0.01);
                                 break;
                             case 4:
-                                position.set(Position.KEY_RSSI, buf.readUnsignedShort());
+                                position.set(Position.KEY_RSSI, buf.readUnsignedShortLE());
                                 break;
                             case 5:
-                                position.set("solarPower", buf.readUnsignedShort() * 0.001);
+                                position.set("solarPower", buf.readUnsignedShortLE() * 0.001);
                                 break;
                             default:
                                 break;
@@ -230,40 +230,40 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         buf.skipBytes(2); // header
 
         int type = buf.readUnsignedByte();
-        int length = buf.readUnsignedShort();
+        int length = buf.readUnsignedShortLE();
 
         if (type == MSG_HELLO) {
 
-            buf.readUnsignedInt(); // device serial number
+            buf.readUnsignedIntLE(); // device serial number
 
             DeviceSession deviceSession = getDeviceSession(
                     channel, remoteAddress, buf.readBytes(15).toString(StandardCharsets.US_ASCII));
 
-            ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
+            ByteBuf response = Unpooled.buffer(0);
             if (length == 51) {
                 response.writeByte(0); // reserved
-                response.writeInt(0); // reserved
+                response.writeIntLE(0); // reserved
             } else {
-                response.writeInt((int) ((System.currentTimeMillis() - 1356998400000L) / 1000));
-                response.writeInt(deviceSession != null ? 0 : 1); // flags
+                response.writeIntLE((int) ((System.currentTimeMillis() - 1356998400000L) / 1000));
+                response.writeIntLE(deviceSession != null ? 0 : 1); // flags
             }
 
             sendResponse(channel, MSG_HELLO_RESPONSE, response);
 
         } else if (type == MSG_COMMIT) {
 
-            ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
+            ByteBuf response = Unpooled.buffer(0);
             response.writeByte(1); // flags (success)
             sendResponse(channel, MSG_COMMIT_RESPONSE, response);
 
         } else if (type == MSG_CANNED_REQUEST_1) {
 
-            ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
+            ByteBuf response = Unpooled.buffer(0);
             response.writeBytes(new byte[12]);
             sendResponse(channel, MSG_CANNED_RESPONSE_1, response);
 
