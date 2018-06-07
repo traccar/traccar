@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,18 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -51,24 +51,22 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
-        buf.readUnsignedShort(); // length
-        int type = buf.readUnsignedShort();
+        buf.readUnsignedShortLE(); // length
+        int type = buf.readUnsignedShortLE();
 
         if (type == MSG_SHAKE_HAND && channel != null) {
 
-            ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 13);
-            response.writeBytes(
-                    ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "\r\n*KW", StandardCharsets.US_ASCII));
+            ByteBuf response = Unpooled.buffer(13);
+            response.writeBytes(Unpooled.copiedBuffer("\r\n*KW", StandardCharsets.US_ASCII));
             response.writeByte(0);
-            response.writeShort(response.capacity());
-            response.writeShort(MSG_SHAKE_HAND_RESPONSE);
+            response.writeShortLE(response.capacity());
+            response.writeShortLE(MSG_SHAKE_HAND_RESPONSE);
             response.writeByte(1); // status
-            response.writeBytes(
-                    ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "\r\n", StandardCharsets.US_ASCII));
+            response.writeBytes(Unpooled.copiedBuffer("\r\n", StandardCharsets.US_ASCII));
 
-            channel.write(response, remoteAddress);
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
 
         } else if (type == MSG_UPLOAD_POSITION || type == MSG_UPLOAD_POSITION_NEW
                 || type == MSG_CONTROL_RESPONSE || type == MSG_ALARM) {
@@ -83,8 +81,8 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position(getProtocolName());
 
             if (type == MSG_CONTROL_RESPONSE) {
-                buf.readUnsignedInt(); // GIS ip
-                buf.readUnsignedInt(); // GIS port
+                buf.readUnsignedIntLE(); // GIS ip
+                buf.readUnsignedIntLE(); // GIS port
             }
 
             position.setValid(BitUtil.check(buf.readUnsignedByte(), 0));
@@ -108,17 +106,17 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (newFormat) {
-                position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedInt()));
-                position.setCourse(buf.readFloat());
+                position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedIntLE()));
+                position.setCourse(buf.readFloatLE());
             } else {
                 position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
-                position.setCourse(buf.readUnsignedShort());
+                position.setCourse(buf.readUnsignedShortLE());
             }
-            position.setLongitude(buf.readFloat());
-            position.setLatitude(buf.readFloat());
+            position.setLongitude(buf.readFloatLE());
+            position.setLatitude(buf.readFloatLE());
 
             if (!newFormat) {
-                long timeValue = buf.readUnsignedInt();
+                long timeValue = buf.readUnsignedIntLE();
                 DateBuilder dateBuilder = new DateBuilder()
                         .setYear((int) BitUtil.from(timeValue, 26))
                         .setMonth((int) BitUtil.between(timeValue, 22, 26))
@@ -129,7 +127,7 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
                 position.setTime(dateBuilder.getDate());
             }
 
-            ChannelBuffer rawId;
+            ByteBuf rawId;
             if (newFormat) {
                 rawId = buf.readBytes(12);
             } else {
@@ -152,8 +150,8 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.PREFIX_IO + 1, buf.readUnsignedByte());
                 position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte());
             } else if (type == MSG_UPLOAD_POSITION_NEW) {
-                position.set(Position.PREFIX_TEMP + 1, buf.readShort());
-                position.set(Position.KEY_ODOMETER, buf.readFloat());
+                position.set(Position.PREFIX_TEMP + 1, buf.readShortLE());
+                position.set(Position.KEY_ODOMETER, buf.readFloatLE());
             }
 
             return position;

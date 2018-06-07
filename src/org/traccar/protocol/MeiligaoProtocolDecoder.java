@@ -15,12 +15,13 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
@@ -39,7 +40,7 @@ import java.util.regex.Pattern;
 
 public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
-    private Map<Byte, ChannelBuffer> photos = new HashMap<>();
+    private Map<Byte, ByteBuf> photos = new HashMap<>();
 
     public MeiligaoProtocolDecoder(MeiligaoProtocol protocol) {
         super(protocol);
@@ -153,7 +154,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_UPLOAD_COMPLETE = 0x0f80;
     public static final int MSG_REBOOT_GPS = 0x4902;
 
-    private DeviceSession identify(ChannelBuffer buf, Channel channel, SocketAddress remoteAddress) {
+    private DeviceSession identify(ByteBuf buf, Channel channel, SocketAddress remoteAddress) {
         StringBuilder builder = new StringBuilder();
 
         for (int i = 0; i < 7; i++) {
@@ -184,10 +185,10 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static void sendResponse(
-            Channel channel, SocketAddress remoteAddress, ChannelBuffer id, int type, ChannelBuffer msg) {
+            Channel channel, SocketAddress remoteAddress, ByteBuf id, int type, ByteBuf msg) {
 
         if (channel != null) {
-            ChannelBuffer buf = ChannelBuffers.buffer(
+            ByteBuf buf = Unpooled.buffer(
                     2 + 2 + id.readableBytes() + 2 + msg.readableBytes() + 2 + 2);
 
             buf.writeByte('@');
@@ -196,18 +197,18 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             buf.writeBytes(id);
             buf.writeShort(type);
             buf.writeBytes(msg);
-            buf.writeShort(Checksum.crc16(Checksum.CRC16_CCITT_FALSE, buf.toByteBuffer()));
+            buf.writeShort(Checksum.crc16(Checksum.CRC16_CCITT_FALSE, buf.nioBuffer()));
             buf.writeByte('\r');
             buf.writeByte('\n');
 
-            channel.write(buf, remoteAddress);
+            channel.writeAndFlush(new NetworkMessage(buf, remoteAddress));
         }
     }
 
     private String getServer(Channel channel) {
         String server = Context.getConfig().getString(getProtocolName() + ".server");
         if (server == null && channel != null) {
-            InetSocketAddress address = (InetSocketAddress) channel.getLocalAddress();
+            InetSocketAddress address = (InetSocketAddress) channel.localAddress();
             server = address.getAddress().getHostAddress() + ":" + address.getPort();
         }
         return server;
@@ -357,7 +358,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private List<Position> decodeRetransmission(ChannelBuffer buf, DeviceSession deviceSession) {
+    private List<Position> decodeRetransmission(ByteBuf buf, DeviceSession deviceSession) {
         List<Position> positions = new LinkedList<>();
 
         int count = buf.readUnsignedByte();
@@ -394,34 +395,34 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
         buf.skipBytes(2); // header
         buf.readShort(); // length
-        ChannelBuffer id = buf.readBytes(7);
+        ByteBuf id = buf.readBytes(7);
         int command = buf.readUnsignedShort();
-        ChannelBuffer response;
+        ByteBuf response;
 
         if (command == MSG_LOGIN) {
-            response = ChannelBuffers.wrappedBuffer(new byte[]{0x01});
+            response = Unpooled.wrappedBuffer(new byte[]{0x01});
             sendResponse(channel, remoteAddress, id, MSG_LOGIN_RESPONSE, response);
             return null;
         } else if (command == MSG_HEARTBEAT) {
-            response = ChannelBuffers.wrappedBuffer(new byte[]{0x01});
+            response = Unpooled.wrappedBuffer(new byte[]{0x01});
             sendResponse(channel, remoteAddress, id, MSG_HEARTBEAT, response);
             return null;
         } else if (command == MSG_SERVER) {
-            response = ChannelBuffers.copiedBuffer(getServer(channel), StandardCharsets.US_ASCII);
+            response = Unpooled.copiedBuffer(getServer(channel), StandardCharsets.US_ASCII);
             sendResponse(channel, remoteAddress, id, MSG_SERVER, response);
             return null;
         } else if (command == MSG_UPLOAD_PHOTO) {
             byte imageIndex = buf.readByte();
-            photos.put(imageIndex, ChannelBuffers.dynamicBuffer());
-            response = ChannelBuffers.copiedBuffer(new byte[]{imageIndex});
+            photos.put(imageIndex, Unpooled.buffer());
+            response = Unpooled.copiedBuffer(new byte[]{imageIndex});
             sendResponse(channel, remoteAddress, id, MSG_UPLOAD_PHOTO_RESPONSE, response);
             return null;
         } else if (command == MSG_UPLOAD_COMPLETE) {
             byte imageIndex = buf.readByte();
-            response = ChannelBuffers.copiedBuffer(new byte[]{imageIndex, 0, 0});
+            response = Unpooled.copiedBuffer(new byte[]{imageIndex, 0, 0});
             sendResponse(channel, remoteAddress, id, MSG_RETRANSMISSION, response);
             return null;
         }

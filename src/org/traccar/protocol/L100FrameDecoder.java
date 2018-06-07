@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,16 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.frame.FrameDecoder;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import org.traccar.BaseFrameDecoder;
 
-public class L100FrameDecoder extends FrameDecoder {
+public class L100FrameDecoder extends BaseFrameDecoder {
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
+            ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
         if (buf.readableBytes() < 80) {
             return null;
@@ -42,7 +42,7 @@ public class L100FrameDecoder extends FrameDecoder {
 
         if (buf.readableBytes() >= index - buf.readerIndex()) {
             buf.skipBytes(2); // header
-            ChannelBuffer frame = buf.readBytes(index - buf.readerIndex() - 2);
+            ByteBuf frame = buf.readBytes(index - buf.readerIndex() - 2);
             buf.skipBytes(2); // footer
             return frame;
         }

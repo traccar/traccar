@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,12 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
@@ -27,7 +28,6 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.nio.ByteOrder;
 
 public class MxtProtocolDecoder extends BaseProtocolDecoder {
 
@@ -41,17 +41,17 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
 
     private static void sendResponse(Channel channel, int device, long id, int crc) {
         if (channel != null) {
-            ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
+            ByteBuf response = Unpooled.buffer();
             response.writeByte(device);
             response.writeByte(MSG_ACK);
-            response.writeInt((int) id);
-            response.writeShort(crc);
-            response.writeShort(Checksum.crc16(
-                    Checksum.CRC16_XMODEM, response.toByteBuffer()));
+            response.writeIntLE((int) id);
+            response.writeShortLE(crc);
+            response.writeShortLE(Checksum.crc16(
+                    Checksum.CRC16_XMODEM, response.nioBuffer()));
 
-            ChannelBuffer encoded = ChannelBuffers.dynamicBuffer();
+            ByteBuf encoded = Unpooled.buffer(0);
             encoded.writeByte(0x01); // header
-            while (response.readable()) {
+            while (response.isReadable()) {
                 int b = response.readByte();
                 if (b == 0x01 || b == 0x04 || b == 0x10 || b == 0x11 || b == 0x13) {
                     encoded.writeByte(0x10);
@@ -60,7 +60,7 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
                 encoded.writeByte(b);
             }
             encoded.writeByte(0x04); // ending
-            channel.write(encoded);
+            channel.write(new NetworkMessage(encoded, channel.remoteAddress()));
         }
     }
 
@@ -68,13 +68,13 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         buf.readUnsignedByte(); // start
         int device = buf.readUnsignedByte(); // device descriptor
         int type = buf.readUnsignedByte();
 
-        long id = buf.readUnsignedInt();
+        long id = buf.readUnsignedIntLE();
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, String.valueOf(id));
         if (deviceSession == null) {
             return null;
@@ -88,11 +88,11 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedByte(); // protocol
             int infoGroups = buf.readUnsignedByte();
 
-            position.set(Position.KEY_INDEX, buf.readUnsignedShort());
+            position.set(Position.KEY_INDEX, buf.readUnsignedShortLE());
 
             DateBuilder dateBuilder = new DateBuilder().setDate(2000, 1, 1);
 
-            long date = buf.readUnsignedInt();
+            long date = buf.readUnsignedIntLE();
 
             long days = BitUtil.from(date, 6 + 6 + 5);
             long hours = BitUtil.between(date, 6 + 6, 6 + 6 + 5);
@@ -104,10 +104,10 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(dateBuilder.getDate());
 
             position.setValid(true);
-            position.setLatitude(buf.readInt() / 1000000.0);
-            position.setLongitude(buf.readInt() / 1000000.0);
+            position.setLatitude(buf.readIntLE() / 1000000.0);
+            position.setLongitude(buf.readIntLE() / 1000000.0);
 
-            long flags = buf.readUnsignedInt();
+            long flags = buf.readUnsignedIntLE();
             position.set(Position.KEY_IGNITION, BitUtil.check(flags, 0));
             if (BitUtil.check(flags, 1)) {
                 position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
@@ -115,7 +115,7 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_INPUT, BitUtil.between(flags, 2, 7));
             position.set(Position.KEY_OUTPUT, BitUtil.between(flags, 7, 10));
             position.setCourse(BitUtil.between(flags, 10, 13) * 45);
-            //position.setValid(BitUtil.check(flags, 15));
+            // position.setValid(BitUtil.check(flags, 15));
             position.set(Position.KEY_CHARGE, BitUtil.check(flags, 20));
 
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
@@ -135,34 +135,34 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_HDOP, buf.readUnsignedByte());
                 position.setAccuracy(buf.readUnsignedByte());
                 position.set(Position.KEY_RSSI, buf.readUnsignedByte());
-                buf.readUnsignedShort(); // time since boot
+                buf.readUnsignedShortLE(); // time since boot
                 position.set(Position.KEY_POWER, buf.readUnsignedByte());
                 position.set(Position.PREFIX_TEMP + 1, buf.readByte());
             }
 
             if (BitUtil.check(infoGroups, 3)) {
-                position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+                position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
             }
 
             if (BitUtil.check(infoGroups, 4)) {
-                position.set(Position.KEY_HOURS, UnitsConverter.msFromMinutes(buf.readUnsignedInt()));
+                position.set(Position.KEY_HOURS, UnitsConverter.msFromMinutes(buf.readUnsignedIntLE()));
             }
 
             if (BitUtil.check(infoGroups, 5)) {
-                buf.readUnsignedInt(); // reason
+                buf.readUnsignedIntLE(); // reason
             }
 
             if (BitUtil.check(infoGroups, 6)) {
-                position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.001);
-                position.set(Position.KEY_BATTERY, buf.readUnsignedShort());
+                position.set(Position.KEY_POWER, buf.readUnsignedShortLE() * 0.001);
+                position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE());
             }
 
             if (BitUtil.check(infoGroups, 7)) {
-                position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(buf.readUnsignedInt()));
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(buf.readUnsignedIntLE()));
             }
 
             buf.readerIndex(buf.writerIndex() - 3);
-            sendResponse(channel, device, id, buf.readUnsignedShort());
+            sendResponse(channel, device, id, buf.readUnsignedShortLE());
 
             return position;
         }

@@ -15,8 +15,8 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DataConverter;
@@ -28,9 +28,9 @@ import java.util.TimeZone;
 
 public class MeiligaoProtocolEncoder extends BaseProtocolEncoder {
 
-    private ChannelBuffer encodeContent(long deviceId, int type, ChannelBuffer content) {
+    private ByteBuf encodeContent(long deviceId, int type, ByteBuf content) {
 
-        ChannelBuffer buf = ChannelBuffers.dynamicBuffer();
+        ByteBuf buf = Unpooled.buffer();
 
         buf.writeByte('@');
         buf.writeByte('@');
@@ -43,7 +43,7 @@ public class MeiligaoProtocolEncoder extends BaseProtocolEncoder {
 
         buf.writeBytes(content);
 
-        buf.writeShort(Checksum.crc16(Checksum.CRC16_CCITT_FALSE, buf.toByteBuffer()));
+        buf.writeShort(Checksum.crc16(Checksum.CRC16_CCITT_FALSE, buf.nioBuffer()));
 
         buf.writeByte('\r');
         buf.writeByte('\n');
@@ -54,7 +54,7 @@ public class MeiligaoProtocolEncoder extends BaseProtocolEncoder {
     @Override
     protected Object encodeCommand(Command command) {
 
-        ChannelBuffer content = ChannelBuffers.dynamicBuffer();
+        ByteBuf content = Unpooled.buffer();
 
         switch (command.getType()) {
             case Command.TYPE_POSITION_SINGLE:

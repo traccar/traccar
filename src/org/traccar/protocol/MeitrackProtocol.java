@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,12 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
-import org.jboss.netty.bootstrap.ServerBootstrap;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.handler.codec.string.StringEncoder;
+import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
+import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.model.Command;
 
-import java.nio.ByteOrder;
 import java.util.List;
 
 public class MeitrackProtocol extends BaseProtocol {
@@ -42,27 +39,23 @@ public class MeitrackProtocol extends BaseProtocol {
 
     @Override
     public void initTrackerServers(List<TrackerServer> serverList) {
-        TrackerServer server = new TrackerServer(new ServerBootstrap(), getName()) {
+        serverList.add(new TrackerServer(false, getName()) {
             @Override
-            protected void addSpecificHandlers(ChannelPipeline pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast("frameDecoder", new MeitrackFrameDecoder());
                 pipeline.addLast("stringEncoder", new StringEncoder());
                 pipeline.addLast("objectEncoder", new MeitrackProtocolEncoder());
                 pipeline.addLast("objectDecoder", new MeitrackProtocolDecoder(MeitrackProtocol.this));
             }
-        };
-        server.setEndianness(ByteOrder.LITTLE_ENDIAN);
-        serverList.add(server);
-        server = new TrackerServer(new ConnectionlessBootstrap(), getName()) {
+        });
+        serverList.add(new TrackerServer(true, getName()) {
             @Override
-            protected void addSpecificHandlers(ChannelPipeline pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast("stringEncoder", new StringEncoder());
                 pipeline.addLast("objectEncoder", new MeitrackProtocolEncoder());
                 pipeline.addLast("objectDecoder", new MeitrackProtocolDecoder(MeitrackProtocol.this));
             }
-        };
-        server.setEndianness(ByteOrder.LITTLE_ENDIAN);
-        serverList.add(server);
+        });
     }
 
 }

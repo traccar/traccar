@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,18 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
@@ -75,23 +75,23 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private ParseResult parsePosition(DeviceSession deviceSession, ChannelBuffer buf) {
+    private ParseResult parsePosition(DeviceSession deviceSession, ByteBuf buf) {
         Position position = new Position(getProtocolName());
 
         position.setDeviceId(deviceSession.getDeviceId());
 
         int format;
         if (buf.getUnsignedByte(buf.readerIndex()) == 0) {
-            format = buf.readUnsignedShort();
+            format = buf.readUnsignedShortLE();
         } else {
             format = buf.readUnsignedByte();
         }
         position.set("format", format);
 
-        long index = buf.readUnsignedInt();
+        long index = buf.readUnsignedIntLE();
         position.set(Position.KEY_INDEX, index);
 
-        position.set(Position.KEY_EVENT, buf.readUnsignedShort());
+        position.set(Position.KEY_EVENT, buf.readUnsignedShortLE());
 
         buf.skipBytes(6); // event time
 
@@ -104,33 +104,33 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_RSSI, buf.readUnsignedByte());
 
         if (isFormat(format, F10, F20, F30)) {
-            position.set(Position.KEY_OUTPUT, buf.readUnsignedShort());
+            position.set(Position.KEY_OUTPUT, buf.readUnsignedShortLE());
         } else if (isFormat(format, F40, F50, F51, F52)) {
             position.set(Position.KEY_OUTPUT, buf.readUnsignedByte());
         }
 
         if (isFormat(format, F10, F20, F30, F40)) {
-            position.set(Position.KEY_INPUT, buf.readUnsignedShort());
+            position.set(Position.KEY_INPUT, buf.readUnsignedShortLE());
         } else if (isFormat(format, F50, F51, F52)) {
             position.set(Position.KEY_INPUT, buf.readUnsignedByte());
         }
 
-        position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.001);
-        position.set(Position.KEY_BATTERY, buf.readUnsignedShort());
+        position.set(Position.KEY_POWER, buf.readUnsignedShortLE() * 0.001);
+        position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE());
 
         if (isFormat(format, F10, F20, F30)) {
-            position.set(Position.PREFIX_TEMP + 1, buf.readShort());
+            position.set(Position.PREFIX_TEMP + 1, buf.readShortLE());
         }
 
         if (isFormat(format, F10, F20, F50, F52)) {
-            position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
-            position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort());
+            position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShortLE());
+            position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShortLE());
         }
 
         // Impulse counters
         if (isFormat(format, F20, F50, F51, F52)) {
-            buf.readUnsignedInt();
-            buf.readUnsignedInt();
+            buf.readUnsignedIntLE();
+            buf.readUnsignedIntLE();
         }
 
         if (isFormat(format, F20, F50, F51, F52)) {
@@ -142,30 +142,30 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
                     .setDateReverse(buf.readUnsignedByte(), buf.readUnsignedByte() + 1, buf.readUnsignedByte());
             position.setTime(dateBuilder.getDate());
 
-            position.setLatitude(buf.readFloat() / Math.PI * 180);
-            position.setLongitude(buf.readFloat() / Math.PI * 180);
-            position.setSpeed(UnitsConverter.knotsFromKph(buf.readFloat()));
-            position.setCourse(buf.readUnsignedShort());
+            position.setLatitude(buf.readFloatLE() / Math.PI * 180);
+            position.setLongitude(buf.readFloatLE() / Math.PI * 180);
+            position.setSpeed(UnitsConverter.knotsFromKph(buf.readFloatLE()));
+            position.setCourse(buf.readUnsignedShortLE());
 
-            position.set(Position.KEY_ODOMETER, buf.readFloat() * 1000);
-            position.set(Position.KEY_DISTANCE, buf.readFloat());
+            position.set(Position.KEY_ODOMETER, buf.readFloatLE() * 1000);
+            position.set(Position.KEY_DISTANCE, buf.readFloatLE());
 
             // Segment times
-            buf.readUnsignedShort();
-            buf.readUnsignedShort();
+            buf.readUnsignedShortLE();
+            buf.readUnsignedShortLE();
         }
 
         // Other
         if (isFormat(format, F51, F52)) {
-            buf.readUnsignedShort();
+            buf.readUnsignedShortLE();
             buf.readByte();
-            buf.readUnsignedShort();
-            buf.readUnsignedShort();
+            buf.readUnsignedShortLE();
+            buf.readUnsignedShortLE();
             buf.readByte();
-            buf.readUnsignedShort();
-            buf.readUnsignedShort();
+            buf.readUnsignedShortLE();
+            buf.readUnsignedShortLE();
             buf.readByte();
-            buf.readUnsignedShort();
+            buf.readUnsignedShortLE();
         }
 
         // Four temperature sensors
@@ -179,12 +179,12 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         return new ParseResult(index, position);
     }
 
-    private Object processSingle(DeviceSession deviceSession, Channel channel, ChannelBuffer buf) {
+    private Object processSingle(DeviceSession deviceSession, Channel channel, ByteBuf buf) {
         ParseResult result = parsePosition(deviceSession, buf);
 
-        ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 8);
-        response.writeBytes(ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "*<T", StandardCharsets.US_ASCII));
-        response.writeInt((int) result.getId());
+        ByteBuf response = Unpooled.buffer(8);
+        response.writeBytes(Unpooled.copiedBuffer("*<T", StandardCharsets.US_ASCII));
+        response.writeIntLE((int) result.getId());
         sendReply(channel, response);
 
         if (result.getPosition().getFixTime() == null) {
@@ -194,7 +194,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         return result.getPosition();
     }
 
-    private Object processArray(DeviceSession deviceSession, Channel channel, ChannelBuffer buf) {
+    private Object processArray(DeviceSession deviceSession, Channel channel, ByteBuf buf) {
         List<Position> positions = new LinkedList<>();
         int count = buf.readUnsignedByte();
 
@@ -205,8 +205,8 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 8);
-        response.writeBytes(ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "*<A", StandardCharsets.US_ASCII));
+        ByteBuf response = Unpooled.buffer(8);
+        response.writeBytes(Unpooled.copiedBuffer("*<A", StandardCharsets.US_ASCII));
         response.writeByte(count);
         sendReply(channel, response);
 
@@ -217,15 +217,15 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         return positions;
     }
 
-    private Object processHandshake(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
+    private Object processHandshake(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
         buf.readByte(); // semicolon symbol
         if (getDeviceSession(channel, remoteAddress, buf.toString(StandardCharsets.US_ASCII)) != null) {
-            sendReply(channel, ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "*<S", StandardCharsets.US_ASCII));
+            sendReply(channel, Unpooled.copiedBuffer("*<S", StandardCharsets.US_ASCII));
         }
         return null;
     }
 
-    private static short checksum(ChannelBuffer buf) {
+    private static short checksum(ByteBuf buf) {
         short sum = 0;
         for (int i = 0; i < buf.readableBytes(); i++) {
             sum ^= buf.getUnsignedByte(i);
@@ -233,17 +233,17 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         return sum;
     }
 
-    private void sendReply(Channel channel, ChannelBuffer data) {
-        ChannelBuffer header = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, 16);
-        header.writeBytes(ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, prefix, StandardCharsets.US_ASCII));
-        header.writeInt((int) deviceUniqueId);
-        header.writeInt((int) serverId);
-        header.writeShort(data.readableBytes());
+    private void sendReply(Channel channel, ByteBuf data) {
+        ByteBuf header = Unpooled.buffer(16);
+        header.writeBytes(Unpooled.copiedBuffer(prefix, StandardCharsets.US_ASCII));
+        header.writeIntLE((int) deviceUniqueId);
+        header.writeIntLE((int) serverId);
+        header.writeShortLE(data.readableBytes());
         header.writeByte(checksum(data));
         header.writeByte(checksum(header));
 
         if (channel != null) {
-            channel.write(ChannelBuffers.copiedBuffer(header, data));
+            channel.writeAndFlush(new NetworkMessage(Unpooled.copiedBuffer(header, data), channel.remoteAddress()));
         }
     }
 
@@ -251,13 +251,13 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         prefix = buf.toString(buf.readerIndex(), 4, StandardCharsets.US_ASCII);
         buf.skipBytes(prefix.length()); // prefix @NTC by default
-        serverId = buf.readUnsignedInt();
-        deviceUniqueId = buf.readUnsignedInt();
-        int length = buf.readUnsignedShort();
+        serverId = buf.readUnsignedIntLE();
+        deviceUniqueId = buf.readUnsignedIntLE();
+        int length = buf.readUnsignedShortLE();
         buf.skipBytes(2); // header and data XOR checksum
 
         if (length == 0) {
