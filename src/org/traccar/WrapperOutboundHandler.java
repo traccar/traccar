@@ -35,7 +35,9 @@ public class WrapperOutboundHandler implements ChannelOutboundHandler {
     }
 
     @Override
-    public void connect(ChannelHandlerContext ctx, SocketAddress remoteAddress, SocketAddress localAddress, ChannelPromise promise) throws Exception {
+    public void connect(
+            ChannelHandlerContext ctx, SocketAddress remoteAddress,
+            SocketAddress localAddress, ChannelPromise promise) throws Exception {
         handler.connect(ctx, remoteAddress, localAddress, promise);
     }
 

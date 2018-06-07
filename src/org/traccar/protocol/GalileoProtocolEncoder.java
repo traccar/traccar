@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,39 +15,38 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
-import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 
 public class GalileoProtocolEncoder extends BaseProtocolEncoder {
 
-    private ChannelBuffer encodeText(String uniqueId, String text) {
+    private ByteBuf encodeText(String uniqueId, String text) {
 
-        ChannelBuffer buf = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 256);
+        ByteBuf buf = Unpooled.buffer(256);
 
         buf.writeByte(0x01);
-        buf.writeShort(uniqueId.length() + text.length() + 11); // TODO
+        buf.writeShortLE(uniqueId.length() + text.length() + 11); // TODO
 
         buf.writeByte(0x03); // imei tag
         buf.writeBytes(uniqueId.getBytes(StandardCharsets.US_ASCII));
 
         buf.writeByte(0x04); // device id tag
-        buf.writeShort(0); // not needed if imei provided
+        buf.writeShortLE(0); // not needed if imei provided
 
         buf.writeByte(0xE0); // index tag
-        buf.writeInt(0); // index
+        buf.writeIntLE(0); // index
 
         buf.writeByte(0xE1); // command text tag
         buf.writeByte(text.length());
         buf.writeBytes(text.getBytes(StandardCharsets.US_ASCII));
 
-        buf.writeShort(Checksum.crc16(Checksum.CRC16_MODBUS, buf.toByteBuffer(0, buf.writerIndex())));
+        buf.writeShortLE(Checksum.crc16(Checksum.CRC16_MODBUS, buf.nioBuffer(0, buf.writerIndex())));
 
         return buf;
     }

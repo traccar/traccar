@@ -17,7 +17,6 @@ package org.traccar;
 
 import io.netty.channel.Channel;
 import io.netty.channel.socket.DatagramChannel;
-import io.netty.handler.codec.http.HttpRequestDecoder;
 import org.traccar.helper.Log;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Device;

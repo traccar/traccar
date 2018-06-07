@@ -22,7 +22,10 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 
-public class BufferUtil {
+public final class BufferUtil {
+
+    private BufferUtil() {
+    }
 
     public static int indexOf(String needle, ByteBuf haystack) {
         return ByteBufUtil.indexOf(

@@ -16,7 +16,6 @@
 package org.traccar;
 
 import io.netty.buffer.Unpooled;
-import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.database.ActiveDevice;
 import org.traccar.helper.DataConverter;
 import org.traccar.model.Command;

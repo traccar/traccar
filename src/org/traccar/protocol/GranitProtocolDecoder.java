@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,18 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
-import org.traccar.helper.StringFinder;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
@@ -50,35 +49,35 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
         adc4Ratio = Context.getConfig().getDouble("granit.adc4Ratio", 1);
     }
 
-    public static void appendChecksum(ChannelBuffer buffer, int length) {
+    public static void appendChecksum(ByteBuf buffer, int length) {
         buffer.writeByte('*');
-        int checksum = Checksum.xor(buffer.toByteBuffer(0, length)) & 0xFF;
+        int checksum = Checksum.xor(buffer.nioBuffer(0, length)) & 0xFF;
         String checksumString = String.format("%02X", checksum);
         buffer.writeBytes(checksumString.getBytes(StandardCharsets.US_ASCII));
         buffer.writeByte('\r'); buffer.writeByte('\n');
     }
 
     private static void sendResponseCurrent(Channel channel, int deviceId, long time) {
-        ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
+        ByteBuf response = Unpooled.buffer(0);
         response.writeBytes("BB+UGRC~".getBytes(StandardCharsets.US_ASCII));
-        response.writeShort(6); // length
+        response.writeShortLE(6); // length
         response.writeInt((int) time);
-        response.writeShort(deviceId);
+        response.writeShortLE(deviceId);
         appendChecksum(response, 16);
-        channel.write(response);
+        channel.write(new NetworkMessage(response, channel.remoteAddress()));
     }
 
     private static void sendResponseArchive(Channel channel, int deviceId, int packNum) {
-        ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
+        ByteBuf response = Unpooled.buffer(0);
         response.writeBytes("BB+ARCF~".getBytes(StandardCharsets.US_ASCII));
-        response.writeShort(4); // length
-        response.writeShort(packNum);
-        response.writeShort(deviceId);
+        response.writeShortLE(4); // length
+        response.writeShortLE(packNum);
+        response.writeShortLE(deviceId);
         appendChecksum(response, 14);
-        channel.write(response);
+        channel.write(new NetworkMessage(response, channel.remoteAddress()));
     }
 
-    private void decodeStructure(ChannelBuffer buf, Position position) {
+    private void decodeStructure(ByteBuf buf, Position position) {
         short flags = buf.readUnsignedByte();
         position.setValid(BitUtil.check(flags, 7));
         if (BitUtil.check(flags, 1)) {
@@ -93,8 +92,8 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
 
         int lonDegrees = buf.readUnsignedByte();
         int latDegrees = buf.readUnsignedByte();
-        int lonMinutes = buf.readUnsignedShort();
-        int latMinutes = buf.readUnsignedShort();
+        int lonMinutes = buf.readUnsignedShortLE();
+        int latMinutes = buf.readUnsignedShortLE();
 
         double latitude = latDegrees + latMinutes / 60000.0;
         double longitude = lonDegrees + lonMinutes / 60000.0;
@@ -119,7 +118,7 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setCourse(course);
 
-        position.set(Position.KEY_DISTANCE, buf.readShort());
+        position.set(Position.KEY_DISTANCE, buf.readShortLE());
 
         int analogIn1 = buf.readUnsignedByte();
         int analogIn2 = buf.readUnsignedByte();
@@ -150,9 +149,9 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
     @Override
     protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
-        int indexTilde = buf.indexOf(buf.readerIndex(), buf.writerIndex(), new StringFinder("~"));
+        int indexTilde = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '~');
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
 
@@ -175,13 +174,13 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
 
         if (header.equals("+RRCB~")) {
 
-            buf.skipBytes(2); //binary length 26
-            int deviceId = buf.readUnsignedShort();
+            buf.skipBytes(2); // binary length 26
+            int deviceId = buf.readUnsignedShortLE();
             deviceSession = getDeviceSession(channel, remoteAddress, String.valueOf(deviceId));
             if (deviceSession == null) {
                 return null;
             }
-            long unixTime = buf.readUnsignedInt();
+            long unixTime = buf.readUnsignedIntLE();
             if (channel != null) {
                 sendResponseCurrent(channel, deviceId, unixTime);
             }
@@ -195,8 +194,8 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (header.equals("+DDAT~")) {
 
-            buf.skipBytes(2); //binary length
-            int deviceId = buf.readUnsignedShort();
+            buf.skipBytes(2); // binary length
+            int deviceId = buf.readUnsignedShortLE();
             deviceSession = getDeviceSession(channel, remoteAddress, String.valueOf(deviceId));
             if (deviceSession == null) {
                 return null;
@@ -206,15 +205,15 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
                 return null;
             }
             byte nblocks = buf.readByte();
-            int packNum = buf.readUnsignedShort();
+            int packNum = buf.readUnsignedShortLE();
             if (channel != null) {
                 sendResponseArchive(channel, deviceId, packNum);
             }
             List<Position> positions = new ArrayList<>();
             while (nblocks > 0) {
                 nblocks--;
-                long unixTime = buf.readUnsignedInt();
-                int timeIncrement = buf.getUnsignedShort(buf.readerIndex() + 120);
+                long unixTime = buf.readUnsignedIntLE();
+                int timeIncrement = buf.getUnsignedShortLE(buf.readerIndex() + 120);
                 for (int i = 0; i < 6; i++) {
                     if (buf.getUnsignedByte(buf.readerIndex()) != 0xFE) {
                         Position position = new Position(getProtocolName());

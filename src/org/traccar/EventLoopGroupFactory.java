@@ -23,6 +23,9 @@ public final class EventLoopGroupFactory {
     private static EventLoopGroup bossGroup = new NioEventLoopGroup();
     private static EventLoopGroup workerGroup = new NioEventLoopGroup();
 
+    private EventLoopGroupFactory() {
+    }
+
     public static EventLoopGroup getBossGroup() {
         return bossGroup;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.traccar.protocol;
+package org.traccar.protocol;
 
 import java.nio.charset.StandardCharsets;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.helper.Log;
 import org.traccar.model.Command;
@@ -44,7 +44,7 @@ public class GranitProtocolEncoder extends BaseProtocolEncoder {
                 return null;
         }
         if (!commandString.isEmpty()) {
-            ChannelBuffer commandBuf = ChannelBuffers.dynamicBuffer();
+            ByteBuf commandBuf = Unpooled.buffer();
             commandBuf.writeBytes(commandString.getBytes(StandardCharsets.US_ASCII));
             GranitProtocolDecoder.appendChecksum(commandBuf, commandString.length());
             return commandBuf;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2014 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,11 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -51,7 +52,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
     private Position decodeOriginal(Channel channel, SocketAddress remoteAddress, String sentence) {
 
         if (channel != null) {
-            channel.write("ACK\r");
+            channel.write(new NetworkMessage("ACK\r", remoteAddress));
         }
 
         String format;
