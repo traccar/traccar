@@ -240,11 +240,13 @@ public class WrapperContext implements ChannelHandlerContext {
         return context.alloc();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public <T> Attribute<T> attr(AttributeKey<T> key) {
         return context.attr(key);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public <T> boolean hasAttr(AttributeKey<T> key) {
         return context.hasAttr(key);

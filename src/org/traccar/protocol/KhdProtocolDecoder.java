@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2014 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,12 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.BcdUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
@@ -34,7 +35,7 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private String readSerialNumber(ChannelBuffer buf) {
+    private String readSerialNumber(ByteBuf buf) {
         int b1 = buf.readUnsignedByte();
         int b2 = buf.readUnsignedByte() - 0x80;
         int b3 = buf.readUnsignedByte() - 0x80;
@@ -55,7 +56,7 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         buf.skipBytes(2); // header
         int type = buf.readUnsignedByte();
@@ -129,16 +130,16 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
             buf.skipBytes(4); // serial number
             buf.readByte(); // reserved
 
-            ChannelBuffer response = ChannelBuffers.dynamicBuffer();
+            ByteBuf response = Unpooled.buffer();
             response.writeByte(0x29); response.writeByte(0x29); // header
             response.writeByte(MSG_CONFIRMATION);
             response.writeShort(5); // size
             response.writeByte(buf.readUnsignedByte());
             response.writeByte(type);
             response.writeByte(0); // reserved
-            response.writeByte(Checksum.xor(response.toByteBuffer()));
+            response.writeByte(Checksum.xor(response.nioBuffer()));
             response.writeByte(0x0D); // ending
-            channel.write(response);
+            channel.write(new NetworkMessage(response, remoteAddress));
 
         }
 

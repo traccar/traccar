@@ -22,6 +22,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.BcdUtil;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
@@ -182,7 +183,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             response.writeShort(Checksum.crc16(Checksum.CRC16_X25,
                     response.nioBuffer(2, response.writerIndex() - 2)));
             response.writeByte('\r'); response.writeByte('\n'); // ending
-            channel.write(response);
+            channel.write(new NetworkMessage(response, channel.remoteAddress()));
         }
     }
 

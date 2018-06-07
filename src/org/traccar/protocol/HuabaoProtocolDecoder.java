@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,13 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.BcdUtil;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
@@ -46,27 +48,27 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
     public static final int RESULT_SUCCESS = 0;
 
-    public static ChannelBuffer formatMessage(int type, ChannelBuffer id, ChannelBuffer data) {
-        ChannelBuffer buf = ChannelBuffers.dynamicBuffer();
+    public static ByteBuf formatMessage(int type, ByteBuf id, ByteBuf data) {
+        ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0x7e);
         buf.writeShort(type);
         buf.writeShort(data.readableBytes());
         buf.writeBytes(id);
         buf.writeShort(1); // index
         buf.writeBytes(data);
-        buf.writeByte(Checksum.xor(buf.toByteBuffer(1, buf.readableBytes() - 1)));
+        buf.writeByte(Checksum.xor(buf.nioBuffer(1, buf.readableBytes() - 1)));
         buf.writeByte(0x7e);
         return buf;
     }
 
     private void sendGeneralResponse(
-            Channel channel, SocketAddress remoteAddress, ChannelBuffer id, int type, int index) {
+            Channel channel, SocketAddress remoteAddress, ByteBuf id, int type, int index) {
         if (channel != null) {
-            ChannelBuffer response = ChannelBuffers.dynamicBuffer();
+            ByteBuf response = Unpooled.buffer();
             response.writeShort(index);
             response.writeShort(type);
             response.writeByte(RESULT_SUCCESS);
-            channel.write(formatMessage(MSG_GENERAL_RESPONSE, id, response), remoteAddress);
+            channel.write(new NetworkMessage(formatMessage(MSG_GENERAL_RESPONSE, id, response), remoteAddress));
         }
     }
 
@@ -100,15 +102,15 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         buf.readUnsignedByte(); // start marker
         int type = buf.readUnsignedShort();
         buf.readUnsignedShort(); // body length
-        ChannelBuffer id = buf.readBytes(6); // phone number
+        ByteBuf id = buf.readBytes(6); // phone number
         int index = buf.readUnsignedShort();
 
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, ChannelBuffers.hexDump(id));
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, ByteBufUtil.hexDump(id));
         if (deviceSession == null) {
             return null;
         }
@@ -116,11 +118,12 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         if (type == MSG_TERMINAL_REGISTER) {
 
             if (channel != null) {
-                ChannelBuffer response = ChannelBuffers.dynamicBuffer();
+                ByteBuf response = Unpooled.buffer();
                 response.writeShort(index);
                 response.writeByte(RESULT_SUCCESS);
                 response.writeBytes("authentication".getBytes(StandardCharsets.US_ASCII));
-                channel.write(formatMessage(MSG_TERMINAL_REGISTER_RESPONSE, id, response), remoteAddress);
+                channel.write(new NetworkMessage(
+                        formatMessage(MSG_TERMINAL_REGISTER_RESPONSE, id, response), remoteAddress));
             }
 
         } else if (type == MSG_TERMINAL_AUTH) {

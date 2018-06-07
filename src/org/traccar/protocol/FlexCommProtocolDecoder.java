@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -117,7 +118,7 @@ public class FlexCommProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_POWER, parser.nextInt() * 0.1);
 
         if (channel != null) {
-            channel.write("{01}");
+            channel.write(new NetworkMessage("{01}", remoteAddress));
         }
 
         return position;

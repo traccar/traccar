@@ -15,8 +15,8 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.Log;
@@ -27,9 +27,9 @@ public class KhdProtocolEncoder extends BaseProtocolEncoder {
     public static final int MSG_CUT_OIL = 0x39;
     public static final int MSG_RESUME_OIL = 0x38;
 
-    private ChannelBuffer encodeCommand(int command, String uniqueId) {
+    private ByteBuf encodeCommand(int command, String uniqueId) {
 
-        ChannelBuffer buf = ChannelBuffers.dynamicBuffer();
+        ByteBuf buf = Unpooled.buffer();
 
         buf.writeByte(0x29);
         buf.writeByte(0x29);
@@ -44,7 +44,7 @@ public class KhdProtocolEncoder extends BaseProtocolEncoder {
         buf.writeByte(Integer.parseInt(uniqueId.substring(4, 6)) + 0x80);
         buf.writeByte(Integer.parseInt(uniqueId.substring(6, 8)));
 
-        buf.writeByte(Checksum.xor(buf.toByteBuffer()));
+        buf.writeByte(Checksum.xor(buf.nioBuffer()));
         buf.writeByte(0x0D); // ending
 
         return buf;
