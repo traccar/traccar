@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,11 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
-import org.jboss.netty.bootstrap.ServerBootstrap;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.handler.codec.string.StringDecoder;
 import org.traccar.BaseProtocol;
+import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+
+import io.netty.handler.codec.string.StringDecoder;
 
 import java.util.List;
 
@@ -32,17 +31,17 @@ public class VtfmsProtocol extends BaseProtocol {
 
     @Override
     public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(new ServerBootstrap(), getName()) {
+        serverList.add(new TrackerServer(false, getName()) {
             @Override
-            protected void addSpecificHandlers(ChannelPipeline pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast("frameDecoder", new VtfmsFrameDecoder());
                 pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("objectDecoder", new VtfmsProtocolDecoder(VtfmsProtocol.this));
             }
         });
-        serverList.add(new TrackerServer(new ConnectionlessBootstrap(), getName()) {
+        serverList.add(new TrackerServer(true, getName()) {
             @Override
-            protected void addSpecificHandlers(ChannelPipeline pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("objectDecoder", new VtfmsProtocolDecoder(VtfmsProtocol.this));
             }

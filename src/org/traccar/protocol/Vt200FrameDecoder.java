@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,22 +15,23 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.frame.FrameDecoder;
+import org.traccar.BaseFrameDecoder;
 
-public class Vt200FrameDecoder extends FrameDecoder {
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+
+public class Vt200FrameDecoder extends BaseFrameDecoder {
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
+            ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
         int endIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ')') + 1;
         if (endIndex > 0) {
 
-            ChannelBuffer frame = ChannelBuffers.dynamicBuffer();
+            ByteBuf frame = Unpooled.buffer();
 
             while (buf.readerIndex() < endIndex) {
                 int b = buf.readByte();

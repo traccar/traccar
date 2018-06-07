@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
@@ -92,7 +92,7 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         if (buf.getByte(buf.readerIndex()) != '*') {
             throw new ParseException(null, 0);
@@ -126,7 +126,7 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
             channel.write("*MG20Y" + type + subtype + "#");
         }
 
-        while (buf.readable()) {
+        while (buf.isReadable()) {
 
             buf.readByte(); // skip delimiter
 
@@ -137,7 +137,7 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                 delimiterIndex = buf.writerIndex();
             }
 
-            ChannelBuffer data = buf.readBytes(delimiterIndex - buf.readerIndex());
+            ByteBuf data = buf.readBytes(delimiterIndex - buf.readerIndex());
 
             switch (dataType) {
                 case 'A':
@@ -148,7 +148,7 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case 'C':
                     long odometer = 0;
-                    while (data.readable()) {
+                    while (data.isReadable()) {
                         odometer <<= 4;
                         odometer += data.readByte() - (byte) '0';
                     }
@@ -162,13 +162,13 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                             Integer.parseInt(data.readBytes(4).toString(StandardCharsets.US_ASCII), 16))));
                     break;
                 case 'Q':
-                    position.set("obd-pid", ChannelBuffers.hexDump(data));
+                    position.set("obd-pid", ByteBufUtil.hexDump(data));
                     break;
                 case 'R':
-                    position.set("odb-travel", ChannelBuffers.hexDump(data));
+                    position.set("odb-travel", ByteBufUtil.hexDump(data));
                     break;
                 case 'S':
-                    position.set("obd-traffic", ChannelBuffers.hexDump(data));
+                    position.set("obd-traffic", ByteBufUtil.hexDump(data));
                     break;
                 default:
                     break;
