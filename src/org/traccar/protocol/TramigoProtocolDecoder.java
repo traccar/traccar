@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2014 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,12 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.DateUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -49,16 +50,18 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         int protocol = buf.readUnsignedByte();
+        boolean legacy = protocol == 0x80;
+
         buf.readUnsignedByte(); // version id
-        int index = buf.readUnsignedShort();
-        int type = buf.readUnsignedShort();
+        int index = legacy ? buf.readUnsignedShort() : buf.readUnsignedShortLE();
+        int type = legacy ? buf.readUnsignedShort() : buf.readUnsignedShortLE();
         buf.readUnsignedShort(); // length
         buf.readUnsignedShort(); // mask
         buf.readUnsignedShort(); // checksum
-        long id = buf.readUnsignedInt();
+        long id = legacy ? buf.readUnsignedInt() : buf.readUnsignedIntLE();
         buf.readUnsignedInt(); // time
 
         Position position = new Position(getProtocolName());
@@ -75,36 +78,37 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
 
             // need to send ack?
 
-            buf.readUnsignedShort(); // report trigger
-            buf.readUnsignedShort(); // state flag
+            buf.readUnsignedShortLE(); // report trigger
+            buf.readUnsignedShortLE(); // state flag
 
-            position.setLatitude(buf.readUnsignedInt() * 0.0000001);
-            position.setLongitude(buf.readUnsignedInt() * 0.0000001);
+            position.setLatitude(buf.readUnsignedIntLE() * 0.0000001);
+            position.setLongitude(buf.readUnsignedIntLE() * 0.0000001);
 
-            position.set(Position.KEY_RSSI, buf.readUnsignedShort());
-            position.set(Position.KEY_SATELLITES, buf.readUnsignedShort());
-            position.set(Position.KEY_SATELLITES_VISIBLE, buf.readUnsignedShort());
-            position.set("gpsAntennaStatus", buf.readUnsignedShort());
+            position.set(Position.KEY_RSSI, buf.readUnsignedShortLE());
+            position.set(Position.KEY_SATELLITES, buf.readUnsignedShortLE());
+            position.set(Position.KEY_SATELLITES_VISIBLE, buf.readUnsignedShortLE());
+            position.set("gpsAntennaStatus", buf.readUnsignedShortLE());
 
-            position.setSpeed(buf.readUnsignedShort() * 0.194384);
-            position.setCourse(buf.readUnsignedShort());
+            position.setSpeed(buf.readUnsignedShortLE() * 0.194384);
+            position.setCourse(buf.readUnsignedShortLE());
 
-            position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+            position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
 
-            position.set(Position.KEY_BATTERY, buf.readUnsignedShort());
+            position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE());
 
-            position.set(Position.KEY_CHARGE, buf.readUnsignedShort());
+            position.set(Position.KEY_CHARGE, buf.readUnsignedShortLE());
 
-            position.setTime(new Date(buf.readUnsignedInt() * 1000));
+            position.setTime(new Date(buf.readUnsignedIntLE() * 1000));
 
             // parse other data
 
             return position;
 
-        } else if (protocol == 0x80) {
+        } else if (legacy) {
 
             if (channel != null) {
-                channel.write(ChannelBuffers.copiedBuffer("gprs,ack," + index, StandardCharsets.US_ASCII));
+                channel.writeAndFlush(new NetworkMessage(
+                        Unpooled.copiedBuffer("gprs,ack," + index, StandardCharsets.US_ASCII), remoteAddress));
             }
 
             String sentence = buf.toString(StandardCharsets.US_ASCII);

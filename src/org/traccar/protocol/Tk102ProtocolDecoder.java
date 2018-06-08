@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,12 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -59,16 +60,16 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
             .text(")")
             .compile();
 
-    private void sendResponse(Channel channel, int type, ChannelBuffer dataSequence, ChannelBuffer content) {
+    private void sendResponse(Channel channel, int type, ByteBuf dataSequence, ByteBuf content) {
         if (channel != null) {
-            ChannelBuffer response = ChannelBuffers.dynamicBuffer();
+            ByteBuf response = Unpooled.buffer();
             response.writeByte('[');
             response.writeByte(type);
             response.writeBytes(dataSequence);
             response.writeByte(content.readableBytes());
             response.writeBytes(content);
             response.writeByte(']');
-            channel.write(response);
+            channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
     }
 
@@ -76,16 +77,16 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         buf.skipBytes(1); // header
         int type = buf.readUnsignedByte();
-        ChannelBuffer dataSequence = buf.readBytes(10);
+        ByteBuf dataSequence = buf.readBytes(10);
         int length = buf.readUnsignedByte();
 
         if (type == MSG_LOGIN_REQUEST || type == MSG_LOGIN_REQUEST_2) {
 
-            ChannelBuffer data = buf.readBytes(length);
+            ByteBuf data = buf.readBytes(length);
 
             String id;
             if (type == MSG_LOGIN_REQUEST) {
@@ -95,7 +96,7 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (getDeviceSession(channel, remoteAddress, id) != null) {
-                ChannelBuffer response = ChannelBuffers.dynamicBuffer();
+                ByteBuf response = Unpooled.buffer();
                 response.writeByte(MODE_GPRS);
                 response.writeBytes(data);
                 sendResponse(channel, MSG_LOGIN_RESPONSE, dataSequence, response);

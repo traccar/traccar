@@ -15,17 +15,18 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.socket.DatagramChannel;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.nio.channels.DatagramChannel;
 import java.util.Date;
 import java.util.regex.Pattern;
 
@@ -102,7 +103,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         if (deviceSession != null && channel != null && !(channel instanceof DatagramChannel)
                 && Context.getIdentityManager().lookupAttributeBoolean(
                         deviceSession.getDeviceId(), getProtocolName() + ".ack", false, true)) {
-            channel.write("OK1\r\n");
+            channel.writeAndFlush(new NetworkMessage("OK1\r\n", remoteAddress));
         }
 
         Parser parser = new Parser(PATTERN_GPRMC, sentence);

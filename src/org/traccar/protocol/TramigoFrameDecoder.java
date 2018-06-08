@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,45 +15,32 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import org.traccar.BaseFrameDecoder;
 
-import java.nio.ByteOrder;
-
-public class TramigoFrameDecoder extends LengthFieldBasedFrameDecoder {
-
-    public TramigoFrameDecoder() {
-        super(1024, 6, 2, -8, 0);
-    }
+public class TramigoFrameDecoder extends BaseFrameDecoder {
 
     @Override
-    protected Object decode(
-            ChannelHandlerContext ctx,
-            Channel channel,
-            ChannelBuffer buf) throws Exception {
+    protected Object decode(ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
         if (buf.readableBytes() < 20) {
             return null;
         }
 
-        // Swap byte order for legacy protocol
+        int length;
         if (buf.getUnsignedByte(buf.readerIndex()) == 0x80) {
-            int length = buf.readableBytes();
-            byte[] bytes = new byte[length];
-            buf.getBytes(buf.readerIndex(), bytes);
-
-            ChannelBuffer result = (ChannelBuffer) super.decode(
-                    ctx, channel, ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, bytes));
-            if (result != null) {
-                buf.skipBytes(result.readableBytes());
-            }
-            return result;
+            length = buf.getUnsignedShort(buf.readerIndex() + 6);
+        } else {
+            length = buf.getUnsignedShortLE(buf.readerIndex() + 6);
         }
 
-        return super.decode(ctx, channel, buf);
+        if (length >= buf.readableBytes()) {
+            return buf.readBytes(length);
+        }
+
+        return null;
     }
 
 }
