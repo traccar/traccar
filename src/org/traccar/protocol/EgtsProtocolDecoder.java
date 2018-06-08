@@ -106,7 +106,7 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
             response.writeBytes(record);
             response.writeShortLE(recordChecksum);
 
-            channel.write(new NetworkMessage(response, channel.remoteAddress()));
+            channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
 
         }
     }

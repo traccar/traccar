@@ -62,7 +62,7 @@ public class DwayProtocolDecoder extends BaseProtocolDecoder {
         String sentence = (String) msg;
         if (sentence.equals("AA55,HB")) {
             if (channel != null) {
-                channel.write(new NetworkMessage("55AA,HB,OK\r\n", remoteAddress));
+                channel.writeAndFlush(new NetworkMessage("55AA,HB,OK\r\n", remoteAddress));
             }
             return null;
         }

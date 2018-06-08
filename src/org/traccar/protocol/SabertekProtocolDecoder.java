@@ -19,6 +19,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -71,7 +72,8 @@ public class SabertekProtocolDecoder extends BaseProtocolDecoder {
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (channel != null) {
-            channel.write(Unpooled.wrappedBuffer(new byte[]{(byte) (deviceSession != null ? 0x06 : 0x15)}));
+            channel.writeAndFlush(new NetworkMessage(
+                    Unpooled.wrappedBuffer(new byte[]{(byte) (deviceSession != null ? 0x06 : 0x15)}), remoteAddress));
         }
         if (deviceSession == null) {
             return null;

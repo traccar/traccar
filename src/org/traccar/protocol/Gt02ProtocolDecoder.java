@@ -21,6 +21,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -74,7 +75,7 @@ public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
 
             if (channel != null) {
                 byte[] response = {0x54, 0x68, 0x1A, 0x0D, 0x0A};
-                channel.write(Unpooled.wrappedBuffer(response));
+                channel.writeAndFlush(new NetworkMessage(Unpooled.wrappedBuffer(response), remoteAddress));
             }
 
         } else if (type == MSG_DATA) {

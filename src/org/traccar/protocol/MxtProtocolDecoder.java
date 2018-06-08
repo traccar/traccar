@@ -60,7 +60,7 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
                 encoded.writeByte(b);
             }
             encoded.writeByte(0x04); // ending
-            channel.write(new NetworkMessage(encoded, channel.remoteAddress()));
+            channel.writeAndFlush(new NetworkMessage(encoded, channel.remoteAddress()));
         }
     }
 

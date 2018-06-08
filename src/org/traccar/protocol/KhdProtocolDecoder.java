@@ -139,7 +139,7 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
             response.writeByte(0); // reserved
             response.writeByte(Checksum.xor(response.nioBuffer()));
             response.writeByte(0x0D); // ending
-            channel.write(new NetworkMessage(response, remoteAddress));
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
 
         }
 

@@ -55,7 +55,7 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
                 response.writeBytes(content);
             }
             response.writeByte(0xC0);
-            channel.write(new NetworkMessage(response, channel.remoteAddress()));
+            channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
     }
 

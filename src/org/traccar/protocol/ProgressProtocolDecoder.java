@@ -152,7 +152,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
                 if (type == MSG_ALARM) {
                     position.set(Position.KEY_ALARM, true);
                     byte[] response = {(byte) 0xC9, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-                    channel.write(Unpooled.wrappedBuffer(response));
+                    channel.writeAndFlush(new NetworkMessage(Unpooled.wrappedBuffer(response), remoteAddress));
                 }
 
                 buf.readUnsignedIntLE(); // crc

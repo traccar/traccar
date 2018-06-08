@@ -20,6 +20,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -63,11 +64,11 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
     private void sendResponse(Channel channel, String id, String index, String content) {
         if (channel != null) {
             if (index != null) {
-                channel.write(String.format(
-                        "[%s*%s*%s*%04x*%s]", manufacturer, id, index, content.length(), content));
+                channel.writeAndFlush(new NetworkMessage(String.format("[%s*%s*%s*%04x*%s]",
+                        manufacturer, id, index, content.length(), content), channel.remoteAddress()));
             } else {
-                channel.write(String.format(
-                        "[%s*%s*%04x*%s]", manufacturer, id, content.length(), content));
+                channel.writeAndFlush(new NetworkMessage(String.format("[%s*%s*%04x*%s]",
+                        manufacturer, id, content.length(), content), channel.remoteAddress()));
             }
         }
     }

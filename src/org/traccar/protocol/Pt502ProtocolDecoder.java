@@ -22,6 +22,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -144,7 +145,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
         if (channel != null) {
             int offset = photo.writerIndex();
             int size = Math.min(photo.writableBytes(), MAX_CHUNK_SIZE);
-            channel.write("#PHD" + offset + "," + size + "\r\n");
+            channel.writeAndFlush(new NetworkMessage("#PHD" + offset + "," + size + "\r\n", channel.remoteAddress()));
         }
     }
 

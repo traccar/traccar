@@ -206,7 +206,7 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         if (channel != null) {
-            channel.write(new NetworkMessage("1234", remoteAddress));
+            channel.writeAndFlush(new NetworkMessage("1234", remoteAddress));
         }
 
         String sentence = (String) msg;

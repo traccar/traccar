@@ -59,7 +59,7 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
             if (content != null) {
                 response.writeBytes(content);
             }
-            channel.write(new NetworkMessage(response, channel.remoteAddress()));
+            channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
     }
 

@@ -68,7 +68,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             response.writeShort(index);
             response.writeShort(type);
             response.writeByte(RESULT_SUCCESS);
-            channel.write(new NetworkMessage(formatMessage(MSG_GENERAL_RESPONSE, id, response), remoteAddress));
+            channel.writeAndFlush(new NetworkMessage(formatMessage(MSG_GENERAL_RESPONSE, id, response), remoteAddress));
         }
     }
 
@@ -122,7 +122,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 response.writeShort(index);
                 response.writeByte(RESULT_SUCCESS);
                 response.writeBytes("authentication".getBytes(StandardCharsets.US_ASCII));
-                channel.write(new NetworkMessage(
+                channel.writeAndFlush(new NetworkMessage(
                         formatMessage(MSG_TERMINAL_REGISTER_RESPONSE, id, response), remoteAddress));
             }
 

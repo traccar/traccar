@@ -64,7 +64,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
         reply.writeByte(checksum);
 
         if (channel != null) {
-            channel.write(new NetworkMessage(reply, remoteAddress));
+            channel.writeAndFlush(new NetworkMessage(reply, remoteAddress));
         }
     }
 

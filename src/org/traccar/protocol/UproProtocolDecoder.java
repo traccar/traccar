@@ -20,6 +20,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
@@ -123,7 +124,7 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
         String subtype = parser.next();
 
         if (reply && channel != null) {
-            channel.write("*MG20Y" + type + subtype + "#");
+            channel.writeAndFlush(new NetworkMessage("*MG20Y" + type + subtype + "#", remoteAddress));
         }
 
         while (buf.isReadable()) {

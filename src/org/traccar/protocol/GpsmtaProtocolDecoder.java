@@ -82,7 +82,7 @@ public class GpsmtaProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_CHARGE, parser.nextInt(0) == 1);
 
         if (channel != null) {
-            channel.write(new NetworkMessage(time, remoteAddress));
+            channel.writeAndFlush(new NetworkMessage(time, remoteAddress));
         }
 
         return position;

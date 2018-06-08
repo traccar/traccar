@@ -333,9 +333,9 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         if (channel != null) {
             if (type.equals("U01") || type.equals("U02") || type.equals("U03")) {
-                channel.write(new NetworkMessage("(S39)", remoteAddress));
+                channel.writeAndFlush(new NetworkMessage("(S39)", remoteAddress));
             } else if (type.equals("U06")) {
-                channel.write(new NetworkMessage("(S20)", remoteAddress));
+                channel.writeAndFlush(new NetworkMessage("(S20)", remoteAddress));
             }
         }
 

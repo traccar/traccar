@@ -68,7 +68,7 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
             response.writeByte(0); // slave order
             response.writeByte(1); // calibration
             response.writeByte(0x0D);
-            channel.write(new NetworkMessage(response, remoteAddress));
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
     }
 

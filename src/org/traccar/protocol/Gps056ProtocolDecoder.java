@@ -43,7 +43,7 @@ public class Gps056ProtocolDecoder extends BaseProtocolDecoder {
                 response.writeBytes(content);
             }
             response.writeByte('#');
-            channel.write(new NetworkMessage(response, channel.remoteAddress()));
+            channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
     }
 

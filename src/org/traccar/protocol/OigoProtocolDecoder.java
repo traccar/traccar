@@ -217,7 +217,7 @@ public class OigoProtocolDecoder extends BaseProtocolDecoder {
             response.writeByte(MSG_ACKNOWLEDGEMENT);
             response.writeByte(index);
             response.writeByte(0x00);
-            channel.write(new NetworkMessage(response, remoteAddress));
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
 
         return position;

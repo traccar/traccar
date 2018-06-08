@@ -97,7 +97,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         reply.writeByte(0x02);
         reply.writeShortLE((short) checksum);
         if (channel != null) {
-            channel.write(new NetworkMessage(reply, channel.remoteAddress()));
+            channel.writeAndFlush(new NetworkMessage(reply, channel.remoteAddress()));
         }
     }
 

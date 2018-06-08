@@ -63,7 +63,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
     private void sendResponse(Channel channel, SocketAddress remoteAddress, String uniqueId, int type, int index) {
         if (channel != null) {
-            channel.write(new NetworkMessage(EelinkProtocolEncoder.encodeContent(
+            channel.writeAndFlush(new NetworkMessage(EelinkProtocolEncoder.encodeContent(
                     channel instanceof DatagramChannel, uniqueId, type, index, null), remoteAddress));
         }
     }

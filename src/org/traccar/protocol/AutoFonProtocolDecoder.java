@@ -138,7 +138,7 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
                 ByteBuf response = Unpooled.buffer();
                 response.writeBytes("resp_crc=".getBytes(StandardCharsets.US_ASCII));
                 response.writeByte(buf.getByte(buf.writerIndex() - 1));
-                channel.write(new NetworkMessage(response, remoteAddress));
+                channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
             }
 
             return null;

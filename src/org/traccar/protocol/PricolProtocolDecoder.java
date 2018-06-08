@@ -87,7 +87,8 @@ public class PricolProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_RPM, buf.readUnsignedShort());
 
         if (channel != null) {
-            channel.write(new NetworkMessage(Unpooled.copiedBuffer("ACK", StandardCharsets.US_ASCII), remoteAddress));
+            channel.writeAndFlush(new NetworkMessage(
+                    Unpooled.copiedBuffer("ACK", StandardCharsets.US_ASCII), remoteAddress));
         }
 
         return position;

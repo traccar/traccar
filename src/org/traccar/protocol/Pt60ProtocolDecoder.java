@@ -53,7 +53,8 @@ public class Pt60ProtocolDecoder extends BaseProtocolDecoder {
     private void sendResponse(Channel channel, SocketAddress remoteAddress) {
         if (channel != null) {
             DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-            channel.write(new NetworkMessage("@G#@,V01,38," + dateFormat.format(new Date()) + ",@R#@", remoteAddress));
+            channel.writeAndFlush(new NetworkMessage(
+                    "@G#@,V01,38," + dateFormat.format(new Date()) + ",@R#@", remoteAddress));
         }
     }
 

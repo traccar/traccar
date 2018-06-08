@@ -64,7 +64,7 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
         response.writeInt((int) time);
         response.writeShortLE(deviceId);
         appendChecksum(response, 16);
-        channel.write(new NetworkMessage(response, channel.remoteAddress()));
+        channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
     }
 
     private static void sendResponseArchive(Channel channel, int deviceId, int packNum) {
@@ -74,7 +74,7 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
         response.writeShortLE(packNum);
         response.writeShortLE(deviceId);
         appendChecksum(response, 14);
-        channel.write(new NetworkMessage(response, channel.remoteAddress()));
+        channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
     }
 
     private void decodeStructure(ByteBuf buf, Position position) {

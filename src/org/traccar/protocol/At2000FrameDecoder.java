@@ -39,7 +39,7 @@ public class At2000FrameDecoder extends BaseFrameDecoder {
             response.writeMedium(1);
             response.writeByte(0x00); // success
             response.writerIndex(2 * BLOCK_LENGTH);
-            channel.write(new NetworkMessage(response, channel.remoteAddress()));
+            channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
     }
 

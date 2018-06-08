@@ -65,7 +65,7 @@ public class Gl100ProtocolDecoder extends BaseProtocolDecoder {
             String response = "+RESP:GTHBD,GPRS ACTIVE,";
             response += sentence.substring(9, sentence.lastIndexOf(','));
             response += '\0';
-            channel.write(new NetworkMessage(response, remoteAddress)); // heartbeat response
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress)); // heartbeat response
         }
 
         Parser parser = new Parser(PATTERN, sentence);

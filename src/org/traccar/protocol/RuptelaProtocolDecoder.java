@@ -20,6 +20,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.DataConverter;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -196,7 +197,8 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (channel != null) {
-                channel.write(Unpooled.wrappedBuffer(DataConverter.parseHex("0002640113bc")));
+                channel.writeAndFlush(new NetworkMessage(
+                        Unpooled.wrappedBuffer(DataConverter.parseHex("0002640113bc")), remoteAddress));
             }
 
             return positions;
@@ -229,7 +231,8 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (channel != null) {
-                channel.write(Unpooled.wrappedBuffer(DataConverter.parseHex("00026d01c4a4")));
+                channel.writeAndFlush(new NetworkMessage(
+                        Unpooled.wrappedBuffer(DataConverter.parseHex("00026d01c4a4")), remoteAddress));
             }
 
             return positions;

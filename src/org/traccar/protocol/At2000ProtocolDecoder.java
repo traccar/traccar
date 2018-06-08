@@ -56,7 +56,7 @@ public class At2000ProtocolDecoder extends BaseProtocolDecoder {
             response.writeByte(MSG_TRACK_REQUEST);
             response.writeMedium(0);
             response.writerIndex(BLOCK_LENGTH);
-            channel.write(new NetworkMessage(response, channel.remoteAddress()));
+            channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
     }
 

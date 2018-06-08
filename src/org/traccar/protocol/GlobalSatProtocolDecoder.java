@@ -52,7 +52,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
     private Position decodeOriginal(Channel channel, SocketAddress remoteAddress, String sentence) {
 
         if (channel != null) {
-            channel.write(new NetworkMessage("ACK\r", remoteAddress));
+            channel.writeAndFlush(new NetworkMessage("ACK\r", remoteAddress));
         }
 
         String format;

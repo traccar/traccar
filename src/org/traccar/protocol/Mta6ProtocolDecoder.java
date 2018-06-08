@@ -25,6 +25,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
@@ -50,7 +51,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
     private void sendContinue(Channel channel) {
         FullHttpResponse response = new DefaultFullHttpResponse(
                 HttpVersion.HTTP_1_1, HttpResponseStatus.CONTINUE);
-        channel.write(response);
+        channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
     }
 
     private void sendResponse(Channel channel, short packetId, short packetCount) {
@@ -62,7 +63,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
 
         FullHttpResponse response = new DefaultFullHttpResponse(
                 HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.wrappedBuffer(begin, end));
-        channel.write(response);
+        channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
     }
 
     private static class FloatReader {

@@ -68,7 +68,7 @@ public class FlextrackProtocolDecoder extends BaseProtocolDecoder {
 
     private void sendAcknowledgement(Channel channel, SocketAddress remoteAddress, String index) {
         if (channel != null) {
-            channel.write(new NetworkMessage(index + ",ACK\r", remoteAddress));
+            channel.writeAndFlush(new NetworkMessage(index + ",ACK\r", remoteAddress));
         }
     }
 

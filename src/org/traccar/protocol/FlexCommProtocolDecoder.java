@@ -118,7 +118,7 @@ public class FlexCommProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_POWER, parser.nextInt() * 0.1);
 
         if (channel != null) {
-            channel.write(new NetworkMessage("{01}", remoteAddress));
+            channel.writeAndFlush(new NetworkMessage("{01}", remoteAddress));
         }
 
         return position;

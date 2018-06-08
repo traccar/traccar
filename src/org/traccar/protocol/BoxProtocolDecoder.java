@@ -63,7 +63,7 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
         } else if (sentence.startsWith("E,")) {
 
             if (channel != null) {
-                channel.write(new NetworkMessage("A," + sentence.substring(2) + "\r", remoteAddress));
+                channel.writeAndFlush(new NetworkMessage("A," + sentence.substring(2) + "\r", remoteAddress));
             }
 
         } else if (sentence.startsWith("L,")) {
