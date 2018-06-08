@@ -33,10 +33,10 @@ public final class BufferUtil {
     }
 
     public static int indexOf(String needle, ByteBuf haystack, int startIndex, int endIndex) {
-        int index = ByteBufUtil.indexOf(
-                Unpooled.wrappedBuffer(needle.getBytes(StandardCharsets.US_ASCII)),
-                Unpooled.wrappedBuffer(haystack.array(), startIndex, endIndex - startIndex));
-        return (index != -1) ? (startIndex + index) : -1;
+        haystack = Unpooled.wrappedBuffer(haystack);
+        haystack.readerIndex(startIndex);
+        haystack.writerIndex(endIndex);
+        return indexOf(needle, haystack);
     }
 
 }
