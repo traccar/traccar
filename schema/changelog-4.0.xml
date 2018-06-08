@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+  logicalFilePath="changelog-4.0">
+
+  <changeSet author="author" id="changelog-4.0-renaming">
+
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="tc_servers" />
+      </not>
+    </preConditions>
+
+    <renameTable oldTableName="attributes" newTableName="tc_attributes" />
+    <renameTable oldTableName="calendars" newTableName="tc_calendars" />
+    <renameTable oldTableName="commands" newTableName="tc_commands" />
+    <renameTable oldTableName="device_attribute" newTableName="tc_device_attribute" />
+    <renameTable oldTableName="device_command" newTableName="tc_device_command" />
+    <renameTable oldTableName="device_driver" newTableName="tc_device_driver" />
+    <renameTable oldTableName="device_geofence" newTableName="tc_device_geofence" />
+    <renameTable oldTableName="device_maintenance" newTableName="tc_device_maintenance" />
+    <renameTable oldTableName="device_notification" newTableName="tc_device_notification" />
+    <renameTable oldTableName="devices" newTableName="tc_devices" />
+    <renameTable oldTableName="drivers" newTableName="tc_drivers" />
+    <renameTable oldTableName="events" newTableName="tc_events" />
+    <renameTable oldTableName="geofences" newTableName="tc_geofences" />
+    <renameTable oldTableName="group_attribute" newTableName="tc_group_attribute" />
+    <renameTable oldTableName="group_command" newTableName="tc_group_command" />
+    <renameTable oldTableName="group_driver" newTableName="tc_group_driver" />
+    <renameTable oldTableName="group_geofence" newTableName="tc_group_geofence" />
+    <renameTable oldTableName="group_maintenance" newTableName="tc_group_maintenance" />
+    <renameTable oldTableName="group_notification" newTableName="tc_group_notification" />
+    <renameTable oldTableName="groups" newTableName="tc_groups" />
+    <renameTable oldTableName="maintenances" newTableName="tc_maintenances" />
+    <renameTable oldTableName="notifications" newTableName="tc_notifications" />
+    <renameTable oldTableName="positions" newTableName="tc_positions" />
+    <renameTable oldTableName="servers" newTableName="tc_servers" />
+    <renameTable oldTableName="statistics" newTableName="tc_statistics" />
+    <renameTable oldTableName="user_attribute" newTableName="tc_user_attribute" />
+    <renameTable oldTableName="user_calendar" newTableName="tc_user_calendar" />
+    <renameTable oldTableName="user_command" newTableName="tc_user_command" />
+    <renameTable oldTableName="user_device" newTableName="tc_user_device" />
+    <renameTable oldTableName="user_driver" newTableName="tc_user_driver" />
+    <renameTable oldTableName="user_geofence" newTableName="tc_user_geofence" />
+    <renameTable oldTableName="user_group" newTableName="tc_user_group" />
+    <renameTable oldTableName="user_maintenance" newTableName="tc_user_maintenance" />
+    <renameTable oldTableName="user_notification" newTableName="tc_user_notification" />
+    <renameTable oldTableName="user_user" newTableName="tc_user_user" />
+    <renameTable oldTableName="users" newTableName="tc_users" />
+
+  </changeSet>
+
+</databaseChangeLog>
