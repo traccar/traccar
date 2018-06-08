@@ -19,7 +19,6 @@ import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 
-import java.nio.ByteOrder;
 import java.util.List;
 
 public class RoboTrackProtocol extends BaseProtocol {
