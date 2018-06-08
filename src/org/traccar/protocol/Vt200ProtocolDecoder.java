@@ -57,7 +57,7 @@ public class Vt200ProtocolDecoder extends BaseProtocolDecoder {
 
         buf.skipBytes(1); // header
 
-        String id = ByteBufUtil.hexDump(buf.readBytes(6));
+        String id = ByteBufUtil.hexDump(buf.readSlice(6));
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
         if (deviceSession == null) {
             return null;

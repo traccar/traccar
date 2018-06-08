@@ -67,7 +67,7 @@ public class ObdDongleProtocolDecoder extends BaseProtocolDecoder {
         buf.skipBytes(2); // header
         int index = buf.readUnsignedShort();
 
-        String imei = buf.readBytes(15).toString(StandardCharsets.US_ASCII);
+        String imei = buf.readSlice(15).toString(StandardCharsets.US_ASCII);
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
         if (deviceSession == null) {
             return null;

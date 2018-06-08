@@ -48,7 +48,7 @@ public class RoboTrackFrameDecoder extends BaseFrameDecoder {
         int length = messageLength(buf);
 
         if (buf.readableBytes() >= length) {
-            return buf.readBytes(length);
+            return buf.readRetainedSlice(length);
         }
 
         return null;

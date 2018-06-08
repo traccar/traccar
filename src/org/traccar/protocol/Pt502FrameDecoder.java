@@ -40,7 +40,7 @@ public class Pt502FrameDecoder extends BaseFrameDecoder {
             int length = buf.getUnsignedShortLE(buf.readerIndex() + 3);
             if (buf.readableBytes() >= length) {
                 buf.skipBytes(BINARY_HEADER);
-                ByteBuf result = buf.readBytes(length - BINARY_HEADER - 2);
+                ByteBuf result = buf.readRetainedSlice(length - BINARY_HEADER - 2);
                 buf.skipBytes(2); // line break
                 return result;
             }
@@ -57,7 +57,7 @@ public class Pt502FrameDecoder extends BaseFrameDecoder {
             }
 
             if (index > 0) {
-                ByteBuf result = buf.readBytes(index - buf.readerIndex());
+                ByteBuf result = buf.readRetainedSlice(index - buf.readerIndex());
                 while (buf.isReadable()
                         && (buf.getByte(buf.readerIndex()) == '\r' || buf.getByte(buf.readerIndex()) == '\n')) {
                     buf.skipBytes(1);

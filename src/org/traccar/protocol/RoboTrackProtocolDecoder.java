@@ -57,7 +57,7 @@ public class RoboTrackProtocolDecoder extends BaseProtocolDecoder {
 
             buf.skipBytes(16); // name
 
-            String imei = buf.readBytes(15).toString(StandardCharsets.US_ASCII);
+            String imei = buf.readSlice(15).toString(StandardCharsets.US_ASCII);
 
             if (getDeviceSession(channel, remoteAddress, imei) != null && channel != null) {
                 ByteBuf response = Unpooled.buffer(0);

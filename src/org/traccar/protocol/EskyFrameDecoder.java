@@ -30,9 +30,9 @@ public class EskyFrameDecoder extends BaseFrameDecoder {
 
         int endIndex = buf.indexOf(buf.readerIndex() + 1, buf.writerIndex(), (byte) 'E');
         if (endIndex > 0) {
-            return buf.readBytes(endIndex - buf.readerIndex());
+            return buf.readRetainedSlice(endIndex - buf.readerIndex());
         } else {
-            return buf.readBytes(buf.readableBytes()); // assume full frame
+            return buf.readRetainedSlice(buf.readableBytes()); // assume full frame
         }
     }
 

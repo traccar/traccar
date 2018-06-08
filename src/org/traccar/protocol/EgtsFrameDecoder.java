@@ -36,7 +36,7 @@ public class EgtsFrameDecoder extends BaseFrameDecoder {
         int length = headerLength + frameLength + (frameLength > 0 ? 2 : 0);
 
         if (buf.readableBytes() >= length) {
-            return buf.readBytes(length);
+            return buf.readRetainedSlice(length);
         }
 
         return null;

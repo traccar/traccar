@@ -81,12 +81,12 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
 
         buf.skipBytes(1); // header
         int type = buf.readUnsignedByte();
-        ByteBuf dataSequence = buf.readBytes(10);
+        ByteBuf dataSequence = buf.readSlice(10);
         int length = buf.readUnsignedByte();
 
         if (type == MSG_LOGIN_REQUEST || type == MSG_LOGIN_REQUEST_2) {
 
-            ByteBuf data = buf.readBytes(length);
+            ByteBuf data = buf.readSlice(length);
 
             String id;
             if (type == MSG_LOGIN_REQUEST) {
@@ -104,7 +104,7 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == MSG_HEARTBEAT_REQUEST) {
 
-            sendResponse(channel, MSG_HEARTBEAT_RESPONSE, dataSequence, buf.readBytes(length));
+            sendResponse(channel, MSG_HEARTBEAT_RESPONSE, dataSequence, buf.readSlice(length));
 
         } else {
 
@@ -113,7 +113,7 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
                 return null;
             }
 
-            Parser parser = new Parser(PATTERN, buf.readBytes(length).toString(StandardCharsets.US_ASCII));
+            Parser parser = new Parser(PATTERN, buf.readSlice(length).toString(StandardCharsets.US_ASCII));
             if (!parser.matches()) {
                 return null;
             }

@@ -106,7 +106,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         buf.readByte(); // marker
 
         DeviceSession deviceSession = getDeviceSession(
-                channel, remoteAddress, ByteBufUtil.hexDump(buf.readBytes(5)));
+                channel, remoteAddress, ByteBufUtil.hexDump(buf.readSlice(5)));
         if (deviceSession == null) {
             return null;
         }

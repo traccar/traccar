@@ -131,7 +131,7 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedByte(); // software version
             }
 
-            String imei = ByteBufUtil.hexDump(buf.readBytes(8)).substring(1);
+            String imei = ByteBufUtil.hexDump(buf.readSlice(8)).substring(1);
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
 
             if (deviceSession != null && channel != null) {

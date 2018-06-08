@@ -48,7 +48,7 @@ public class TlvProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private String readArgument(ByteBuf buf) {
-        return buf.readBytes(buf.readUnsignedByte()).toString(StandardCharsets.US_ASCII);
+        return buf.readSlice(buf.readUnsignedByte()).toString(StandardCharsets.US_ASCII);
     }
 
     @Override
@@ -57,7 +57,7 @@ public class TlvProtocolDecoder extends BaseProtocolDecoder {
 
         ByteBuf buf = (ByteBuf) msg;
 
-        String type = buf.readBytes(2).toString(StandardCharsets.US_ASCII);
+        String type = buf.readSlice(2).toString(StandardCharsets.US_ASCII);
 
         if (channel != null) {
             switch (type) {

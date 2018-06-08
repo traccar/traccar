@@ -38,7 +38,7 @@ public class AlematicsFrameDecoder extends LineBasedFrameDecoder {
         }
 
         if (buf.getUnsignedShort(buf.readerIndex()) == 0xFAF8) {
-            ByteBuf heartbeat = buf.readBytes(12);
+            ByteBuf heartbeat = buf.readRetainedSlice(12);
             if (ctx != null && ctx.channel() != null) {
                 ctx.channel().writeAndFlush(new NetworkMessage(heartbeat, ctx.channel().remoteAddress()));
             }

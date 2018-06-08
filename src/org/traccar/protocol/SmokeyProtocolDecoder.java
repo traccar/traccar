@@ -78,7 +78,7 @@ public class SmokeyProtocolDecoder extends BaseProtocolDecoder {
 
         int type = buf.readUnsignedByte();
 
-        ByteBuf id = buf.readBytes(8);
+        ByteBuf id = buf.readSlice(8);
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, ByteBufUtil.hexDump(id));
         if (deviceSession == null) {
             return null;

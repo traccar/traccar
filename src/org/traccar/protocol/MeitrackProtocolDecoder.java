@@ -348,7 +348,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         List<Position> positions = new LinkedList<>();
 
         buf.readerIndex(buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ',') + 1);
-        String imei = buf.readBytes(15).toString(StandardCharsets.US_ASCII);
+        String imei = buf.readSlice(15).toString(StandardCharsets.US_ASCII);
         buf.skipBytes(1 + 3 + 1);
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
@@ -485,7 +485,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                 int current = Integer.parseInt(buf.toString(index, endIndex - index, StandardCharsets.US_ASCII));
 
                 buf.readerIndex(endIndex + 1);
-                photo.writeBytes(buf.readBytes(buf.readableBytes() - 1 - 2 - 2));
+                photo.writeBytes(buf.readSlice(buf.readableBytes() - 1 - 2 - 2));
 
                 if (current == total - 1) {
                     Position position = new Position(getProtocolName());

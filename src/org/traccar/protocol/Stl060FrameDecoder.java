@@ -37,7 +37,7 @@ public class Stl060FrameDecoder extends CharacterDelimiterFrameDecoder {
                 return result;
             } else {
                 result.skipBytes(index);
-                return result.readBytes(result.readableBytes());
+                return result.readRetainedSlice(result.readableBytes());
             }
 
         }

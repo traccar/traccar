@@ -38,7 +38,7 @@ public class WondexFrameDecoder extends BaseFrameDecoder {
         if (buf.getUnsignedByte(buf.readerIndex()) == 0xD0) {
 
             // Send response
-            ByteBuf frame = buf.readBytes(KEEP_ALIVE_LENGTH);
+            ByteBuf frame = buf.readRetainedSlice(KEEP_ALIVE_LENGTH);
             if (channel != null) {
                 channel.writeAndFlush(new NetworkMessage(frame, channel.remoteAddress()));
             }
@@ -48,7 +48,7 @@ public class WondexFrameDecoder extends BaseFrameDecoder {
 
             int index = BufferUtil.indexOf("\r\n", buf);
             if (index != -1) {
-                ByteBuf frame = buf.readBytes(index - buf.readerIndex());
+                ByteBuf frame = buf.readRetainedSlice(index - buf.readerIndex());
                 buf.skipBytes(2);
                 return frame;
             }

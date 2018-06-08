@@ -371,7 +371,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
                 endIndex = buf.writerIndex() - 4;
             }
 
-            String sentence = buf.readBytes(endIndex - buf.readerIndex()).toString(StandardCharsets.US_ASCII);
+            String sentence = buf.readSlice(endIndex - buf.readerIndex()).toString(StandardCharsets.US_ASCII);
 
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
@@ -398,7 +398,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         ByteBuf buf = (ByteBuf) msg;
         buf.skipBytes(2); // header
         buf.readShort(); // length
-        ByteBuf id = buf.readBytes(7);
+        ByteBuf id = buf.readSlice(7);
         int command = buf.readUnsignedShort();
         ByteBuf response;
 

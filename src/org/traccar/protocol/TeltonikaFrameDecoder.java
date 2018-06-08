@@ -38,12 +38,12 @@ public class TeltonikaFrameDecoder extends BaseFrameDecoder {
         int length = buf.getUnsignedShort(buf.readerIndex());
         if (length > 0) {
             if (buf.readableBytes() >= (length + 2)) {
-                return buf.readBytes(length + 2);
+                return buf.readRetainedSlice(length + 2);
             }
         } else {
             int dataLength = buf.getInt(buf.readerIndex() + 4);
             if (buf.readableBytes() >= (dataLength + 12)) {
-                return buf.readBytes(dataLength + 12);
+                return buf.readRetainedSlice(dataLength + 12);
             }
         }
 

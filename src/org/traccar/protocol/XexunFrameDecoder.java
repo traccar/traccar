@@ -52,7 +52,7 @@ public class XexunFrameDecoder extends BaseFrameDecoder {
 
         buf.skipBytes(beginIndex - buf.readerIndex());
 
-        return buf.readBytes(endIndex - beginIndex + 1);
+        return buf.readRetainedSlice(endIndex - beginIndex + 1);
     }
 
 }

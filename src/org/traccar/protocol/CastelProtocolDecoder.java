@@ -383,7 +383,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
             decodeStat(position, buf);
 
             buf.readUnsignedByte(); // flag
-            position.add(ObdDecoder.decodeCodes(ByteBufUtil.hexDump(buf.readBytes(buf.readUnsignedByte()))));
+            position.add(ObdDecoder.decodeCodes(ByteBufUtil.hexDump(buf.readSlice(buf.readUnsignedByte()))));
 
             return position;
 
@@ -426,7 +426,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
             for (int i = 0; i < successCount; i++) {
                 buf.readUnsignedShortLE(); // tag
                 position.set(Position.KEY_RESULT,
-                        buf.readBytes(buf.readUnsignedShortLE()).toString(StandardCharsets.US_ASCII));
+                        buf.readSlice(buf.readUnsignedShortLE()).toString(StandardCharsets.US_ASCII));
             }
 
             return position;
@@ -548,7 +548,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
             version = buf.readUnsignedByte();
         }
 
-        ByteBuf id = buf.readBytes(20);
+        ByteBuf id = buf.readSlice(20);
         short type = buf.readShort();
 
         DeviceSession deviceSession = getDeviceSession(

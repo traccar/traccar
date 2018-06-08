@@ -85,7 +85,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
         int type = buf.readUnsignedByte();
         buf.readUnsignedShort(); // length
         int index = buf.readUnsignedShort();
-        ByteBuf imei = buf.readBytes(8);
+        ByteBuf imei = buf.readSlice(8);
 
         DeviceSession deviceSession = getDeviceSession(
                 channel, remoteAddress, ByteBufUtil.hexDump(imei).substring(1));

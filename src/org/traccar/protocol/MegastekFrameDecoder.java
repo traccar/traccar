@@ -36,7 +36,7 @@ public class MegastekFrameDecoder extends BaseFrameDecoder {
         if (Character.isDigit(buf.getByte(buf.readerIndex()))) {
             int length = 4 + Integer.parseInt(buf.toString(buf.readerIndex(), 4, StandardCharsets.US_ASCII));
             if (buf.readableBytes() >= length) {
-                return buf.readBytes(length);
+                return buf.readRetainedSlice(length);
             }
         } else {
             while (buf.getByte(buf.readerIndex()) == '\r' || buf.getByte(buf.readerIndex()) == '\n') {
@@ -47,7 +47,7 @@ public class MegastekFrameDecoder extends BaseFrameDecoder {
                 delimiter = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '!');
             }
             if (delimiter != -1) {
-                ByteBuf result = buf.readBytes(delimiter - buf.readerIndex());
+                ByteBuf result = buf.readRetainedSlice(delimiter - buf.readerIndex());
                 buf.skipBytes(1);
                 return result;
             }

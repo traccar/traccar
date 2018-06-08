@@ -37,7 +37,7 @@ public class MeiligaoFrameDecoder extends BaseFrameDecoder {
         if (buf.readableBytes() >= MESSAGE_HEADER) {
             int length = buf.getUnsignedShort(buf.readerIndex() + 2);
             if (buf.readableBytes() >= length) {
-                return buf.readBytes(length);
+                return buf.readRetainedSlice(length);
             }
         }
 

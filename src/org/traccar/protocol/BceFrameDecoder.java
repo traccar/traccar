@@ -49,7 +49,7 @@ public class BceFrameDecoder extends BaseFrameDecoder {
             end += buf.getUnsignedShortLE(buf.readerIndex() + end) + 2;
 
             if (buf.readableBytes() > end && checksum(buf, end) == buf.getByte(buf.readerIndex() + end)) {
-                return buf.readBytes(end + 1);
+                return buf.readRetainedSlice(end + 1);
             }
         }
 

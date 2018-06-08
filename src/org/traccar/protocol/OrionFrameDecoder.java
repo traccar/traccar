@@ -49,14 +49,14 @@ public class OrionFrameDecoder extends BaseFrameDecoder {
                 }
 
                 if (buf.readableBytes() >= length) {
-                    return buf.readBytes(length);
+                    return buf.readRetainedSlice(length);
                 }
 
             } else if (type == OrionProtocolDecoder.MSG_SYSLOG && buf.readableBytes() >= length + 12) {
 
                 length += buf.getUnsignedShortLE(buf.readerIndex() + 8);
                 if (buf.readableBytes() >= length) {
-                    return buf.readBytes(length);
+                    return buf.readRetainedSlice(length);
                 }
 
             }

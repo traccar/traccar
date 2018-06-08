@@ -76,7 +76,7 @@ public class At2000ProtocolDecoder extends BaseProtocolDecoder {
 
         if (type == MSG_DEVICE_ID) {
 
-            String imei = buf.readBytes(15).toString(StandardCharsets.US_ASCII);
+            String imei = buf.readSlice(15).toString(StandardCharsets.US_ASCII);
             if (getDeviceSession(channel, remoteAddress, imei) != null) {
 
                 byte[] iv = new byte[BLOCK_LENGTH];

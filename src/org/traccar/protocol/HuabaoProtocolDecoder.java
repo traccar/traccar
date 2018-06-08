@@ -107,7 +107,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedByte(); // start marker
         int type = buf.readUnsignedShort();
         buf.readUnsignedShort(); // body length
-        ByteBuf id = buf.readBytes(6); // phone number
+        ByteBuf id = buf.readSlice(6); // phone number
         int index = buf.readUnsignedShort();
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, ByteBufUtil.hexDump(id));

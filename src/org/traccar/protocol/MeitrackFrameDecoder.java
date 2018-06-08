@@ -37,7 +37,7 @@ public class MeitrackFrameDecoder extends BaseFrameDecoder {
             int length = index - buf.readerIndex() + Integer.parseInt(
                     buf.toString(buf.readerIndex() + 3, index - buf.readerIndex() - 3, StandardCharsets.US_ASCII));
             if (buf.readableBytes() >= length) {
-                return buf.readBytes(length);
+                return buf.readRetainedSlice(length);
             }
         }
 

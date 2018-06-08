@@ -38,7 +38,7 @@ public class NvsFrameDecoder extends BaseFrameDecoder {
         }
 
         if (buf.readableBytes() >= length) {
-            return buf.readBytes(length);
+            return buf.readRetainedSlice(length);
         }
 
         return null;

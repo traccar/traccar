@@ -34,7 +34,7 @@ public class AtrackFrameDecoder extends BaseFrameDecoder {
             if (buf.getUnsignedShort(buf.readerIndex()) == 0xfe02) {
 
                 if (buf.readableBytes() >= KEEPALIVE_LENGTH) {
-                    return buf.readBytes(KEEPALIVE_LENGTH);
+                    return buf.readRetainedSlice(KEEPALIVE_LENGTH);
                 }
 
             } else if (buf.getUnsignedShort(buf.readerIndex()) == 0x4050 && buf.getByte(buf.readerIndex() + 2) != ',') {
@@ -42,7 +42,7 @@ public class AtrackFrameDecoder extends BaseFrameDecoder {
                 if (buf.readableBytes() > 6) {
                     int length = buf.getUnsignedShort(buf.readerIndex() + 4) + 4 + 2;
                     if (buf.readableBytes() >= length) {
-                        return buf.readBytes(length);
+                        return buf.readRetainedSlice(length);
                     }
                 }
 
@@ -50,7 +50,7 @@ public class AtrackFrameDecoder extends BaseFrameDecoder {
 
                 int endIndex = BufferUtil.indexOf("\r\n", buf);
                 if (endIndex > 0) {
-                    return buf.readBytes(endIndex - buf.readerIndex() + 2);
+                    return buf.readRetainedSlice(endIndex - buf.readerIndex() + 2);
                 }
 
             }

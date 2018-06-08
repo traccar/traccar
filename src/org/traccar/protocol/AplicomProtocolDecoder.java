@@ -131,7 +131,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         ArrayList<ByteBuf> values = new ArrayList<>(count);
 
         for (int i = 0; i < count; i++) {
-            values.add(buf.readBytes(8));
+            values.add(buf.readSlice(8));
         }
 
         for (int i = 0; i < count; i++) {
@@ -349,13 +349,13 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if ((selector & 0x0800) != 0) {
-            position.set(Position.KEY_VIN, buf.readBytes(18).toString(StandardCharsets.US_ASCII).trim());
+            position.set(Position.KEY_VIN, buf.readSlice(18).toString(StandardCharsets.US_ASCII).trim());
         }
 
         if ((selector & 0x2000) != 0) {
             buf.readUnsignedByte(); // card 1 type
             buf.readUnsignedByte(); // card 1 country code
-            String card = buf.readBytes(20).toString(StandardCharsets.US_ASCII).trim();
+            String card = buf.readSlice(20).toString(StandardCharsets.US_ASCII).trim();
             if (!card.isEmpty()) {
                 position.set("card1", card);
             }
@@ -364,7 +364,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         if ((selector & 0x4000) != 0) {
             buf.readUnsignedByte(); // card 2 type
             buf.readUnsignedByte(); // card 2 country code
-            String card = buf.readBytes(20).toString(StandardCharsets.US_ASCII).trim();
+            String card = buf.readSlice(20).toString(StandardCharsets.US_ASCII).trim();
             if (!card.isEmpty()) {
                 position.set("card2", card);
             }
@@ -373,7 +373,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         if ((selector & 0x10000) != 0) {
             int count = buf.readUnsignedByte();
             for (int i = 1; i <= count; i++) {
-                position.set("driver" + i, buf.readBytes(22).toString(StandardCharsets.US_ASCII).trim());
+                position.set("driver" + i, buf.readSlice(22).toString(StandardCharsets.US_ASCII).trim());
                 position.set("driverTime" + i, buf.readUnsignedInt());
             }
         }
@@ -477,7 +477,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
 
             switch (type) {
                 case 0x01:
-                    position.set("brakeFlags", ByteBufUtil.hexDump(buf.readBytes(length)));
+                    position.set("brakeFlags", ByteBufUtil.hexDump(buf.readSlice(length)));
                     break;
                 case 0x02:
                     position.set("wheelSpeed", buf.readUnsignedShort() / 256.0);
@@ -507,10 +507,10 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
                     position.set("vdcActiveCounter", buf.readUnsignedShort());
                     break;
                 case 0x0B:
-                    position.set("brakeMinMaxData", ByteBufUtil.hexDump(buf.readBytes(length)));
+                    position.set("brakeMinMaxData", ByteBufUtil.hexDump(buf.readSlice(length)));
                     break;
                 case 0x0C:
-                    position.set("missingPgn", ByteBufUtil.hexDump(buf.readBytes(length)));
+                    position.set("missingPgn", ByteBufUtil.hexDump(buf.readSlice(length)));
                     break;
                 case 0x0D:
                     buf.readUnsignedByte();

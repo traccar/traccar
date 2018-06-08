@@ -165,7 +165,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
 
             if (photo != null) {
 
-                photo.writeBytes(buf.readBytes(buf.readableBytes()));
+                photo.writeBytes(buf.readSlice(buf.readableBytes()));
 
                 if (photo.writableBytes() > 0) {
 

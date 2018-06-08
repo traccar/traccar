@@ -388,7 +388,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
         if (type == MSG_LOGIN) {
 
-            String imei = ByteBufUtil.hexDump(buf.readBytes(8)).substring(1);
+            String imei = ByteBufUtil.hexDump(buf.readSlice(8)).substring(1);
             buf.readUnsignedShort(); // type
 
             deviceSession = getDeviceSession(channel, remoteAddress, imei);
@@ -573,7 +573,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             if (type != MSG_LBS_MULTIPLE && type != MSG_LBS_2) {
                 int wifiCount = buf.readUnsignedByte();
                 for (int i = 0; i < wifiCount; i++) {
-                    String mac = ByteBufUtil.hexDump(buf.readBytes(6)).replaceAll("(..)", "$1:");
+                    String mac = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");
                     network.addWifiAccessPoint(WifiAccessPoint.from(
                             mac.substring(0, mac.length() - 1), buf.readUnsignedByte()));
                 }
@@ -590,7 +590,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             if (commandLength > 0) {
                 buf.readUnsignedByte(); // server flag (reserved)
                 position.set(Position.KEY_RESULT,
-                        buf.readBytes(commandLength - 1).toString(StandardCharsets.US_ASCII));
+                        buf.readSlice(commandLength - 1).toString(StandardCharsets.US_ASCII));
             }
 
         } else if (isSupported(type)) {
@@ -666,9 +666,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedInt(); // server flag
             String data;
             if (buf.readUnsignedByte() == 1) {
-                data = buf.readBytes(buf.readableBytes() - 6).toString(StandardCharsets.US_ASCII);
+                data = buf.readSlice(buf.readableBytes() - 6).toString(StandardCharsets.US_ASCII);
             } else {
-                data = buf.readBytes(buf.readableBytes() - 6).toString(StandardCharsets.UTF_16BE);
+                data = buf.readSlice(buf.readableBytes() - 6).toString(StandardCharsets.UTF_16BE);
             }
 
             if (decodeLocationString(position, data) == null) {

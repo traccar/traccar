@@ -169,11 +169,11 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
                     }
                     if (BitUtil.check(flags, 1)) {
                         getDeviceSession(
-                                channel, remoteAddress, buf.readBytes(15).toString(StandardCharsets.US_ASCII).trim());
+                                channel, remoteAddress, buf.readSlice(15).toString(StandardCharsets.US_ASCII).trim());
                     }
                     if (BitUtil.check(flags, 2)) {
                         getDeviceSession(
-                                channel, remoteAddress, buf.readBytes(16).toString(StandardCharsets.US_ASCII).trim());
+                                channel, remoteAddress, buf.readSlice(16).toString(StandardCharsets.US_ASCII).trim());
                     }
                     if (BitUtil.check(flags, 3)) {
                         buf.skipBytes(3); // language identifier
@@ -186,7 +186,7 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
                     }
                     if (BitUtil.check(flags, 7)) {
                         getDeviceSession(
-                                channel, remoteAddress, buf.readBytes(15).toString(StandardCharsets.US_ASCII).trim());
+                                channel, remoteAddress, buf.readSlice(15).toString(StandardCharsets.US_ASCII).trim());
                     }
 
                     response = Unpooled.buffer(0);

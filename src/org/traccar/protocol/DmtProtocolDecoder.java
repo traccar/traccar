@@ -242,7 +242,7 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedIntLE(); // device serial number
 
             DeviceSession deviceSession = getDeviceSession(
-                    channel, remoteAddress, buf.readBytes(15).toString(StandardCharsets.US_ASCII));
+                    channel, remoteAddress, buf.readSlice(15).toString(StandardCharsets.US_ASCII));
 
             ByteBuf response = Unpooled.buffer(0);
             if (length == 51) {

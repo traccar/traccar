@@ -67,7 +67,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
         while (buf.readerIndex() < end) {
             int parameterLength = buf.getUnsignedByte(buf.readerIndex()) >> 4;
             int mode = buf.readUnsignedByte() & 0x0F;
-            position.add(ObdDecoder.decode(mode, ByteBufUtil.hexDump(buf.readBytes(parameterLength - 1))));
+            position.add(ObdDecoder.decode(mode, ByteBufUtil.hexDump(buf.readSlice(parameterLength - 1))));
         }
     }
 
@@ -83,7 +83,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
             if (type == 3) {
                 id += 256;
             }
-            String value = ByteBufUtil.hexDump(buf.readBytes(len - 1));
+            String value = ByteBufUtil.hexDump(buf.readSlice(len - 1));
             if (type == 2 || type == 3) {
                 position.set("pid" + id, value);
             }
@@ -206,7 +206,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedByte(); // version
         buf.readUnsignedByte(); // type
 
-        String imei = ByteBufUtil.hexDump(buf.readBytes(8)).substring(1);
+        String imei = ByteBufUtil.hexDump(buf.readSlice(8)).substring(1);
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
         if (deviceSession == null) {
@@ -296,7 +296,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
                     break;
 
                 case DATA_CANBUS:
-                    position.set("can", ByteBufUtil.hexDump(buf.readBytes(length)));
+                    position.set("can", ByteBufUtil.hexDump(buf.readSlice(length)));
                     break;
 
                 case DATA_J1708:
@@ -304,12 +304,12 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
                     break;
 
                 case DATA_VIN:
-                    position.set(Position.KEY_VIN, buf.readBytes(length).toString(StandardCharsets.US_ASCII));
+                    position.set(Position.KEY_VIN, buf.readSlice(length).toString(StandardCharsets.US_ASCII));
                     break;
 
                 case DATA_RFID:
                     position.set(Position.KEY_DRIVER_UNIQUE_ID,
-                            buf.readBytes(length - 1).toString(StandardCharsets.US_ASCII));
+                            buf.readSlice(length - 1).toString(StandardCharsets.US_ASCII));
                     position.set("authorized", buf.readUnsignedByte() != 0);
                     break;
 

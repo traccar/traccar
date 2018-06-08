@@ -75,10 +75,10 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                     position.set("antihijack", buf.readUnsignedByte());
                     break;
                 case 9:
-                    position.set("unauthorized", ByteBufUtil.hexDump(buf.readBytes(8)));
+                    position.set("unauthorized", ByteBufUtil.hexDump(buf.readSlice(8)));
                     break;
                 case 10:
-                    position.set("authorized", ByteBufUtil.hexDump(buf.readBytes(8)));
+                    position.set("authorized", ByteBufUtil.hexDump(buf.readSlice(8)));
                     break;
                 case 24:
                     for (int i = 0; i < length / 2; i++) {

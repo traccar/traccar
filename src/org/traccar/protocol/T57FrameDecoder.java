@@ -43,7 +43,7 @@ public class T57FrameDecoder extends BaseFrameDecoder {
             }
         }
 
-        return index > 0 ? buf.readBytes(index + 1 - buf.readerIndex()) : null;
+        return index > 0 ? buf.readRetainedSlice(index + 1 - buf.readerIndex()) : null;
     }
 
 }

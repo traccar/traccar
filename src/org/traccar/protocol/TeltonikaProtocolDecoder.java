@@ -79,7 +79,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_TYPE, buf.readUnsignedByte());
 
-        position.set(Position.KEY_RESULT, buf.readBytes(buf.readInt()).toString(StandardCharsets.US_ASCII));
+        position.set(Position.KEY_RESULT, buf.readSlice(buf.readInt()).toString(StandardCharsets.US_ASCII));
 
     }
 
@@ -151,7 +151,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             case 134:
                 String driver = id == 129 || id == 132 ? "" : position.getString("driver1");
                 position.set("driver" + (id >= 132 ? 2 : 1),
-                        driver + buf.readBytes(length).toString(StandardCharsets.US_ASCII).trim());
+                        driver + buf.readSlice(length).toString(StandardCharsets.US_ASCII).trim());
                 break;
             case 179:
                 position.set(Position.PREFIX_OUT + 1, readValue(buf, length, false) == 1);
@@ -394,7 +394,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         if (extended) {
             int cnt = buf.readUnsignedByte();
             for (int j = 0; j < cnt; j++) {
-                position.set(Position.PREFIX_IO + buf.readUnsignedByte(), ByteBufUtil.hexDump(buf.readBytes(16)));
+                position.set(Position.PREFIX_IO + buf.readUnsignedByte(), ByteBufUtil.hexDump(buf.readSlice(16)));
             }
         }
 
@@ -482,7 +482,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedShort(); // packet id
         buf.readUnsignedByte(); // packet type
         int locationPacketId = buf.readUnsignedByte();
-        String imei = buf.readBytes(buf.readUnsignedShort()).toString(StandardCharsets.US_ASCII);
+        String imei = buf.readSlice(buf.readUnsignedShort()).toString(StandardCharsets.US_ASCII);
 
         return parseData(channel, remoteAddress, buf, locationPacketId, imei);
 

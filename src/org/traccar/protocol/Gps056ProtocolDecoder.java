@@ -79,8 +79,8 @@ public class Gps056ProtocolDecoder extends BaseProtocolDecoder {
         buf.skipBytes(2); // header
         buf.skipBytes(2); // length
 
-        String type = buf.readBytes(7).toString(StandardCharsets.US_ASCII);
-        String imei = buf.readBytes(15).toString(StandardCharsets.US_ASCII);
+        String type = buf.readSlice(7).toString(StandardCharsets.US_ASCII);
+        String imei = buf.readSlice(15).toString(StandardCharsets.US_ASCII);
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
         if (deviceSession == null) {
@@ -110,7 +110,7 @@ public class Gps056ProtocolDecoder extends BaseProtocolDecoder {
 
             decodeStatus(buf, position);
 
-            sendResponse(channel, "GPSA" + type.substring(4), imei, buf.readBytes(2));
+            sendResponse(channel, "GPSA" + type.substring(4), imei, buf.readSlice(2));
 
             return position;
 

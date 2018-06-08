@@ -81,7 +81,7 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
                 int subtype = buf.readUnsignedShort();
                 int length = buf.readUnsignedShort() - 4;
                 if (subtype == 0x0003) {
-                    String imei = buf.readBytes(length).toString(StandardCharsets.US_ASCII);
+                    String imei = buf.readSlice(length).toString(StandardCharsets.US_ASCII);
                     DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
                     if (deviceSession != null && channel != null) {
                         ByteBuf content = Unpooled.buffer();
@@ -115,7 +115,7 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_IGNITION, BitUtil.check(status, 14));
             position.set(Position.KEY_EVENT, buf.readUnsignedShort());
 
-            String time = buf.readBytes(12).toString(StandardCharsets.US_ASCII);
+            String time = buf.readSlice(12).toString(StandardCharsets.US_ASCII);
 
             DateBuilder dateBuilder = new DateBuilder()
                     .setYear(Integer.parseInt(time.substring(0, 2)))

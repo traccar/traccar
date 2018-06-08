@@ -339,7 +339,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
         if (buf.getByte(0) == 'E' && buf.getByte(1) == 'L') {
             buf.skipBytes(2 + 2 + 2); // udp header
-            uniqueId = ByteBufUtil.hexDump(buf.readBytes(8)).substring(1);
+            uniqueId = ByteBufUtil.hexDump(buf.readSlice(8)).substring(1);
             deviceSession = getDeviceSession(channel, remoteAddress, uniqueId);
         } else {
             deviceSession = getDeviceSession(channel, remoteAddress);
@@ -357,7 +357,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         if (type == MSG_LOGIN) {
 
             if (deviceSession == null) {
-                getDeviceSession(channel, remoteAddress, ByteBufUtil.hexDump(buf.readBytes(8)).substring(1));
+                getDeviceSession(channel, remoteAddress, ByteBufUtil.hexDump(buf.readSlice(8)).substring(1));
             }
 
         } else {

@@ -47,7 +47,7 @@ public class NavigilFrameDecoder extends BaseFrameDecoder {
                 buf.readUnsignedIntLE();
                 length -= 4;
             }
-            return buf.readBytes(length);
+            return buf.readRetainedSlice(length);
         }
 
         return null;

@@ -93,7 +93,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         String result = null;
         int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) 0);
         if (index > buf.readerIndex()) {
-            result = buf.readBytes(index - buf.readerIndex()).toString(StandardCharsets.US_ASCII);
+            result = buf.readSlice(index - buf.readerIndex()).toString(StandardCharsets.US_ASCII);
         }
         buf.readByte();
         return result;

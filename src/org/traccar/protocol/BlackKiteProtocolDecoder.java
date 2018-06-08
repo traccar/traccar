@@ -95,7 +95,7 @@ public class BlackKiteProtocolDecoder extends BaseProtocolDecoder {
             switch (tag) {
 
                 case TAG_IMEI:
-                    getDeviceSession(channel, remoteAddress, buf.readBytes(15).toString(StandardCharsets.US_ASCII));
+                    getDeviceSession(channel, remoteAddress, buf.readSlice(15).toString(StandardCharsets.US_ASCII));
                     break;
 
                 case TAG_DATE:

@@ -53,7 +53,7 @@ public class AplicomFrameDecoder extends BaseFrameDecoder {
 
         // Return buffer
         if (buf.readableBytes() >= length) {
-            return buf.readBytes(length);
+            return buf.readRetainedSlice(length);
         }
 
         return null;

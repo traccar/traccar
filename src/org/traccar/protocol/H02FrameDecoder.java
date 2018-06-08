@@ -50,7 +50,7 @@ public class H02FrameDecoder extends BaseFrameDecoder {
                 // Return text message
                 int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '#');
                 if (index != -1) {
-                    ByteBuf result = buf.readBytes(index + 1 - buf.readerIndex());
+                    ByteBuf result = buf.readRetainedSlice(index + 1 - buf.readerIndex());
                     while (buf.isReadable()
                             && (buf.getByte(buf.readerIndex()) == '\r' || buf.getByte(buf.readerIndex()) == '\n')) {
                         buf.readByte(); // skip new line
@@ -71,7 +71,7 @@ public class H02FrameDecoder extends BaseFrameDecoder {
                 }
 
                 if (buf.readableBytes() >= messageLength) {
-                    return buf.readBytes(messageLength);
+                    return buf.readRetainedSlice(messageLength);
                 }
 
                 break;
@@ -79,7 +79,7 @@ public class H02FrameDecoder extends BaseFrameDecoder {
             case 'X':
 
                 if (buf.readableBytes() >= MESSAGE_SHORT) {
-                    return buf.readBytes(MESSAGE_SHORT);
+                    return buf.readRetainedSlice(MESSAGE_SHORT);
                 }
 
                 break;

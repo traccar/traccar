@@ -31,7 +31,7 @@ public class VtfmsFrameDecoder extends BaseFrameDecoder {
         if (endIndex > 0) {
             endIndex += 1 + 3;
             if (buf.writerIndex() >= endIndex) {
-                return buf.readBytes(endIndex - buf.readerIndex());
+                return buf.readRetainedSlice(endIndex - buf.readerIndex());
             }
         }
 

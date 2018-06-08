@@ -113,7 +113,7 @@ public class Gl200BinaryProtocolDecoder extends BaseProtocolDecoder {
 
                 switch (BitUtil.from(buf.getUnsignedByte(buf.readerIndex()), 8 - 2)) {
                     case 1:
-                        bits = new BitBuffer(buf.readBytes(3));
+                        bits = new BitBuffer(buf.readSlice(3));
                         bits.readUnsigned(2); // point attribute
                         bits.readUnsigned(1); // fix type
                         speed = bits.readUnsigned(12);
@@ -125,7 +125,7 @@ public class Gl200BinaryProtocolDecoder extends BaseProtocolDecoder {
                         }
                         break;
                     case 2:
-                        bits = new BitBuffer(buf.readBytes(5));
+                        bits = new BitBuffer(buf.readSlice(5));
                         bits.readUnsigned(2); // point attribute
                         bits.readUnsigned(1); // fix type
                         speed += bits.readSigned(7);
@@ -387,7 +387,7 @@ public class Gl200BinaryProtocolDecoder extends BaseProtocolDecoder {
 
         ByteBuf buf = (ByteBuf) msg;
 
-        switch (buf.readBytes(4).toString(StandardCharsets.US_ASCII)) {
+        switch (buf.readSlice(4).toString(StandardCharsets.US_ASCII)) {
             case "+RSP":
                 return decodeLocation(channel, remoteAddress, buf);
             case "+INF":

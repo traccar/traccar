@@ -36,12 +36,12 @@ public class TelicFrameDecoder extends BaseFrameDecoder {
         if (length < 1024) {
             if (buf.readableBytes() >= length + 4) {
                 buf.readUnsignedIntLE();
-                return buf.readBytes((int) length);
+                return buf.readRetainedSlice((int) length);
             }
         } else {
             int endIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) 0);
             if (endIndex >= 0) {
-                ByteBuf frame = buf.readBytes(endIndex - buf.readerIndex());
+                ByteBuf frame = buf.readRetainedSlice(endIndex - buf.readerIndex());
                 buf.readByte();
                 if (frame.readableBytes() > 0) {
                     return frame;

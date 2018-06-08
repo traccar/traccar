@@ -55,7 +55,7 @@ public class RecodaProtocolDecoder extends BaseProtocolDecoder {
 
         if (type == MSG_SIGNAL_LINK_REGISTRATION) {
 
-            getDeviceSession(channel, remoteAddress, buf.readBytes(12).toString(StandardCharsets.US_ASCII));
+            getDeviceSession(channel, remoteAddress, buf.readSlice(12).toString(StandardCharsets.US_ASCII));
 
         } else if (type == MSG_GPS_DATA) {
 

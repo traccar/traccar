@@ -50,7 +50,7 @@ public class TotemFrameDecoder extends BaseFrameDecoder {
         }
 
         if (length <= buf.readableBytes()) {
-            return buf.readBytes(length);
+            return buf.readRetainedSlice(length);
         }
 
         return null;

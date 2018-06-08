@@ -37,7 +37,7 @@ public class GranitFrameDecoder extends BaseFrameDecoder {
                     return null;
                 }
             }
-            ByteBuf frame = buf.readBytes(indexEnd - buf.readerIndex());
+            ByteBuf frame = buf.readRetainedSlice(indexEnd - buf.readerIndex());
             buf.skipBytes(2);
             return frame;
         }

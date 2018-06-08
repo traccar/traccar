@@ -34,7 +34,7 @@ public class GalileoFrameDecoder extends BaseFrameDecoder {
 
         int length = buf.getUnsignedShortLE(buf.readerIndex() + 1) & 0x7fff;
         if (buf.readableBytes() >= (length + MESSAGE_MINIMUM_LENGTH)) {
-            return buf.readBytes(length + MESSAGE_MINIMUM_LENGTH);
+            return buf.readRetainedSlice(length + MESSAGE_MINIMUM_LENGTH);
         }
 
         return null;

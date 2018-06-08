@@ -54,7 +54,7 @@ public class TmgFrameDecoder extends BaseFrameDecoder {
             int endIndex = buf.indexOf(beginIndex, buf.writerIndex(), (byte) '\n');
 
             if (endIndex >= 0) {
-                ByteBuf frame = buf.readBytes(endIndex - beginIndex);
+                ByteBuf frame = buf.readRetainedSlice(endIndex - beginIndex);
                 buf.readByte(); // delimiter
                 return frame;
             }

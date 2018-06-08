@@ -53,12 +53,12 @@ public class OigoProtocolDecoder extends BaseProtocolDecoder {
         DeviceSession deviceSession;
         switch (BitUtil.to(tag, 3)) {
             case 0:
-                String imei = ByteBufUtil.hexDump(buf.readBytes(8)).substring(1);
+                String imei = ByteBufUtil.hexDump(buf.readSlice(8)).substring(1);
                 deviceSession = getDeviceSession(channel, remoteAddress, imei);
                 break;
             case 1:
                 buf.skipBytes(1);
-                String meid = buf.readBytes(14).toString(StandardCharsets.US_ASCII);
+                String meid = buf.readSlice(14).toString(StandardCharsets.US_ASCII);
                 deviceSession = getDeviceSession(channel, remoteAddress, meid);
                 break;
             default:
@@ -171,7 +171,7 @@ public class OigoProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedByte(); // flags
             deviceSession = getDeviceSession(channel, remoteAddress);
         } else {
-            String imei = ByteBufUtil.hexDump(buf.readBytes(8)).substring(1);
+            String imei = ByteBufUtil.hexDump(buf.readSlice(8)).substring(1);
             deviceSession = getDeviceSession(channel, remoteAddress, imei);
         }
 

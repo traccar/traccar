@@ -79,7 +79,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
             length = buf.readUnsignedShortLE();
             buf.skipBytes(length);
             length = buf.readUnsignedShortLE();
-            String imei = buf.readBytes(length).toString(StandardCharsets.US_ASCII);
+            String imei = buf.readSlice(length).toString(StandardCharsets.US_ASCII);
             getDeviceSession(channel, remoteAddress, imei);
 
         } else if (type == MSG_POINT || type == MSG_ALARM || type == MSG_LOGMSG) {
@@ -146,7 +146,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
                 }
 
                 if (BitUtil.check(extraFlags, 2)) {
-                    position.set("passenger", ByteBufUtil.hexDump(buf.readBytes(buf.readUnsignedShortLE())));
+                    position.set("passenger", ByteBufUtil.hexDump(buf.readSlice(buf.readUnsignedShortLE())));
                 }
 
                 if (type == MSG_ALARM) {

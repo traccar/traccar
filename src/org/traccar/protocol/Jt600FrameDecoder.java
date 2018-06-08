@@ -38,12 +38,12 @@ public class Jt600FrameDecoder extends BaseFrameDecoder {
             boolean longFormat = buf.getUnsignedByte(buf.readerIndex() + 1) == 0x75;
             int length = buf.getUnsignedShort(buf.readerIndex() + (longFormat ? 8 : 7)) + 10;
             if (length <= buf.readableBytes()) {
-                return buf.readBytes(length);
+                return buf.readRetainedSlice(length);
             }
         } else if (type == '(') {
             int endIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ')');
             if (endIndex != -1) {
-                return buf.readBytes(endIndex + 1);
+                return buf.readRetainedSlice(endIndex + 1);
             }
         } else {
             throw new ParseException(null, 0); // unknown message

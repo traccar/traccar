@@ -39,14 +39,14 @@ public class Gt06FrameDecoder extends BaseFrameDecoder {
         }
 
         if (buf.readableBytes() >= length && buf.getUnsignedShort(buf.readerIndex() + length - 2) == 0x0d0a) {
-            return buf.readBytes(length);
+            return buf.readRetainedSlice(length);
         }
 
         int endIndex = buf.readerIndex() - 1;
         do {
             endIndex = buf.indexOf(endIndex + 1, buf.writerIndex(), (byte) 0x0d);
             if (endIndex > 0 && buf.writerIndex() > endIndex + 1 && buf.getByte(endIndex + 1) == 0x0a) {
-                return buf.readBytes(endIndex + 2 - buf.readerIndex());
+                return buf.readRetainedSlice(endIndex + 2 - buf.readerIndex());
             }
         } while (endIndex > 0);
 

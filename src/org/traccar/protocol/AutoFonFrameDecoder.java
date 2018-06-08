@@ -56,7 +56,7 @@ public class AutoFonFrameDecoder extends BaseFrameDecoder {
 
         // Check length and return buffer
         if (length != 0 && buf.readableBytes() >= length) {
-            return buf.readBytes(length);
+            return buf.readRetainedSlice(length);
         }
 
         return null;

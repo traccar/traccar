@@ -103,7 +103,7 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
         if (headerIndex < 0) {
             headerIndex = buf.writerIndex();
         }
-        String header = buf.readBytes(headerIndex - buf.readerIndex()).toString(StandardCharsets.US_ASCII);
+        String header = buf.readSlice(headerIndex - buf.readerIndex()).toString(StandardCharsets.US_ASCII);
 
         Parser parser = new Parser(PATTERN_HEADER, header);
         if (!parser.matches()) {
@@ -138,7 +138,7 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                 delimiterIndex = buf.writerIndex();
             }
 
-            ByteBuf data = buf.readBytes(delimiterIndex - buf.readerIndex());
+            ByteBuf data = buf.readSlice(delimiterIndex - buf.readerIndex());
 
             switch (dataType) {
                 case 'A':
@@ -157,10 +157,10 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case 'P':
                     position.setNetwork(new Network(CellTower.from(
-                            Integer.parseInt(data.readBytes(4).toString(StandardCharsets.US_ASCII)),
-                            Integer.parseInt(data.readBytes(4).toString(StandardCharsets.US_ASCII)),
-                            Integer.parseInt(data.readBytes(4).toString(StandardCharsets.US_ASCII), 16),
-                            Integer.parseInt(data.readBytes(4).toString(StandardCharsets.US_ASCII), 16))));
+                            Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII)),
+                            Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII)),
+                            Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII), 16),
+                            Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII), 16))));
                     break;
                 case 'Q':
                     position.set("obd-pid", ByteBufUtil.hexDump(data));

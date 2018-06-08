@@ -77,7 +77,7 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
                         length += 1;
                     }
 
-                    String num = ByteBufUtil.hexDump(buf.readBytes(length / 2));
+                    String num = ByteBufUtil.hexDump(buf.readSlice(length / 2));
 
                     if (odd) {
                         num = num.substring(1);
@@ -122,7 +122,7 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
         int hardware = buf.readUnsignedShort();
         long firmware = buf.readUnsignedInt();
 
-        String imei = ByteBufUtil.hexDump(buf.readBytes(8)).substring(1);
+        String imei = ByteBufUtil.hexDump(buf.readSlice(8)).substring(1);
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
         if (deviceSession == null) {
             return null;

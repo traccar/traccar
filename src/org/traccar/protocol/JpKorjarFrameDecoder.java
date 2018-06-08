@@ -41,7 +41,7 @@ public class JpKorjarFrameDecoder extends BaseFrameDecoder {
             return null;
         }
 
-        return buf.readBytes(endIndex + 1);
+        return buf.readRetainedSlice(endIndex + 1);
     }
 
 }

@@ -132,7 +132,7 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
         if (responseTextLength < 0) {
             responseTextLength = CMD_RESPONSE_SIZE - 3;
         }
-        position.set(Position.KEY_RESULT, buf.readBytes(responseTextLength).toString(StandardCharsets.UTF_8));
+        position.set(Position.KEY_RESULT, buf.readSlice(responseTextLength).toString(StandardCharsets.UTF_8));
 
         return position;
     }
@@ -147,7 +147,7 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
         if (size != CMD_RESPONSE_SIZE) {
             int type = buf.readUnsignedByte();
             if (type == MSG_IMEI) {
-                getDeviceSession(channel, remoteAddress, buf.readBytes(15).toString(StandardCharsets.UTF_8));
+                getDeviceSession(channel, remoteAddress, buf.readSlice(15).toString(StandardCharsets.UTF_8));
             } else {
                 return decodeData(channel, remoteAddress, buf, type);
             }

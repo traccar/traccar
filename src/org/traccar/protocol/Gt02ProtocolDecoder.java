@@ -55,7 +55,7 @@ public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
         int power = buf.readUnsignedByte();
         int gsm = buf.readUnsignedByte();
 
-        String imei = ByteBufUtil.hexDump(buf.readBytes(8)).substring(1);
+        String imei = ByteBufUtil.hexDump(buf.readSlice(8)).substring(1);
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
         if (deviceSession == null) {
             return null;
@@ -110,7 +110,7 @@ public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
             getLastLocation(position, null);
 
             position.set(Position.KEY_RESULT,
-                    buf.readBytes(buf.readUnsignedByte()).toString(StandardCharsets.US_ASCII));
+                    buf.readSlice(buf.readUnsignedByte()).toString(StandardCharsets.US_ASCII));
 
         } else {
 

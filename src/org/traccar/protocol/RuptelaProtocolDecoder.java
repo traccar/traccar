@@ -225,7 +225,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_ARCHIVE, true);
                 }
 
-                position.set(Position.KEY_DTCS, buf.readBytes(5).toString(StandardCharsets.US_ASCII));
+                position.set(Position.KEY_DTCS, buf.readSlice(5).toString(StandardCharsets.US_ASCII));
 
                 positions.add(position);
             }

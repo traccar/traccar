@@ -170,7 +170,7 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
         if (buf.readableBytes() < HEADER_LENGTH) {
             return null;
         }
-        String header = buf.readBytes(HEADER_LENGTH).toString(StandardCharsets.US_ASCII);
+        String header = buf.readSlice(HEADER_LENGTH).toString(StandardCharsets.US_ASCII);
 
         if (header.equals("+RRCB~")) {
 

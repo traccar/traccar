@@ -215,7 +215,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
                 break;
             case 0xe1:
                 position.set(Position.KEY_RESULT,
-                        buf.readBytes(buf.readUnsignedByte()).toString(StandardCharsets.US_ASCII));
+                        buf.readSlice(buf.readUnsignedByte()).toString(StandardCharsets.US_ASCII));
                 break;
             case 0xe2:
             case 0xe3:
@@ -228,8 +228,8 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
                 position.set("userData" + (tag - 0xe2), buf.readUnsignedIntLE());
                 break;
             case 0xea:
-                position.set("userDataArray", ByteBufUtil.hexDump(buf.readBytes(buf.readUnsignedByte())));
-                position.set("userDataArray", ByteBufUtil.hexDump(buf.readBytes(buf.readUnsignedByte())));
+                position.set("userDataArray", ByteBufUtil.hexDump(buf.readSlice(buf.readUnsignedByte())));
+                position.set("userDataArray", ByteBufUtil.hexDump(buf.readSlice(buf.readUnsignedByte())));
                 break;
             default:
                 buf.skipBytes(getTagLength(tag));
@@ -268,7 +268,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
 
             if (tag == 0x03) {
                 deviceSession = getDeviceSession(
-                        channel, remoteAddress, buf.readBytes(15).toString(StandardCharsets.US_ASCII));
+                        channel, remoteAddress, buf.readSlice(15).toString(StandardCharsets.US_ASCII));
             } else if (tag == 0x30) {
                 hasLocation = true;
                 position.setValid((buf.readUnsignedByte() & 0xf0) == 0x00);

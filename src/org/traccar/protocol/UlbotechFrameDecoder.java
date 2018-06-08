@@ -59,7 +59,7 @@ public class UlbotechFrameDecoder extends BaseFrameDecoder {
 
             int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '#');
             if (index != -1) {
-                return buf.readBytes(index + 1 - buf.readerIndex());
+                return buf.readRetainedSlice(index + 1 - buf.readerIndex());
             }
 
         }

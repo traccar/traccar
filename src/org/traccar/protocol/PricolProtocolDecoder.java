@@ -43,7 +43,7 @@ public class PricolProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedByte(); // header
 
         DeviceSession deviceSession = getDeviceSession(
-                channel, remoteAddress, buf.readBytes(7).toString(StandardCharsets.US_ASCII));
+                channel, remoteAddress, buf.readSlice(7).toString(StandardCharsets.US_ASCII));
         if (deviceSession == null) {
             return null;
         }

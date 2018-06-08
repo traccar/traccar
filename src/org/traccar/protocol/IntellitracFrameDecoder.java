@@ -40,7 +40,7 @@ public class IntellitracFrameDecoder extends LineBasedFrameDecoder {
 
         // Check for sync packet
         if (buf.getUnsignedShort(buf.readerIndex()) == 0xFAF8) {
-            ByteBuf syncMessage = buf.readBytes(8);
+            ByteBuf syncMessage = buf.readRetainedSlice(8);
             if (ctx != null && ctx.channel() != null) {
                 ctx.channel().writeAndFlush(new NetworkMessage(syncMessage, ctx.channel().remoteAddress()));
             }

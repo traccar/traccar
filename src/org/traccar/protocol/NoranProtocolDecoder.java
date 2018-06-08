@@ -129,9 +129,9 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
 
             ByteBuf rawId;
             if (newFormat) {
-                rawId = buf.readBytes(12);
+                rawId = buf.readSlice(12);
             } else {
-                rawId = buf.readBytes(11);
+                rawId = buf.readSlice(11);
             }
             String id = rawId.toString(StandardCharsets.US_ASCII).replaceAll("[^\\p{Print}]", "");
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
@@ -142,7 +142,7 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
 
             if (newFormat) {
                 DateFormat dateFormat = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
-                position.setTime(dateFormat.parse(buf.readBytes(17).toString(StandardCharsets.US_ASCII)));
+                position.setTime(dateFormat.parse(buf.readSlice(17).toString(StandardCharsets.US_ASCII)));
                 buf.readByte();
             }
 

@@ -56,7 +56,7 @@ public class ThinkRaceProtocolDecoder extends BaseProtocolDecoder {
         ByteBuf buf = (ByteBuf) msg;
 
         buf.skipBytes(2); // header
-        ByteBuf id = buf.readBytes(12);
+        ByteBuf id = buf.readSlice(12);
         buf.readUnsignedByte(); // separator
         int type = buf.readUnsignedByte();
         buf.readUnsignedShort(); // length

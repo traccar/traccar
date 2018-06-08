@@ -42,7 +42,7 @@ public class L100FrameDecoder extends BaseFrameDecoder {
 
         if (buf.readableBytes() >= index - buf.readerIndex()) {
             buf.skipBytes(2); // header
-            ByteBuf frame = buf.readBytes(index - buf.readerIndex() - 2);
+            ByteBuf frame = buf.readRetainedSlice(index - buf.readerIndex() - 2);
             buf.skipBytes(2); // footer
             return frame;
         }

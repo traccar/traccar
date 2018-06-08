@@ -69,7 +69,7 @@ public class Tk103FrameDecoder extends BaseFrameDecoder {
 
         buf.readerIndex(frameStartIndex);
 
-        return buf.readBytes(frameEndIndex + 1 - frameStartIndex);
+        return buf.readRetainedSlice(frameEndIndex + 1 - frameStartIndex);
     }
 
 }

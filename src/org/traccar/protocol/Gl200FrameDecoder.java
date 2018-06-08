@@ -74,7 +74,7 @@ public class Gl200FrameDecoder extends BaseFrameDecoder {
             }
 
             if (buf.readableBytes() >= length) {
-                return buf.readBytes(length);
+                return buf.readRetainedSlice(length);
             }
 
         } else {
@@ -84,7 +84,7 @@ public class Gl200FrameDecoder extends BaseFrameDecoder {
                 endIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) 0);
             }
             if (endIndex > 0) {
-                ByteBuf frame = buf.readBytes(endIndex - buf.readerIndex());
+                ByteBuf frame = buf.readRetainedSlice(endIndex - buf.readerIndex());
                 buf.readByte(); // delimiter
                 return frame;
             }
