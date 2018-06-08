@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,21 +17,16 @@ package org.traccar.geolocation;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.ning.http.client.AsyncCompletionHandler;
-import com.ning.http.client.Response;
 import org.traccar.Context;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.WifiAccessPoint;
 
-import javax.json.Json;
 import javax.json.JsonObject;
-import javax.json.JsonReader;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.InvocationCallback;
 import java.util.Collection;
 
 public class UnwiredGeolocationProvider implements GeolocationProvider {
@@ -90,39 +85,27 @@ public class UnwiredGeolocationProvider implements GeolocationProvider {
 
     @Override
     public void getLocation(Network network, final LocationProviderCallback callback) {
-        try {
-            ObjectNode json = objectMapper.valueToTree(network);
-            json.put("token", key);
-            String request = objectMapper.writeValueAsString(json);
-            Context.getAsyncHttpClient().preparePost(url)
-                    .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
-                    .setHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(request.length()))
-                    .setBody(request).execute(new AsyncCompletionHandler() {
-                @Override
-                public Object onCompleted(Response response) throws Exception {
-                    try (JsonReader reader = Json.createReader(response.getResponseBodyAsStream())) {
-                        JsonObject json = reader.readObject();
-                        if (json.getString("status").equals("error")) {
-                            callback.onFailure(
-                                    new GeolocationException(json.getString("message")));
-                        } else {
-                            callback.onSuccess(
-                                    json.getJsonNumber("lat").doubleValue(),
-                                    json.getJsonNumber("lon").doubleValue(),
-                                    json.getJsonNumber("accuracy").doubleValue());
-                        }
-                    }
-                    return null;
-                }
+        ObjectNode json = objectMapper.valueToTree(network);
+        json.put("token", key);
 
-                @Override
-                public void onThrowable(Throwable t) {
-                    callback.onFailure(t);
+        Context.getClient().target(url).request().async().post(Entity.json(json), new InvocationCallback<JsonObject>() {
+            @Override
+            public void completed(JsonObject json) {
+                if (json.getString("status").equals("error")) {
+                    callback.onFailure(new GeolocationException(json.getString("message")));
+                } else {
+                    callback.onSuccess(
+                            json.getJsonNumber("lat").doubleValue(),
+                            json.getJsonNumber("lon").doubleValue(),
+                            json.getJsonNumber("accuracy").doubleValue());
                 }
-            });
-        } catch (JsonProcessingException e) {
-            callback.onFailure(e);
-        }
+            }
+
+            @Override
+            public void failed(Throwable throwable) {
+                callback.onFailure(throwable);
+            }
+        });
     }
 
 }
