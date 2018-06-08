@@ -15,11 +15,12 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
@@ -27,7 +28,6 @@ import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
@@ -49,7 +49,7 @@ public class RoboTrackProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         int type = buf.readUnsignedByte();
 
@@ -60,11 +60,11 @@ public class RoboTrackProtocolDecoder extends BaseProtocolDecoder {
             String imei = buf.readBytes(15).toString(StandardCharsets.US_ASCII);
 
             if (getDeviceSession(channel, remoteAddress, imei) != null && channel != null) {
-                ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
+                ByteBuf response = Unpooled.buffer(0);
                 response.writeByte(MSG_ACK);
                 response.writeByte(0x01); // success
                 response.writeByte(0x66); // checksum
-                channel.write(response);
+                channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
             }
 
         } else if (type == MSG_GPS || type == MSG_GSM) {
@@ -77,14 +77,14 @@ public class RoboTrackProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
-            position.setDeviceTime(new Date(buf.readUnsignedInt() * 1000));
+            position.setDeviceTime(new Date(buf.readUnsignedIntLE() * 1000));
 
             if (type == MSG_GPS) {
 
                 position.setValid(true);
                 position.setFixTime(position.getDeviceTime());
-                position.setLatitude(buf.readInt() * 0.000001);
-                position.setLongitude(buf.readInt() * 0.000001);
+                position.setLatitude(buf.readIntLE() * 0.000001);
+                position.setLongitude(buf.readIntLE() * 0.000001);
                 position.setSpeed(UnitsConverter.knotsFromKph(buf.readByte()));
 
             } else {
@@ -92,8 +92,8 @@ public class RoboTrackProtocolDecoder extends BaseProtocolDecoder {
                 getLastLocation(position, position.getDeviceTime());
 
                 position.setNetwork(new Network(CellTower.from(
-                        buf.readUnsignedShort(), buf.readUnsignedShort(),
-                        buf.readUnsignedShort(), buf.readUnsignedShort())));
+                        buf.readUnsignedShortLE(), buf.readUnsignedShortLE(),
+                        buf.readUnsignedShortLE(), buf.readUnsignedShortLE())));
 
                 buf.readUnsignedByte(); // reserved
 
@@ -117,7 +117,7 @@ public class RoboTrackProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_DEVICE_TEMP, buf.readByte());
 
             for (int i = 1; i <= 3; i++) {
-                position.set(Position.PREFIX_ADC + i, buf.readUnsignedShort());
+                position.set(Position.PREFIX_ADC + i, buf.readUnsignedShortLE());
             }
 
             return position;

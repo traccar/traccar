@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.DataConverter;
@@ -31,7 +31,6 @@ import javax.json.JsonObject;
 import java.io.StringReader;
 import java.net.SocketAddress;
 import java.net.URLDecoder;
-import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
@@ -45,9 +44,9 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        HttpRequest request = (HttpRequest) msg;
+        FullHttpRequest request = (FullHttpRequest) msg;
         JsonObject json = Json.createReader(new StringReader(URLDecoder.decode(
-                request.getContent().toString(StandardCharsets.UTF_8).split("=")[0], "UTF-8"))).readObject();
+                request.content().toString(StandardCharsets.UTF_8).split("=")[0], "UTF-8"))).readObject();
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, json.getString("device"));
         if (deviceSession == null) {
@@ -60,15 +59,14 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
 
         position.setTime(new Date(json.getInt("time") * 1000L));
 
-        ChannelBuffer buf = ChannelBuffers.wrappedBuffer(
-                ByteOrder.LITTLE_ENDIAN, DataConverter.parseHex(json.getString("data")));
+        ByteBuf buf = Unpooled.wrappedBuffer(DataConverter.parseHex(json.getString("data")));
 
         int type = buf.readUnsignedByte() >> 4;
         if (type == 0) {
 
             position.setValid(true);
-            position.setLatitude(buf.readInt() * 0.0000001);
-            position.setLongitude(buf.readInt() * 0.0000001);
+            position.setLatitude(buf.readIntLE() * 0.0000001);
+            position.setLongitude(buf.readIntLE() * 0.0000001);
             position.setCourse(buf.readUnsignedByte() * 2);
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
 

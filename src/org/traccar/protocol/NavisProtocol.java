@@ -35,7 +35,7 @@ public class NavisProtocol extends BaseProtocol {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast("frameDecoder",
-                        new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 4 * 1024, 12, 2, 2, 0, false));
+                        new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 4 * 1024, 12, 2, 2, 0, true));
                 pipeline.addLast("objectDecoder", new NavisProtocolDecoder(NavisProtocol.this));
             }
         });

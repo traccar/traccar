@@ -15,14 +15,14 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.frame.FrameDecoder;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import org.traccar.BaseFrameDecoder;
 
-public class RoboTrackFrameDecoder extends FrameDecoder {
+public class RoboTrackFrameDecoder extends BaseFrameDecoder {
 
-    private int messageLength(ChannelBuffer buf) {
+    private int messageLength(ByteBuf buf) {
         switch ((int) buf.getByte(buf.readerIndex())) {
             case RoboTrackProtocolDecoder.MSG_ID:
                 return 69;
@@ -33,7 +33,7 @@ public class RoboTrackFrameDecoder extends FrameDecoder {
             case RoboTrackProtocolDecoder.MSG_IMAGE_START:
                 return 24;
             case RoboTrackProtocolDecoder.MSG_IMAGE_DATA:
-                return 8 + buf.getUnsignedShort(buf.readerIndex() + 1);
+                return 8 + buf.getUnsignedShortLE(buf.readerIndex() + 1);
             case RoboTrackProtocolDecoder.MSG_IMAGE_END:
                 return 6;
             default:
@@ -43,7 +43,7 @@ public class RoboTrackFrameDecoder extends FrameDecoder {
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
+            ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
         int length = messageLength(buf);
 

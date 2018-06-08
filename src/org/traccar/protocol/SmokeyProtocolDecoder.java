@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,16 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Seconds;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.DateBuilder;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
@@ -42,10 +44,10 @@ public class SmokeyProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_DATE_RECORD_ACK = 1;
 
     private static void sendResponse(
-            Channel channel, SocketAddress remoteAddress, ChannelBuffer id, int index, int report) {
+            Channel channel, SocketAddress remoteAddress, ByteBuf id, int index, int report) {
 
         if (channel != null) {
-            ChannelBuffer response = ChannelBuffers.dynamicBuffer();
+            ByteBuf response = Unpooled.buffer();
             response.writeBytes("SM".getBytes(StandardCharsets.US_ASCII));
             response.writeByte(3); // protocol version
             response.writeByte(MSG_DATE_RECORD_ACK);
@@ -57,11 +59,11 @@ public class SmokeyProtocolDecoder extends BaseProtocolDecoder {
 
             short checksum = (short) 0xF5A0;
             for (int i = 0; i < response.readableBytes(); i += 2) {
-                checksum ^= ChannelBuffers.swapShort(response.getShort(i));
+                checksum ^= response.getShortLE(i);
             }
             response.writeShort(checksum);
 
-            channel.write(response, remoteAddress);
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
     }
 
@@ -69,15 +71,15 @@ public class SmokeyProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         buf.skipBytes(2); // header
         buf.readUnsignedByte(); // protocol version
 
         int type = buf.readUnsignedByte();
 
-        ChannelBuffer id = buf.readBytes(8);
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, ChannelBuffers.hexDump(id));
+        ByteBuf id = buf.readBytes(8);
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, ByteBufUtil.hexDump(id));
         if (deviceSession == null) {
             return null;
         }
