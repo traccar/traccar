@@ -243,5 +243,6 @@
     <entry key='telemax.port'>5165</entry>
     <entry key='sabertek.port'>5166</entry>
     <entry key='retranslator.port'>5167</entry>
+    <entry key='svias.port'>5168</entry>
 
 </properties>
