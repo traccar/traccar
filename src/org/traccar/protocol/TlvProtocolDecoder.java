@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,12 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
@@ -33,20 +34,20 @@ public class TlvProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private void sendResponse(Channel channel, String type, String... arguments) {
+    private void sendResponse(Channel channel, SocketAddress remoteAddress, String type, String... arguments) {
         if (channel != null) {
-            ChannelBuffer response = ChannelBuffers.dynamicBuffer();
-            response.writeBytes(ChannelBuffers.copiedBuffer(type, StandardCharsets.US_ASCII));
+            ByteBuf response = Unpooled.buffer();
+            response.writeBytes(Unpooled.copiedBuffer(type, StandardCharsets.US_ASCII));
             for (String argument : arguments) {
                 response.writeByte(argument.length());
-                response.writeBytes(ChannelBuffers.copiedBuffer(argument, StandardCharsets.US_ASCII));
+                response.writeBytes(Unpooled.copiedBuffer(argument, StandardCharsets.US_ASCII));
             }
             response.writeByte(0);
-            channel.write(response);
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
     }
 
-    private String readArgument(ChannelBuffer buf) {
+    private String readArgument(ByteBuf buf) {
         return buf.readBytes(buf.readUnsignedByte()).toString(StandardCharsets.US_ASCII);
     }
 
@@ -54,7 +55,7 @@ public class TlvProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         String type = buf.readBytes(2).toString(StandardCharsets.US_ASCII);
 
@@ -62,14 +63,14 @@ public class TlvProtocolDecoder extends BaseProtocolDecoder {
             switch (type) {
                 case "0A":
                 case "0C":
-                    sendResponse(channel, type);
+                    sendResponse(channel, remoteAddress, type);
                     break;
                 case "0B":
-                    sendResponse(channel, type, "1482202689", "10", "20", "15");
+                    sendResponse(channel, remoteAddress, type, "1482202689", "10", "20", "15");
                     break;
                 case "0E":
                 case "0F":
-                    sendResponse(channel, type, "30", "Unknown");
+                    sendResponse(channel, remoteAddress, type, "30", "Unknown");
                     break;
                 default:
                     break;

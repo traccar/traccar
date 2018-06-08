@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -119,11 +120,11 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
             String responseHeader = id + (char) (type.charAt(0) + 1) + type.substring(1);
             if (type.equals("AP00") && id.equals("IW")) {
                 String time = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-                channel.write(responseHeader + "," + time + ",0#");
+                channel.writeAndFlush(new NetworkMessage(responseHeader + "," + time + ",0#", remoteAddress));
             } else if (type.equals("AP14")) {
-                channel.write(responseHeader + ",0.000,0.000#");
+                channel.writeAndFlush(new NetworkMessage(responseHeader + ",0.000,0.000#", remoteAddress));
             } else {
-                channel.write(responseHeader + "#");
+                channel.writeAndFlush(new NetworkMessage(responseHeader + "#", remoteAddress));
             }
         }
 

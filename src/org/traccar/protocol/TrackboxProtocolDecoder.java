@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2014 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -46,9 +47,9 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)")                      // satellites
             .compile();
 
-    private void sendResponse(Channel channel) {
+    private void sendResponse(Channel channel, SocketAddress remoteAddress) {
         if (channel != null) {
-            channel.write("=OK=\r\n");
+            channel.writeAndFlush(new NetworkMessage("=OK=\r\n", remoteAddress));
         }
     }
 
@@ -61,7 +62,7 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
         if (sentence.startsWith("a=connect")) {
             String id = sentence.substring(sentence.indexOf("i=") + 2);
             if (getDeviceSession(channel, remoteAddress, id) != null) {
-                sendResponse(channel);
+                sendResponse(channel, remoteAddress);
             }
             return null;
         }
@@ -75,7 +76,7 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
         if (!parser.matches()) {
             return null;
         }
-        sendResponse(channel);
+        sendResponse(channel, remoteAddress);
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
