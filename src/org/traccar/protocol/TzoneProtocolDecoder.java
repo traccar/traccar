@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
@@ -57,7 +57,7 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private void decodeCards(Position position, ChannelBuffer buf) {
+    private void decodeCards(Position position, ByteBuf buf) {
 
         int index = 1;
         for (int i = 0; i < 4; i++) {
@@ -77,7 +77,7 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
                         length += 1;
                     }
 
-                    String num = ChannelBuffers.hexDump(buf.readBytes(length / 2));
+                    String num = ByteBufUtil.hexDump(buf.readBytes(length / 2));
 
                     if (odd) {
                         num = num.substring(1);
@@ -92,7 +92,7 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
 
     }
 
-    private void decodePassengers(Position position, ChannelBuffer buf) {
+    private void decodePassengers(Position position, ByteBuf buf) {
 
         int blockLength = buf.readUnsignedShort();
         int blockEnd = buf.readerIndex() + blockLength;
@@ -112,7 +112,7 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         buf.skipBytes(2); // header
         buf.readUnsignedShort(); // length
@@ -122,7 +122,7 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
         int hardware = buf.readUnsignedShort();
         long firmware = buf.readUnsignedInt();
 
-        String imei = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
+        String imei = ByteBufUtil.hexDump(buf.readBytes(8)).substring(1);
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
         if (deviceSession == null) {
             return null;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,13 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -36,7 +38,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private void decodeExtraData(Position position, ChannelBuffer buf, int end) {
+    private void decodeExtraData(Position position, ByteBuf buf, int end) {
         while (buf.readerIndex() < end) {
 
             int type = buf.readUnsignedByte();
@@ -73,10 +75,10 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                     position.set("antihijack", buf.readUnsignedByte());
                     break;
                 case 9:
-                    position.set("unauthorized", ChannelBuffers.hexDump(buf.readBytes(8)));
+                    position.set("unauthorized", ByteBufUtil.hexDump(buf.readBytes(8)));
                     break;
                 case 10:
-                    position.set("authorized", ChannelBuffers.hexDump(buf.readBytes(8)));
+                    position.set("authorized", ByteBufUtil.hexDump(buf.readBytes(8)));
                     break;
                 case 24:
                     for (int i = 0; i < length / 2; i++) {
@@ -124,16 +126,16 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         buf.readUnsignedByte(); // protocol
         buf.readUnsignedShort(); // length
         int index = buf.readUnsignedByte() >> 3;
 
         if (channel != null) {
-            ChannelBuffer response = ChannelBuffers.copiedBuffer(
+            ByteBuf response = Unpooled.copiedBuffer(
                     "^" + index, StandardCharsets.US_ASCII);
-            channel.write(response, remoteAddress);
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
 
         String id = String.valueOf(buf.readUnsignedInt());
