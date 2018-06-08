@@ -15,9 +15,10 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
@@ -49,10 +50,10 @@ public class Pt60ProtocolDecoder extends BaseProtocolDecoder {
             .expression("(.*)")                  // data
             .compile();
 
-    private void sendResponse(Channel channel) {
+    private void sendResponse(Channel channel, SocketAddress remoteAddress) {
         if (channel != null) {
             DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-            channel.write("@G#@,V01,38," + dateFormat.format(new Date()) + ",@R#@");
+            channel.write(new NetworkMessage("@G#@,V01,38," + dateFormat.format(new Date()) + ",@R#@", remoteAddress));
         }
     }
 
@@ -60,7 +61,7 @@ public class Pt60ProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        sendResponse(channel);
+        sendResponse(channel, remoteAddress);
 
         Parser parser = new Parser(PATTERN, (String) msg);
         if (!parser.matches()) {

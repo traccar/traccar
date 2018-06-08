@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,17 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelFutureListener;
-import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponse;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.jboss.netty.handler.codec.http.HttpVersion;
-import org.jboss.netty.handler.codec.http.QueryStringDecoder;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpVersion;
+import io.netty.handler.codec.http.QueryStringDecoder;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
@@ -58,16 +59,16 @@ public class PathAwayProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        HttpRequest request = (HttpRequest) msg;
-        QueryStringDecoder decoder = new QueryStringDecoder(request.getUri());
+        FullHttpRequest request = (FullHttpRequest) msg;
+        QueryStringDecoder decoder = new QueryStringDecoder(request.uri());
 
         DeviceSession deviceSession = getDeviceSession(
-                channel, remoteAddress, decoder.getParameters().get("UserName").get(0));
+                channel, remoteAddress, decoder.parameters().get("UserName").get(0));
         if (deviceSession == null) {
             return null;
         }
 
-        Parser parser = new Parser(PATTERN, decoder.getParameters().get("LOC").get(0));
+        Parser parser = new Parser(PATTERN, decoder.parameters().get("LOC").get(0));
         if (!parser.matches()) {
             return null;
         }
@@ -85,8 +86,8 @@ public class PathAwayProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(parser.nextDouble(0));
 
         if (channel != null) {
-            HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-            channel.write(response).addListener(ChannelFutureListener.CLOSE);
+            FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress)).addListener(ChannelFutureListener.CLOSE);
         }
 
         return position;

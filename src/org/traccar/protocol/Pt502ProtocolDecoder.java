@@ -16,9 +16,9 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
@@ -35,7 +35,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
 
     private static final int MAX_CHUNK_SIZE = 960;
 
-    private ChannelBuffer photo;
+    private ByteBuf photo;
 
     public Pt502ProtocolDecoder(Pt502Protocol protocol) {
         super(protocol);
@@ -152,7 +152,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         int typeEndIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ',');
         String type = buf.toString(buf.readerIndex(), typeEndIndex - buf.readerIndex(), StandardCharsets.US_ASCII);
@@ -195,7 +195,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
             if (type.startsWith("$PHO")) {
                 int size = Integer.parseInt(type.split("-")[0].substring(4));
                 if (size > 0) {
-                    photo = ChannelBuffers.buffer(size);
+                    photo = Unpooled.buffer(size);
                     requestPhotoFragment(channel);
                 }
             }

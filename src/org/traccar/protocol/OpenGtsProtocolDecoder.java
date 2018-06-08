@@ -15,10 +15,10 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.jboss.netty.handler.codec.http.QueryStringDecoder;
+import io.netty.channel.Channel;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.QueryStringDecoder;
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;
@@ -55,9 +55,9 @@ public class OpenGtsProtocolDecoder extends BaseHttpProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        HttpRequest request = (HttpRequest) msg;
-        QueryStringDecoder decoder = new QueryStringDecoder(request.getUri());
-        Map<String, List<String>> params = decoder.getParameters();
+        FullHttpRequest request = (FullHttpRequest) msg;
+        QueryStringDecoder decoder = new QueryStringDecoder(request.uri());
+        Map<String, List<String>> params = decoder.parameters();
 
         Position position = new Position();
         position.setProtocol(getProtocolName());

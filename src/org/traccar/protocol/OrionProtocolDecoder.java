@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Anton Tananaev (anton@traccar.org)
+ * Copyright 2014 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,12 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.DateBuilder;
 import org.traccar.model.Position;
 
@@ -36,13 +37,13 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_USERLOG = 0;
     public static final int MSG_SYSLOG = 3;
 
-    private static void sendResponse(Channel channel, ChannelBuffer buf) {
+    private static void sendResponse(Channel channel, ByteBuf buf) {
         if (channel != null) {
-            ChannelBuffer response = ChannelBuffers.directBuffer(4);
+            ByteBuf response = Unpooled.buffer(4);
             response.writeByte('*');
             response.writeShort(buf.getUnsignedShort(buf.writerIndex() - 2));
             response.writeByte(buf.getUnsignedByte(buf.writerIndex() - 3));
-            channel.write(response);
+            channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
     }
 
@@ -56,7 +57,7 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         buf.skipBytes(2); // header
         int type = buf.readUnsignedByte() & 0x0f;
@@ -84,13 +85,13 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
 
                 position.set(Position.KEY_EVENT, buf.readUnsignedByte());
                 buf.readUnsignedByte(); // length
-                position.set(Position.KEY_FLAGS, buf.readUnsignedShort());
+                position.set(Position.KEY_FLAGS, buf.readUnsignedShortLE());
 
-                position.setLatitude(convertCoordinate(buf.readInt()));
-                position.setLongitude(convertCoordinate(buf.readInt()));
-                position.setAltitude(buf.readShort() / 10.0);
-                position.setCourse(buf.readUnsignedShort());
-                position.setSpeed(buf.readUnsignedShort() * 0.0539957);
+                position.setLatitude(convertCoordinate(buf.readIntLE()));
+                position.setLongitude(convertCoordinate(buf.readIntLE()));
+                position.setAltitude(buf.readShortLE() / 10.0);
+                position.setCourse(buf.readUnsignedShortLE());
+                position.setSpeed(buf.readUnsignedShortLE() * 0.0539957);
 
                 DateBuilder dateBuilder = new DateBuilder()
                         .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())

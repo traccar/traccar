@@ -1,7 +1,6 @@
 package org.traccar.protocol;
 
-import org.jboss.netty.handler.codec.http.HttpMethod;
-
+import io.netty.handler.codec.http.HttpMethod;
 import org.junit.Test;
 import org.traccar.ProtocolTest;
 

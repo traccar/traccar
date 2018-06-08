@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,12 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -42,9 +43,9 @@ public class ObdDongleProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_TYPE_PINGRESP = 0x0D;
     public static final int MSG_TYPE_DISCONNECT = 0x0E;
 
-    private static void sendResponse(Channel channel, int type, int index, String imei, ChannelBuffer content) {
+    private static void sendResponse(Channel channel, int type, int index, String imei, ByteBuf content) {
         if (channel != null) {
-            ChannelBuffer response = ChannelBuffers.dynamicBuffer();
+            ByteBuf response = Unpooled.buffer();
             response.writeShort(0x5555); // header
             response.writeShort(index);
             response.writeBytes(imei.getBytes(StandardCharsets.US_ASCII));
@@ -53,7 +54,7 @@ public class ObdDongleProtocolDecoder extends BaseProtocolDecoder {
             response.writeBytes(content);
             response.writeByte(0); // checksum
             response.writeShort(0xAAAA);
-            channel.write(response);
+            channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
     }
 
@@ -61,7 +62,7 @@ public class ObdDongleProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         buf.skipBytes(2); // header
         int index = buf.readUnsignedShort();
@@ -78,7 +79,7 @@ public class ObdDongleProtocolDecoder extends BaseProtocolDecoder {
 
         if (type == MSG_TYPE_CONNECT) {
 
-            ChannelBuffer response = ChannelBuffers.dynamicBuffer();
+            ByteBuf response = Unpooled.buffer();
             response.writeByte(1);
             response.writeShort(0);
             response.writeInt(0);
@@ -112,7 +113,7 @@ public class ObdDongleProtocolDecoder extends BaseProtocolDecoder {
             position.setSpeed(UnitsConverter.knotsFromMph(BitUtil.from(speedCourse, 10) * 0.1));
             position.setCourse(BitUtil.to(speedCourse, 10));
 
-            ChannelBuffer response = ChannelBuffers.dynamicBuffer();
+            ByteBuf response = Unpooled.buffer();
             response.writeByte(typeMajor);
             response.writeByte(typeMinor);
             sendResponse(channel, MSG_TYPE_PUBACK, index, imei, response);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Anton Tananaev (anton@traccar.org)
+ * Copyright 2014 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,23 +15,23 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponse;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.jboss.netty.handler.codec.http.HttpVersion;
-import org.jboss.netty.handler.codec.http.QueryStringDecoder;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpVersion;
+import io.netty.handler.codec.http.QueryStringDecoder;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
@@ -44,11 +44,10 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
 
     private void sendResponse(Channel channel, String message) {
         if (channel != null) {
-            HttpResponse response = new DefaultHttpResponse(
-                    HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-            response.setContent(ChannelBuffers.copiedBuffer(
-                    ByteOrder.BIG_ENDIAN, message, StandardCharsets.US_ASCII));
-            channel.write(response);
+            FullHttpResponse response = new DefaultFullHttpResponse(
+                    HttpVersion.HTTP_1_1, HttpResponseStatus.OK,
+                    Unpooled.copiedBuffer(message, StandardCharsets.US_ASCII));
+            channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
     }
 
@@ -60,8 +59,8 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        HttpRequest request = (HttpRequest) msg;
-        String uri = request.getUri();
+        FullHttpRequest request = (FullHttpRequest) msg;
+        String uri = request.uri();
 
         if (uri.startsWith("/config")) {
 
@@ -79,15 +78,15 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
 
             sendResponse(channel, "BINGPS: OK");
 
-            QueryStringDecoder decoder = new QueryStringDecoder(request.getUri());
+            QueryStringDecoder decoder = new QueryStringDecoder(request.uri());
             DeviceSession deviceSession = getDeviceSession(
-                    channel, remoteAddress, decoder.getParameters().get("imei").get(0));
+                    channel, remoteAddress, decoder.parameters().get("imei").get(0));
             if (deviceSession == null) {
                 return null;
             }
 
             List<Position> positions = new LinkedList<>();
-            ChannelBuffer buf = request.getContent();
+            ByteBuf buf = request.content();
 
             while (buf.readableBytes() > 2) {
 
