@@ -273,11 +273,12 @@ public class DataManager {
         if (propertyName.equals("ManagedUser")) {
             propertyName = "User";
         }
-        return Introspector.decapitalize(owner.getSimpleName()) + "_" + Introspector.decapitalize(propertyName);
+        return "tc_" + Introspector.decapitalize(owner.getSimpleName())
+                + "_" + Introspector.decapitalize(propertyName);
     }
 
     private static String getObjectsTableName(Class<?> clazz) {
-        String result = Introspector.decapitalize(clazz.getSimpleName());
+        String result = "tc_" + Introspector.decapitalize(clazz.getSimpleName());
         // Add "s" ending if object name is not plural already
         if (!result.endsWith("s")) {
             result += "s";

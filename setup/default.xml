@@ -41,36 +41,36 @@
     <entry key='database.changelog'>./schema/changelog-master.xml</entry>
  
     <entry key='database.loginUser'>
-        SELECT * FROM users
+        SELECT * FROM tc_users
         WHERE email = :email OR login = :email
     </entry>
 
     <entry key='database.selectPositions'>
-        SELECT * FROM positions WHERE deviceId = :deviceId AND fixTime BETWEEN :from AND :to ORDER BY fixTime
+        SELECT * FROM tc_positions WHERE deviceId = :deviceId AND fixTime BETWEEN :from AND :to ORDER BY fixTime
     </entry>
 
     <entry key='database.selectLatestPositions'>
-        SELECT positions.* FROM positions INNER JOIN devices ON positions.id = devices.positionid;
+        SELECT tc_positions.* FROM tc_positions INNER JOIN tc_devices ON tc_positions.id = tc_devices.positionid;
     </entry>
 
     <entry key='database.updateLatestPosition'>
-        UPDATE devices SET positionId = :id WHERE id = :deviceId
+        UPDATE tc_devices SET positionId = :id WHERE id = :deviceId
     </entry>
 
     <entry key='database.selectEvents'>
-        SELECT * FROM events WHERE deviceId = :deviceId AND serverTime BETWEEN :from AND :to ORDER BY serverTime
+        SELECT * FROM tc_events WHERE deviceId = :deviceId AND serverTime BETWEEN :from AND :to ORDER BY serverTime
     </entry>
 
     <entry key='database.deletePositions'>
-        DELETE FROM positions WHERE serverTime &lt; :serverTime AND id NOT IN (SELECT positionId FROM devices WHERE positionId IS NOT NULL)
+        DELETE FROM tc_positions WHERE serverTime &lt; :serverTime AND id NOT IN (SELECT positionId FROM tc_devices WHERE positionId IS NOT NULL)
     </entry>
 
     <entry key='database.deleteEvents'>
-        DELETE FROM events WHERE serverTime &lt; :serverTime
+        DELETE FROM tc_events WHERE serverTime &lt; :serverTime
     </entry>
 
     <entry key='database.selectStatistics'>
-        SELECT * FROM statistics WHERE captureTime BETWEEN :from AND :to ORDER BY captureTime
+        SELECT * FROM tc_statistics WHERE captureTime BETWEEN :from AND :to ORDER BY captureTime
     </entry>
 
     <!-- PROTOCOL CONFIG -->
