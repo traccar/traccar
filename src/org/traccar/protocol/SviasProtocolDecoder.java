@@ -61,6 +61,10 @@ public class SviasProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg)
             throws Exception {
 
+        if (channel != null) {
+            channel.write("@");
+        }
+
         Parser parser = new Parser(PATTERN, (String) msg);
         if (!parser.matches()) {
             return null;
@@ -92,10 +96,6 @@ public class SviasProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_POWER, parser.nextInt() * 0.001);
         position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
         position.set(Position.KEY_RSSI, parser.nextInt());
-
-        if (channel != null) {
-            channel.write("@");
-        }
 
         return position;
     }
