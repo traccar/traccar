@@ -57,7 +57,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
 
         if (channel != null) {
-            ByteBuf response = Unpooled.directBuffer(1);
+            ByteBuf response = Unpooled.buffer(1);
             if (deviceSession != null) {
                 response.writeByte(1);
             } else {

@@ -26,9 +26,7 @@ public class UlbotechFrameDecoder extends BaseFrameDecoder {
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx,
-            Channel channel,
-            ByteBuf buf) throws Exception {
+            ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
         if (buf.readableBytes() < 2) {
             return null;

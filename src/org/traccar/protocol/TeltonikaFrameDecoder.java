@@ -27,9 +27,7 @@ public class TeltonikaFrameDecoder extends BaseFrameDecoder {
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx,
-            Channel channel,
-            ByteBuf buf) throws Exception {
+            ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
         // Check minimum length
         if (buf.readableBytes() < MESSAGE_MINIMUM_LENGTH) {
