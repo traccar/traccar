@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,11 @@
  */
 package org.traccar;
 
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import org.traccar.model.Position;
 
-import java.net.SocketAddress;
-
 @ChannelHandler.Sharable
-public class HemisphereHandler extends ExtendedObjectDecoder {
+public class HemisphereHandler extends BaseDataHandler {
 
     private int latitudeFactor;
     private int longitudeFactor;
@@ -47,19 +44,14 @@ public class HemisphereHandler extends ExtendedObjectDecoder {
     }
 
     @Override
-    protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
-
-        if (msg instanceof Position) {
-            Position position = (Position) msg;
-            if (latitudeFactor != 0) {
-                position.setLatitude(Math.abs(position.getLatitude()) * latitudeFactor);
-            }
-            if (longitudeFactor != 0) {
-                position.setLongitude(Math.abs(position.getLongitude()) * longitudeFactor);
-            }
+    protected Position handlePosition(Position position) {
+        if (latitudeFactor != 0) {
+            position.setLatitude(Math.abs(position.getLatitude()) * latitudeFactor);
         }
-
-        return msg;
+        if (longitudeFactor != 0) {
+            position.setLongitude(Math.abs(position.getLongitude()) * longitudeFactor);
+        }
+        return position;
     }
 
 }

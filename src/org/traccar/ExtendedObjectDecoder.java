@@ -20,6 +20,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.util.ReferenceCounted;
 import org.traccar.helper.DataConverter;
 import org.traccar.model.Position;
 
@@ -46,11 +47,9 @@ public abstract class ExtendedObjectDecoder extends ChannelInboundHandlerAdapter
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         NetworkMessage networkMessage = (NetworkMessage) msg;
         Object originalMessage = networkMessage.getMessage();
-        Object decodedMessage = decode(ctx.channel(), networkMessage.getRemoteAddress(), originalMessage);
-        onMessageEvent(ctx.channel(), networkMessage.getRemoteAddress(), originalMessage, decodedMessage);
-        if (originalMessage == decodedMessage) {
-            ctx.fireChannelRead(originalMessage);
-        } else {
+        try {
+            Object decodedMessage = decode(ctx.channel(), networkMessage.getRemoteAddress(), originalMessage);
+            onMessageEvent(ctx.channel(), networkMessage.getRemoteAddress(), originalMessage, decodedMessage);
             if (decodedMessage == null) {
                 decodedMessage = handleEmptyMessage(ctx.channel(), networkMessage.getRemoteAddress(), originalMessage);
             }
@@ -64,6 +63,10 @@ public abstract class ExtendedObjectDecoder extends ChannelInboundHandlerAdapter
                     saveOriginal(decodedMessage, originalMessage);
                     ctx.fireChannelRead(decodedMessage);
                 }
+            }
+        } finally {
+            if (originalMessage instanceof ReferenceCounted) {
+                ((ReferenceCounted) originalMessage).release();
             }
         }
     }
