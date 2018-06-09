@@ -75,12 +75,12 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, int packetType, int index, int serviceType, int type, ByteBuf content) {
         if (channel != null) {
 
-            ByteBuf data = Unpooled.buffer(0);
+            ByteBuf data = Unpooled.buffer(); // TODO ref count
             data.writeByte(type);
             data.writeShortLE(content.readableBytes());
             data.writeBytes(content);
 
-            ByteBuf record = Unpooled.buffer(0);
+            ByteBuf record = Unpooled.buffer(); // TODO ref count
             if (packetType == PT_RESPONSE) {
                 record.writeShortLE(index);
                 record.writeByte(0); // success
@@ -93,7 +93,7 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
             record.writeBytes(data);
             int recordChecksum = Checksum.crc16(Checksum.CRC16_CCITT_FALSE, record.nioBuffer());
 
-            ByteBuf response = Unpooled.buffer(0);
+            ByteBuf response = Unpooled.buffer();
             response.writeByte(1); // protocol version
             response.writeByte(0); // security key id
             response.writeByte(0); // flags
@@ -150,7 +150,7 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
                 position.setDeviceId(deviceSession.getDeviceId());
             }
 
-            ByteBuf response = Unpooled.buffer(0);
+            ByteBuf response = Unpooled.buffer(); // TODO ref count
             response.writeShortLE(recordIndex);
             response.writeByte(0); // success
             sendResponse(channel, PT_RESPONSE, index, serviceType, MSG_RECORD_RESPONSE, response);
@@ -189,7 +189,7 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
                                 channel, remoteAddress, buf.readSlice(15).toString(StandardCharsets.US_ASCII).trim());
                     }
 
-                    response = Unpooled.buffer(0);
+                    response = Unpooled.buffer(); // TODO ref count
                     response.writeByte(0); // success
                     sendResponse(channel, PT_APPDATA, 0, serviceType, MSG_RESULT_CODE, response);
 

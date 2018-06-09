@@ -296,7 +296,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
                 || type == MSG_SC_ALARM || type == MSG_SC_CURRENT_LOCATION || type == MSG_SC_FUEL) {
 
             if (type == MSG_SC_LOGIN) {
-                ByteBuf response = Unpooled.buffer(10);
+                ByteBuf response = Unpooled.buffer(10); // TODO ref count
                 response.writeIntLE(0xFFFFFFFF);
                 response.writeShortLE(0);
                 response.writeIntLE((int) (System.currentTimeMillis() / 1000));

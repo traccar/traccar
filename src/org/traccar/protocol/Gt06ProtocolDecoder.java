@@ -189,7 +189,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
     private void sendPhotoRequest(Channel channel, int pictureId) {
         ByteBuf photo = photos.get(pictureId);
-        ByteBuf content = Unpooled.buffer();
+        ByteBuf content = Unpooled.buffer(); // TODO ref count
         content.writeInt(pictureId);
         content.writeInt(photo.writerIndex());
         content.writeShort(Math.min(photo.writableBytes(), 1024));
@@ -437,7 +437,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         } else if (type == MSG_ADDRESS_REQUEST) {
 
             String response = "NA&&NA&&0##";
-            ByteBuf content = Unpooled.buffer();
+            ByteBuf content = Unpooled.buffer(); // TODO ref count
             content.writeByte(response.length());
             content.writeInt(0);
             content.writeBytes(response.getBytes(StandardCharsets.US_ASCII));
@@ -446,7 +446,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         } else if (type == MSG_TIME_REQUEST) {
 
             Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-            ByteBuf content = Unpooled.buffer();
+            ByteBuf content = Unpooled.buffer(); // TODO ref count
             content.writeByte(calendar.get(Calendar.YEAR) - 2000);
             content.writeByte(calendar.get(Calendar.MONTH) + 1);
             content.writeByte(calendar.get(Calendar.DAY_OF_MONTH));
@@ -484,7 +484,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedByte(); // photo source
             buf.readUnsignedByte(); // picture format
 
-            ByteBuf photo = Unpooled.buffer(buf.readInt());
+            ByteBuf photo = Unpooled.buffer(buf.readInt()); // TODO release photo
             int pictureId = buf.readInt();
             photos.put(pictureId, photo);
             sendPhotoRequest(channel, pictureId);

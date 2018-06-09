@@ -58,7 +58,7 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static void sendResponseCurrent(Channel channel, int deviceId, long time) {
-        ByteBuf response = Unpooled.buffer(0);
+        ByteBuf response = Unpooled.buffer();
         response.writeBytes("BB+UGRC~".getBytes(StandardCharsets.US_ASCII));
         response.writeShortLE(6); // length
         response.writeInt((int) time);
@@ -68,7 +68,7 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static void sendResponseArchive(Channel channel, int deviceId, int packNum) {
-        ByteBuf response = Unpooled.buffer(0);
+        ByteBuf response = Unpooled.buffer();
         response.writeBytes("BB+ARCF~".getBytes(StandardCharsets.US_ASCII));
         response.writeShortLE(4); // length
         response.writeShortLE(packNum);

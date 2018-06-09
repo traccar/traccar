@@ -84,7 +84,7 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
                     String imei = buf.readSlice(length).toString(StandardCharsets.US_ASCII);
                     DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
                     if (deviceSession != null && channel != null) {
-                        ByteBuf content = Unpooled.buffer();
+                        ByteBuf content = Unpooled.buffer(); // TODO ref count
                         content.writeByte(0); // success
                         sendResponse(channel, MSG_LOGIN_RSP, index, content);
                     }

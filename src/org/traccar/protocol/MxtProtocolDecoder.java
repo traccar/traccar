@@ -41,7 +41,7 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
 
     private static void sendResponse(Channel channel, int device, long id, int crc) {
         if (channel != null) {
-            ByteBuf response = Unpooled.buffer();
+            ByteBuf response = Unpooled.buffer(); // TODO ref count
             response.writeByte(device);
             response.writeByte(MSG_ACK);
             response.writeIntLE((int) id);
@@ -49,7 +49,7 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
             response.writeShortLE(Checksum.crc16(
                     Checksum.CRC16_XMODEM, response.nioBuffer()));
 
-            ByteBuf encoded = Unpooled.buffer(0);
+            ByteBuf encoded = Unpooled.buffer();
             encoded.writeByte(0x01); // header
             while (response.isReadable()) {
                 int b = response.readByte();

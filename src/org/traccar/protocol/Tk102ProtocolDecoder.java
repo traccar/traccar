@@ -96,7 +96,7 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (getDeviceSession(channel, remoteAddress, id) != null) {
-                ByteBuf response = Unpooled.buffer();
+                ByteBuf response = Unpooled.buffer(); // TODO ref count
                 response.writeByte(MODE_GPRS);
                 response.writeBytes(data);
                 sendResponse(channel, MSG_LOGIN_RESPONSE, dataSequence, response);

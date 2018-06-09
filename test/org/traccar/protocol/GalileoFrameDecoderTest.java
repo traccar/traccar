@@ -3,8 +3,6 @@ package org.traccar.protocol;
 import org.junit.Test;
 import org.traccar.ProtocolTest;
 
-import java.nio.ByteOrder;
-
 import static org.junit.Assert.assertEquals;
 
 public class GalileoFrameDecoderTest extends ProtocolTest {

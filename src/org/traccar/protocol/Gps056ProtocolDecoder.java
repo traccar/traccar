@@ -89,8 +89,12 @@ public class Gps056ProtocolDecoder extends BaseProtocolDecoder {
 
         if (type.startsWith("LOGN")) {
 
-            sendResponse(channel, "LGSA" + type.substring(4), imei,
-                    Unpooled.copiedBuffer("1", StandardCharsets.US_ASCII)); // TODO ref count
+            ByteBuf content = Unpooled.copiedBuffer("1", StandardCharsets.US_ASCII);
+            try {
+                sendResponse(channel, "LGSA" + type.substring(4), imei, content);
+            } finally {
+                content.release();
+            }
 
         } else if (type.startsWith("GPSL")) {
 

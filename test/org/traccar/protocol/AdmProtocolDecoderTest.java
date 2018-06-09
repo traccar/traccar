@@ -3,8 +3,6 @@ package org.traccar.protocol;
 import org.junit.Test;
 import org.traccar.ProtocolTest;
 
-import java.nio.ByteOrder;
-
 public class AdmProtocolDecoderTest extends ProtocolTest {
 
     @Test

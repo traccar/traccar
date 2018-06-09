@@ -52,7 +52,7 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
 
     private void sendResponse(Channel channel, int type, ByteBuf content) {
         if (channel != null) {
-            ByteBuf response = Unpooled.buffer(0);
+            ByteBuf response = Unpooled.buffer();
             response.writeByte(0x02); response.writeByte(0x55); // header
             response.writeByte(type);
             response.writeShortLE(content != null ? content.readableBytes() : 0);
@@ -244,7 +244,7 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
             DeviceSession deviceSession = getDeviceSession(
                     channel, remoteAddress, buf.readSlice(15).toString(StandardCharsets.US_ASCII));
 
-            ByteBuf response = Unpooled.buffer(0);
+            ByteBuf response = Unpooled.buffer(); // TODO ref count
             if (length == 51) {
                 response.writeByte(0); // reserved
                 response.writeIntLE(0); // reserved
@@ -257,13 +257,13 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == MSG_COMMIT) {
 
-            ByteBuf response = Unpooled.buffer(0);
+            ByteBuf response = Unpooled.buffer(0); // TODO ref count
             response.writeByte(1); // flags (success)
             sendResponse(channel, MSG_COMMIT_RESPONSE, response);
 
         } else if (type == MSG_CANNED_REQUEST_1) {
 
-            ByteBuf response = Unpooled.buffer(0);
+            ByteBuf response = Unpooled.buffer(0); // TODO ref count
             response.writeBytes(new byte[12]);
             sendResponse(channel, MSG_CANNED_RESPONSE_1, response);
 

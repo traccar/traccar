@@ -60,7 +60,7 @@ public class RoboTrackProtocolDecoder extends BaseProtocolDecoder {
             String imei = buf.readSlice(15).toString(StandardCharsets.US_ASCII);
 
             if (getDeviceSession(channel, remoteAddress, imei) != null && channel != null) {
-                ByteBuf response = Unpooled.buffer(0);
+                ByteBuf response = Unpooled.buffer();
                 response.writeByte(MSG_ACK);
                 response.writeByte(0x01); // success
                 response.writeByte(0x66); // checksum

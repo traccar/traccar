@@ -33,7 +33,7 @@ public class HuaShengFrameDecoder extends BaseFrameDecoder {
 
         int index = buf.indexOf(buf.readerIndex() + 1, buf.writerIndex(), (byte) 0xC0);
         if (index != -1) {
-            ByteBuf result = Unpooled.buffer(index + 1 - buf.readerIndex());
+            ByteBuf result = Unpooled.buffer(index + 1 - buf.readerIndex()); // TODO ref count
 
             while (buf.readerIndex() <= index) {
                 int b = buf.readUnsignedByte();

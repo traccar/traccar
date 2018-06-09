@@ -234,15 +234,15 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void sendReply(Channel channel, ByteBuf data) {
-        ByteBuf header = Unpooled.buffer(16);
-        header.writeCharSequence(prefix, StandardCharsets.US_ASCII);
-        header.writeIntLE((int) deviceUniqueId);
-        header.writeIntLE((int) serverId);
-        header.writeShortLE(data.readableBytes());
-        header.writeByte(checksum(data));
-        header.writeByte(checksum(header));
-
         if (channel != null) {
+            ByteBuf header = Unpooled.buffer(16);
+            header.writeCharSequence(prefix, StandardCharsets.US_ASCII);
+            header.writeIntLE((int) deviceUniqueId);
+            header.writeIntLE((int) serverId);
+            header.writeShortLE(data.readableBytes());
+            header.writeByte(checksum(data));
+            header.writeByte(checksum(header));
+
             channel.writeAndFlush(new NetworkMessage(Unpooled.wrappedBuffer(header, data), channel.remoteAddress()));
         }
     }

@@ -93,10 +93,10 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void sendReply(Channel channel, int checksum) {
-        ByteBuf reply = Unpooled.buffer(3);
-        reply.writeByte(0x02);
-        reply.writeShortLE((short) checksum);
         if (channel != null) {
+            ByteBuf reply = Unpooled.buffer(3);
+            reply.writeByte(0x02);
+            reply.writeShortLE((short) checksum);
             channel.writeAndFlush(new NetworkMessage(reply, channel.remoteAddress()));
         }
     }

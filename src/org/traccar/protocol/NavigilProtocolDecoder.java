@@ -75,7 +75,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         header.writeIntLE((int) (System.currentTimeMillis() / 1000) + LEAP_SECONDS_DELTA);
 
         if (channel != null) {
-            channel.writeAndFlush(new NetworkMessage(Unpooled.copiedBuffer(header, data), channel.remoteAddress()));
+            channel.writeAndFlush(new NetworkMessage(Unpooled.wrappedBuffer(header, data), channel.remoteAddress()));
         }
     }
 

@@ -415,7 +415,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             return null;
         } else if (command == MSG_UPLOAD_PHOTO) {
             byte imageIndex = buf.readByte();
-            photos.put(imageIndex, Unpooled.buffer());
+            photos.put(imageIndex, Unpooled.buffer()); // TODO release photos
             ByteBuf response = Unpooled.copiedBuffer(new byte[]{imageIndex});
             sendResponse(channel, remoteAddress, id, MSG_UPLOAD_PHOTO_RESPONSE, response);
             return null;

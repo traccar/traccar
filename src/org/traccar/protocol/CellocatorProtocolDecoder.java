@@ -44,26 +44,26 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
     private byte commandCount;
 
     private void sendReply(Channel channel, SocketAddress remoteAddress, long deviceId, byte packetNumber) {
-        ByteBuf reply = Unpooled.buffer(28);
-        reply.writeByte('M');
-        reply.writeByte('C');
-        reply.writeByte('G');
-        reply.writeByte('P');
-        reply.writeByte(MSG_SERVER_ACKNOWLEDGE);
-        reply.writeIntLE((int) deviceId);
-        reply.writeByte(commandCount++);
-        reply.writeIntLE(0); // authentication code
-        reply.writeByte(0);
-        reply.writeByte(packetNumber);
-        reply.writeZero(11);
-
-        byte checksum = 0;
-        for (int i = 4; i < 27; i++) {
-            checksum += reply.getByte(i);
-        }
-        reply.writeByte(checksum);
-
         if (channel != null) {
+            ByteBuf reply = Unpooled.buffer(28);
+            reply.writeByte('M');
+            reply.writeByte('C');
+            reply.writeByte('G');
+            reply.writeByte('P');
+            reply.writeByte(MSG_SERVER_ACKNOWLEDGE);
+            reply.writeIntLE((int) deviceId);
+            reply.writeByte(commandCount++);
+            reply.writeIntLE(0); // authentication code
+            reply.writeByte(0);
+            reply.writeByte(packetNumber);
+            reply.writeZero(11);
+
+            byte checksum = 0;
+            for (int i = 4; i < 27; i++) {
+                checksum += reply.getByte(i);
+            }
+            reply.writeByte(checksum);
+
             channel.writeAndFlush(new NetworkMessage(reply, remoteAddress));
         }
     }

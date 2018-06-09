@@ -196,7 +196,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
             if (type.startsWith("$PHO")) {
                 int size = Integer.parseInt(type.split("-")[0].substring(4));
                 if (size > 0) {
-                    photo = Unpooled.buffer(size);
+                    photo = Unpooled.buffer(size); // TODO ref count
                     requestPhotoFragment(channel);
                 }
             }

@@ -471,7 +471,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         switch (type) {
             case "D00":
                 if (photo == null) {
-                    photo = Unpooled.buffer();
+                    photo = Unpooled.buffer(); // TODO ref count
                 }
 
                 index = index + 1 + type.length() + 1;
@@ -504,7 +504,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     return null;
                 }
             case "D03":
-                photo = Unpooled.buffer();
+                photo = Unpooled.buffer(); // TODO ref count
                 requestPhotoPacket(channel, remoteAddress, imei, "camera_picture.jpg", 0);
                 return null;
             case "CCC":

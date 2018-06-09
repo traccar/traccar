@@ -57,7 +57,7 @@ public class WatchFrameDecoder extends BaseFrameDecoder {
         int length = Integer.parseInt(
                 buf.toString(lengthIndex, payloadIndex - lengthIndex, StandardCharsets.US_ASCII), 16);
         if (buf.readableBytes() >= payloadIndex + 1 + length + 1) {
-            ByteBuf frame = Unpooled.buffer();
+            ByteBuf frame = Unpooled.buffer(); // TODO ref count
             int endIndex = buf.readerIndex() + payloadIndex + 1 + length + 1;
             while (buf.readerIndex() < endIndex) {
                 byte b = buf.readByte();
