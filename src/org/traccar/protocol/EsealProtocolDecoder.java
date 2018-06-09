@@ -113,6 +113,7 @@ public class EsealProtocolDecoder extends BaseProtocolDecoder {
                 sendResponse(channel, prefix, type + " ACK", index + "," + config);
                 break;
             case "Normal":
+            case "Button-Normal":
             case "Termination":
             case "Event-Door":
             case "Event-Shock":
