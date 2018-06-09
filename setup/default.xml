@@ -244,5 +244,6 @@
     <entry key='sabertek.port'>5166</entry>
     <entry key='retranslator.port'>5167</entry>
     <entry key='svias.port'>5168</entry>
+    <entry key='eseal.port'>5169</entry>
 
 </properties>
