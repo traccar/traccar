@@ -37,10 +37,10 @@ public class TlvProtocolDecoder extends BaseProtocolDecoder {
     private void sendResponse(Channel channel, SocketAddress remoteAddress, String type, String... arguments) {
         if (channel != null) {
             ByteBuf response = Unpooled.buffer();
-            response.writeBytes(Unpooled.copiedBuffer(type, StandardCharsets.US_ASCII));
+            response.writeCharSequence(type, StandardCharsets.US_ASCII);
             for (String argument : arguments) {
                 response.writeByte(argument.length());
-                response.writeBytes(Unpooled.copiedBuffer(argument, StandardCharsets.US_ASCII));
+                response.writeCharSequence(argument, StandardCharsets.US_ASCII);
             }
             response.writeByte(0);
             channel.writeAndFlush(new NetworkMessage(response, remoteAddress));

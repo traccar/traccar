@@ -189,7 +189,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
         if (channel != null) {
             ByteBuf buf = Unpooled.buffer(
-                    2 + 2 + id.readableBytes() + 2 + msg.readableBytes() + 2 + 2);
+                    2 + 2 + id.readableBytes() + 2 + msg.readableBytes() + 2 + 2); // TODO ref count
 
             buf.writeByte('@');
             buf.writeByte('@');
@@ -400,29 +400,28 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         buf.readShort(); // length
         ByteBuf id = buf.readSlice(7);
         int command = buf.readUnsignedShort();
-        ByteBuf response;
 
         if (command == MSG_LOGIN) {
-            response = Unpooled.wrappedBuffer(new byte[]{0x01});
+            ByteBuf response = Unpooled.wrappedBuffer(new byte[]{0x01});
             sendResponse(channel, remoteAddress, id, MSG_LOGIN_RESPONSE, response);
             return null;
         } else if (command == MSG_HEARTBEAT) {
-            response = Unpooled.wrappedBuffer(new byte[]{0x01});
+            ByteBuf response = Unpooled.wrappedBuffer(new byte[]{0x01});
             sendResponse(channel, remoteAddress, id, MSG_HEARTBEAT, response);
             return null;
         } else if (command == MSG_SERVER) {
-            response = Unpooled.copiedBuffer(getServer(channel), StandardCharsets.US_ASCII);
+            ByteBuf response = Unpooled.copiedBuffer(getServer(channel), StandardCharsets.US_ASCII);
             sendResponse(channel, remoteAddress, id, MSG_SERVER, response);
             return null;
         } else if (command == MSG_UPLOAD_PHOTO) {
             byte imageIndex = buf.readByte();
             photos.put(imageIndex, Unpooled.buffer());
-            response = Unpooled.copiedBuffer(new byte[]{imageIndex});
+            ByteBuf response = Unpooled.copiedBuffer(new byte[]{imageIndex});
             sendResponse(channel, remoteAddress, id, MSG_UPLOAD_PHOTO_RESPONSE, response);
             return null;
         } else if (command == MSG_UPLOAD_COMPLETE) {
             byte imageIndex = buf.readByte();
-            response = Unpooled.copiedBuffer(new byte[]{imageIndex, 0, 0});
+            ByteBuf response = Unpooled.copiedBuffer(new byte[]{imageIndex, 0, 0});
             sendResponse(channel, remoteAddress, id, MSG_RETRANSMISSION, response);
             return null;
         }

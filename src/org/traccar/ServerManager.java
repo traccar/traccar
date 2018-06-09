@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 package org.traccar;
 
-import io.netty.channel.ChannelException;
 import org.traccar.helper.Log;
 
 import java.io.File;
@@ -80,14 +79,12 @@ public class ServerManager {
         return protocolList.get(name);
     }
 
-    public void start() {
+    public void start() throws Exception {
         for (TrackerServer server: serverList) {
             try {
                 server.start();
-            } catch (ChannelException e) {
-                if (e.getCause() instanceof BindException) {
-                    Log.warning("One of the protocols is disabled due to port conflict"); // TODO test this
-                }
+            } catch (BindException e) {
+                Log.warning("One of the protocols is disabled due to port conflict");
             }
         }
     }

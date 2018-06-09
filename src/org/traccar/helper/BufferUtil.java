@@ -28,8 +28,12 @@ public final class BufferUtil {
     }
 
     public static int indexOf(String needle, ByteBuf haystack) {
-        return ByteBufUtil.indexOf(
-                Unpooled.wrappedBuffer(needle.getBytes(StandardCharsets.US_ASCII)), haystack);
+        ByteBuf needleBuffer = Unpooled.wrappedBuffer(needle.getBytes(StandardCharsets.US_ASCII));
+        try {
+            return ByteBufUtil.indexOf(needleBuffer, haystack);
+        } finally {
+            needleBuffer.release();
+        }
     }
 
     public static int indexOf(String needle, ByteBuf haystack, int startIndex, int endIndex) {

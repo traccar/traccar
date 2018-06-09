@@ -31,7 +31,7 @@ public class HuabaoProtocolEncoder extends BaseProtocolEncoder {
     protected Object encodeCommand(Command command) {
 
         ByteBuf id =  Unpooled.wrappedBuffer(
-                DataConverter.parseHex(getUniqueId(command.getDeviceId())));
+                DataConverter.parseHex(getUniqueId(command.getDeviceId()))); // TODO ref count
 
         ByteBuf data = Unpooled.buffer();
         byte[] time = DataConverter.parseHex(new SimpleDateFormat("yyMMddHHmmss").format(new Date()));

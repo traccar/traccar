@@ -60,22 +60,25 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
         position.setTime(new Date(json.getInt("time") * 1000L));
 
         ByteBuf buf = Unpooled.wrappedBuffer(DataConverter.parseHex(json.getString("data")));
+        try {
+            int type = buf.readUnsignedByte() >> 4;
+            if (type == 0) {
 
-        int type = buf.readUnsignedByte() >> 4;
-        if (type == 0) {
+                position.setValid(true);
+                position.setLatitude(buf.readIntLE() * 0.0000001);
+                position.setLongitude(buf.readIntLE() * 0.0000001);
+                position.setCourse(buf.readUnsignedByte() * 2);
+                position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
 
-            position.setValid(true);
-            position.setLatitude(buf.readIntLE() * 0.0000001);
-            position.setLongitude(buf.readIntLE() * 0.0000001);
-            position.setCourse(buf.readUnsignedByte() * 2);
-            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
+                position.set(Position.KEY_BATTERY, buf.readUnsignedByte() * 0.025);
 
-            position.set(Position.KEY_BATTERY, buf.readUnsignedByte() * 0.025);
+            } else {
 
-        } else {
+                getLastLocation(position, position.getDeviceTime());
 
-            getLastLocation(position, position.getDeviceTime());
-
+            }
+        } finally {
+            buf.release();
         }
 
         position.set(Position.KEY_RSSI, json.getJsonNumber("rssi").doubleValue());

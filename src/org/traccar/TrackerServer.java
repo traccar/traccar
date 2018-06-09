@@ -25,6 +25,7 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.util.concurrent.GlobalEventExecutor;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 
 public abstract class TrackerServer {
@@ -94,7 +95,7 @@ public abstract class TrackerServer {
         return channelGroup;
     }
 
-    public void start() {
+    public void start() throws Exception {
         InetSocketAddress endpoint;
         if (address == null) {
             endpoint = new InetSocketAddress(port);
@@ -102,8 +103,7 @@ public abstract class TrackerServer {
             endpoint = new InetSocketAddress(address, port);
         }
 
-        Channel channel = bootstrap.bind(endpoint).channel();
-
+        Channel channel = bootstrap.bind(endpoint).sync().channel();
         if (channel != null) {
             getChannelGroup().add(channel);
         }

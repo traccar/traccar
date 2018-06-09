@@ -59,12 +59,12 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
         if (type == MSG_SHAKE_HAND && channel != null) {
 
             ByteBuf response = Unpooled.buffer(13);
-            response.writeBytes(Unpooled.copiedBuffer("\r\n*KW", StandardCharsets.US_ASCII));
+            response.writeCharSequence("\r\n*KW", StandardCharsets.US_ASCII);
             response.writeByte(0);
             response.writeShortLE(response.capacity());
             response.writeShortLE(MSG_SHAKE_HAND_RESPONSE);
             response.writeByte(1); // status
-            response.writeBytes(Unpooled.copiedBuffer("\r\n", StandardCharsets.US_ASCII));
+            response.writeCharSequence("\r\n", StandardCharsets.US_ASCII);
 
             channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
 

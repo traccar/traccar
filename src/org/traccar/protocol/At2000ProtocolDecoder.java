@@ -106,51 +106,54 @@ public class At2000ProtocolDecoder extends BaseProtocolDecoder {
                 return null; // empty message
             }
 
+            List<Position> positions = new LinkedList<>();
+
             byte[] data = new byte[buf.capacity() - BLOCK_LENGTH];
             buf.readBytes(data);
             buf = Unpooled.wrappedBuffer(cipher.update(data));
+            try {
+                while (buf.readableBytes() >= 63) {
 
-            List<Position> positions = new LinkedList<>();
+                    Position position = new Position(getProtocolName());
+                    position.setDeviceId(deviceSession.getDeviceId());
 
-            while (buf.readableBytes() >= 63) {
+                    buf.readUnsignedShortLE(); // index
+                    buf.readUnsignedShortLE(); // reserved
 
-                Position position = new Position(getProtocolName());
-                position.setDeviceId(deviceSession.getDeviceId());
+                    position.setValid(true);
 
-                buf.readUnsignedShortLE(); // index
-                buf.readUnsignedShortLE(); // reserved
+                    position.setTime(new Date(buf.readLongLE() * 1000));
 
-                position.setValid(true);
+                    position.setLatitude(buf.readFloatLE());
+                    position.setLongitude(buf.readFloatLE());
+                    position.setAltitude(buf.readFloatLE());
+                    position.setSpeed(UnitsConverter.knotsFromKph(buf.readFloatLE()));
+                    position.setCourse(buf.readFloatLE());
 
-                position.setTime(new Date(buf.readLongLE() * 1000));
+                    buf.readUnsignedIntLE(); // geozone event
+                    buf.readUnsignedIntLE(); // io events
+                    buf.readUnsignedIntLE(); // geozone value
+                    buf.readUnsignedIntLE(); // io values
+                    buf.readUnsignedShortLE(); // operator
 
-                position.setLatitude(buf.readFloatLE());
-                position.setLongitude(buf.readFloatLE());
-                position.setAltitude(buf.readFloatLE());
-                position.setSpeed(UnitsConverter.knotsFromKph(buf.readFloatLE()));
-                position.setCourse(buf.readFloatLE());
+                    position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShortLE());
+                    position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShortLE());
 
-                buf.readUnsignedIntLE(); // geozone event
-                buf.readUnsignedIntLE(); // io events
-                buf.readUnsignedIntLE(); // geozone value
-                buf.readUnsignedIntLE(); // io values
-                buf.readUnsignedShortLE(); // operator
+                    position.set(Position.KEY_POWER, buf.readUnsignedShortLE() * 0.001);
 
-                position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShortLE());
-                position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShortLE());
+                    buf.readUnsignedShortLE(); // cid
+                    position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+                    buf.readUnsignedByte(); // current profile
 
-                position.set(Position.KEY_POWER, buf.readUnsignedShortLE() * 0.001);
+                    position.set(Position.KEY_BATTERY, buf.readUnsignedByte());
+                    position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedByte());
+                    position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
 
-                buf.readUnsignedShortLE(); // cid
-                position.set(Position.KEY_RSSI, buf.readUnsignedByte());
-                buf.readUnsignedByte(); // current profile
+                    positions.add(position);
 
-                position.set(Position.KEY_BATTERY, buf.readUnsignedByte());
-                position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedByte());
-                position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
-
-                positions.add(position);
-
+                }
+            } finally {
+                buf.release();
             }
 
             return positions;

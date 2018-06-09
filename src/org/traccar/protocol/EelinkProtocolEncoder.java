@@ -47,7 +47,7 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
         ByteBuf buf = Unpooled.buffer();
 
         if (connectionless) {
-            buf.writeBytes(Unpooled.wrappedBuffer(DataConverter.parseHex('0' + uniqueId)));
+            buf.writeBytes(DataConverter.parseHex('0' + uniqueId));
         }
 
         buf.writeByte(0x67);

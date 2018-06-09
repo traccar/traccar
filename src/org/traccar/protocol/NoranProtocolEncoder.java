@@ -29,7 +29,7 @@ public class NoranProtocolEncoder extends BaseProtocolEncoder {
 
         ByteBuf buf = Unpooled.buffer(12 + 56);
 
-        buf.writeBytes(Unpooled.copiedBuffer("\r\n*KW", StandardCharsets.US_ASCII));
+        buf.writeCharSequence("\r\n*KW", StandardCharsets.US_ASCII);
         buf.writeByte(0);
         buf.writeShortLE(buf.capacity());
         buf.writeShortLE(NoranProtocolDecoder.MSG_CONTROL);
@@ -37,7 +37,7 @@ public class NoranProtocolEncoder extends BaseProtocolEncoder {
         buf.writeShortLE(0); // gis port
         buf.writeBytes(content.getBytes(StandardCharsets.US_ASCII));
         buf.writerIndex(buf.writerIndex() + 50 - content.length());
-        buf.writeBytes(Unpooled.copiedBuffer("\r\n", StandardCharsets.US_ASCII));
+        buf.writeCharSequence("\r\n", StandardCharsets.US_ASCII);
 
         return buf;
     }

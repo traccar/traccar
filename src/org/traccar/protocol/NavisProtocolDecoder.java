@@ -183,7 +183,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         ParseResult result = parsePosition(deviceSession, buf);
 
         ByteBuf response = Unpooled.buffer(8);
-        response.writeBytes(Unpooled.copiedBuffer("*<T", StandardCharsets.US_ASCII));
+        response.writeCharSequence("*<T", StandardCharsets.US_ASCII);
         response.writeIntLE((int) result.getId());
         sendReply(channel, response);
 
@@ -206,7 +206,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         }
 
         ByteBuf response = Unpooled.buffer(8);
-        response.writeBytes(Unpooled.copiedBuffer("*<A", StandardCharsets.US_ASCII));
+        response.writeCharSequence("*<A", StandardCharsets.US_ASCII);
         response.writeByte(count);
         sendReply(channel, response);
 
@@ -235,7 +235,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
     private void sendReply(Channel channel, ByteBuf data) {
         ByteBuf header = Unpooled.buffer(16);
-        header.writeBytes(Unpooled.copiedBuffer(prefix, StandardCharsets.US_ASCII));
+        header.writeCharSequence(prefix, StandardCharsets.US_ASCII);
         header.writeIntLE((int) deviceUniqueId);
         header.writeIntLE((int) serverId);
         header.writeShortLE(data.readableBytes());
@@ -243,7 +243,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         header.writeByte(checksum(header));
 
         if (channel != null) {
-            channel.writeAndFlush(new NetworkMessage(Unpooled.copiedBuffer(header, data), channel.remoteAddress()));
+            channel.writeAndFlush(new NetworkMessage(Unpooled.wrappedBuffer(header, data), channel.remoteAddress()));
         }
     }
 

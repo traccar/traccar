@@ -133,8 +133,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
         int index = buf.readUnsignedByte() >> 3;
 
         if (channel != null) {
-            ByteBuf response = Unpooled.copiedBuffer(
-                    "^" + index, StandardCharsets.US_ASCII);
+            ByteBuf response = Unpooled.copiedBuffer("^" + index, StandardCharsets.US_ASCII);
             channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
 

@@ -31,7 +31,7 @@ public class GalileoProtocolEncoder extends BaseProtocolEncoder {
         ByteBuf buf = Unpooled.buffer(256);
 
         buf.writeByte(0x01);
-        buf.writeShortLE(uniqueId.length() + text.length() + 11); // TODO
+        buf.writeShortLE(uniqueId.length() + text.length() + 11);
 
         buf.writeByte(0x03); // imei tag
         buf.writeBytes(uniqueId.getBytes(StandardCharsets.US_ASCII));
