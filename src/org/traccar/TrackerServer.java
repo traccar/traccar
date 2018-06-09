@@ -25,7 +25,6 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.util.concurrent.GlobalEventExecutor;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 
 public abstract class TrackerServer {

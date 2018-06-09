@@ -20,7 +20,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.util.ReferenceCounted;
+import io.netty.util.ReferenceCountUtil;
 import org.traccar.helper.DataConverter;
 import org.traccar.model.Position;
 
@@ -65,9 +65,7 @@ public abstract class ExtendedObjectDecoder extends ChannelInboundHandlerAdapter
                 }
             }
         } finally {
-            if (originalMessage instanceof ReferenceCounted) {
-                ((ReferenceCounted) originalMessage).release();
-            }
+            ReferenceCountUtil.release(originalMessage);
         }
     }
 
