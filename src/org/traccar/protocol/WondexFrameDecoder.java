@@ -40,6 +40,7 @@ public class WondexFrameDecoder extends BaseFrameDecoder {
             // Send response
             ByteBuf frame = buf.readRetainedSlice(KEEP_ALIVE_LENGTH);
             if (channel != null) {
+                frame.retain();
                 channel.writeAndFlush(new NetworkMessage(frame, channel.remoteAddress()));
             }
             return frame;
