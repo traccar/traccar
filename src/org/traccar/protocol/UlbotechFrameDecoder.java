@@ -36,7 +36,7 @@ public class UlbotechFrameDecoder extends BaseFrameDecoder {
 
             int index = buf.indexOf(buf.readerIndex() + 1, buf.writerIndex(), (byte) 0xF8);
             if (index != -1) {
-                ByteBuf result = Unpooled.buffer(index + 1 - buf.readerIndex()); // TODO ref count
+                ByteBuf result = Unpooled.buffer(index + 1 - buf.readerIndex());
 
                 while (buf.readerIndex() <= index) {
                     int b = buf.readUnsignedByte();

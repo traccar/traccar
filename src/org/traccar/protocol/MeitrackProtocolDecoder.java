@@ -471,7 +471,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         switch (type) {
             case "D00":
                 if (photo == null) {
-                    photo = Unpooled.buffer(); // TODO ref count
+                    photo = Unpooled.buffer();
                 }
 
                 index = index + 1 + type.length() + 1;
@@ -494,6 +494,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     getLastLocation(position, null);
 
                     position.set(Position.KEY_IMAGE, Context.getMediaManager().writeFile(imei, photo, "jpg"));
+                    photo.release();
                     photo = null;
 
                     return position;
@@ -504,7 +505,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     return null;
                 }
             case "D03":
-                photo = Unpooled.buffer(); // TODO ref count
+                photo = Unpooled.buffer();
                 requestPhotoPacket(channel, remoteAddress, imei, "camera_picture.jpg", 0);
                 return null;
             case "CCC":

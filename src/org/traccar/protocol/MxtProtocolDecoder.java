@@ -41,7 +41,7 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
 
     private static void sendResponse(Channel channel, int device, long id, int crc) {
         if (channel != null) {
-            ByteBuf response = Unpooled.buffer(); // TODO ref count
+            ByteBuf response = Unpooled.buffer();
             response.writeByte(device);
             response.writeByte(MSG_ACK);
             response.writeIntLE((int) id);
@@ -59,6 +59,7 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
                 }
                 encoded.writeByte(b);
             }
+            response.release();
             encoded.writeByte(0x04); // ending
             channel.writeAndFlush(new NetworkMessage(encoded, channel.remoteAddress()));
         }

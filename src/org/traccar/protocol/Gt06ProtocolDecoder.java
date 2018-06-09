@@ -178,6 +178,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             response.writeByte(type);
             if (content != null) {
                 response.writeBytes(content);
+                content.release();
             }
             response.writeShort(index);
             response.writeShort(Checksum.crc16(Checksum.CRC16_X25,
@@ -189,7 +190,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
     private void sendPhotoRequest(Channel channel, int pictureId) {
         ByteBuf photo = photos.get(pictureId);
-        ByteBuf content = Unpooled.buffer(); // TODO ref count
+        ByteBuf content = Unpooled.buffer();
         content.writeInt(pictureId);
         content.writeInt(photo.writerIndex());
         content.writeShort(Math.min(photo.writableBytes(), 1024));
@@ -437,7 +438,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         } else if (type == MSG_ADDRESS_REQUEST) {
 
             String response = "NA&&NA&&0##";
-            ByteBuf content = Unpooled.buffer(); // TODO ref count
+            ByteBuf content = Unpooled.buffer();
             content.writeByte(response.length());
             content.writeInt(0);
             content.writeBytes(response.getBytes(StandardCharsets.US_ASCII));
@@ -446,7 +447,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         } else if (type == MSG_TIME_REQUEST) {
 
             Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-            ByteBuf content = Unpooled.buffer(); // TODO ref count
+            ByteBuf content = Unpooled.buffer();
             content.writeByte(calendar.get(Calendar.YEAR) - 2000);
             content.writeByte(calendar.get(Calendar.MONTH) + 1);
             content.writeByte(calendar.get(Calendar.DAY_OF_MONTH));
@@ -484,7 +485,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedByte(); // photo source
             buf.readUnsignedByte(); // picture format
 
-            ByteBuf photo = Unpooled.buffer(buf.readInt()); // TODO release photo
+            ByteBuf photo = Unpooled.buffer(buf.readInt());
             int pictureId = buf.readInt();
             photos.put(pictureId, photo);
             sendPhotoRequest(channel, pictureId);
@@ -719,7 +720,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 Device device = Context.getDeviceManager().getById(deviceSession.getDeviceId());
                 position.set(
                         Position.KEY_IMAGE, Context.getMediaManager().writeFile(device.getUniqueId(), photo, "jpg"));
-                photos.remove(pictureId);
+                photos.remove(pictureId).release();
             }
 
         } else if (type == MSG_AZ735_GPS || type == MSG_AZ735_ALARM) {

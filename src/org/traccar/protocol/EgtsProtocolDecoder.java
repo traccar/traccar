@@ -75,12 +75,13 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, int packetType, int index, int serviceType, int type, ByteBuf content) {
         if (channel != null) {
 
-            ByteBuf data = Unpooled.buffer(); // TODO ref count
+            ByteBuf data = Unpooled.buffer();
             data.writeByte(type);
             data.writeShortLE(content.readableBytes());
             data.writeBytes(content);
+            content.release();
 
-            ByteBuf record = Unpooled.buffer(); // TODO ref count
+            ByteBuf record = Unpooled.buffer();
             if (packetType == PT_RESPONSE) {
                 record.writeShortLE(index);
                 record.writeByte(0); // success
@@ -91,6 +92,7 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
             record.writeByte(serviceType);
             record.writeByte(serviceType);
             record.writeBytes(data);
+            data.release();
             int recordChecksum = Checksum.crc16(Checksum.CRC16_CCITT_FALSE, record.nioBuffer());
 
             ByteBuf response = Unpooled.buffer();
@@ -104,6 +106,7 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
             response.writeByte(packetType);
             response.writeByte(Checksum.crc8(Checksum.CRC8_EGTS, response.nioBuffer()));
             response.writeBytes(record);
+            record.release();
             response.writeShortLE(recordChecksum);
 
             channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
@@ -150,7 +153,7 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
                 position.setDeviceId(deviceSession.getDeviceId());
             }
 
-            ByteBuf response = Unpooled.buffer(); // TODO ref count
+            ByteBuf response = Unpooled.buffer();
             response.writeShortLE(recordIndex);
             response.writeByte(0); // success
             sendResponse(channel, PT_RESPONSE, index, serviceType, MSG_RECORD_RESPONSE, response);
@@ -189,7 +192,7 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
                                 channel, remoteAddress, buf.readSlice(15).toString(StandardCharsets.US_ASCII).trim());
                     }
 
-                    response = Unpooled.buffer(); // TODO ref count
+                    response = Unpooled.buffer();
                     response.writeByte(0); // success
                     sendResponse(channel, PT_APPDATA, 0, serviceType, MSG_RESULT_CODE, response);
 

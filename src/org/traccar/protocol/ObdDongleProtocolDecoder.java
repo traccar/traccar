@@ -52,6 +52,7 @@ public class ObdDongleProtocolDecoder extends BaseProtocolDecoder {
             response.writeByte(type);
             response.writeShort(content.readableBytes());
             response.writeBytes(content);
+            content.release();
             response.writeByte(0); // checksum
             response.writeShort(0xAAAA);
             channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
@@ -79,7 +80,7 @@ public class ObdDongleProtocolDecoder extends BaseProtocolDecoder {
 
         if (type == MSG_TYPE_CONNECT) {
 
-            ByteBuf response = Unpooled.buffer(); // TODO ref count
+            ByteBuf response = Unpooled.buffer();
             response.writeByte(1);
             response.writeShort(0);
             response.writeInt(0);
@@ -113,7 +114,7 @@ public class ObdDongleProtocolDecoder extends BaseProtocolDecoder {
             position.setSpeed(UnitsConverter.knotsFromMph(BitUtil.from(speedCourse, 10) * 0.1));
             position.setCourse(BitUtil.to(speedCourse, 10));
 
-            ByteBuf response = Unpooled.buffer(); // TODO ref count
+            ByteBuf response = Unpooled.buffer();
             response.writeByte(typeMajor);
             response.writeByte(typeMinor);
             sendResponse(channel, MSG_TYPE_PUBACK, index, imei, response);

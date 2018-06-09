@@ -53,6 +53,7 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
             response.writeInt(index);
             if (content != null) {
                 response.writeBytes(content);
+                content.release();
             }
             response.writeByte(0xC0);
             channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
@@ -84,7 +85,7 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
                     String imei = buf.readSlice(length).toString(StandardCharsets.US_ASCII);
                     DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
                     if (deviceSession != null && channel != null) {
-                        ByteBuf content = Unpooled.buffer(); // TODO ref count
+                        ByteBuf content = Unpooled.buffer();
                         content.writeByte(0); // success
                         sendResponse(channel, MSG_LOGIN_RSP, index, content);
                     }

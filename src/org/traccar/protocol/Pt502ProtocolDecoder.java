@@ -182,7 +182,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
                     getLastLocation(position, null);
 
                     position.set(Position.KEY_IMAGE, Context.getMediaManager().writeFile(uniqueId, photo, "jpg"));
-
+                    photo.release();
                     photo = null;
 
                     return position;
@@ -196,7 +196,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
             if (type.startsWith("$PHO")) {
                 int size = Integer.parseInt(type.split("-")[0].substring(4));
                 if (size > 0) {
-                    photo = Unpooled.buffer(size); // TODO ref count
+                    photo = Unpooled.buffer(size);
                     requestPhotoFragment(channel);
                 }
             }

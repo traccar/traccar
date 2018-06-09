@@ -56,6 +56,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         buf.writeBytes(id);
         buf.writeShort(1); // index
         buf.writeBytes(data);
+        data.release();
         buf.writeByte(Checksum.xor(buf.nioBuffer(1, buf.readableBytes() - 1)));
         buf.writeByte(0x7e);
         return buf;
@@ -64,7 +65,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
     private void sendGeneralResponse(
             Channel channel, SocketAddress remoteAddress, ByteBuf id, int type, int index) {
         if (channel != null) {
-            ByteBuf response = Unpooled.buffer(); // TODO ref count
+            ByteBuf response = Unpooled.buffer();
             response.writeShort(index);
             response.writeShort(type);
             response.writeByte(RESULT_SUCCESS);
@@ -119,7 +120,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         if (type == MSG_TERMINAL_REGISTER) {
 
             if (channel != null) {
-                ByteBuf response = Unpooled.buffer(); // TODO ref count
+                ByteBuf response = Unpooled.buffer();
                 response.writeShort(index);
                 response.writeByte(RESULT_SUCCESS);
                 response.writeBytes("authentication".getBytes(StandardCharsets.US_ASCII));

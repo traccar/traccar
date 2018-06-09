@@ -68,6 +68,7 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
             response.writeBytes(dataSequence);
             response.writeByte(content.readableBytes());
             response.writeBytes(content);
+            content.release();
             response.writeByte(']');
             channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
@@ -96,7 +97,7 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (getDeviceSession(channel, remoteAddress, id) != null) {
-                ByteBuf response = Unpooled.buffer(); // TODO ref count
+                ByteBuf response = Unpooled.buffer();
                 response.writeByte(MODE_GPRS);
                 response.writeBytes(data);
                 sendResponse(channel, MSG_LOGIN_RESPONSE, dataSequence, response);
@@ -104,7 +105,7 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == MSG_HEARTBEAT_REQUEST) {
 
-            sendResponse(channel, MSG_HEARTBEAT_RESPONSE, dataSequence, buf.readSlice(length));
+            sendResponse(channel, MSG_HEARTBEAT_RESPONSE, dataSequence, buf.readRetainedSlice(length));
 
         } else {
 

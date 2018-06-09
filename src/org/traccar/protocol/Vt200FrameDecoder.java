@@ -31,7 +31,7 @@ public class Vt200FrameDecoder extends BaseFrameDecoder {
         int endIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ')') + 1;
         if (endIndex > 0) {
 
-            ByteBuf frame = Unpooled.buffer(); // TODO ref count
+            ByteBuf frame = Unpooled.buffer();
 
             while (buf.readerIndex() < endIndex) {
                 int b = buf.readByte();

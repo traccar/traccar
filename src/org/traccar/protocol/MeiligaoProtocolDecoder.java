@@ -189,7 +189,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
         if (channel != null) {
             ByteBuf buf = Unpooled.buffer(
-                    2 + 2 + id.readableBytes() + 2 + msg.readableBytes() + 2 + 2); // TODO ref count
+                    2 + 2 + id.readableBytes() + 2 + msg.readableBytes() + 2 + 2);
 
             buf.writeByte('@');
             buf.writeByte('@');
@@ -197,6 +197,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             buf.writeBytes(id);
             buf.writeShort(type);
             buf.writeBytes(msg);
+            msg.release();
             buf.writeShort(Checksum.crc16(Checksum.CRC16_CCITT_FALSE, buf.nioBuffer()));
             buf.writeByte('\r');
             buf.writeByte('\n');
@@ -415,7 +416,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             return null;
         } else if (command == MSG_UPLOAD_PHOTO) {
             byte imageIndex = buf.readByte();
-            photos.put(imageIndex, Unpooled.buffer()); // TODO release photos
+            photos.put(imageIndex, Unpooled.buffer());
             ByteBuf response = Unpooled.copiedBuffer(new byte[]{imageIndex});
             sendResponse(channel, remoteAddress, id, MSG_UPLOAD_PHOTO_RESPONSE, response);
             return null;
@@ -475,8 +476,12 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
                 byte imageIndex = buf.readByte();
                 buf.readUnsignedByte(); // image upload type
                 String uniqueId = Context.getIdentityManager().getById(deviceSession.getDeviceId()).getUniqueId();
-                String file = Context.getMediaManager().writeFile(uniqueId, photos.remove(imageIndex), "jpg");
-                position.set(Position.KEY_IMAGE, file);
+                ByteBuf photo = photos.remove(imageIndex);
+                try {
+                    position.set(Position.KEY_IMAGE, Context.getMediaManager().writeFile(uniqueId, photo, "jpg"));
+                } finally {
+                    photo.release();
+                }
             }
 
             String sentence = buf.toString(buf.readerIndex(), buf.readableBytes() - 4, StandardCharsets.US_ASCII);

@@ -58,6 +58,7 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
             response.writeShortLE(content != null ? content.readableBytes() : 0);
             if (content != null) {
                 response.writeBytes(content);
+                content.release();
             }
             channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
@@ -244,7 +245,7 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
             DeviceSession deviceSession = getDeviceSession(
                     channel, remoteAddress, buf.readSlice(15).toString(StandardCharsets.US_ASCII));
 
-            ByteBuf response = Unpooled.buffer(); // TODO ref count
+            ByteBuf response = Unpooled.buffer();
             if (length == 51) {
                 response.writeByte(0); // reserved
                 response.writeIntLE(0); // reserved
@@ -257,13 +258,13 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == MSG_COMMIT) {
 
-            ByteBuf response = Unpooled.buffer(0); // TODO ref count
+            ByteBuf response = Unpooled.buffer(0);
             response.writeByte(1); // flags (success)
             sendResponse(channel, MSG_COMMIT_RESPONSE, response);
 
         } else if (type == MSG_CANNED_REQUEST_1) {
 
-            ByteBuf response = Unpooled.buffer(0); // TODO ref count
+            ByteBuf response = Unpooled.buffer(0);
             response.writeBytes(new byte[12]);
             sendResponse(channel, MSG_CANNED_RESPONSE_1, response);
 
