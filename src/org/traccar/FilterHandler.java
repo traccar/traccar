@@ -227,6 +227,14 @@ public class FilterHandler extends BaseDataHandler {
         }
 
         if (filterType.length() > 0) {
+            if (last != null && !filterZero(last) && !filterInvalid(last)) {
+                if (position.getLong(Position.KEY_STATUS) != last.getLong(Position.KEY_STATUS)) {
+                    position.setLatitude(last.getLatitude());
+                    position.setLongitude(last.getLongitude());
+                    position.setFixTime(last.getFixTime());
+                    return false;
+                }
+            }
 
             StringBuilder message = new StringBuilder();
             message.append("Position filtered by ");
