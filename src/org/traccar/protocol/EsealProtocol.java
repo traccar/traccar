@@ -22,6 +22,7 @@ import org.jboss.netty.handler.codec.string.StringDecoder;
 import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.TrackerServer;
+import org.traccar.model.Command;
 
 import java.util.List;
 
@@ -29,6 +30,10 @@ public class EsealProtocol extends BaseProtocol {
 
     public EsealProtocol() {
         super("eseal");
+        setSupportedDataCommands(
+                Command.TYPE_CUSTOM,
+                Command.TYPE_ALARM_ARM,
+                Command.TYPE_ALARM_DISARM);
     }
 
     @Override
@@ -39,6 +44,7 @@ public class EsealProtocol extends BaseProtocol {
                 pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
                 pipeline.addLast("stringEncoder", new StringEncoder());
                 pipeline.addLast("stringDecoder", new StringDecoder());
+                pipeline.addLast("objectEncoder", new EsealProtocolEncoder());
                 pipeline.addLast("objectDecoder", new EsealProtocolDecoder(EsealProtocol.this));
             }
         });
