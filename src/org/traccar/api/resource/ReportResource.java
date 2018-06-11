@@ -59,6 +59,16 @@ public class ReportResource extends BaseResource {
                 .header(HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE_XLSX).build();
     }
 
+    @Path("fuel")
+    @GET
+    public Collection<Position> getFuel(
+            @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
+            @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
+        Collection<Position> result = Route.getFuelObjects(getUserId(), deviceIds, groupIds,
+                DateUtil.parseDate(from), DateUtil.parseDate(to));
+        return result;
+    }
+
     @Path("events")
     @GET
     public Collection<Event> getEvents(

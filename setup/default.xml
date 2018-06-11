@@ -49,6 +49,23 @@
         SELECT * FROM positions WHERE deviceId = :deviceId AND fixTime BETWEEN :from AND :to ORDER BY fixTime
     </entry>
 
+    <entry key='database.selectPositionsForRoute'>
+        SELECT deviceid, devicetime, latitude, longitude, speed, course
+        FROM positions
+        WHERE deviceId = :deviceId
+        AND fixTime BETWEEN :from AND :to
+        AND valid = true AND speed > 0
+        ORDER BY fixTime
+    </entry>
+
+    <entry key='database.selectPositionsForFuel'>
+        SELECT deviceid, devicetime, attributes
+        FROM positions
+        WHERE deviceId = :deviceId
+        AND fixTime BETWEEN :from AND :to
+        ORDER BY fixTime
+    </entry>
+
     <entry key='database.selectPeripheralSensors'>
         SELECT p.id AS peripheralSensorId, d.id AS deviceId, dt.typename as typeName, p.calibrationdata as calibrationData
         FROM peripheralsensors AS p
