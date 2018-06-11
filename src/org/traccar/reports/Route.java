@@ -48,8 +48,9 @@ public final class Route {
         return result;
     }
 
-    public static Collection<Position> getFuelObjects(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
-                                                  Date from, Date to) throws SQLException {
+    public static Collection<Position> getFuelObjects(long userId, Collection<Long> deviceIds,
+                                                      Collection<Long> groupIds,
+                                                      Date from, Date to) throws SQLException {
         ReportUtils.checkPeriodLimit(from, to);
         ArrayList<Position> result = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
