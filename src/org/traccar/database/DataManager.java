@@ -344,6 +344,22 @@ public class DataManager {
         return queryBuilder.executeQuery(Position.class);
     }
 
+    public Collection<Position> getPositionsForRoute(long deviceId, Date from, Date to) throws SQLException {
+        QueryBuilder queryBuilder = QueryBuilder.create(dataSource, getQuery("database.selectPositionsForRoute"))
+                                                .setLong("deviceId", deviceId)
+                                                .setDate("from", from)
+                                                .setDate("to", to);
+        return queryBuilder.executeQuery(Position.class);
+    }
+
+    public Collection<Position> getPositionsForFuel(long deviceId, Date from, Date to) throws SQLException {
+        QueryBuilder queryBuilder = QueryBuilder.create(dataSource, getQuery("database.selectPositionsForFuel"))
+                                                .setLong("deviceId", deviceId)
+                                                .setDate("from", from)
+                                                .setDate("to", to);
+        return queryBuilder.executeQuery(Position.class);
+    }
+
     public Collection<FCMPushNotificationType> getFCMPushNotificationTypes() throws SQLException {
         return QueryBuilder.create(dataSource, getQuery(ACTION_SELECT_ALL, FCMPushNotificationType.class))
                            .executeQuery(FCMPushNotificationType.class);

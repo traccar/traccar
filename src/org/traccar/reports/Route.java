@@ -43,7 +43,18 @@ public final class Route {
         ArrayList<Position> result = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            result.addAll(Context.getDataManager().getPositions(deviceId, from, to));
+            result.addAll(Context.getDataManager().getPositionsForRoute(deviceId, from, to));
+        }
+        return result;
+    }
+
+    public static Collection<Position> getFuelObjects(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
+                                                  Date from, Date to) throws SQLException {
+        ReportUtils.checkPeriodLimit(from, to);
+        ArrayList<Position> result = new ArrayList<>();
+        for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
+            Context.getPermissionsManager().checkDevice(userId, deviceId);
+            result.addAll(Context.getDataManager().getPositionsForFuel(deviceId, from, to));
         }
         return result;
     }
