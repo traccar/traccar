@@ -245,5 +245,6 @@
     <entry key='retranslator.port'>5167</entry>
     <entry key='svias.port'>5168</entry>
     <entry key='eseal.port'>5169</entry>
+    <entry key='freematics.port'>5170</entry>
 
 </properties>
