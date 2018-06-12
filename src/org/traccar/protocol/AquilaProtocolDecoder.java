@@ -302,7 +302,7 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_ALARM, Position.ALARM_SOS);
             if (channel != null) {
                 String password = Context.getIdentityManager().lookupAttributeString(
-                        position.getDeviceId(), getProtocolName() + ".language", "aquila123", true);
+                        position.getDeviceId(), getProtocolName() + ".password", "aquila123", true);
                 channel.writeAndFlush(new NetworkMessage(
                         "#set$" + id + "@" + password + "#EMR_MODE:0*", remoteAddress));
             }

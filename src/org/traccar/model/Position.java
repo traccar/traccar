@@ -112,6 +112,8 @@ public class Position extends Message {
     public static final String ALARM_POWER_OFF = "powerOff";
     public static final String ALARM_POWER_ON = "powerOn";
     public static final String ALARM_DOOR = "door";
+    public static final String ALARM_LOCK = "lock";
+    public static final String ALARM_UNLOCK = "unlock";
     public static final String ALARM_GEOFENCE = "geofence";
     public static final String ALARM_GEOFENCE_ENTER = "geofenceEnter";
     public static final String ALARM_GEOFENCE_EXIT = "geofenceExit";
