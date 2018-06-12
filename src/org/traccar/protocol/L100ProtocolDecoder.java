@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
@@ -169,7 +170,7 @@ public class L100ProtocolDecoder extends BaseProtocolDecoder {
             if (channel != null) {
                 String response = "@" + imei + ",00," + index + ",";
                 response += "*" + (char) Checksum.xor(response);
-                channel.write(response, remoteAddress);
+                channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
             }
             return null;
         }

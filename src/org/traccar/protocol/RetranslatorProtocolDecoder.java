@@ -15,15 +15,15 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
@@ -33,21 +33,15 @@ public class RetranslatorProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private double readDouble(ChannelBuffer buf) {
-        byte[] bytes = new byte[8];
-        buf.readBytes(bytes);
-        return ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, bytes).readDouble();
-    }
-
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         if (channel != null) {
-            channel.write(ChannelBuffers.wrappedBuffer(new byte[]{0x11}));
+            channel.writeAndFlush(new NetworkMessage(Unpooled.wrappedBuffer(new byte[]{0x11}), remoteAddress));
         }
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         buf.readUnsignedInt(); // length
 
@@ -65,7 +59,7 @@ public class RetranslatorProtocolDecoder extends BaseProtocolDecoder {
 
         buf.readUnsignedInt(); // bit flags
 
-        while (buf.readable()) {
+        while (buf.isReadable()) {
 
             buf.readUnsignedShort(); // block type
             int blockEnd = buf.readInt() + buf.readerIndex();
@@ -78,9 +72,9 @@ public class RetranslatorProtocolDecoder extends BaseProtocolDecoder {
 
             if (name.equals("posinfo")) {
                 position.setValid(true);
-                position.setLongitude(readDouble(buf));
-                position.setLatitude(readDouble(buf));
-                position.setAltitude(readDouble(buf));
+                position.setLongitude(buf.readDoubleLE());
+                position.setLatitude(buf.readDoubleLE());
+                position.setAltitude(buf.readDoubleLE());
                 position.setSpeed(buf.readShort());
                 position.setCourse(buf.readShort());
                 position.set(Position.KEY_SATELLITES, buf.readByte());
@@ -95,7 +89,7 @@ public class RetranslatorProtocolDecoder extends BaseProtocolDecoder {
                         position.set(name, buf.readInt());
                         break;
                     case 4:
-                        position.set(name, readDouble(buf));
+                        position.set(name, buf.readDoubleLE());
                         break;
                     case 5:
                         position.set(name, buf.readLong());

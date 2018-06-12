@@ -15,8 +15,9 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.PatternBuilder;
 
@@ -62,7 +63,7 @@ public class SviasProtocolDecoder extends BaseProtocolDecoder {
             throws Exception {
 
         if (channel != null) {
-            channel.write("@");
+            channel.writeAndFlush(new NetworkMessage("@", remoteAddress));
         }
 
         Parser parser = new Parser(PATTERN, (String) msg);

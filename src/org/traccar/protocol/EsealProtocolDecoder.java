@@ -15,10 +15,11 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -62,7 +63,8 @@ public class EsealProtocolDecoder extends BaseProtocolDecoder {
 
     private void sendResponse(Channel channel, String prefix, String type, String payload) {
         if (channel != null) {
-            channel.write(prefix + type + "," + payload + ",E##\r\n");
+            channel.writeAndFlush(new NetworkMessage(
+                    prefix + type + "," + payload + ",E##\r\n", channel.remoteAddress()));
         }
     }
 
