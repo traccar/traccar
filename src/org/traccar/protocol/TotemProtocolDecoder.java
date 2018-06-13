@@ -246,6 +246,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         }
 
         int io = parser.nextBinInt();
+        position.set(Position.KEY_STATUS, io);
         if (pattern == PATTERN1) {
             position.set(Position.KEY_ALARM, BitUtil.check(io, 0) ? Position.ALARM_SOS : null);
             position.set(Position.PREFIX_IN + 3, BitUtil.check(io, 4));
