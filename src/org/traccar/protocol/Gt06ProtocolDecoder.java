@@ -431,6 +431,13 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_IGNITION, BitUtil.check(status, 1));
             position.set(Position.KEY_CHARGE, BitUtil.check(status, 2));
 
+            if (buf.readableBytes() >= 2 + 6) {
+                position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.01);
+            }
+            if (buf.readableBytes() >= 1 + 6) {
+                position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+            }
+
             sendResponse(channel, false, type, buf.getShort(buf.writerIndex() - 6), null);
 
             return position;
