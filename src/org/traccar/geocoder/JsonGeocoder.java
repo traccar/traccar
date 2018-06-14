@@ -19,6 +19,7 @@ import org.traccar.Context;
 import org.traccar.helper.Log;
 
 import javax.json.JsonObject;
+import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.InvocationCallback;
 import java.util.AbstractMap;
@@ -62,8 +63,9 @@ public abstract class JsonGeocoder implements Geocoder {
         } else {
             if (callback != null) {
                 callback.onFailure(new GeocoderException("Empty address"));
+            } else {
+                Log.warning("Empty address");
             }
-            Log.warning("Empty address");
         }
         return null;
     }
@@ -88,7 +90,7 @@ public abstract class JsonGeocoder implements Geocoder {
             request.async().get(new InvocationCallback<JsonObject>() {
                 @Override
                 public void completed(JsonObject json) {
-                    callback.onSuccess(handleResponse(latitude, longitude, json, callback));
+                    handleResponse(latitude, longitude, json, callback);
                 }
 
                 @Override
@@ -97,7 +99,11 @@ public abstract class JsonGeocoder implements Geocoder {
                 }
             });
         } else {
-            return handleResponse(latitude, longitude, request.get(JsonObject.class), null);
+            try {
+                return handleResponse(latitude, longitude, request.get(JsonObject.class), null);
+            } catch (ClientErrorException e) {
+                Log.warning(e);
+            }
         }
         return null;
     }
