@@ -54,7 +54,7 @@
         FROM positions
         WHERE deviceId = :deviceId
         AND fixTime BETWEEN :from AND :to
-        AND valid = true AND speed > 0
+        AND valid = true
         ORDER BY fixTime
     </entry>
 

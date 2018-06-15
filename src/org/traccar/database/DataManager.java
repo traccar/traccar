@@ -22,11 +22,15 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
@@ -357,7 +361,21 @@ public class DataManager {
                                                 .setLong("deviceId", deviceId)
                                                 .setDate("from", from)
                                                 .setDate("to", to);
-        return queryBuilder.executeQuery(Position.class);
+
+        Collection<Position> queryResult = queryBuilder.executeQuery(Position.class);
+
+        // Remove all unwanted properties on attributes, so the return payload is smaller.
+        for (Position p : queryResult) {
+            Map<String, Object> attributes = p.getAttributes();
+            Set<String> keys = attributes.keySet();
+            List<String> keysList = keys.stream().collect(Collectors.toList());
+            for (String key : keysList) {
+                if (!key.equals("fuel")) {
+                    attributes.remove(key);
+                }
+            }
+        }
+        return queryResult;
     }
 
     public Collection<FCMPushNotificationType> getFCMPushNotificationTypes() throws SQLException {
