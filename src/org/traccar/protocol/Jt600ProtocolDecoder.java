@@ -145,7 +145,15 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
                 buf.readUnsignedInt(); // vehicle id combined
 
-                position.set(Position.KEY_STATUS, buf.readUnsignedShort());
+                int status = buf.readUnsignedShort();
+                position.set(Position.KEY_ALARM, BitUtil.check(status, 1) ? Position.ALARM_GEOFENCE_ENTER : null);
+                position.set(Position.KEY_ALARM, BitUtil.check(status, 2) ? Position.ALARM_GEOFENCE_EXIT : null);
+                position.set(Position.KEY_ALARM, BitUtil.check(status, 3) ? Position.ALARM_POWER_CUT : null);
+                position.set(Position.KEY_ALARM, BitUtil.check(status, 4) ? Position.ALARM_VIBRATION : null);
+                position.set(Position.KEY_BLOCKED, BitUtil.check(status, 7));
+                position.set(Position.KEY_ALARM, BitUtil.check(status, 8 + 3) ? Position.ALARM_LOW_BATTERY : null);
+                position.set(Position.KEY_ALARM, BitUtil.check(status, 8 + 6) ? Position.ALARM_FAULT : null);
+                position.set(Position.KEY_STATUS, status);
 
                 int battery = buf.readUnsignedByte();
                 if (battery == 0xff) {

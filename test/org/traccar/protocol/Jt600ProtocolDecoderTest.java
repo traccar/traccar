@@ -12,6 +12,9 @@ public class Jt600ProtocolDecoderTest extends ProtocolTest {
         Jt600ProtocolDecoder decoder = new Jt600ProtocolDecoder(new Jt600Protocol());
 
         verifyPositions(decoder, binary(
+                "2475801263981711002713061813333723501622090221558f012f0000002a070000000020c055b88552191f000f0f0f07"));
+
+        verifyPositions(decoder, binary(
                 "24408111888821001B09060908045322564025113242329F0598000001003F0000002D00AB"));
 
         verifyPositions(decoder, binary(
