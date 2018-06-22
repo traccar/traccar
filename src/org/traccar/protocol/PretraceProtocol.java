@@ -21,6 +21,7 @@ import org.traccar.BaseProtocol;
 import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.model.Command;
 
 import java.util.List;
 
@@ -28,6 +29,9 @@ public class PretraceProtocol extends BaseProtocol {
 
     public PretraceProtocol() {
         super("pretrace");
+        setSupportedDataCommands(
+                Command.TYPE_CUSTOM,
+                Command.TYPE_POSITION_PERIODIC);
     }
 
     @Override
@@ -38,6 +42,7 @@ public class PretraceProtocol extends BaseProtocol {
                 pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, ')'));
                 pipeline.addLast("stringEncoder", new StringEncoder());
                 pipeline.addLast("stringDecoder", new StringDecoder());
+                pipeline.addLast("objectEncoder", new PretraceProtocolEncoder());
                 pipeline.addLast("objectDecoder", new PretraceProtocolDecoder(PretraceProtocol.this));
             }
         });
