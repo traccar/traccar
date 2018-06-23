@@ -123,6 +123,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         long status = parser.nextHexLong();
         position.set(Position.KEY_STATUS, status);
         position.set(Position.KEY_ALARM, decodeAlarm(status));
+        position.set(Position.KEY_IGNITION, (status & 0x00800000) != 0);
 
         position.set("signal", parser.next());
         position.set(Position.KEY_POWER, parser.nextDouble(0));
