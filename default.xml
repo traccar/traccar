@@ -203,7 +203,6 @@
         FROM positions
         WHERE deviceId = :deviceId
         AND fixTime BETWEEN :from AND :to
-        AND mod(minute(fixTime),:timerange) = 0
         ORDER BY fixTime
     </entry>
 
