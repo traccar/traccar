@@ -121,10 +121,9 @@ public class ConnectionManager {
         if (status.equals(Device.STATUS_ONLINE)) {
             timeouts.put(deviceId, GlobalTimer.getTimer().newTimeout(new TimerTask() {
                 @Override
-                public void run(Timeout timeout) throws Exception {
+                public void run(Timeout timeout) {
                     if (!timeout.isCancelled()) {
                         updateDevice(deviceId, Device.STATUS_UNKNOWN, null);
-                        activeDevices.remove(deviceId);
                     }
                 }
             }, deviceTimeout, TimeUnit.MILLISECONDS));
