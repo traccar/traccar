@@ -190,10 +190,11 @@
     </entry>
 
     <entry key='database.selectPositionsForRoute'>
-        SELECT deviceid, devicetime, latitude, longitude, speed, course
+        SELECT deviceid, devicetime, latitude, longitude, speed, course, attributes
         FROM positions
         WHERE deviceId = :deviceId
         AND fixTime BETWEEN :from AND :to
+        AND mod(minute(fixTime),:timerange) = 0
         AND valid = true
         ORDER BY fixTime
     </entry>
@@ -203,6 +204,7 @@
         FROM positions
         WHERE deviceId = :deviceId
         AND fixTime BETWEEN :from AND :to
+        AND mod(minute(fixTime),:timerange) = 0
         ORDER BY fixTime
     </entry>
 

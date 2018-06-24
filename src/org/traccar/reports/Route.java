@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.traccar.Context;
@@ -43,9 +44,18 @@ public final class Route {
         ArrayList<Position> result = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            result.addAll(Context.getDataManager().getPositionsForRoute(deviceId, from, to));
+            Collection<Position> routePositions = Context.getDataManager().getPositionsForRoute(deviceId, from, to);
+            result.addAll(routePositions.stream().filter(Route::positionFilter).collect(Collectors.toList()));
         }
         return result;
+    }
+
+    private static boolean positionFilter(Position p) {
+        if (!p.getAttributes().keySet().contains("distance")) {
+            return false;
+        }
+
+        return (double) p.getAttributes().get("distance") > 50; // At least 50 meters distance to avoid weird positions.
     }
 
     public static Collection<Position> getFuelObjects(long userId, Collection<Long> deviceIds,
