@@ -349,34 +349,12 @@ public class DataManager {
 
     public Collection<Position> getPositionsForRoute(long deviceId, Date from, Date to) throws SQLException {
 
-        long window = getWindow(from, to);
-
         QueryBuilder queryBuilder = QueryBuilder.create(dataSource, getQuery("database.selectPositionsForRoute"))
                                                 .setLong("deviceId", deviceId)
                                                 .setDate("from", from)
-                                                .setDate("to", to)
-                                                .setLong("timerange", window);
+                                                .setDate("to", to);
 
         return queryBuilder.executeQuery(Position.class);
-    }
-
-    private long getWindow(Date from, Date to) {
-        int millisInHour = 3600 * 1000;
-        long gapInMillis = to.getTime() - from.getTime();
-
-        if (gapInMillis <= 6 * millisInHour) {
-            return 1; // 1 minute
-        }
-
-        if (gapInMillis > 6 * millisInHour && gapInMillis <= 24 * millisInHour) {
-            return 120; // 2 hours
-        }
-
-        if (gapInMillis >  24 * millisInHour) {
-            return 120 * 6; // 6 hours
-        }
-
-        return 0; // should never be hit.
     }
 
     public Collection<Position> getPositionsForFuel(long deviceId, Date from, Date to) throws SQLException {
