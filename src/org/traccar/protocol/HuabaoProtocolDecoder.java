@@ -31,6 +31,8 @@ import org.traccar.model.Position;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.TimeZone;
 
 public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
@@ -44,6 +46,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_TERMINAL_REGISTER_RESPONSE = 0x8100;
     public static final int MSG_TERMINAL_AUTH = 0x0102;
     public static final int MSG_LOCATION_REPORT = 0x0200;
+    public static final int MSG_LOCATION_BATCH = 0x0704;
     public static final int MSG_OIL_CONTROL = 0XA006;
 
     public static final int RESULT_SUCCESS = 0;
@@ -134,52 +137,77 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == MSG_LOCATION_REPORT) {
 
-            Position position = new Position(getProtocolName());
-            position.setDeviceId(deviceSession.getDeviceId());
+            return decodeLocation(deviceSession, buf);
 
-            position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedInt()));
+        } else if (type == MSG_LOCATION_BATCH) {
 
-            int flags = buf.readInt();
-
-            position.set(Position.KEY_IGNITION, BitUtil.check(flags, 0));
-
-            position.setValid(BitUtil.check(flags, 1));
-
-            double lat = buf.readUnsignedInt() * 0.000001;
-            double lon = buf.readUnsignedInt() * 0.000001;
-
-            if (BitUtil.check(flags, 2)) {
-                position.setLatitude(-lat);
-            } else {
-                position.setLatitude(lat);
-            }
-
-            if (BitUtil.check(flags, 3)) {
-                position.setLongitude(-lon);
-            } else {
-                position.setLongitude(lon);
-            }
-
-            position.setAltitude(buf.readShort());
-            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort() * 0.1));
-            position.setCourse(buf.readUnsignedShort());
-
-            DateBuilder dateBuilder = new DateBuilder(TimeZone.getTimeZone("GMT+8"))
-                    .setYear(BcdUtil.readInteger(buf, 2))
-                    .setMonth(BcdUtil.readInteger(buf, 2))
-                    .setDay(BcdUtil.readInteger(buf, 2))
-                    .setHour(BcdUtil.readInteger(buf, 2))
-                    .setMinute(BcdUtil.readInteger(buf, 2))
-                    .setSecond(BcdUtil.readInteger(buf, 2));
-            position.setTime(dateBuilder.getDate());
-
-            // additional information
-
-            return position;
+            return decodeLocationBatch(deviceSession, buf);
 
         }
 
         return null;
+    }
+
+    private Position decodeLocation(DeviceSession deviceSession, ByteBuf buf) {
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedInt()));
+
+        int flags = buf.readInt();
+
+        position.set(Position.KEY_IGNITION, BitUtil.check(flags, 0));
+
+        position.setValid(BitUtil.check(flags, 1));
+
+        double lat = buf.readUnsignedInt() * 0.000001;
+        double lon = buf.readUnsignedInt() * 0.000001;
+
+        if (BitUtil.check(flags, 2)) {
+            position.setLatitude(-lat);
+        } else {
+            position.setLatitude(lat);
+        }
+
+        if (BitUtil.check(flags, 3)) {
+            position.setLongitude(-lon);
+        } else {
+            position.setLongitude(lon);
+        }
+
+        position.setAltitude(buf.readShort());
+        position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort() * 0.1));
+        position.setCourse(buf.readUnsignedShort());
+
+        DateBuilder dateBuilder = new DateBuilder(TimeZone.getTimeZone("GMT+8"))
+                .setYear(BcdUtil.readInteger(buf, 2))
+                .setMonth(BcdUtil.readInteger(buf, 2))
+                .setDay(BcdUtil.readInteger(buf, 2))
+                .setHour(BcdUtil.readInteger(buf, 2))
+                .setMinute(BcdUtil.readInteger(buf, 2))
+                .setSecond(BcdUtil.readInteger(buf, 2));
+        position.setTime(dateBuilder.getDate());
+
+        // additional information
+
+        return position;
+    }
+
+    private List<Position> decodeLocationBatch(DeviceSession deviceSession, ByteBuf buf) {
+
+        List<Position> positions = new LinkedList<>();
+
+        int count = buf.readUnsignedShort();
+        buf.readUnsignedByte(); // location type
+
+        for (int i = 0; i < count; i++) {
+            int endIndex = buf.readUnsignedShort() + buf.readerIndex();
+            positions.add(decodeLocation(deviceSession, buf));
+            buf.readerIndex(endIndex);
+        }
+
+        return positions;
     }
 
 }
