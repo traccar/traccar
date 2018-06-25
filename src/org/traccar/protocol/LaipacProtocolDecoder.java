@@ -115,7 +115,8 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
                 .setTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
 
         String status = parser.next();
-        position.setValid(status.toUpperCase().equals("A"));
+        String upperCaseStatus = status.toUpperCase();
+        position.setValid(upperCaseStatus.equals("A") || upperCaseStatus.equals("R") || upperCaseStatus.equals("P"));
         position.set(Position.KEY_STATUS, status);
 
         position.setLatitude(parser.nextCoordinate());
