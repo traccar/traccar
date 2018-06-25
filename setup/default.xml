@@ -247,5 +247,6 @@
     <entry key='eseal.port'>5169</entry>
     <entry key='freematics.port'>5170</entry>
     <entry key='avema.port'>5171</entry>
+    <entry key='autotrack.port'>5172</entry>
 
 </properties>
