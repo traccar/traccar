@@ -57,9 +57,7 @@ public class ConnectionManager {
     }
 
     public void addActiveDevice(long deviceId, Protocol protocol, Channel channel, SocketAddress remoteAddress) {
-        ActiveDevice activeDevice = new ActiveDevice(deviceId, protocol, channel, remoteAddress);
-        activeDevices.put(deviceId, activeDevice);
-        Context.getCommandsManager().sendQueuedCommands(activeDevice);
+        activeDevices.put(deviceId, new ActiveDevice(deviceId, protocol, channel, remoteAddress));
     }
 
     public void removeActiveDevice(Channel channel) {
@@ -136,6 +134,10 @@ public class ConnectionManager {
         }
 
         updateDevice(device);
+
+        if (status.equals(Device.STATUS_ONLINE) && !oldStatus.equals(Device.STATUS_ONLINE)) {
+            Context.getCommandsManager().sendQueuedCommands(getActiveDevice(deviceId));
+        }
     }
 
     public Map<Event, Position> updateDeviceState(long deviceId) {
