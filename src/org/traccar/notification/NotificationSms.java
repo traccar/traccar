@@ -20,33 +20,42 @@ import org.traccar.Context;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
+import org.traccar.sms.SMSManager;
+import org.traccar.sms.SMSException;
 
-import com.cloudhopper.smpp.type.RecoverablePduException;
-import com.cloudhopper.smpp.type.SmppChannelException;
-import com.cloudhopper.smpp.type.SmppTimeoutException;
-import com.cloudhopper.smpp.type.UnrecoverablePduException;
+public final class NotificationSms extends Notificator {
 
-public final class NotificationSms {
+    private final SMSManager sms;
 
-    private NotificationSms() {
-    }
-
-    public static void sendSmsAsync(long userId, Event event, Position position) {
-        User user = Context.getPermissionsManager().getUser(userId);
-        if (Context.getSmppManager() != null && user.getPhone() != null) {
-            Context.getStatisticsManager().registerSms();
-            Context.getSmppManager().sendMessageAsync(user.getPhone(),
-                    NotificationFormatter.formatSmsMessage(userId, event, position), false);
+    public NotificationSms(String methodId) throws ClassNotFoundException,
+            InstantiationException, IllegalAccessException {
+        final String smsClass = Context.getConfig().getString("notificator." + methodId + ".sms.class", "");
+        if (smsClass.length() > 0) {
+            sms = (SMSManager) Class.forName(smsClass).newInstance();
+        } else {
+            sms = Context.getSmsManager();
         }
     }
 
-    public static void sendSmsSync(long userId, Event event, Position position) throws RecoverablePduException,
-            UnrecoverablePduException, SmppTimeoutException, SmppChannelException, InterruptedException {
-        User user = Context.getPermissionsManager().getUser(userId);
-        if (Context.getSmppManager() != null && user.getPhone() != null) {
+
+    @Override
+    public void sendAsync(long userId, Event event, Position position) {
+        final User user = Context.getPermissionsManager().getUser(userId);
+        if (user.getPhone() != null) {
             Context.getStatisticsManager().registerSms();
-            Context.getSmppManager().sendMessageSync(user.getPhone(),
-                    NotificationFormatter.formatSmsMessage(userId, event, position), false);
+            sms.sendMessageAsync(user.getPhone(),
+                    NotificationFormatter.formatShortMessage(userId, event, position), false);
+        }
+    }
+
+    @Override
+    public void sendSync(long userId, Event event, Position position) throws SMSException,
+            InterruptedException {
+        final User user = Context.getPermissionsManager().getUser(userId);
+        if (user.getPhone() != null) {
+            Context.getStatisticsManager().registerSms();
+            sms.sendMessageSync(user.getPhone(),
+                    NotificationFormatter.formatShortMessage(userId, event, position), false);
         }
     }
 }

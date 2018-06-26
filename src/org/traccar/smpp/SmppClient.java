@@ -25,6 +25,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.traccar.Context;
 import org.traccar.helper.Log;
+import org.traccar.sms.SMSException;
+import org.traccar.sms.SMSManager;
 
 import com.cloudhopper.commons.charset.CharsetUtil;
 import com.cloudhopper.smpp.SmppBindType;
@@ -42,7 +44,7 @@ import com.cloudhopper.smpp.type.SmppChannelException;
 import com.cloudhopper.smpp.type.SmppTimeoutException;
 import com.cloudhopper.smpp.type.UnrecoverablePduException;
 
-public class SmppClient {
+public class SmppClient implements SMSManager {
 
     private SmppSessionConfiguration sessionConfig = new SmppSessionConfiguration();
     private SmppSession smppSession;
@@ -212,46 +214,52 @@ public class SmppClient {
         }
     }
 
+    @Override
     public synchronized void sendMessageSync(String destAddress, String message, boolean command)
-            throws RecoverablePduException, UnrecoverablePduException, SmppTimeoutException, SmppChannelException,
-            InterruptedException, IllegalStateException {
+            throws SMSException, InterruptedException, IllegalStateException {
         if (getSession() != null && getSession().isBound()) {
-            SubmitSm submit = new SubmitSm();
-            byte[] textBytes;
-            textBytes = CharsetUtil.encode(message, command ? commandsCharsetName : notificationsCharsetName);
-            submit.setDataCoding(command ? commandsDataCoding : notificationsDataCoding);
-            if (requestDlr) {
-                submit.setRegisteredDelivery(SmppConstants.REGISTERED_DELIVERY_SMSC_RECEIPT_REQUESTED);
-            }
+            try {
+                SubmitSm submit = new SubmitSm();
+                byte[] textBytes;
+                textBytes = CharsetUtil.encode(message, command ? commandsCharsetName : notificationsCharsetName);
+                submit.setDataCoding(command ? commandsDataCoding : notificationsDataCoding);
+                if (requestDlr) {
+                    submit.setRegisteredDelivery(SmppConstants.REGISTERED_DELIVERY_SMSC_RECEIPT_REQUESTED);
+                }
 
-            if (textBytes != null && textBytes.length > 255) {
-                submit.addOptionalParameter(new Tlv(SmppConstants.TAG_MESSAGE_PAYLOAD, textBytes, "message_payload"));
-            } else {
-                submit.setShortMessage(textBytes);
-            }
+                if (textBytes != null && textBytes.length > 255) {
+                    submit.addOptionalParameter(new Tlv(SmppConstants.TAG_MESSAGE_PAYLOAD, textBytes,
+                        "message_payload"));
+                } else {
+                    submit.setShortMessage(textBytes);
+                }
 
-            submit.setSourceAddress(command ? new Address(commandSourceTon, commandSourceNpi, commandSourceAddress)
-                    : new Address(sourceTon, sourceNpi, sourceAddress));
-            submit.setDestAddress(new Address(destTon, destNpi, destAddress));
-            SubmitSmResp submitResponce = getSession().submit(submit, submitTimeout);
-            if (submitResponce.getCommandStatus() == SmppConstants.STATUS_OK) {
-                Log.debug("SMS submitted, message id: " + submitResponce.getMessageId());
-            } else {
-                throw new IllegalStateException(submitResponce.getResultMessage());
+                submit.setSourceAddress(command ? new Address(commandSourceTon, commandSourceNpi, commandSourceAddress)
+                        : new Address(sourceTon, sourceNpi, sourceAddress));
+                submit.setDestAddress(new Address(destTon, destNpi, destAddress));
+                SubmitSmResp submitResponce = getSession().submit(submit, submitTimeout);
+                if (submitResponce.getCommandStatus() == SmppConstants.STATUS_OK) {
+                    Log.debug("SMS submitted, message id: " + submitResponce.getMessageId());
+                } else {
+                    throw new IllegalStateException(submitResponce.getResultMessage());
+                }
+            } catch (SmppChannelException | RecoverablePduException
+                    | SmppTimeoutException | UnrecoverablePduException error) {
+                throw new SMSException(error);
             }
         } else {
-            throw new SmppChannelException("SMPP session is not connected");
+            throw new SMSException(new SmppChannelException("SMPP session is not connected"));
         }
     }
 
+    @Override
     public void sendMessageAsync(final String destAddress, final String message, final boolean command) {
         executorService.execute(new Runnable() {
             @Override
             public void run() {
                 try {
                     sendMessageSync(destAddress, message, command);
-                } catch (InterruptedException | RecoverablePduException | UnrecoverablePduException
-                        | SmppTimeoutException | SmppChannelException | IllegalStateException error) {
+                } catch (SMSException | InterruptedException | IllegalStateException error) {
                     Log.warning(error);
                 }
             }

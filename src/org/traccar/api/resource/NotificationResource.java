@@ -17,11 +17,11 @@ package org.traccar.api.resource;
 
 import java.util.Collection;
 
-import javax.mail.MessagingException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -31,13 +31,8 @@ import org.traccar.api.ExtendedObjectResource;
 import org.traccar.model.Event;
 import org.traccar.model.Notification;
 import org.traccar.model.Typed;
-import org.traccar.notification.NotificationMail;
-import org.traccar.notification.NotificationSms;
+import org.traccar.notification.NotificationException;
 
-import com.cloudhopper.smpp.type.RecoverablePduException;
-import com.cloudhopper.smpp.type.SmppChannelException;
-import com.cloudhopper.smpp.type.SmppTimeoutException;
-import com.cloudhopper.smpp.type.UnrecoverablePduException;
 
 @Path("notifications")
 @Produces(MediaType.APPLICATION_JSON)
@@ -56,11 +51,26 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
 
     @POST
     @Path("test")
-    public Response testMessage() throws MessagingException, RecoverablePduException,
-            UnrecoverablePduException, SmppTimeoutException, SmppChannelException, InterruptedException {
-        NotificationMail.sendMailSync(getUserId(), new Event("test", 0), null);
-        NotificationSms.sendSmsSync(getUserId(), new Event("test", 0), null);
+    public Response testMessage() throws NotificationException, InterruptedException {
+        for (String method : Context.getNotificatorManager().getNotificatorTypes()) {
+            Context.getNotificatorManager().getNotificator(method).sendSync(getUserId(), new Event("test", 0), null);
+        }
         return Response.noContent().build();
     }
+
+    @POST
+    @Path("test/{method}")
+    public Response testMessage(@PathParam("method") String method) throws NotificationException, InterruptedException {
+        Context.getNotificatorManager().getNotificator(method).sendSync(getUserId(), new Event("test", 0), null);
+        return Response.noContent().build();
+    }
+
+
+    @GET
+    @Path("notificators")
+    public Collection<String> getNotificators() {
+        return Context.getNotificatorManager().getNotificatorTypes();
+    }
+
 
 }

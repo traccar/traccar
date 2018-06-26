@@ -32,8 +32,6 @@ import org.traccar.model.Event;
 import org.traccar.model.Notification;
 import org.traccar.model.Position;
 import org.traccar.model.Typed;
-import org.traccar.notification.NotificationMail;
-import org.traccar.notification.NotificationSms;
 
 public class NotificationManager extends ExtendedObjectManager<Notification> {
 
@@ -85,28 +83,15 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
                 if (usersToForward != null) {
                     usersToForward.add(userId);
                 }
-                boolean sentWeb = false;
-                boolean sentMail = false;
-                boolean sentSms = Context.getSmppManager() == null;
+                final Set<String> notificationMethods = new HashSet<>();
                 for (long notificationId : getEffectiveNotifications(userId, deviceId, event.getServerTime())) {
                     Notification notification = getById(notificationId);
                     if (getById(notificationId).getType().equals(event.getType())) {
-                        if (!sentWeb && notification.getWeb()) {
-                            Context.getConnectionManager().updateEvent(userId, event);
-                            sentWeb = true;
-                        }
-                        if (!sentMail && notification.getMail()) {
-                            NotificationMail.sendMailAsync(userId, event, position);
-                            sentMail = true;
-                        }
-                        if (!sentSms && notification.getSms()) {
-                            NotificationSms.sendSmsAsync(userId, event, position);
-                            sentSms = true;
-                        }
+                        notificationMethods.addAll(notification.getTransportMethods());
                     }
-                    if (sentWeb && sentMail && sentSms) {
-                        break;
-                    }
+                }
+                for (String nm : notificationMethods) {
+                    Context.getNotificatorManager().getNotificator(nm).sendAsync(userId, event, position);
                 }
             }
         }

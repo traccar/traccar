@@ -15,6 +15,9 @@
  */
 package org.traccar.model;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class Notification extends ScheduledModel {
 
     private boolean always;
@@ -37,33 +40,25 @@ public class Notification extends ScheduledModel {
         this.type = type;
     }
 
-    private boolean web;
 
-    public boolean getWeb() {
-        return web;
+    private String transports;
+
+    public String getTransports() {
+        return transports;
     }
 
-    public void setWeb(boolean web) {
-        this.web = web;
+    public void setTransports(String transports) {
+        this.transports = transports;
     }
 
-    private boolean mail;
 
-    public boolean getMail() {
-        return mail;
+    public Set<String> getTransportMethods() {
+        final Set<String> set = new HashSet<>();
+        final String[] tmp = transports.split(",");
+        for (String t : tmp) {
+            set.add(t.trim());
+        }
+        return set;
     }
 
-    public void setMail(boolean mail) {
-        this.mail = mail;
-    }
-
-    private boolean sms;
-
-    public boolean getSms() {
-        return sms;
-    }
-
-    public void setSms(boolean sms) {
-        this.sms = sms;
-    }
 }

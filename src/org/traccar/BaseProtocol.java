@@ -91,18 +91,18 @@ public abstract class BaseProtocol implements Protocol {
 
     @Override
     public void sendTextCommand(String destAddress, Command command) throws Exception {
-        if (Context.getSmppManager() != null) {
+        if (Context.getSmsManager() != null) {
             if (command.getType().equals(Command.TYPE_CUSTOM)) {
-                Context.getSmppManager().sendMessageSync(destAddress, command.getString(Command.KEY_DATA), true);
+                Context.getSmsManager().sendMessageSync(destAddress, command.getString(Command.KEY_DATA), true);
             } else if (supportedTextCommands.contains(command.getType()) && textCommandEncoder != null) {
-                Context.getSmppManager().sendMessageSync(destAddress,
+                Context.getSmsManager().sendMessageSync(destAddress,
                         (String) textCommandEncoder.encodeCommand(command), true);
             } else {
                 throw new RuntimeException(
                         "Command " + command.getType() + " is not supported in protocol " + getName());
             }
         } else {
-            throw new RuntimeException("SMPP client is not enabled");
+            throw new RuntimeException("SMS is not enabled");
         }
     }
 

@@ -61,10 +61,10 @@ public class CommandsManager  extends ExtendedObjectManager<Command> {
                 BaseProtocol protocol = Context.getServerManager().getProtocol(lastPosition.getProtocol());
                 protocol.sendTextCommand(phone, command);
             } else if (command.getType().equals(Command.TYPE_CUSTOM)) {
-                if (Context.getSmppManager() != null) {
-                    Context.getSmppManager().sendMessageSync(phone, command.getString(Command.KEY_DATA), true);
+                if (Context.getSmsManager() != null) {
+                    Context.getSmsManager().sendMessageSync(phone, command.getString(Command.KEY_DATA), true);
                 } else {
-                    throw new RuntimeException("SMPP client is not enabled");
+                    throw new RuntimeException("SMS is not enabled");
                 }
             } else {
                 throw new RuntimeException("Command " + command.getType() + " is not supported");
