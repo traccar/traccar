@@ -88,12 +88,12 @@ public final class NotificationFormatter {
         return template;
     }
 
-    public static MailMessage formatFullMessage(long userId, Event event, Position position) {
+    public static FullMessage formatFullMessage(long userId, Event event, Position position) {
         String templatePath = Context.getConfig().getString("message.full.templatesPath", "full");
         VelocityContext velocityContext = prepareContext(userId, event, position);
         String formattedMessage = formatMessage(velocityContext, userId, event, position, templatePath);
 
-        return new MailMessage((String) velocityContext.get("subject"), formattedMessage);
+        return new FullMessage((String) velocityContext.get("subject"), formattedMessage);
     }
 
     public static String formatShortMessage(long userId, Event event, Position position) {

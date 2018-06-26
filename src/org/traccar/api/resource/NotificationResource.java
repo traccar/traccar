@@ -48,7 +48,7 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
     public Collection<Typed> get() {
         return Context.getNotificationManager().getAllNotificationTypes();
     }
-    
+
     @GET
     @Path("notificators")
     public Collection<Typed> getNotificators() {

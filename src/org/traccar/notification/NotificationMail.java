@@ -108,10 +108,10 @@ public final class NotificationMail extends Notificator {
             }
 
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(user.getEmail()));
-            MailMessage mailMessage = NotificationFormatter.formatFullMessage(userId, event, position);
-            message.setSubject(mailMessage.getSubject());
+            FullMessage fullMessage = NotificationFormatter.formatFullMessage(userId, event, position);
+            message.setSubject(fullMessage.getSubject());
             message.setSentDate(new Date());
-            message.setContent(mailMessage.getBody(), "text/html; charset=utf-8");
+            message.setContent(fullMessage.getBody(), "text/html; charset=utf-8");
 
             Transport transport = session.getTransport();
             try {
