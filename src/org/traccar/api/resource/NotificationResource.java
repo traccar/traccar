@@ -48,11 +48,17 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
     public Collection<Typed> get() {
         return Context.getNotificationManager().getAllNotificationTypes();
     }
+    
+    @GET
+    @Path("notificators")
+    public Collection<Typed> getNotificators() {
+        return Context.getNotificatorManager().getAllNotificatorTypes();
+    }
 
     @POST
     @Path("test")
     public Response testMessage() throws NotificationException, InterruptedException {
-        for (Typed method : Context.getNotificatorManager().getNotificatorTypes()) {
+        for (Typed method : Context.getNotificatorManager().getAllNotificatorTypes()) {
             Context.getNotificatorManager()
                     .getNotificator(method.getType()).sendSync(getUserId(), new Event("test", 0), null);
         }
@@ -60,18 +66,11 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
     }
 
     @POST
-    @Path("test/{method}")
-    public Response testMessage(@PathParam("method") String method) throws NotificationException, InterruptedException {
-        Context.getNotificatorManager().getNotificator(method).sendSync(getUserId(), new Event("test", 0), null);
+    @Path("test/{notificator}")
+    public Response testMessage(@PathParam("notificator") String notificator)
+            throws NotificationException, InterruptedException {
+        Context.getNotificatorManager().getNotificator(notificator).sendSync(getUserId(), new Event("test", 0), null);
         return Response.noContent().build();
     }
-
-
-    @GET
-    @Path("notificators")
-    public Collection<Typed> getNotificators() {
-        return Context.getNotificatorManager().getNotificatorTypes();
-    }
-
 
 }

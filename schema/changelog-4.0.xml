@@ -56,41 +56,41 @@
   <changeSet author="author" id="changelog-4.0">
 
     <addColumn tableName="tc_notifications">
-      <column name="transports" type="VARCHAR(128)" />
+      <column name="notificators" type="VARCHAR(128)" />
     </addColumn>
 
     <update tableName="tc_notifications">
-        <column name="transports" value="web,mail,sms" />
+        <column name="notificators" value="web,mail,sms" />
         <where>web = 1 AND mail = 1 AND sms = 1</where>
     </update>
 
     <update tableName="tc_notifications">
-        <column name="transports" value="web,mail" />
+        <column name="notificators" value="web,mail" />
         <where>web = 1 AND mail = 1 AND sms = 0</where>
     </update>
 
     <update tableName="tc_notifications">
-        <column name="transports" value="web" />
+        <column name="notificators" value="web" />
         <where>web = 1 AND mail = 0 AND sms = 0</where>
     </update>
 
     <update tableName="tc_notifications">
-        <column name="transports" value="web,sms" />
+        <column name="notificators" value="web,sms" />
         <where>web = 1 AND mail = 0 AND sms = 1</where>
     </update>
 
     <update tableName="tc_notifications">
-        <column name="transports" value="mail,sms" />
+        <column name="notificators" value="mail,sms" />
         <where>web = 0 AND mail = 1 AND sms = 1</where>
     </update>
 
     <update tableName="tc_notifications">
-        <column name="transports" value="mail" />
+        <column name="notificators" value="mail" />
         <where>web = 0 AND mail = 1 AND sms = 0</where>
     </update>
 
     <update tableName="tc_notifications">
-        <column name="transports" value="sms" />
+        <column name="notificators" value="sms" />
         <where>web = 0 AND mail = 0 AND sms = 1</where>
     </update>
 

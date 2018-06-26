@@ -83,16 +83,15 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
                 if (usersToForward != null) {
                     usersToForward.add(userId);
                 }
-                final Set<String> notificationMethods = new HashSet<>();
+                final Set<String> notificators = new HashSet<>();
                 for (long notificationId : getEffectiveNotifications(userId, deviceId, event.getServerTime())) {
                     Notification notification = getById(notificationId);
                     if (getById(notificationId).getType().equals(event.getType())) {
-                        notificationMethods.addAll(notification.getTransportMethods());
+                        notificators.addAll(notification.getNotificatorsTypes());
                     }
                 }
-                for (String notificationMethod : notificationMethods) {
-                    Context.getNotificatorManager()
-                            .getNotificator(notificationMethod).sendAsync(userId, event, position);
+                for (String notificator : notificators) {
+                    Context.getNotificatorManager().getNotificator(notificator).sendAsync(userId, event, position);
                 }
             }
         }

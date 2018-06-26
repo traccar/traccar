@@ -64,7 +64,7 @@ public final class NotificatorManager {
     }
 
 
-    public Set<Typed> getNotificatorTypes() {
+    public Set<Typed> getAllNotificatorTypes() {
         Set<Typed> result = new HashSet<>();
         for (String notificator : notificators.keySet()) {
             result.add(new Typed(notificator));

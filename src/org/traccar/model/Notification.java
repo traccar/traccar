@@ -45,23 +45,23 @@ public class Notification extends ScheduledModel {
     }
 
 
-    private String transports;
+    private String notificators;
 
-    public String getTransports() {
-        return transports;
+    public String getNotificators() {
+        return notificators;
     }
 
-    public void setTransports(String transports) {
-        this.transports = transports;
+    public void setNotificators(String transports) {
+        this.notificators = transports;
     }
 
 
     @JsonIgnore
     @QueryIgnore
-    public Set<String> getTransportMethods() {
+    public Set<String> getNotificatorsTypes() {
         final Set<String> result = new HashSet<>();
-        if (transports != null) {
-            final String[] transportsList = transports.split(",");
+        if (notificators != null) {
+            final String[] transportsList = notificators.split(",");
             for (String transport : transportsList) {
                 result.add(transport.trim());
             }
