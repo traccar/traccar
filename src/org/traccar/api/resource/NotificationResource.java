@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,8 +52,9 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
     @POST
     @Path("test")
     public Response testMessage() throws NotificationException, InterruptedException {
-        for (String method : Context.getNotificatorManager().getNotificatorTypes()) {
-            Context.getNotificatorManager().getNotificator(method).sendSync(getUserId(), new Event("test", 0), null);
+        for (Typed method : Context.getNotificatorManager().getNotificatorTypes()) {
+            Context.getNotificatorManager()
+                    .getNotificator(method.getType()).sendSync(getUserId(), new Event("test", 0), null);
         }
         return Response.noContent().build();
     }
@@ -68,7 +69,7 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
 
     @GET
     @Path("notificators")
-    public Collection<String> getNotificators() {
+    public Collection<Typed> getNotificators() {
         return Context.getNotificatorManager().getNotificatorTypes();
     }
 

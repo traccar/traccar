@@ -90,8 +90,9 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
                         notificationMethods.addAll(notification.getTransportMethods());
                     }
                 }
-                for (String nm : notificationMethods) {
-                    Context.getNotificatorManager().getNotificator(nm).sendAsync(userId, event, position);
+                for (String notificationMethod : notificationMethods) {
+                    Context.getNotificatorManager()
+                            .getNotificator(notificationMethod).sendAsync(userId, event, position);
                 }
             }
         }

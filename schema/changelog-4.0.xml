@@ -53,4 +53,51 @@
 
   </changeSet>
 
+  <changeSet author="author" id="changelog-4.0">
+
+    <addColumn tableName="tc_notifications">
+      <column name="transports" type="VARCHAR(128)" />
+    </addColumn>
+
+    <update tableName="tc_notifications">
+        <column name="transports" value="web,mail,sms" />
+        <where>web = 1 AND mail = 1 AND sms = 1</where>
+    </update>
+
+    <update tableName="tc_notifications">
+        <column name="transports" value="web,mail" />
+        <where>web = 1 AND mail = 1 AND sms = 0</where>
+    </update>
+
+    <update tableName="tc_notifications">
+        <column name="transports" value="web" />
+        <where>web = 1 AND mail = 0 AND sms = 0</where>
+    </update>
+
+    <update tableName="tc_notifications">
+        <column name="transports" value="web,sms" />
+        <where>web = 1 AND mail = 0 AND sms = 1</where>
+    </update>
+
+    <update tableName="tc_notifications">
+        <column name="transports" value="mail,sms" />
+        <where>web = 0 AND mail = 1 AND sms = 1</where>
+    </update>
+
+    <update tableName="tc_notifications">
+        <column name="transports" value="mail" />
+        <where>web = 0 AND mail = 1 AND sms = 0</where>
+    </update>
+
+    <update tableName="tc_notifications">
+        <column name="transports" value="sms" />
+        <where>web = 0 AND mail = 0 AND sms = 1</where>
+    </update>
+
+    <dropColumn tableName="tc_notifications" columnName="web" />
+    <dropColumn tableName="tc_notifications" columnName="mail" />
+    <dropColumn tableName="tc_notifications" columnName="sms" />
+
+  </changeSet>
+
 </databaseChangeLog>

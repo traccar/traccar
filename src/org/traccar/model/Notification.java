@@ -18,6 +18,10 @@ package org.traccar.model;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.traccar.database.QueryIgnore;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class Notification extends ScheduledModel {
 
     private boolean always;
@@ -52,13 +56,17 @@ public class Notification extends ScheduledModel {
     }
 
 
+    @JsonIgnore
+    @QueryIgnore
     public Set<String> getTransportMethods() {
-        final Set<String> set = new HashSet<>();
-        final String[] tmp = transports.split(",");
-        for (String t : tmp) {
-            set.add(t.trim());
+        final Set<String> result = new HashSet<>();
+        if (transports != null) {
+            final String[] transportsList = transports.split(",");
+            for (String transport : transportsList) {
+                result.add(transport.trim());
+            }
         }
-        return set;
+        return result;
     }
 
 }
