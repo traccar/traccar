@@ -22,6 +22,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.helper.Checksum;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
@@ -102,6 +103,7 @@ public class AutoTrackProtocolDecoder extends BaseProtocolDecoder {
                     response.writeBytes(ByteBufUtil.decodeHexDump(imei));
                     response.writeShortLE(fuelConst);
                     response.writeShortLE(tripConst);
+                    response.writeShort(Checksum.crc16(Checksum.CRC16_XMODEM, response.nioBuffer()));
                     channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
                 }
                 return null;
