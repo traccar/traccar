@@ -31,7 +31,7 @@ import org.traccar.api.ExtendedObjectResource;
 import org.traccar.model.Event;
 import org.traccar.model.Notification;
 import org.traccar.model.Typed;
-import org.traccar.notification.NotificationException;
+import org.traccar.notification.MessageException;
 
 
 @Path("notifications")
@@ -57,7 +57,7 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
 
     @POST
     @Path("test")
-    public Response testMessage() throws NotificationException, InterruptedException {
+    public Response testMessage() throws MessageException, InterruptedException {
         for (Typed method : Context.getNotificatorManager().getAllNotificatorTypes()) {
             Context.getNotificatorManager()
                     .getNotificator(method.getType()).sendSync(getUserId(), new Event("test", 0), null);
@@ -68,7 +68,7 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
     @POST
     @Path("test/{notificator}")
     public Response testMessage(@PathParam("notificator") String notificator)
-            throws NotificationException, InterruptedException {
+            throws MessageException, InterruptedException {
         Context.getNotificatorManager().getNotificator(notificator).sendSync(getUserId(), new Event("test", 0), null);
         return Response.noContent().build();
     }

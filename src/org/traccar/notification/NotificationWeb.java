@@ -23,8 +23,7 @@ import org.traccar.model.Position;
 public final class NotificationWeb extends Notificator {
 
     @Override
-    public void sendSync(long userId, Event event, Position position) throws NotificationException,
-            InterruptedException {
+    public void sendSync(long userId, Event event, Position position) {
         Context.getConnectionManager().updateEvent(userId, event);
     }
 

@@ -27,14 +27,14 @@ public abstract class Notificator {
             public void run() {
                 try {
                     sendSync(userId, event, position);
-                } catch (NotificationException | InterruptedException error) {
+                } catch (MessageException | InterruptedException error) {
                     Log.warning(error);
                 }
             }
         }).start();
     }
 
-
     public abstract void sendSync(long userId, Event event, Position position)
-        throws NotificationException, InterruptedException;
+        throws MessageException, InterruptedException;
+
 }

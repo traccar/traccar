@@ -16,8 +16,6 @@
  */
 package org.traccar.notification;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -29,30 +27,39 @@ import org.traccar.model.Typed;
 
 public final class NotificatorManager {
 
-    public NotificatorManager() {
-        final String[] types = Context.getConfig().getString("notificator.types", "").split(",");
-        for (String type : types) {
-            final String className = Context.getConfig().getString("notificator." + type + ".class", "");
-            if (className.length() > 0) {
-                try {
-                    final Class<Notificator> clazz = (Class<Notificator>) Class.forName(className);
-                    try {
-                        final Constructor<Notificator> constructor = clazz.getConstructor(new Class[]{String.class});
-                        notificators.put(type, constructor.newInstance(type));
-                    } catch (NoSuchMethodException e) {
-                        // No constructor with String argument
-                        notificators.put(type, clazz.newInstance());
-                    }
-                } catch (ClassNotFoundException | InstantiationException
-                        | IllegalAccessException | InvocationTargetException e) {
-                    Log.error("Unable to load notificator class for " + type + " " + className + " " + e.getMessage());
-                }
-            }
-        }
-    }
+    private static final String DEFAULT_WEB_NOTIFICATOR = "org.traccar.notification.NotificationWeb";
+    private static final String DEFAULT_MAIL_NOTIFICATOR = "org.traccar.notification.NotificationMail";
+    private static final String DEFAULT_SMS_NOTIFICATOR = "org.traccar.notification.NotificationSms";
 
     private final Map<String, Notificator> notificators = new HashMap<>();
     private static final Notificator NULL_NOTIFICATOR = new NotificationNull();
+
+    public NotificatorManager() {
+        final String[] types = Context.getConfig().getString("notificator.types", "").split(",");
+        for (String type : types) {
+            String defaultNotificator = "";
+            switch (type) {
+                case "web":
+                    defaultNotificator = DEFAULT_WEB_NOTIFICATOR;
+                    break;
+                case "mail":
+                    defaultNotificator = DEFAULT_MAIL_NOTIFICATOR;
+                    break;
+                case "sms":
+                    defaultNotificator = DEFAULT_SMS_NOTIFICATOR;
+                    break;
+                default:
+                    break;
+            }
+            final String className = Context.getConfig()
+                    .getString("notificator." + type + ".class", defaultNotificator);
+            try {
+                notificators.put(type, (Notificator) Class.forName(className).newInstance());
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+                Log.error("Unable to load notificator class for " + type + " " + className + " " + e.getMessage());
+            }
+        }
+    }
 
     public Notificator getNotificator(String type) {
         final Notificator notificator = notificators.get(type);
@@ -63,7 +70,6 @@ public final class NotificatorManager {
         return notificator;
     }
 
-
     public Set<Typed> getAllNotificatorTypes() {
         Set<Typed> result = new HashSet<>();
         for (String notificator : notificators.keySet()) {
@@ -72,6 +78,4 @@ public final class NotificatorManager {
         return result;
     }
 
-
 }
-

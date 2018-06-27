@@ -79,7 +79,7 @@ import org.traccar.notification.EventForwarder;
 import org.traccar.notification.JsonTypeEventForwarder;
 import org.traccar.notification.NotificatorManager;
 import org.traccar.reports.model.TripsConfig;
-import org.traccar.sms.SMSManager;
+import org.traccar.sms.SmsManager;
 import org.traccar.web.WebServer;
 
 import javax.ws.rs.client.Client;
@@ -261,9 +261,9 @@ public final class Context {
         return statisticsManager;
     }
 
-    private static SMSManager smsManager;
+    private static SmsManager smsManager;
 
-    public static SMSManager getSmsManager() {
+    public static SmsManager getSmsManager() {
         return smsManager;
     }
 
@@ -396,11 +396,11 @@ public final class Context {
 
         tripsConfig = initTripsConfig();
 
-        if (config.getBoolean("sms.smpp.enable")) {
+        if (config.getBoolean("sms.enable")) {
             final String smsManagerClass = config.getString("sms.manager.class", "org.traccar.smpp.SmppClient");
             try {
-                smsManager = (SMSManager) Class.forName(smsManagerClass).newInstance();
-            } catch (ClassNotFoundException e) {
+                smsManager = (SmsManager) Class.forName(smsManagerClass).newInstance();
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
                 Log.warning("Error loading SMS Manager class : " + smsManagerClass, e);
             }
         }

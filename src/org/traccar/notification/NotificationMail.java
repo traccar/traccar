@@ -82,7 +82,7 @@ public final class NotificationMail extends Notificator {
     }
 
     @Override
-    public void sendSync(long userId, Event event, Position position) throws NotificationException {
+    public void sendSync(long userId, Event event, Position position) throws MessageException {
         User user = Context.getPermissionsManager().getUser(userId);
 
         Properties properties = null;
@@ -125,7 +125,7 @@ public final class NotificationMail extends Notificator {
                 transport.close();
             }
         } catch (MessagingException e) {
-            throw new NotificationException(e);
+            throw new MessageException(e);
         }
     }
 

@@ -16,13 +16,12 @@
  */
 package org.traccar.sms;
 
+import org.traccar.notification.MessageException;
 
-import org.traccar.notification.NotificationException;
+public interface SmsManager {
 
-public class SMSException extends NotificationException {
-
-    public SMSException(Throwable cause) {
-        super(cause);
-    }
+    void sendMessageSync(String destAddress, String message, boolean command)
+            throws InterruptedException, MessageException;
+    void sendMessageAsync(final String destAddress, final String message, final boolean command);
 
 }

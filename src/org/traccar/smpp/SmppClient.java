@@ -25,8 +25,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.traccar.Context;
 import org.traccar.helper.Log;
-import org.traccar.sms.SMSException;
-import org.traccar.sms.SMSManager;
+import org.traccar.notification.MessageException;
+import org.traccar.sms.SmsManager;
 
 import com.cloudhopper.commons.charset.CharsetUtil;
 import com.cloudhopper.smpp.SmppBindType;
@@ -44,7 +44,7 @@ import com.cloudhopper.smpp.type.SmppChannelException;
 import com.cloudhopper.smpp.type.SmppTimeoutException;
 import com.cloudhopper.smpp.type.UnrecoverablePduException;
 
-public class SmppClient implements SMSManager {
+public class SmppClient implements SmsManager {
 
     private SmppSessionConfiguration sessionConfig = new SmppSessionConfiguration();
     private SmppSession smppSession;
@@ -216,7 +216,7 @@ public class SmppClient implements SMSManager {
 
     @Override
     public synchronized void sendMessageSync(String destAddress, String message, boolean command)
-            throws SMSException, InterruptedException, IllegalStateException {
+            throws MessageException, InterruptedException, IllegalStateException {
         if (getSession() != null && getSession().isBound()) {
             try {
                 SubmitSm submit = new SubmitSm();
@@ -245,10 +245,10 @@ public class SmppClient implements SMSManager {
                 }
             } catch (SmppChannelException | RecoverablePduException
                     | SmppTimeoutException | UnrecoverablePduException error) {
-                throw new SMSException(error);
+                throw new MessageException(error);
             }
         } else {
-            throw new SMSException(new SmppChannelException("SMPP session is not connected"));
+            throw new MessageException(new SmppChannelException("SMPP session is not connected"));
         }
     }
 
@@ -259,7 +259,7 @@ public class SmppClient implements SMSManager {
             public void run() {
                 try {
                     sendMessageSync(destAddress, message, command);
-                } catch (SMSException | InterruptedException | IllegalStateException error) {
+                } catch (MessageException | InterruptedException | IllegalStateException error) {
                     Log.warning(error);
                 }
             }

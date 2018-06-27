@@ -16,9 +16,9 @@
  */
 package org.traccar.notification;
 
-public class NotificationException extends Exception {
+public class MessageException extends Exception {
 
-    public NotificationException(Throwable cause) {
+    public MessageException(Throwable cause) {
         super(cause);
     }
 

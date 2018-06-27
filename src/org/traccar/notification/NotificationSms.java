@@ -20,41 +20,37 @@ import org.traccar.Context;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
-import org.traccar.sms.SMSManager;
-import org.traccar.sms.SMSException;
+import org.traccar.sms.SmsManager;
 
 public final class NotificationSms extends Notificator {
 
-    private final SMSManager sms;
+    private final SmsManager smsManager;
 
-    public NotificationSms(String methodId) throws ClassNotFoundException,
-            InstantiationException, IllegalAccessException {
-        final String smsClass = Context.getConfig().getString("notificator." + methodId + ".sms.class", "");
+    public NotificationSms() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+        final String smsClass = Context.getConfig().getString("notificator.sms.manager.class", "");
         if (smsClass.length() > 0) {
-            sms = (SMSManager) Class.forName(smsClass).newInstance();
+            smsManager = (SmsManager) Class.forName(smsClass).newInstance();
         } else {
-            sms = Context.getSmsManager();
+            smsManager = Context.getSmsManager();
         }
     }
-
 
     @Override
     public void sendAsync(long userId, Event event, Position position) {
         final User user = Context.getPermissionsManager().getUser(userId);
         if (user.getPhone() != null) {
             Context.getStatisticsManager().registerSms();
-            sms.sendMessageAsync(user.getPhone(),
+            smsManager.sendMessageAsync(user.getPhone(),
                     NotificationFormatter.formatShortMessage(userId, event, position), false);
         }
     }
 
     @Override
-    public void sendSync(long userId, Event event, Position position) throws SMSException,
-            InterruptedException {
+    public void sendSync(long userId, Event event, Position position) throws MessageException, InterruptedException {
         final User user = Context.getPermissionsManager().getUser(userId);
         if (user.getPhone() != null) {
             Context.getStatisticsManager().registerSms();
-            sms.sendMessageSync(user.getPhone(),
+            smsManager.sendMessageSync(user.getPhone(),
                     NotificationFormatter.formatShortMessage(userId, event, position), false);
         }
     }
