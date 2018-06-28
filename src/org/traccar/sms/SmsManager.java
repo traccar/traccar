@@ -1,6 +1,6 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
- * Copyright 2016 Andrey Kunitsyn (andrey@traccar.org)
+ * Copyright 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.notification;
+package org.traccar.sms;
 
-public class MailMessage {
+import org.traccar.notification.MessageException;
 
-    private String subject;
-    private String body;
+public interface SmsManager {
 
-    public MailMessage(String subject, String body) {
-        this.subject = subject;
-        this.body = body;
-    }
+    void sendMessageSync(String destAddress, String message, boolean command)
+            throws InterruptedException, MessageException;
+    void sendMessageAsync(final String destAddress, final String message, final boolean command);
 
-    public String getSubject() {
-        return subject;
-    }
-
-    public String getBody() {
-        return body;
-    }
 }

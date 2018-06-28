@@ -1,6 +1,6 @@
 /*
- * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
- * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
+ * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,7 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 
-public final class NotificationMail {
-
-    private NotificationMail() {
-    }
+public final class NotificationMail extends Notificator {
 
     private static Properties getProperties(PropertiesProvider provider) {
         Properties properties = new Properties();
@@ -84,7 +81,8 @@ public final class NotificationMail {
         return properties;
     }
 
-    public static void sendMailSync(long userId, Event event, Position position) throws MessagingException {
+    @Override
+    public void sendSync(long userId, Event event, Position position) throws MessageException {
         User user = Context.getPermissionsManager().getUser(userId);
 
         Properties properties = null;
@@ -103,40 +101,32 @@ public final class NotificationMail {
 
         MimeMessage message = new MimeMessage(session);
 
-        String from = properties.getProperty("mail.smtp.from");
-        if (from != null) {
-            message.setFrom(new InternetAddress(from));
-        }
-
-        message.addRecipient(Message.RecipientType.TO, new InternetAddress(user.getEmail()));
-        MailMessage mailMessage = NotificationFormatter.formatMailMessage(userId, event, position);
-        message.setSubject(mailMessage.getSubject());
-        message.setSentDate(new Date());
-        message.setContent(mailMessage.getBody(), "text/html; charset=utf-8");
-
-        Transport transport = session.getTransport();
         try {
-            Context.getStatisticsManager().registerMail();
-            transport.connect(
-                    properties.getProperty("mail.smtp.host"),
-                    properties.getProperty("mail.smtp.username"),
-                    properties.getProperty("mail.smtp.password"));
-            transport.sendMessage(message, message.getAllRecipients());
-        } finally {
-            transport.close();
-        }
-    }
-
-    public static void sendMailAsync(final long userId, final Event event, final Position position) {
-        new Thread(new Runnable() {
-            public void run() {
-                try {
-                    sendMailSync(userId, event, position);
-                } catch (MessagingException error) {
-                    Log.warning(error);
-                }
+            String from = properties.getProperty("mail.smtp.from");
+            if (from != null) {
+                message.setFrom(new InternetAddress(from));
             }
-        }).start();
+
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(user.getEmail()));
+            FullMessage fullMessage = NotificationFormatter.formatFullMessage(userId, event, position);
+            message.setSubject(fullMessage.getSubject());
+            message.setSentDate(new Date());
+            message.setContent(fullMessage.getBody(), "text/html; charset=utf-8");
+
+            Transport transport = session.getTransport();
+            try {
+                Context.getStatisticsManager().registerMail();
+                transport.connect(
+                        properties.getProperty("mail.smtp.host"),
+                        properties.getProperty("mail.smtp.username"),
+                        properties.getProperty("mail.smtp.password"));
+                transport.sendMessage(message, message.getAllRecipients());
+            } finally {
+                transport.close();
+            }
+        } catch (MessagingException e) {
+            throw new MessageException(e);
+        }
     }
 
 }

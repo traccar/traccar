@@ -15,6 +15,13 @@
  */
 package org.traccar.model;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import org.traccar.database.QueryIgnore;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class Notification extends ScheduledModel {
 
     private boolean always;
@@ -37,33 +44,29 @@ public class Notification extends ScheduledModel {
         this.type = type;
     }
 
-    private boolean web;
 
-    public boolean getWeb() {
-        return web;
+    private String notificators;
+
+    public String getNotificators() {
+        return notificators;
     }
 
-    public void setWeb(boolean web) {
-        this.web = web;
+    public void setNotificators(String transports) {
+        this.notificators = transports;
     }
 
-    private boolean mail;
 
-    public boolean getMail() {
-        return mail;
+    @JsonIgnore
+    @QueryIgnore
+    public Set<String> getNotificatorsTypes() {
+        final Set<String> result = new HashSet<>();
+        if (notificators != null) {
+            final String[] transportsList = notificators.split(",");
+            for (String transport : transportsList) {
+                result.add(transport.trim());
+            }
+        }
+        return result;
     }
 
-    public void setMail(boolean mail) {
-        this.mail = mail;
-    }
-
-    private boolean sms;
-
-    public boolean getSms() {
-        return sms;
-    }
-
-    public void setSms(boolean sms) {
-        this.sms = sms;
-    }
 }

@@ -77,8 +77,9 @@ import org.traccar.geolocation.MozillaGeolocationProvider;
 import org.traccar.geolocation.OpenCellIdGeolocationProvider;
 import org.traccar.notification.EventForwarder;
 import org.traccar.notification.JsonTypeEventForwarder;
+import org.traccar.notification.NotificatorManager;
 import org.traccar.reports.model.TripsConfig;
-import org.traccar.smpp.SmppClient;
+import org.traccar.sms.SmsManager;
 import org.traccar.web.WebServer;
 
 import javax.ws.rs.client.Client;
@@ -206,6 +207,12 @@ public final class Context {
         return notificationManager;
     }
 
+    private static NotificatorManager notificatorManager;
+
+    public static NotificatorManager getNotificatorManager() {
+        return notificatorManager;
+    }
+
     private static VelocityEngine velocityEngine;
 
     public static VelocityEngine getVelocityEngine() {
@@ -254,10 +261,10 @@ public final class Context {
         return statisticsManager;
     }
 
-    private static SmppClient smppClient;
+    private static SmsManager smsManager;
 
-    public static SmppClient getSmppManager() {
-        return smppClient;
+    public static SmsManager getSmsManager() {
+        return smsManager;
     }
 
     private static MotionEventHandler motionEventHandler;
@@ -389,6 +396,15 @@ public final class Context {
 
         tripsConfig = initTripsConfig();
 
+        if (config.getBoolean("sms.enable")) {
+            final String smsManagerClass = config.getString("sms.manager.class", "org.traccar.smpp.SmppClient");
+            try {
+                smsManager = (SmsManager) Class.forName(smsManagerClass).newInstance();
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+                Log.warning("Error loading SMS Manager class : " + smsManagerClass, e);
+            }
+        }
+
         if (config.getBoolean("event.enable")) {
             initEventsModule();
         }
@@ -406,10 +422,6 @@ public final class Context {
         commandsManager = new CommandsManager(dataManager, config.getBoolean("commands.queueing"));
 
         statisticsManager = new StatisticsManager();
-
-        if (config.getBoolean("sms.smpp.enable")) {
-            smppClient = new SmppClient();
-        }
 
     }
 
@@ -441,6 +453,7 @@ public final class Context {
         calendarManager = new CalendarManager(dataManager);
         maintenancesManager = new MaintenancesManager(dataManager);
         notificationManager = new NotificationManager(dataManager);
+        notificatorManager = new NotificatorManager();
         Properties velocityProperties = new Properties();
         velocityProperties.setProperty("file.resource.loader.path",
                 Context.getConfig().getString("templates.rootPath", "templates") + "/");
