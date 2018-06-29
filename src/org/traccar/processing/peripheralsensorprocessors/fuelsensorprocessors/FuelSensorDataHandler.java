@@ -41,6 +41,8 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
     private static final int SECONDS_IN_ONE_HOUR = 3600;
 
+    private int minValuesForOutlier;
+    private int offsetForOutlier;
     private int minValuesForMovingAvg;
     private int maxInMemoryPreviousPositionsListSize;
     private int hoursOfDataToLoad;
@@ -75,6 +77,8 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
         hoursOfDataToLoad = Context.getConfig()
                                    .getInteger("processing.peripheralSensorData.hoursOfDataToLoad");
+
+        minValuesForOutlier = 9;
 
         minValuesForMovingAvg = Context.getConfig()
                                        .getInteger("processing.peripheralSensorData.minValuesForMovingAverage");
@@ -313,17 +317,36 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
         double calibratedFuelLevel = maybeCalibratedFuelLevel.get();
         position.set(Position.KEY_CALIBRATED_FUEL_LEVEL, calibratedFuelLevel);
+        positionsForDeviceSensor.add(position);
 
+        offsetForOutlier = 0;
+        /*
+        List<Position> relevantPositionsListForOutliers =
+                getRelevantPositionsSubList(positionsForDeviceSensor,
+                        position,
+                        minValuesForOutlier);
+
+        if (relevantPositionsListForOutliers.size() < minValuesForOutlier) {
+            return;
+        }
+
+        if (outlierPresentInSublist(relevantPositionsListForOutliers)) {
+            //remove outlier position from positionsForDeviceSensor (if required) and from previousPositions
+            return;
+        }
+
+        offsetForOutlier = 4;
+        */
         List<Position> relevantPositionsListForAverages =
                 getRelevantPositionsSubList(positionsForDeviceSensor,
                                             position,
-                                            minValuesForMovingAvg - 1);
+                                            minValuesForMovingAvg);
 
-        double currentFuelLevelAverage = getAverageValue(position, relevantPositionsListForAverages);
+        double currentFuelLevelAverage = getAverageValue(relevantPositionsListForAverages);
 
         // KEY_FUEL_LEVEL will hold the smoothed data, which is average of raw values in the relevant list.
-        position.set(Position.KEY_FUEL_LEVEL, currentFuelLevelAverage);
-        positionsForDeviceSensor.add(position);
+        //position.set(Position.KEY_FUEL_LEVEL, currentFuelLevelAverage);
+        //store currentFuelLevelAverage in correct row of position table and positionsForDeviceSensor
 
         List<Position> relevantPositionsListForAlerts =
                 getRelevantPositionsSubList(positionsForDeviceSensor,
@@ -382,6 +405,51 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         }
     }
 
+    private boolean outlierPresentInSublist(List<Position> rawFuelOutlierSublist) {
+
+        int midPoint = (rawFuelOutlierSublist.size() - 1) / 2;
+        double rawFuelOfMidpoint = (double) rawFuelOutlierSublist.get(midPoint)
+                .getAttributes().get(Position.KEY_CALIBRATED_FUEL_LEVEL);
+        double medianValue;
+        double[] fuelArray = new double[9];
+        double standardDeviation, mean, differenceOfMean, sumOfSquaredDifferenceOfMean = 0, sumOfValues = 0;
+        for (int i = 0; i < rawFuelOutlierSublist.size(); i++) {
+            sumOfValues += (double) rawFuelOutlierSublist.get(i).getAttributes()
+                    .get(Position.KEY_CALIBRATED_FUEL_LEVEL);
+            fuelArray[i] = (double) rawFuelOutlierSublist.get(i).getAttributes()
+                    .get(Position.KEY_CALIBRATED_FUEL_LEVEL);
+        }
+        mean = sumOfValues / rawFuelOutlierSublist.size();
+        for (int i = 0; i < rawFuelOutlierSublist.size(); i++) {
+            differenceOfMean = (double) rawFuelOutlierSublist.get(i).getAttributes()
+                    .get(Position.KEY_CALIBRATED_FUEL_LEVEL) - mean;
+            sumOfSquaredDifferenceOfMean += differenceOfMean * differenceOfMean;
+        }
+
+        for (int i = 0; i < rawFuelOutlierSublist.size() - 1; i++) {
+            double temp = 0;
+            for (int j = i + 1; j < rawFuelOutlierSublist.size(); j++) {
+                if (fuelArray[i] > fuelArray[j]) {
+                   temp = fuelArray[i];
+                   fuelArray[i] = fuelArray[j];
+                   fuelArray[j] = temp;
+                }
+            }
+        }
+        medianValue = fuelArray[midPoint];
+
+        standardDeviation = Math.sqrt(sumOfSquaredDifferenceOfMean / rawFuelOutlierSublist.size());
+        double lowerVal = medianValue - 2 * standardDeviation;
+        double upperVal = medianValue + 2 * standardDeviation;
+        //if (rawFuelOfMidpoint >= lowerVal && rawFuelOfMidpoint <= upperVal) {
+         //   return false;
+        //}
+
+        //else {
+            return false;
+        //}
+    }
+
     private Date getAdjustedDate(Date fromDate, int type, int amount) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(fromDate);
@@ -389,13 +457,12 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         return cal.getTime();
     }
 
-    private Double getAverageValue(Position currentPosition,
-                                   List<Position> fuelLevelReadings) {
+    private Double getAverageValue(List<Position> fuelLevelReadings) {
 
         // Omit values that are 0s, to avoid skewing the average. This is mostly useful in handling 0s from the
         // analog sensor, which are noise.
-        Double total = (Double) currentPosition.getAttributes().get(Position.KEY_CALIBRATED_FUEL_LEVEL);
-        double size = total > 0.0 ? 1.0 : 0.0;
+        double total = 0;
+        double size = 0;
 
         for (Position position : fuelLevelReadings) {
             double level = (Double) position.getAttributes().get(Position.KEY_CALIBRATED_FUEL_LEVEL);
@@ -411,7 +478,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
         double avg = total / size;
 
-        Log.debug("[FUEL_ACTIVITY_AVERAGES] deviceId: " + currentPosition.getDeviceId()
+        Log.debug("[FUEL_ACTIVITY_AVERAGES] deviceId: "
                   + " average: " + avg
                   + " averages list size: " + fuelLevelReadings.size());
 
@@ -423,7 +490,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                                                        Position position,
                                                        int minListSize) {
 
-        if (positionsForSensor.size() <= minListSize) {
+        if (positionsForSensor.size() <= (minListSize + offsetForOutlier)) {
             return positionsForSensor.stream()
                                      .collect(Collectors.toList());
         }
@@ -436,7 +503,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         SortedMultiset<Position> positionsSubset =
                 positionsForSensor.subMultiset(fromPosition, BoundType.OPEN, position, BoundType.CLOSED);
 
-        if (positionsSubset.size() <= minListSize) {
+        if (positionsSubset.size() <= (minListSize + offsetForOutlier)) {
             Log.debug("[RELEVANT_SUBLIST] sublist is lesser than "
                       + minListSize + " returning " + positionsSubset.size());
             return positionsSubset.stream()
@@ -447,7 +514,8 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
         List<Position> sublistToReturn =  positionsSubset.stream()
                                                          .collect(Collectors.toList())
-                                                         .subList(listMaxIndex - minListSize, listMaxIndex);
+                                                         .subList(listMaxIndex - minListSize - offsetForOutlier,
+                                                                 listMaxIndex - offsetForOutlier);
 
         Log.debug("[RELEVANT_SUBLIST] sublist size: " + sublistToReturn.size());
 
