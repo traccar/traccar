@@ -24,7 +24,10 @@ public abstract class BaseDataHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof Position) {
-            ctx.fireChannelRead(handlePosition((Position) msg));
+            Position position = handlePosition((Position) msg);
+            if (position != null) {
+                ctx.fireChannelRead(position);
+            }
         } else {
             super.channelRead(ctx, msg);
         }
