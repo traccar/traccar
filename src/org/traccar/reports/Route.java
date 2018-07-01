@@ -51,11 +51,9 @@ public final class Route {
     }
 
     private static boolean positionFilter(Position p) {
-        if (!p.getAttributes().keySet().contains("distance")) {
-            return false;
-        }
+        return p.getAttributes().keySet().contains("distance")
+                && (double) p.getAttributes().get("distance") > 50;
 
-        return (double) p.getAttributes().get("distance") > 50; // At least 50 meters distance to avoid weird positions.
     }
 
     public static Collection<Position> getFuelObjects(long userId, Collection<Long> deviceIds,
