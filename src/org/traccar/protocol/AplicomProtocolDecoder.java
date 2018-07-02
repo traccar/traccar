@@ -102,6 +102,18 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedInt();
                 buf.readUnsignedByte();
                 break;
+            case 119:
+                StringBuilder sb = new StringBuilder();
+                while (buf.isReadable()) {
+                    char c = (char) buf.readByte();
+                    if (c >= 0x20) {
+                        sb.append(c);
+                    } else {
+                        break;
+                    }
+                }
+                position.set("eventData", sb.toString());
+                break;
             case 121:
             case 142:
                 buf.readLong();
