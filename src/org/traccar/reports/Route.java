@@ -60,11 +60,29 @@ public final class Route {
                                                       Collection<Long> groupIds,
                                                       Date from, Date to) throws SQLException {
         ReportUtils.checkPeriodLimit(from, to);
-        ArrayList<Position> result = new ArrayList<>();
+        ArrayList<Position> fuelOnlyPositions = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            result.addAll(Context.getDataManager().getPositionsForFuel(deviceId, from, to));
+            fuelOnlyPositions.addAll(Context.getDataManager().getPositionsForFuel(deviceId, from, to));
         }
+
+        ArrayList<Position> result = new ArrayList<>();
+        for (int positionIndex = 1; positionIndex < fuelOnlyPositions.size(); positionIndex++) {
+            Position previous = fuelOnlyPositions.get(positionIndex - 1);
+            Position current = fuelOnlyPositions.get(positionIndex);
+
+            double previousFuel = (double) previous.getAttributes().get("fuel");
+            double currentFuel = (double) current.getAttributes().get("fuel");
+
+            double percentChangeFromPrevious = ((Math.abs(previousFuel - currentFuel)) / previousFuel) * 100;
+            if (percentChangeFromPrevious > 1) {
+                if (positionIndex == 1) {
+                    result.add(previous);
+                }
+                result.add(current);
+            }
+        }
+
         return result;
     }
 
