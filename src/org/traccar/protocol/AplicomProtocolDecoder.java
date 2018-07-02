@@ -218,11 +218,14 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if ((selector & 0x0004) != 0) {
-            buf.skipBytes(4); // snapshot time
+            position.setDeviceTime(new Date(buf.readUnsignedInt() * 1000));
         }
 
         if ((selector & 0x0008) != 0) {
-            position.setTime(new Date(buf.readUnsignedInt() * 1000));
+            position.setFixTime(new Date(buf.readUnsignedInt() * 1000));
+            if (position.getDeviceTime() == null) {
+                position.setDeviceTime(position.getFixTime());
+            }
             position.setLatitude(buf.readInt() / 1000000.0);
             position.setLongitude(buf.readInt() / 1000000.0);
             position.set(Position.KEY_SATELLITES_VISIBLE, buf.readUnsignedByte());
@@ -540,11 +543,13 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
 
     private void decodeF(Position position, ByteBuf buf, int selector) {
 
-        getLastLocation(position, null);
+        Date deviceTime = null;
 
         if ((selector & 0x0004) != 0) {
-            buf.skipBytes(4); // snapshot time
+            deviceTime = new Date(buf.readUnsignedInt() * 1000);
         }
+
+        getLastLocation(position, deviceTime);
 
         buf.readUnsignedByte(); // data validity
 
