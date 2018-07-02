@@ -335,26 +335,28 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             relevantPositionsListForOutliers.get(i - 1)
                     .set(Position.KEY_FUEL_LEVEL, tempAvg);
         }
-
-        //if sufficient data to checck for outlier not present in window then return
+        //if sufficient data to check for outlier not present in window then return
         if (relevantPositionsListForOutliers.size() < minValuesForOutlier) {
             return;
         }
-
+        for (int i = 0; i < relevantPositionsListForOutliers.size(); i++) {
+            Log.debug("ol" + i);
+            Log.debug("raw-" + relevantPositionsListForOutliers.get(i).getAttributes()
+                    .get(Position.KEY_CALIBRATED_FUEL_LEVEL) + " avg-"
+                    + relevantPositionsListForOutliers.get(i).getAttributes()
+                    .get(Position.KEY_FUEL_LEVEL));
+        }
         //currently if outlier detected, copying the fuel average of previous packet as im not able to remove the same
         if (outlierPresentInSublist(relevantPositionsListForOutliers)) {
             Log.debug("outlier present");
             Log.debug("value removed-" + relevantPositionsListForOutliers.get(indexOfPositionEvaluation)
                     .getAttributes().get(Position.KEY_CALIBRATED_FUEL_LEVEL));
-            double prevAvg = (double) relevantPositionsListForOutliers.get(indexOfPositionEvaluation - 1)
-                    .getAttributes().get(Position.KEY_FUEL_LEVEL);
-            relevantPositionsListForOutliers.get(indexOfPositionEvaluation)
-                    .set(Position.KEY_FUEL_LEVEL, prevAvg);
-            relevantPositionsListForOutliers.remove(indexOfPositionEvaluation);
+            Position tempPosition = new Position();
+            tempPosition = relevantPositionsListForOutliers.get(indexOfPositionEvaluation);
+            positionsForDeviceSensor.remove(tempPosition);
             Log.debug("size-" + relevantPositionsListForOutliers.size());
             return;
         }
-
         Position positionUnderEvaluation = new Position();
         positionUnderEvaluation = relevantPositionsListForOutliers.get(indexOfPositionEvaluation);
 
@@ -362,24 +364,21 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                 getRelevantPositionsSubList(positionsForDeviceSensor,
                                             positionUnderEvaluation,
                                             minValuesForMovingAvg);
-
         double currentFuelLevelAverage = getAverageValue(relevantPositionsListForAverages);
         // KEY_FUEL_LEVEL will hold the smoothed data, which is average of raw values in the relevant list.
         //position.set(Position.KEY_FUEL_LEVEL, currentFuelLevelAverage);
-        relevantPositionsListForOutliers.get(indexOfPositionEvaluation)
+        Log.debug("index-" + indexOfPositionEvaluation);
+            relevantPositionsListForOutliers.get(indexOfPositionEvaluation)
                 .set(Position.KEY_FUEL_LEVEL, currentFuelLevelAverage);
-
         List<Position> relevantPositionsListForAlerts =
                 getRelevantPositionsSubList(positionsForDeviceSensor,
                                             positionUnderEvaluation,
                                             maxValuesForAlerts);
-
         for (int i = 0; i < relevantPositionsListForAlerts.size(); i++) {
             Log.debug("a" + i);
             Log.debug("a" + relevantPositionsListForAlerts.get(i).getAttributes()
                     .get(Position.KEY_FUEL_LEVEL));
         }
-
         if (!this.loadingOldDataFromDB && relevantPositionsListForAlerts.size() >= maxValuesForAlerts
                 && relevantPositionsListForAverages.size() >= maxValuesForAlerts) {
             // We'll use the smoothed values to check for activity.
