@@ -334,6 +334,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             tempAvg = tempAvg / i;
             relevantPositionsListForOutliers.get(i - 1)
                     .set(Position.KEY_FUEL_LEVEL, tempAvg);
+            Log.debug("id-" + relevantPositionsListForOutliers.get(i - 1).getId() + "fuelaverage - " + tempAvg);
         }
         //if sufficient data to check for outlier not present in window then return
         if (relevantPositionsListForOutliers.size() < minValuesForOutlier) {
@@ -350,7 +351,8 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         if (outlierPresentInSublist(relevantPositionsListForOutliers)) {
             Log.debug("outlier present");
             Log.debug("value removed-" + relevantPositionsListForOutliers.get(indexOfPositionEvaluation)
-                    .getAttributes().get(Position.KEY_CALIBRATED_FUEL_LEVEL));
+                    .getAttributes().get(Position.KEY_CALIBRATED_FUEL_LEVEL) + "id-"
+                    + relevantPositionsListForOutliers.get(indexOfPositionEvaluation).getId());
             Position tempPosition = new Position();
             tempPosition = relevantPositionsListForOutliers.get(indexOfPositionEvaluation);
             positionsForDeviceSensor.remove(tempPosition);
@@ -367,9 +369,10 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         double currentFuelLevelAverage = getAverageValue(relevantPositionsListForAverages);
         // KEY_FUEL_LEVEL will hold the smoothed data, which is average of raw values in the relevant list.
         //position.set(Position.KEY_FUEL_LEVEL, currentFuelLevelAverage);
-        Log.debug("index-" + indexOfPositionEvaluation);
-            relevantPositionsListForOutliers.get(indexOfPositionEvaluation)
+        relevantPositionsListForOutliers.get(indexOfPositionEvaluation)
                 .set(Position.KEY_FUEL_LEVEL, currentFuelLevelAverage);
+        Log.debug("id-" + relevantPositionsListForOutliers.get(indexOfPositionEvaluation).getId()
+                + "fuelaverage - " + currentFuelLevelAverage);
         List<Position> relevantPositionsListForAlerts =
                 getRelevantPositionsSubList(positionsForDeviceSensor,
                                             positionUnderEvaluation,
