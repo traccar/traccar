@@ -66,6 +66,20 @@
         ORDER BY fixTime
     </entry>
 
+    <entry key='database.selectPositionsForSummary'>
+        SELECT *
+        FROM positions
+        AS a,
+        (SELECT MIN(id) AS mini, MAX(id) AS maxi
+        FROM positions
+        WHERE deviceId = :deviceId
+        AND attributes NOT LIKE '%"totalDistance":0.0%'
+        AND fixTime BETWEEN :from AND :to
+        ORDER BY fixtime)
+        AS m WHERE  m.maxi = a.id
+        OR m.mini = a.id
+    </entry>
+
     <entry key='database.selectPeripheralSensors'>
         SELECT p.id AS peripheralSensorId, d.id AS deviceId, dt.typename as typeName, p.calibrationdata as calibrationData
         FROM peripheralsensors AS p

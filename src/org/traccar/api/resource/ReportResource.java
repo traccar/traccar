@@ -69,6 +69,16 @@ public class ReportResource extends BaseResource {
         return result;
     }
 
+    @Path("mileage")
+    @GET
+    public Collection<Position> getMileage(
+            @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
+            @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
+        Collection<Position> result = Route.getSummaryObjects(getUserId(), deviceIds, groupIds,
+                DateUtil.parseDate(from), DateUtil.parseDate(to));
+        return result;
+    }
+
     @Path("events")
     @GET
     public Collection<Event> getEvents(

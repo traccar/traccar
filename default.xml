@@ -206,6 +206,21 @@
         ORDER BY fixTime
     </entry>
 
+    <entry key='database.selectPositionsForSummary'>
+        SELECT *
+        FROM positions
+        AS a,
+        (SELECT MIN(id) AS mini, MAX(id) AS maxi
+        FROM positions
+        WHERE deviceId = :deviceId
+        AND attributes NOT LIKE '%"totalDistance":0.0%'
+        AND fixTime BETWEEN :from AND :to
+        ORDER BY fixtime)
+        AS m WHERE  m.maxi = a.id
+        OR m.mini = a.i
+    </entry>
+
+
     <entry key='database.insertPosition'>
         INSERT INTO positions (deviceId, protocol, serverTime, deviceTime, fixTime, valid, latitude, longitude, altitude, speed, course, address, attributes, accuracy, network)
         VALUES (:deviceId, :protocol, :now, :deviceTime, :fixTime, :valid, :latitude, :longitude, :altitude, :speed, :course, :address, :attributes, :accuracy, :network)
