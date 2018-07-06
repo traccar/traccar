@@ -355,6 +355,11 @@ public final class ReportUtils {
                     startEventIndex = -1;
                 }
             }
+            //Rising edge detected, but no falling edge. Assume that's the trip for today then.
+            //Traccar client switched off when riding, so no falling edge.
+            if (startEventIndex != -1 && startNoEventIndex == -1) {
+                startNoEventIndex = positions.size() - 1;
+            }
             if (startEventIndex != -1 && (startNoEventIndex != -1 || !trips)) {
                 result.add(calculateTripOrStop(positions, startEventIndex,
                             startNoEventIndex != -1 ? startNoEventIndex : positions.size() - 1,

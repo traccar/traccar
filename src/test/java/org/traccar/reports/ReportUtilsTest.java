@@ -66,6 +66,49 @@ public class ReportUtilsTest extends BaseTest {
     }
 
     @Test
+    public void testDetectTripsSimpleWithoutFallingEdge() throws ParseException {
+
+        List<Position> data = Arrays.asList(
+                position("2016-01-01 00:00:00.000", 0, 0),
+                position("2016-01-01 00:01:00.000", 0, 0),
+                position("2016-01-01 00:02:00.000", 10, 0),
+                position("2016-01-01 00:03:00.000", 10, 1000),
+                position("2016-01-01 00:04:00.000", 10, 2000));
+
+        TripsConfig tripsConfig = new TripsConfig(500, 300000, 180000, 900000, false, false, 0.01);
+
+        Collection<TripReport> trips = ReportUtils.detectTripsAndStops(data, tripsConfig, false, TripReport.class);
+
+        assertNotNull(trips);
+        assertFalse(trips.isEmpty());
+
+        TripReport itemTrip = trips.iterator().next();
+
+        assertEquals(date("2016-01-01 00:02:00.000"), itemTrip.getStartTime());
+        assertEquals(date("2016-01-01 00:04:00.000"), itemTrip.getEndTime());
+        assertEquals(120000, itemTrip.getDuration());
+        //Should be this if you calculate avg. speed over total dist. divided by total time.
+        // Avg. speed is calculated as avg. speed from the intervals.
+        //assertEquals(10, itemTrip.getAverageSpeed(), 0.01);
+        assertEquals(15, itemTrip.getAverageSpeed(), 0.01);
+        assertEquals(10, itemTrip.getMaxSpeed(), 0.01);
+        assertEquals(2000, itemTrip.getDistance(), 0.01);
+
+        Collection<StopReport> stops = ReportUtils.detectTripsAndStops(data, tripsConfig, false, StopReport.class);
+
+        assertNotNull(stops);
+        assertFalse(stops.isEmpty());
+
+        Iterator<StopReport> iterator = stops.iterator();
+
+        StopReport itemStop = iterator.next();
+
+        assertEquals(date("2016-01-01 00:00:00.000"), itemStop.getStartTime());
+        assertEquals(date("2016-01-01 00:02:00.000"), itemStop.getEndTime());
+        assertEquals(120000, itemStop.getDuration());
+    }
+    
+    @Test
     public void testDetectTripsSimple() throws ParseException {
 
         List<Position> data = Arrays.asList(
