@@ -37,6 +37,14 @@ public class ContinentalProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_ACK = 0x06;
     public static final int MSG_NACK = 0x15;
 
+    private double readCoordinate(ByteBuf buf, boolean extended) {
+        long value = buf.readUnsignedInt();
+        if (extended ? (value & 0x08000000) != 0 : (value & 0x00800000) != 0) {
+            value |= extended ? 0xF0000000 : 0xFF000000;
+        }
+        return (int) value / (extended ? 360000.0 : 3600.0);
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -64,11 +72,9 @@ public class ContinentalProtocolDecoder extends BaseProtocolDecoder {
 
             position.setFixTime(new Date(buf.readUnsignedInt() * 1000L));
 
-            buf.readUnsignedByte();
-            position.setLatitude(buf.readMedium() / 3600.0);
-
-            buf.readUnsignedByte();
-            position.setLongitude(buf.readMedium() / 3600.0);
+            boolean extended = buf.getUnsignedByte(buf.readerIndex()) != 0;
+            position.setLatitude(readCoordinate(buf, extended));
+            position.setLongitude(readCoordinate(buf, extended));
 
             position.setCourse(buf.readUnsignedShort());
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
