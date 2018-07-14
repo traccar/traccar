@@ -250,5 +250,6 @@
     <entry key='freematics.port'>5170</entry>
     <entry key='avema.port'>5171</entry>
     <entry key='autotrack.port'>5172</entry>
+    <entry key='tek.port'>5173</entry>
 
 </properties>

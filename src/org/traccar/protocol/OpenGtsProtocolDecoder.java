@@ -59,8 +59,7 @@ public class OpenGtsProtocolDecoder extends BaseHttpProtocolDecoder {
         QueryStringDecoder decoder = new QueryStringDecoder(request.uri());
         Map<String, List<String>> params = decoder.parameters();
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
 
         for (Map.Entry<String, List<String>> entry : params.entrySet()) {
             String value = entry.getValue().get(0);
