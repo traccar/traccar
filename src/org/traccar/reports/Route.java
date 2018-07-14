@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.traccar.Context;
+import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.model.Position;
@@ -66,23 +67,40 @@ public final class Route {
             fuelOnlyPositions.addAll(Context.getDataManager().getPositionsForFuel(deviceId, from, to));
         }
 
+        String deviceIdsString = deviceIds.stream().map(d -> d.toString()).collect(Collectors.joining(","));
+        Log.info("[FUEL_INFO_REPORT] fuelOnlyPositions "
+                 + fuelOnlyPositions.size() + " for deviceId = " + deviceIdsString);
+
         ArrayList<Position> result = new ArrayList<>();
-        for (int positionIndex = 1; positionIndex < fuelOnlyPositions.size(); positionIndex++) {
-            Position previous = fuelOnlyPositions.get(positionIndex - 1);
-            Position current = fuelOnlyPositions.get(positionIndex);
 
-            double previousFuel = (double) previous.getAttributes().get("fuel");
-            double currentFuel = (double) current.getAttributes().get("fuel");
+        if (fuelOnlyPositions.size() > 1) {
+            try {
+                for (int positionIndex = 1; positionIndex < fuelOnlyPositions.size(); positionIndex++) {
+                    Position previous = fuelOnlyPositions.get(positionIndex - 1);
+                    Position current = fuelOnlyPositions.get(positionIndex);
 
-            double percentChangeFromPrevious = ((Math.abs(previousFuel - currentFuel)) / previousFuel) * 100;
-            if (percentChangeFromPrevious > 1) {
-                if (positionIndex == 1) {
-                    result.add(previous);
+                    if (current.getAttributes().containsKey("fuel")
+                        && previous.getAttributes().containsKey("fuel")) {
+
+                        double previousFuel = (double) previous.getAttributes().get("fuel");
+                        double currentFuel = (double) current.getAttributes().get("fuel");
+
+                        double volumeChangeFromPrevious = Math.abs(previousFuel - currentFuel);
+                        if (volumeChangeFromPrevious > 0.15) {
+                            if (positionIndex == 1) {
+                                result.add(previous);
+                            }
+                            result.add(current);
+                        }
+                    }
                 }
-                result.add(current);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
 
+        Log.info("[FUEL_INFO_REPORT] Returning " + result.size()
+                 + " positions for fuel info report for deviceId = " + deviceIdsString);
         return result;
     }
 

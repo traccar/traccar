@@ -294,7 +294,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             // This is a position from the DB, add to the list and move on.
             // If we don't skip further processing, it might trigger FCM notification unnecessarily.
             positionsForDeviceSensor.add(position);
-            removeFirstPositionIfNecessary(positionsForDeviceSensor);
+            removeFirstPositionIfNecessary(positionsForDeviceSensor, deviceId);
             return;
         }
 
@@ -372,13 +372,15 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             }
         }
 
-        removeFirstPositionIfNecessary(positionsForDeviceSensor);
+        removeFirstPositionIfNecessary(positionsForDeviceSensor, deviceId);
     }
 
-    private void removeFirstPositionIfNecessary(TreeMultiset<Position> positionsForDeviceSensor) {
+    private void removeFirstPositionIfNecessary(TreeMultiset<Position> positionsForDeviceSensor, long deviceId) {
         if (positionsForDeviceSensor.size() > maxInMemoryPreviousPositionsListSize) {
             Position toRemove = positionsForDeviceSensor.firstEntry().getElement();
             positionsForDeviceSensor.remove(toRemove);
+            Log.debug("Size of positionsForDeviceSensor with deviceId = " + deviceId
+                      + " after removing position: " + positionsForDeviceSensor.size());
         }
     }
 
