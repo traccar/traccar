@@ -87,7 +87,7 @@ public final class Route {
 
                         double volumeChangeFromPrevious = Math.abs(previousFuel - currentFuel);
                         if (volumeChangeFromPrevious > 0.15) {
-                            if (positionIndex == 1) {
+                            if (!result.contains(previous)) {
                                 result.add(previous);
                             }
                             result.add(current);
