@@ -36,6 +36,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
+    private static final long GPS_STATUS_WORKING_WITH_GPS_FIX = 3;
 
     private boolean connectionless;
     private boolean extended;
@@ -126,7 +127,10 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_BATTERY, readValue(buf, length, false) * 0.001);
                 break;
             case 69:
-                position.set("gpsStatus", readValue(buf, length, false));
+                final long gpsStatus = readValue(buf, length, false);
+                position.set("gpsStatus", gpsStatus);
+                final boolean validGpsStatus = GPS_STATUS_WORKING_WITH_GPS_FIX == gpsStatus;
+                position.setValid(position.getValid() && validGpsStatus);
                 break;
             case 72:
                 position.set(Position.PREFIX_TEMP + 1, readValue(buf, length, true) * 0.1);
