@@ -70,13 +70,7 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
                         position.setDeviceId(deviceSession.getDeviceId());
                         break;
                     case "valid":
-                        if (value == "1") {
-                            position.setValid(true);
-                        } else if (value == "0") {
-                            position.setValid(false);
-                        } else {
-                            position.setValid(Boolean.parseBoolean(value));
-                        }
+                        position.setValid(Boolean.parseBoolean(value) || "1".equals(value));
                         break;
                     case "timestamp":
                         try {
