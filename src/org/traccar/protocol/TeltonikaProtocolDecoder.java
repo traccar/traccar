@@ -306,7 +306,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 }
 
                 if (BitUtil.check(locationMask, 4)) {
-                    position.set(Position.KEY_SATELLITES, (int) buf.readUnsignedByte());
+                    position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                 }
 
                 if (BitUtil.check(locationMask, 5)) {
