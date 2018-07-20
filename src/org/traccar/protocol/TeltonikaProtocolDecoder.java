@@ -125,6 +125,11 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             case 67:
                 position.set(Position.KEY_BATTERY, readValue(buf, length, false) * 0.001);
                 break;
+            case 69:
+                final long gpsStatus = readValue(buf, length, false);
+                position.set("gpsStatus", gpsStatus);
+                position.setValid(gpsStatus == 3);
+                break;
             case 72:
                 position.set(Position.PREFIX_TEMP + 1, readValue(buf, length, true) * 0.1);
                 break;
@@ -301,9 +306,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 }
 
                 if (BitUtil.check(locationMask, 4)) {
-                    int satellites = buf.readUnsignedByte();
-                    position.set(Position.KEY_SATELLITES, satellites);
-                    position.setValid(satellites >= 3);
+                    position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                 }
 
                 if (BitUtil.check(locationMask, 5)) {
@@ -423,6 +426,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position(getProtocolName());
 
             position.setDeviceId(deviceSession.getDeviceId());
+            position.setValid(true);
 
             if (codec == CODEC_12) {
                 decodeSerial(position, buf);
