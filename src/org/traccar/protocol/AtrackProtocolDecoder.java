@@ -274,7 +274,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             .number("(-?d+),")                   // latitude
             .number("(d+),")                     // course
             .number("(d+),")                     // report id
-            .number("(d+.d+),")                  // odometer
+            .number("(d+.?d*),")                 // odometer
             .number("(d+),")                     // hdop
             .number("(d+),")                     // inputs
             .number("(d+),")                     // speed

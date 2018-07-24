@@ -11,6 +11,9 @@ public class AtrackProtocolDecoderTest extends ProtocolTest {
         AtrackProtocolDecoder decoder = new AtrackProtocolDecoder(new AtrackProtocol());
 
         verifyPosition(decoder, buffer(
+                "@P,3A34,146,41431,353816057242284,20180622015809,20180622015809,20180622015809,9720689,4014230,61,2,0,20,1,0,0,0,0,2000,2000,12160,42,624,002,20009,20014,\r\n"));
+
+        verifyPosition(decoder, buffer(
                 "@P,1126,121,104547,358901048091554,20180412143513,20180412143514,20180413060000,16423389,48178700,108,2,6.5,9,0,0,0,0,0,2000,2000,\r\n"));
 
         verifyPosition(decoder, buffer(
