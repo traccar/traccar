@@ -86,7 +86,9 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
                     position.setSpeed(UnitsConverter.knotsFromKph(Integer.parseInt(values[index - 1])));
                 }
                 position.setCourse(Integer.parseInt(values[index++]));
-                position.setAltitude(Integer.parseInt(values[index++]));
+                if (index < values.length) {
+                    position.setAltitude(Integer.parseInt(values[index++]));
+                }
                 if (index < values.length) {
                     position.set(Position.KEY_HDOP, Double.parseDouble(values[index++]));
                 }
