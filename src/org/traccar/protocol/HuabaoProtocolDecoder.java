@@ -120,6 +120,10 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
+        if (deviceSession.getTimeZone() == null) {
+            deviceSession.setTimeZone(getTimeZone(deviceSession.getDeviceId(), "GMT+8"));
+        }
+
         if (type == MSG_TERMINAL_REGISTER) {
 
             if (channel != null) {
@@ -180,7 +184,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort() * 0.1));
         position.setCourse(buf.readUnsignedShort());
 
-        DateBuilder dateBuilder = new DateBuilder(TimeZone.getTimeZone("GMT+8"))
+        DateBuilder dateBuilder = new DateBuilder(deviceSession.getTimeZone())
                 .setYear(BcdUtil.readInteger(buf, 2))
                 .setMonth(BcdUtil.readInteger(buf, 2))
                 .setDay(BcdUtil.readInteger(buf, 2))
