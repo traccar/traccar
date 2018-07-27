@@ -14,19 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.notification;
+package org.traccar.notificators;
 
 import org.traccar.Context;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
+import org.traccar.notification.MessageException;
+import org.traccar.notification.NotificationFormatter;
 import org.traccar.sms.SmsManager;
 
-public final class NotificationSms extends Notificator {
+public final class NotificatorSms extends Notificator {
 
     private final SmsManager smsManager;
 
-    public NotificationSms() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+    public NotificatorSms() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         final String smsClass = Context.getConfig().getString("notificator.sms.manager.class", "");
         if (smsClass.length() > 0) {
             smsManager = (SmsManager) Class.forName(smsClass).newInstance();

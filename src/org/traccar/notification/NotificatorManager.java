@@ -24,15 +24,17 @@ import java.util.Set;
 import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Typed;
+import org.traccar.notificators.NotificatorNull;
+import org.traccar.notificators.Notificator;
 
 public final class NotificatorManager {
 
-    private static final String DEFAULT_WEB_NOTIFICATOR = "org.traccar.notification.NotificationWeb";
-    private static final String DEFAULT_MAIL_NOTIFICATOR = "org.traccar.notification.NotificationMail";
-    private static final String DEFAULT_SMS_NOTIFICATOR = "org.traccar.notification.NotificationSms";
+    private static final String DEFAULT_WEB_NOTIFICATOR = "org.traccar.notificators.NotificatorWeb";
+    private static final String DEFAULT_MAIL_NOTIFICATOR = "org.traccar.notificators.NotificatorMail";
+    private static final String DEFAULT_SMS_NOTIFICATOR = "org.traccar.notificators.NotificatorSms";
 
     private final Map<String, Notificator> notificators = new HashMap<>();
-    private static final Notificator NULL_NOTIFICATOR = new NotificationNull();
+    private static final Notificator NULL_NOTIFICATOR = new NotificatorNull();
 
     public NotificatorManager() {
         final String[] types = Context.getConfig().getString("notificator.types", "").split(",");

@@ -14,17 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.notification;
+package org.traccar.notificators;
 
-import org.traccar.Context;
+import org.traccar.helper.Log;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
-public final class NotificationWeb extends Notificator {
+public final class NotificatorNull extends Notificator {
+
+    @Override
+    public void sendAsync(long userId, Event event, Position position) {
+        Log.warning("You are using null notificatior, please check your configuration, notification not sent");
+    }
 
     @Override
     public void sendSync(long userId, Event event, Position position) {
-        Context.getConnectionManager().updateEvent(userId, event);
+        Log.warning("You are using null notificatior, please check your configuration, notification not sent");
     }
-
 }
