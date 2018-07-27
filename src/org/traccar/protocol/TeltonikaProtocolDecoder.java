@@ -126,9 +126,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_BATTERY, readValue(buf, length, false) * 0.001);
                 break;
             case 69:
-                final long gpsStatus = readValue(buf, length, false);
-                position.set("gpsStatus", gpsStatus);
-                position.setValid(gpsStatus == 3);
+                position.set("gpsStatus", readValue(buf, length, false));
                 break;
             case 72:
                 position.set(Position.PREFIX_TEMP + 1, readValue(buf, length, true) * 0.1);
