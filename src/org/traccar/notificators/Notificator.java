@@ -14,11 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.notification;
+package org.traccar.notificators;
 
 import org.traccar.helper.Log;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+import org.traccar.notification.MessageException;
 
 public abstract class Notificator {
 

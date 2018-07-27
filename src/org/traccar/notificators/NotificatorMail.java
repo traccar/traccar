@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.notification;
+package org.traccar.notificators;
 
 import java.util.Properties;
 
@@ -31,8 +31,12 @@ import org.traccar.helper.Log;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
+import org.traccar.notification.FullMessage;
+import org.traccar.notification.MessageException;
+import org.traccar.notification.NotificationFormatter;
+import org.traccar.notification.PropertiesProvider;
 
-public final class NotificationMail extends Notificator {
+public final class NotificatorMail extends Notificator {
 
     private static Properties getProperties(PropertiesProvider provider) {
         Properties properties = new Properties();
