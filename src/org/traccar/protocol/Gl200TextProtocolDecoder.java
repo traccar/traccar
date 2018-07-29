@@ -1023,6 +1023,12 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         decodeDeviceTime(position, parser);
 
         switch (type) {
+            case "TOW":
+                position.set(Position.KEY_ALARM, Position.ALARM_TOW);
+                break;
+            case "IDL":
+                position.set(Position.KEY_ALARM, Position.ALARM_IDLE);
+                break;
             case "PNA":
                 position.set(Position.KEY_ALARM, Position.ALARM_POWER_ON);
                 break;
@@ -1030,9 +1036,11 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_ALARM, Position.ALARM_POWER_OFF);
                 break;
             case "EPN":
+            case "MPN":
                 position.set(Position.KEY_ALARM, Position.ALARM_POWER_RESTORED);
                 break;
             case "EPF":
+            case "MPF":
                 position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
                 break;
             case "BPL":
