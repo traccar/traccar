@@ -53,6 +53,15 @@ public class DistanceHandler extends BaseDataHandler {
         Position last = getLastPosition(position.getDeviceId());
         if (last != null && position.getDeviceTime().compareTo((last.getDeviceTime())) >= 0) {
             totalDistance = last.getDouble(Position.KEY_TOTAL_DISTANCE);
+
+            // If the current position is not valid (esp when lat=long=0), we want to carry forward the
+            // total distance on it, so that calculations on future positions stay correct.
+            if (!position.getValid()) {
+                position.set(Position.KEY_DISTANCE, 0);
+                position.set(Position.KEY_TOTAL_DISTANCE, totalDistance);
+                return position;
+            }
+
             if (!position.getAttributes().containsKey(Position.KEY_DISTANCE)) {
                 distance = DistanceCalculator.distance(
                         position.getLatitude(), position.getLongitude(),

@@ -282,7 +282,8 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         long deviceId = position.getDeviceId();
 
         if (!previousPositions.containsKey(deviceId) || !previousPositions.get(deviceId).containsKey(sensorId)) {
-            TreeMultiset<Position> positions = TreeMultiset.create(Comparator.comparing(Position::getDeviceTime));
+            TreeMultiset<Position> positions =
+                    TreeMultiset.create(Comparator.comparing(p -> p.getDeviceTime().getTime()));
             Map<Integer, TreeMultiset<Position>> sensorPositions = new ConcurrentHashMap<>();
             sensorPositions.put(sensorId, positions);
             previousPositions.put(deviceId, sensorPositions);
