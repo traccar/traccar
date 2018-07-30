@@ -60,6 +60,8 @@ public class AlematicsProtocolDecoder extends BaseProtocolDecoder {
             .or()
             .number("(d+),")                     // extra mask
             .expression("(.*)")                  // extra data
+            .or()
+            .any()
             .groupEnd()
             .compile();
 
@@ -144,7 +146,7 @@ public class AlematicsProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext()) {
             position.set("text", parser.next());
-        } else {
+        } else if (parser.hasNext()) {
             decodeExtras(position, parser);
         }
 

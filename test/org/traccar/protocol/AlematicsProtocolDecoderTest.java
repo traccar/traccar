@@ -11,6 +11,12 @@ public class AlematicsProtocolDecoderTest extends ProtocolTest {
         AlematicsProtocolDecoder decoder = new AlematicsProtocolDecoder(new AlematicsProtocol());
 
         verifyPosition(decoder, text(
+                "$T,2,64,866050035975497,20180726103446,20180726103514,23.033305,72.558032,0,0,41,5.4,4,0,0,0.000,12.960,0,"));
+
+        verifyPosition(decoder, text(
+                "$T,2,65,866050035975497,20180726103646,20180726103736,23.033305,72.558032,0,0,41,5.4,4,0,0,0.000,12.976,0,0"));
+
+        verifyPosition(decoder, text(
                 "$T,2,552,868259020159698,20170515060949,20170515060949,25.035277,121.561986,0,202,78,1.0,8,1,0,0.000,12.768,1629,38,12770,4109,9"));
 
         verifyPosition(decoder, text(
