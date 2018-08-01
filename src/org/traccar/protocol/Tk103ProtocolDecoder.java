@@ -54,7 +54,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .expression("([EW]),?")
             .number("(d+.d)(?:d*,)?")            // speed
             .number("(dd)(dd)(dd),?")            // time (hhmmss)
-            .number("(d+.?d{1,2}),?")            // course
+            .number("(d+.?d{1,4}),?")            // course
             .groupBegin()
             .number("([01])")                    // charge
             .number("([01])")                    // ignition
