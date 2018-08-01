@@ -20,6 +20,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.BcdUtil;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
@@ -31,7 +32,10 @@ import org.traccar.model.Position;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 public class H02ProtocolDecoder extends BaseProtocolDecoder {
@@ -156,7 +160,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .text("V4,")
             .expression("(.*),")                 // response
             .or()
-            .expression("V[^,]*,")
+            .expression("(V[^,]*),")
             .groupEnd()
             .number("(?:(dd)(dd)(dd))?,")        // time (hhmmss)
             .groupEnd()
@@ -254,6 +258,15 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .text("#").optional()
             .compile();
 
+    private void sendResponse(Channel channel, SocketAddress remoteAddress, String id, String type) {
+        if (channel != null && id != null) {
+            DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+            String response = String.format("*HQ,%s,V4,%s,%s#", id, type, dateFormat.format(new Date()));
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+        }
+    }
+
     private Position decodeText(String sentence, Channel channel, SocketAddress remoteAddress) {
 
         Parser parser = new Parser(PATTERN, sentence);
@@ -261,7 +274,8 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        String id = parser.next();
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
         if (deviceSession == null) {
             return null;
         }
@@ -271,6 +285,10 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext()) {
             position.set(Position.KEY_RESULT, parser.next());
+        }
+
+        if (parser.hasNext() && parser.next().equals("V1")) {
+            sendResponse(channel, remoteAddress, id, "V1");
         }
 
         DateBuilder dateBuilder = new DateBuilder();
@@ -341,10 +359,13 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        String id = parser.next();
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
         if (deviceSession == null) {
             return null;
         }
+
+        sendResponse(channel, remoteAddress, id, "NBR");
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
