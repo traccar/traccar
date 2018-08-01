@@ -348,10 +348,12 @@ public class DataManager {
     }
 
     public Collection<Position> getPositionsForRoute(long deviceId, Date from, Date to) throws SQLException {
+
         QueryBuilder queryBuilder = QueryBuilder.create(dataSource, getQuery("database.selectPositionsForRoute"))
                                                 .setLong("deviceId", deviceId)
                                                 .setDate("from", from)
                                                 .setDate("to", to);
+
         return queryBuilder.executeQuery(Position.class);
     }
 

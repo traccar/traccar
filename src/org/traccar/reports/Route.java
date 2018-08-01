@@ -24,9 +24,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.traccar.Context;
+import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.model.Position;
@@ -43,20 +45,62 @@ public final class Route {
         ArrayList<Position> result = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            result.addAll(Context.getDataManager().getPositionsForRoute(deviceId, from, to));
+            Collection<Position> routePositions = Context.getDataManager().getPositionsForRoute(deviceId, from, to);
+            result.addAll(routePositions.stream().filter(Route::positionFilter).collect(Collectors.toList()));
         }
         return result;
+    }
+
+    private static boolean positionFilter(Position p) {
+        return p.getAttributes().keySet().contains("distance")
+                && (double) p.getAttributes().get("distance") > 50;
+
     }
 
     public static Collection<Position> getFuelObjects(long userId, Collection<Long> deviceIds,
                                                       Collection<Long> groupIds,
                                                       Date from, Date to) throws SQLException {
         ReportUtils.checkPeriodLimit(from, to);
-        ArrayList<Position> result = new ArrayList<>();
+        ArrayList<Position> fuelOnlyPositions = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            result.addAll(Context.getDataManager().getPositionsForFuel(deviceId, from, to));
+            fuelOnlyPositions.addAll(Context.getDataManager().getPositionsForFuel(deviceId, from, to));
         }
+
+        String deviceIdsString = deviceIds.stream().map(d -> d.toString()).collect(Collectors.joining(","));
+        Log.info("[FUEL_INFO_REPORT] fuelOnlyPositions "
+                 + fuelOnlyPositions.size() + " for deviceId = " + deviceIdsString);
+
+        ArrayList<Position> result = new ArrayList<>();
+
+        if (fuelOnlyPositions.size() > 1) {
+            try {
+                for (int positionIndex = 1; positionIndex < fuelOnlyPositions.size(); positionIndex++) {
+                    Position previous = fuelOnlyPositions.get(positionIndex - 1);
+                    Position current = fuelOnlyPositions.get(positionIndex);
+
+                    if (current.getAttributes().containsKey("fuel")
+                        && previous.getAttributes().containsKey("fuel")) {
+
+                        double previousFuel = (double) previous.getAttributes().get("fuel");
+                        double currentFuel = (double) current.getAttributes().get("fuel");
+
+                        double volumeChangeFromPrevious = Math.abs(previousFuel - currentFuel);
+                        if (volumeChangeFromPrevious > 0.15) {
+                            if (!result.contains(previous)) {
+                                result.add(previous);
+                            }
+                            result.add(current);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        Log.info("[FUEL_INFO_REPORT] Returning " + result.size()
+                 + " positions for fuel info report for deviceId = " + deviceIdsString);
         return result;
     }
 
