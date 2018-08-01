@@ -419,7 +419,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
         if (buf.getUnsignedShort(buf.readerIndex()) == 0xfe02) {
             if (channel != null) {
-                channel.writeAndFlush(new NetworkMessage(buf, remoteAddress)); // keep-alive message
+                channel.writeAndFlush(new NetworkMessage(buf.retain(), remoteAddress)); // keep-alive message
             }
             return null;
         } else if (buf.getByte(buf.readerIndex()) == '$') {
