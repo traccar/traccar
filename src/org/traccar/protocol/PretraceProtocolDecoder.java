@@ -51,8 +51,8 @@ public class PretraceProtocolDecoder extends BaseProtocolDecoder {
             .number("(x)")                       // satellites
             .number("(dd)")                      // hdop
             .number("(dd)")                      // gsm
-            .expression("(.{8})")                // state
-            .any()
+            .expression("(.{8}),&")              // state
+            .expression("(.+)?")                 // optional data
             .text("^")
             .number("xx")                        // checksum
             .compile();
@@ -88,6 +88,42 @@ public class PretraceProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_SATELLITES, parser.nextHexInt(0));
         position.set(Position.KEY_HDOP, parser.nextInt(0));
         position.set(Position.KEY_RSSI, parser.nextInt(0));
+
+        parser.next(); // state
+
+        if (parser.hasNext()) {
+            for (String value : parser.next().split(",")) {
+                switch (value.charAt(0)) {
+                    case 'P':
+                        if (value.charAt(1) == '1') {
+                            if (value.charAt(4) == '%') {
+                                position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(value.substring(2, 4)));
+                            } else {
+                                position.set(Position.KEY_BATTERY, Integer.parseInt(value.substring(2), 16) * 0.01);
+                            }
+                        } else {
+                            position.set(Position.KEY_POWER, Integer.parseInt(value.substring(2), 16) * 0.01);
+                        }
+                        break;
+                    case 'T':
+                        double temperature = Integer.parseInt(value.substring(2), 16) * 0.25;
+                        if (value.charAt(1) == '1') {
+                            position.set(Position.KEY_DEVICE_TEMP, temperature);
+                        } else {
+                            position.set(Position.PREFIX_TEMP + (value.charAt(1) - '0'), temperature);
+                        }
+                        break;
+                    case 'F':
+                        position.set("fuel" + (value.charAt(1) - '0'), Integer.parseInt(value.substring(2), 16) * 0.01);
+                        break;
+                    case 'R':
+                        position.set(Position.KEY_DRIVER_UNIQUE_ID, value.substring(3));
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
 
         return position;
     }
