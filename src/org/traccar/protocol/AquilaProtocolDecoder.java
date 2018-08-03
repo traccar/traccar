@@ -217,11 +217,12 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private static final Pattern PATTERN_B = new PatternBuilder()
-            .text("$Header,")
+    private static final Pattern PATTERN_B_1 = new PatternBuilder()
+            .text("$")
+            .expression("[^,]+,")                // header
             .expression("[^,]+,")                // client
             .expression("[^,]+,")                // firmware version
-            .expression(".{2},")                 // type
+            .expression(".{2},")                 // packet type
             .number("d+,")                       // message id
             .expression("[LH],")                 // status
             .number("(d+),")                     // imei
@@ -264,9 +265,62 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
-    private Position decodeB(Channel channel, SocketAddress remoteAddress, String sentence) {
+    private static final Pattern PATTERN_B_2 = new PatternBuilder()
+            .text("$")
+            .expression("[^,]+,")                // header
+            .expression("[^,]+,")                // client
+            .expression("(.{3}),")               // message type
+            .number("(d+),")                     // imei
+            .expression(".{2},")                 // packet type
+            .number("(dd)(dd)(dddd)")            // date (ddmmyyyy)
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
+            .expression("([AV]),")               // validity
+            .number("(-?d+.d+),")                // latitude
+            .expression("([NS]),")
+            .number("(-?d+.d+),")                // longitude
+            .expression("([EW]),")
+            .number("(-?d+.d+),")                // altitude
+            .number("(d+.d+),")                  // speed
+            .any()
+            .compile();
 
-        Parser parser = new Parser(PATTERN_B, sentence);
+    private Position decodeB2(Channel channel, SocketAddress remoteAddress, String sentence) {
+
+        Parser parser = new Parser(PATTERN_B_2, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        String type = parser.next();
+        String id = parser.next();
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
+        position.setValid(parser.next().equals("A"));
+        position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
+        position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
+        position.setAltitude(parser.nextDouble());
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+
+        if (type.equals("EMR") && channel != null) {
+            String password = Context.getIdentityManager().lookupAttributeString(
+                    deviceSession.getDeviceId(), getProtocolName() + ".password", "aquila123", true);
+            channel.writeAndFlush(new NetworkMessage(
+                    "#set$" + id + "@" + password + "#EMR_MODE:0*", remoteAddress));
+        }
+
+        return position;
+    }
+
+    private Position decodeB1(Channel channel, SocketAddress remoteAddress, String sentence) {
+
+        Parser parser = new Parser(PATTERN_B_1, sentence);
         if (!parser.matches()) {
             return null;
         }
@@ -300,12 +354,6 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.nextInt() == 1) {
             position.set(Position.KEY_ALARM, Position.ALARM_SOS);
-            if (channel != null) {
-                String password = Context.getIdentityManager().lookupAttributeString(
-                        position.getDeviceId(), getProtocolName() + ".password", "aquila123", true);
-                channel.writeAndFlush(new NetworkMessage(
-                        "#set$" + id + "@" + password + "#EMR_MODE:0*", remoteAddress));
-            }
         }
 
         Network network = new Network();
@@ -328,6 +376,14 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.PREFIX_ADC + 2, parser.nextDouble());
 
         return position;
+    }
+
+    private Position decodeB(Channel channel, SocketAddress remoteAddress, String sentence) {
+        if (sentence.contains("EMR") || sentence.contains("SEM")) {
+            return decodeB2(channel, remoteAddress, sentence);
+        } else {
+            return decodeB1(channel, remoteAddress, sentence);
+        }
     }
 
     @Override
