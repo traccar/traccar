@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class Tk103ProtocolDecoderTest extends ProtocolTest {
 
@@ -34,8 +35,9 @@ public class Tk103ProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "(325031693849BR00170228A5750.8012N02700.7476E000.2154529000.0000000200L00000000,170228,194530)"));
 
-        verifyPosition(decoder, text(
-                "(087073803649BR00170221A6142.0334N02712.2197E000.3203149000.00,00000000L00000000)"));
+        verifyAttribute(decoder, text(
+                "(087073803649BR00170221A6142.0334N02712.2197E000.3203149000.00,00000000L00000000)"),
+                Position.KEY_FUEL_LEVEL, 0);
 
         verifyPosition(decoder, text(
                 "(864768010869060,DW30,050117,A,5135.82713N,00001.17918E,0.089,154745,000.0,43.40,12)"));
