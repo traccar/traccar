@@ -23,7 +23,7 @@ import org.traccar.BaseFrameDecoder;
 public class RoboTrackFrameDecoder extends BaseFrameDecoder {
 
     private int messageLength(ByteBuf buf) {
-        switch ((int) buf.getByte(buf.readerIndex())) {
+        switch (buf.getUnsignedByte(buf.readerIndex())) {
             case RoboTrackProtocolDecoder.MSG_ID:
                 return 69;
             case RoboTrackProtocolDecoder.MSG_ACK:

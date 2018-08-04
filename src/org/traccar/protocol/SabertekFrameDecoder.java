@@ -29,7 +29,7 @@ public class SabertekFrameDecoder extends BaseFrameDecoder {
         int beginIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) 0x02);
         if (beginIndex >= 0) {
             int endIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) 0x03);
-            if (beginIndex >= 0) {
+            if (endIndex >= 0) {
                 buf.readerIndex(beginIndex + 1);
                 ByteBuf frame = buf.readRetainedSlice(endIndex - beginIndex - 1);
                 buf.readerIndex(endIndex + 1);
