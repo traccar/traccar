@@ -11,6 +11,9 @@ public class AplicomProtocolDecoderTest extends ProtocolTest {
         AplicomProtocolDecoder decoder = new AplicomProtocolDecoder(new AplicomProtocol());
 
         verifyAttributes(decoder, binary(
+                "44c30144f667ca8e6b003200b45f7700f05b6565e75b6565e6031f845100c6f0e70c00001483387c0fe60001000a263433233031303138373433303746230d0a"));
+
+        verifyAttributes(decoder, binary(
                 "44c30144f667ca8e6b002d00305f7700d45b307a9a5b307a97031f840a00c6f05b0600000083000000263433233031303138373433303746230d0a"));
 
         verifyAttributes(decoder, binary(
