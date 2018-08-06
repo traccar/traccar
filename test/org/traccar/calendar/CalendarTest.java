@@ -44,7 +44,7 @@ public class CalendarTest {
                 "END:VCALENDAR";
         Calendar calendar = new Calendar();
         calendar.setData(calendarString.getBytes());
-        DateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ssX");
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssX");
 
         Date date = format.parse("2016-12-13 22:59:59+05");
         assertTrue(!calendar.checkMoment(date));

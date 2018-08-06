@@ -49,7 +49,7 @@ public class MediaManager {
     public String writeFile(String uniqueId, ByteBuf buf, String extension) {
         if (path != null) {
             int size = buf.readableBytes();
-            String name = new SimpleDateFormat("yyyyMMddhhmmss").format(new Date()) + "." + extension;
+            String name = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + "." + extension;
             try (FileOutputStream output = new FileOutputStream(createFile(uniqueId, name));
                     FileChannel fileChannel = output.getChannel()) {
                     ByteBuffer byteBuffer = buf.nioBuffer();
