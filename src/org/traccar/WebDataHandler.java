@@ -80,12 +80,12 @@ public class WebDataHandler extends BaseDataHandler {
         }
     }
 
-    public String formatRequest(Position position) {
+    public String formatRequest(Position position) throws UnsupportedEncodingException, JsonProcessingException {
 
         Device device = Context.getIdentityManager().getById(position.getDeviceId());
 
         String request = url
-                .replace("{name}", device.getName())
+                .replace("{name}", URLEncoder.encode(device.getName(), StandardCharsets.UTF_8.name()))
                 .replace("{uniqueId}", device.getUniqueId())
                 .replace("{status}", device.getStatus())
                 .replace("{deviceId}", String.valueOf(position.getDeviceId()))
@@ -102,22 +102,14 @@ public class WebDataHandler extends BaseDataHandler {
                 .replace("{statusCode}", calculateStatus(position));
 
         if (position.getAddress() != null) {
-            try {
-                request = request.replace(
-                        "{address}", URLEncoder.encode(position.getAddress(), StandardCharsets.UTF_8.name()));
-            } catch (UnsupportedEncodingException error) {
-                Log.warning(error);
-            }
+            request = request.replace(
+                    "{address}", URLEncoder.encode(position.getAddress(), StandardCharsets.UTF_8.name()));
         }
 
         if (request.contains("{attributes}")) {
-            try {
-                String attributes = Context.getObjectMapper().writeValueAsString(position.getAttributes());
-                request = request.replace(
-                        "{attributes}", URLEncoder.encode(attributes, StandardCharsets.UTF_8.name()));
-            } catch (UnsupportedEncodingException | JsonProcessingException error) {
-                Log.warning(error);
-            }
+            String attributes = Context.getObjectMapper().writeValueAsString(position.getAttributes());
+            request = request.replace(
+                    "{attributes}", URLEncoder.encode(attributes, StandardCharsets.UTF_8.name()));
         }
 
         if (request.contains("{gprmc}")) {
@@ -132,7 +124,11 @@ public class WebDataHandler extends BaseDataHandler {
         if (json) {
             Context.getClient().target(url).request().async().post(Entity.json(prepareJsonPayload(position)));
         } else {
-            Context.getClient().target(formatRequest(position)).request().async().get();
+            try {
+                Context.getClient().target(formatRequest(position)).request().async().get();
+            } catch (UnsupportedEncodingException | JsonProcessingException e) {
+                Log.warning(e);
+            }
         }
         return position;
     }
