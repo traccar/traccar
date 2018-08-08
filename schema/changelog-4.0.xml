@@ -160,13 +160,7 @@
 
   </changeSet>
 
-  <changeSet author="author" id="changelog-4.0-post">
-
-    <preConditions onFail="MARK_RAN">
-      <columnExists tableName="tc_notifications" columnName="web" />
-      <columnExists tableName="tc_notifications" columnName="mail" />
-      <columnExists tableName="tc_notifications" columnName="sms" />
-    </preConditions>
+  <changeSet author="author" id="changelog-4.0">
 
     <dropDefaultValue tableName="tc_notifications" columnName="web" />
     <dropColumn tableName="tc_notifications" columnName="web" />
