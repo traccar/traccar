@@ -32,11 +32,15 @@ import org.traccar.model.Position;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -99,7 +103,24 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         return result;
     }
 
-    private void readCustomData(Position position, ByteBuf buf, String form) {
+    private void readTextCustomData(Position position, String data, String form) {
+        String[] keys = form.substring(1).split("%");
+        String[] values = data.split(",");
+        for (int i = 0; i < Math.min(keys.length, values.length); i++) {
+            switch (keys[i]) {
+                case "MV":
+                    position.set(Position.KEY_POWER, Integer.parseInt(values[i]) * 0.1);
+                    break;
+                case "BV":
+                    position.set(Position.KEY_BATTERY, Integer.parseInt(values[i]) * 0.1);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    private void readBinaryCustomData(Position position, ByteBuf buf, String form) {
         CellTower cellTower = new CellTower();
         String[] keys = form.substring(1).split("%");
         for (String key : keys) {
@@ -108,10 +129,10 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                     break;
                 case "MV":
-                    position.set(Position.KEY_POWER, buf.readUnsignedShort());
+                    position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.1);
                     break;
                 case "BV":
-                    position.set(Position.KEY_BATTERY, buf.readUnsignedShort());
+                    position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.1);
                     break;
                 case "GQ":
                     cellTower.setSignalStrength((int) buf.readUnsignedByte());
@@ -266,8 +287,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             .number("d+,")                       // length
             .number("d+,")                       // index
             .number("(d+),")                     // imei
-            .number("(dddd)(dd)(dd)")            // date (yymmdd)
-            .number("(dd)(dd)(dd),")             // time (hhmmss)
+            .number("(d+),")                     // date and time
             .number("d+,")                       // rtc date and time
             .number("d+,")                       // device date and time
             .number("(-?d+),")                   // longitude
@@ -283,7 +303,9 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             .number("[^,]*,")                    // driver
             .number("(d+),")                     // temp1
             .number("(d+),")                     // temp2
-            .any()
+            .expression("[^,]*,")                // text message
+            .expression("(.*)")                  // custom data
+            .optional(2)
             .compile();
 
     private Position decodeText(Channel channel, SocketAddress remoteAddress, String sentence) {
@@ -302,7 +324,20 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.setValid(true);
-        position.setTime(parser.nextDateTime());
+
+        String time = parser.next();
+        if (time.length() >= 14) {
+            try {
+                DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+                dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                position.setTime(dateFormat.parse(time));
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            position.setTime(new Date(Long.parseLong(time) * 1000));
+        }
+
         position.setLongitude(parser.nextInt() * 0.000001);
         position.setLatitude(parser.nextInt() * 0.000001);
         position.setCourse(parser.nextInt());
@@ -318,6 +353,16 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.PREFIX_ADC + 1, parser.nextInt());
         position.set(Position.PREFIX_TEMP + 1, parser.nextInt());
         position.set(Position.PREFIX_TEMP + 2, parser.nextInt());
+
+        if (custom) {
+            String data = parser.next();
+            String form = this.form;
+            if (form == null) {
+                form = data.substring(0, data.indexOf(',')).substring("%CI".length());
+                data = data.substring(data.indexOf(',') + 1);
+            }
+            readTextCustomData(position, data, form);
+        }
 
         return position;
     }
@@ -353,9 +398,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
                 buf.skipBytes(7 + 7);
 
-
             } else {
-
                 position.setFixTime(new Date(buf.readUnsignedInt() * 1000));
                 position.setDeviceTime(new Date(buf.readUnsignedInt() * 1000));
                 buf.readUnsignedInt(); // send time
@@ -401,7 +444,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                 if (form == null) {
                     form = readString(buf).substring("%CI".length());
                 }
-                readCustomData(position, buf, form);
+                readBinaryCustomData(position, buf, form);
             }
 
             positions.add(position);
