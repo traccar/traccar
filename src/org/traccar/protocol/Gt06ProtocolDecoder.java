@@ -350,7 +350,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             .text("Course:").number("(d+.d+),")  // course
             .text("Speed:").number("(d+.d+),")   // speed
             .text("DateTime:")
-            .number("(dddd)-(dd)-(dd)  ")        // date
+            .number("(dddd)-(dd)-(dd) +")        // date
             .number("(dd):(dd):(dd)")            // time
             .compile();
 
