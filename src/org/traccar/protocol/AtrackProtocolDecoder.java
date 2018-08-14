@@ -105,7 +105,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
     private void readTextCustomData(Position position, String data, String form) {
         String[] keys = form.substring(1).split("%");
-        String[] values = data.split(",");
+        String[] values = data.split(",|\r\n");
         for (int i = 0; i < Math.min(keys.length, values.length); i++) {
             switch (keys[i]) {
                 case "MV":
