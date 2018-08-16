@@ -3,6 +3,7 @@ package org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -16,10 +17,20 @@ public class FuelSensorDataHandlerHelper {
     public static boolean isOutlierPresentInSublist(List<Position> rawFuelOutlierSublist,
                                                     int indexOfPositionEvaluated) {
 
-        int listSize = rawFuelOutlierSublist.size();
+        // Make a copy so we don't affect the original incoming list esp in the sort below,
+        // since the order of the incoming list needs to be preserved to remove / mark the right
+        // Position as an outlier.
+        List<Position> copyOfRawValues = new ArrayList<>();
+        for (Position p : rawFuelOutlierSublist) {
+            Position tempPosition = new Position();
+            tempPosition.set(Position.KEY_CALIBRATED_FUEL_LEVEL, (double) p.getAttributes().get(Position.KEY_CALIBRATED_FUEL_LEVEL));
+            copyOfRawValues.add(tempPosition);
+        }
+
+        int listSize = copyOfRawValues.size();
 
         double sumOfValues =
-                rawFuelOutlierSublist.stream()
+                copyOfRawValues.stream()
                                      .mapToDouble(p -> (double) p.getAttributes()
                                                                  .get(Position.KEY_CALIBRATED_FUEL_LEVEL))
                                      .sum();
@@ -28,7 +39,7 @@ public class FuelSensorDataHandlerHelper {
 
 
         double sumOfSquaredDifferenceOfMean =
-                rawFuelOutlierSublist.stream()
+                copyOfRawValues.stream()
                                      .mapToDouble(p -> {
                                          double differenceOfMean =
                                                  (double) p.getAttributes()
@@ -39,16 +50,16 @@ public class FuelSensorDataHandlerHelper {
 
 
         double rawFuelOfPositionEvaluated =
-                (double) rawFuelOutlierSublist.get(indexOfPositionEvaluated)
+                (double) copyOfRawValues.get(indexOfPositionEvaluated)
                                               .getAttributes()
                                               .get(Position.KEY_CALIBRATED_FUEL_LEVEL);
 
-        rawFuelOutlierSublist.sort(Comparator.comparing(p -> (double) p.getAttributes()
+        copyOfRawValues.sort(Comparator.comparing(p -> (double) p.getAttributes()
                                                                        .get(Position.KEY_CALIBRATED_FUEL_LEVEL)));
 
         int midPointOfList = (listSize - 1) / 2;
 
-        double medianRawFuelValue = (double) rawFuelOutlierSublist.get(midPointOfList)
+        double medianRawFuelValue = (double) copyOfRawValues.get(midPointOfList)
                                                                   .getAttributes()
                                                                   .get(Position.KEY_CALIBRATED_FUEL_LEVEL);
 

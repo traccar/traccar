@@ -361,10 +361,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             // Also, we do not want to lose any data coming in, so we'll only mark the position as an outlier rather
             // than deleting it.
             updatePosition(outlierPosition);
-
-            Log.debug("Outlier detected. Size of list before removing: " + relevantPositionsListForOutliers.size());
             positionsForDeviceSensor.remove(outlierPosition);
-            Log.debug("Outlier detected. Size of list after removing: " + relevantPositionsListForOutliers.size());
             return;
         }
 
