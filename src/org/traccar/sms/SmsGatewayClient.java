@@ -60,7 +60,7 @@ public class SmsGatewayClient implements SmsManager {
         Response response = getRequestBuilder().post(Entity.json(preparePayload(destAddress, message)));
         if (!response.getStatusInfo().equals(Response.Status.OK)) {
             String output = response.readEntity(String.class);
-            throw new MessageException(new Exception(output));
+            throw new MessageException(output);
         }
     }
 
