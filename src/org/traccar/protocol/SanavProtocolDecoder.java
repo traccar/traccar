@@ -87,7 +87,7 @@ public class SanavProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(dateBuilder.getDate());
 
         if (parser.hasNext()) {
-            int io = parser.nextInt();
+            int io = parser.nextHexInt();
             for (int i = 0; i < 5; i++) {
                 position.set(Position.PREFIX_IN + (i + 1), BitUtil.check(io, i));
             }
