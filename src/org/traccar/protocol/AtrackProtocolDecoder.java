@@ -267,6 +267,30 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                 case "MA":
                     readString(buf); // mac address
                     break;
+                case "PD":
+                    buf.readUnsignedByte(); // pending code status
+                    break;
+                case "CD":
+                    readString(buf); // sim cid
+                    break;
+                case "CM":
+                    buf.readLong(); // imsi
+                    break;
+                case "GN":
+                    buf.skipBytes(60); // g sensor data
+                    break;
+                case "GV":
+                    buf.skipBytes(6); // maximum g force
+                    break;
+                case "ME":
+                    readString(buf); // imei
+                    break;
+                case "IA":
+                    buf.readUnsignedByte(); // intake air temperature
+                    break;
+                case "MP":
+                    buf.readUnsignedByte(); // manifold absolute pressure
+                    break;
                 default:
                     break;
             }
@@ -274,7 +298,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
         if (cellTower.getMobileCountryCode() != null
             && cellTower.getMobileNetworkCode() != null
-            && cellTower.getCellId() != null
+            && cellTower.getCellId() != null && cellTower.getCellId() != 0
             && cellTower.getLocationAreaCode() != null) {
             position.setNetwork(new Network(cellTower));
         } else if (cellTower.getSignalStrength() != null) {
@@ -519,7 +543,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             if (custom) {
                 String form = this.form;
                 if (form == null) {
-                    form = readString(buf).substring("%CI".length());
+                    form = readString(buf).trim().substring("%CI".length());
                 }
                 readBinaryCustomData(position, buf, form);
             }
