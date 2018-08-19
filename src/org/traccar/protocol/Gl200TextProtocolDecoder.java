@@ -175,14 +175,16 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private static final Pattern PATTERN_FRI = new PatternBuilder()
-            .text("+").expression("(?:RESP|BUFF):GTFRI,")
+            .text("+").expression("(?:RESP|BUFF):GT...,")
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
             .number("(d{15}|x{14}),")            // imei
             .expression("(?:([0-9A-Z]{17}),)?")  // vin
             .expression("[^,]*,")                // device name
             .number("(d+)?,")                    // power
-            .number("d{1,2},")                   // report type
-            .number("d{1,2},")                   // count
+            .number("d{1,2},").optional()        // report type
+            .number("d{1,2},").optional()        // count
+            .number(",").optional()              // reserved
+            .number("(d+),").optional()          // battery
             .expression("((?:")
             .expression(PATTERN_LOCATION.pattern())
             .expression(")+)")
@@ -200,6 +202,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("(?:d+.?d*|Inf|NaN)?,")      // fuel consumption
             .number("(d+)?,")                    // fuel level
             .groupEnd()
+            .any()
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
             .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
             .text(",")
@@ -711,6 +714,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         String vin = parser.next();
         Integer power = parser.nextInt();
+        Integer battery = parser.nextInt();
 
         Parser itemParser = new Parser(PATTERN_LOCATION, parser.next());
         while (itemParser.find()) {
@@ -730,6 +734,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         if (power != null && power > 10) {
             position.set(Position.KEY_POWER, power * 0.001); // only on some devices
+        }
+        if (battery != null) {
+            position.set(Position.KEY_BATTERY_LEVEL, battery);
         }
 
         if (parser.hasNext()) {
@@ -1094,6 +1101,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                     result = decodeCan(channel, remoteAddress, sentence);
                     break;
                 case "FRI":
+                case "GEO":
+                case "STR":
                     result = decodeFri(channel, remoteAddress, sentence);
                     break;
                 case "ERI":
