@@ -283,7 +283,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                     buf.skipBytes(6); // maximum g force
                     break;
                 case "ME":
-                    readString(buf); // imei
+                    buf.readLong(); // imei
                     break;
                 case "IA":
                     buf.readUnsignedByte(); // intake air temperature

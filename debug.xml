@@ -19,4 +19,6 @@
     <entry key='database.user'>sa</entry>
     <entry key='database.password'></entry>
 
+    <entry key='atrack.custom'>true</entry>
+
 </properties>
