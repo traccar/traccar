@@ -10,13 +10,13 @@ public class AtrackProtocolDecoderTest extends ProtocolTest {
 
         AtrackProtocolDecoder decoder = new AtrackProtocolDecoder(new AtrackProtocol());
 
-        verifyPosition(decoder, buffer(
+        verifyPositions(decoder, buffer(
                 "@P,3A34,146,41431,353816057242284,20180622015809,20180622015809,20180622015809,9720689,4014230,61,2,0,20,1,0,0,0,0,2000,2000,12160,42,624,002,20009,20014,\r\n"));
 
-        verifyPosition(decoder, buffer(
+        verifyPositions(decoder, buffer(
                 "@P,1126,121,104547,358901048091554,20180412143513,20180412143514,20180413060000,16423389,48178700,108,2,6.5,9,0,0,0,0,0,2000,2000,\r\n"));
 
-        verifyPosition(decoder, buffer(
+        verifyPositions(decoder, buffer(
                 "@P,434E,124,104655,358901048091554,20180412143706,20180412143706,20180413060107,16423389,48178700,108,121,6.5,10,0,0,0,0,0,2000,2000,\r\n"));
 
         verifyPositions(decoder, binary(
@@ -34,12 +34,15 @@ public class AtrackProtocolDecoderTest extends ProtocolTest {
 
         decoder.setCustom(true);
 
-        verifyPosition(decoder, buffer(
+        verifyPositions(decoder, buffer(
+                "@P,6254,235,989,356961075931165,1534381563,1534381564,1534381564,-88429188,44271225,70,2,200563,8,1,0,0,0,,2000,2000,,%CI%CE%CN%GQ%GS%FL%ML%VN%PD%FC%EL%ET%CD%AT%MF%MV,0,310260,18,9,0,0,2T1KR32E28C706185,0,0,0,54,8901260881215247759,252,489,123"));
+
+        verifyPositions(decoder, buffer(
                 "@P,27A6,663,707,356961075931165,1534211298,1534211297,1534211437,-88429190,44271135,288,2,200235,8,1,0,0,0,,2000,2000,,%CI%CE%CN%GQ%GS%FL%ML%VN%PD%FC%EL%ET%CD%AT%MF%MV,0,310260,17,9,0,0,2T1KR32E28C706185,0,0,0,80,8901260881215247759,251,59,124\r\n",
                 "1534211353,1534211357,1534211437,-88429190,44271135,288,2,200235,7,1,0,0,0,,2000,2000,,%CI%CE%CN%GQ%GS%FL%ML%VN%PD%FC%EL%ET%CD%AT%MF%MV,0,310260,17,2,0,0,2T1KR32E28C706185,0,0,0,79,8901260881215247759,251,60,124\r\n",
                 "1534211417,1534211417,1534211437,-88429190,44271135,288,2,200235,7,1,0,0,0,,2000,2000,,%CI%CE%CN%GQ%GS%FL%ML%VN%PD%FC%EL%ET%CD%AT%MF%MV,0,310260,17,2,0,0,2T1KR32E28C706185,0,0,0,78,8901260881215247759,251,56,124\r\n"));
 
-        verifyPosition(decoder, buffer(
+        verifyPositions(decoder, buffer(
                 "@P,CA4B,122,1,358683064932578,1533633976,1533633975,1533633975,121562641,25082649,72,0,1638,15,0,0,1,0,,2000,2000,,%CI%MV%BV,143,0\r\n"));
 
         verifyPositions(decoder, binary(
