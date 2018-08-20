@@ -128,8 +128,10 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                     cellTower.setLocationAreaCode(Integer.parseInt(values[i]));
                     break;
                 case "CN":
-                    cellTower.setMobileCountryCode(Integer.parseInt(values[i].substring(0, 3)));
-                    cellTower.setMobileNetworkCode(Integer.parseInt(values[i].substring(3)));
+                    if (values[i].length() > 3) {
+                        cellTower.setMobileCountryCode(Integer.parseInt(values[i].substring(0, 3)));
+                        cellTower.setMobileNetworkCode(Integer.parseInt(values[i].substring(3)));
+                    }
                     break;
                 case "PC":
                     position.set(Position.PREFIX_COUNT + 1, Integer.parseInt(values[i]));
