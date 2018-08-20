@@ -67,6 +67,15 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
         return protocol.getName();
     }
 
+    public String getServer(Channel channel) {
+        String server = Context.getConfig().getString(getProtocolName() + ".server");
+        if (server == null && channel != null) {
+            InetSocketAddress address = (InetSocketAddress) channel.localAddress();
+            server = address.getAddress().getHostAddress() + ":" + address.getPort();
+        }
+        return server;
+    }
+
     protected double convertSpeed(double value, String defaultUnits) {
         switch (Context.getConfig().getString(getProtocolName() + ".speed", defaultUnits)) {
             case "kmh":

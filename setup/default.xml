@@ -251,5 +251,6 @@
     <entry key='avema.port'>5171</entry>
     <entry key='autotrack.port'>5172</entry>
     <entry key='tek.port'>5173</entry>
+    <entry key='wristband.port'>5174</entry>
 
 </properties>
