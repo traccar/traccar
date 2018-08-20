@@ -21,6 +21,8 @@ import io.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseFrameDecoder;
 import org.traccar.helper.BufferUtil;
 
+import java.nio.charset.StandardCharsets;
+
 public class AtrackFrameDecoder extends BaseFrameDecoder {
 
     private static final int KEEPALIVE_LENGTH = 12;
@@ -48,9 +50,24 @@ public class AtrackFrameDecoder extends BaseFrameDecoder {
 
             } else {
 
-                int endIndex = BufferUtil.indexOf("\r\n", buf);
-                if (endIndex > 0) {
-                    return buf.readRetainedSlice(endIndex - buf.readerIndex() + 2);
+                int lengthStart = buf.indexOf(buf.readerIndex() + 3, buf.writerIndex(), (byte) ',') + 1;
+                if (lengthStart > 0) {
+                    int lengthEnd = buf.indexOf(lengthStart, buf.writerIndex(), (byte) ',');
+                    if (lengthEnd > 0) {
+                        int length = lengthEnd + Integer.parseInt(buf.toString(
+                                lengthStart, lengthEnd - lengthStart, StandardCharsets.US_ASCII));
+                        if (buf.readableBytes() > length && buf.getByte(buf.readerIndex() + length) == '\n') {
+                            length += 1;
+                        }
+                        if (buf.readableBytes() >= length) {
+                            return buf.readRetainedSlice(length);
+                        }
+                    }
+                } else {
+                    int endIndex = BufferUtil.indexOf("\r\n", buf);
+                    if (endIndex > 0) {
+                        return buf.readRetainedSlice(endIndex - buf.readerIndex() + 2);
+                    }
                 }
 
             }
