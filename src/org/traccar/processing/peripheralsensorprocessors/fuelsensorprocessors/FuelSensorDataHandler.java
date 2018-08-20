@@ -304,6 +304,14 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             return;
         }
 
+        if (position.getAttributes().containsKey(Position.KEY_POWER) &&
+                (int) position.getAttributes().get(Position.KEY_POWER)  <= 0) {
+
+            updateWithLastAvailable(position);
+            Log.debug("Device power too low, updating with last known fuel level for deviceId" + deviceId);
+            return;
+        }
+
         Optional<Double> maybeCalibratedFuelLevel =
                 getCalibratedFuelLevel(deviceId, sensorId, fuelLevelPoints);
 
