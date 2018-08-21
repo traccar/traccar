@@ -353,7 +353,12 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
 
-            position.set(Position.KEY_EVENT, buf.readUnsignedByte());
+            if (codec == CODEC_16) {
+                position.set(Position.KEY_EVENT, buf.readUnsignedShort());
+                buf.readUnsignedByte(); // generation type
+            } else {
+                position.set(Position.KEY_EVENT, buf.readUnsignedByte());
+            }
 
             buf.readUnsignedByte(); // total IO data records
 
@@ -363,7 +368,8 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(globalMask, 1)) {
             int cnt = buf.readUnsignedByte();
             for (int j = 0; j < cnt; j++) {
-                decodeParameter(position, buf.readUnsignedByte(), buf, 1, codec);
+                int id = codec == CODEC_16 ? buf.readUnsignedShort() : buf.readUnsignedByte();
+                decodeParameter(position, id, buf, 1, codec);
             }
         }
 
@@ -371,7 +377,8 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(globalMask, 2)) {
             int cnt = buf.readUnsignedByte();
             for (int j = 0; j < cnt; j++) {
-                decodeParameter(position, buf.readUnsignedByte(), buf, 2, codec);
+                int id = codec == CODEC_16 ? buf.readUnsignedShort() : buf.readUnsignedByte();
+                decodeParameter(position, id, buf, 2, codec);
             }
         }
 
@@ -379,7 +386,8 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(globalMask, 3)) {
             int cnt = buf.readUnsignedByte();
             for (int j = 0; j < cnt; j++) {
-                decodeParameter(position, buf.readUnsignedByte(), buf, 4, codec);
+                int id = codec == CODEC_16 ? buf.readUnsignedShort() : buf.readUnsignedByte();
+                decodeParameter(position, id, buf, 4, codec);
             }
         }
 
@@ -387,7 +395,8 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         if (codec == CODEC_FM4X00 || codec == CODEC_16) {
             int cnt = buf.readUnsignedByte();
             for (int j = 0; j < cnt; j++) {
-                decodeOtherParameter(position, buf.readUnsignedByte(), buf, 8);
+                int id = codec == CODEC_16 ? buf.readUnsignedShort() : buf.readUnsignedByte();
+                decodeOtherParameter(position, id, buf, 8);
             }
         }
 
@@ -395,7 +404,8 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         if (extended) {
             int cnt = buf.readUnsignedByte();
             for (int j = 0; j < cnt; j++) {
-                position.set(Position.PREFIX_IO + buf.readUnsignedByte(), ByteBufUtil.hexDump(buf.readSlice(16)));
+                int id = codec == CODEC_16 ? buf.readUnsignedShort() : buf.readUnsignedByte();
+                position.set(Position.PREFIX_IO + id, ByteBufUtil.hexDump(buf.readSlice(16)));
             }
         }
 
