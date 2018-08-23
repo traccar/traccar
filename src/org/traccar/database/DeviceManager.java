@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -354,8 +354,12 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
     public void resetDeviceAccumulators(DeviceAccumulators deviceAccumulators) throws SQLException {
         Position last = positions.get(deviceAccumulators.getDeviceId());
         if (last != null) {
-            last.getAttributes().put(Position.KEY_TOTAL_DISTANCE, deviceAccumulators.getTotalDistance());
-            last.getAttributes().put(Position.KEY_HOURS, deviceAccumulators.getHours());
+            if (deviceAccumulators.getTotalDistance() != null) {
+                last.getAttributes().put(Position.KEY_TOTAL_DISTANCE, deviceAccumulators.getTotalDistance());
+            }
+            if (deviceAccumulators.getHours() != null) {
+                last.getAttributes().put(Position.KEY_HOURS, deviceAccumulators.getHours());
+            }
             getDataManager().addObject(last);
             updateLatestPosition(last);
         } else {

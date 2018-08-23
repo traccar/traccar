@@ -1,6 +1,6 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
- * Copyright 2016 Andrey Kunitsyn (andrey@traccar.org)
+ * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,23 +28,23 @@ public class DeviceAccumulators {
         this.deviceId = deviceId;
     }
 
-    private double totalDistance;
+    private Double totalDistance;
 
-    public double getTotalDistance() {
+    public Double getTotalDistance() {
         return totalDistance;
     }
 
-    public void setTotalDistance(double totalDistance) {
+    public void setTotalDistance(Double totalDistance) {
         this.totalDistance = totalDistance;
     }
 
-    private long hours;
+    private Long hours;
 
-    public long getHours() {
+    public Long getHours() {
         return hours;
     }
 
-    public void setHours(long hours) {
+    public void setHours(Long hours) {
         this.hours = hours;
     }
 
