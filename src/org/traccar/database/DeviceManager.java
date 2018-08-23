@@ -30,7 +30,7 @@ import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceState;
-import org.traccar.model.DeviceTotalDistance;
+import org.traccar.model.DeviceAccumulators;
 import org.traccar.model.Group;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
@@ -351,10 +351,11 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         return result;
     }
 
-    public void resetTotalDistance(DeviceTotalDistance deviceTotalDistance) throws SQLException {
-        Position last = positions.get(deviceTotalDistance.getDeviceId());
+    public void resetDeviceAccumulators(DeviceAccumulators deviceAccumulators) throws SQLException {
+        Position last = positions.get(deviceAccumulators.getDeviceId());
         if (last != null) {
-            last.getAttributes().put(Position.KEY_TOTAL_DISTANCE, deviceTotalDistance.getTotalDistance());
+            last.getAttributes().put(Position.KEY_TOTAL_DISTANCE, deviceAccumulators.getTotalDistance());
+            last.getAttributes().put(Position.KEY_HOURS, deviceAccumulators.getHours());
             getDataManager().addObject(last);
             updateLatestPosition(last);
         } else {

@@ -16,7 +16,7 @@
  */
 package org.traccar.model;
 
-public class DeviceTotalDistance {
+public class DeviceAccumulators {
 
     private long deviceId;
 
@@ -36,6 +36,16 @@ public class DeviceTotalDistance {
 
     public void setTotalDistance(double totalDistance) {
         this.totalDistance = totalDistance;
+    }
+
+    private long hours;
+
+    public long getHours() {
+        return hours;
+    }
+
+    public void setHours(long hours) {
+        this.hours = hours;
     }
 
 }

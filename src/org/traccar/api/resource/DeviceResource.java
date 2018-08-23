@@ -20,7 +20,7 @@ import org.traccar.api.BaseObjectResource;
 import org.traccar.database.DeviceManager;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Device;
-import org.traccar.model.DeviceTotalDistance;
+import org.traccar.model.DeviceAccumulators;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -85,15 +85,15 @@ public class DeviceResource extends BaseObjectResource<Device> {
         return deviceManager.getItems(result);
     }
 
-    @Path("{id}/distance")
+    @Path("{id}/accumulators")
     @PUT
-    public Response updateTotalDistance(DeviceTotalDistance entity) throws SQLException {
+    public Response updateAccumulators(DeviceAccumulators entity) throws SQLException {
         if (!Context.getPermissionsManager().getUserAdmin(getUserId())) {
             Context.getPermissionsManager().checkManager(getUserId());
             Context.getPermissionsManager().checkPermission(Device.class, getUserId(), entity.getDeviceId());
         }
-        Context.getDeviceManager().resetTotalDistance(entity);
-        LogAction.resetTotalDistance(getUserId(), entity.getDeviceId());
+        Context.getDeviceManager().resetDeviceAccumulators(entity);
+        LogAction.resetDeviceAccumulators(getUserId(), entity.getDeviceId());
         return Response.noContent().build();
     }
 
