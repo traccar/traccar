@@ -103,16 +103,8 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedByte();
                 break;
             case 119:
-                StringBuilder sb = new StringBuilder();
-                while (buf.isReadable()) {
-                    char c = (char) buf.readByte();
-                    if (c >= 0x20) {
-                        sb.append(c);
-                    } else {
-                        break;
-                    }
-                }
-                position.set("eventData", sb.toString());
+                position.set("eventData", ByteBufUtil.hexDump(
+                        buf, buf.readerIndex(), Math.min(buf.readableBytes(), 1024)));
                 break;
             case 121:
             case 142:
