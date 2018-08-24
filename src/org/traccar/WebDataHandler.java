@@ -60,9 +60,13 @@ public class WebDataHandler extends BaseDataHandler {
 
             f.format("%02d%07.4f,%c,", (int) Math.abs(lat), Math.abs(lat) % 1 * 60, lat < 0 ? 'S' : 'N');
             f.format("%03d%07.4f,%c,", (int) Math.abs(lon), Math.abs(lon) % 1 * 60, lon < 0 ? 'W' : 'E');
+            f.format("%.2f,", position.getSpeed());
 
-            f.format("%.2f,%.2f,", position.getSpeed(), position.getCourse());
-            f.format("%1$td%1$tm%1$ty,,", calendar);
+            if (position.getCourse() != null)  {
+                f.format("%.2f", position.getCourse());
+            }
+
+            f.format(",%1$td%1$tm%1$ty,,", calendar);
         }
 
         s.append(Checksum.nmea(s.toString()));
@@ -95,10 +99,10 @@ public class WebDataHandler extends BaseDataHandler {
                 .replace("{valid}", String.valueOf(position.getValid()))
                 .replace("{latitude}", String.valueOf(position.getLatitude()))
                 .replace("{longitude}", String.valueOf(position.getLongitude()))
-                .replace("{altitude}", String.valueOf(position.getAltitude()))
+                .replace("{altitude}", (position.getAltitude() == null) ? "0" : String.valueOf(position.getAltitude()))
                 .replace("{speed}", String.valueOf(position.getSpeed()))
-                .replace("{course}", String.valueOf(position.getCourse()))
-                .replace("{accuracy}", String.valueOf(position.getAccuracy()))
+                .replace("{course}", (position.getCourse() == null) ? "0" : String.valueOf(position.getCourse()))
+                .replace("{accuracy}", (position.getAccuracy() == null) ? "0" : String.valueOf(position.getAccuracy()))
                 .replace("{statusCode}", calculateStatus(position));
 
         if (position.getAddress() != null) {
