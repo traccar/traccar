@@ -5,6 +5,7 @@ import org.traccar.model.Position;
 import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.FuelActivity;
 import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.FuelSensorDataHandler;
 import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.FuelEventMetadata;
+import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.FuelSensorDataHandlerHelper;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -93,12 +94,40 @@ public class FuelSensorDataHandlerTest {
         for (int i = 0; i < size; i++) {
             Position position = new Position();
             double fuelIncrement = i * ((endFuelLevel - startFuelLevel)/size);
-            position.set(Position.KEY_FUEL_LEVEL, startFuelLevel + fuelIncrement);
+            double fuelValue = startFuelLevel + fuelIncrement;
+            position.set(Position.KEY_FUEL_LEVEL, fuelValue);
+            position.set(Position.KEY_CALIBRATED_FUEL_LEVEL, fuelValue);
             position.setDeviceTime(getAdjustedTime(30 *(size - i)));
             positions.add(position);
         }
 
         return positions;
+    }
+
+    private Position getPositionWithCalibValue(double value) {
+        Position p = new Position();
+        p.set(Position.KEY_CALIBRATED_FUEL_LEVEL, value);
+        return p;
+    }
+
+    @Test
+    public void testOutliers() {
+        List<Position> positions = new ArrayList<>();
+        positions.add(getPositionWithCalibValue(100.0));
+        positions.add(getPositionWithCalibValue(100.2));
+        positions.add(getPositionWithCalibValue(100.5));
+        positions.add(getPositionWithCalibValue(100.3));
+        positions.add(getPositionWithCalibValue(102.0));
+        positions.add(getPositionWithCalibValue(100.1));
+        positions.add(getPositionWithCalibValue(100.4));
+        positions.add(getPositionWithCalibValue(100.2));
+        positions.add(getPositionWithCalibValue(100.6));
+
+        boolean isOutlier = FuelSensorDataHandlerHelper.isOutlierPresentInSublist(positions,
+                                                              4);
+
+        assert isOutlier == true;
+
     }
 
     private Date getAdjustedTime(int secondsBehind) {

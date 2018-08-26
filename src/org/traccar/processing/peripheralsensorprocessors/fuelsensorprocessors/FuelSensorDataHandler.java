@@ -42,6 +42,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
     private static final int SECONDS_IN_ONE_HOUR = 3600;
 
     private int minValuesForMovingAvg;
+    private int minValuesForOutlierDetection;
     private int maxInMemoryPreviousPositionsListSize;
     private int hoursOfDataToLoad;
     private int minHoursOfDataInMemory;
@@ -78,6 +79,10 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
         minValuesForMovingAvg = Context.getConfig()
                                        .getInteger("processing.peripheralSensorData.minValuesForMovingAverage");
+
+        minValuesForOutlierDetection =
+                Context.getConfig()
+                       .getInteger("processing.peripheralSensorData.minValuesForOutlierDetection");
 
         minHoursOfDataInMemory = Context.getConfig()
                                         .getInteger("processing.peripheralSensorData.minHoursOfDataInMemory");
@@ -299,6 +304,14 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             return;
         }
 
+        if (position.getAttributes().containsKey(Position.KEY_POWER) &&
+                (int) position.getAttributes().get(Position.KEY_POWER)  <= 0) {
+
+            updateWithLastAvailable(position);
+            Log.debug("Device power too low, updating with last known fuel level for deviceId" + deviceId);
+            return;
+        }
+
         Optional<Double> maybeCalibratedFuelLevel =
                 getCalibratedFuelLevel(deviceId, sensorId, fuelLevelPoints);
 
@@ -320,11 +333,61 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                                             position,
                                             minValuesForMovingAvg - 1);
 
-        double currentFuelLevelAverage = getAverageValue(position, relevantPositionsListForAverages);
+        relevantPositionsListForAverages.add(position);
+        double currentFuelLevelAverage = getAverageValue(relevantPositionsListForAverages);
 
         // KEY_FUEL_LEVEL will hold the smoothed data, which is average of raw values in the relevant list.
+        // Until the number of positions in the list comes up to the expected number of positions for calculating
+        // averages and / or outliers, this will calculate the average of the existing list and set that on the
+        // current position, so it's available for later calculations. This will also make sure that we are able to send
+        // this info to any client that's listening for these updates.
+
         position.set(Position.KEY_FUEL_LEVEL, currentFuelLevelAverage);
         positionsForDeviceSensor.add(position);
+
+        // Detect and remove outliers
+        List<Position> relevantPositionsListForOutliers =
+                getRelevantPositionsSubList(positionsForDeviceSensor, position, minValuesForOutlierDetection);
+
+        if (relevantPositionsListForOutliers.size() < minValuesForOutlierDetection) {
+            Log.debug("List too small for outlier detection");
+            return;
+        }
+
+        int indexOfPositionEvaluation = (minValuesForOutlierDetection - 1) / 2;
+        boolean outlierPresent = FuelSensorDataHandlerHelper.isOutlierPresentInSublist(
+                relevantPositionsListForOutliers,
+                indexOfPositionEvaluation);
+
+        if (outlierPresent) {
+            // Remove the outlier
+            Position outlierPosition = relevantPositionsListForOutliers.get(indexOfPositionEvaluation);
+            outlierPosition.set(Position.KEY_FUEL_IS_OUTLIER, true);
+
+            // Note: Need to do this in a better way since this is a direct write to the db and can slow things down.
+            // We could use an external queue and update these positions from there, without affecting processing here.
+            // Also, we do not want to lose any data coming in, so we'll only mark the position as an outlier rather
+            // than deleting it.
+            updatePosition(outlierPosition);
+            positionsForDeviceSensor.remove(outlierPosition);
+            return;
+        }
+
+        Position positionUnderEvaluation = relevantPositionsListForOutliers.get(indexOfPositionEvaluation);
+
+        // Re-calculate and reset averages if there were no outliers.
+        relevantPositionsListForAverages =
+                getRelevantPositionsSubList(positionsForDeviceSensor,
+                                            positionUnderEvaluation,
+                                            minValuesForMovingAvg);
+
+        currentFuelLevelAverage = getAverageValue(relevantPositionsListForAverages);
+        positionUnderEvaluation.set(Position.KEY_FUEL_LEVEL, currentFuelLevelAverage);
+
+        // Update the position in the db so the recalculated average is reflected there.
+        updatePosition(positionUnderEvaluation);
+
+        //-- End Outliers
 
         List<Position> relevantPositionsListForAlerts =
                 getRelevantPositionsSubList(positionsForDeviceSensor,
@@ -376,6 +439,14 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         removeFirstPositionIfNecessary(positionsForDeviceSensor, deviceId);
     }
 
+    private static void updatePosition(final Position outlierPosition) {
+        try {
+            Context.getDataManager().updateObject(outlierPosition);
+        } catch (SQLException e) {
+            Log.debug("Exception while updating outlier position with id: " + outlierPosition.getId());
+        }
+    }
+
     private void removeFirstPositionIfNecessary(TreeMultiset<Position> positionsForDeviceSensor, long deviceId) {
         if (positionsForDeviceSensor.size() > maxInMemoryPreviousPositionsListSize) {
             Position toRemove = positionsForDeviceSensor.firstEntry().getElement();
@@ -392,13 +463,12 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         return cal.getTime();
     }
 
-    private Double getAverageValue(Position currentPosition,
-                                   List<Position> fuelLevelReadings) {
+    private Double getAverageValue(List<Position> fuelLevelReadings) {
 
         // Omit values that are 0s, to avoid skewing the average. This is mostly useful in handling 0s from the
         // analog sensor, which are noise.
-        Double total = (Double) currentPosition.getAttributes().get(Position.KEY_CALIBRATED_FUEL_LEVEL);
-        double size = total > 0.0 ? 1.0 : 0.0;
+        double total = 0.0;
+        double size = 0.0;
 
         for (Position position : fuelLevelReadings) {
             double level = (Double) position.getAttributes().get(Position.KEY_CALIBRATED_FUEL_LEVEL);
@@ -414,7 +484,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
         double avg = total / size;
 
-        Log.debug("[FUEL_ACTIVITY_AVERAGES] deviceId: " + currentPosition.getDeviceId()
+        Log.debug("[FUEL_ACTIVITY_AVERAGES] deviceId: " + fuelLevelReadings.get(0).getDeviceId()
                   + " average: " + avg
                   + " averages list size: " + fuelLevelReadings.size());
 
