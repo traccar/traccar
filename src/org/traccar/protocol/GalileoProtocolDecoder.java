@@ -20,6 +20,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.helper.UnitsConverter;
@@ -40,6 +41,8 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
     public GalileoProtocolDecoder(GalileoProtocol protocol) {
         super(protocol);
     }
+
+    private ByteBuf photo;
 
     private static final Map<Integer, Integer> TAG_LENGTH_MAP = new HashMap<>();
 
@@ -92,10 +95,10 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         return length;
     }
 
-    private void sendReply(Channel channel, int checksum) {
+    private void sendReply(Channel channel, int header, int checksum) {
         if (channel != null) {
             ByteBuf reply = Unpooled.buffer(3);
-            reply.writeByte(0x02);
+            reply.writeByte(header);
             reply.writeShortLE((short) checksum);
             channel.writeAndFlush(new NetworkMessage(reply, channel.remoteAddress()));
         }
@@ -243,7 +246,19 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
 
         ByteBuf buf = (ByteBuf) msg;
 
-        buf.readUnsignedByte(); // header
+        int header = buf.readUnsignedByte();
+        if (header == 0x01) {
+            return decodePositions(channel, remoteAddress, buf);
+        } else if (header == 0x07) {
+            return decodePhoto(channel, remoteAddress, buf);
+        }
+
+        return null;
+    }
+
+    private Object decodePositions(
+            Channel channel, SocketAddress remoteAddress, ByteBuf buf) throws Exception {
+
         int length = (buf.readUnsignedShortLE() & 0x7fff) + 3;
 
         List<Position> positions = new LinkedList<>();
@@ -295,13 +310,50 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
             positions.add(position);
         }
 
-        sendReply(channel, buf.readUnsignedShortLE());
+        sendReply(channel, 0x02, buf.readUnsignedShortLE());
 
         for (Position p : positions) {
             p.setDeviceId(deviceSession.getDeviceId());
         }
 
         return positions.isEmpty() ? null : positions;
+    }
+
+    private Object decodePhoto(
+            Channel channel, SocketAddress remoteAddress, ByteBuf buf) throws Exception {
+
+        int length = buf.readUnsignedShortLE();
+
+        Position position = null;
+
+        if (length > 1) {
+
+            if (photo == null) {
+                photo = Unpooled.buffer();
+            }
+
+            buf.readUnsignedByte(); // part number
+            photo.writeBytes(buf, length - 1);
+
+        } else {
+
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+            String uniqueId = Context.getIdentityManager().getById(deviceSession.getDeviceId()).getUniqueId();
+
+            position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            position.set(Position.KEY_IMAGE, Context.getMediaManager().writeFile(uniqueId, photo, "jpg"));
+            photo.release();
+            photo = null;
+
+        }
+
+        sendReply(channel, 0x07, buf.readUnsignedShortLE());
+
+        return position;
     }
 
 }
