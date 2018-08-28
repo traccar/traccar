@@ -4,6 +4,8 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
+import io.netty.handler.codec.http.DefaultHttpHeaders;
+import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpVersion;
 import org.traccar.helper.DataConverter;
@@ -72,6 +74,10 @@ public class ProtocolTest extends BaseTest {
 
     protected DefaultFullHttpRequest request(HttpMethod method, String url, ByteBuf data) {
         return new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, url, data);
+    }
+
+    protected DefaultFullHttpRequest request(HttpMethod method, String url, HttpHeaders headers) {
+        return new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, url, Unpooled.buffer(), headers, new DefaultHttpHeaders());
     }
 
     protected void verifyNotNull(BaseProtocolDecoder decoder, Object object) throws Exception {
