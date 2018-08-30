@@ -311,6 +311,21 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_LOW_BATTERY;
             case 0x11:
                 return Position.ALARM_POWER_OFF;
+            case 0x13:
+                return Position.ALARM_TAMPERING;
+            case 0x14:
+                return Position.ALARM_DOOR;
+            case 0x29:
+                return Position.ALARM_ACCELERATION;
+            case 0x30:
+                return Position.ALARM_BRAKING;
+            case 0x2A:
+            case 0x2B:
+                return Position.ALARM_CORNERING;
+            case 0x2C:
+                return Position.ALARM_ACCIDENT;
+            case 0x23:
+                return Position.ALARM_FALL_DOWN;
             default:
                 return null;
         }
