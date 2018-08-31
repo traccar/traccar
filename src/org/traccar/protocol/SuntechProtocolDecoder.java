@@ -185,8 +185,14 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             int cid = Integer.parseInt(values[index++]);
             int mcc = Integer.parseInt(values[index++]);
             int mnc = Integer.parseInt(values[index++]);
-            int rssi = Integer.parseInt(values[index++]);
-            int lac = Integer.parseInt(values[index++]);
+            int lac, rssi;
+            if (i == 0) {
+                rssi = Integer.parseInt(values[index++]);
+                lac = Integer.parseInt(values[index++]);
+            } else {
+                lac = Integer.parseInt(values[index++]);
+                rssi = Integer.parseInt(values[index++]);
+            }
             index += 1; // timing advance
             if (cid > 0) {
                 network.addCellTower(CellTower.from(mcc, mnc, lac, cid, rssi));
