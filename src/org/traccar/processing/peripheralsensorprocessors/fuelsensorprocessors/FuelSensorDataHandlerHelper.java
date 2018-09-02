@@ -83,4 +83,39 @@ public class FuelSensorDataHandlerHelper {
 
         return isOutlier;
     }
+
+    public static boolean isDataLoss(FuelEventMetadata fuelEventMetadata,
+                                     FuelActivity fuelActivity,
+                                     double fuelChangeVolume) {
+
+        double startTotalDistance = (double) fuelEventMetadata.getActivityStartPosition()
+                                                              .getAttributes().get(Position.KEY_TOTAL_DISTANCE);
+
+        double startOdometer = (double) fuelEventMetadata.getActivityStartPosition()
+                                                         .getAttributes().get(Position.KEY_ODOMETER);
+
+        double endTotalDistance = (double) fuelEventMetadata.getActivityEndPosition()
+                                                            .getAttributes().get(Position.KEY_TOTAL_DISTANCE);
+
+        double endOdometer = (double) fuelEventMetadata.getActivityStartPosition()
+                                                       .getAttributes().get(Position.KEY_ODOMETER);
+
+        double differenceTotalDistance = endTotalDistance - startTotalDistance;
+        double differenceOdometer = endOdometer - startOdometer;
+
+        double maximumDistanceTravelled = differenceTotalDistance > differenceOdometer
+                ? differenceTotalDistance : differenceOdometer;
+
+        double minimumAverageMileage = 1.5; // This has to be a self learning value
+        double expectedFuelConsumed = maximumDistanceTravelled / minimumAverageMileage;
+
+        boolean dataLoss = Math.abs(fuelChangeVolume) <= expectedFuelConsumed;
+
+        if (dataLoss) {
+            Log.debug("Data Loss: Distance covered" + maximumDistanceTravelled + " Exp fuel consumed:"
+                    + expectedFuelConsumed + " actual fuel consumed:" + fuelActivity);
+        }
+
+        return dataLoss;
+    }
 }

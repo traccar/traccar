@@ -678,7 +678,11 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             Log.debug("[FUEL_ACTIVITY_END] errorCheckFuelChange: " + errorCheckFuelChange);
             Log.debug("[FUEL_ACTIVITY_END] errorCheck: " + errorCheck);
 
-            if (fuelChangeVolume < 0.0) {
+            boolean isDataLoss = FuelSensorDataHandlerHelper.isDataLoss(fuelEventMetadata,
+                    fuelActivity,
+                    fuelChangeVolume);
+
+            if (fuelChangeVolume < 0.0 && !isDataLoss) {
                 fuelActivity.setActivityType(FuelActivityType.FUEL_DRAIN);
                 fuelActivity.setChangeVolume(fuelChangeVolume);
                 fuelActivity.setActivityStartTime(fuelEventMetadata.getStartTime());
@@ -698,7 +702,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                 // The start may have been detected as a false positive. In any case, remove after we determine the kind
                 // of activity.
                 Log.debug("[FUEL_ACTIVITY] Removing event metadata from list to avoid false positives: "
-                          + lookupKey);
+                        + lookupKey);
                 deviceFuelEventMetadata.remove(lookupKey);
             }
         }
