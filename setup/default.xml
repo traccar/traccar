@@ -253,5 +253,6 @@
     <entry key='tek.port'>5173</entry>
     <entry key='wristband.port'>5174</entry>
     <entry key='applet.port'>5175</entry>
+    <entry key='milesmate.port'>5176</entry>
 
 </properties>
