@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -66,6 +67,20 @@ public class ReportResource extends BaseResource {
             @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
         Collection<Position> result = Route.getFuelObjects(getUserId(), deviceIds, groupIds,
                 DateUtil.parseDate(from), DateUtil.parseDate(to));
+        return result;
+    }
+
+    @Path("mileage")
+    @GET
+    public Collection<Position> getMileage(
+            @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
+            @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
+
+        long userid = getUserId();
+        Date fromDate = DateUtil.parseDate(from);
+        Date endDate = DateUtil.parseDate(to);
+
+        Collection<Position> result = Route.getSummaryObjects(userid, deviceIds, groupIds, fromDate, endDate);
         return result;
     }
 

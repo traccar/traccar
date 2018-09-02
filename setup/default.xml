@@ -74,6 +74,22 @@
         JOIN devices AS d ON dp.deviceid = d.id;
     </entry>
 
+    <entry key='database.selectPositionsForSummary'>
+        SELECT a.*
+        FROM positions AS a,
+        (
+            SELECT MIN(id) AS mini, MAX(id) AS maxi
+            FROM positions
+            WHERE deviceId = :deviceId
+            AND attributes NOT LIKE '%"totalDistance":0.0%'
+            AND fixTime BETWEEN :from AND :to
+            ORDER BY fixtime
+        ) AS m
+        WHERE  m.maxi = a.id
+        OR m.mini = a.id
+        ORDER BY a.id
+    </entry>
+
     <entry key='database.selectFCMPushNotificationsByUserId'>
         SELECT deviceId, eventTypeId, enabled FROM fcmpushnotifications WHERE userId = :userId
     </entry>
