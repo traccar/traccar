@@ -16,14 +16,7 @@ import org.traccar.transforms.model.FuelSensorCalibration;
 import org.traccar.transforms.model.SensorPointsMap;
 
 import java.sql.SQLException;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Date;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -307,8 +300,8 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         if (position.getAttributes().containsKey(Position.KEY_POWER) &&
                 (int) position.getAttributes().get(Position.KEY_POWER)  <= 0) {
 
+            Log.debug("Device power too low or missing, updating with last known fuel level for deviceId" + deviceId);
             updateWithLastAvailable(position);
-            Log.debug("Device power too low, updating with last known fuel level for deviceId" + deviceId);
             return;
         }
 
@@ -682,7 +675,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                     fuelActivity,
                     fuelChangeVolume);
 
-            if (fuelChangeVolume < 0.0 && !isDataLoss) {
+            if (!isDataLoss && fuelChangeVolume < 0.0) {
                 fuelActivity.setActivityType(FuelActivityType.FUEL_DRAIN);
                 fuelActivity.setChangeVolume(fuelChangeVolume);
                 fuelActivity.setActivityStartTime(fuelEventMetadata.getStartTime());
@@ -690,7 +683,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                 fuelActivity.setActivitystartPosition(fuelEventMetadata.getActivityStartPosition());
                 fuelActivity.setActivityEndPosition(fuelEventMetadata.getActivityEndPosition());
                 deviceFuelEventMetadata.remove(lookupKey);
-            } else if (fuelChangeVolume > 0.0) { 
+            } else if (fuelChangeVolume > 0.0 && errorCheckFuelChange > errorCheck) {
                 fuelActivity.setActivityType(FuelActivityType.FUEL_FILL);
                 fuelActivity.setChangeVolume(fuelChangeVolume);
                 fuelActivity.setActivityStartTime(fuelEventMetadata.getStartTime());

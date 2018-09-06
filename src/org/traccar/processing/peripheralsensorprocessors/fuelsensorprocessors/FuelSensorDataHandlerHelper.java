@@ -91,13 +91,13 @@ public class FuelSensorDataHandlerHelper {
         double startTotalDistance = (double) fuelEventMetadata.getActivityStartPosition()
                                                               .getAttributes().get(Position.KEY_TOTAL_DISTANCE);
 
-        double startOdometer = (double) fuelEventMetadata.getActivityStartPosition()
+        int startOdometer = (int) fuelEventMetadata.getActivityStartPosition()
                                                          .getAttributes().get(Position.KEY_ODOMETER);
 
         double endTotalDistance = (double) fuelEventMetadata.getActivityEndPosition()
                                                             .getAttributes().get(Position.KEY_TOTAL_DISTANCE);
 
-        double endOdometer = (double) fuelEventMetadata.getActivityStartPosition()
+        int endOdometer = (int) fuelEventMetadata.getActivityStartPosition()
                                                        .getAttributes().get(Position.KEY_ODOMETER);
 
         double differenceTotalDistance = endTotalDistance - startTotalDistance;
