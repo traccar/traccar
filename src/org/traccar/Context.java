@@ -57,6 +57,7 @@ import org.traccar.geocoder.FactualGeocoder;
 import org.traccar.geocoder.GeocodeFarmGeocoder;
 import org.traccar.geocoder.GeocodeXyzGeocoder;
 import org.traccar.geocoder.GisgraphyGeocoder;
+import org.traccar.geocoder.BanGeocoder;
 import org.traccar.geocoder.GoogleGeocoder;
 import org.traccar.geocoder.MapQuestGeocoder;
 import org.traccar.geocoder.NominatimGeocoder;
@@ -339,6 +340,8 @@ public final class Context {
                 return new GeocodeFarmGeocoder(key, language, cacheSize, addressFormat);
             case "geocodexyz":
                 return new GeocodeXyzGeocoder(key, cacheSize, addressFormat);
+            case "ban":
+                return new BanGeocoder(cacheSize, addressFormat);
             default:
                 return new GoogleGeocoder(key, language, cacheSize, addressFormat);
         }

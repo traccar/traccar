@@ -135,4 +135,23 @@ public class GeocoderTest {
         assertEquals("605 ESTRELLA AVE, ARCADIA, California United States of America, US", waitAddress());
     }
 
+    @Ignore
+    @Test
+    public void testBan() throws InterruptedException {
+        Geocoder geocoder = new BanGeocoder(0, new AddressFormat("%f [%d], %c"));
+
+        geocoder.getAddress(48.8575, 2.2944, new Geocoder.ReverseGeocoderCallback() {
+            @Override
+            public void onSuccess(String address) {
+                setAddress(address);
+            }
+
+            @Override
+            public void onFailure(Throwable e) {
+            }
+        });
+
+        assertEquals("8 Avenue Gustave Eiffel 75007 Paris [75, Paris, Île-de-France], FR", waitAddress());
+    }
+
 }
