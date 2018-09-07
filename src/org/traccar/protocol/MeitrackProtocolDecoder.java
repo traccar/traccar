@@ -115,6 +115,19 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_POWER_CUT;
             case 36:
                 return Position.ALARM_TOW;
+            case 44:
+                return Position.ALARM_JAMMING;
+            case 78:
+                return Position.ALARM_ACCIDENT;
+            case 90:
+            case 91:
+                return Position.ALARM_CORNERING;
+            case 129:
+                return Position.ALARM_BRAKING;
+            case 130:
+                return Position.ALARM_ACCELERATION;
+            case 135:
+                return Position.ALARM_FATIGUE_DRIVING;
             default:
                 return null;
         }
