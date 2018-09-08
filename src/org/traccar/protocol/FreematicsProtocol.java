@@ -16,6 +16,7 @@
 package org.traccar.protocol;
 
 import io.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
@@ -33,6 +34,7 @@ public class FreematicsProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
+                pipeline.addLast("stringEncoder", new StringEncoder());
                 pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("objectDecoder", new FreematicsProtocolDecoder(FreematicsProtocol.this));
             }

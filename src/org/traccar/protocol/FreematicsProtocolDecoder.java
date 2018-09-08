@@ -18,12 +18,16 @@ package org.traccar.protocol;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
+import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 public class FreematicsProtocolDecoder extends BaseProtocolDecoder {
 
@@ -31,30 +35,67 @@ public class FreematicsProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    @Override
-    protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+    private Object decodeEvent(
+            Channel channel, SocketAddress remoteAddress, String sentence) throws Exception {
 
-        String sentence = (String) msg;
-        int startIndex = sentence.indexOf('#');
-        int endIndex = sentence.indexOf('*');
+        DeviceSession deviceSession = null;
+        String time = null;
 
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, sentence.substring(0, startIndex));
+        for (String pair : sentence.split(",")) {
+            String[] data = pair.split("=");
+            String key = data[0];
+            String value = data[1];
+            switch (key) {
+                case "ID":
+                case "VIN":
+                    if (deviceSession == null) {
+                        deviceSession = getDeviceSession(channel, remoteAddress, value);
+                    }
+                    break;
+                case "TS":
+                    time = value;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        if (channel != null && deviceSession != null && time != null) {
+            String message = "1#EV=1,RX=1,TS=" + time;
+            message += '*' + Checksum.sum(message);
+            channel.writeAndFlush(new NetworkMessage(message, remoteAddress));
+        }
+
+        return null;
+    }
+
+    private Object decodePosition(
+            Channel channel, SocketAddress remoteAddress, String sentence) throws Exception {
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
         if (deviceSession == null) {
             return null;
         }
 
-        Position position = new Position(getProtocolName());
-        position.setDeviceId(deviceSession.getDeviceId());
-        position.setValid(true);
+        List<Position> positions = new LinkedList<>();
+        Position position = null;
+        DateBuilder dateBuilder = null;
 
-        DateBuilder dateBuilder = new DateBuilder(new Date());
-
-        for (String pair : sentence.substring(startIndex + 1, endIndex).split(",")) {
-            String[] data = pair.split("=");
+        for (String pair : sentence.split(",")) {
+            String[] data = pair.split("[=:]");
             int key = Integer.parseInt(data[0], 16);
             String value = data[1];
             switch (key) {
+                case 0x0:
+                    if (position != null) {
+                        position.setTime(dateBuilder.getDate());
+                        positions.add(position);
+                    }
+                    position = new Position(getProtocolName());
+                    position.setDeviceId(deviceSession.getDeviceId());
+                    position.setValid(true);
+                    dateBuilder = new DateBuilder(new Date());
+                    break;
                 case 0x11:
                     value = ("000000" + value).substring(value.length());
                     dateBuilder.setDateReverse(
@@ -77,10 +118,10 @@ public class FreematicsProtocolDecoder extends BaseProtocolDecoder {
                     position.setLongitude(Double.parseDouble(value));
                     break;
                 case 0xC:
-                    position.setAltitude(Integer.parseInt(value));
+                    position.setAltitude(Double.parseDouble(value));
                     break;
                 case 0xD:
-                    position.setLatitude(UnitsConverter.knotsFromKph(Integer.parseInt(value)));
+                    position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(value)));
                     break;
                 case 0xE:
                     position.setCourse(Integer.parseInt(value));
@@ -88,16 +129,51 @@ public class FreematicsProtocolDecoder extends BaseProtocolDecoder {
                 case 0xF:
                     position.set(Position.KEY_SATELLITES, Integer.parseInt(value));
                     break;
+                case 0x20:
+                    position.set(Position.KEY_ACCELERATION, value);
+                    break;
+                case 0x24:
+                    position.set(Position.KEY_BATTERY, Integer.parseInt(value) * 0.01);
+                    break;
+                case 0x81:
+                    position.set(Position.KEY_RSSI, Integer.parseInt(value));
+                    break;
+                case 0x82:
+                    position.set(Position.KEY_DEVICE_TEMP, Integer.parseInt(value) * 0.1);
+                    break;
                 default:
                     position.set(data[0], value);
                     break;
             }
-
         }
 
-        position.setTime(dateBuilder.getDate());
+        if (position != null) {
+            position.setTime(dateBuilder.getDate());
+            positions.add(position);
+        }
 
-        return position;
+        return positions;
+    }
+
+    @Override
+    protected Object decode(
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+
+        String sentence = (String) msg;
+        int startIndex = sentence.indexOf('#');
+        int endIndex = sentence.indexOf('*');
+
+        if (startIndex > 0 && endIndex > 0) {
+            sentence = sentence.substring(startIndex + 1, endIndex);
+
+            if (sentence.startsWith("EV")) {
+                return decodeEvent(channel, remoteAddress, sentence);
+            } else {
+                return decodePosition(channel, remoteAddress, sentence);
+            }
+        }
+
+        return null;
     }
 
 }
