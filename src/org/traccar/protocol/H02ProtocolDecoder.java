@@ -107,10 +107,18 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position(getProtocolName());
 
+        boolean longId = buf.readableBytes() == 42;
+
         buf.readByte(); // marker
 
-        DeviceSession deviceSession = getDeviceSession(
-                channel, remoteAddress, ByteBufUtil.hexDump(buf.readSlice(5)));
+        String id;
+        if (longId) {
+            id = ByteBufUtil.hexDump(buf.readSlice(8)).substring(0, 15);
+        } else {
+            id = ByteBufUtil.hexDump(buf.readSlice(5));
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
         if (deviceSession == null) {
             return null;
         }
@@ -183,6 +191,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .expression("([EW]),")
             .number("(d+.?d*),")                 // speed
             .number("(d+.?d*)?,")                // course
+            .number("(?:d+,)?")                  // battery
             .number("(?:(dd)(dd)(dd))?")         // date (ddmmyy)
             .groupBegin()
             .expression(",[^,]*,")
