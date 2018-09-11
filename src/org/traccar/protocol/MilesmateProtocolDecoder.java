@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
@@ -60,6 +61,10 @@ public class MilesmateProtocolDecoder extends BaseProtocolDecoder {
         Parser parser = new Parser(PATTERN, (String) msg);
         if (!parser.matches()) {
             return null;
+        }
+
+        if (channel != null) {
+            channel.writeAndFlush(new NetworkMessage("+##Received OK\n", remoteAddress));
         }
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
