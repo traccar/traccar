@@ -85,7 +85,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             .expression("OBD,")                  // type
             .number("(dd)(dd)(dd)")              // date (yymmdd)
             .number("(dd)(dd)(dd),")             // time (hhmmss)
-            .number("(d+),")                     // odometer
+            .number("(d+)?,")                    // odometer
             .number("(d+.d+)?,")                 // fuel instant
             .number("(d+.d+)?,")                 // fuel average
             .number("(d+)?,")                    // hours
