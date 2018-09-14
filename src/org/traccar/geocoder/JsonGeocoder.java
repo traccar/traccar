@@ -15,8 +15,9 @@
  */
 package org.traccar.geocoder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.Context;
-import org.traccar.helper.Log;
 
 import javax.json.JsonObject;
 import javax.ws.rs.ClientErrorException;
@@ -28,6 +29,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public abstract class JsonGeocoder implements Geocoder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JsonGeocoder.class);
 
     private final String url;
     private final AddressFormat addressFormat;
@@ -64,7 +67,7 @@ public abstract class JsonGeocoder implements Geocoder {
             if (callback != null) {
                 callback.onFailure(new GeocoderException("Empty address"));
             } else {
-                Log.warning("Empty address");
+                LOGGER.warn("Empty address");
             }
         }
         return null;
@@ -102,7 +105,7 @@ public abstract class JsonGeocoder implements Geocoder {
             try {
                 return handleResponse(latitude, longitude, request.get(JsonObject.class), null);
             } catch (ClientErrorException e) {
-                Log.warning(e);
+                LOGGER.warn(null, e);
             }
         }
         return null;

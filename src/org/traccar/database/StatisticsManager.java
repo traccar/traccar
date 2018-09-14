@@ -16,8 +16,9 @@
 package org.traccar.database;
 
 import org.joda.time.format.ISODateTimeFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.Context;
-import org.traccar.helper.Log;
 import org.traccar.model.Statistics;
 
 import javax.ws.rs.client.Entity;
@@ -30,6 +31,8 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class StatisticsManager {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StatisticsManager.class);
 
     private static final int SPLIT_MODE = Calendar.DAY_OF_MONTH;
 
@@ -64,7 +67,7 @@ public class StatisticsManager {
             try {
                 Context.getDataManager().addObject(statistics);
             } catch (SQLException e) {
-                Log.warning(e);
+                LOGGER.warn(null, e);
             }
 
             String url = Context.getConfig().getString("server.statistics");
@@ -72,7 +75,7 @@ public class StatisticsManager {
                 String time = ISODateTimeFormat.dateTime().print(statistics.getCaptureTime().getTime());
 
                 Form form = new Form();
-                form.param("version", Log.getAppVersion());
+                form.param("version", Context.getAppVersion());
                 form.param("captureTime", time);
                 form.param("activeUsers", String.valueOf(statistics.getActiveUsers()));
                 form.param("activeDevices", String.valueOf(statistics.getActiveDevices()));

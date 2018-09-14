@@ -31,10 +31,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.Context;
-import org.traccar.helper.Log;
 
 public class CsvBuilder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CsvBuilder.class);
 
     private static final String LINE_ENDING = "\r\n";
     private static final String SEPARATOR = ";";
@@ -103,12 +106,12 @@ public class CsvBuilder {
                                 builder.append(map);
                                 addSeparator();
                             } catch (JsonProcessingException e) {
-                                Log.warning(e);
+                                LOGGER.warn(null, e);
                             }
                         }
                     }
                 } catch (IllegalAccessException | InvocationTargetException error) {
-                    Log.warning(error);
+                    LOGGER.warn(null, error);
                 }
             }
         }

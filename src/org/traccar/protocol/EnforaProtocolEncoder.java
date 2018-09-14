@@ -19,7 +19,6 @@ package org.traccar.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.traccar.StringProtocolEncoder;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 import java.nio.charset.StandardCharsets;
@@ -49,11 +48,8 @@ public class EnforaProtocolEncoder extends StringProtocolEncoder {
             case Command.TYPE_ENGINE_RESUME:
                 return encodeContent("AT$IOGP3=0");
             default:
-                Log.warning(new UnsupportedOperationException(command.getType()));
-                break;
+                return null;
         }
-
-        return null;
     }
 
 }

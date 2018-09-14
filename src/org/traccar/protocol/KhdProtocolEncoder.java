@@ -19,7 +19,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.helper.Checksum;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 public class KhdProtocolEncoder extends BaseProtocolEncoder {
@@ -61,11 +60,8 @@ public class KhdProtocolEncoder extends BaseProtocolEncoder {
             case Command.TYPE_ENGINE_RESUME:
                 return encodeCommand(MSG_RESUME_OIL, uniqueId);
             default:
-                Log.warning(new UnsupportedOperationException(command.getType()));
-                break;
+                return null;
         }
-
-        return null;
     }
 
 }

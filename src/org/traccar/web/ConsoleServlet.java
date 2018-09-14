@@ -17,14 +17,17 @@ package org.traccar.web;
 
 import org.h2.server.web.ConnectionInfo;
 import org.h2.server.web.WebServlet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.Context;
-import org.traccar.helper.Log;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class ConsoleServlet extends WebServlet {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConsoleServlet.class);
 
     @Override
     public void init() {
@@ -51,7 +54,7 @@ public class ConsoleServlet extends WebServlet {
             method.invoke(server, true);
 
         } catch (NoSuchFieldException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-            Log.warning(e);
+            LOGGER.warn(null, e);
         }
     }
 

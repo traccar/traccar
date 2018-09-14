@@ -25,9 +25,10 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.Config;
 import org.traccar.Context;
-import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceState;
 import org.traccar.model.DeviceAccumulators;
@@ -36,6 +37,8 @@ import org.traccar.model.Position;
 import org.traccar.model.Server;
 
 public class DeviceManager extends BaseObjectManager<Device> implements IdentityManager, ManagableObjects {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DeviceManager.class);
 
     public static final long DEFAULT_REFRESH_DELAY = 300;
 
@@ -93,7 +96,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
             try {
                 updateDeviceCache(true);
             } catch (SQLException e) {
-                Log.warning(e);
+                LOGGER.warn(null, e);
             }
             result = super.getAllItems();
         }
@@ -228,7 +231,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
                     positions.put(position.getDeviceId(), position);
                 }
             } catch (SQLException error) {
-                Log.warning(error);
+                LOGGER.warn(null, error);
             }
         }
     }

@@ -20,7 +20,6 @@ import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.Context;
 import org.traccar.helper.Checksum;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 import java.nio.charset.StandardCharsets;
@@ -28,6 +27,7 @@ import java.nio.charset.StandardCharsets;
 public class CastelProtocolEncoder extends BaseProtocolEncoder {
 
     private ByteBuf encodeContent(long deviceId, short type, ByteBuf content) {
+
         ByteBuf buf = Unpooled.buffer(0);
         String uniqueId = Context.getIdentityManager().getById(deviceId).getUniqueId();
 
@@ -63,10 +63,8 @@ public class CastelProtocolEncoder extends BaseProtocolEncoder {
                 content.writeByte(0);
                 return encodeContent(command.getDeviceId(), CastelProtocolDecoder.MSG_CC_PETROL_CONTROL, content);
             default:
-                Log.warning(new UnsupportedOperationException(command.getType()));
-                break;
+                return null;
         }
-        return null;
     }
 
 }

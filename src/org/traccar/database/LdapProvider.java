@@ -23,13 +23,16 @@ import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.Config;
-import org.traccar.helper.Log;
 import org.traccar.model.User;
 
 import java.util.Hashtable;
 
 public class LdapProvider {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LdapProvider.class);
 
     private String url;
     private String searchBase;
@@ -85,7 +88,7 @@ public class LdapProvider {
                 if (results.hasMoreElements()) {
                     results.nextElement();
                     if (results.hasMoreElements()) {
-                        Log.warning("Matched multiple users for the accountName: " + accountName);
+                        LOGGER.warn("Matched multiple users for the accountName: " + accountName);
                         return false;
                     }
                     return true;
@@ -117,7 +120,7 @@ public class LdapProvider {
         if (results.hasMoreElements()) {
             searchResult = results.nextElement();
             if (results.hasMoreElements()) {
-                Log.warning("Matched multiple users for the accountName: " + accountName);
+                LOGGER.warn("Matched multiple users for the accountName: " + accountName);
                 return null;
             }
         }
@@ -155,7 +158,7 @@ public class LdapProvider {
             user.setLogin(accountName);
             user.setName(accountName);
             user.setEmail(accountName);
-            Log.warning(e);
+            LOGGER.warn(null, e);
         }
         return user;
     }

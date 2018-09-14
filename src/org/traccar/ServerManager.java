@@ -15,7 +15,8 @@
  */
 package org.traccar;
 
-import org.traccar.helper.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.BindException;
@@ -32,6 +33,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 public class ServerManager {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerManager.class);
 
     private final List<TrackerServer> serverList = new LinkedList<>();
     private final Map<String, BaseProtocol> protocolList = new ConcurrentHashMap<>();
@@ -84,7 +87,7 @@ public class ServerManager {
             try {
                 server.start();
             } catch (BindException e) {
-                Log.warning("One of the protocols is disabled due to port conflict");
+                LOGGER.warn("One of the protocols is disabled due to port conflict");
             }
         }
     }

@@ -24,10 +24,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.traccar.helper.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.model.BaseModel;
 
 public class BaseObjectManager<T extends BaseModel> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BaseObjectManager.class);
 
     private final DataManager dataManager;
 
@@ -74,7 +77,7 @@ public class BaseObjectManager<T extends BaseModel> {
                     }
                 }
             } catch (SQLException error) {
-                Log.warning(error);
+                LOGGER.warn(null, error);
             }
         }
     }

@@ -26,8 +26,9 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.tools.generic.DateTool;
 import org.apache.velocity.tools.generic.NumberTool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.Context;
-import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -35,6 +36,8 @@ import org.traccar.model.User;
 import org.traccar.reports.ReportUtils;
 
 public final class NotificationFormatter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NotificationFormatter.class);
 
     private NotificationFormatter() {
     }
@@ -81,7 +84,7 @@ public final class NotificationFormatter {
             templateFilePath = Paths.get(path, event.getType() + ".vm").toString();
             template = Context.getVelocityEngine().getTemplate(templateFilePath, StandardCharsets.UTF_8.name());
         } catch (ResourceNotFoundException error) {
-            Log.warning(error);
+            LOGGER.warn(null, error);
             templateFilePath = Paths.get(path, "unknown.vm").toString();
             template = Context.getVelocityEngine().getTemplate(templateFilePath, StandardCharsets.UTF_8.name());
         }

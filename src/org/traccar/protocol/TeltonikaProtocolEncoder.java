@@ -17,7 +17,6 @@ package org.traccar.protocol;
 
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.helper.Checksum;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 import io.netty.buffer.ByteBuf;
@@ -53,11 +52,8 @@ public class TeltonikaProtocolEncoder extends BaseProtocolEncoder {
             case Command.TYPE_CUSTOM:
                 return encodeContent(command.getString(Command.KEY_DATA));
             default:
-                Log.warning(new UnsupportedOperationException(command.getType()));
-                break;
+                return null;
         }
-
-        return null;
     }
 
 }

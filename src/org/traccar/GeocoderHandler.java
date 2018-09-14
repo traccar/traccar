@@ -18,12 +18,15 @@ package org.traccar;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.geocoder.Geocoder;
-import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
 @ChannelHandler.Sharable
 public class GeocoderHandler extends ChannelInboundHandlerAdapter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GeocoderHandler.class);
 
     private final Geocoder geocoder;
     private final boolean processInvalidPositions;
@@ -63,7 +66,7 @@ public class GeocoderHandler extends ChannelInboundHandlerAdapter {
 
                     @Override
                     public void onFailure(Throwable e) {
-                        Log.warning("Geocoding failed", e);
+                        LOGGER.warn("Geocoding failed", e);
                         ctx.fireChannelRead(position);
                     }
                 });

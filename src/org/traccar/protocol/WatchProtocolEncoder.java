@@ -18,7 +18,6 @@ package org.traccar.protocol;
 import io.netty.channel.Channel;
 import org.traccar.StringProtocolEncoder;
 import org.traccar.helper.DataConverter;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 import java.nio.charset.StandardCharsets;
@@ -144,11 +143,8 @@ public class WatchProtocolEncoder extends StringProtocolEncoder implements Strin
             case Command.TYPE_SET_INDICATOR:
                 return formatCommand(channel, command, "FLOWER,{%s}", Command.KEY_DATA);
             default:
-                Log.warning(new UnsupportedOperationException(command.getType()));
-                break;
+                return null;
         }
-
-        return null;
     }
 
 }

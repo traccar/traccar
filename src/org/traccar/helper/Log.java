@@ -15,126 +15,137 @@
  */
 package org.traccar.helper;
 
-import org.apache.log4j.Appender;
-import org.apache.log4j.DailyRollingFileAppender;
-import org.apache.log4j.Layout;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
-import org.apache.log4j.varia.NullAppender;
 import org.traccar.Config;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryMXBean;
-import java.lang.management.OperatingSystemMXBean;
-import java.lang.management.RuntimeMXBean;
-import java.nio.charset.Charset;
+import java.io.Writer;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Formatter;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 public final class Log {
 
     private Log() {
     }
 
-    public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
-
-    private static final String LOGGER_NAME = "traccar";
-
     private static final String STACK_PACKAGE = "org.traccar";
     private static final int STACK_LIMIT = 3;
 
-    private static Logger logger = null;
+    private static class RollingFileHandler extends Handler {
 
-    public static String getAppVersion() {
-        return Log.class.getPackage().getImplementationVersion();
+        private String name;
+        private String suffix;
+        private Writer writer;
+
+        RollingFileHandler(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public synchronized void publish(LogRecord record) {
+            if (isLoggable(record)) {
+                try {
+                    String suffix = new SimpleDateFormat("yyyyMMdd").format(new Date(record.getMillis()));
+                    if (writer != null && !suffix.equals(this.suffix)) {
+                        writer.close();
+                        writer = null;
+                        new File(name).renameTo(new File(name + "." + this.suffix));
+                    }
+                    if (writer == null) {
+                        this.suffix = suffix;
+                        writer = new BufferedWriter(new FileWriter(name));
+                    }
+                    writer.write(getFormatter().format(record));
+                    writer.flush();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
+        @Override
+        public void flush() {
+            if (writer != null) {
+                try {
+                    writer.flush();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
+        @Override
+        public void close() throws SecurityException {
+            if (writer != null) {
+                try {
+                    writer.close();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
+    }
+
+    public static class LogFormatter extends Formatter {
+
+        private static String formatLevel(Level level) {
+            switch (level.getName()) {
+                case "FINEST":
+                    return "TRACE";
+                case "FINER":
+                case "FINE":
+                    return "DEBUG";
+                case "INFO":
+                    return "INFO";
+                case "WARNING":
+                    return "WARN";
+                case "SEVERE":
+                default:
+                    return "ERROR";
+            }
+        }
+
+        @Override
+        public String format(LogRecord record) {
+            StringBuilder message = new StringBuilder(record.getMessage());
+
+            if (record.getThrown() != null) {
+                message.append(" - ").append(exceptionStack(record.getThrown()));
+            }
+
+            return String.format("%1$tF %1$tT %2$5s: %3$s%n",
+                    new Date(record.getMillis()), formatLevel(record.getLevel()), message.toString());
+        }
+
     }
 
     public static void setupLogger(Config config) throws IOException {
 
-        Layout layout = new PatternLayout("%d{" + DATE_FORMAT + "} %5p: %m%n");
-
-        Appender appender = new DailyRollingFileAppender(
-                layout, config.getString("logger.file"), "'.'yyyyMMdd");
-
-        LogManager.resetConfiguration();
-        LogManager.getRootLogger().addAppender(new NullAppender());
-
-        logger = Logger.getLogger(LOGGER_NAME);
-        logger.addAppender(appender);
-        logger.setLevel(Level.toLevel(config.getString("logger.level"), Level.ALL));
-
-        Log.logSystemInfo();
-        Log.info("Version: " + getAppVersion());
-    }
-
-    public static Logger getLogger() {
-        if (logger == null) {
-            logger = Logger.getLogger(LOGGER_NAME);
-            logger.setLevel(Level.OFF);
+        Logger rootLogger = Logger.getLogger("");
+        for (Handler handler : rootLogger.getHandlers()) {
+            rootLogger.removeHandler(handler);
         }
-        return logger;
-    }
 
-    public static void logSystemInfo() {
-        try {
-            OperatingSystemMXBean operatingSystemBean = ManagementFactory.getOperatingSystemMXBean();
-            Log.info("Operating system"
-                    + " name: " + operatingSystemBean.getName()
-                    + " version: " + operatingSystemBean.getVersion()
-                    + " architecture: " + operatingSystemBean.getArch());
-
-            RuntimeMXBean runtimeBean = ManagementFactory.getRuntimeMXBean();
-            Log.info("Java runtime"
-                    + " name: " + runtimeBean.getVmName()
-                    + " vendor: " + runtimeBean.getVmVendor()
-                    + " version: " + runtimeBean.getVmVersion());
-
-            MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
-            Log.info("Memory limit"
-                    + " heap: " + memoryBean.getHeapMemoryUsage().getMax() / (1024 * 1024) + "mb"
-                    + " non-heap: " + memoryBean.getNonHeapMemoryUsage().getMax() / (1024 * 1024) + "mb");
-
-            Log.info("Character encoding: "
-                    + System.getProperty("file.encoding") + " charset: " + Charset.defaultCharset());
-
-        } catch (Exception error) {
-            Log.warning("Failed to get system info");
+        Handler handler;
+        if (config.getBoolean("logger.console")) {
+            handler = new ConsoleHandler();
+        } else {
+            handler = new RollingFileHandler(config.getString("logger.file"));
         }
-    }
 
-    public static void error(String msg) {
-        getLogger().error(msg);
-    }
+        handler.setFormatter(new LogFormatter());
+        handler.setLevel(Level.parse(config.getString("logger.level").toUpperCase()));
 
-    public static void warning(String msg) {
-        getLogger().warn(msg);
-    }
-
-    public static void warning(Throwable exception) {
-        warning(null, exception);
-    }
-
-    public static void warning(String msg, Throwable exception) {
-        StringBuilder s = new StringBuilder();
-        if (msg != null) {
-            s.append(msg);
-        }
-        if (exception != null) {
-            if (msg != null) {
-                s.append(" - ");
-            }
-            s.append(exceptionStack(exception));
-        }
-        getLogger().warn(s.toString());
-    }
-
-    public static void info(String msg) {
-        getLogger().info(msg);
-    }
-
-    public static void debug(String msg) {
-        getLogger().debug(msg);
+        rootLogger.addHandler(handler);
     }
 
     public static String exceptionStack(Throwable exception) {

@@ -18,9 +18,10 @@ package org.traccar.api;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.Context;
 import org.traccar.database.ConnectionManager;
-import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -31,6 +32,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.UpdateListener {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AsyncSocket.class);
 
     private static final String KEY_DEVICES = "devices";
     private static final String KEY_POSITIONS = "positions";
@@ -86,7 +89,7 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
             try {
                 getRemote().sendString(Context.getObjectMapper().writeValueAsString(data), null);
             } catch (JsonProcessingException e) {
-                Log.warning(e);
+                LOGGER.warn(null, e);
             }
         }
     }

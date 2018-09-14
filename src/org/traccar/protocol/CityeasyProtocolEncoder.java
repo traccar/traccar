@@ -21,7 +21,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.helper.Checksum;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 public class CityeasyProtocolEncoder extends BaseProtocolEncoder {
@@ -67,11 +66,8 @@ public class CityeasyProtocolEncoder extends BaseProtocolEncoder {
                 content.writeShort(Math.abs(timezone));
                 return encodeContent(CityeasyProtocolDecoder.MSG_TIMEZONE, content);
             default:
-                Log.warning(new UnsupportedOperationException(command.getType()));
-                break;
+                return null;
         }
-
-        return null;
     }
 
 }

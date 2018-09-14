@@ -12,6 +12,7 @@
 
     <entry key='geocoder.enable'>false</entry>
 
+    <entry key='logger.console'>true</entry>
     <entry key='logger.file'>target/tracker-server.log</entry>
 
     <entry key='database.driver'>org.h2.Driver</entry>

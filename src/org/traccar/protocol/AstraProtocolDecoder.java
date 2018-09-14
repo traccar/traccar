@@ -18,12 +18,13 @@ package org.traccar.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
-import org.traccar.helper.Log;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
@@ -33,6 +34,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class AstraProtocolDecoder extends BaseProtocolDecoder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AstraProtocolDecoder.class);
 
     public AstraProtocolDecoder(AstraProtocol protocol) {
         super(protocol);
@@ -111,7 +114,7 @@ public class AstraProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (BitUtil.check(status, 6)) {
-                Log.warning("Extension data is not supported");
+                LOGGER.warn("Extension data is not supported");
                 return position;
             }
 

@@ -16,8 +16,9 @@
 package org.traccar;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.helper.Checksum;
-import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 
@@ -33,6 +34,8 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 public class WebDataHandler extends BaseDataHandler {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebDataHandler.class);
 
     private final String url;
     private final boolean json;
@@ -127,7 +130,7 @@ public class WebDataHandler extends BaseDataHandler {
             try {
                 Context.getClient().target(formatRequest(position)).request().async().get();
             } catch (UnsupportedEncodingException | JsonProcessingException e) {
-                Log.warning(e);
+                LOGGER.warn(null, e);
             }
         }
         return position;

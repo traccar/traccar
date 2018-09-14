@@ -29,15 +29,18 @@ import io.netty.channel.ChannelHandler;
 import org.apache.commons.jexl2.JexlEngine;
 import org.apache.commons.jexl2.JexlException;
 import org.apache.commons.jexl2.MapContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.BaseDataHandler;
 import org.traccar.Context;
-import org.traccar.helper.Log;
 import org.traccar.model.Attribute;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 
 @ChannelHandler.Sharable
 public class ComputedAttributesHandler extends BaseDataHandler {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ComputedAttributesHandler.class);
 
     private JexlEngine engine;
 
@@ -77,7 +80,7 @@ public class ComputedAttributesHandler extends BaseDataHandler {
                         }
                     }
                 } catch (IllegalAccessException | InvocationTargetException error) {
-                    Log.warning(error);
+                    LOGGER.warn(null, error);
                 }
             }
         }
@@ -98,7 +101,7 @@ public class ComputedAttributesHandler extends BaseDataHandler {
                 try {
                     result = computeAttribute(attribute, position);
                 } catch (JexlException error) {
-                    Log.warning(error);
+                    LOGGER.warn(null, error);
                 }
                 if (result != null) {
                     try {
@@ -115,7 +118,7 @@ public class ComputedAttributesHandler extends BaseDataHandler {
                                 position.getAttributes().put(attribute.getAttribute(), result.toString());
                         }
                     } catch (ClassCastException error) {
-                        Log.warning(error);
+                        LOGGER.warn(null, error);
                     }
                 }
             }

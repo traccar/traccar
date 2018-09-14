@@ -18,7 +18,6 @@ package org.traccar.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 public class CellocatorProtocolEncoder extends BaseProtocolEncoder {
@@ -60,11 +59,8 @@ public class CellocatorProtocolEncoder extends BaseProtocolEncoder {
                         + command.getInteger(Command.KEY_INDEX);
                 return encodeContent(command.getDeviceId(), 0x03, data, 0);
             default:
-                Log.warning(new UnsupportedOperationException(command.getType()));
-                break;
+                return null;
         }
-
-        return null;
     }
 
 }

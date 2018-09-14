@@ -22,14 +22,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.Context;
-import org.traccar.helper.Log;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Permission;
 import org.traccar.model.User;
 
 public abstract class SimpleObjectManager<T extends BaseModel> extends BaseObjectManager<T>
         implements ManagableObjects {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleObjectManager.class);
 
     private Map<Long, Set<Long>> userItems;
 
@@ -77,7 +80,7 @@ public abstract class SimpleObjectManager<T extends BaseModel> extends BaseObjec
                     getUserItems(permission.getOwnerId()).add(permission.getPropertyId());
                 }
             } catch (SQLException | ClassNotFoundException error) {
-                Log.warning(error);
+                LOGGER.warn(null, error);
             }
         }
     }

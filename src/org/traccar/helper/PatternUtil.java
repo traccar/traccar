@@ -15,12 +15,17 @@
  */
 package org.traccar.helper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.management.ManagementFactory;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 public final class PatternUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PatternUtil.class);
 
     private PatternUtil() {
     }
@@ -66,7 +71,7 @@ public final class PatternUtil {
                     result.stringTail = input.substring(matcher.group(1).length());
                 }
             } catch (PatternSyntaxException error) {
-                Log.warning(error);
+                LOGGER.warn(null, error);
             }
         }
 

@@ -27,6 +27,8 @@ import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import org.apache.velocity.app.VelocityEngine;
 import org.eclipse.jetty.util.URIUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.database.CalendarManager;
 import org.traccar.database.CommandsManager;
 import org.traccar.database.AttributesManager;
@@ -87,7 +89,15 @@ import javax.ws.rs.client.ClientBuilder;
 
 public final class Context {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(Context.class);
+
+    public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+
     private Context() {
+    }
+
+    public static String getAppVersion() {
+        return Context.class.getPackage().getImplementationVersion();
     }
 
     private static Config config;
@@ -398,7 +408,7 @@ public final class Context {
             try {
                 smsManager = (SmsManager) Class.forName(smsManagerClass).newInstance();
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-                Log.warning("Error loading SMS Manager class : " + smsManagerClass, e);
+                LOGGER.warn("Error loading SMS Manager class : " + smsManagerClass, e);
             }
         }
 

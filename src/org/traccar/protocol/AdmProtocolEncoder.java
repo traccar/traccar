@@ -17,7 +17,6 @@
 package org.traccar.protocol;
 
 import org.traccar.StringProtocolEncoder;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 public class AdmProtocolEncoder extends StringProtocolEncoder {
@@ -33,11 +32,8 @@ public class AdmProtocolEncoder extends StringProtocolEncoder {
                 return formatCommand(command, "{%s}\r\n", Command.KEY_DATA);
 
             default:
-                Log.warning(new UnsupportedOperationException(command.getType()));
-                break;
+                return null;
         }
-
-        return null;
     }
 
 }

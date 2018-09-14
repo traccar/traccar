@@ -26,14 +26,17 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocol;
 import org.traccar.Context;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 import org.traccar.model.Typed;
 import org.traccar.model.Position;
 
 public class CommandsManager  extends ExtendedObjectManager<Command> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommandsManager.class);
 
     private final Map<Long, Queue<Command>> deviceQueues = new ConcurrentHashMap<>();
 
@@ -126,7 +129,7 @@ public class CommandsManager  extends ExtendedObjectManager<Command> {
                 try {
                     result.add(new Typed(field.get(null).toString()));
                 } catch (IllegalArgumentException | IllegalAccessException error) {
-                    Log.warning(error);
+                    LOGGER.warn(null, error);
                 }
             }
         }

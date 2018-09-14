@@ -16,8 +16,9 @@
 package org.traccar.database;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.Context;
-import org.traccar.helper.Log;
 import org.traccar.model.MiscFormatter;
 import org.traccar.model.Permission;
 
@@ -42,6 +43,8 @@ import java.util.List;
 import java.util.Map;
 
 public final class QueryBuilder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(QueryBuilder.class);
 
     private final Map<String, List<Integer>> indexMap = new HashMap<>();
     private Connection connection;
@@ -289,7 +292,7 @@ public final class QueryBuilder {
                         }
                     }
                 } catch (IllegalAccessException | InvocationTargetException | JsonProcessingException error) {
-                    Log.warning(error);
+                    LOGGER.warn(null, error);
                 }
             }
         }
@@ -321,7 +324,7 @@ public final class QueryBuilder {
                     try {
                         method.invoke(object, resultSet.getBoolean(name));
                     } catch (IllegalAccessException | InvocationTargetException error) {
-                        Log.warning(error);
+                        LOGGER.warn(null, error);
                     }
                 }
             });
@@ -332,7 +335,7 @@ public final class QueryBuilder {
                     try {
                         method.invoke(object, resultSet.getInt(name));
                     } catch (IllegalAccessException | InvocationTargetException error) {
-                        Log.warning(error);
+                        LOGGER.warn(null, error);
                     }
                 }
             });
@@ -343,7 +346,7 @@ public final class QueryBuilder {
                     try {
                         method.invoke(object, resultSet.getLong(name));
                     } catch (IllegalAccessException | InvocationTargetException error) {
-                        Log.warning(error);
+                        LOGGER.warn(null, error);
                     }
                 }
             });
@@ -354,7 +357,7 @@ public final class QueryBuilder {
                     try {
                         method.invoke(object, resultSet.getDouble(name));
                     } catch (IllegalAccessException | InvocationTargetException error) {
-                        Log.warning(error);
+                        LOGGER.warn(null, error);
                     }
                 }
             });
@@ -365,7 +368,7 @@ public final class QueryBuilder {
                     try {
                         method.invoke(object, resultSet.getString(name));
                     } catch (IllegalAccessException | InvocationTargetException error) {
-                        Log.warning(error);
+                        LOGGER.warn(null, error);
                     }
                 }
             });
@@ -379,7 +382,7 @@ public final class QueryBuilder {
                             method.invoke(object, new Date(timestamp.getTime()));
                         }
                     } catch (IllegalAccessException | InvocationTargetException error) {
-                        Log.warning(error);
+                        LOGGER.warn(null, error);
                     }
                 }
             });
@@ -390,7 +393,7 @@ public final class QueryBuilder {
                     try {
                         method.invoke(object, resultSet.getBytes(name));
                     } catch (IllegalAccessException | InvocationTargetException error) {
-                        Log.warning(error);
+                        LOGGER.warn(null, error);
                     }
                 }
             });
@@ -403,7 +406,7 @@ public final class QueryBuilder {
                         try {
                             method.invoke(object, Context.getObjectMapper().readValue(value, parameterType));
                         } catch (InvocationTargetException | IllegalAccessException | IOException error) {
-                            Log.warning(error);
+                            LOGGER.warn(null, error);
                         }
                     }
                 }

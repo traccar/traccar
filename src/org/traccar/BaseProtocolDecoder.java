@@ -17,7 +17,8 @@ package org.traccar;
 
 import io.netty.channel.Channel;
 import io.netty.channel.socket.DatagramChannel;
-import org.traccar.helper.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
@@ -32,6 +33,8 @@ import java.util.TimeZone;
 import java.sql.SQLException;
 
 public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BaseProtocolDecoder.class);
 
     private final Protocol protocol;
 
@@ -49,7 +52,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
         try {
             Context.getDeviceManager().addItem(device);
 
-            Log.info("Automatically registered device " + uniqueId);
+            LOGGER.info("Automatically registered device " + uniqueId);
 
             if (defaultGroupId != 0) {
                 Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
@@ -58,7 +61,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
 
             return device.getId();
         } catch (SQLException e) {
-            Log.warning(e);
+            LOGGER.warn(null, e);
             return 0;
         }
     }
@@ -107,7 +110,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
             int timeZoneOffset = Context.getConfig().getInteger(getProtocolName() + ".timezone", 0);
             if (timeZoneOffset != 0) {
                 result.setRawOffset(timeZoneOffset * 1000);
-                Log.warning("Config parameter " + getProtocolName() + ".timezone is deprecated");
+                LOGGER.warn("Config parameter " + getProtocolName() + ".timezone is deprecated");
             }
         }
         return result;
@@ -131,7 +134,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
                     }
                 }
             } catch (Exception e) {
-                Log.warning(e);
+                LOGGER.warn(null, e);
             }
             if (deviceId == 0 && Context.getConfig().getBoolean("database.registerUnknown")) {
                 return addUnknownDevice(uniqueIds[0]);
@@ -151,7 +154,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
             if (remoteAddress != null) {
                 message.append(" (").append(((InetSocketAddress) remoteAddress).getHostString()).append(")");
             }
-            Log.warning(message.toString());
+            LOGGER.warn(message.toString());
         }
         return 0;
     }

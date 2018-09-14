@@ -19,7 +19,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.helper.DataConverter;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 import java.text.SimpleDateFormat;
@@ -46,7 +45,6 @@ public class HuabaoProtocolEncoder extends BaseProtocolEncoder {
                     data.writeBytes(time);
                     return HuabaoProtocolDecoder.formatMessage(HuabaoProtocolDecoder.MSG_OIL_CONTROL, id, data);
                 default:
-                    Log.warning(new UnsupportedOperationException(command.getType()));
                     return null;
             }
         } finally {

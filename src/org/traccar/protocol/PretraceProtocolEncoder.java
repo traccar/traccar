@@ -18,7 +18,6 @@ package org.traccar.protocol;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.Context;
 import org.traccar.helper.Checksum;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 public class PretraceProtocolEncoder extends BaseProtocolEncoder {
@@ -40,7 +39,6 @@ public class PretraceProtocolEncoder extends BaseProtocolEncoder {
                 return formatCommand(
                         uniqueId, String.format("D221%1$d,%1$d,,", command.getInteger(Command.KEY_FREQUENCY)));
             default:
-                Log.warning(new UnsupportedOperationException(command.getType()));
                 return null;
         }
     }

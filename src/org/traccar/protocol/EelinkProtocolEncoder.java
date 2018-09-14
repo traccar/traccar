@@ -17,15 +17,18 @@ package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.helper.DataConverter;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 public class EelinkProtocolEncoder extends BaseProtocolEncoder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EelinkProtocolEncoder.class);
 
     private boolean connectionless;
 
@@ -100,11 +103,8 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
             case Command.TYPE_REBOOT_DEVICE:
                 return encodeContent(command.getDeviceId(), "RESET#");
             default:
-                Log.warning(new UnsupportedOperationException(command.getType()));
-                break;
+                return null;
         }
-
-        return null;
     }
 
 }

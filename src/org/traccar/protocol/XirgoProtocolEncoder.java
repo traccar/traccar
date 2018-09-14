@@ -16,7 +16,6 @@
 package org.traccar.protocol;
 
 import org.traccar.StringProtocolEncoder;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 public class XirgoProtocolEncoder extends StringProtocolEncoder {
@@ -28,11 +27,8 @@ public class XirgoProtocolEncoder extends StringProtocolEncoder {
             case Command.TYPE_OUTPUT_CONTROL:
                 return String.format("+XT:7005,%d,1", command.getInteger(Command.KEY_DATA) + 1);
             default:
-                Log.warning(new UnsupportedOperationException(command.getType()));
-                break;
+                return null;
         }
-
-        return null;
     }
 
 }

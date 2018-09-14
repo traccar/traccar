@@ -16,12 +16,15 @@
 package org.traccar;
 
 import io.netty.channel.ChannelHandler;
-import org.traccar.helper.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 @ChannelHandler.Sharable
 public class FilterHandler extends BaseDataHandler {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FilterHandler.class);
 
     private boolean filterInvalid;
     private boolean filterZero;
@@ -236,7 +239,7 @@ public class FilterHandler extends BaseDataHandler {
             message.append("filters from device: ");
             message.append(Context.getIdentityManager().getById(position.getDeviceId()).getUniqueId());
 
-            Log.info(message.toString());
+            LOGGER.info(message.toString());
             return true;
         }
 

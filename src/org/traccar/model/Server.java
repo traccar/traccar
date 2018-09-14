@@ -15,14 +15,14 @@
  */
 package org.traccar.model;
 
+import org.traccar.Context;
 import org.traccar.database.QueryIgnore;
-import org.traccar.helper.Log;
 
 public class Server extends ExtendedModel {
 
     @QueryIgnore
     public String getVersion() {
-        return Log.getAppVersion();
+        return Context.getAppVersion();
     }
 
     public void setVersion(String version) {

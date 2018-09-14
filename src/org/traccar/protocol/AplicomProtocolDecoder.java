@@ -18,11 +18,12 @@ package org.traccar.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.helper.Checksum;
-import org.traccar.helper.Log;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
@@ -32,6 +33,8 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class AplicomProtocolDecoder extends BaseProtocolDecoder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AplicomProtocolDecoder.class);
 
     public AplicomProtocolDecoder(AplicomProtocol protocol) {
         super(protocol);
@@ -195,7 +198,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
                     }
                     break;
                 default:
-                    Log.warning(new UnsupportedOperationException());
+                    LOGGER.warn(null, new UnsupportedOperationException());
                     break;
             }
         }

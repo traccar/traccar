@@ -17,7 +17,6 @@
 package org.traccar.protocol;
 
 import org.traccar.StringProtocolEncoder;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 public class WialonProtocolEncoder extends StringProtocolEncoder {
@@ -34,9 +33,8 @@ public class WialonProtocolEncoder extends StringProtocolEncoder {
             case Command.TYPE_OUTPUT_CONTROL:
                 return formatCommand(command, "L{%s}={%s}\r\n", Command.KEY_INDEX, Command.KEY_DATA);
             default:
-                Log.warning(new UnsupportedOperationException(command.getType()));
-                break;
+                return null;
         }
-        return null;
     }
+
 }

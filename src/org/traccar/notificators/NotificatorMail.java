@@ -26,8 +26,9 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.util.Date;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.Context;
-import org.traccar.helper.Log;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
@@ -37,6 +38,8 @@ import org.traccar.notification.NotificationFormatter;
 import org.traccar.notification.PropertiesProvider;
 
 public final class NotificatorMail extends Notificator {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NotificatorMail.class);
 
     private static Properties getProperties(PropertiesProvider provider) {
         Properties properties = new Properties();
@@ -97,7 +100,7 @@ public final class NotificatorMail extends Notificator {
             properties = getProperties(new PropertiesProvider(Context.getConfig()));
         }
         if (!properties.containsKey("mail.smtp.host")) {
-            Log.warning("No SMTP configuration found");
+            LOGGER.warn("No SMTP configuration found");
             return;
         }
 

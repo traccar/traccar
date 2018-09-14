@@ -23,8 +23,9 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.Context;
-import org.traccar.helper.Log;
 import org.traccar.notification.MessageException;
 import org.traccar.sms.SmsManager;
 
@@ -45,6 +46,8 @@ import com.cloudhopper.smpp.type.SmppTimeoutException;
 import com.cloudhopper.smpp.type.UnrecoverablePduException;
 
 public class SmppClient implements SmsManager {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SmppClient.class);
 
     private SmppSessionConfiguration sessionConfig = new SmppSessionConfiguration();
     private SmppSession smppSession;
@@ -168,10 +171,10 @@ public class SmppClient implements SmsManager {
             smppSession = clientBootstrap.bind(sessionConfig, sessionHandler);
             stopReconnectionkTask();
             runEnquireLinkTask();
-            Log.info("SMPP session connected");
+            LOGGER.info("SMPP session connected");
         } catch (SmppTimeoutException | SmppChannelException
                 | UnrecoverablePduException | InterruptedException error) {
-            Log.warning("Unable to connect to SMPP server: ", error);
+            LOGGER.warn("Unable to connect to SMPP server: ", error);
         }
     }
 
@@ -208,7 +211,7 @@ public class SmppClient implements SmsManager {
 
     private void destroySession() {
         if (smppSession != null) {
-            Log.debug("Cleaning up SMPP session... ");
+            LOGGER.debug("Cleaning up SMPP session... ");
             smppSession.destroy();
             smppSession = null;
         }
@@ -239,7 +242,7 @@ public class SmppClient implements SmsManager {
                 submit.setDestAddress(new Address(destTon, destNpi, destAddress));
                 SubmitSmResp submitResponce = getSession().submit(submit, submitTimeout);
                 if (submitResponce.getCommandStatus() == SmppConstants.STATUS_OK) {
-                    Log.debug("SMS submitted, message id: " + submitResponce.getMessageId());
+                    LOGGER.debug("SMS submitted, message id: " + submitResponce.getMessageId());
                 } else {
                     throw new IllegalStateException(submitResponce.getResultMessage());
                 }
@@ -260,7 +263,7 @@ public class SmppClient implements SmsManager {
                 try {
                     sendMessageSync(destAddress, message, command);
                 } catch (MessageException | InterruptedException | IllegalStateException error) {
-                    Log.warning(error);
+                    LOGGER.warn(null, error);
                 }
             }
         });

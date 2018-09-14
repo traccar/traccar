@@ -18,9 +18,13 @@ package org.traccar.helper;
 
 import java.beans.Introspector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.model.BaseModel;
 
 public final class LogAction {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogAction.class);
 
     private LogAction() {
     }
@@ -71,26 +75,25 @@ public final class LogAction {
     }
 
     public static void resetDeviceAccumulators(long userId, long deviceId) {
-        log(String.format(PATTERN_DEVICE_ACCUMULATORS, userId, ACTION_DEVICE_ACCUMULATORS, deviceId));
+        LOGGER.info(String.format(
+                PATTERN_DEVICE_ACCUMULATORS, userId, ACTION_DEVICE_ACCUMULATORS, deviceId));
     }
 
     private static void logObjectAction(String action, long userId, Class<?> clazz, long objectId) {
-        log(String.format(PATTERN_OBJECT, userId, action, Introspector.decapitalize(clazz.getSimpleName()), objectId));
+        LOGGER.info(String.format(
+                PATTERN_OBJECT, userId, action, Introspector.decapitalize(clazz.getSimpleName()), objectId));
     }
 
     private static void logLinkAction(String action, long userId,
             Class<?> owner, long ownerId, Class<?> property, long propertyId) {
-        log(String.format(PATTERN_LINK, userId, action,
+        LOGGER.info(String.format(
+                PATTERN_LINK, userId, action,
                 Introspector.decapitalize(owner.getSimpleName()), ownerId,
                 Introspector.decapitalize(property.getSimpleName()), propertyId));
     }
 
     private static void logLoginAction(String action, long userId) {
-        log(String.format(PATTERN_LOGIN, userId, action));
-    }
-
-    private static void log(String msg) {
-        Log.info(msg);
+        LOGGER.info(String.format(PATTERN_LOGIN, userId, action));
     }
 
 }

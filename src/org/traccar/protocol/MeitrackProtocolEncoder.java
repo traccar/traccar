@@ -18,7 +18,6 @@ package org.traccar.protocol;
 import org.traccar.Context;
 import org.traccar.StringProtocolEncoder;
 import org.traccar.helper.Checksum;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 import java.util.Map;
@@ -59,11 +58,8 @@ public class MeitrackProtocolEncoder extends StringProtocolEncoder {
                 return formatCommand(command, 'f', "C02,0,"
                         + attributes.get(Command.KEY_PHONE) + "," + attributes.get(Command.KEY_MESSAGE));
             default:
-                Log.warning(new UnsupportedOperationException(command.getType()));
-                break;
+                return null;
         }
-
-        return null;
     }
 
 }

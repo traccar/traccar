@@ -20,7 +20,6 @@ import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DataConverter;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 import java.nio.charset.StandardCharsets;
@@ -80,11 +79,8 @@ public class MeiligaoProtocolEncoder extends BaseProtocolEncoder {
             case Command.TYPE_REBOOT_DEVICE:
                 return encodeContent(command.getDeviceId(), MeiligaoProtocolDecoder.MSG_REBOOT_GPS, content);
             default:
-                Log.warning(new UnsupportedOperationException(command.getType()));
-                break;
+                return null;
         }
-
-        return null;
     }
 
 }

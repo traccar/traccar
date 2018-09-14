@@ -95,8 +95,12 @@ public abstract class BaseProtocol implements Protocol {
             if (command.getType().equals(Command.TYPE_CUSTOM)) {
                 Context.getSmsManager().sendMessageSync(destAddress, command.getString(Command.KEY_DATA), true);
             } else if (supportedTextCommands.contains(command.getType()) && textCommandEncoder != null) {
-                Context.getSmsManager().sendMessageSync(destAddress,
-                        (String) textCommandEncoder.encodeCommand(command), true);
+                String encodedCommand = (String) textCommandEncoder.encodeCommand(command);
+                if (encodedCommand != null) {
+                    Context.getSmsManager().sendMessageSync(destAddress, encodedCommand, true);
+                } else {
+                    throw new RuntimeException("Failed to encode command");
+                }
             } else {
                 throw new RuntimeException(
                         "Command " + command.getType() + " is not supported in protocol " + getName());

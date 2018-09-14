@@ -16,7 +16,6 @@
 package org.traccar.protocol;
 
 import org.traccar.StringProtocolEncoder;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 public class EsealProtocolEncoder extends StringProtocolEncoder {
@@ -35,11 +34,8 @@ public class EsealProtocolEncoder extends StringProtocolEncoder {
                 return formatCommand(
                         command, "##S,eSeal,{%s},256,3.0.8,RC-Unlock,E##", Command.KEY_UNIQUE_ID);
             default:
-                Log.warning(new UnsupportedOperationException(command.getType()));
-                break;
+                return null;
         }
-
-        return null;
     }
 
 }

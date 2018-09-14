@@ -16,8 +16,9 @@
  */
 package org.traccar.smpp;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.events.TextMessageEventHandler;
-import org.traccar.helper.Log;
 
 import com.cloudhopper.commons.charset.CharsetUtil;
 import com.cloudhopper.smpp.SmppConstants;
@@ -29,6 +30,8 @@ import com.cloudhopper.smpp.util.SmppUtil;
 
 public class ClientSmppSessionHandler extends DefaultSmppSessionHandler {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientSmppSessionHandler.class);
+
     private SmppClient smppClient;
 
     public ClientSmppSessionHandler(SmppClient smppClient) {
@@ -37,7 +40,7 @@ public class ClientSmppSessionHandler extends DefaultSmppSessionHandler {
 
     @Override
     public void firePduRequestExpired(PduRequest pduRequest) {
-        Log.warning("PDU request expired: " + pduRequest);
+        LOGGER.warn("PDU request expired: " + pduRequest);
     }
 
     @Override
@@ -48,7 +51,7 @@ public class ClientSmppSessionHandler extends DefaultSmppSessionHandler {
                 String sourceAddress = ((DeliverSm) request).getSourceAddress().getAddress();
                 String message = CharsetUtil.decode(((DeliverSm) request).getShortMessage(),
                         smppClient.mapDataCodingToCharset(((DeliverSm) request).getDataCoding()));
-                Log.debug("SMS Message Received: " + message.trim() + ", Source Address: " + sourceAddress);
+                LOGGER.debug("SMS Message Received: " + message.trim() + ", Source Address: " + sourceAddress);
 
                 boolean isDeliveryReceipt = false;
                 if (smppClient.getDetectDlrByOpts()) {
@@ -63,7 +66,7 @@ public class ClientSmppSessionHandler extends DefaultSmppSessionHandler {
             }
             response = request.createResponse();
         } catch (Throwable error) {
-            Log.warning(error);
+            LOGGER.warn(null, error);
             response = request.createResponse();
             response.setResultMessage(error.getMessage());
             response.setCommandStatus(SmppConstants.STATUS_UNKNOWNERR);
@@ -73,7 +76,7 @@ public class ClientSmppSessionHandler extends DefaultSmppSessionHandler {
 
     @Override
     public void fireChannelUnexpectedlyClosed() {
-        Log.warning("SMPP session channel unexpectedly closed");
+        LOGGER.warn("SMPP session channel unexpectedly closed");
         smppClient.scheduleReconnect();
     }
 }

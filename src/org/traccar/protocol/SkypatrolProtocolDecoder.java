@@ -17,18 +17,21 @@ package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
-import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 
 public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SkypatrolProtocolDecoder.class);
 
     private final long defaultMask;
 
@@ -81,7 +84,7 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
                 id = buf.toString(buf.readerIndex(), 22, StandardCharsets.US_ASCII).trim();
                 buf.skipBytes(22);
             } else {
-                Log.warning("No device id field");
+                LOGGER.warn("No device id field");
                 return null;
             }
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);

@@ -19,7 +19,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.helper.Checksum;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 import java.nio.charset.StandardCharsets;
@@ -67,11 +66,8 @@ public class RuptelaProtocolEncoder extends BaseProtocolEncoder {
                 content.writeInt(Integer.parseInt(command.getString(Command.KEY_DATA)));
                 return encodeContent(RuptelaProtocolDecoder.MSG_SET_ODOMETER, content);
             default:
-                Log.warning(new UnsupportedOperationException(command.getType()));
-                break;
+                return null;
         }
-
-        return null;
     }
 
 }

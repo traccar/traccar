@@ -17,7 +17,6 @@ package org.traccar.protocol;
 
 import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 import java.nio.charset.StandardCharsets;
@@ -32,11 +31,8 @@ public class AtrackProtocolEncoder extends BaseProtocolEncoder {
                 return Unpooled.copiedBuffer(
                         command.getString(Command.KEY_DATA) + "\r\n", StandardCharsets.US_ASCII);
             default:
-                Log.warning(new UnsupportedOperationException(command.getType()));
-                break;
+                return null;
         }
-
-        return null;
     }
 
 }

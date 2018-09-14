@@ -18,7 +18,6 @@ package org.traccar.protocol;
 import java.util.TimeZone;
 
 import org.traccar.StringProtocolEncoder;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 public class MiniFinderProtocolEncoder extends StringProtocolEncoder implements StringProtocolEncoder.ValueFormatter {
@@ -76,7 +75,6 @@ public class MiniFinderProtocolEncoder extends StringProtocolEncoder implements 
             case Command.TYPE_SET_INDICATOR:
                 return formatCommand(command, "{%s}LED{%s}", Command.KEY_DEVICE_PASSWORD, Command.KEY_DATA);
             default:
-                Log.warning(new UnsupportedOperationException(command.getType()));
                 return null;
         }
     }

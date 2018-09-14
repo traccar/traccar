@@ -18,7 +18,6 @@ package org.traccar.protocol;
 
 import org.traccar.Context;
 import org.traccar.StringProtocolEncoder;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 public class Tk103ProtocolEncoder extends StringProtocolEncoder {
@@ -75,7 +74,6 @@ public class Tk103ProtocolEncoder extends StringProtocolEncoder {
                 case Command.TYPE_SOS_NUMBER:
                     return formatAlt(command, "*master*{%s}*{%s}*", Command.KEY_DEVICE_PASSWORD, Command.KEY_PHONE);
                 default:
-                    Log.warning(new UnsupportedOperationException(command.getType()));
                     return null;
             }
         } else {
@@ -102,7 +100,6 @@ public class Tk103ProtocolEncoder extends StringProtocolEncoder {
                 case Command.TYPE_OUTPUT_CONTROL:
                     return formatCommand(command, "({%s}AV00{%s})", Command.KEY_UNIQUE_ID, Command.KEY_DATA);
                 default:
-                    Log.warning(new UnsupportedOperationException(command.getType()));
                     return null;
             }
         }

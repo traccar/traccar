@@ -19,7 +19,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.helper.DataConverter;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 import java.nio.charset.StandardCharsets;
@@ -53,11 +52,8 @@ public class T800xProtocolEncoder extends BaseProtocolEncoder {
             case Command.TYPE_CUSTOM:
                 return encodeContent(command, command.getString(Command.KEY_DATA));
             default:
-                Log.warning(new UnsupportedOperationException(command.getType()));
-                break;
+                return null;
         }
-
-        return null;
     }
 
 }

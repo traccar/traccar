@@ -21,13 +21,16 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.Context;
-import org.traccar.helper.Log;
 import org.traccar.model.Typed;
 import org.traccar.notificators.NotificatorNull;
 import org.traccar.notificators.Notificator;
 
 public final class NotificatorManager {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NotificatorManager.class);
 
     private static final String DEFAULT_WEB_NOTIFICATOR = "org.traccar.notificators.NotificatorWeb";
     private static final String DEFAULT_MAIL_NOTIFICATOR = "org.traccar.notificators.NotificatorMail";
@@ -58,7 +61,7 @@ public final class NotificatorManager {
             try {
                 notificators.put(type, (Notificator) Class.forName(className).newInstance());
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-                Log.error("Unable to load notificator class for " + type + " " + className + " " + e.getMessage());
+                LOGGER.warn("Unable to load notificator class for " + type + " " + className + " " + e.getMessage());
             }
         }
     }
@@ -66,7 +69,7 @@ public final class NotificatorManager {
     public Notificator getNotificator(String type) {
         final Notificator notificator = notificators.get(type);
         if (notificator == null) {
-            Log.error("No notificator configured for type : " + type);
+            LOGGER.warn("No notificator configured for type : " + type);
             return NULL_NOTIFICATOR;
         }
         return notificator;

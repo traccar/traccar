@@ -18,7 +18,6 @@ package org.traccar.protocol;
 import java.util.TimeZone;
 
 import org.traccar.StringProtocolEncoder;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 public class Pt502ProtocolEncoder extends StringProtocolEncoder implements StringProtocolEncoder.ValueFormatter {
@@ -52,11 +51,8 @@ public class Pt502ProtocolEncoder extends StringProtocolEncoder implements Strin
             case Command.TYPE_REQUEST_PHOTO:
                 return formatCommand(command, "#PHO\r\n");
             default:
-                Log.warning(new UnsupportedOperationException(command.getType()));
-                break;
+                return null;
         }
-
-        return null;
     }
 
 }

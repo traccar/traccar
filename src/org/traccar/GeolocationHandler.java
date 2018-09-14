@@ -18,12 +18,15 @@ package org.traccar;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import org.traccar.helper.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.model.Position;
 
 @ChannelHandler.Sharable
 public class GeolocationHandler extends ChannelInboundHandlerAdapter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GeolocationHandler.class);
 
     private final GeolocationProvider geolocationProvider;
     private final boolean processInvalidPositions;
@@ -60,7 +63,7 @@ public class GeolocationHandler extends ChannelInboundHandlerAdapter {
 
                     @Override
                     public void onFailure(Throwable e) {
-                        Log.warning(e);
+                        LOGGER.warn(null, e);
                         ctx.fireChannelRead(position);
                     }
                 });

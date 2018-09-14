@@ -22,7 +22,6 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.helper.Checksum;
-import org.traccar.helper.Log;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
@@ -301,11 +300,8 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
             case MSG_TRACKING_DATA:
                 return parseTrackingData(deviceSession, buf, sequenceNumber, timestamp);
             default:
-                Log.warning(new UnsupportedOperationException(String.valueOf(messageId)));
-                break;
+                return null;
         }
-
-        return null;
     }
 
 }

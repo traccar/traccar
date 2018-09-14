@@ -16,7 +16,6 @@
 package org.traccar.protocol;
 
 import org.traccar.StringProtocolEncoder;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 public class XexunProtocolEncoder extends StringProtocolEncoder {
@@ -32,11 +31,8 @@ public class XexunProtocolEncoder extends StringProtocolEncoder {
             case Command.TYPE_ENGINE_RESUME:
                 return formatCommand(command, "powercar{%s} 00", Command.KEY_DEVICE_PASSWORD);
             default:
-                Log.warning(new UnsupportedOperationException(command.getType()));
-                break;
+                return null;
         }
-
-        return null;
     }
 
 }

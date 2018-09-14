@@ -23,13 +23,14 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
-import org.traccar.helper.Log;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
@@ -40,6 +41,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Mta6ProtocolDecoder.class);
 
     private final boolean simple;
 
@@ -85,7 +88,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
                     previousFloat = (previousFloat & 0xff000000) + ((buf.readUnsignedMedium() & 0x3fffff) << 2);
                     break;
                 default:
-                    Log.warning(new IllegalArgumentException());
+                    LOGGER.warn(null, new IllegalArgumentException());
                     break;
             }
             return Float.intBitsToFloat(previousFloat);
@@ -192,7 +195,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
                 positions.add(position);
             }
         } catch (IndexOutOfBoundsException error) {
-            Log.warning(error);
+            LOGGER.warn(null, error);
         }
 
         return positions;

@@ -29,6 +29,8 @@ import io.netty.channel.ChannelPromise;
 import io.netty.channel.socket.DatagramChannel;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.handler.timeout.IdleStateHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.events.CommandResultEventHandler;
 import org.traccar.events.DriverEventHandler;
 import org.traccar.events.FuelDropEventHandler;
@@ -38,13 +40,14 @@ import org.traccar.events.MaintenanceEventHandler;
 import org.traccar.events.MotionEventHandler;
 import org.traccar.events.OverspeedEventHandler;
 import org.traccar.events.AlertEventHandler;
-import org.traccar.helper.Log;
 import org.traccar.processing.ComputedAttributesHandler;
 import org.traccar.processing.CopyAttributesHandler;
 
 import java.net.InetSocketAddress;
 
 public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BasePipelineFactory.class);
 
     private final TrackerServer server;
     private int timeout;
@@ -155,7 +158,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
             message.append(" HEX: ");
             message.append(ByteBufUtil.hexDump((ByteBuf) networkMessage.getMessage()));
 
-            Log.debug(message.toString());
+            LOGGER.debug(message.toString());
         }
 
     }
@@ -352,7 +355,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
                 try {
                     pipeline.addLast("extraHandler." + i, (ChannelHandler) Class.forName(handlers[i]).newInstance());
                 } catch (ClassNotFoundException | InstantiationException | IllegalAccessException error) {
-                    Log.warning(error);
+                    LOGGER.warn(null, error);
                 }
             }
         }

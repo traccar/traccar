@@ -18,11 +18,12 @@ package org.traccar.database;
 import io.netty.channel.Channel;
 import io.netty.util.Timeout;
 import io.netty.util.TimerTask;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.Context;
 import org.traccar.GlobalTimer;
 import org.traccar.Protocol;
 import org.traccar.events.OverspeedEventHandler;
-import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceState;
 import org.traccar.model.Event;
@@ -39,6 +40,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class ConnectionManager {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionManager.class);
 
     private static final long DEFAULT_TIMEOUT = 600;
 
@@ -130,7 +133,7 @@ public class ConnectionManager {
         try {
             Context.getDeviceManager().updateDeviceStatus(device);
         } catch (SQLException error) {
-            Log.warning(error);
+            LOGGER.warn(null, error);
         }
 
         updateDevice(device);

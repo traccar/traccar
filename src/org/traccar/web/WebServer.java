@@ -32,6 +32,8 @@ import org.eclipse.jetty.webapp.WebAppContext;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.Config;
 import org.traccar.Context;
 import org.traccar.api.AsyncSocketServlet;
@@ -41,7 +43,6 @@ import org.traccar.api.ObjectMapperProvider;
 import org.traccar.api.ResourceErrorHandler;
 import org.traccar.api.SecurityRequestFilter;
 import org.traccar.api.resource.ServerResource;
-import org.traccar.helper.Log;
 
 import javax.naming.InitialContext;
 import javax.servlet.DispatcherType;
@@ -55,6 +56,8 @@ import java.net.InetSocketAddress;
 import java.util.EnumSet;
 
 public class WebServer {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebServer.class);
 
     private Server server;
     private final Config config;
@@ -150,7 +153,7 @@ public class WebServer {
             javax.naming.Context context = new InitialContext();
             context.bind("java:/DefaultDS", dataSource);
         } catch (Exception error) {
-            Log.warning(error);
+            LOGGER.warn(null, error);
         }
 
         WebAppContext app = new WebAppContext();
@@ -196,7 +199,7 @@ public class WebServer {
         try {
             server.start();
         } catch (Exception error) {
-            Log.warning(error);
+            LOGGER.warn(null, error);
         }
     }
 
@@ -204,7 +207,7 @@ public class WebServer {
         try {
             server.stop();
         } catch (Exception error) {
-            Log.warning(error);
+            LOGGER.warn(null, error);
         }
     }
 

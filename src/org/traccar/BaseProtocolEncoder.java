@@ -19,11 +19,14 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
-import org.traccar.helper.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
 
 public abstract class BaseProtocolEncoder extends ChannelOutboundHandlerAdapter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BaseProtocolEncoder.class);
 
     protected String getUniqueId(long deviceId) {
         return Context.getIdentityManager().getById(deviceId).getUniqueId();
@@ -60,7 +63,7 @@ public abstract class BaseProtocolEncoder extends ChannelOutboundHandlerAdapter 
             } else {
                 s.append("not sent");
             }
-            Log.info(s.toString());
+            LOGGER.info(s.toString());
 
             ctx.write(new NetworkMessage(encodedCommand, networkMessage.getRemoteAddress()), promise);
 

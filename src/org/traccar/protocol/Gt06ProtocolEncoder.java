@@ -20,7 +20,6 @@ import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.Context;
 import org.traccar.helper.Checksum;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 import java.nio.charset.StandardCharsets;
@@ -72,11 +71,8 @@ public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
             case Command.TYPE_CUSTOM:
                 return encodeContent(command.getDeviceId(), command.getString(Command.KEY_DATA));
             default:
-                Log.warning(new UnsupportedOperationException(command.getType()));
-                break;
+                return null;
         }
-
-        return null;
     }
 
 }

@@ -16,7 +16,6 @@
 package org.traccar.protocol;
 
 import org.traccar.StringProtocolEncoder;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 public class SuntechProtocolEncoder extends StringProtocolEncoder {
@@ -48,11 +47,8 @@ public class SuntechProtocolEncoder extends StringProtocolEncoder {
             case Command.TYPE_ALARM_DISARM:
                 return formatCommand(command, "SA200CMD;{%s};02;Disable2\r", Command.KEY_UNIQUE_ID);
             default:
-                Log.warning(new UnsupportedOperationException(command.getType()));
-                break;
+                return null;
         }
-
-        return null;
     }
 
 }

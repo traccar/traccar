@@ -18,7 +18,6 @@ package org.traccar.protocol;
 import java.util.TimeZone;
 
 import org.traccar.StringProtocolEncoder;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 public class Jt600ProtocolEncoder extends StringProtocolEncoder {
@@ -37,11 +36,8 @@ public class Jt600ProtocolEncoder extends StringProtocolEncoder {
             case Command.TYPE_REBOOT_DEVICE:
                 return "(S17)";
             default:
-                Log.warning(new UnsupportedOperationException(command.getType()));
-                break;
+                return null;
         }
-
-        return null;
     }
 
 }

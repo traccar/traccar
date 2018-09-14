@@ -18,7 +18,6 @@ package org.traccar.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 import java.nio.charset.StandardCharsets;
@@ -58,11 +57,8 @@ public class NoranProtocolEncoder extends BaseProtocolEncoder {
             case Command.TYPE_ENGINE_RESUME:
                 return encodeContent("*KW,000,007,000000,1#");
             default:
-                Log.warning(new UnsupportedOperationException(command.getType()));
-                break;
+                return null;
         }
-
-        return null;
     }
 
 }

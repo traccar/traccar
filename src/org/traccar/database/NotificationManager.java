@@ -25,8 +25,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.Context;
-import org.traccar.helper.Log;
 import org.traccar.model.Calendar;
 import org.traccar.model.Event;
 import org.traccar.model.Notification;
@@ -34,6 +35,8 @@ import org.traccar.model.Position;
 import org.traccar.model.Typed;
 
 public class NotificationManager extends ExtendedObjectManager<Notification> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NotificationManager.class);
 
     private boolean geocodeOnRequest;
 
@@ -61,7 +64,7 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
         try {
             getDataManager().addObject(event);
         } catch (SQLException error) {
-            Log.warning(error);
+            LOGGER.warn(null, error);
         }
 
         if (position != null && geocodeOnRequest && Context.getGeocoder() != null && position.getAddress() == null) {
@@ -114,7 +117,7 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
                 try {
                     types.add(new Typed(field.get(null).toString()));
                 } catch (IllegalArgumentException | IllegalAccessException error) {
-                    Log.warning(error);
+                    LOGGER.warn(null, error);
                 }
             }
         }

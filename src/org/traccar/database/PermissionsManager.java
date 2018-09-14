@@ -15,8 +15,9 @@
  */
 package org.traccar.database;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.Context;
-import org.traccar.helper.Log;
 import org.traccar.model.Attribute;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Calendar;
@@ -39,6 +40,8 @@ import java.util.Map;
 import java.util.Set;
 
 public class PermissionsManager {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PermissionsManager.class);
 
     private final DataManager dataManager;
     private final UsersManager usersManager;
@@ -108,7 +111,7 @@ public class PermissionsManager {
         try {
             server = dataManager.getServer();
         } catch (SQLException error) {
-            Log.warning(error);
+            LOGGER.warn(null, error);
         }
     }
 
@@ -143,7 +146,7 @@ public class PermissionsManager {
             }
 
         } catch (SQLException | ClassNotFoundException error) {
-            Log.warning(error);
+            LOGGER.warn(null, error);
         }
 
         deviceUsers.clear();

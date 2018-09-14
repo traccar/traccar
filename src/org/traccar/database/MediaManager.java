@@ -16,7 +16,8 @@
 package org.traccar.database;
 
 import io.netty.buffer.ByteBuf;
-import org.traccar.helper.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -30,6 +31,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class MediaManager {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MediaManager.class);
 
     private String path;
 
@@ -60,7 +63,7 @@ public class MediaManager {
                 fileChannel.force(false);
                 return name;
             } catch (IOException e) {
-                Log.warning(e);
+                LOGGER.warn(null, e);
             }
         }
         return null;
