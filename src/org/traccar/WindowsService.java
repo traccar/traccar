@@ -27,16 +27,14 @@ import com.sun.jna.platform.win32.Winsvc.SERVICE_MAIN_FUNCTION;
 import com.sun.jna.platform.win32.Winsvc.SERVICE_STATUS;
 import com.sun.jna.platform.win32.Winsvc.SERVICE_STATUS_HANDLE;
 import com.sun.jna.platform.win32.Winsvc.SERVICE_TABLE_ENTRY;
+import jnr.posix.POSIXFactory;
+
 import java.io.File;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLClassLoader;
 
-public class WindowsService {
+public abstract class WindowsService {
 
     private static final Advapi32 ADVAPI_32 = Advapi32.INSTANCE;
-
-    private final Object waitObject = new Object();
 
     private String serviceName;
     private ServiceMain serviceMain;
@@ -53,10 +51,8 @@ public class WindowsService {
 
         String javaHome = System.getProperty("java.home");
         String javaBinary = javaHome + "\\bin\\java.exe";
-        URLClassLoader cl = (URLClassLoader) WindowsService.class.getClassLoader();
-        URL jarPath = cl.getURLs()[0];
 
-        File jar = new File(jarPath.toURI());
+        File jar = new File(WindowsService.class.getProtectionDomain().getCodeSource().getLocation().toURI());
         String command = javaBinary + " -jar \"" + jar.getAbsolutePath() + "\" --service \"" + config + "\"";
 
         boolean success = false;
@@ -145,7 +141,13 @@ public class WindowsService {
         return (success);
     }
 
-    public void init() {
+    public void init() throws URISyntaxException {
+        String path = new File(
+                WindowsService.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent();
+
+        POSIXFactory.getPOSIX().chdir(path);
+        System.setProperty("user.dir", path);
+
         serviceMain = new ServiceMain();
         SERVICE_TABLE_ENTRY entry = new SERVICE_TABLE_ENTRY();
         entry.lpServiceName = serviceName;
@@ -169,6 +171,8 @@ public class WindowsService {
         ADVAPI_32.SetServiceStatus(serviceStatusHandle, serviceStatus);
     }
 
+    public abstract void run();
+
     private class ServiceMain implements SERVICE_MAIN_FUNCTION {
 
         public void callback(int dwArgc, Pointer lpszArgv) {
@@ -178,12 +182,8 @@ public class WindowsService {
             reportStatus(Winsvc.SERVICE_START_PENDING, WinError.NO_ERROR, 3000);
             reportStatus(Winsvc.SERVICE_RUNNING, WinError.NO_ERROR, 0);
 
-            try {
-                synchronized (waitObject) {
-                    waitObject.wait();
-                }
-            } catch (InterruptedException ex) {
-            }
+            run();
+
             reportStatus(Winsvc.SERVICE_STOPPED, WinError.NO_ERROR, 0);
 
             // Avoid returning from ServiceMain, which will cause a crash
@@ -202,9 +202,6 @@ public class WindowsService {
                 case Winsvc.SERVICE_CONTROL_SHUTDOWN:
                     reportStatus(Winsvc.SERVICE_STOP_PENDING, WinError.NO_ERROR, 5000);
                     System.exit(0);
-                    synchronized (waitObject) {
-                        waitObject.notifyAll();
-                    }
                 default:
                     break;
             }

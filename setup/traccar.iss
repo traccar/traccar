@@ -7,7 +7,6 @@ OutputBaseFilename=traccar-setup
 ArchitecturesInstallIn64BitMode=x64
 
 [Dirs]
-Name: "{app}\bat"
 Name: "{app}\conf"
 Name: "{app}\data"
 Name: "{app}\lib"
@@ -20,10 +19,10 @@ Name: "{app}\templates"
 Source: "out\*"; DestDir: "{app}"; Flags: recursesubdirs
 
 [Run]
-Filename: "{app}\bat\installService.bat"; Parameters: ">%TEMP%\installService.log 2>&1"; Flags: runhidden
+Filename: "java.exe"; Parameters: "-jar {app}\tracker-server.jar --install {app}\conf\traccar.xml"; Flags: runhidden
 
 [UninstallRun]
-Filename: "{app}\bat\uninstallService.bat"; Parameters: ">%TEMP%\uninstallService.log 2>&1"; Flags: runhidden
+Filename: "java.exe"; Parameters: "-jar {app}\tracker-server.jar --uninstall"; Flags: runhidden
 
 [Code]
 function GetLocalMachine(): Integer;

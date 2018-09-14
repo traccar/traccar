@@ -179,6 +179,11 @@
             <artifactId>jna-platform</artifactId>
             <version>4.5.2</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.jnr</groupId>
+            <artifactId>jnr-posix</artifactId>
+            <version>3.0.46</version>
+        </dependency>
     </dependencies>
 
     <build>

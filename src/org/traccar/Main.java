@@ -71,11 +71,16 @@ public final class Main {
             throw new RuntimeException("Configuration file is not provided");
         }
 
-        String configFile = args[args.length - 1];
+        final String configFile = args[args.length - 1];
 
-        if (args.length > 1) {
-            WindowsService windowsService = new WindowsService("traccar");
-            switch (args[1]) {
+        if (args[0].startsWith("--")) {
+            WindowsService windowsService = new WindowsService("traccar") {
+                @Override
+                public void run() {
+                    Main.run(configFile);
+                }
+            };
+            switch (args[0]) {
                 case "--install":
                     windowsService.install("traccar", null, null, null, null, configFile);
                     return;
@@ -87,40 +92,49 @@ public final class Main {
                     windowsService.init();
                     break;
             }
+        } else {
+            run(configFile);
         }
+    }
 
-        Context.init(configFile);
-        logSystemInfo();
-        LOGGER.info("Version: " + Context.getAppVersion());
-        LOGGER.info("Starting server...");
+    public static void run(String configFile) {
+        try {
+            Context.init(configFile);
+            logSystemInfo();
+            LOGGER.info("Version: " + Context.getAppVersion());
+            LOGGER.info("Starting server...");
 
-        Context.getServerManager().start();
-        if (Context.getWebServer() != null) {
-            Context.getWebServer().start();
+            Context.getServerManager().start();
+            if (Context.getWebServer() != null) {
+                Context.getWebServer().start();
+            }
+
+            new Timer().scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    try {
+                        Context.getDataManager().clearHistory();
+                    } catch (SQLException error) {
+                        LOGGER.warn(null, error);
+                    }
+                }
+            }, 0, CLEAN_PERIOD);
+
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                @Override
+                public void run() {
+                    LOGGER.info("Shutting down server...");
+
+                    if (Context.getWebServer() != null) {
+                        Context.getWebServer().stop();
+                    }
+                    Context.getServerManager().stop();
+                }
+            });
+        } catch (Exception e) {
+            LOGGER.error(null, e);
+            throw new RuntimeException(e);
         }
-
-        new Timer().scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                try {
-                    Context.getDataManager().clearHistory();
-                } catch (SQLException error) {
-                    LOGGER.warn(null, error);
-                }
-            }
-        }, 0, CLEAN_PERIOD);
-
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                LOGGER.info("Shutting down server...");
-
-                if (Context.getWebServer() != null) {
-                    Context.getWebServer().stop();
-                }
-                Context.getServerManager().stop();
-            }
-        });
     }
 
 }

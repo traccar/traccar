@@ -44,7 +44,7 @@ public class ServerManager {
         List<String> names = new LinkedList<>();
         String packageName = "org.traccar.protocol";
         String packagePath = packageName.replace('.', '/');
-        URL packageUrl = Thread.currentThread().getContextClassLoader().getResource(packagePath);
+        URL packageUrl = getClass().getClassLoader().getResource(packagePath);
 
         if (packageUrl.getProtocol().equals("jar")) {
             String jarFileName = URLDecoder.decode(packageUrl.getFile(), StandardCharsets.UTF_8.name());

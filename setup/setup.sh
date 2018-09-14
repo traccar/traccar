@@ -9,8 +9,13 @@ then
     rm -r ../out
     rm /opt/traccar/setup.sh
     chmod -R go+rX /opt/traccar
-    cd /opt/traccar/bin/
-    /opt/traccar/bin/installDaemon.sh
+
+    mv /opt/traccar/traccar.service /etc/systemd/system
+    chmod 664 /etc/systemd/system/traccar.service
+
+    systemctl daemon-reload
+    systemctl enable traccar.service
+    systemctl start traccar.service
   else
     echo 'Java 7 or higher is required'
   fi
