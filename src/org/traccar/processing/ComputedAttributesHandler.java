@@ -80,7 +80,7 @@ public class ComputedAttributesHandler extends BaseDataHandler {
                         }
                     }
                 } catch (IllegalAccessException | InvocationTargetException error) {
-                    LOGGER.warn(null, error);
+                    LOGGER.warn("Attribute reflection error", error);
                 }
             }
         }
@@ -101,7 +101,7 @@ public class ComputedAttributesHandler extends BaseDataHandler {
                 try {
                     result = computeAttribute(attribute, position);
                 } catch (JexlException error) {
-                    LOGGER.warn(null, error);
+                    LOGGER.warn("Attribute computation error", error);
                 }
                 if (result != null) {
                     try {
@@ -118,7 +118,7 @@ public class ComputedAttributesHandler extends BaseDataHandler {
                                 position.getAttributes().put(attribute.getAttribute(), result.toString());
                         }
                     } catch (ClassCastException error) {
-                        LOGGER.warn(null, error);
+                        LOGGER.warn("Attribute cast error", error);
                     }
                 }
             }

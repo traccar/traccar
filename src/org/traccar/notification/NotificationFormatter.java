@@ -84,7 +84,7 @@ public final class NotificationFormatter {
             templateFilePath = Paths.get(path, event.getType() + ".vm").toString();
             template = Context.getVelocityEngine().getTemplate(templateFilePath, StandardCharsets.UTF_8.name());
         } catch (ResourceNotFoundException error) {
-            LOGGER.warn(null, error);
+            LOGGER.warn("Notification template error", error);
             templateFilePath = Paths.get(path, "unknown.vm").toString();
             template = Context.getVelocityEngine().getTemplate(templateFilePath, StandardCharsets.UTF_8.name());
         }

@@ -63,7 +63,7 @@ public class MediaManager {
                 fileChannel.force(false);
                 return name;
             } catch (IOException e) {
-                LOGGER.warn(null, e);
+                LOGGER.warn("Save media file error", e);
             }
         }
         return null;

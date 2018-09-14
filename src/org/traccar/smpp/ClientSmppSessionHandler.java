@@ -45,7 +45,7 @@ public class ClientSmppSessionHandler extends DefaultSmppSessionHandler {
 
     @Override
     public PduResponse firePduRequestReceived(PduRequest request) {
-        PduResponse response = null;
+        PduResponse response;
         try {
             if (request instanceof DeliverSm) {
                 String sourceAddress = ((DeliverSm) request).getSourceAddress().getAddress();
@@ -53,7 +53,7 @@ public class ClientSmppSessionHandler extends DefaultSmppSessionHandler {
                         smppClient.mapDataCodingToCharset(((DeliverSm) request).getDataCoding()));
                 LOGGER.debug("SMS Message Received: " + message.trim() + ", Source Address: " + sourceAddress);
 
-                boolean isDeliveryReceipt = false;
+                boolean isDeliveryReceipt;
                 if (smppClient.getDetectDlrByOpts()) {
                     isDeliveryReceipt = request.getOptionalParameters() != null;
                 } else {
@@ -65,8 +65,8 @@ public class ClientSmppSessionHandler extends DefaultSmppSessionHandler {
                 }
             }
             response = request.createResponse();
-        } catch (Throwable error) {
-            LOGGER.warn(null, error);
+        } catch (Exception error) {
+            LOGGER.warn("SMS receiving error", error);
             response = request.createResponse();
             response.setResultMessage(error.getMessage());
             response.setCommandStatus(SmppConstants.STATUS_UNKNOWNERR);

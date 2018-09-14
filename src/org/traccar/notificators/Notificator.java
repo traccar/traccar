@@ -32,7 +32,7 @@ public abstract class Notificator {
                 try {
                     sendSync(userId, event, position);
                 } catch (MessageException | InterruptedException error) {
-                    LOGGER.warn(null, error);
+                    LOGGER.warn("Event send error", error);
                 }
             }
         }).start();

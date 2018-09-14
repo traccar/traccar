@@ -129,7 +129,7 @@ public class CommandsManager  extends ExtendedObjectManager<Command> {
                 try {
                     result.add(new Typed(field.get(null).toString()));
                 } catch (IllegalArgumentException | IllegalAccessException error) {
-                    LOGGER.warn(null, error);
+                    LOGGER.warn("Get command types error", error);
                 }
             }
         }

@@ -115,7 +115,7 @@ public final class Main {
                     try {
                         Context.getDataManager().clearHistory();
                     } catch (SQLException error) {
-                        LOGGER.warn(null, error);
+                        LOGGER.warn("Clear history error", error);
                     }
                 }
             }, 0, CLEAN_PERIOD);
@@ -132,7 +132,7 @@ public final class Main {
                 }
             });
         } catch (Exception e) {
-            LOGGER.error(null, e);
+            LOGGER.error("Main method error", e);
             throw new RuntimeException(e);
         }
     }

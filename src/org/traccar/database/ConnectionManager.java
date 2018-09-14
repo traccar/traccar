@@ -133,7 +133,7 @@ public class ConnectionManager {
         try {
             Context.getDeviceManager().updateDeviceStatus(device);
         } catch (SQLException error) {
-            LOGGER.warn(null, error);
+            LOGGER.warn("Update device status error", error);
         }
 
         updateDevice(device);

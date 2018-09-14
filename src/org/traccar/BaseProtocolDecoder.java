@@ -61,7 +61,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
 
             return device.getId();
         } catch (SQLException e) {
-            LOGGER.warn(null, e);
+            LOGGER.warn("Automatic device registration error", e);
             return 0;
         }
     }
@@ -134,7 +134,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
                     }
                 }
             } catch (Exception e) {
-                LOGGER.warn(null, e);
+                LOGGER.warn("Find device error", e);
             }
             if (deviceId == 0 && Context.getConfig().getBoolean("database.registerUnknown")) {
                 return addUnknownDevice(uniqueIds[0]);

@@ -108,7 +108,7 @@ public abstract class ExtendedObjectManager<T extends BaseModel> extends SimpleO
                 }
 
             } catch (SQLException | ClassNotFoundException error) {
-                LOGGER.warn(null, error);
+                LOGGER.warn("Refresh permissions error", error);
             }
         }
     }

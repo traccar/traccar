@@ -65,7 +65,7 @@ public class GroupsManager extends BaseObjectManager<Group> implements Managable
             try {
                 updateGroupCache(true);
             } catch (SQLException e) {
-                LOGGER.warn(null, e);
+                LOGGER.warn("Update group cache error", e);
             }
             result = super.getAllItems();
         }

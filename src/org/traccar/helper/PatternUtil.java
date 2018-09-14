@@ -71,7 +71,7 @@ public final class PatternUtil {
                     result.stringTail = input.substring(matcher.group(1).length());
                 }
             } catch (PatternSyntaxException error) {
-                LOGGER.warn(null, error);
+                LOGGER.warn("Pattern matching error", error);
             }
         }
 

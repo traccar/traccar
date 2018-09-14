@@ -89,7 +89,7 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
             try {
                 getRemote().sendString(Context.getObjectMapper().writeValueAsString(data), null);
             } catch (JsonProcessingException e) {
-                LOGGER.warn(null, e);
+                LOGGER.warn("Socket JSON formatting error", e);
             }
         }
     }

@@ -153,7 +153,7 @@ public class WebServer {
             javax.naming.Context context = new InitialContext();
             context.bind("java:/DefaultDS", dataSource);
         } catch (Exception error) {
-            LOGGER.warn(null, error);
+            LOGGER.warn("JNDI context error", error);
         }
 
         WebAppContext app = new WebAppContext();
@@ -199,7 +199,7 @@ public class WebServer {
         try {
             server.start();
         } catch (Exception error) {
-            LOGGER.warn(null, error);
+            LOGGER.warn("Web server start failed", error);
         }
     }
 
@@ -207,7 +207,7 @@ public class WebServer {
         try {
             server.stop();
         } catch (Exception error) {
-            LOGGER.warn(null, error);
+            LOGGER.warn("Web server stop failed", error);
         }
     }
 

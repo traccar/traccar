@@ -130,7 +130,7 @@ public class WebDataHandler extends BaseDataHandler {
             try {
                 Context.getClient().target(formatRequest(position)).request().async().get();
             } catch (UnsupportedEncodingException | JsonProcessingException e) {
-                LOGGER.warn(null, e);
+                LOGGER.warn("Forwarding formatting error", e);
             }
         }
         return position;

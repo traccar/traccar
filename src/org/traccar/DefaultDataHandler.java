@@ -29,7 +29,7 @@ public class DefaultDataHandler extends BaseDataHandler {
         try {
             Context.getDataManager().addObject(position);
         } catch (Exception error) {
-            LOGGER.warn(null, error);
+            LOGGER.warn("Failed to store position", error);
         }
 
         return position;

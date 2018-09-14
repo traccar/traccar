@@ -263,7 +263,7 @@ public class SmppClient implements SmsManager {
                 try {
                     sendMessageSync(destAddress, message, command);
                 } catch (MessageException | InterruptedException | IllegalStateException error) {
-                    LOGGER.warn(null, error);
+                    LOGGER.warn("SMS sending error", error);
                 }
             }
         });

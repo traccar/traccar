@@ -106,12 +106,12 @@ public class CsvBuilder {
                                 builder.append(map);
                                 addSeparator();
                             } catch (JsonProcessingException e) {
-                                LOGGER.warn(null, e);
+                                LOGGER.warn("Map JSON formatting error", e);
                             }
                         }
                     }
                 } catch (IllegalAccessException | InvocationTargetException error) {
-                    LOGGER.warn(null, error);
+                    LOGGER.warn("Reflection invocation error", error);
                 }
             }
         }

@@ -80,7 +80,7 @@ public abstract class SimpleObjectManager<T extends BaseModel> extends BaseObjec
                     getUserItems(permission.getOwnerId()).add(permission.getPropertyId());
                 }
             } catch (SQLException | ClassNotFoundException error) {
-                LOGGER.warn(null, error);
+                LOGGER.warn("Error getting permissions", error);
             }
         }
     }

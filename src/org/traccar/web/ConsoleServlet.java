@@ -54,7 +54,7 @@ public class ConsoleServlet extends WebServlet {
             method.invoke(server, true);
 
         } catch (NoSuchFieldException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-            LOGGER.warn(null, e);
+            LOGGER.warn("Console reflection error", e);
         }
     }
 

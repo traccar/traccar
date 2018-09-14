@@ -198,7 +198,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
                     }
                     break;
                 default:
-                    LOGGER.warn(null, new UnsupportedOperationException());
+                    LOGGER.warn("Aplicom CAN decoding error", new UnsupportedOperationException());
                     break;
             }
         }

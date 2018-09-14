@@ -111,7 +111,7 @@ public class PermissionsManager {
         try {
             server = dataManager.getServer();
         } catch (SQLException error) {
-            LOGGER.warn(null, error);
+            LOGGER.warn("Refresh server config error", error);
         }
     }
 
@@ -146,7 +146,7 @@ public class PermissionsManager {
             }
 
         } catch (SQLException | ClassNotFoundException error) {
-            LOGGER.warn(null, error);
+            LOGGER.warn("Refresh device permissions error", error);
         }
 
         deviceUsers.clear();

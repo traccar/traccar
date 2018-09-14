@@ -77,7 +77,7 @@ public class BaseObjectManager<T extends BaseModel> {
                     }
                 }
             } catch (SQLException error) {
-                LOGGER.warn(null, error);
+                LOGGER.warn("Error refreshing items", error);
             }
         }
     }

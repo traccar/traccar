@@ -88,7 +88,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
                     previousFloat = (previousFloat & 0xff000000) + ((buf.readUnsignedMedium() & 0x3fffff) << 2);
                     break;
                 default:
-                    LOGGER.warn(null, new IllegalArgumentException());
+                    LOGGER.warn("MTA6 float decoding error", new IllegalArgumentException());
                     break;
             }
             return Float.intBitsToFloat(previousFloat);
@@ -195,7 +195,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
                 positions.add(position);
             }
         } catch (IndexOutOfBoundsException error) {
-            LOGGER.warn(null, error);
+            LOGGER.warn("MTA6 parsing error", error);
         }
 
         return positions;

@@ -96,7 +96,7 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
             }
 
         } catch (SecurityException e) {
-            LOGGER.warn(null, e);
+            LOGGER.warn("Authentication error", e);
         }
 
         if (securityContext != null) {

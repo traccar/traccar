@@ -64,7 +64,7 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
         try {
             getDataManager().addObject(event);
         } catch (SQLException error) {
-            LOGGER.warn(null, error);
+            LOGGER.warn("Event save error", error);
         }
 
         if (position != null && geocodeOnRequest && Context.getGeocoder() != null && position.getAddress() == null) {
@@ -117,7 +117,7 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
                 try {
                     types.add(new Typed(field.get(null).toString()));
                 } catch (IllegalArgumentException | IllegalAccessException error) {
-                    LOGGER.warn(null, error);
+                    LOGGER.warn("Get event types error", error);
                 }
             }
         }

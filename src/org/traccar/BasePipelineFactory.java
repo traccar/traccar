@@ -355,7 +355,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
                 try {
                     pipeline.addLast("extraHandler." + i, (ChannelHandler) Class.forName(handlers[i]).newInstance());
                 } catch (ClassNotFoundException | InstantiationException | IllegalAccessException error) {
-                    LOGGER.warn(null, error);
+                    LOGGER.warn("Dynamic handler error", error);
                 }
             }
         }

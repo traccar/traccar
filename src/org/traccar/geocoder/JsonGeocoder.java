@@ -105,7 +105,7 @@ public abstract class JsonGeocoder implements Geocoder {
             try {
                 return handleResponse(latitude, longitude, request.get(JsonObject.class), null);
             } catch (ClientErrorException e) {
-                LOGGER.warn(null, e);
+                LOGGER.warn("Geocoder network error", e);
             }
         }
         return null;

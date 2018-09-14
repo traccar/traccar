@@ -67,7 +67,7 @@ public class StatisticsManager {
             try {
                 Context.getDataManager().addObject(statistics);
             } catch (SQLException e) {
-                LOGGER.warn(null, e);
+                LOGGER.warn("Error saving statistics", e);
             }
 
             String url = Context.getConfig().getString("server.statistics");

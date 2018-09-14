@@ -292,7 +292,7 @@ public final class QueryBuilder {
                         }
                     }
                 } catch (IllegalAccessException | InvocationTargetException | JsonProcessingException error) {
-                    LOGGER.warn(null, error);
+                    LOGGER.warn("Get property error", error);
                 }
             }
         }
@@ -324,7 +324,7 @@ public final class QueryBuilder {
                     try {
                         method.invoke(object, resultSet.getBoolean(name));
                     } catch (IllegalAccessException | InvocationTargetException error) {
-                        LOGGER.warn(null, error);
+                        LOGGER.warn("Set property error", error);
                     }
                 }
             });
@@ -335,7 +335,7 @@ public final class QueryBuilder {
                     try {
                         method.invoke(object, resultSet.getInt(name));
                     } catch (IllegalAccessException | InvocationTargetException error) {
-                        LOGGER.warn(null, error);
+                        LOGGER.warn("Set property error", error);
                     }
                 }
             });
@@ -346,7 +346,7 @@ public final class QueryBuilder {
                     try {
                         method.invoke(object, resultSet.getLong(name));
                     } catch (IllegalAccessException | InvocationTargetException error) {
-                        LOGGER.warn(null, error);
+                        LOGGER.warn("Set property error", error);
                     }
                 }
             });
@@ -357,7 +357,7 @@ public final class QueryBuilder {
                     try {
                         method.invoke(object, resultSet.getDouble(name));
                     } catch (IllegalAccessException | InvocationTargetException error) {
-                        LOGGER.warn(null, error);
+                        LOGGER.warn("Set property error", error);
                     }
                 }
             });
@@ -368,7 +368,7 @@ public final class QueryBuilder {
                     try {
                         method.invoke(object, resultSet.getString(name));
                     } catch (IllegalAccessException | InvocationTargetException error) {
-                        LOGGER.warn(null, error);
+                        LOGGER.warn("Set property error", error);
                     }
                 }
             });
@@ -382,7 +382,7 @@ public final class QueryBuilder {
                             method.invoke(object, new Date(timestamp.getTime()));
                         }
                     } catch (IllegalAccessException | InvocationTargetException error) {
-                        LOGGER.warn(null, error);
+                        LOGGER.warn("Set property error", error);
                     }
                 }
             });
@@ -393,7 +393,7 @@ public final class QueryBuilder {
                     try {
                         method.invoke(object, resultSet.getBytes(name));
                     } catch (IllegalAccessException | InvocationTargetException error) {
-                        LOGGER.warn(null, error);
+                        LOGGER.warn("Set property error", error);
                     }
                 }
             });
@@ -406,7 +406,7 @@ public final class QueryBuilder {
                         try {
                             method.invoke(object, Context.getObjectMapper().readValue(value, parameterType));
                         } catch (InvocationTargetException | IllegalAccessException | IOException error) {
-                            LOGGER.warn(null, error);
+                            LOGGER.warn("Set property error", error);
                         }
                     }
                 }

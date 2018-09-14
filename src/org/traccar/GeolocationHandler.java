@@ -63,7 +63,7 @@ public class GeolocationHandler extends ChannelInboundHandlerAdapter {
 
                     @Override
                     public void onFailure(Throwable e) {
-                        LOGGER.warn(null, e);
+                        LOGGER.warn("Geolocation network error", e);
                         ctx.fireChannelRead(position);
                     }
                 });

@@ -96,7 +96,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
             try {
                 updateDeviceCache(true);
             } catch (SQLException e) {
-                LOGGER.warn(null, e);
+                LOGGER.warn("Update device cache error", e);
             }
             result = super.getAllItems();
         }
@@ -231,7 +231,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
                     positions.put(position.getDeviceId(), position);
                 }
             } catch (SQLException error) {
-                LOGGER.warn(null, error);
+                LOGGER.warn("Load latest positions error", error);
             }
         }
     }

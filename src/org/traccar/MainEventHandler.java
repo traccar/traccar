@@ -51,7 +51,7 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
             try {
                 Context.getDeviceManager().updateLatestPosition(position);
             } catch (SQLException error) {
-                LOGGER.warn(null, error);
+                LOGGER.warn("Failed to update device", error);
             }
 
             String uniqueId = Context.getIdentityManager().getById(position.getDeviceId()).getUniqueId();

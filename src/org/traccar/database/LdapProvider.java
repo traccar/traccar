@@ -158,7 +158,7 @@ public class LdapProvider {
             user.setLogin(accountName);
             user.setName(accountName);
             user.setEmail(accountName);
-            LOGGER.warn(null, e);
+            LOGGER.warn("User lookup error", e);
         }
         return user;
     }
