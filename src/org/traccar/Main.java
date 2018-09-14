@@ -67,7 +67,29 @@ public final class Main {
     public static void main(String[] args) throws Exception {
         Locale.setDefault(Locale.ENGLISH);
 
-        Context.init(args);
+        if (args.length <= 0) {
+            throw new RuntimeException("Configuration file is not provided");
+        }
+
+        String configFile = args[args.length - 1];
+
+        if (args.length > 1) {
+            WindowsService windowsService = new WindowsService("traccar");
+            switch (args[1]) {
+                case "--install":
+                    windowsService.install("traccar", null, null, null, null, configFile);
+                    return;
+                case "--uninstall":
+                    windowsService.uninstall();
+                    return;
+                case "--service":
+                default:
+                    windowsService.init();
+                    break;
+            }
+        }
+
+        Context.init(configFile);
         logSystemInfo();
         LOGGER.info("Version: " + Context.getAppVersion());
         LOGGER.info("Starting server...");

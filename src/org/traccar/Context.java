@@ -340,14 +340,10 @@ public final class Context {
         }
     }
 
-    public static void init(String[] arguments) throws Exception {
+    public static void init(String configFile) throws Exception {
 
         config = new Config();
-        if (arguments.length <= 0) {
-            throw new RuntimeException("Configuration file is not provided");
-        }
-
-        config.load(arguments[0]);
+        config.load(configFile);
 
         loggerEnabled = config.getBoolean("logger.enable");
         if (loggerEnabled) {
