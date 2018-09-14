@@ -1,0 +1,12 @@
+[Unit]
+Description=traccar
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/traccar
+ExecStart=/bin/sh -c "exec java -jar tracker-server.jar conf/traccar.xml"
+SyslogIdentifier=traccar
+
+[Install]
+WantedBy=multi-user.target
