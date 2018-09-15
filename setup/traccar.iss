@@ -19,10 +19,10 @@ Name: "{app}\templates"
 Source: "out\*"; DestDir: "{app}"; Flags: recursesubdirs
 
 [Run]
-Filename: "java.exe"; Parameters: "-jar {app}\tracker-server.jar --install {app}\conf\traccar.xml"; Flags: runhidden
+Filename: "java.exe"; Parameters: "-jar ""{app}\tracker-server.jar"" --install .\conf\traccar.xml"; Flags: runhidden
 
 [UninstallRun]
-Filename: "java.exe"; Parameters: "-jar {app}\tracker-server.jar --uninstall"; Flags: runhidden
+Filename: "java.exe"; Parameters: "-jar ""{app}\tracker-server.jar"" --uninstall"; Flags: runhidden
 
 [Code]
 function GetLocalMachine(): Integer;
