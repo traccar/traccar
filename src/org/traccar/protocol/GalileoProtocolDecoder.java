@@ -128,6 +128,9 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
             case 0x34:
                 position.setAltitude(buf.readShortLE());
                 break;
+            case 0x35:
+                position.set(Position.KEY_HDOP, buf.readUnsignedByte() * 0.1);
+                break;
             case 0x40:
                 position.set(Position.KEY_STATUS, buf.readUnsignedShortLE());
                 break;
@@ -233,6 +236,17 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
             case 0xea:
                 position.set("userDataArray", ByteBufUtil.hexDump(buf.readSlice(buf.readUnsignedByte())));
                 position.set("userDataArray", ByteBufUtil.hexDump(buf.readSlice(buf.readUnsignedByte())));
+                break;
+            case 0xf0:
+            case 0xf1:
+            case 0xf2:
+            case 0xf3:
+            case 0xf4:
+            case 0xf5:
+            case 0xf6:
+            case 0xf7:
+            case 0xf8:
+                position.set("can32Bit" + (tag - 0xf0 + 5), buf.readUnsignedIntLE());
                 break;
             default:
                 buf.skipBytes(getTagLength(tag));
