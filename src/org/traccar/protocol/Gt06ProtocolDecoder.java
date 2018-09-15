@@ -516,6 +516,17 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             return decodeWifi(buf, deviceSession);
 
+        } else if (type == MSG_INFO) {
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            position.set(Position.KEY_POWER, buf.readShort() * 0.01);
+
+            return position;
+
         } else {
 
             return decodeBasicOther(channel, buf, deviceSession, type, dataLength);
