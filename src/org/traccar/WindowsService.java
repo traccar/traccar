@@ -182,6 +182,8 @@ public abstract class WindowsService {
             reportStatus(Winsvc.SERVICE_START_PENDING, WinError.NO_ERROR, 3000);
             reportStatus(Winsvc.SERVICE_RUNNING, WinError.NO_ERROR, 0);
 
+            Thread.currentThread().setContextClassLoader(WindowsService.class.getClassLoader());
+
             run();
 
             reportStatus(Winsvc.SERVICE_STOPPED, WinError.NO_ERROR, 0);

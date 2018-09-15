@@ -21,6 +21,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -97,6 +99,12 @@ public final class Log {
 
     public static class LogFormatter extends Formatter {
 
+        private boolean fullStackTraces;
+
+        LogFormatter(boolean fullStackTraces) {
+            this.fullStackTraces = fullStackTraces;
+        }
+
         private static String formatLevel(Level level) {
             switch (level.getName()) {
                 case "FINEST":
@@ -119,7 +127,15 @@ public final class Log {
             StringBuilder message = new StringBuilder(record.getMessage());
 
             if (record.getThrown() != null) {
-                message.append(" - ").append(exceptionStack(record.getThrown()));
+                message.append(" - ");
+                if (fullStackTraces) {
+                    StringWriter stringWriter = new StringWriter();
+                    PrintWriter printWriter = new PrintWriter(stringWriter);
+                    record.getThrown().printStackTrace(printWriter);
+                    message.append(System.lineSeparator()).append(stringWriter.toString());
+                } else {
+                    message.append(exceptionStack(record.getThrown()));
+                }
             }
 
             return String.format("%1$tF %1$tT %2$5s: %3$s%n",
@@ -128,7 +144,7 @@ public final class Log {
 
     }
 
-    public static void setupLogger(Config config) throws IOException {
+    public static void setupLogger(Config config) {
 
         Logger rootLogger = Logger.getLogger("");
         for (Handler handler : rootLogger.getHandlers()) {
@@ -142,7 +158,7 @@ public final class Log {
             handler = new RollingFileHandler(config.getString("logger.file"));
         }
 
-        handler.setFormatter(new LogFormatter());
+        handler.setFormatter(new LogFormatter(config.getBoolean("logger.fullStackTraces")));
         handler.setLevel(Level.parse(config.getString("logger.level").toUpperCase()));
 
         rootLogger.addHandler(handler);
