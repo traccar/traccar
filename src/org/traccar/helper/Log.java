@@ -159,7 +159,10 @@ public final class Log {
         }
 
         handler.setFormatter(new LogFormatter(config.getBoolean("logger.fullStackTraces")));
-        handler.setLevel(Level.parse(config.getString("logger.level").toUpperCase()));
+
+        Level level = Level.parse(config.getString("logger.level").toUpperCase());
+        rootLogger.setLevel(level);
+        handler.setLevel(level);
 
         rootLogger.addHandler(handler);
     }

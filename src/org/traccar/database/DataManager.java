@@ -361,7 +361,7 @@ public class DataManager {
         long historyDays = config.getInteger("database.historyDays");
         if (historyDays != 0) {
             Date timeLimit = new Date(System.currentTimeMillis() - historyDays * 24 * 3600 * 1000);
-            LOGGER.debug(
+            LOGGER.info(
                     "Clearing history earlier than " + new SimpleDateFormat(Context.DATE_FORMAT).format(timeLimit));
             QueryBuilder.create(dataSource, getQuery("database.deletePositions"))
                     .setDate("serverTime", timeLimit)

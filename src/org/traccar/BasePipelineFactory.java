@@ -158,7 +158,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
             message.append(" HEX: ");
             message.append(ByteBufUtil.hexDump((ByteBuf) networkMessage.getMessage()));
 
-            LOGGER.debug(message.toString());
+            LOGGER.info(message.toString());
         }
 
     }

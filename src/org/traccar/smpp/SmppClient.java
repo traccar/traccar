@@ -211,7 +211,7 @@ public class SmppClient implements SmsManager {
 
     private void destroySession() {
         if (smppSession != null) {
-            LOGGER.debug("Cleaning up SMPP session... ");
+            LOGGER.info("Cleaning up SMPP session... ");
             smppSession.destroy();
             smppSession = null;
         }
@@ -242,7 +242,7 @@ public class SmppClient implements SmsManager {
                 submit.setDestAddress(new Address(destTon, destNpi, destAddress));
                 SubmitSmResp submitResponce = getSession().submit(submit, submitTimeout);
                 if (submitResponce.getCommandStatus() == SmppConstants.STATUS_OK) {
-                    LOGGER.debug("SMS submitted, message id: " + submitResponce.getMessageId());
+                    LOGGER.info("SMS submitted, message id: " + submitResponce.getMessageId());
                 } else {
                     throw new IllegalStateException(submitResponce.getResultMessage());
                 }

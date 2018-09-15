@@ -51,7 +51,7 @@ public class ClientSmppSessionHandler extends DefaultSmppSessionHandler {
                 String sourceAddress = ((DeliverSm) request).getSourceAddress().getAddress();
                 String message = CharsetUtil.decode(((DeliverSm) request).getShortMessage(),
                         smppClient.mapDataCodingToCharset(((DeliverSm) request).getDataCoding()));
-                LOGGER.debug("SMS Message Received: " + message.trim() + ", Source Address: " + sourceAddress);
+                LOGGER.info("SMS Message Received: " + message.trim() + ", Source Address: " + sourceAddress);
 
                 boolean isDeliveryReceipt;
                 if (smppClient.getDetectDlrByOpts()) {
