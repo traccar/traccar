@@ -119,11 +119,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                 return position;
             }
 
-            if (position.getAttributes().containsKey(Position.KEY_ODOMETER)
-                    && position.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)
-                    && (int) position.getAttributes().get(Position.KEY_ODOMETER) > 0) {
-                deviceLastKnownOdometerPositionLookup.put(position.getDeviceId(), position);
-            }
+            updateLatestKnownPosition(position);
 
             Optional<Integer> sensorIdOnPosition =
                     getSensorId(position, peripheralSensorsOnDevice.get());
@@ -149,6 +145,38 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         } finally {
             return position;
         }
+    }
+
+    private void updateLatestKnownPosition(Position position) {
+
+        if (!position.getAttributes().containsKey(Position.KEY_ODOMETER)
+                || !position.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)) {
+
+            return;
+        }
+
+        Optional<Position> lastKnown = deviceLastKnownOdometerPositionLookup.containsKey(position.getDeviceId())?
+                Optional.of(deviceLastKnownOdometerPositionLookup.get(position.getDeviceId())) : Optional.empty();
+
+        if (!lastKnown.isPresent()) {
+            deviceLastKnownOdometerPositionLookup.put(position.getDeviceId(), position);
+            return;
+        }
+
+        Position lastKnownPosition = lastKnown.get();
+        Map<String, Object> lastKnownAttributes = lastKnownPosition.getAttributes();
+        Map<String, Object> currentAttributes = position.getAttributes();
+
+        if (lastKnownPosition.getDeviceTime().getTime() > position.getDeviceTime().getTime()
+            || ((int) lastKnownAttributes.get(Position.KEY_ODOMETER) >
+                    (int) currentAttributes.get(Position.KEY_ODOMETER))
+            || ((double) lastKnownAttributes.get(Position.KEY_TOTAL_DISTANCE) >
+                    (double) lastKnownAttributes.get(Position.KEY_TOTAL_DISTANCE))) {
+
+            return;
+        }
+
+        deviceLastKnownOdometerPositionLookup.put(position.getDeviceId(), position);
     }
 
     private void updateWithLastAvailable(final Position position, final String attributeToUpdate) {
@@ -296,12 +324,9 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         // Since digital fuel level payloads don't have the odometer reading, let's update it with the one on
         // the last known position. This will help downstream processing where this is needed e.g. data loss check.
         long deviceId = position.getDeviceId();
-        if (deviceLastKnownOdometerPositionLookup.containsKey(deviceId)
-                && deviceLastKnownOdometerPositionLookup.get(deviceId).getAttributes().containsKey(Position.KEY_ODOMETER)) {
-
+        if (deviceLastKnownOdometerPositionLookup.containsKey(deviceId)) {
             Position lastPosition = deviceLastKnownOdometerPositionLookup.get(deviceId);
             position.set(Position.KEY_ODOMETER, (int) lastPosition.getAttributes().get(Position.KEY_ODOMETER));
-
             position.set(Position.KEY_TOTAL_DISTANCE, (double) lastPosition.getAttributes()
                                                                            .get(Position.KEY_TOTAL_DISTANCE));
         }
