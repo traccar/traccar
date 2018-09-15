@@ -120,6 +120,13 @@ public final class Main {
                 }
             }, 0, CLEAN_PERIOD);
 
+            Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+                @Override
+                public void uncaughtException(Thread t, Throwable e) {
+                    LOGGER.error("Thread exception", e);
+                }
+            });
+
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 @Override
                 public void run() {

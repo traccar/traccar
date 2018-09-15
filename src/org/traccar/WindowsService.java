@@ -36,6 +36,8 @@ public abstract class WindowsService {
 
     private static final Advapi32 ADVAPI_32 = Advapi32.INSTANCE;
 
+    private final Object waitObject = new Object();
+
     private String serviceName;
     private ServiceMain serviceMain;
     private ServiceControl serviceControl;
@@ -186,12 +188,21 @@ public abstract class WindowsService {
 
             run();
 
+            try {
+                synchronized (waitObject) {
+                    waitObject.wait();
+                }
+            } catch (InterruptedException ex) {
+            }
+
             reportStatus(Winsvc.SERVICE_STOPPED, WinError.NO_ERROR, 0);
 
             // Avoid returning from ServiceMain, which will cause a crash
             // See http://support.microsoft.com/kb/201349, which recommends
             // having init() wait for this thread.
             // Waiting on this thread in init() won't fix the crash, though.
+
+            System.exit(0);
         }
 
     }
@@ -203,7 +214,10 @@ public abstract class WindowsService {
                 case Winsvc.SERVICE_CONTROL_STOP:
                 case Winsvc.SERVICE_CONTROL_SHUTDOWN:
                     reportStatus(Winsvc.SERVICE_STOP_PENDING, WinError.NO_ERROR, 5000);
-                    System.exit(0);
+                    synchronized (waitObject) {
+                        waitObject.notifyAll();
+                    }
+                    break;
                 default:
                     break;
             }
