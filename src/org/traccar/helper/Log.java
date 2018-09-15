@@ -63,7 +63,7 @@ public final class Log {
                     }
                     if (writer == null) {
                         this.suffix = suffix;
-                        writer = new BufferedWriter(new FileWriter(name));
+                        writer = new BufferedWriter(new FileWriter(name, true));
                     }
                     writer.write(getFormatter().format(record));
                     writer.flush();
