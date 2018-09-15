@@ -29,7 +29,7 @@
     <entry key='processing.peripheralSensorData.hoursOfDataToLoad'>24</entry>
     <entry key='processing.peripheralSensorData.minHoursOfDataInMemory'>24</entry>
     <entry key='processing.peripheralSensorData.storedEventLookAroundSeconds'>300</entry>
-    <entry key='processing.peripheralSensorData.currentEventLookBackSeconds'>300</entry>
+    <entry key='processing.peripheralSensorData.currentEventLookBackSeconds'>900</entry>
 
     <entry key='processing.peripheralSensorData.minValuesForMovingAverage'>9</entry>
     <entry key='processing.peripheralSensorData.minValuesForOutlierDetection'>9</entry>

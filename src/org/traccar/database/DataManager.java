@@ -357,6 +357,14 @@ public class DataManager {
         return queryBuilder.executeQuery(Position.class);
     }
 
+    public Collection<Position> getPositionsForSummary(long deviceId, Date from, Date to) throws SQLException {
+        QueryBuilder queryBuilder = QueryBuilder.create(dataSource, getQuery("database.selectPositionsForSummary"))
+                                                .setLong("deviceId", deviceId)
+                                                .setDate("from", from)
+                                                .setDate("to", to);
+        return queryBuilder.executeQuery(Position.class);
+    }
+
     public Collection<Position> getPositionsForFuel(long deviceId, Date from, Date to) throws SQLException {
         QueryBuilder queryBuilder = QueryBuilder.create(dataSource, getQuery("database.selectPositionsForFuel"))
                                                 .setLong("deviceId", deviceId)

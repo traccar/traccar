@@ -83,4 +83,52 @@ public class FuelSensorDataHandlerHelper {
 
         return isOutlier;
     }
+
+    public static boolean isDataLoss(final FuelEventMetadata fuelEventMetadata,
+                                     final double calculatedFuelChangeVolume) {
+
+
+        boolean requiredFieldsPresent = checkRequiredFieldsPresent(fuelEventMetadata);
+        if (!requiredFieldsPresent) {
+            // Not enough info to process data loss.
+            return false;
+        }
+
+        double startTotalGPSDistanceInMeters = (double) fuelEventMetadata.getActivityStartPosition()
+                                                                         .getAttributes()
+                                                                         .get(Position.KEY_TOTAL_DISTANCE);
+
+        double endTotalGPSDistanceInMeters = (double) fuelEventMetadata.getActivityEndPosition()
+                                                                       .getAttributes()
+                                                                       .get(Position.KEY_TOTAL_DISTANCE);
+
+        int startOdometerInMeters = (int) fuelEventMetadata.getActivityStartPosition()
+                                                         .getAttributes().get(Position.KEY_ODOMETER);
+
+        int endOdometerInMeters = (int) fuelEventMetadata.getActivityEndPosition()
+                                                         .getAttributes().get(Position.KEY_ODOMETER);
+
+        double differenceTotalDistanceInMeters = endTotalGPSDistanceInMeters - startTotalGPSDistanceInMeters;
+        double differenceOdometerInMeters = endOdometerInMeters - startOdometerInMeters;
+
+        double maximumDistanceTravelled = Math.max(differenceTotalDistanceInMeters, differenceOdometerInMeters);
+        double minimumAverageMileage = 1.5; // This has to be a self learning value
+        double expectedFuelConsumed = maximumDistanceTravelled / minimumAverageMileage;
+
+        boolean dataLoss = Math.abs(calculatedFuelChangeVolume) <= expectedFuelConsumed;
+
+        if (dataLoss) {
+            Log.debug(String.format("Data Loss: Distance covered %f, Exp fuel consumed: %f, actual fuel consumed: %f",
+                    maximumDistanceTravelled, expectedFuelConsumed, calculatedFuelChangeVolume));
+        }
+
+        return dataLoss;
+    }
+
+    private static boolean checkRequiredFieldsPresent(FuelEventMetadata fuelEventMetadata) {
+        return fuelEventMetadata.getActivityStartPosition().getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)
+                && fuelEventMetadata.getActivityStartPosition().getAttributes().containsKey(Position.KEY_ODOMETER)
+                && fuelEventMetadata.getActivityEndPosition().getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)
+                && fuelEventMetadata.getActivityEndPosition().getAttributes().containsKey(Position.KEY_ODOMETER);
+    }
 }
