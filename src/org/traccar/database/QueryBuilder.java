@@ -209,6 +209,23 @@ public final class QueryBuilder {
         return this;
     }
 
+    public QueryBuilder setDouble(String name, Double value) throws SQLException {
+        for (int i : indexes(name)) {
+            try {
+                if (value == null) {
+                    statement.setNull(i, Types.DOUBLE);
+                } else {
+                    statement.setDouble(i, value);
+                }
+            } catch (SQLException error) {
+                statement.close();
+                connection.close();
+                throw error;
+            }
+        }
+        return this;
+    }
+
     public QueryBuilder setString(String name, String value) throws SQLException {
         for (int i : indexes(name)) {
             try {
@@ -276,6 +293,8 @@ public final class QueryBuilder {
                     } else if (method.getReturnType().equals(long.class)) {
                         setLong(name, (Long) method.invoke(object), name.endsWith("Id"));
                     } else if (method.getReturnType().equals(double.class)) {
+                        setDouble(name, (double) method.invoke(object));
+                    } else if (method.getReturnType().equals(Double.class)) {
                         setDouble(name, (Double) method.invoke(object));
                     } else if (method.getReturnType().equals(String.class)) {
                         setString(name, (String) method.invoke(object));

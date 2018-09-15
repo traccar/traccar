@@ -233,9 +233,9 @@ public class Position extends Message {
         this.longitude = longitude;
     }
 
-    private double altitude; // value in meters
+    private Double altitude; // value in meters
 
-    public double getAltitude() {
+    public Double getAltitude() {
         return altitude;
     }
 
@@ -253,9 +253,9 @@ public class Position extends Message {
         this.speed = speed;
     }
 
-    private double course;
+    private Double course;
 
-    public double getCourse() {
+    public Double getCourse() {
         return course;
     }
 
@@ -273,9 +273,9 @@ public class Position extends Message {
         this.address = address;
     }
 
-    private double accuracy;
+    private Double accuracy;
 
-    public double getAccuracy() {
+    public Double getAccuracy() {
         return accuracy;
     }
 
@@ -299,4 +299,12 @@ public class Position extends Message {
         return super.getType();
     }
 
+    public void clear() {
+        this.latitude = 0;
+        this.longitude = 0;
+        this.accuracy = null;
+        this.altitude = null;
+        this.course = null;
+        this.speed = 0;
+    }
 }

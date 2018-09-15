@@ -40,6 +40,7 @@ public class ProtocolTest extends BaseTest {
         position.setValid(valid);
         position.setLatitude(lat);
         position.setLongitude(lon);
+        position.setCourse(0);
 
         return position;
     }
@@ -167,14 +168,18 @@ public class ProtocolTest extends BaseTest {
 
             }
 
-            assertTrue("altitude >= -12262", position.getAltitude() >= -12262);
-            assertTrue("altitude <= 18000", position.getAltitude() <= 18000);
+            if (position.getAltitude() != null) {
+                assertTrue("altitude >= -12262", position.getAltitude() >= -12262);
+                assertTrue("altitude <= 18000", position.getAltitude() <= 18000);
+            }
 
             assertTrue("speed >= 0", position.getSpeed() >= 0);
             assertTrue("speed <= 869", position.getSpeed() <= 869);
 
-            assertTrue("course >= 0", position.getCourse() >= 0);
-            assertTrue("course <= 360", position.getCourse() <= 360);
+            if (position.getCourse() != null) {
+                assertTrue("course >= 0", position.getCourse() >= 0);
+                assertTrue("course <= 360", position.getCourse() <= 360);
+            }
 
             assertNotNull("protocol is null", position.getProtocol());
 

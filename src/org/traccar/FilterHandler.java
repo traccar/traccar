@@ -132,7 +132,7 @@ public class FilterHandler extends BaseDataHandler {
     }
 
     private boolean filterAccuracy(Position position) {
-        return filterAccuracy != 0 && position.getAccuracy() > filterAccuracy;
+        return filterAccuracy != 0 && position.getAccuracy() != null && position.getAccuracy() > filterAccuracy;
     }
 
     private boolean filterApproximate(Position position) {

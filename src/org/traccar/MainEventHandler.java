@@ -67,8 +67,10 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
             if (position.getSpeed() > 0) {
                 s.append(", speed: ").append(String.format("%.1f", position.getSpeed()));
             }
-            s.append(", course: ").append(String.format("%.1f", position.getCourse()));
-            if (position.getAccuracy() > 0) {
+            if (position.getCourse() != null) {
+                s.append(", course: ").append(String.format("%.1f", position.getCourse()));
+            }
+            if (position.getAccuracy() != null && position.getAccuracy() > 0) {
                 s.append(", accuracy: ").append(String.format("%.1f", position.getAccuracy()));
             }
             Object cmdResult = position.getAttributes().get(Position.KEY_RESULT);
