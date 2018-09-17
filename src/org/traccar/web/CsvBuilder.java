@@ -19,6 +19,7 @@ package org.traccar.web;
 import java.beans.Introspector;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
@@ -28,9 +29,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
@@ -41,7 +39,6 @@ public class CsvBuilder {
 
     private static final String LINE_ENDING = "\r\n";
     private static final String SEPARATOR = ";";
-    private static final DateTimeFormatter DATE_FORMAT = ISODateTimeFormat.dateTime();
 
     private StringBuilder builder = new StringBuilder();
 
@@ -94,7 +91,7 @@ public class CsvBuilder {
                         addSeparator();
                     } else if (method.getReturnType().equals(Date.class)) {
                         Date value = (Date) method.invoke(object);
-                        builder.append(DATE_FORMAT.print(new DateTime(value)));
+                        builder.append(DateTimeFormatter.ISO_DATE_TIME.format(value.toInstant()));
                         addSeparator();
                     } else if (method.getReturnType().equals(Map.class)) {
                         Map value = (Map) method.invoke(object);
@@ -163,4 +160,5 @@ public class CsvBuilder {
     public String build() {
         return builder.toString();
     }
+
 }
