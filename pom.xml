@@ -11,8 +11,9 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jetty.version>9.2.24.v20180105</jetty.version> <!-- Jetty 9.3+ requires Java 8 -->
-        <jersey.version>2.25.1</jersey.version>
+        <jetty.version>9.4.12.v20180830</jetty.version>
+        <jersey.version>2.26</jersey.version>
+        <jackson.version>2.8.4</jackson.version>
     </properties>
 
     <dependencies>
@@ -40,17 +41,17 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.46</version> <!-- Version 6 required Java 8 -->
+            <version>8.0.12</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.2.4.jre7</version>
+            <version>42.2.5</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
-            <version>6.4.0.jre7</version>
+            <version>7.0.0.jre8</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.microsoft.azure</groupId>
@@ -60,13 +61,13 @@
         </dependency>
         <dependency>
             <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP-java7</artifactId>
-            <version>2.4.13</version>
+            <artifactId>HikariCP</artifactId>
+            <version>3.2.0</version>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
-            <version>4.1.28.Final</version>
+            <version>4.1.29.Final</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -76,7 +77,7 @@
         <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>javax.json</artifactId>
-            <version>1.0.4</version>
+            <version>1.1.2</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
@@ -119,9 +120,19 @@
             <version>${jersey.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.glassfish.jersey.inject</groupId>
+            <artifactId>jersey-hk2</artifactId>
+            <version>${jersey.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.jaxrs</groupId>
+            <artifactId>jackson-jaxrs-json-provider</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr353</artifactId>
-            <version>2.8.4</version>
+            <version>${jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>org.liquibase</groupId>
@@ -136,8 +147,8 @@
         </dependency>
         <dependency>
             <groupId>javax.mail</groupId>
-            <artifactId>mail</artifactId>
-            <version>1.4.7</version>
+            <artifactId>javax.mail-api</artifactId>
+            <version>1.6.2</version>
         </dependency>
         <dependency>
             <groupId>org.jxls</groupId>
@@ -161,13 +172,13 @@
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
-            <artifactId>commons-collections4</artifactId> <!-- Required by Velocity -->
+            <artifactId>commons-collections4</artifactId>
             <version>4.2</version>
         </dependency>
         <dependency>
             <groupId>org.mnode.ical4j</groupId>
             <artifactId>ical4j</artifactId>
-            <version>2.0.5</version>
+            <version>2.0.5</version> <!-- UPGRADE -->
         </dependency>
         <dependency>
             <groupId>com.fizzed</groupId>
@@ -272,8 +283,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.7.0</version>
                 <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                     <compilerArgument>-Xlint:unchecked</compilerArgument>
                 </configuration>
             </plugin>
@@ -289,10 +300,7 @@
                         <configuration>
                             <rules>
                                 <enforceBytecodeVersion>
-                                    <maxJdkVersion>1.7</maxJdkVersion>
-                                    <ignoreClasses>
-                                        <ignoreClass>*JDBC42*</ignoreClass>
-                                    </ignoreClasses>
+                                    <maxJdkVersion>1.8</maxJdkVersion>
                                 </enforceBytecodeVersion>
                             </rules>
                             <fail>true</fail>
