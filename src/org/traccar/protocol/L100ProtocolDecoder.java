@@ -21,6 +21,7 @@ import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
+import org.traccar.helper.ObdDecoder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.CellTower;
@@ -68,7 +69,7 @@ public class L100ProtocolDecoder extends BaseProtocolDecoder {
             .text("ATL")
             .compile();
 
-    private static final Pattern PATTERN_OBD = new PatternBuilder()
+    private static final Pattern PATTERN_OBD_LOCATION = new PatternBuilder()
             .expression("[LH],")                 // archive
             .text("ATL,")
             .number("(d{15}),")                  // imei
@@ -95,6 +96,18 @@ public class L100ProtocolDecoder extends BaseProtocolDecoder {
             .groupEnd("?")
             .compile();
 
+    private static final Pattern PATTERN_OBD_DATA = new PatternBuilder()
+            .expression("[LH],")                 // archive
+            .text("ATLOBD,")
+            .number("(d{15}),")                  // imei
+            .number("d+,")                       // type
+            .number("d+,")                       // index
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
+            .number("(dd)(dd)(dd),")             // date (ddmmyy)
+            .expression("[^,]+,")                // obd protocol
+            .expression("(.+)")                  // data
+            .compile();
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -102,7 +115,11 @@ public class L100ProtocolDecoder extends BaseProtocolDecoder {
         String sentence = (String) msg;
 
         if (sentence.startsWith("L") || sentence.startsWith("H")) {
-            return decodeObd(channel, remoteAddress, sentence);
+            if (sentence.substring(2, 8).equals("ATLOBD")) {
+                return decodeObdData(channel, remoteAddress, sentence);
+            } else {
+                return decodeObdLocation(channel, remoteAddress, sentence);
+            }
         } else {
             return decodeNormal(channel, remoteAddress, sentence);
         }
@@ -150,9 +167,9 @@ public class L100ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private Object decodeObd(Channel channel, SocketAddress remoteAddress, String sentence) {
+    private Object decodeObdLocation(Channel channel, SocketAddress remoteAddress, String sentence) {
 
-        Parser parser = new Parser(PATTERN_OBD, sentence);
+        Parser parser = new Parser(PATTERN_OBD_LOCATION, sentence);
         if (!parser.matches()) {
             return null;
         }
@@ -213,6 +230,34 @@ public class L100ProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.nextInt() == 1) {
             position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+        }
+
+        return position;
+    }
+
+    private Object decodeObdData(Channel channel, SocketAddress remoteAddress, String sentence) {
+
+        Parser parser = new Parser(PATTERN_OBD_DATA, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY));
+
+        for (String entry : parser.next().split(",")) {
+            String[] values = entry.split(":");
+            if (values.length == 2 && values[1].charAt(0) != 'X') {
+                position.add(ObdDecoder.decodeData(
+                        Integer.parseInt(values[0].substring(2), 16), Integer.parseInt(values[1], 16), true));
+            }
         }
 
         return position;
