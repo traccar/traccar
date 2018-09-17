@@ -35,7 +35,7 @@ public class OpenGtsProtocolDecoder extends BaseHttpProtocolDecoder {
 
     private static final Pattern PATTERN = new PatternBuilder()
             .text("$GPRMC,")
-            .number("(dd)(dd)(dd),")             // time (hhmmss)
+            .number("(dd)(dd)(dd)(?:.d+)?,")     // time (hhmmss)
             .expression("([AV]),")               // validity
             .number("(d+)(dd.d+),")              // latitude
             .expression("([NS]),")
