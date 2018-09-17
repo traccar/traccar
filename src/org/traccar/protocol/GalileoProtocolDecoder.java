@@ -105,6 +105,30 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void decodeTag(Position position, ByteBuf buf, int tag) {
+        if (tag >= 0x50 && tag <= 0x57) {
+            position.set(Position.PREFIX_ADC + (tag - 0x50), buf.readUnsignedShortLE());
+        } else if (tag >= 0x60 && tag <= 0x62) {
+            position.set("fuel" + (tag - 0x60), buf.readUnsignedShortLE());
+        } else if (tag >= 0xa0 && tag <= 0xaf) {
+            position.set("can8BitR" + (tag - 0xa0 + 15), buf.readUnsignedByte());
+        } else if (tag >= 0xb0 && tag <= 0xb9) {
+            position.set("can16BitR" + (tag - 0xb0 + 5), buf.readUnsignedShortLE());
+        } else if (tag >= 0xc4 && tag <= 0xd2) {
+            position.set("can8BitR" + (tag - 0xc4), buf.readUnsignedByte());
+        } else if (tag >= 0xd6 && tag <= 0xda) {
+            position.set("can16BitR" + (tag - 0xd6), buf.readUnsignedShortLE());
+        } else if (tag >= 0xdb && tag <= 0xdf) {
+            position.set("can32BitR" + (tag - 0xdb), buf.readUnsignedIntLE());
+        } else if (tag >= 0xe2 && tag <= 0xe9) {
+            position.set("userData" + (tag - 0xe2), buf.readUnsignedIntLE());
+        } else if (tag >= 0xf0 && tag <= 0xf9) {
+            position.set("can32BitR" + (tag - 0xf0 + 5), buf.readUnsignedIntLE());
+        } else {
+            decodeTagOther(position, buf, tag);
+        }
+    }
+
+    private void decodeTagOther(Position position, ByteBuf buf, int tag) {
         switch (tag) {
             case 0x01:
                 position.set(Position.KEY_VERSION_HW, buf.readUnsignedByte());
@@ -152,21 +176,14 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
             case 0x46:
                 position.set(Position.KEY_INPUT, buf.readUnsignedShortLE());
                 break;
-            case 0x50:
-            case 0x51:
-            case 0x52:
-            case 0x53:
-            case 0x54:
-            case 0x55:
-            case 0x56:
-            case 0x57:
-                position.set(Position.PREFIX_ADC + (tag - 0x50), buf.readUnsignedShortLE());
-                break;
             case 0x58:
                 position.set("rs2320", buf.readUnsignedShortLE());
                 break;
             case 0x59:
                 position.set("rs2321", buf.readUnsignedShortLE());
+                break;
+            case 0x90:
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(buf.readUnsignedIntLE()));
                 break;
             case 0xc0:
                 position.set("fuelTotal", buf.readUnsignedIntLE() * 0.5);
@@ -182,37 +199,6 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
             case 0xc3:
                 position.set("canB1", buf.readUnsignedIntLE());
                 break;
-            case 0xc4:
-            case 0xc5:
-            case 0xc6:
-            case 0xc7:
-            case 0xc8:
-            case 0xc9:
-            case 0xca:
-            case 0xcb:
-            case 0xcc:
-            case 0xcd:
-            case 0xce:
-            case 0xcf:
-            case 0xd0:
-            case 0xd1:
-            case 0xd2:
-                position.set("can8Bit" + (tag - 0xc4), buf.readUnsignedByte());
-                break;
-            case 0xd6:
-            case 0xd7:
-            case 0xd8:
-            case 0xd9:
-            case 0xda:
-                position.set("can16Bit" + (tag - 0xd6), buf.readUnsignedShortLE());
-                break;
-            case 0xdb:
-            case 0xdc:
-            case 0xdd:
-            case 0xde:
-            case 0xdf:
-                position.set("can32Bit" + (tag - 0xdb), buf.readUnsignedIntLE());
-                break;
             case 0xd4:
                 position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
                 break;
@@ -223,30 +209,9 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_RESULT,
                         buf.readSlice(buf.readUnsignedByte()).toString(StandardCharsets.US_ASCII));
                 break;
-            case 0xe2:
-            case 0xe3:
-            case 0xe4:
-            case 0xe5:
-            case 0xe6:
-            case 0xe7:
-            case 0xe8:
-            case 0xe9:
-                position.set("userData" + (tag - 0xe2), buf.readUnsignedIntLE());
-                break;
             case 0xea:
                 position.set("userDataArray", ByteBufUtil.hexDump(buf.readSlice(buf.readUnsignedByte())));
                 position.set("userDataArray", ByteBufUtil.hexDump(buf.readSlice(buf.readUnsignedByte())));
-                break;
-            case 0xf0:
-            case 0xf1:
-            case 0xf2:
-            case 0xf3:
-            case 0xf4:
-            case 0xf5:
-            case 0xf6:
-            case 0xf7:
-            case 0xf8:
-                position.set("can32Bit" + (tag - 0xf0 + 5), buf.readUnsignedIntLE());
                 break;
             default:
                 buf.skipBytes(getTagLength(tag));
