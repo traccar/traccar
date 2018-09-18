@@ -87,7 +87,9 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        LOGGER.info(formatChannel(ctx.channel()) + " connected");
+        if (!(ctx.channel() instanceof DatagramChannel)) {
+            LOGGER.info(formatChannel(ctx.channel()) + " connected");
+        }
     }
 
     @Override

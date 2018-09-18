@@ -1,16 +1,22 @@
 package org.traccar.protocol;
 
-import org.joda.time.DateTime;
 import org.junit.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Command;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
+import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
 
 public class H02ProtocolEncoderTest extends ProtocolTest {
 
     private H02ProtocolEncoder encoder = new H02ProtocolEncoder();
-    private DateTime time = new DateTime().withHourOfDay(1).withMinuteOfHour(2).withSecondOfMinute(3);
+    private Date time = Date.from(
+            LocalDateTime.of(LocalDate.now(), LocalTime.of(1, 2, 3)).atZone(ZoneOffset.systemDefault()).toInstant());
 
     @Test
     public void testAlarmArmEncode() throws Exception {

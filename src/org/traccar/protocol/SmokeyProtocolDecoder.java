@@ -19,9 +19,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.Seconds;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
@@ -33,6 +30,8 @@ import org.traccar.model.WifiAccessPoint;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 public class SmokeyProtocolDecoder extends BaseProtocolDecoder {
 
@@ -52,8 +51,8 @@ public class SmokeyProtocolDecoder extends BaseProtocolDecoder {
             response.writeByte(3); // protocol version
             response.writeByte(MSG_DATE_RECORD_ACK);
             response.writeBytes(id);
-            response.writeInt(Seconds.secondsBetween(
-                    new DateTime(2000, 1, 1, 0, 0, DateTimeZone.UTC), new DateTime(DateTimeZone.UTC)).getSeconds());
+            response.writeInt(
+                    (int) ChronoUnit.SECONDS.between(Instant.parse("2000-01-01T00:00:00.00Z"), Instant.now()));
             response.writeByte(index);
             response.writeByte(report - 0x200);
 

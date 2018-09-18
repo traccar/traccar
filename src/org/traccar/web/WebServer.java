@@ -20,11 +20,9 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.proxy.AsyncProxyServlet;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.SessionManager;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
-import org.eclipse.jetty.server.session.HashSessionManager;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -63,7 +61,7 @@ public class WebServer {
     private final Config config;
     private final DataSource dataSource;
     private final HandlerList handlers = new HandlerList();
-    private final SessionManager sessionManager;
+    private int sessionTimeout;
 
     private void initServer() {
 
@@ -79,12 +77,7 @@ public class WebServer {
     public WebServer(Config config, DataSource dataSource) {
         this.config = config;
         this.dataSource = dataSource;
-
-        sessionManager = new HashSessionManager();
-        int sessionTimeout = config.getInteger("web.sessionTimeout");
-        if (sessionTimeout != 0) {
-            sessionManager.setMaxInactiveInterval(sessionTimeout);
-        }
+        sessionTimeout = config.getInteger("web.sessionTimeout");
 
         initServer();
         initApi();
@@ -137,7 +130,6 @@ public class WebServer {
         resourceHandler.setResourceBase(config.getString("web.path"));
         if (config.getBoolean("web.debug")) {
             resourceHandler.setWelcomeFiles(new String[] {"debug.html", "index.html"});
-            resourceHandler.setMinMemoryMappedContentLength(-1); // avoid locking files on Windows
         } else {
             String cache = config.getString("web.cacheControl");
             if (cache != null && !cache.isEmpty()) {
@@ -158,7 +150,9 @@ public class WebServer {
 
         WebAppContext app = new WebAppContext();
         app.setContextPath("/");
-        app.getSessionHandler().setSessionManager(sessionManager);
+        if (sessionTimeout > 0) {
+            app.getSessionHandler().setMaxInactiveInterval(sessionTimeout);
+        }
         app.setWar(config.getString("web.application"));
         handlers.addHandler(app);
     }
@@ -166,7 +160,9 @@ public class WebServer {
     private void initApi() {
         ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         servletHandler.setContextPath("/api");
-        servletHandler.getSessionHandler().setSessionManager(sessionManager);
+        if (sessionTimeout > 0) {
+            servletHandler.getSessionHandler().setMaxInactiveInterval(sessionTimeout);
+        }
 
         servletHandler.addServlet(new ServletHolder(new AsyncSocketServlet()), "/socket");
 

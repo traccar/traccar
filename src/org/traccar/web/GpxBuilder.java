@@ -16,11 +16,8 @@
  */
 package org.traccar.web;
 
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
-
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
@@ -41,8 +38,6 @@ public class GpxBuilder {
             + "</trkpt>%n";
     private static final String FOOTER = "</trkseg></trk></gpx>";
 
-    private static final DateTimeFormatter DATE_FORMAT = ISODateTimeFormat.dateTime();
-
     public GpxBuilder() {
         builder.append(HEADER);
         builder.append("<trkseg>\n");
@@ -55,7 +50,7 @@ public class GpxBuilder {
 
     public void addPosition(Position position) {
         builder.append(String.format(POINT, position.getLatitude(), position.getLongitude(),
-                DATE_FORMAT.print(new DateTime(position.getFixTime())), position.getAltitude(),
+                DateTimeFormatter.ISO_DATE_TIME.format(position.getFixTime().toInstant()), position.getAltitude(),
                 position.getCourse(), UnitsConverter.mpsFromKnots(position.getSpeed())));
     }
 
