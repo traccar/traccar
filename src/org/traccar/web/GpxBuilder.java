@@ -16,8 +16,9 @@
  */
 package org.traccar.web;
 
-import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+
+import org.traccar.Context;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
@@ -50,7 +51,7 @@ public class GpxBuilder {
 
     public void addPosition(Position position) {
         builder.append(String.format(POINT, position.getLatitude(), position.getLongitude(),
-                DateTimeFormatter.ISO_DATE_TIME.format(position.getFixTime().toInstant()), position.getAltitude(),
+                Context.DATE_FORMATTER.format(position.getFixTime().toInstant()), position.getAltitude(),
                 position.getCourse(), UnitsConverter.mpsFromKnots(position.getSpeed())));
     }
 
