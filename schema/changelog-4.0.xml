@@ -173,4 +173,11 @@
 
   </changeSet>
 
+    <changeSet id="addFcm" author="atiq">
+        <addColumn tableName="tc_users">
+            <column name="fcmtoken" type="VARCHAR(255)">
+            </column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

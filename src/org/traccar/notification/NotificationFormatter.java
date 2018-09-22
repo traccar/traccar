@@ -102,6 +102,14 @@ public final class NotificationFormatter {
         return formatMessage(null, userId, event, position, "short");
     }
 
+    public static FullMessage formatFCMMessage(long userId,Event event, Position position){
+        VelocityContext velocityContext = prepareContext(userId, event, position);
+        String formattedMessage = formatMessage(velocityContext, userId, event, position, "short");
+
+        Device device = (Device) velocityContext.get("device");
+        return new FullMessage(device.getName(), formattedMessage);
+    }
+
     private static String formatMessage(VelocityContext vc, Long userId, Event event, Position position,
             String templatePath) {
 

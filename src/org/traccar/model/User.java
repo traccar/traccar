@@ -17,6 +17,7 @@ package org.traccar.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import org.traccar.Context;
 import org.traccar.database.QueryExtended;
 import org.traccar.database.QueryIgnore;
 import org.traccar.helper.Hashing;
@@ -273,4 +274,29 @@ public class User extends ExtendedModel {
         return Hashing.validatePassword(password, hashedPassword, salt);
     }
 
+    private String fcmToken;
+
+    @JsonIgnore
+    public String getFcmToken() {
+        return fcmToken;
+    }
+
+    public void setFcmToken(String fcmToken) {
+        this.fcmToken = fcmToken;
+    }
+
+    @QueryIgnore
+    public String getFcm() {
+        return fcmToken;
+    }
+
+    public void setFcm(String fcmToken) {
+        if(fcmToken != null && !fcmToken.isEmpty())
+            this.fcmToken = fcmToken;
+        else{
+            User user = Context.getPermissionsManager().getUser(getId());
+            this.fcmToken = user.getFcmToken();
+
+        }
+    }
 }

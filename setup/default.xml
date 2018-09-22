@@ -28,11 +28,13 @@
 
     <entry key='media.path'>./media</entry>
 
-    <entry key='notificator.types'>web,mail</entry>
+    <entry key='notificator.types'>web,mail,fcm</entry>
 
     <entry key='server.statistics'>https://www.traccar.org/analytics/</entry>
 
     <entry key='commands.queueing'>true</entry>
+
+    <entry key="notificator.fcm.serverkey"></entry>
 
     <!-- DATABASE CONFIG -->
 

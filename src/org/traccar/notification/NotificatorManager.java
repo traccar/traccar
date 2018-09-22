@@ -35,6 +35,7 @@ public final class NotificatorManager {
     private static final String DEFAULT_WEB_NOTIFICATOR = "org.traccar.notificators.NotificatorWeb";
     private static final String DEFAULT_MAIL_NOTIFICATOR = "org.traccar.notificators.NotificatorMail";
     private static final String DEFAULT_SMS_NOTIFICATOR = "org.traccar.notificators.NotificatorSms";
+    private static final String DEFAULT_FCM_NOTIFICATOR = "org.traccar.notificators.NotificatorFcm";
 
     private final Map<String, Notificator> notificators = new HashMap<>();
     private static final Notificator NULL_NOTIFICATOR = new NotificatorNull();
@@ -52,6 +53,9 @@ public final class NotificatorManager {
                     break;
                 case "sms":
                     defaultNotificator = DEFAULT_SMS_NOTIFICATOR;
+                    break;
+                case "fcm":
+                    defaultNotificator = DEFAULT_FCM_NOTIFICATOR;
                     break;
                 default:
                     break;
