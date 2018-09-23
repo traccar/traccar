@@ -4,7 +4,11 @@
 
 <properties>
 
-    <!-- SERVER CONFIG -->
+    <!--
+
+    DO NOT MODIFY THIS FILE. Use traccar.xml instead.
+
+    -->
 
     <entry key='web.enable'>true</entry>
     <entry key='web.port'>8082</entry>
@@ -34,12 +38,8 @@
 
     <entry key='commands.queueing'>true</entry>
 
-    <!-- DATABASE CONFIG -->
-
     <entry key='database.ignoreUnknown'>true</entry>
-
     <entry key='database.generateQueries'>true</entry>
-
     <entry key='database.changelog'>./schema/changelog-master.xml</entry>
  
     <entry key='database.loginUser'>
@@ -74,8 +74,6 @@
     <entry key='database.selectStatistics'>
         SELECT * FROM tc_statistics WHERE captureTime BETWEEN :from AND :to ORDER BY captureTime
     </entry>
-
-    <!-- PROTOCOL CONFIG -->
 
     <entry key='gps103.port'>5001</entry>
     <entry key='tk103.port'>5002</entry>
