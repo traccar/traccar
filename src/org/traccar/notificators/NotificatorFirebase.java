@@ -37,13 +37,15 @@ public class NotificatorFirebase extends Notificator {
     private String key;
 
     public static class Notification {
-        public String body;
+        @JsonProperty("body")
+        private String body;
     }
 
     public static class Message {
         @JsonProperty("registration_ids")
-        public String[] tokens;
-        public Notification notification;
+        private String[] tokens;
+        @JsonProperty("notification")
+        private Notification notification;
     }
 
     public NotificatorFirebase() {
