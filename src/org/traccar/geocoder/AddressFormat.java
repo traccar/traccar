@@ -30,6 +30,7 @@ import java.text.ParsePosition;
  * %u - suburb
  * %r - street (road)
  * %h - house
+ * %f - formatted address
  *
  */
 public class AddressFormat extends Format {
