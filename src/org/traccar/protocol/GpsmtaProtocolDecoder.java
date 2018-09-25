@@ -36,8 +36,8 @@ public class GpsmtaProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN = new PatternBuilder()
             .expression("([^ ]+) ")              // uid
             .number("(d+) ")                     // time (unix time)
-            .number("(d+.d+) ")                  // latitude
-            .number("(d+.d+) ")                  // longitude
+            .number("-?(d+.d+) ")                // latitude
+            .number("-?(d+.d+) ")                // longitude
             .number("(d+) ")                     // speed
             .number("(d+) ")                     // course
             .number("(d+) ")                     // accuracy
@@ -45,7 +45,7 @@ public class GpsmtaProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+) ")                     // flags
             .number("(d+) ")                     // battery
             .number("(d+) ")                     // temperature
-            .number("(d)")                       // changing status
+            .number("(d)")                       // charging status
             .any()
             .compile();
 
