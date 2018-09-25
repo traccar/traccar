@@ -124,10 +124,16 @@ public final class Log {
 
         @Override
         public String format(LogRecord record) {
-            StringBuilder message = new StringBuilder(record.getMessage());
+            StringBuilder message = new StringBuilder();
+
+            if (record.getMessage() != null) {
+                message.append(record.getMessage());
+            }
 
             if (record.getThrown() != null) {
-                message.append(" - ");
+                if (message.length() > 0) {
+                    message.append(" - ");
+                }
                 if (fullStackTraces) {
                     StringWriter stringWriter = new StringWriter();
                     PrintWriter printWriter = new PrintWriter(stringWriter);
