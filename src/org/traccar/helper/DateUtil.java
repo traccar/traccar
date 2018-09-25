@@ -15,8 +15,9 @@
  */
 package org.traccar.helper;
 
+import org.traccar.Context;
+
 import java.time.Instant;
-import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -58,7 +59,7 @@ public final class DateUtil {
     }
 
     public static Date parseDate(String value) {
-        return Date.from(Instant.from(DateTimeFormatter.ISO_DATE_TIME.parse(value)));
+        return Date.from(Instant.from(Context.DATE_FORMATTER.parse(value)));
     }
 
 }

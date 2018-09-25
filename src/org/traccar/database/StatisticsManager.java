@@ -23,7 +23,6 @@ import org.traccar.model.Statistics;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Form;
 import java.sql.SQLException;
-import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
@@ -72,7 +71,7 @@ public class StatisticsManager {
 
             String url = Context.getConfig().getString("server.statistics");
             if (url != null) {
-                String time = DateTimeFormatter.ISO_DATE_TIME.format(statistics.getCaptureTime().toInstant());
+                String time = Context.DATE_FORMATTER.format(statistics.getCaptureTime().toInstant());
 
                 Form form = new Form();
                 form.param("version", Context.getAppVersion());

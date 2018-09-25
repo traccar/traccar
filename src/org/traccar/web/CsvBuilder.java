@@ -19,7 +19,6 @@ package org.traccar.web;
 import java.beans.Introspector;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
@@ -91,7 +90,7 @@ public class CsvBuilder {
                         addSeparator();
                     } else if (method.getReturnType().equals(Date.class)) {
                         Date value = (Date) method.invoke(object);
-                        builder.append(DateTimeFormatter.ISO_DATE_TIME.format(value.toInstant()));
+                        builder.append(Context.DATE_FORMATTER.format(value.toInstant()));
                         addSeparator();
                     } else if (method.getReturnType().equals(Map.class)) {
                         Map value = (Map) method.invoke(object);

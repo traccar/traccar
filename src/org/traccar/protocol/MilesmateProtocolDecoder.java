@@ -19,7 +19,6 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
-import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -46,8 +45,8 @@ public class MilesmateProtocolDecoder extends BaseProtocolDecoder {
             .number("G:(d+.d+),")                // speed
             .number("H:(dd)(dd)(dd),")           // date (ddmmyy)
             .expression("I:[GL],")               // location source
-            .number("J:([01]{8}),")              // flags
-            .number("K:([01]{7})")               // flags
+            .number("J:(d{8}),")                 // flags
+            .number("K:(d{7})")                  // flags
             .expression("([AV]),")               // validity
             .number("L:d{4},")                   // pin
             .number("M:(d+.d+)")                 // course
@@ -88,15 +87,15 @@ public class MilesmateProtocolDecoder extends BaseProtocolDecoder {
         dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
         position.setTime(dateBuilder.getDate());
 
-        int flags = parser.nextBinInt();
-        position.set(Position.KEY_IGNITION, BitUtil.check(flags, 8 - 1));
-        position.set(Position.KEY_ALARM, BitUtil.check(flags, 8 - 2) ? Position.ALARM_SOS : null);
-        position.set(Position.KEY_CHARGE, BitUtil.check(flags, 8 - 6));
-        position.set(Position.KEY_ALARM, BitUtil.check(flags, 8 - 8) ? Position.ALARM_OVERSPEED : null);
+        String flags = parser.next();
+        position.set(Position.KEY_IGNITION, flags.charAt(0) == '1');
+        position.set(Position.KEY_ALARM, flags.charAt(1) == '1' ? Position.ALARM_SOS : null);
+        position.set(Position.KEY_CHARGE, flags.charAt(5) == '1');
+        position.set(Position.KEY_ALARM, flags.charAt(7) == '1' ? Position.ALARM_OVERSPEED : null);
 
-        flags = parser.nextBinInt() << 1;
-        position.set(Position.KEY_BLOCKED, BitUtil.check(flags, 8 - 1));
-        position.set(Position.KEY_ALARM, BitUtil.check(flags, 8 - 2) ? Position.ALARM_TOW : null);
+        flags = parser.next();
+        position.set(Position.KEY_BLOCKED, flags.charAt(0) == '1');
+        position.set(Position.KEY_ALARM, flags.charAt(1) == '1' ? Position.ALARM_TOW : null);
 
         position.setValid(parser.next().equals("A"));
 
