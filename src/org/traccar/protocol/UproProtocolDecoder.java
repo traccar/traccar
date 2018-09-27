@@ -31,7 +31,6 @@ import org.traccar.model.Position;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
 import java.util.regex.Pattern;
 
 public class UproProtocolDecoder extends BaseProtocolDecoder {
@@ -42,7 +41,7 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_HEADER = new PatternBuilder()
             .text("*")
-            .expression("..20")
+            .expression("(..20)")                // head
             .expression("([01])")                // ack
             .number("(d+),")                     // device id
             .expression("(.)")                   // type
@@ -96,7 +95,7 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
         ByteBuf buf = (ByteBuf) msg;
 
         if (buf.getByte(buf.readerIndex()) != '*') {
-            throw new ParseException(null, 0);
+            return null;
         }
 
         int headerIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '&');
@@ -110,6 +109,7 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
+        String head = parser.next();
         boolean reply = parser.next().equals("1");
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
@@ -124,7 +124,7 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
         String subtype = parser.next();
 
         if (reply && channel != null) {
-            channel.writeAndFlush(new NetworkMessage("*MG20Y" + type + subtype + "#", remoteAddress));
+            channel.writeAndFlush(new NetworkMessage("*" + head + "Y" + type + subtype + "#", remoteAddress));
         }
 
         while (buf.isReadable()) {
@@ -155,6 +155,13 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                     }
                     position.set(Position.KEY_ODOMETER, odometer * 2 * 1852 / 3600);
                     break;
+                case 'F':
+                    position.setSpeed(
+                            Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII)) * 0.1);
+                    break;
+                case 'K':
+                    position.set("statusExtended", data.toString(StandardCharsets.US_ASCII));
+                    break;
                 case 'P':
                     position.setNetwork(new Network(CellTower.from(
                             Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII)),
@@ -163,13 +170,28 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                             Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII), 16))));
                     break;
                 case 'Q':
-                    position.set("obd-pid", ByteBufUtil.hexDump(data));
+                    position.set("obdPid", ByteBufUtil.hexDump(data));
                     break;
                 case 'R':
-                    position.set("odb-travel", ByteBufUtil.hexDump(data));
+                    if (head.startsWith("HQ")) {
+                        position.set(Position.KEY_RSSI,
+                                Integer.parseInt(data.readSlice(2).toString(StandardCharsets.US_ASCII)));
+                        position.set(Position.KEY_SATELLITES,
+                                Integer.parseInt(data.readSlice(2).toString(StandardCharsets.US_ASCII)));
+                    } else {
+                        position.set("odbTravel", ByteBufUtil.hexDump(data));
+                    }
                     break;
                 case 'S':
-                    position.set("obd-traffic", ByteBufUtil.hexDump(data));
+                    position.set("obdTraffic", ByteBufUtil.hexDump(data));
+                    break;
+                case 'T':
+                    position.set(Position.KEY_BATTERY_LEVEL,
+                            Integer.parseInt(data.readSlice(2).toString(StandardCharsets.US_ASCII)));
+                    break;
+                case 'V':
+                    position.set(Position.KEY_POWER,
+                            Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII)) * 0.1);
                     break;
                 default:
                     break;
