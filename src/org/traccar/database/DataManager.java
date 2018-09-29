@@ -91,10 +91,6 @@ public class DataManager {
         initDatabaseSchema();
     }
 
-    public DataSource getDataSource() {
-        return dataSource;
-    }
-
     private void initDatabase() throws Exception {
 
         String jndiName = config.getString("database.jndi");

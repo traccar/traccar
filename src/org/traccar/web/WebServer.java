@@ -117,18 +117,20 @@ public class WebServer {
     }
 
     private void initWebApp() {
-        ResourceHandler resourceHandler = new ResourceHandler();
-        resourceHandler.setResourceBase(config.getString("web.path"));
+        ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        ServletHolder servletHolder = new ServletHolder(DefaultServlet.class);
+        servletHolder.setInitParameter("resourceBase", config.getString("web.path"));
         if (config.getBoolean("web.debug")) {
-            resourceHandler.setWelcomeFiles(new String[] {"release.html", "index.html"});
+            servletHandler.setWelcomeFiles(new String[] {"debug.html", "index.html"});
         } else {
             String cache = config.getString("web.cacheControl");
             if (cache != null && !cache.isEmpty()) {
-                resourceHandler.setCacheControl(cache);
+                servletHolder.setInitParameter("cacheControl", cache);
             }
-            resourceHandler.setWelcomeFiles(new String[] {"release.html", "index.html"});
+            servletHandler.setWelcomeFiles(new String[] {"release.html", "index.html"});
         }
-        handlers.addHandler(resourceHandler);
+        servletHandler.addServlet(servletHolder, "/*");
+        handlers.addHandler(servletHandler);
     }
 
     private void initApi() {
@@ -141,7 +143,7 @@ public class WebServer {
         servletHandler.addServlet(new ServletHolder(new AsyncSocketServlet()), "/socket");
 
         if (config.hasKey("media.path")) {
-            ServletHolder servletHolder = new ServletHolder("media", DefaultServlet.class);
+            ServletHolder servletHolder = new ServletHolder(DefaultServlet.class);
             servletHolder.setInitParameter("resourceBase", config.getString("media.path"));
             servletHolder.setInitParameter("dirAllowed", config.getString("media.dirAllowed", "false"));
             servletHolder.setInitParameter("pathInfoOnly", "true");

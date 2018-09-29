@@ -406,7 +406,7 @@ public final class Context {
         }
 
         if (config.getBoolean("web.enable")) {
-            webServer = new WebServer(config, dataManager.getDataSource());
+            webServer = new WebServer(config);
         }
 
         permissionsManager = new PermissionsManager(dataManager, usersManager);
