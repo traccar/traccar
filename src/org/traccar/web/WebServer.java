@@ -59,7 +59,6 @@ public class WebServer {
 
     private Server server;
     private final Config config;
-    private final DataSource dataSource;
     private final HandlerList handlers = new HandlerList();
     private int sessionTimeout;
 
@@ -74,9 +73,8 @@ public class WebServer {
         }
     }
 
-    public WebServer(Config config, DataSource dataSource) {
+    public WebServer(Config config) {
         this.config = config;
-        this.dataSource = dataSource;
         sessionTimeout = config.getInteger("web.sessionTimeout");
 
         initServer();
@@ -84,14 +82,7 @@ public class WebServer {
         if (config.getBoolean("web.console")) {
             initConsole();
         }
-        switch (config.getString("web.type", "new")) {
-            case "old":
-                initOldWebApp();
-                break;
-            default:
-                initWebApp();
-                break;
-        }
+        initWebApp();
         initClientProxy();
         server.setHandler(handlers);
 
@@ -129,7 +120,7 @@ public class WebServer {
         ResourceHandler resourceHandler = new ResourceHandler();
         resourceHandler.setResourceBase(config.getString("web.path"));
         if (config.getBoolean("web.debug")) {
-            resourceHandler.setWelcomeFiles(new String[] {"debug.html", "index.html"});
+            resourceHandler.setWelcomeFiles(new String[] {"release.html", "index.html"});
         } else {
             String cache = config.getString("web.cacheControl");
             if (cache != null && !cache.isEmpty()) {
@@ -138,23 +129,6 @@ public class WebServer {
             resourceHandler.setWelcomeFiles(new String[] {"release.html", "index.html"});
         }
         handlers.addHandler(resourceHandler);
-    }
-
-    private void initOldWebApp() {
-        try {
-            javax.naming.Context context = new InitialContext();
-            context.bind("java:/DefaultDS", dataSource);
-        } catch (Exception error) {
-            LOGGER.warn("JNDI context error", error);
-        }
-
-        WebAppContext app = new WebAppContext();
-        app.setContextPath("/");
-        if (sessionTimeout > 0) {
-            app.getSessionHandler().setMaxInactiveInterval(sessionTimeout);
-        }
-        app.setWar(config.getString("web.application"));
-        handlers.addHandler(app);
     }
 
     private void initApi() {
