@@ -41,6 +41,7 @@ import org.traccar.database.DeviceManager;
 import org.traccar.database.DriversManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.database.LdapProvider;
+import org.traccar.database.MailManager;
 import org.traccar.database.MaintenancesManager;
 import org.traccar.database.MediaManager;
 import org.traccar.database.NotificationManager;
@@ -139,6 +140,12 @@ public final class Context {
 
     public static LdapProvider getLdapProvider() {
         return ldapProvider;
+    }
+
+    private static MailManager mailManager;
+
+    public static MailManager getMailManager() {
+        return mailManager;
     }
 
     private static MediaManager mediaManager;
@@ -377,6 +384,8 @@ public final class Context {
         if (config.getBoolean("ldap.enable")) {
             ldapProvider = new LdapProvider(config);
         }
+
+        mailManager = new MailManager();
 
         mediaManager = new MediaManager(config.getString("media.path"));
 

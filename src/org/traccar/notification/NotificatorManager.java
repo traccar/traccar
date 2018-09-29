@@ -25,20 +25,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
 import org.traccar.model.Typed;
+import org.traccar.notificators.NotificatorFirebase;
+import org.traccar.notificators.NotificatorMail;
 import org.traccar.notificators.NotificatorNull;
 import org.traccar.notificators.Notificator;
+import org.traccar.notificators.NotificatorSms;
+import org.traccar.notificators.NotificatorWeb;
 
 public final class NotificatorManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificatorManager.class);
 
-    private static final String DEFAULT_WEB_NOTIFICATOR = "org.traccar.notificators.NotificatorWeb";
-    private static final String DEFAULT_MAIL_NOTIFICATOR = "org.traccar.notificators.NotificatorMail";
-    private static final String DEFAULT_SMS_NOTIFICATOR = "org.traccar.notificators.NotificatorSms";
-    private static final String DEFAULT_FIREBASE_NOTIFICATOR = "org.traccar.notificators.NotificatorFirebase";
+    private static final Notificator NULL_NOTIFICATOR = new NotificatorNull();
 
     private final Map<String, Notificator> notificators = new HashMap<>();
-    private static final Notificator NULL_NOTIFICATOR = new NotificatorNull();
 
     public NotificatorManager() {
         final String[] types = Context.getConfig().getString("notificator.types", "").split(",");
@@ -46,16 +46,16 @@ public final class NotificatorManager {
             String defaultNotificator = "";
             switch (type) {
                 case "web":
-                    defaultNotificator = DEFAULT_WEB_NOTIFICATOR;
+                    defaultNotificator = NotificatorWeb.class.getCanonicalName();
                     break;
                 case "mail":
-                    defaultNotificator = DEFAULT_MAIL_NOTIFICATOR;
+                    defaultNotificator = NotificatorMail.class.getCanonicalName();
                     break;
                 case "sms":
-                    defaultNotificator = DEFAULT_SMS_NOTIFICATOR;
+                    defaultNotificator = NotificatorSms.class.getCanonicalName();
                     break;
                 case "firebase":
-                    defaultNotificator = DEFAULT_FIREBASE_NOTIFICATOR;
+                    defaultNotificator = NotificatorFirebase.class.getCanonicalName();
                     break;
                 default:
                     break;

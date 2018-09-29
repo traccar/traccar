@@ -16,26 +16,24 @@
  */
 package org.traccar.database;
 
-import java.util.Properties;
-
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-import java.util.Date;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
-import org.traccar.model.Event;
-import org.traccar.model.Position;
 import org.traccar.model.User;
-import org.traccar.notification.FullMessage;
-import org.traccar.notification.MessageException;
-import org.traccar.notification.NotificationFormatter;
 import org.traccar.notification.PropertiesProvider;
+
+import javax.mail.BodyPart;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import java.util.Date;
+import java.util.Properties;
 
 public final class MailManager {
 
@@ -88,8 +86,13 @@ public final class MailManager {
         return properties;
     }
 
-    @Override
-    public void sendSync(long userId, Event event, Position position) throws MessageException {
+    public void sendMessage(
+            long userId, String subject, String body) throws MessagingException {
+        sendMessage(userId, subject, body, null);
+    }
+
+    public void sendMessage(
+            long userId, String subject, String body, MimeBodyPart attachment) throws MessagingException {
         User user = Context.getPermissionsManager().getUser(userId);
 
         Properties properties = null;
@@ -108,31 +111,35 @@ public final class MailManager {
 
         MimeMessage message = new MimeMessage(session);
 
-        try {
-            String from = properties.getProperty("mail.smtp.from");
-            if (from != null) {
-                message.setFrom(new InternetAddress(from));
-            }
+        String from = properties.getProperty("mail.smtp.from");
+        if (from != null) {
+            message.setFrom(new InternetAddress(from));
+        }
 
-            message.addRecipient(Message.RecipientType.TO, new InternetAddress(user.getEmail()));
-            FullMessage fullMessage = NotificationFormatter.formatFullMessage(userId, event, position);
-            message.setSubject(fullMessage.getSubject());
-            message.setSentDate(new Date());
-            message.setContent(fullMessage.getBody(), "text/html; charset=utf-8");
+        message.addRecipient(Message.RecipientType.TO, new InternetAddress(user.getEmail()));
+        message.setSubject(subject);
+        message.setSentDate(new Date());
 
-            Transport transport = session.getTransport();
-            try {
-                Context.getStatisticsManager().registerMail();
-                transport.connect(
-                        properties.getProperty("mail.smtp.host"),
-                        properties.getProperty("mail.smtp.username"),
-                        properties.getProperty("mail.smtp.password"));
-                transport.sendMessage(message, message.getAllRecipients());
-            } finally {
-                transport.close();
-            }
-        } catch (MessagingException e) {
-            throw new MessageException(e);
+        if (attachment != null) {
+            Multipart multipart = new MimeMultipart();
+
+            BodyPart messageBodyPart = new MimeBodyPart();
+            messageBodyPart.setContent(body, "text/html; charset=utf-8");
+            multipart.addBodyPart(messageBodyPart);
+            multipart.addBodyPart(attachment);
+
+            message.setContent(multipart);
+        } else {
+            message.setContent(body, "text/html; charset=utf-8");
+        }
+
+        try (Transport transport = session.getTransport()) {
+            Context.getStatisticsManager().registerMail();
+            transport.connect(
+                    properties.getProperty("mail.smtp.host"),
+                    properties.getProperty("mail.smtp.username"),
+                    properties.getProperty("mail.smtp.password"));
+            transport.sendMessage(message, message.getAllRecipients());
         }
     }
 
