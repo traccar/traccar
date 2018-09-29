@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.notificators;
+package org.traccar.database;
 
 import java.util.Properties;
 
@@ -37,9 +37,9 @@ import org.traccar.notification.MessageException;
 import org.traccar.notification.NotificationFormatter;
 import org.traccar.notification.PropertiesProvider;
 
-public final class NotificatorMail extends Notificator {
+public final class MailManager {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NotificatorMail.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MailManager.class);
 
     private static Properties getProperties(PropertiesProvider provider) {
         Properties properties = new Properties();
