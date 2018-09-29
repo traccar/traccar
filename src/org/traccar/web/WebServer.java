@@ -22,18 +22,15 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
-import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.webapp.WebAppContext;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Config;
-import org.traccar.Context;
 import org.traccar.api.AsyncSocketServlet;
 import org.traccar.api.CorsResponseFilter;
 import org.traccar.api.MediaFilter;
@@ -42,12 +39,10 @@ import org.traccar.api.ResourceErrorHandler;
 import org.traccar.api.SecurityRequestFilter;
 import org.traccar.api.resource.ServerResource;
 
-import javax.naming.InitialContext;
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.InetSocketAddress;
@@ -58,11 +53,8 @@ public class WebServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(WebServer.class);
 
     private Server server;
-    private final Config config;
-    private final HandlerList handlers = new HandlerList();
-    private int sessionTimeout;
 
-    private void initServer() {
+    private void initServer(Config config) {
 
         String address = config.getString("web.address");
         int port = config.getInteger("web.port", 8082);
@@ -74,30 +66,41 @@ public class WebServer {
     }
 
     public WebServer(Config config) {
-        this.config = config;
-        sessionTimeout = config.getInteger("web.sessionTimeout");
 
-        initServer();
-        initApi();
-        if (config.getBoolean("web.console")) {
-            initConsole();
+        initServer(config);
+
+        ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
+
+        int sessionTimeout = config.getInteger("web.sessionTimeout");
+        if (sessionTimeout > 0) {
+            servletHandler.getSessionHandler().setMaxInactiveInterval(sessionTimeout);
         }
-        initWebApp();
-        initClientProxy();
-        server.setHandler(handlers);
 
-        server.addBean(new ErrorHandler() {
+        initApi(config, servletHandler);
+
+        if (config.getBoolean("web.console")) {
+            servletHandler.addServlet(new ServletHolder(new ConsoleServlet()), "/console/*");
+        }
+
+        initWebApp(config, servletHandler);
+
+        servletHandler.setErrorHandler(new ErrorHandler() {
             @Override
             protected void handleErrorPage(
                     HttpServletRequest request, Writer writer, int code, String message) throws IOException {
                 writer.write("<!DOCTYPE<html><head><title>Error</title></head><html><body>"
                         + code + " - " + HttpStatus.getMessage(code) + "</body></html>");
             }
-        }, false);
+        });
+
+        HandlerList handlers = new HandlerList();
+        initClientProxy(config, handlers);
+        handlers.addHandler(servletHandler);
+        server.setHandler(handlers);
     }
 
-    private void initClientProxy() {
-        int port = Context.getConfig().getInteger("osmand.port");
+    private void initClientProxy(Config config, HandlerList handlers) {
+        int port = config.getInteger("osmand.port");
         if (port != 0) {
             ServletContextHandler servletHandler = new ServletContextHandler() {
                 @Override
@@ -116,8 +119,7 @@ public class WebServer {
         }
     }
 
-    private void initWebApp() {
-        ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
+    private void initWebApp(Config config, ServletContextHandler servletHandler) {
         ServletHolder servletHolder = new ServletHolder(DefaultServlet.class);
         servletHolder.setInitParameter("resourceBase", config.getString("web.path"));
         if (config.getBoolean("web.debug")) {
@@ -130,41 +132,25 @@ public class WebServer {
             servletHandler.setWelcomeFiles(new String[] {"release.html", "index.html"});
         }
         servletHandler.addServlet(servletHolder, "/*");
-        handlers.addHandler(servletHandler);
     }
 
-    private void initApi() {
-        ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        servletHandler.setContextPath("/api");
-        if (sessionTimeout > 0) {
-            servletHandler.getSessionHandler().setMaxInactiveInterval(sessionTimeout);
-        }
-
-        servletHandler.addServlet(new ServletHolder(new AsyncSocketServlet()), "/socket");
+    private void initApi(Config config, ServletContextHandler servletHandler) {
+        servletHandler.addServlet(new ServletHolder(new AsyncSocketServlet()), "/api/socket");
 
         if (config.hasKey("media.path")) {
             ServletHolder servletHolder = new ServletHolder(DefaultServlet.class);
             servletHolder.setInitParameter("resourceBase", config.getString("media.path"));
             servletHolder.setInitParameter("dirAllowed", config.getString("media.dirAllowed", "false"));
             servletHolder.setInitParameter("pathInfoOnly", "true");
-            servletHandler.addServlet(servletHolder, "/media/*");
-            servletHandler.addFilter(MediaFilter.class, "/media/*", EnumSet.allOf(DispatcherType.class));
+            servletHandler.addServlet(servletHolder, "/api/media/*");
+            servletHandler.addFilter(MediaFilter.class, "/api/media/*", EnumSet.allOf(DispatcherType.class));
         }
 
         ResourceConfig resourceConfig = new ResourceConfig();
         resourceConfig.registerClasses(JacksonFeature.class, ObjectMapperProvider.class, ResourceErrorHandler.class);
         resourceConfig.registerClasses(SecurityRequestFilter.class, CorsResponseFilter.class);
         resourceConfig.packages(ServerResource.class.getPackage().getName());
-        servletHandler.addServlet(new ServletHolder(new ServletContainer(resourceConfig)), "/*");
-
-        handlers.addHandler(servletHandler);
-    }
-
-    private void initConsole() {
-        ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        servletHandler.setContextPath("/console");
-        servletHandler.addServlet(new ServletHolder(new ConsoleServlet()), "/*");
-        handlers.addHandler(servletHandler);
+        servletHandler.addServlet(new ServletHolder(new ServletContainer(resourceConfig)), "/api/*");
     }
 
     public void start() {
