@@ -7,8 +7,9 @@ public class WatchFrameDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {
-        
-        WatchFrameDecoder decoder = new WatchFrameDecoder();
+
+        WatchProtocol protocol = new WatchProtocol();
+        WatchFrameDecoder decoder = new WatchFrameDecoder(protocol);
 
         verifyFrame(
                 binary("5b53472a3335323636313039303134333135302a303030312a4c4b2c302c302c3130305d"),

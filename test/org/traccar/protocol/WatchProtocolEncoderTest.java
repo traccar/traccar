@@ -11,7 +11,8 @@ public class WatchProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        WatchProtocolEncoder encoder = new WatchProtocolEncoder();
+        WatchProtocol protocol = new WatchProtocol();
+        WatchProtocolEncoder encoder = new WatchProtocolEncoder(protocol);
         
         Command command;
 

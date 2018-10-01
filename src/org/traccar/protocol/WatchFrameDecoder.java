@@ -22,9 +22,17 @@ import io.netty.channel.ChannelHandlerContext;
 
 import java.nio.charset.StandardCharsets;
 
+import org.traccar.helper.Log;
 import org.traccar.BaseFrameDecoder;
+import org.traccar.Context;
 
 public class WatchFrameDecoder extends BaseFrameDecoder {
+
+    private final boolean enableFramelogging;
+
+    public WatchFrameDecoder(WatchProtocol protocol) {
+        enableFramelogging = Context.getConfig().getBoolean(protocol.getName() + ".enableFramelogging");
+    }
 
     @Override
     protected Object decode(
@@ -91,6 +99,12 @@ public class WatchFrameDecoder extends BaseFrameDecoder {
         if (endmarkerIndex < payloadIndex + 1 + length || payloadIndex + 1 + length < endmarkerIndex) {
             int framelength = length;
             length = endmarkerIndex - payloadIndex - 1;
+
+            if (enableFramelogging) {
+                Log.debug(String.format("watch protocol error fixed: lenght indicator "
+                        + "reported %d but supposed to be %d based on frame end marker",
+                        framelength, length));
+            }
         }
 
         if (buf.readableBytes() >= payloadIndex + 1 + length + 1 - buf.readerIndex()) {

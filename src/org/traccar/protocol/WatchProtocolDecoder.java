@@ -34,11 +34,15 @@ import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.regex.Pattern;
+import org.traccar.helper.Log;
 
 public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
+    private final boolean enableFramelogging;
+
     public WatchProtocolDecoder(WatchProtocol protocol) {
         super(protocol);
+        enableFramelogging = Context.getConfig().getBoolean(getProtocolName() + ".enableFramelogging");
     }
 
     private static final Pattern PATTERN_POSITION = new PatternBuilder()
@@ -178,6 +182,9 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ByteBuf buf = (ByteBuf) msg;
+        if (enableFramelogging) {
+            logFrame(msg);
+        }
 
         buf.skipBytes(1); // header
         manufacturer = buf.readSlice(2).toString(StandardCharsets.US_ASCII);
@@ -309,4 +316,10 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
+    private void logFrame(Object msg) {
+        StringBuilder logmsg = new StringBuilder();
+        logmsg.append("received frame: ");
+        logmsg.append(((ByteBuf) msg).toString(StandardCharsets.US_ASCII));
+        Log.debug(logmsg.toString());
+    }
 }

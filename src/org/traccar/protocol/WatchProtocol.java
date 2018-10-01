@@ -50,9 +50,9 @@ public class WatchProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new WatchFrameDecoder());
+                pipeline.addLast("frameDecoder", new WatchFrameDecoder(WatchProtocol.this));
                 pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("objectEncoder", new WatchProtocolEncoder());
+                pipeline.addLast("objectEncoder", new WatchProtocolEncoder(WatchProtocol.this));
                 pipeline.addLast("objectDecoder", new WatchProtocolDecoder(WatchProtocol.this));
             }
         });

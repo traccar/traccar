@@ -16,10 +16,14 @@
 package org.traccar.protocol;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
 import org.traccar.StringProtocolEncoder;
 import org.traccar.helper.DataConverter;
 import org.traccar.helper.Log;
 import org.traccar.model.Command;
+import org.traccar.NetworkMessage;
+import org.traccar.Context;
 
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
@@ -30,6 +34,33 @@ import java.util.Map;
 import java.util.TimeZone;
 
 public class WatchProtocolEncoder extends StringProtocolEncoder implements StringProtocolEncoder.ValueFormatter {
+
+    private final boolean enableFramelogging;
+    private String lastencodedCmd = new String();
+
+    public WatchProtocolEncoder(WatchProtocol protocol) {
+        enableFramelogging = Context.getConfig().getBoolean(protocol.getName() + ".enableFramelogging");
+    }
+
+    @Override
+    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+        super.write(ctx, msg, promise);
+        if (ctx.handler() instanceof WatchProtocolEncoder && enableFramelogging) {
+            logFrame(msg);
+        }
+    }
+
+    private void logFrame(Object msg) {
+        StringBuilder logmsg = new StringBuilder();
+        NetworkMessage networkMessage = (NetworkMessage) msg;
+        logmsg.append("transmitted frame: ");
+        if (networkMessage.getMessage() instanceof Command) {
+            logmsg.append(lastencodedCmd);
+        } else {
+            logmsg.append(networkMessage.getMessage().toString());
+        }
+        Log.debug(logmsg.toString());
+    }
 
     @Override
     public String formatValue(String key, Object value) {
@@ -113,42 +144,72 @@ public class WatchProtocolEncoder extends StringProtocolEncoder implements Strin
 
     @Override
     protected Object encodeCommand(Channel channel, Command command) {
+        Object cmdtoSend;
 
         switch (command.getType()) {
             case Command.TYPE_CUSTOM:
-                return formatCommand(channel, command, command.getString(Command.KEY_DATA));
+                cmdtoSend = formatCommand(channel, command, command.getString(Command.KEY_DATA));
+                lastencodedCmd = (String) cmdtoSend;
+                break;
             case Command.TYPE_POSITION_SINGLE:
-                return formatCommand(channel, command, "RG");
+                cmdtoSend = formatCommand(channel, command, "RG");
+                lastencodedCmd = (String) cmdtoSend;
+                break;
             case Command.TYPE_SOS_NUMBER:
-                return formatCommand(channel, command, "SOS{%s},{%s}", Command.KEY_INDEX, Command.KEY_PHONE);
+                cmdtoSend = formatCommand(channel, command, "SOS{%s},{%s}", Command.KEY_INDEX, Command.KEY_PHONE);
+                lastencodedCmd = (String) cmdtoSend;
+                break;
             case Command.TYPE_ALARM_SOS:
-                return formatCommand(channel, command, "SOSSMS," + getEnableFlag(command));
+                cmdtoSend = formatCommand(channel, command, "SOSSMS," + getEnableFlag(command));
+                lastencodedCmd = (String) cmdtoSend;
+                break;
             case Command.TYPE_ALARM_BATTERY:
-                return formatCommand(channel, command, "LOWBAT," + getEnableFlag(command));
+                cmdtoSend = formatCommand(channel, command, "LOWBAT," + getEnableFlag(command));
+                lastencodedCmd = (String) cmdtoSend;
+                break;
             case Command.TYPE_REBOOT_DEVICE:
-                return formatCommand(channel, command, "RESET");
+                cmdtoSend = formatCommand(channel, command, "RESET");
+                lastencodedCmd = (String) cmdtoSend;
+                break;
             case Command.TYPE_ALARM_REMOVE:
-                return formatCommand(channel, command, "REMOVE," + getEnableFlag(command));
+                cmdtoSend = formatCommand(channel, command, "REMOVE," + getEnableFlag(command));
+                lastencodedCmd = (String) cmdtoSend;
+                break;
             case Command.TYPE_SILENCE_TIME:
-                return formatCommand(channel, command, "SILENCETIME,{%s}", Command.KEY_DATA);
+                cmdtoSend = formatCommand(channel, command, "SILENCETIME,{%s}", Command.KEY_DATA);
+                lastencodedCmd = (String) cmdtoSend;
+                break;
             case Command.TYPE_ALARM_CLOCK:
-                return formatCommand(channel, command, "REMIND,{%s}", Command.KEY_DATA);
+                cmdtoSend = formatCommand(channel, command, "REMIND,{%s}", Command.KEY_DATA);
+                lastencodedCmd = (String) cmdtoSend;
+                break;
             case Command.TYPE_SET_PHONEBOOK:
-                return formatCommand(channel, command, "PHB,{%s}", Command.KEY_DATA);
+                cmdtoSend = formatCommand(channel, command, "PHB,{%s}", Command.KEY_DATA);
+                lastencodedCmd = (String) cmdtoSend;
+                break;
             case Command.TYPE_VOICE_MESSAGE:
-                return formatCommand(channel, command, "TK," + getBinaryData(command));
+                cmdtoSend = formatCommand(channel, command, "TK," + getBinaryData(command));
+                lastencodedCmd = (String) cmdtoSend;
+                break;
             case Command.TYPE_POSITION_PERIODIC:
-                return formatCommand(channel, command, "UPLOAD,{%s}", Command.KEY_FREQUENCY);
+                cmdtoSend = formatCommand(channel, command, "UPLOAD,{%s}", Command.KEY_FREQUENCY);
+                lastencodedCmd = (String) cmdtoSend;
+                break;
             case Command.TYPE_SET_TIMEZONE:
-                return formatCommand(channel, command, "LZ,,{%s}", Command.KEY_TIMEZONE);
+                cmdtoSend = formatCommand(channel, command, "LZ,,{%s}", Command.KEY_TIMEZONE);
+                lastencodedCmd = (String) cmdtoSend;
+                break;
             case Command.TYPE_SET_INDICATOR:
-                return formatCommand(channel, command, "FLOWER,{%s}", Command.KEY_DATA);
+                cmdtoSend = formatCommand(channel, command, "FLOWER,{%s}", Command.KEY_DATA);
+                lastencodedCmd = (String) cmdtoSend;
+                break;
             default:
+                cmdtoSend = null;
                 Log.warning(new UnsupportedOperationException(command.getType()));
                 break;
         }
 
-        return null;
+        return cmdtoSend;
     }
 
 }
