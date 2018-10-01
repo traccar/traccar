@@ -30,8 +30,34 @@ public class WatchFrameDecoder extends BaseFrameDecoder {
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
+        int idFollowUpFrameStart;
+        do {
+            int idFrameStart = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '[');
+            if (idFrameStart < 0) {
+                buf.skipBytes(buf.writerIndex() - buf.readerIndex());
+                return null;
+            } else if (idFrameStart - buf.readerIndex() > 0) {
+                buf.skipBytes(idFrameStart - buf.readerIndex());
+            }
+
+            int idFrameEnd = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ']');
+            if (idFrameEnd < 0) {
+                return null;
+            }
+
+            idFollowUpFrameStart = buf.indexOf(buf.readerIndex() + 1, buf.writerIndex(), (byte) '[');
+            if (idFollowUpFrameStart > 0) {
+                if (idFollowUpFrameStart < idFrameEnd) {
+                    buf.skipBytes(idFollowUpFrameStart - buf.readerIndex());
+                } else {
+                    break;
+                }
+            }
+        } while (idFollowUpFrameStart >= 0);
+
         int idIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '*') + 1;
         if (idIndex <= 0) {
+            buf.skipBytes(buf.writerIndex() - buf.readerIndex());
             return null;
         }
 
@@ -56,9 +82,20 @@ public class WatchFrameDecoder extends BaseFrameDecoder {
 
         int length = Integer.parseInt(
                 buf.toString(lengthIndex, payloadIndex - lengthIndex, StandardCharsets.US_ASCII), 16);
-        if (buf.readableBytes() >= payloadIndex + 1 + length + 1) {
+
+        int endmarkerIndex = buf.indexOf(lengthIndex + 5, buf.writerIndex(), (byte) ']');
+        if (endmarkerIndex <= 0) {
+            return null;
+        }
+
+        if (endmarkerIndex < payloadIndex + 1 + length || payloadIndex + 1 + length < endmarkerIndex) {
+            int framelength = length;
+            length = endmarkerIndex - payloadIndex - 1;
+        }
+
+        if (buf.readableBytes() >= payloadIndex + 1 + length + 1 - buf.readerIndex()) {
             ByteBuf frame = Unpooled.buffer();
-            int endIndex = buf.readerIndex() + payloadIndex + 1 + length + 1;
+            int endIndex = payloadIndex + 1 + length + 1;
             while (buf.readerIndex() < endIndex) {
                 byte b = buf.readByte();
                 if (b == 0x7D) {

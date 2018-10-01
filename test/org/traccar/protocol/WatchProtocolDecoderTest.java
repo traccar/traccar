@@ -15,7 +15,7 @@ public class WatchProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, buffer(
                 "[SG*352661090143150*006C*UD,150817,132115,V,28.435142,N,81.354333,W,2.2038,000,99,00,70,100,0,50,00000000,1,1,310,260,1091,30082,139,,00]"));
-
+  
         verifyAttributes(decoder, buffer(
                 "[3G*4700609403*0013*bphrt,120,79,73,,,,]"));
 
@@ -52,7 +52,13 @@ public class WatchProtocolDecoderTest extends ProtocolTest {
 
         verifyNull(decoder, buffer(
                 "[SG*9081000548*0009*LK,0,100]"));
+        
+        verifyNull(decoder, buffer(
+                "[SG*9081000548*0001*LK,0,100]"));
 
+        verifyNull(decoder, buffer(
+                "[SG*9081000548*0020*LK,0,100]"));
+        
         verifyPosition(decoder, buffer(
                 "[SG*9081000548*00A9*UD,110116,113639,V,16.479064,S,68.119072,,0.7593,000,99,00,80,80,0,50,00000000,5,1,736,2,10103,10732,153,10103,11061,152,10103,11012,152,10103,10151,150,10103,10731,143,,00]"));
 

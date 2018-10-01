@@ -295,4 +295,7 @@ public class ProtocolTest extends BaseTest {
         assertEquals(ByteBufUtil.hexDump(expected), ByteBufUtil.hexDump((ByteBuf) object));
     }
 
+    protected void verifyFrameNull(Object object) {                
+        assertNull(object);
+    }
 }
