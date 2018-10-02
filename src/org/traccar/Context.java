@@ -25,8 +25,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
 import com.fasterxml.jackson.datatype.jsr353.JSR353Module;
-import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
-import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import org.apache.velocity.app.VelocityEngine;
 import org.eclipse.jetty.util.URIUtil;
 import org.slf4j.Logger;
@@ -90,6 +88,7 @@ import org.traccar.web.WebServer;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.ext.ContextResolver;
 
 public final class Context {
 
@@ -315,6 +314,15 @@ public final class Context {
                 config.getDouble("event.motion.speedThreshold", 0.01));
     }
 
+    private static class ObjectMapperContextResolver implements ContextResolver<ObjectMapper> {
+
+        @Override
+        public ObjectMapper getContext(Class<?> clazz) {
+            return objectMapper;
+        }
+
+    }
+
     public static Geocoder initGeocoder() {
         String type = config.getString("geocoder.type", "google");
         String url = config.getString("geocoder.url");
@@ -372,9 +380,7 @@ public final class Context {
             objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         }
 
-        JacksonJsonProvider jsonProvider =
-                new JacksonJaxbJsonProvider(objectMapper, JacksonJaxbJsonProvider.DEFAULT_ANNOTATIONS);
-        client = ClientBuilder.newClient().register(jsonProvider);
+        client = ClientBuilder.newClient().register(new ObjectMapperContextResolver());
 
 
         if (config.hasKey("database.url")) {
@@ -504,9 +510,7 @@ public final class Context {
         config = new Config();
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JSR353Module());
-        JacksonJsonProvider jsonProvider =
-                new JacksonJaxbJsonProvider(objectMapper, JacksonJaxbJsonProvider.DEFAULT_ANNOTATIONS);
-        client = ClientBuilder.newClient().register(jsonProvider);
+        client = ClientBuilder.newClient().register(new ObjectMapperContextResolver());
         identityManager = testIdentityManager;
     }
 

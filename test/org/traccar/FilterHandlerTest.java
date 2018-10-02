@@ -10,11 +10,7 @@ import java.util.Date;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-public class FilterHandlerTest {
-
-    static {
-        Context.init(new TestIdentityManager());
-    }
+public class FilterHandlerTest extends BaseTest {
 
     private FilterHandler filtingHandler;
     private FilterHandler passingHandler;
