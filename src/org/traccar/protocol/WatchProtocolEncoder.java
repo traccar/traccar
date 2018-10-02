@@ -15,6 +15,8 @@
  */
 package org.traccar.protocol;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
@@ -29,9 +31,11 @@ import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
 
 public class WatchProtocolEncoder extends StringProtocolEncoder implements StringProtocolEncoder.ValueFormatter {
 
@@ -69,7 +73,9 @@ public class WatchProtocolEncoder extends StringProtocolEncoder implements Strin
             DecimalFormat fmt = new DecimalFormat("+#.##;-#.##", DecimalFormatSymbols.getInstance(Locale.US));
             return fmt.format(offset);
         }
-
+        if (key.equals(Command.KEY_BLOB)) {
+            return getBinaryData((String) value);
+        }
         return null;
     }
 
@@ -114,8 +120,8 @@ public class WatchProtocolEncoder extends StringProtocolEncoder implements Strin
         mapping.put((byte) 0x2A, (byte) 0x05);
     }
 
-    private String getBinaryData(Command command) {
-        byte[] data = DataConverter.parseHex(command.getString(Command.KEY_DATA));
+    private String getBinaryData(String content) {
+        byte[] data = DataConverter.parseHex(content);
 
         int encodedLength = data.length;
         for (byte b : data) {
@@ -139,7 +145,47 @@ public class WatchProtocolEncoder extends StringProtocolEncoder implements Strin
             index += 1;
         }
 
-        return new String(encodedData, StandardCharsets.US_ASCII);
+        return new String(encodedData, StandardCharsets.ISO_8859_1);
+    }
+
+    private String extractAudiofileReference(String keyData) {
+        String filePath;
+        if (keyData.length() > 7 && keyData.substring(0, 7).equals("file://")) {
+            filePath = keyData.substring(7, keyData.length());
+            if (!filePath.startsWith("/")) {
+                filePath = "/" + filePath;
+            }
+            return (filePath);
+        }
+        return null;
+    }
+
+    private byte[] getAudiofileBlob(String filePath) {
+        return (Context.getMediaManager().readFile(filePath));
+    }
+
+    private void prepareVoiceMessageData(Command command) {
+        String blob;
+        String filePath = extractAudiofileReference(command.getString(Command.KEY_DATA));
+        if (filePath != null) {
+            blob = DataConverter.printHex(getAudiofileBlob(filePath));
+        } else {
+            blob = command.getString(Command.KEY_DATA);
+        }
+        Map<String, Object> attributes = new LinkedHashMap<>();
+        command.setAttributes(attributes);
+        command.set(Command.KEY_BLOB, blob);
+    }
+
+    private String logVoiceMessageFrame(Object encodedCmd) {
+        if (!enableFramelogging) {
+            return null;
+        }
+        String logencodedCmd;
+        logencodedCmd = Matcher.quoteReplacement((String) encodedCmd);
+        logencodedCmd = logencodedCmd.substring(0, Math.min(logencodedCmd.length(), 60));
+        logencodedCmd += "...";
+        return logencodedCmd;
     }
 
     @Override
@@ -188,8 +234,9 @@ public class WatchProtocolEncoder extends StringProtocolEncoder implements Strin
                 lastencodedCmd = (String) cmdtoSend;
                 break;
             case Command.TYPE_VOICE_MESSAGE:
-                cmdtoSend = formatCommand(channel, command, "TK," + getBinaryData(command));
-                lastencodedCmd = (String) cmdtoSend;
+                prepareVoiceMessageData(command);
+                cmdtoSend = formatCommand(channel, command, "TK,{%s}", Command.KEY_BLOB);
+                lastencodedCmd = logVoiceMessageFrame(cmdtoSend);
                 break;
             case Command.TYPE_POSITION_PERIODIC:
                 cmdtoSend = formatCommand(channel, command, "UPLOAD,{%s}", Command.KEY_FREQUENCY);
@@ -208,8 +255,9 @@ public class WatchProtocolEncoder extends StringProtocolEncoder implements Strin
                 Log.warning(new UnsupportedOperationException(command.getType()));
                 break;
         }
-
-        return cmdtoSend;
+        ByteBuf commandBuf = Unpooled.buffer();
+        commandBuf.writeBytes(((String) cmdtoSend).getBytes(StandardCharsets.ISO_8859_1));
+        return (commandBuf);
     }
 
 }

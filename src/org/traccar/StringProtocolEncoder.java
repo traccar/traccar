@@ -18,6 +18,7 @@ package org.traccar;
 import org.traccar.model.Command;
 
 import java.util.Map;
+import java.util.regex.Matcher;
 
 public abstract class StringProtocolEncoder extends BaseProtocolEncoder {
 
@@ -38,7 +39,7 @@ public abstract class StringProtocolEncoder extends BaseProtocolEncoder {
             if (value == null) {
                 value = entry.getValue().toString();
             }
-            result = result.replaceAll("\\{" + entry.getKey() + "}", value);
+            result = result.replaceAll("\\{" + entry.getKey() + "}", Matcher.quoteReplacement(value));
         }
 
         return result;

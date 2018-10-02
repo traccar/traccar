@@ -19,6 +19,7 @@ import io.netty.buffer.ByteBuf;
 import org.traccar.helper.Log;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -46,13 +47,22 @@ public class MediaManager {
         return filePath.toFile();
     }
 
+    private File openFile(String name) throws IOException {
+        Path filePath = Paths.get(path, name);
+        if (!Files.isRegularFile(filePath)) {
+            return null;
+        } else {
+            return filePath.toFile();
+        }
+    }
+
     public String writeFile(String uniqueId, ByteBuf buf, String extension) {
         if (path != null) {
             int size = buf.readableBytes();
             String name = new SimpleDateFormat("yyyyMMddhhmmss").format(new Date()) + "." + extension;
             try (FileOutputStream output = new FileOutputStream(createFile(uniqueId, name));
                     FileChannel fileChannel = output.getChannel()) {
-                    ByteBuffer byteBuffer = buf.nioBuffer();
+                ByteBuffer byteBuffer = buf.nioBuffer();
                 int written = 0;
                 while (written < size) {
                     written += fileChannel.write(byteBuffer);
@@ -66,4 +76,25 @@ public class MediaManager {
         return null;
     }
 
+    public byte[] readFile(String fileName) {
+        if (path != null) {
+            try (FileInputStream input = new FileInputStream(openFile(fileName));
+                    FileChannel fileChannel = input.getChannel()) {
+                ByteBuffer readbuffer = ByteBuffer.allocate(65535);
+                int readbytes = fileChannel.read(readbuffer);
+                if (readbytes > 0) {
+                    readbuffer.rewind();
+                    readbuffer.limit(readbytes);
+                    byte[] blob = new byte[readbytes];
+                    readbuffer.get(blob, 0, readbytes);
+                    return (blob);
+                } else {
+                    return null;
+                }
+            } catch (IOException e) {
+                Log.warning(e);
+            }
+        }
+        return null;
+    }
 }
