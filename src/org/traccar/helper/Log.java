@@ -171,6 +171,9 @@ public final class Log {
         handler.setLevel(level);
 
         rootLogger.addHandler(handler);
+
+        Logger.getLogger("sun").setLevel(Level.OFF);
+        Logger.getLogger("java").setLevel(Level.OFF);
     }
 
     public static String exceptionStack(Throwable exception) {
