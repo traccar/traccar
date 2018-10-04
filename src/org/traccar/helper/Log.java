@@ -169,11 +169,9 @@ public final class Log {
         Level level = Level.parse(config.getString("logger.level").toUpperCase());
         rootLogger.setLevel(level);
         handler.setLevel(level);
+        handler.setFilter(record -> record != null && !record.getLoggerName().startsWith("sun"));
 
         rootLogger.addHandler(handler);
-
-        Logger.getLogger("sun").setLevel(Level.OFF);
-        Logger.getLogger("java").setLevel(Level.OFF);
     }
 
     public static String exceptionStack(Throwable exception) {
