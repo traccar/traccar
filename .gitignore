@@ -7,3 +7,5 @@ nbactions.xml
 *.iml
 .DS_Store
 .checkstyle
+jdk-10.0.*.zip
+traccar-linux-64*.zip
