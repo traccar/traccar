@@ -111,6 +111,7 @@ public final class Log {
                     return "TRACE";
                 case "FINER":
                 case "FINE":
+                case "CONFIG":
                     return "DEBUG";
                 case "INFO":
                     return "INFO";
