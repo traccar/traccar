@@ -327,8 +327,8 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         if (deviceLastKnownOdometerPositionLookup.containsKey(deviceId)) {
             Position lastPosition = deviceLastKnownOdometerPositionLookup.get(deviceId);
             position.set(Position.KEY_ODOMETER, (int) lastPosition.getAttributes().get(Position.KEY_ODOMETER));
-            position.set(Position.KEY_TOTAL_DISTANCE, (double) lastPosition.getAttributes()
-                                                                           .get(Position.KEY_TOTAL_DISTANCE));
+            //position.set(Position.KEY_TOTAL_DISTANCE, (double) lastPosition.getAttributes()
+              //                                                           .get(Position.KEY_TOTAL_DISTANCE));
         }
 
         Optional<Long> fuelLevelPoints =
@@ -426,6 +426,52 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         // Detect and remove outliers
         List<Position> relevantPositionsListForOutliers =
                 getRelevantPositionsSubList(positionsForDeviceSensor, position, minValuesForOutlierDetection);
+
+        // Detect data loss if size of relevantPositionsListForOutliers is = 1
+        if (relevantPositionsListForOutliers.size() == 1) {
+            Position last = getLastPosition(position.getDeviceId());
+            if (last == null) {
+                return;
+            }
+            double startTotalGPSDistanceInMeters = last.getDouble(Position.KEY_TOTAL_DISTANCE);
+            double endTotalGPSDistanceInMeters = position.getDouble(Position.KEY_TOTAL_DISTANCE);
+
+            int startOdometerInMeters = last.getInteger(Position.KEY_ODOMETER);
+            int endOdometerInMeters = position.getInteger(Position.KEY_ODOMETER);
+
+            double calculatedFuelChangeVolume = position.getInteger(Position.KEY_FUEL_LEVEL)
+                    - last.getInteger(Position.KEY_FUEL_LEVEL);
+
+            double differenceTotalDistanceInMeters = endTotalGPSDistanceInMeters - startTotalGPSDistanceInMeters;
+            double differenceOdometerInMeters = endOdometerInMeters - startOdometerInMeters;
+
+            double maximumDistanceTravelled = Math.max(differenceTotalDistanceInMeters, differenceOdometerInMeters) / 1000;
+            double minimumAverageMileage = 1.5; // This has to be a self learning value
+            double maximumAverageMileage = 4.0; // This has to be a self learning value
+            double currentAverageMileage = 2.5; // This has to be a self learning value
+            double expectedMaxFuelConsumed = maximumDistanceTravelled / minimumAverageMileage;
+            double expectedMinFuelConsumed = maximumDistanceTravelled / maximumAverageMileage;
+            double expectedCurrentFuelConsumed = maximumDistanceTravelled / currentAverageMileage;
+            Log.debug("Expfuel-" + expectedCurrentFuelConsumed + " MaxFuel-" + expectedMaxFuelConsumed
+                    + " Minfuel-" + expectedMinFuelConsumed + " maxdist-" + maximumDistanceTravelled
+                    + " fuelchange-" + calculatedFuelChangeVolume);
+            if (calculatedFuelChangeVolume < 0) {
+                if(Math.abs(calculatedFuelChangeVolume) <= expectedMaxFuelConsumed
+                        && Math.abs(calculatedFuelChangeVolume) >= expectedMinFuelConsumed) {
+                    Log.debug(String.format("Data Loss: Distance covered %f, Exp fuel consumed: %f, actual fuel consumed: %f",
+                            maximumDistanceTravelled, expectedCurrentFuelConsumed, calculatedFuelChangeVolume));
+                } else if (Math.abs(calculatedFuelChangeVolume) > expectedMaxFuelConsumed){
+                    double possibleFuelDrain = Math.abs(calculatedFuelChangeVolume) - expectedCurrentFuelConsumed;
+                    //send notification for possibleFuelDrain;
+                } else {
+                    double possibleFuelFill = expectedCurrentFuelConsumed - Math.abs(calculatedFuelChangeVolume);
+                    //send notification for possibleFuelFill;
+                }
+            } else {
+                double expectedFuelFill = calculatedFuelChangeVolume + expectedCurrentFuelConsumed;
+                //send notification for expectedFuelFill;
+            }
+        }
 
         if (relevantPositionsListForOutliers.size() < minValuesForOutlierDetection) {
             Log.debug("List too small for outlier detection");
@@ -821,5 +867,12 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
         Long fuelSensorPoints = Long.parseLong(fuelParts[1].split("\\.")[0], 16);
         return Optional.of(fuelSensorPoints);
+    }
+    private Position getLastPosition(long deviceId) {
+        if (Context.getIdentityManager() != null) {
+            return Context.getIdentityManager().getLastPosition(deviceId);
+        }
+        Log.debug("returning null");
+        return null;
     }
 }

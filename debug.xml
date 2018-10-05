@@ -48,7 +48,7 @@
     <entry key='database.url'>jdbc:mysql://localhost:3306/traccar?allowMultiQueries=true&amp;autoReconnect=true&amp;useUnicode=yes&amp;characterEncoding=UTF-8&amp;sessionVariables=sql_mode=''</entry>
 
     <entry key='database.user'>root</entry>
-    <entry key='database.password'></entry>
+    <entry key='database.password'>rahul@1234</entry>
 
     <entry key='aquila.port'>5089</entry>
     <!--<entry key='intellitrac.port'>6037</entry>-->

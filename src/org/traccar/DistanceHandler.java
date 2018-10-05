@@ -17,6 +17,7 @@
 package org.traccar;
 
 import org.traccar.helper.DistanceCalculator;
+import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
 import java.math.BigDecimal;
@@ -68,6 +69,25 @@ public class DistanceHandler extends BaseDataHandler {
                         last.getLatitude(), last.getLongitude());
                 distance = BigDecimal.valueOf(distance).setScale(2, RoundingMode.HALF_EVEN).doubleValue();
             }
+
+            //if data missing then check odometer readings
+            double dataLossDuration = 1800;
+            double durationBetweenPackets = (position.getDeviceTime().getTime() - last.getDeviceTime().getTime()) / 1000;
+            if (durationBetweenPackets >= dataLossDuration) {
+                double differenceInOdometer = (double) ((Integer)position.getAttributes().get(Position.KEY_ODOMETER))
+                        - (double) ((Integer)last.getAttributes().get(Position.KEY_ODOMETER));
+                if(differenceInOdometer > distance) {
+                    distance = differenceInOdometer;
+                }
+            }
+
+            //verify if distance calculated is legit or not
+            double maxVehicleSpeedKMPH = 150.00;
+            double maxDistancePossible = maxVehicleSpeedKMPH * 1000 / (60 * 60) * durationBetweenPackets;
+            if (distance > maxDistancePossible) {
+                distance = 0;
+            }
+
             if (filter && last.getValid() && last.getLatitude() != 0 && last.getLongitude() != 0) {
                 boolean satisfiesMin = coordinatesMinError == 0 || distance > coordinatesMinError;
                 boolean satisfiesMax = coordinatesMaxError == 0

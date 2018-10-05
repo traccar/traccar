@@ -111,7 +111,7 @@ public class FuelSensorDataHandlerHelper {
         double differenceTotalDistanceInMeters = endTotalGPSDistanceInMeters - startTotalGPSDistanceInMeters;
         double differenceOdometerInMeters = endOdometerInMeters - startOdometerInMeters;
 
-        double maximumDistanceTravelled = Math.max(differenceTotalDistanceInMeters, differenceOdometerInMeters);
+        double maximumDistanceTravelled = Math.max(differenceTotalDistanceInMeters, differenceOdometerInMeters) / 1000;
         double minimumAverageMileage = 1.5; // This has to be a self learning value
         double expectedFuelConsumed = maximumDistanceTravelled / minimumAverageMileage;
 
