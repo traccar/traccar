@@ -20,6 +20,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -82,34 +83,32 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
 
         position.setTime(parser.nextDateTime());
 
-        position.setLongitude(parser.nextDouble(0));
-        position.setLatitude(parser.nextDouble(0));
-        position.setSpeed(parser.nextDouble(0));
-        position.setCourse(parser.nextDouble(0));
-        position.setAltitude(parser.nextDouble(0));
+        position.setValid(true);
+        position.setLongitude(parser.nextDouble());
+        position.setLatitude(parser.nextDouble());
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+        position.setCourse(parser.nextDouble());
+        position.setAltitude(parser.nextDouble());
 
-        int satellites = parser.nextInt(0);
-        position.setValid(satellites >= 3);
-        position.set(Position.KEY_SATELLITES, satellites);
+        position.set(Position.KEY_SATELLITES, parser.nextInt());
+        position.set(Position.KEY_INDEX, parser.nextLong());
+        position.set(Position.KEY_INPUT, parser.nextInt());
+        position.set(Position.KEY_OUTPUT, parser.nextInt());
 
-        position.set(Position.KEY_INDEX, parser.nextLong(0));
-        position.set(Position.KEY_INPUT, parser.nextInt(0));
-        position.set(Position.KEY_OUTPUT, parser.nextInt(0));
-
-        position.set(Position.PREFIX_ADC + 1, parser.nextDouble(0));
-        position.set(Position.PREFIX_ADC + 2, parser.nextDouble(0));
+        position.set(Position.PREFIX_ADC + 1, parser.nextDouble());
+        position.set(Position.PREFIX_ADC + 2, parser.nextDouble());
 
         // J1939 data
-        position.set(Position.KEY_OBD_SPEED, parser.nextInt(0));
-        position.set(Position.KEY_RPM, parser.nextInt(0));
-        position.set("coolant", parser.nextInt(0));
-        position.set(Position.KEY_FUEL_LEVEL, parser.nextInt(0));
-        position.set(Position.KEY_FUEL_CONSUMPTION, parser.nextInt(0));
-        position.set(Position.PREFIX_TEMP + 1, parser.nextInt(0));
-        position.set("chargerPressure", parser.nextInt(0));
-        position.set("tpl", parser.nextInt(0));
-        position.set(Position.KEY_AXLE_WEIGHT, parser.nextInt(0));
-        position.set(Position.KEY_OBD_ODOMETER, parser.nextInt(0));
+        position.set(Position.KEY_OBD_SPEED, parser.nextInt());
+        position.set(Position.KEY_RPM, parser.nextInt());
+        position.set("coolant", parser.nextInt());
+        position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
+        position.set(Position.KEY_FUEL_CONSUMPTION, parser.nextInt());
+        position.set(Position.PREFIX_TEMP + 1, parser.nextInt());
+        position.set("chargerPressure", parser.nextInt());
+        position.set("tpl", parser.nextInt());
+        position.set(Position.KEY_AXLE_WEIGHT, parser.nextInt());
+        position.set(Position.KEY_OBD_ODOMETER, parser.nextInt());
 
         return position;
     }
