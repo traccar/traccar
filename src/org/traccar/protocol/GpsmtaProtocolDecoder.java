@@ -43,7 +43,7 @@ public class GpsmtaProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+) ")                     // accuracy
             .number("(d+) ")                     // altitude
             .number("(d+) ")                     // flags
-            .number("(d+) ")                     // battery
+            .number("(d+) ")                     // battery level
             .number("(d+) ")                     // temperature
             .number("(d)")                       // charging status
             .any()
@@ -77,7 +77,7 @@ public class GpsmtaProtocolDecoder extends BaseProtocolDecoder {
         position.setAltitude(parser.nextInt(0));
 
         position.set(Position.KEY_STATUS, parser.nextInt(0));
-        position.set(Position.KEY_BATTERY, parser.nextInt(0));
+        position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt(0));
         position.set(Position.PREFIX_TEMP + 1, parser.nextInt(0));
         position.set(Position.KEY_CHARGE, parser.nextInt(0) == 1);
 
