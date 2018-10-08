@@ -42,23 +42,23 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN_POSITION = new PatternBuilder()
-            .number("(dd)(dd)(dd),")             // date (ddmmyy)
-            .number("(dd)(dd)(dd),")             // time (hhmmss)
-            .expression("([AV]),")               // validity
-            .number(" *(-?d+.d+),")              // latitude
+            .number("(dd)(dd)(dd),") // date (ddmmyy)
+            .number("(dd)(dd)(dd),") // time (hhmmss)
+            .expression("([AV]),") // validity
+            .number(" *(-?d+.d+),") // latitude
             .expression("([NS]),")
-            .number(" *(-?d+.d+),")              // longitude
+            .number(" *(-?d+.d+),") // longitude
             .expression("([EW])?,")
-            .number("(d+.?d*),")                 // speed
-            .number("(d+.?d*),")                 // course
-            .number("(d+.?d*),")                 // altitude
-            .number("(d+),")                     // satellites
-            .number("(d+),")                     // rssi
-            .number("(d+),")                     // battery
-            .number("(d+),")                     // steps
-            .number("d+,")                       // tumbles
-            .number("(x+),")                     // status
-            .expression("(.*)")                  // cell and wifi
+            .number("(d+.?d*),") // speed
+            .number("(d+.?d*),") // course
+            .number("(d+.?d*),") // altitude
+            .number("(d+),") // satellites
+            .number("(d+),") // rssi
+            .number("(d+),") // battery
+            .number("(d+),") // steps
+            .number("d+,") // tumbles
+            .number("(x+),") // status
+            .expression("(.*)") // cell and wifi
             .compile();
 
     private void sendResponse(Channel channel, String id, String index, String content) {

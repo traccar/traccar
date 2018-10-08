@@ -7,9 +7,26 @@ public class WatchFrameDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {
-
+        
         WatchFrameDecoder decoder = new WatchFrameDecoder();
 
+        verifyFrame(
+                binary("5b53472a3335323636313039303134333135302a303030312a4c4b2c302c302c3130305d"),
+                decoder.decode(null, null, binary("0D5b53472a3335323636313039303134333135302a303030312a4c4b2c302c302c3130305d")));
+
+        verifyFrameNull(                
+                decoder.decode(null, null, binary("0D53472a3335323636313039303134333135302a303030312a4c4b2c302c302c3130305d")));
+
+        verifyFrameNull(                
+                decoder.decode(null, null, binary("2a3335323636313039303134333135302a303030312a4c4b2c302c302c3130305d")));
+
+        verifyFrameNull(                
+                decoder.decode(null, null, binary("5b53472a3335323636313039303134333135302a303030312a4c4b2c302c302c313030")));        
+        
+        verifyFrame(
+                binary("5b53472a3335323636313039303134333135302a303030312a4c4b2c302c302c3130305d"),
+                decoder.decode(null, null, binary("5b53472a3335323636313039303134333135302a303030312a4c4b2c302c302c3130305b53472a3335323636313039303134333135302a303030312a4c4b2c302c302c3130305D")));        
+        
         verifyFrame(
                 binary("5b33472a3335323636313039303134333135302a303030412a4c4b2c302c302c3130305d"),
                 decoder.decode(null, null, binary("5b33472a3335323636313039303134333135302a303030412a4c4b2c302c302c3130305d")));
