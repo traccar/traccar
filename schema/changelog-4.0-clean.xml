@@ -6,8 +6,8 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
   logicalFilePath="changelog-4.0-clean">
 
-  <property name="blob.type" value="BLOB" dbms="h2,mysql,mssql,oracle"/>
-  <property name="blob.type" value="bytea" dbms="postgresql"/>
+  <property name="blob.type" value="BLOB" dbms="h2,mysql,mssql,oracle" />
+  <property name="blob.type" value="bytea" dbms="postgresql" />
 
   <changeSet author="author" id="changelog-4.0-clean">
 
