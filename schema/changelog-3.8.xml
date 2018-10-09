@@ -8,6 +8,12 @@
 
   <changeSet author="author" id="changelog-3.8">
 
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="tc_servers" />
+      </not>
+    </preConditions>
+
     <createTable tableName="attribute_aliases">
       <column name="id" type="INT" autoIncrement="true">
         <constraints primaryKey="true" />
@@ -121,4 +127,5 @@
     </addColumn>
 
   </changeSet>
+
 </databaseChangeLog>
