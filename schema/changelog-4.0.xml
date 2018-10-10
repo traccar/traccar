@@ -54,7 +54,11 @@
   </changeSet>
 
   <changeSet author="author" id="changelog-4.0-pre">
+
     <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="tc_servers" />
+      </not>
       <not>
         <columnExists tableName="tc_notifications" columnName="notificators" />
       </not>
@@ -70,6 +74,9 @@
 
     <preConditions onFail="MARK_RAN">
       <not>
+        <tableExists tableName="tc_servers" />
+      </not>
+      <not>
         <dbms type="postgresql" />
       </not>
       <columnExists tableName="tc_notifications" columnName="web" />
@@ -78,38 +85,38 @@
     </preConditions>
 
     <update tableName="tc_notifications">
-        <column name="notificators" value="web,mail,sms" />
-        <where>web = 1 AND mail = 1 AND sms = 1</where>
+      <column name="notificators" value="web,mail,sms" />
+      <where>web = 1 AND mail = 1 AND sms = 1</where>
     </update>
 
     <update tableName="tc_notifications">
-        <column name="notificators" value="web,mail" />
-        <where>web = 1 AND mail = 1 AND sms = 0</where>
+      <column name="notificators" value="web,mail" />
+      <where>web = 1 AND mail = 1 AND sms = 0</where>
     </update>
 
     <update tableName="tc_notifications">
-        <column name="notificators" value="web" />
-        <where>web = 1 AND mail = 0 AND sms = 0</where>
+      <column name="notificators" value="web" />
+      <where>web = 1 AND mail = 0 AND sms = 0</where>
     </update>
 
     <update tableName="tc_notifications">
-        <column name="notificators" value="web,sms" />
-        <where>web = 1 AND mail = 0 AND sms = 1</where>
+      <column name="notificators" value="web,sms" />
+      <where>web = 1 AND mail = 0 AND sms = 1</where>
     </update>
 
     <update tableName="tc_notifications">
-        <column name="notificators" value="mail,sms" />
-        <where>web = 0 AND mail = 1 AND sms = 1</where>
+      <column name="notificators" value="mail,sms" />
+      <where>web = 0 AND mail = 1 AND sms = 1</where>
     </update>
 
     <update tableName="tc_notifications">
-        <column name="notificators" value="mail" />
-        <where>web = 0 AND mail = 1 AND sms = 0</where>
+      <column name="notificators" value="mail" />
+      <where>web = 0 AND mail = 1 AND sms = 0</where>
     </update>
 
     <update tableName="tc_notifications">
-        <column name="notificators" value="sms" />
-        <where>web = 0 AND mail = 0 AND sms = 1</where>
+      <column name="notificators" value="sms" />
+      <where>web = 0 AND mail = 0 AND sms = 1</where>
     </update>
 
   </changeSet>
@@ -117,6 +124,9 @@
   <changeSet author="author" id="changelog-4.0-pg">
 
     <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="tc_servers" />
+      </not>
       <dbms type="postgresql" />
       <columnExists tableName="tc_notifications" columnName="web" />
       <columnExists tableName="tc_notifications" columnName="mail" />
@@ -124,43 +134,49 @@
     </preConditions>
 
     <update tableName="tc_notifications">
-        <column name="notificators" value="web,mail,sms" />
-        <where>web = TRUE AND mail = TRUE AND sms = TRUE</where>
+      <column name="notificators" value="web,mail,sms" />
+      <where>web = TRUE AND mail = TRUE AND sms = TRUE</where>
     </update>
 
     <update tableName="tc_notifications">
-        <column name="notificators" value="web,mail" />
-        <where>web = TRUE AND mail = TRUE AND sms = FALSE</where>
+      <column name="notificators" value="web,mail" />
+      <where>web = TRUE AND mail = TRUE AND sms = FALSE</where>
     </update>
 
     <update tableName="tc_notifications">
-        <column name="notificators" value="web" />
-        <where>web = TRUE AND mail = FALSE AND sms = FALSE</where>
+      <column name="notificators" value="web" />
+      <where>web = TRUE AND mail = FALSE AND sms = FALSE</where>
     </update>
 
     <update tableName="tc_notifications">
-        <column name="notificators" value="web,sms" />
-        <where>web = TRUE AND mail = FALSE AND sms = TRUE</where>
+      <column name="notificators" value="web,sms" />
+      <where>web = TRUE AND mail = FALSE AND sms = TRUE</where>
     </update>
 
     <update tableName="tc_notifications">
-        <column name="notificators" value="mail,sms" />
-        <where>web = FALSE AND mail = TRUE AND sms = TRUE</where>
+      <column name="notificators" value="mail,sms" />
+      <where>web = FALSE AND mail = TRUE AND sms = TRUE</where>
     </update>
 
     <update tableName="tc_notifications">
-        <column name="notificators" value="mail" />
-        <where>web = FALSE AND mail = TRUE AND sms = FALSE</where>
+      <column name="notificators" value="mail" />
+      <where>web = FALSE AND mail = TRUE AND sms = FALSE</where>
     </update>
 
     <update tableName="tc_notifications">
-        <column name="notificators" value="sms" />
-        <where>web = FALSE AND mail = FALSE AND sms = TRUE</where>
+      <column name="notificators" value="sms" />
+      <where>web = FALSE AND mail = FALSE AND sms = TRUE</where>
     </update>
 
   </changeSet>
 
   <changeSet author="author" id="changelog-4.0">
+
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="tc_servers" />
+      </not>
+    </preConditions>
 
     <dropDefaultValue tableName="tc_notifications" columnName="web" />
     <dropColumn tableName="tc_notifications" columnName="web" />

@@ -8,6 +8,12 @@
 
   <changeSet author="author" id="changelog-3.15">
 
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="tc_servers" />
+      </not>
+    </preConditions>
+
     <dropForeignKeyConstraint baseTableName="attribute_aliases" constraintName="fk_attribute_aliases_deviceid" />
     <dropUniqueConstraint tableName="attribute_aliases" constraintName="uk_deviceid_attribute" />
 
@@ -104,7 +110,7 @@
       INSERT INTO user_notification (notificationid, userid) SELECT id AS notificationid, userid FROM notifications;
     </sql>
 
-    <dropForeignKeyConstraint baseTableName="notifications" constraintName="fk_notifications_userid"/>
+    <dropForeignKeyConstraint baseTableName="notifications" constraintName="fk_notifications_userid" />
     <dropColumn tableName="notifications" columnName="userid" />
 
     <addForeignKeyConstraint baseTableName="user_notification" baseColumnNames="notificationid" constraintName="fk_user_notification_notificationid" referencedTableName="notifications" referencedColumnNames="id" onDelete="CASCADE" />
@@ -141,4 +147,5 @@
     </addColumn>
 
   </changeSet>
+
 </databaseChangeLog>

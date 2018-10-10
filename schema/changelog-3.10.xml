@@ -8,6 +8,12 @@
 
   <changeSet author="author" id="changelog-3.10">
 
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="tc_servers" />
+      </not>
+    </preConditions>
+
     <createTable tableName="calendars">
       <column name="id" type="INT" autoIncrement="true">
         <constraints primaryKey="true" />
@@ -39,7 +45,7 @@
       <column name="calendarid" type="INT" />
     </addColumn>
 
-    <addForeignKeyConstraint baseColumnNames="calendarid" baseTableName="geofences" constraintName="fk_geofence_calendar_calendarid" onDelete="SET NULL" onUpdate="RESTRICT" referencedColumnNames="id" referencedTableName="calendars"/>
+    <addForeignKeyConstraint baseColumnNames="calendarid" baseTableName="geofences" constraintName="fk_geofence_calendar_calendarid" onDelete="SET NULL" onUpdate="RESTRICT" referencedColumnNames="id" referencedTableName="calendars" />
 
     <addColumn tableName="positions">
       <column name="accuracy" type="DOUBLE" defaultValueNumeric="0">
@@ -64,8 +70,8 @@
     <addForeignKeyConstraint baseTableName="user_user" baseColumnNames="userid" constraintName="fk_user_user_userid" referencedTableName="users" referencedColumnNames="id" onDelete="CASCADE" />
 
     <update tableName="users">
-        <column name="devicelimit" valueNumeric="-1" />
-        <where>devicelimit = 0</where>
+      <column name="devicelimit" valueNumeric="-1" />
+      <where>devicelimit = 0</where>
     </update>
     <dropDefaultValue tableName="users" columnName="devicelimit" />
     <addDefaultValue tableName="users" columnName="devicelimit" defaultValueNumeric="-1" />
@@ -80,9 +86,13 @@
 
     <preConditions onFail="MARK_RAN">
       <not>
+        <tableExists tableName="tc_servers" />
+      </not>
+      <not>
         <dbms type="mssql" />
       </not>
     </preConditions>
+
     <addForeignKeyConstraint baseTableName="user_user" baseColumnNames="manageduserid" constraintName="fk_user_user_manageduserid" referencedTableName="users" referencedColumnNames="id" onDelete="CASCADE" />
 
   </changeSet>
@@ -90,8 +100,12 @@
   <changeSet author="author" id="changelog-3.10-mssql">
 
     <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="tc_servers" />
+      </not>
       <dbms type="mssql" />
     </preConditions>
+
     <sql>
       CREATE TRIGGER tg_users_delete
       ON users FOR DELETE
@@ -105,8 +119,12 @@
   <changeSet author="author" id="changelog-3.7-mssql">
 
     <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="tc_servers" />
+      </not>
       <dbms type="mssql" />
     </preConditions>
+
     <sql>
       CREATE TRIGGER tg_groups_delete
       ON groups FOR DELETE
