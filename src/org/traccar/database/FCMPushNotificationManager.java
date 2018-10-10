@@ -104,8 +104,10 @@ public class FCMPushNotificationManager extends ExtendedObjectManager<FCMPushNot
 
         Device device = Context.getDeviceManager().getById(deviceId);
         String title = String.format("%s (%s)", device.getName(), device.getRegistrationNumber());
-        String body = String.format("[%s]: Vehicle %s", getDateTimeStringInTimezone(event.getServerTime()),
-                FCMPushNotificationTypeManager.getFcmPushNotificationTypeToStringMap().get(eventType));
+        String body = String.format("[%s]: Vehicle %s",
+                                    getDateTimeStringInTimezone((long) event.getAttributes().get("startTime")),
+                                    FCMPushNotificationTypeManager.getFcmPushNotificationTypeToStringMap()
+                                                                  .get(eventType));
 
         PushNotifications.getInstance().sendEventNotification(tokens, title, body, ttl);
     }
@@ -117,7 +119,7 @@ public class FCMPushNotificationManager extends ExtendedObjectManager<FCMPushNot
             return;
         }
 
-        long deviceId = fuelActivity.getActivitystartPosition().getDeviceId();
+        long deviceId = fuelActivity.getActivityStartPosition().getDeviceId();
         Set<String> tokens = getEffectiveFCMTokens(eventType.name(), deviceId);
 
         if (tokens.isEmpty()) {
@@ -133,10 +135,15 @@ public class FCMPushNotificationManager extends ExtendedObjectManager<FCMPushNot
         String startTime = getDateTimeStringInTimezone(fuelActivity.getActivityStartTime());
         String endTime = getDateTimeStringInTimezone(fuelActivity.getActivityEndTime());
 
-        String messageBody = String.format("Volume: %s, %n", volumeChanged)
+        String messageBody = String.format("Volume: %sL, %n", volumeChanged)
                              + String.format("Time range: %s - %s", startTime, endTime);
 
         PushNotifications.getInstance().sendEventNotification(tokens, title, messageBody, FUEL_EVENT_TTL);
+    }
+
+    private String getDateTimeStringInTimezone(Long dateInMilliseconds) {
+        Date date = new Date(dateInMilliseconds);
+        return getDateTimeStringInTimezone(date);
     }
 
     private String getDateTimeStringInTimezone(Date date) {
