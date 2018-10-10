@@ -80,7 +80,9 @@ public final class Route {
                     Position current = fuelOnlyPositions.get(positionIndex);
 
                     if (current.getAttributes().containsKey("fuel")
-                        && previous.getAttributes().containsKey("fuel")) {
+                        && previous.getAttributes().containsKey("fuel")
+                        && !current.getBoolean("fuelIsOutlier")
+                        && !previous.getBoolean("fuelIsOutlier")) {
 
                         double previousFuel = (double) previous.getAttributes().get("fuel");
                         double currentFuel = (double) current.getAttributes().get("fuel");
