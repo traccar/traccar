@@ -8,30 +8,37 @@
 
   <changeSet author="author" id="changelog-3.9">
 
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="tc_servers" />
+      </not>
+    </preConditions>
+
     <addColumn tableName="notifications">
       <column name="web" type="BOOLEAN" defaultValueBoolean="false" />
       <column name="mail" type="BOOLEAN" defaultValueBoolean="false" />
     </addColumn>
 
     <update tableName="notifications">
-        <column name="web" valueBoolean="true" />
-        <where>attributes = '{"web":"true"}'</where>
+      <column name="web" valueBoolean="true" />
+      <where>attributes = '{"web":"true"}'</where>
     </update>
 
     <update tableName="notifications">
-        <column name="mail" valueBoolean="true" />
+      <column name="mail" valueBoolean="true" />
         <where>attributes = '{"mail":"true"}'</where>
     </update>
 
     <update tableName="notifications">
-        <column name="web" valueBoolean="true" />
-        <column name="mail" valueBoolean="true" />
-        <where>attributes = '{"web":"true","mail":"true"}'</where>
+      <column name="web" valueBoolean="true" />
+      <column name="mail" valueBoolean="true" />
+      <where>attributes = '{"web":"true","mail":"true"}'</where>
     </update>
 
     <update tableName="notifications">
-        <column name="attributes" value="{}" />
+      <column name="attributes" value="{}" />
     </update>
 
   </changeSet>
+
 </databaseChangeLog>

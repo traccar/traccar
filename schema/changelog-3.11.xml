@@ -8,6 +8,12 @@
 
   <changeSet author="author" id="changelog-3.11">
 
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="tc_servers" />
+      </not>
+    </preConditions>
+
     <addColumn tableName="users">
       <column name="phone" type="VARCHAR(128)" />
     </addColumn>

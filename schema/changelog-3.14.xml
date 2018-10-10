@@ -8,6 +8,12 @@
 
   <changeSet author="author" id="changelog-3.14">
 
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="tc_servers" />
+      </not>
+    </preConditions>
+
     <createTable tableName="drivers">
       <column name="id" type="INT" autoIncrement="true">
         <constraints primaryKey="true" />
@@ -64,4 +70,5 @@
     <renameTable oldTableName="server" newTableName="servers" />
 
   </changeSet>
+
 </databaseChangeLog>

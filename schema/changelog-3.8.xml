@@ -8,6 +8,12 @@
 
   <changeSet author="author" id="changelog-3.8">
 
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="tc_servers" />
+      </not>
+    </preConditions>
+
     <createTable tableName="attribute_aliases">
       <column name="id" type="INT" autoIncrement="true">
         <constraints primaryKey="true" />
@@ -27,15 +33,15 @@
     <addUniqueConstraint tableName="attribute_aliases" columnNames="deviceid, attribute" constraintName="uk_deviceid_attribute" />
 
     <update tableName="users">
-      <column name="map" type="VARCHAR(128)"/>
+      <column name="map" type="VARCHAR(128)" />
       <where>map = 'osm'</where>
     </update>
     <update tableName="users">
-      <column name="distanceunit" type="VARCHAR(128)"/>
+      <column name="distanceunit" type="VARCHAR(128)" />
       <where>distanceunit = 'km'</where>
     </update>
     <update tableName="users">
-      <column name="speedunit" type="VARCHAR(128)"/>
+      <column name="speedunit" type="VARCHAR(128)" />
       <where>speedunit = 'kmh'</where>
     </update>
 
@@ -121,4 +127,5 @@
     </addColumn>
 
   </changeSet>
+
 </databaseChangeLog>
