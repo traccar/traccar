@@ -15,7 +15,7 @@ public class FuelSensorDataHandlerTest {
 
     public void testFuelFillActivity() {
 
-        long sensorId = 1;
+        int sensorId = 1;
 
         FuelSensorDataHandler fuelSensorDataHandler =
                 new FuelSensorDataHandler(false);
@@ -36,7 +36,8 @@ public class FuelSensorDataHandlerTest {
         List<FuelActivity> activities = new LinkedList<>();
         for (int start = 0, end = 9; end < deviceBeforeFillPositions.size(); start++, end++) {
             List<Position> subListToPass = deviceBeforeFillPositions.subList(start, end);
-            activities.add(fuelSensorDataHandler.checkForActivity(subListToPass, fuelEventMetadataMap, sensorId, threshold, fuelErrorThreshold));
+            activities.add(fuelSensorDataHandler.checkForActivity(subListToPass, fuelEventMetadataMap,
+                                                                  sensorId, threshold, fuelErrorThreshold));
         }
 
         int fuelFills = 0;
@@ -52,7 +53,7 @@ public class FuelSensorDataHandlerTest {
 
     public void testFuelDrainActivity() {
 
-        long sensorId = 1;
+        int sensorId = 1;
 
         FuelSensorDataHandler fuelSensorDataHandler =
                 new FuelSensorDataHandler(false);
@@ -73,7 +74,8 @@ public class FuelSensorDataHandlerTest {
         List<FuelActivity> activities = new LinkedList<>();
         for (int start = 0, end = 9; end < deviceBeforeDrainPositions.size(); start++, end++) {
             List<Position> subListToPass = deviceBeforeDrainPositions.subList(start, end);
-            activities.add(fuelSensorDataHandler.checkForActivity(subListToPass, fuelEventMetadataMap, sensorId, threshold, fuelErrorThreshold));
+            activities.add(fuelSensorDataHandler.checkForActivity(subListToPass, fuelEventMetadataMap,
+                                                                  sensorId, threshold, fuelErrorThreshold));
         }
 
         int fuelDrains = 0;
@@ -124,10 +126,9 @@ public class FuelSensorDataHandlerTest {
         positions.add(getPositionWithCalibValue(100.6));
 
         boolean isOutlier = FuelSensorDataHandlerHelper.isOutlierPresentInSublist(positions,
-                                                              4);
+                                                              4, Optional.of(100L));
 
         assert isOutlier == true;
-
     }
 
     private Date getAdjustedTime(int secondsBehind) {
