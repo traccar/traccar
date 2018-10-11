@@ -41,11 +41,9 @@ public class FuelSensorDataHandler extends BaseDataHandler {
     private int hoursOfDataToLoad;
     private int minHoursOfDataInMemory;
     private int maxValuesForAlerts;
-    private int storedEventLookAroundSeconds;
     private int currentEventLookBackSeconds;
     private double fuelLevelChangeThresholdLitresDigital;
     private double fuelLevelChangeThresholdLitresAnalog;
-    private double fuelErrorThreshold;
 
     private final Map<Long, Map<Integer, TreeMultiset<Position>>> previousPositions =
             new ConcurrentHashMap<>();
@@ -94,9 +92,6 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
         maxValuesForAlerts = Context.getConfig()
                                     .getInteger("processing.peripheralSensorData.maxValuesForAlerts");
-        storedEventLookAroundSeconds =
-                Context.getConfig()
-                       .getInteger("processing.peripheralSensorData.storedEventLookAroundSeconds");
 
         currentEventLookBackSeconds =
                 Context.getConfig()
@@ -109,8 +104,6 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         fuelLevelChangeThresholdLitresAnalog =
                 Context.getConfig()
                        .getDouble("processing.peripheralSensorData.fuelLevelChangeThresholdLitersAnalog");
-
-        fuelErrorThreshold = Context.getConfig().getDouble("processing.peripheralSensorData.fuelErrorThreshold");
     }
 
     @Override
@@ -505,8 +498,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                     checkForActivity(relevantPositionsListForAlerts,
                                      deviceFuelEventMetadata,
                                      sensorId,
-                                     fuelLevelChangeThreshold,
-                                     fuelErrorThreshold);
+                                     fuelLevelChangeThreshold);
 
             sendNotificationIfNecessary(deviceId, fuelActivity);
         }
@@ -770,8 +762,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
     public FuelActivity checkForActivity(List<Position> readingsForDevice,
                                                 Map<String, FuelEventMetadata> deviceFuelEventMetadata,
                                                 Integer sensorId,
-                                                double fuelLevelChangeThreshold,
-                                                double fuelErrorThreshold) {
+                                                double fuelLevelChangeThreshold) {
 
         FuelActivity fuelActivity = new FuelActivity();
 
@@ -848,7 +839,6 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
             double fuelChangeVolume = fuelEventMetadata.getEndLevel() - fuelEventMetadata.getStartLevel();
             double errorCheckFuelChange = fuelEventMetadata.getErrorCheckEnd() - fuelEventMetadata.getErrorCheckStart();
-            double errorCheck = fuelChangeVolume * fuelErrorThreshold;
 
             Log.debug("[FUEL_ACTIVITY_END] Activity end detected: deviceId" + deviceId + " at: "
                       + midPointPosition.getDeviceTime());
@@ -866,10 +856,8 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             Log.debug("[FUEL_ACTIVITY_END] Midpoint: " + midPointPosition.getAttributes()
                                                                          .get(Position.KEY_CALIBRATED_FUEL_LEVEL));
             Log.debug("[FUEL_ACTIVITY_END] metadata: " + fuelEventMetadata);
-            Log.debug("[FUEL_ACTIVITY_END] fuelErrorThreshold: " + fuelErrorThreshold);
             Log.debug("[FUEL_ACTIVITY_END] fuelChangeVolume: " + fuelChangeVolume);
             Log.debug("[FUEL_ACTIVITY_END] errorCheckFuelChange: " + errorCheckFuelChange);
-            Log.debug("[FUEL_ACTIVITY_END] errorCheck: " + errorCheck);
 
             Optional<Long> maxCapacity = getFuelTankMaxCapacity(deviceId, sensorId);
             boolean isDataLoss = FuelSensorDataHandlerHelper.isFuelEventDueToDataLoss(fuelEventMetadata, maxCapacity);
