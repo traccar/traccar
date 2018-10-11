@@ -134,10 +134,9 @@ public class FuelSensorDataHandlerHelper {
     }
 
     public static boolean possibleDataLoss(final double calculatedFuelChangeVolume,
-                                            final ExpectedFuelConsumptionValues expectedFuelConsumptionValues) {
+                                           final ExpectedFuelConsumptionValues expectedFuelConsumptionValues) {
 
         return Math.abs(calculatedFuelChangeVolume) > expectedFuelConsumptionValues.allowedDeviation
-        && calculatedFuelChangeVolume < 0
         && Math.abs(calculatedFuelChangeVolume) <= expectedFuelConsumptionValues.expectedMaxFuelConsumed
         && Math.abs(calculatedFuelChangeVolume) >= expectedFuelConsumptionValues.expectedMinFuelConsumed;
     }
@@ -205,6 +204,17 @@ public class FuelSensorDataHandlerHelper {
             this.expectedMinFuelConsumed = expectedMinFuelConsumed;
             this.allowedDeviation = allowedDeviation;
             this.maximumDistanceTravelled = maximumDistanceTravelled;
+        }
+
+        @Override
+        public String toString() {
+            String maxDist = String.format("Maximum Distance Travelled: %f", maximumDistanceTravelled);
+            String minFuel = String.format("Expected Min fuel consumed: %f", expectedMinFuelConsumed);
+            String maxFuel = String.format("Expected max fuel consumed: %f", expectedMaxFuelConsumed);
+            String currentFuel = String.format("Expected current fuel consumed %f", expectedCurrentFuelConsumed);
+            String deviation = String.format("Allowed deviation: %f", allowedDeviation);
+
+            return String.format("%s%n%s%n%s%n%s%n%s%n", maxDist, minFuel, maxFuel, currentFuel, deviation);
         }
     }
 }

@@ -563,9 +563,16 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             if (calculatedFuelChangeVolume < 0.0) {
                 boolean isDataLoss = FuelSensorDataHandlerHelper.possibleDataLoss(calculatedFuelChangeVolume,
                                                                                   expectedFuelConsumptionValues);
-                if (!isDataLoss
-                    && Math.abs(calculatedFuelChangeVolume) > expectedFuelConsumptionValues.expectedMaxFuelConsumed) {
 
+                if (isDataLoss) {
+                    Log.info(String.format(
+                            "Determined data loss, but cannot identify fuel event since calculatedVolume" +
+                            " is outside expected range: %s", expectedFuelConsumptionValues));
+
+                    return Optional.empty();
+                }
+
+                if (Math.abs(calculatedFuelChangeVolume) > expectedFuelConsumptionValues.expectedMaxFuelConsumed) {
                     double possibleFuelDrain =
                             Math.abs(calculatedFuelChangeVolume) -
                             expectedFuelConsumptionValues.expectedCurrentFuelConsumed;
