@@ -42,7 +42,7 @@ public class OpenGtsProtocolDecoder extends BaseHttpProtocolDecoder {
             .number("(d+)(dd.d+),")              // longitude
             .expression("([EW]),")
             .number("(d+.d+),")                  // speed
-            .number("(d+.d+),")                  // course
+            .number("(d+.d+)?,")                 // course
             .number("(dd)(dd)(dd),")             // date (ddmmyy)
             .any()
             .compile();
@@ -80,15 +80,15 @@ public class OpenGtsProtocolDecoder extends BaseHttpProtocolDecoder {
                     }
 
                     DateBuilder dateBuilder = new DateBuilder()
-                            .setTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
+                            .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
 
                     position.setValid(parser.next().equals("A"));
                     position.setLatitude(parser.nextCoordinate());
                     position.setLongitude(parser.nextCoordinate());
-                    position.setSpeed(parser.nextDouble(0));
+                    position.setSpeed(parser.nextDouble());
                     position.setCourse(parser.nextDouble(0));
 
-                    dateBuilder.setDateReverse(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
+                    dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
                     position.setTime(dateBuilder.getDate());
                     break;
                 case "alt":
