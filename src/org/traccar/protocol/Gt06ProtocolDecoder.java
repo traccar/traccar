@@ -478,7 +478,37 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             content.writeByte(calendar.get(Calendar.SECOND));
             sendResponse(channel, false, MSG_TIME_REQUEST, 0, content);
 
-        } else if (type == MSG_X1_GPS) {
+        } else if (type == MSG_X1_GPS || type == MSG_X1_PHOTO_INFO) {
+
+            return decodeX1(channel, buf, deviceSession, type);
+
+        } else if (type == MSG_WIFI || type == MSG_WIFI_2) {
+
+            return decodeWifi(buf, deviceSession);
+
+        } else if (type == MSG_INFO) {
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            position.set(Position.KEY_POWER, buf.readShort() * 0.01);
+
+            return position;
+
+        } else {
+
+            return decodeBasicOther(channel, buf, deviceSession, type, dataLength);
+
+        }
+
+        return null;
+    }
+
+    private Object decodeX1(Channel channel, ByteBuf buf, DeviceSession deviceSession, int type) {
+
+        if (type == MSG_X1_GPS) {
 
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
@@ -519,25 +549,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             int pictureId = buf.readInt();
             photos.put(pictureId, photo);
             sendPhotoRequest(channel, pictureId);
-
-        } else if (type == MSG_WIFI || type == MSG_WIFI_2) {
-
-            return decodeWifi(buf, deviceSession);
-
-        } else if (type == MSG_INFO) {
-
-            Position position = new Position(getProtocolName());
-            position.setDeviceId(deviceSession.getDeviceId());
-
-            getLastLocation(position, null);
-
-            position.set(Position.KEY_POWER, buf.readShort() * 0.01);
-
-            return position;
-
-        } else {
-
-            return decodeBasicOther(channel, buf, deviceSession, type, dataLength);
 
         }
 
