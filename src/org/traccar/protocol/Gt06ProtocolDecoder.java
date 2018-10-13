@@ -495,6 +495,14 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     buf.readUnsignedShort(), buf.readUnsignedByte(),
                     buf.readUnsignedShort(), buf.readUnsignedInt())));
 
+            long driverId = buf.readUnsignedInt();
+            if (driverId > 0) {
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(driverId));
+            }
+
+            position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.01);
+            position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
+
             return position;
 
         } else if (type == MSG_X1_PHOTO_INFO) {
