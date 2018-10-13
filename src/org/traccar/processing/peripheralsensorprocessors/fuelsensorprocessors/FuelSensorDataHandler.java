@@ -226,14 +226,14 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         long deviceId = position.getDeviceId();
         if (!previousPositions.containsKey(deviceId)) {
             Log.debug("deviceId not found in previousPositions" + deviceId);
-            Optional.empty();
+            return Optional.empty();
         }
 
         Map<Integer, TreeMultiset<Position>> sensorReadingsFromDevice = previousPositions.get(deviceId);
 
         if (sensorReadingsFromDevice.size() < 1) {
             Log.debug("No readings for sensors found on deviceId: " + deviceId);
-            Optional.empty();
+            return Optional.empty();
         }
 
         Optional<Integer> sensorId = sensorReadingsFromDevice.keySet().stream().findFirst();
@@ -243,7 +243,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                     + "sensorId present: " + sensorId.isPresent()
                     + "keySet: " + sensorReadingsFromDevice.keySet()
                     + " readings: " + (sensorId.isPresent() ? sensorReadingsFromDevice.get(sensorId.get()).size() : 0));
-            Optional.empty();
+            return Optional.empty();
         }
 
         final Position lastKnownPosition = sensorReadingsFromDevice.get(sensorId.get())
