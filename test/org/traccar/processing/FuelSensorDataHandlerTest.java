@@ -31,13 +31,12 @@ public class FuelSensorDataHandlerTest {
         Map<String, FuelEventMetadata> fuelEventMetadataMap = new ConcurrentHashMap<>();
 
         double threshold = 5.34;
-        double fuelErrorThreshold = 0.75;
 
         List<FuelActivity> activities = new LinkedList<>();
         for (int start = 0, end = 9; end < deviceBeforeFillPositions.size(); start++, end++) {
             List<Position> subListToPass = deviceBeforeFillPositions.subList(start, end);
             activities.add(fuelSensorDataHandler.checkForActivity(subListToPass, fuelEventMetadataMap,
-                                                                  sensorId, threshold, fuelErrorThreshold));
+                                                                  sensorId, threshold));
         }
 
         int fuelFills = 0;
@@ -69,13 +68,12 @@ public class FuelSensorDataHandlerTest {
         Map<String, FuelEventMetadata> fuelEventMetadataMap = new ConcurrentHashMap<>();
 
         double threshold = 3;
-        double fuelErrorThreshold = 0.5;
 
         List<FuelActivity> activities = new LinkedList<>();
         for (int start = 0, end = 9; end < deviceBeforeDrainPositions.size(); start++, end++) {
             List<Position> subListToPass = deviceBeforeDrainPositions.subList(start, end);
             activities.add(fuelSensorDataHandler.checkForActivity(subListToPass, fuelEventMetadataMap,
-                                                                  sensorId, threshold, fuelErrorThreshold));
+                                                                  sensorId, threshold));
         }
 
         int fuelDrains = 0;
