@@ -176,6 +176,9 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
             case 0x46:
                 position.set(Position.KEY_INPUT, buf.readUnsignedShortLE());
                 break;
+            case 0x48:
+                position.set("statusExtended", buf.readUnsignedShortLE());
+                break;
             case 0x58:
                 position.set("rs2320", buf.readUnsignedShortLE());
                 break;
