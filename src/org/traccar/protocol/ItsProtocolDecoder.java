@@ -34,18 +34,30 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN = new PatternBuilder()
             .text("$,")
-            .expression("[^,]+,")                // header
+            .expression("[^,]+,")                // event
+            .groupBegin()
+            .expression("[^,]+,")                // vendor
+            .number("d+.d+.d+,")                 // firmware version
+            .groupEnd("?")
             .expression("[^,]+,")                // type
+            .groupBegin()
+            .number("d+,")
+            .expression("[LH],")                 // history
+            .groupEnd("?")
             .number("(d{15}),")                  // imei
+            .groupBegin()
             .expression("(?:NM|SP),")            // status
+            .or()
+            .expression("[^,]+,")                // vehicle registration
+            .number("([01]),")                   // valid
+            .groupEnd()
             .number("(dd),(dd),(dddd),")         // date (ddmmyyyy)
             .number("(dd),(dd),(dd),")           // time (hhmmss)
-            .expression("([AV]),")               // valid
+            .expression("([AV]),").optional()    // valid
             .number("(d+.d+),([NS]),")           // latitude
             .number("(d+.d+),([EW]),")           // longitude
-            .number("(-?d+.d+),")                // altitude
+            .number("(-?d+.d+),").optional()     // altitude
             .number("(d+.d+),")                  // speed
-            .number("(d+.d+),")                  // distance
             .any()
             .compile();
 
@@ -66,14 +78,17 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
+        if (parser.hasNext()) {
+            position.setValid(parser.nextInt() == 1);
+        }
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
-        position.setValid(parser.next().equals("A"));
+        if (parser.hasNext()) {
+            position.setValid(parser.next().equals("A"));
+        }
         position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
         position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
-        position.setAltitude(parser.nextDouble());
+        position.setAltitude(parser.nextDouble(0));
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
-
-        position.set(Position.KEY_ODOMETER, parser.nextDouble());
 
         return position;
     }
