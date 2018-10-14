@@ -8,6 +8,12 @@
 
   <changeSet author="author" id="changelog-3.12">
 
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="tc_servers" />
+      </not>
+    </preConditions>
+
     <addColumn tableName="statistics">
       <column name="mailsent" type="INT" defaultValueNumeric="0">
         <constraints nullable="false" />
@@ -77,12 +83,6 @@
     <addForeignKeyConstraint baseTableName="device_attribute" baseColumnNames="deviceid" constraintName="fk_device_attribute_deviceid" referencedTableName="devices" referencedColumnNames="id" onDelete="CASCADE" />
     <addForeignKeyConstraint baseTableName="device_attribute" baseColumnNames="attributeid" constraintName="fk_device_attribute_attributeid" referencedTableName="attributes" referencedColumnNames="id" onDelete="CASCADE" />
 
-    <!--<dropForeignKeyConstraint baseTableName="positions" constraintName="fk_position_deviceid" />
-    <addForeignKeyConstraint baseTableName="positions" baseColumnNames="deviceid" constraintName="fk_positions_deviceid" referencedTableName="devices" referencedColumnNames="id" onDelete="CASCADE" />
-
-    <dropForeignKeyConstraint baseTableName="events" constraintName="fk_event_deviceid" />
-    <addForeignKeyConstraint baseTableName="events" baseColumnNames="deviceid" constraintName="fk_events_deviceid" referencedTableName="devices" referencedColumnNames="id" onDelete="CASCADE" />-->
-
     <dropForeignKeyConstraint baseTableName="device_geofence" constraintName="fk_user_device_geofence_deviceid" />
     <addForeignKeyConstraint baseTableName="device_geofence" baseColumnNames="deviceid" constraintName="fk_device_geofence_deviceid" referencedTableName="devices" referencedColumnNames="id" onDelete="CASCADE" />
     <dropForeignKeyConstraint baseTableName="device_geofence" constraintName="fk_user_device_geofence_geofenceid" />
@@ -100,9 +100,13 @@
 
     <preConditions onFail="MARK_RAN">
       <not>
+        <tableExists tableName="tc_servers" />
+      </not>
+      <not>
         <dbms type="mssql" />
       </not>
     </preConditions>
+
     <dropForeignKeyConstraint baseTableName="groups" constraintName="fk_group_group_groupid" />
     <addForeignKeyConstraint baseTableName="groups" baseColumnNames="groupid" constraintName="fk_groups_groupid" onDelete="SET NULL" onUpdate="RESTRICT" referencedColumnNames="id" referencedTableName="groups" />
 
@@ -111,9 +115,13 @@
   <changeSet author="author" id="changelog-3.12-pgsql">
 
     <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="tc_servers" />
+      </not>
       <dbms type="postgresql" />
       <sqlCheck expectedResult="oid">SELECT data_type FROM information_schema.columns WHERE table_name = 'calendars' AND column_name = 'data';</sqlCheck>
     </preConditions>
+
     <dropColumn tableName="calendars" columnName="data" />
     <addColumn tableName="calendars">
       <column name="data" type="bytea">
