@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
@@ -38,6 +39,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import org.traccar.helper.Log;
 
 public class ConnectionManager {
 

@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.ConsoleHandler;
@@ -34,6 +35,10 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 public final class Log {
+
+    public static void warning(SQLException error) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 
     private Log() {
     }
