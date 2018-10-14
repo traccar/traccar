@@ -77,6 +77,25 @@ public class ConnectionManager {
         return activeDevices.get(deviceId);
     }
 
+    public void updateDeviceMovement(long deviceId, String movement) {
+        Device device = Context.getIdentityManager().getById(deviceId);
+        if (device == null) {
+            return;
+        }
+
+        if (!movement.equals(device.getMovement())) {
+            device.setMovement(movement);
+
+            try {
+                Context.getDeviceManager().updateDeviceStatus(device);
+            } catch (SQLException error) {
+                Log.warning(error);
+            }
+
+            updateDevice(device);
+        }
+    }
+
     public void updateDevice(final long deviceId, String status, Date time) {
         Device device = Context.getIdentityManager().getById(deviceId);
         if (device == null) {

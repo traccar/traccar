@@ -47,6 +47,10 @@ public class Device extends GroupedModel {
     public static final String STATUS_ONLINE = "online";
     public static final String STATUS_OFFLINE = "offline";
 
+    public static final String MOVEMENT_MOVING = "moving";
+    public static final String MOVEMENT_PARKED = "parked";
+    public static final String MOVEMENT_IDLE = "idle";
+
     private String status;
 
     @QueryIgnore
@@ -56,6 +60,17 @@ public class Device extends GroupedModel {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    private String movement;
+
+    @QueryExtended
+    public String getMovement() {
+        return movement;
+    }
+
+    public void setMovement(String movement) {
+        this.movement = movement;
     }
 
     private Date lastUpdate;

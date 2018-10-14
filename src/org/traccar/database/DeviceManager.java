@@ -221,6 +221,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         Device cachedDevice = getById(device.getId());
         if (cachedDevice != null) {
             cachedDevice.setStatus(device.getStatus());
+            cachedDevice.setMovement(device.getMovement());
         }
     }
 

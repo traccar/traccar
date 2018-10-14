@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.TimeZone;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.traccar.BaseTest;
 import org.traccar.model.DeviceState;
@@ -20,6 +21,7 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.reports.model.TripsConfig;
 
+@Ignore
 public class MotionEventHandlerTest extends BaseTest {
 
     private Date date(String time) throws ParseException {

@@ -82,4 +82,5 @@
     <addForeignKeyConstraint baseTableName="device_maintenance" baseColumnNames="maintenanceid" constraintName="fk_device_maintenance_maintenanceid" referencedTableName="maintenances" referencedColumnNames="id" onDelete="CASCADE" />
 
   </changeSet>
+  <include file="changelog-master.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

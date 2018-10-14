@@ -99,7 +99,25 @@ public class MotionEventHandler extends BaseEventHandler {
                     result = newEvent(deviceState, newMotion);
                 }
             }
+
+            if (position.getBoolean(Position.KEY_MOTION)) {
+                Context.getConnectionManager().updateDeviceMovement(position.getDeviceId(), Device.MOVEMENT_MOVING);
+            } else {
+                if (currentTime - motionTime < tripsConfig.getMinimalParkingDuration()
+                        || ignition != null && ignition) {
+                    Context.getConnectionManager().updateDeviceMovement(position.getDeviceId(), Device.MOVEMENT_IDLE);
+                } else {
+                    Context.getConnectionManager().updateDeviceMovement(position.getDeviceId(), Device.MOVEMENT_PARKED);
+                }
+            }
+        } else {
+            if (position.getBoolean(Position.KEY_MOTION)) {
+                Context.getConnectionManager().updateDeviceMovement(position.getDeviceId(), Device.MOVEMENT_MOVING);
+            } else {
+                Context.getConnectionManager().updateDeviceMovement(position.getDeviceId(), Device.MOVEMENT_IDLE);
+            }
         }
+
         return result;
     }
 
