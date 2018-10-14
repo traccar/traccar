@@ -478,39 +478,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             content.writeByte(calendar.get(Calendar.SECOND));
             sendResponse(channel, false, MSG_TIME_REQUEST, 0, content);
 
-        } else if (type == MSG_X1_GPS) {
+        } else if (type == MSG_X1_GPS || type == MSG_X1_PHOTO_INFO) {
 
-            Position position = new Position(getProtocolName());
-            position.setDeviceId(deviceSession.getDeviceId());
-
-            buf.readUnsignedInt(); // data and alarm
-
-            decodeGps(position, buf, false, deviceSession.getTimeZone());
-
-            buf.readUnsignedShort(); // terminal info
-
-            position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
-
-            position.setNetwork(new Network(CellTower.from(
-                    buf.readUnsignedShort(), buf.readUnsignedByte(),
-                    buf.readUnsignedShort(), buf.readUnsignedInt())));
-
-            return position;
-
-        } else if (type == MSG_X1_PHOTO_INFO) {
-
-            buf.skipBytes(6); // time
-            buf.readUnsignedByte(); // fix status
-            buf.readUnsignedInt(); // latitude
-            buf.readUnsignedInt(); // longitude
-            buf.readUnsignedByte(); // camera id
-            buf.readUnsignedByte(); // photo source
-            buf.readUnsignedByte(); // picture format
-
-            ByteBuf photo = Unpooled.buffer(buf.readInt());
-            int pictureId = buf.readInt();
-            photos.put(pictureId, photo);
-            sendPhotoRequest(channel, pictureId);
+            return decodeX1(channel, buf, deviceSession, type);
 
         } else if (type == MSG_WIFI || type == MSG_WIFI_2) {
 
@@ -530,6 +500,55 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         } else {
 
             return decodeBasicOther(channel, buf, deviceSession, type, dataLength);
+
+        }
+
+        return null;
+    }
+
+    private Object decodeX1(Channel channel, ByteBuf buf, DeviceSession deviceSession, int type) {
+
+        if (type == MSG_X1_GPS) {
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            buf.readUnsignedInt(); // data and alarm
+
+            decodeGps(position, buf, false, deviceSession.getTimeZone());
+
+            buf.readUnsignedShort(); // terminal info
+
+            position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+
+            position.setNetwork(new Network(CellTower.from(
+                    buf.readUnsignedShort(), buf.readUnsignedByte(),
+                    buf.readUnsignedShort(), buf.readUnsignedInt())));
+
+            long driverId = buf.readUnsignedInt();
+            if (driverId > 0) {
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(driverId));
+            }
+
+            position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.01);
+            position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
+
+            return position;
+
+        } else if (type == MSG_X1_PHOTO_INFO) {
+
+            buf.skipBytes(6); // time
+            buf.readUnsignedByte(); // fix status
+            buf.readUnsignedInt(); // latitude
+            buf.readUnsignedInt(); // longitude
+            buf.readUnsignedByte(); // camera id
+            buf.readUnsignedByte(); // photo source
+            buf.readUnsignedByte(); // picture format
+
+            ByteBuf photo = Unpooled.buffer(buf.readInt());
+            int pictureId = buf.readInt();
+            photos.put(pictureId, photo);
+            sendPhotoRequest(channel, pictureId);
 
         }
 
