@@ -233,16 +233,24 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
 
     protected abstract void addProtocolHandlers(PipelineBuilder pipeline);
 
+    private void addHandlers(ChannelPipeline pipeline, ChannelHandler... handlers) {
+        for (ChannelHandler handler : handlers) {
+            if (handler != null) {
+                pipeline.addLast(handler);
+            }
+        }
+    }
+
     @Override
     protected void initChannel(Channel channel) throws Exception {
         final ChannelPipeline pipeline = channel.pipeline();
         if (timeout > 0 && !server.isDatagram()) {
-            pipeline.addLast("idleHandler", new IdleStateHandler(timeout, 0, 0));
+            pipeline.addLast(new IdleStateHandler(timeout, 0, 0));
         }
-        pipeline.addLast("openHandler", new OpenChannelHandler(server));
-        pipeline.addLast("messageHandler", new NetworkMessageHandler());
+        pipeline.addLast(new OpenChannelHandler(server));
+        pipeline.addLast(new NetworkMessageHandler());
         if (Context.isLoggerEnabled()) {
-            pipeline.addLast("logger", new StandardLoggingHandler());
+            pipeline.addLast(new StandardLoggingHandler());
         }
 
         addProtocolHandlers(new PipelineBuilder() {
@@ -259,101 +267,54 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
             }
         });
 
-        if (geolocationHandler != null) {
-            pipeline.addLast("location", geolocationHandler);
-        }
-        if (hemisphereHandler != null) {
-            pipeline.addLast("hemisphere", hemisphereHandler);
-        }
-
-        if (distanceHandler != null) {
-            pipeline.addLast("distance", distanceHandler);
-        }
-
-        if (remoteAddressHandler != null) {
-            pipeline.addLast("remoteAddress", remoteAddressHandler);
-        }
+        addHandlers(
+                pipeline,
+                geolocationHandler,
+                hemisphereHandler,
+                distanceHandler,
+                remoteAddressHandler);
 
         addDynamicHandlers(pipeline);
 
-        if (filterHandler != null) {
-            pipeline.addLast("filter", filterHandler);
-        }
-
-        if (geocoderHandler != null) {
-            pipeline.addLast("geocoder", geocoderHandler);
-        }
-
-        if (motionHandler != null) {
-            pipeline.addLast("motion", motionHandler);
-        }
-
-        if (engineHoursHandler != null) {
-            pipeline.addLast("engineHours", engineHoursHandler);
-        }
-
-        if (copyAttributesHandler != null) {
-            pipeline.addLast("copyAttributes", copyAttributesHandler);
-        }
-
-        if (computedAttributesHandler != null) {
-            pipeline.addLast("computedAttributes", computedAttributesHandler);
-        }
+        addHandlers(
+                pipeline,
+                filterHandler,
+                geocoderHandler,
+                motionHandler,
+                engineHoursHandler,
+                copyAttributesHandler,
+                computedAttributesHandler);
 
         if (Context.getDataManager() != null) {
-            pipeline.addLast("dataHandler", new DefaultDataHandler());
+            pipeline.addLast(new DefaultDataHandler());
         }
 
         if (Context.getConfig().getBoolean("forward.enable")) {
-            pipeline.addLast("webHandler", new WebDataHandler(Context.getConfig().getString("forward.url"),
-                    Context.getConfig().getBoolean("forward.json")));
+            pipeline.addLast(new WebDataHandler(
+                    Context.getConfig().getString("forward.url"), Context.getConfig().getBoolean("forward.json")));
         }
 
-        if (commandResultEventHandler != null) {
-            pipeline.addLast("CommandResultEventHandler", commandResultEventHandler);
-        }
+        addHandlers(
+                pipeline,
+                commandResultEventHandler,
+                overspeedEventHandler,
+                fuelDropEventHandler,
+                motionEventHandler,
+                geofenceEventHandler,
+                alertEventHandler,
+                ignitionEventHandler,
+                maintenanceEventHandler,
+                driverEventHandler);
 
-        if (overspeedEventHandler != null) {
-            pipeline.addLast("OverspeedEventHandler", overspeedEventHandler);
-        }
-
-        if (fuelDropEventHandler != null) {
-            pipeline.addLast("FuelDropEventHandler", fuelDropEventHandler);
-        }
-
-        if (motionEventHandler != null) {
-            pipeline.addLast("MotionEventHandler", motionEventHandler);
-        }
-
-        if (geofenceEventHandler != null) {
-            pipeline.addLast("GeofenceEventHandler", geofenceEventHandler);
-        }
-
-        if (alertEventHandler != null) {
-            pipeline.addLast("AlertEventHandler", alertEventHandler);
-        }
-
-        if (ignitionEventHandler != null) {
-            pipeline.addLast("IgnitionEventHandler", ignitionEventHandler);
-        }
-
-        if (maintenanceEventHandler != null) {
-            pipeline.addLast("MaintenanceEventHandler", maintenanceEventHandler);
-        }
-
-        if (driverEventHandler != null) {
-            pipeline.addLast("DriverEventHandler", driverEventHandler);
-        }
-
-        pipeline.addLast("mainHandler", new MainEventHandler());
+        pipeline.addLast(new MainEventHandler());
     }
 
     private void addDynamicHandlers(ChannelPipeline pipeline) {
         if (Context.getConfig().hasKey("extra.handlers")) {
             String[] handlers = Context.getConfig().getString("extra.handlers").split(",");
-            for (int i = 0; i < handlers.length; i++) {
+            for (String handler : handlers) {
                 try {
-                    pipeline.addLast("extraHandler." + i, (ChannelHandler) Class.forName(handlers[i]).newInstance());
+                    pipeline.addLast((ChannelHandler) Class.forName(handler).newInstance());
                 } catch (ClassNotFoundException | InstantiationException | IllegalAccessException error) {
                     LOGGER.warn("Dynamic handler error", error);
                 }
