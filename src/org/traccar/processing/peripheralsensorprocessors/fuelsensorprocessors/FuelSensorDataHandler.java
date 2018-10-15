@@ -257,27 +257,38 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         this.loadingOldDataFromDB = true;
         Collection<Device> devices = Context.getDeviceManager().getAllDevices();
 
-        Date hoursAgo = getAdjustedDate(new Date(), Calendar.HOUR_OF_DAY, -this.hoursOfDataToLoad);
+        // Load latest 24 hour of data for device
+        try {
 
-        for (Device device : devices) {
-            Optional<List<PeripheralSensor>> linkedDevices =
-                    getLinkedDevices(device.getId());
+            Collection<Position> latestPositionsOfDevices = Context.getDataManager().getLatestPositions();
+            Map<Long, Date> deviceIdToLatestDateMap = new ConcurrentHashMap<>();
+            latestPositionsOfDevices.stream().forEach(p -> {
+                deviceIdToLatestDateMap.put(p.getDeviceId(), p.getDeviceTime());
+            });
 
-            if (!linkedDevices.isPresent()) {
-                continue;
-            }
+            for (Device device : devices) {
+                Optional<List<PeripheralSensor>> linkedDevices =
+                        getLinkedDevices(device.getId());
 
-            try {
+                if (!linkedDevices.isPresent()) {
+                    continue;
+                }
+
+                Date deviceLastPositionDate = deviceIdToLatestDateMap.get(device.getId());
+                Date hoursAgo = getAdjustedDate(deviceLastPositionDate, Calendar.HOUR_OF_DAY, -this.hoursOfDataToLoad);
+
+                Log.info(String.format("Loading data from %s to %s for deviceId %d",
+                                       hoursAgo, deviceLastPositionDate, device.getId()));
+
                 Collection<Position> devicePositionsInLastDay =
                         getDataManager().getPositions(device.getId(), hoursAgo, new Date());
 
                 for (Position position : devicePositionsInLastDay) {
                     handlePosition(position);
                 }
-
-            } catch (Exception e) {
-                e.printStackTrace();
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         this.loadingOldDataFromDB = false;
     }
