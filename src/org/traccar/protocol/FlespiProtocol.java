@@ -35,10 +35,10 @@ public class FlespiProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("httpEncoder", new HttpResponseEncoder());
-                pipeline.addLast("httpDecoder", new HttpRequestDecoder());
-                pipeline.addLast("httpAggregator", new HttpObjectAggregator(Integer.MAX_VALUE));
-                pipeline.addLast("objectDecoder", new FlespiProtocolDecoder(FlespiProtocol.this));
+                pipeline.addLast(new HttpResponseEncoder());
+                pipeline.addLast(new HttpRequestDecoder());
+                pipeline.addLast(new HttpObjectAggregator(Integer.MAX_VALUE));
+                pipeline.addLast(new FlespiProtocolDecoder(FlespiProtocol.this));
             }
         });
     }

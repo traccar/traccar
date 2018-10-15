@@ -32,7 +32,7 @@ public class Xt2400Protocol extends BaseProtocol {
         serverList.add(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("objectDecoder", new Xt2400ProtocolDecoder(Xt2400Protocol.this));
+                pipeline.addLast(new Xt2400ProtocolDecoder(Xt2400Protocol.this));
             }
         });
     }

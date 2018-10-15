@@ -34,10 +34,10 @@ public class Stl060Protocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new Stl060FrameDecoder(1024));
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("objectDecoder", new Stl060ProtocolDecoder(Stl060Protocol.this));
+                pipeline.addLast(new Stl060FrameDecoder(1024));
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new Stl060ProtocolDecoder(Stl060Protocol.this));
             }
         });
     }

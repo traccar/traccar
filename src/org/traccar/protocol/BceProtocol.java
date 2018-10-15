@@ -32,8 +32,8 @@ public class BceProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new BceFrameDecoder());
-                pipeline.addLast("objectDecoder", new BceProtocolDecoder(BceProtocol.this));
+                pipeline.addLast(new BceFrameDecoder());
+                pipeline.addLast(new BceProtocolDecoder(BceProtocol.this));
             }
         });
     }

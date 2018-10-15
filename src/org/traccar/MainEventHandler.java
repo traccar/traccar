@@ -19,6 +19,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.DatagramChannel;
+import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,8 +98,8 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
         LOGGER.info(formatChannel(ctx.channel()) + " disconnected");
         closeChannel(ctx.channel());
 
-        BaseProtocolDecoder protocolDecoder = (BaseProtocolDecoder) ctx.pipeline().get("objectDecoder");
-        if (ctx.pipeline().get("httpDecoder") == null
+        BaseProtocolDecoder protocolDecoder = ctx.pipeline().get(BaseProtocolDecoder.class);
+        if (ctx.pipeline().get(HttpRequestDecoder.class) == null
                 && !connectionlessProtocols.contains(protocolDecoder.getProtocolName())) {
             Context.getConnectionManager().removeActiveDevice(ctx.channel());
         }

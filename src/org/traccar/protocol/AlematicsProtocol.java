@@ -34,10 +34,10 @@ public class AlematicsProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new AlematicsFrameDecoder(1024));
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectDecoder", new AlematicsProtocolDecoder(AlematicsProtocol.this));
+                pipeline.addLast(new AlematicsFrameDecoder(1024));
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new AlematicsProtocolDecoder(AlematicsProtocol.this));
             }
         });
     }

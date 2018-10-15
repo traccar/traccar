@@ -32,8 +32,8 @@ public class At2000Protocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new At2000FrameDecoder());
-                pipeline.addLast("objectDecoder", new At2000ProtocolDecoder(At2000Protocol.this));
+                pipeline.addLast(new At2000FrameDecoder());
+                pipeline.addLast(new At2000ProtocolDecoder(At2000Protocol.this));
             }
         });
     }

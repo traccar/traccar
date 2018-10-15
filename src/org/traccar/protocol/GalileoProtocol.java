@@ -36,9 +36,9 @@ public class GalileoProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new GalileoFrameDecoder());
-                pipeline.addLast("objectEncoder", new GalileoProtocolEncoder());
-                pipeline.addLast("objectDecoder", new GalileoProtocolDecoder(GalileoProtocol.this));
+                pipeline.addLast(new GalileoFrameDecoder());
+                pipeline.addLast(new GalileoProtocolEncoder());
+                pipeline.addLast(new GalileoProtocolDecoder(GalileoProtocol.this));
             }
         });
     }

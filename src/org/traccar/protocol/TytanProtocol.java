@@ -32,7 +32,7 @@ public class TytanProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("objectDecoder", new TytanProtocolDecoder(TytanProtocol.this));
+                pipeline.addLast(new TytanProtocolDecoder(TytanProtocol.this));
             }
         });
     }

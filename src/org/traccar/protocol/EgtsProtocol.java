@@ -32,8 +32,8 @@ public class EgtsProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new EgtsFrameDecoder());
-                pipeline.addLast("objectDecoder", new EgtsProtocolDecoder(EgtsProtocol.this));
+                pipeline.addLast(new EgtsFrameDecoder());
+                pipeline.addLast(new EgtsProtocolDecoder(EgtsProtocol.this));
             }
         });
     }

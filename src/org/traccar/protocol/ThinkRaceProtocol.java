@@ -33,8 +33,8 @@ public class ThinkRaceProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 2 + 12 + 1 + 1, 2, 2, 0));
-                pipeline.addLast("objectDecoder", new ThinkRaceProtocolDecoder(ThinkRaceProtocol.this));
+                pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 2 + 12 + 1 + 1, 2, 2, 0));
+                pipeline.addLast(new ThinkRaceProtocolDecoder(ThinkRaceProtocol.this));
             }
         });
     }

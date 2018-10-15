@@ -42,18 +42,18 @@ public class MeitrackProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new MeitrackFrameDecoder());
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("objectEncoder", new MeitrackProtocolEncoder());
-                pipeline.addLast("objectDecoder", new MeitrackProtocolDecoder(MeitrackProtocol.this));
+                pipeline.addLast(new MeitrackFrameDecoder());
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new MeitrackProtocolEncoder());
+                pipeline.addLast(new MeitrackProtocolDecoder(MeitrackProtocol.this));
             }
         });
         serverList.add(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("objectEncoder", new MeitrackProtocolEncoder());
-                pipeline.addLast("objectDecoder", new MeitrackProtocolDecoder(MeitrackProtocol.this));
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new MeitrackProtocolEncoder());
+                pipeline.addLast(new MeitrackProtocolDecoder(MeitrackProtocol.this));
             }
         });
     }

@@ -32,8 +32,8 @@ public class RoboTrackProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new RoboTrackFrameDecoder());
-                pipeline.addLast("objectDecoder", new RoboTrackProtocolDecoder(RoboTrackProtocol.this));
+                pipeline.addLast(new RoboTrackFrameDecoder());
+                pipeline.addLast(new RoboTrackProtocolDecoder(RoboTrackProtocol.this));
             }
         });
     }

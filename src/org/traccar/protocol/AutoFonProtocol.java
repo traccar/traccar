@@ -32,8 +32,8 @@ public class AutoFonProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new AutoFonFrameDecoder());
-                pipeline.addLast("objectDecoder", new AutoFonProtocolDecoder(AutoFonProtocol.this));
+                pipeline.addLast(new AutoFonFrameDecoder());
+                pipeline.addLast(new AutoFonProtocolDecoder(AutoFonProtocol.this));
             }
         });
     }

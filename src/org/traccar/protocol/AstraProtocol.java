@@ -33,14 +33,14 @@ public class AstraProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 1, 2, -3, 0));
-                pipeline.addLast("objectDecoder", new AstraProtocolDecoder(AstraProtocol.this));
+                pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 1, 2, -3, 0));
+                pipeline.addLast(new AstraProtocolDecoder(AstraProtocol.this));
             }
         });
         serverList.add(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("objectDecoder", new AstraProtocolDecoder(AstraProtocol.this));
+                pipeline.addLast(new AstraProtocolDecoder(AstraProtocol.this));
             }
         });
     }

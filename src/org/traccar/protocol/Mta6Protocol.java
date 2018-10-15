@@ -36,10 +36,10 @@ public class Mta6Protocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("httpEncoder", new HttpResponseEncoder());
-                pipeline.addLast("httpDecoder", new HttpRequestDecoder());
-                pipeline.addLast("httpAggregator", new HttpObjectAggregator(65535));
-                pipeline.addLast("objectDecoder", new Mta6ProtocolDecoder(
+                pipeline.addLast(new HttpResponseEncoder());
+                pipeline.addLast(new HttpRequestDecoder());
+                pipeline.addLast(new HttpObjectAggregator(65535));
+                pipeline.addLast(new Mta6ProtocolDecoder(
                         Mta6Protocol.this, !Context.getConfig().getBoolean(getName() + ".can")));
             }
         });

@@ -42,9 +42,9 @@ public class RuptelaProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 0, 2, 2, 0));
-                pipeline.addLast("objectEncoder", new RuptelaProtocolEncoder());
-                pipeline.addLast("objectDecoder", new RuptelaProtocolDecoder(RuptelaProtocol.this));
+                pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 0, 2, 2, 0));
+                pipeline.addLast(new RuptelaProtocolEncoder());
+                pipeline.addLast(new RuptelaProtocolDecoder(RuptelaProtocol.this));
             }
         });
     }

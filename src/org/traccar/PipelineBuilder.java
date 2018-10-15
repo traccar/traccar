@@ -19,6 +19,8 @@ import io.netty.channel.ChannelHandler;
 
 public interface PipelineBuilder {
 
-    void addLast(String name, ChannelHandler handler);
+    void addLast(ChannelHandler handler);
+
+    void addLast(String name, ChannelHandler handler); // TODO remove
 
 }

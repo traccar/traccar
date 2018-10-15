@@ -32,8 +32,8 @@ public class NvsProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new NvsFrameDecoder());
-                pipeline.addLast("objectDecoder", new NvsProtocolDecoder(NvsProtocol.this));
+                pipeline.addLast(new NvsFrameDecoder());
+                pipeline.addLast(new NvsProtocolDecoder(NvsProtocol.this));
             }
         });
     }

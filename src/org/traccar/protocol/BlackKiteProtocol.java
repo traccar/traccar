@@ -33,8 +33,8 @@ public class BlackKiteProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new GalileoFrameDecoder());
-                pipeline.addLast("objectDecoder", new BlackKiteProtocolDecoder(BlackKiteProtocol.this));
+                pipeline.addLast(new GalileoFrameDecoder());
+                pipeline.addLast(new BlackKiteProtocolDecoder(BlackKiteProtocol.this));
             }
         });
     }

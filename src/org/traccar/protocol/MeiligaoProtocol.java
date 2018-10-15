@@ -42,16 +42,16 @@ public class MeiligaoProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new MeiligaoFrameDecoder());
-                pipeline.addLast("objectEncoder", new MeiligaoProtocolEncoder());
-                pipeline.addLast("objectDecoder", new MeiligaoProtocolDecoder(MeiligaoProtocol.this));
+                pipeline.addLast(new MeiligaoFrameDecoder());
+                pipeline.addLast(new MeiligaoProtocolEncoder());
+                pipeline.addLast(new MeiligaoProtocolDecoder(MeiligaoProtocol.this));
             }
         });
         serverList.add(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("objectEncoder", new MeiligaoProtocolEncoder());
-                pipeline.addLast("objectDecoder", new MeiligaoProtocolDecoder(MeiligaoProtocol.this));
+                pipeline.addLast(new MeiligaoProtocolEncoder());
+                pipeline.addLast(new MeiligaoProtocolDecoder(MeiligaoProtocol.this));
             }
         });
     }

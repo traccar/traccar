@@ -39,11 +39,11 @@ public class TotemProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new TotemFrameDecoder());
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectEncoder", new TotemProtocolEncoder());
-                pipeline.addLast("objectDecoder", new TotemProtocolDecoder(TotemProtocol.this));
+                pipeline.addLast(new TotemFrameDecoder());
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new TotemProtocolEncoder());
+                pipeline.addLast(new TotemProtocolDecoder(TotemProtocol.this));
             }
         });
     }

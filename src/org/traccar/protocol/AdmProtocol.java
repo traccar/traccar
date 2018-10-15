@@ -39,11 +39,10 @@ public class AdmProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder",
-                        new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 1024, 2, 1, -3, 0, true));
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("objectEncoder", new AdmProtocolEncoder());
-                pipeline.addLast("objectDecoder", new AdmProtocolDecoder(AdmProtocol.this));
+                pipeline.addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 1024, 2, 1, -3, 0, true));
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new AdmProtocolEncoder());
+                pipeline.addLast(new AdmProtocolDecoder(AdmProtocol.this));
             }
         });
     }

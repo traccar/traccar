@@ -34,16 +34,16 @@ public class VtfmsProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new VtfmsFrameDecoder());
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectDecoder", new VtfmsProtocolDecoder(VtfmsProtocol.this));
+                pipeline.addLast(new VtfmsFrameDecoder());
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new VtfmsProtocolDecoder(VtfmsProtocol.this));
             }
         });
         serverList.add(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectDecoder", new VtfmsProtocolDecoder(VtfmsProtocol.this));
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new VtfmsProtocolDecoder(VtfmsProtocol.this));
             }
         });
     }

@@ -32,7 +32,7 @@ public class CalAmpProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("objectDecoder", new CalAmpProtocolDecoder(CalAmpProtocol.this));
+                pipeline.addLast(new CalAmpProtocolDecoder(CalAmpProtocol.this));
             }
         });
     }

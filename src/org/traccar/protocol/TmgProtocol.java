@@ -34,10 +34,10 @@ public class TmgProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new TmgFrameDecoder());
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectDecoder", new TmgProtocolDecoder(TmgProtocol.this));
+                pipeline.addLast(new TmgFrameDecoder());
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new TmgProtocolDecoder(TmgProtocol.this));
             }
         });
     }

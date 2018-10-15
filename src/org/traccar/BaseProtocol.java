@@ -16,6 +16,7 @@
 package org.traccar;
 
 import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.database.ActiveDevice;
 import org.traccar.helper.DataConverter;
 import org.traccar.model.Command;
@@ -75,7 +76,7 @@ public abstract class BaseProtocol implements Protocol {
             activeDevice.write(command);
         } else if (command.getType().equals(Command.TYPE_CUSTOM)) {
             String data = command.getString(Command.KEY_DATA);
-            if (activeDevice.getChannel().pipeline().get("stringEncoder") != null) {
+            if (activeDevice.getChannel().pipeline().get(StringEncoder.class) != null) {
                 activeDevice.write(data);
             } else {
                 activeDevice.write(Unpooled.wrappedBuffer(DataConverter.parseHex(data)));

@@ -34,9 +34,8 @@ public class AutoTrackProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder",
-                        new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 1024, 5, 2, 2, 0, true));
-                pipeline.addLast("objectDecoder", new AutoTrackProtocolDecoder(AutoTrackProtocol.this));
+                pipeline.addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 1024, 5, 2, 2, 0, true));
+                pipeline.addLast(new AutoTrackProtocolDecoder(AutoTrackProtocol.this));
             }
         });
     }

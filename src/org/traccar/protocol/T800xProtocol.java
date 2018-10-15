@@ -36,9 +36,9 @@ public class T800xProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 3, 2, -5, 0));
-                pipeline.addLast("objectEncoder", new T800xProtocolEncoder());
-                pipeline.addLast("objectDecoder", new T800xProtocolDecoder(T800xProtocol.this));
+                pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 3, 2, -5, 0));
+                pipeline.addLast(new T800xProtocolEncoder());
+                pipeline.addLast(new T800xProtocolDecoder(T800xProtocol.this));
             }
         });
     }

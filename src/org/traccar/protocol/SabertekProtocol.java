@@ -33,9 +33,9 @@ public class SabertekProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new SabertekFrameDecoder());
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectDecoder", new SabertekProtocolDecoder(SabertekProtocol.this));
+                pipeline.addLast(new SabertekFrameDecoder());
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new SabertekProtocolDecoder(SabertekProtocol.this));
             }
         });
     }

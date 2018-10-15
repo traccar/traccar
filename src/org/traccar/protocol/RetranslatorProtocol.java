@@ -32,8 +32,8 @@ public class RetranslatorProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new RetranslatorFrameDecoder());
-                pipeline.addLast("objectDecoder", new RetranslatorProtocolDecoder(RetranslatorProtocol.this));
+                pipeline.addLast(new RetranslatorFrameDecoder());
+                pipeline.addLast(new RetranslatorProtocolDecoder(RetranslatorProtocol.this));
             }
         });
     }

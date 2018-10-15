@@ -35,16 +35,16 @@ public class CellocatorProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new CellocatorFrameDecoder());
-                pipeline.addLast("objectEncoder", new CellocatorProtocolEncoder());
-                pipeline.addLast("objectDecoder", new CellocatorProtocolDecoder(CellocatorProtocol.this));
+                pipeline.addLast(new CellocatorFrameDecoder());
+                pipeline.addLast(new CellocatorProtocolEncoder());
+                pipeline.addLast(new CellocatorProtocolDecoder(CellocatorProtocol.this));
             }
         });
         serverList.add(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("objectEncoder", new CellocatorProtocolEncoder());
-                pipeline.addLast("objectDecoder", new CellocatorProtocolDecoder(CellocatorProtocol.this));
+                pipeline.addLast(new CellocatorProtocolEncoder());
+                pipeline.addLast(new CellocatorProtocolDecoder(CellocatorProtocol.this));
             }
         });
     }

@@ -35,10 +35,10 @@ public class Pt60Protocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, "@R#@"));
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectDecoder", new Pt60ProtocolDecoder(Pt60Protocol.this));
+                pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, "@R#@"));
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new Pt60ProtocolDecoder(Pt60Protocol.this));
             }
         });
     }

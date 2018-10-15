@@ -32,8 +32,8 @@ public class TramigoProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new TramigoFrameDecoder());
-                pipeline.addLast("objectDecoder", new TramigoProtocolDecoder(TramigoProtocol.this));
+                pipeline.addLast(new TramigoFrameDecoder());
+                pipeline.addLast(new TramigoProtocolDecoder(TramigoProtocol.this));
             }
         });
     }

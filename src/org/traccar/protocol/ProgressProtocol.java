@@ -34,9 +34,8 @@ public class ProgressProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder",
-                        new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 1024, 2, 2, 4, 0, true));
-                pipeline.addLast("objectDecoder", new ProgressProtocolDecoder(ProgressProtocol.this));
+                pipeline.addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 1024, 2, 2, 4, 0, true));
+                pipeline.addLast(new ProgressProtocolDecoder(ProgressProtocol.this));
             }
         });
     }

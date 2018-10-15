@@ -33,8 +33,8 @@ public class WristbandProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 3, 2, 3, 0));
-                pipeline.addLast("objectDecoder", new WristbandProtocolDecoder(WristbandProtocol.this));
+                pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 3, 2, 3, 0));
+                pipeline.addLast(new WristbandProtocolDecoder(WristbandProtocol.this));
             }
         });
     }

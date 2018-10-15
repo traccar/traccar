@@ -32,7 +32,7 @@ public class OigoProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("objectDecoder", new OigoProtocolDecoder(OigoProtocol.this));
+                pipeline.addLast(new OigoProtocolDecoder(OigoProtocol.this));
             }
         });
     }

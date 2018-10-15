@@ -32,7 +32,7 @@ public class SmokeyProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("objectDecoder", new SmokeyProtocolDecoder(SmokeyProtocol.this));
+                pipeline.addLast(new SmokeyProtocolDecoder(SmokeyProtocol.this));
             }
         });
     }

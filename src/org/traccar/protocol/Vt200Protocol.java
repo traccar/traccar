@@ -32,8 +32,8 @@ public class Vt200Protocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new Vt200FrameDecoder());
-                pipeline.addLast("objectDecoder", new Vt200ProtocolDecoder(Vt200Protocol.this));
+                pipeline.addLast(new Vt200FrameDecoder());
+                pipeline.addLast(new Vt200ProtocolDecoder(Vt200Protocol.this));
             }
         });
     }

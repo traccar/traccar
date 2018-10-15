@@ -33,8 +33,8 @@ public class AnytrekProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 2, 2, 2, 0));
-                pipeline.addLast("objectDecoder", new AnytrekProtocolDecoder(AnytrekProtocol.this));
+                pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 2, 2, 2, 0));
+                pipeline.addLast(new AnytrekProtocolDecoder(AnytrekProtocol.this));
             }
         });
     }

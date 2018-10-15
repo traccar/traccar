@@ -35,16 +35,16 @@ public class TeltonikaProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new TeltonikaFrameDecoder());
-                pipeline.addLast("objectEncoder", new TeltonikaProtocolEncoder());
-                pipeline.addLast("objectDecoder", new TeltonikaProtocolDecoder(TeltonikaProtocol.this, false));
+                pipeline.addLast(new TeltonikaFrameDecoder());
+                pipeline.addLast(new TeltonikaProtocolEncoder());
+                pipeline.addLast(new TeltonikaProtocolDecoder(TeltonikaProtocol.this, false));
             }
         });
         serverList.add(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("objectEncoder", new TeltonikaProtocolEncoder());
-                pipeline.addLast("objectDecoder", new TeltonikaProtocolDecoder(TeltonikaProtocol.this, true));
+                pipeline.addLast(new TeltonikaProtocolEncoder());
+                pipeline.addLast(new TeltonikaProtocolDecoder(TeltonikaProtocol.this, true));
             }
         });
     }

@@ -43,18 +43,18 @@ public class WondexProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new WondexFrameDecoder());
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("objectEncoder", new WondexProtocolEncoder());
-                pipeline.addLast("objectDecoder", new WondexProtocolDecoder(WondexProtocol.this));
+                pipeline.addLast(new WondexFrameDecoder());
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new WondexProtocolEncoder());
+                pipeline.addLast(new WondexProtocolDecoder(WondexProtocol.this));
             }
         });
         serverList.add(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("objectEncoder", new WondexProtocolEncoder());
-                pipeline.addLast("objectDecoder", new WondexProtocolDecoder(WondexProtocol.this));
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new WondexProtocolEncoder());
+                pipeline.addLast(new WondexProtocolDecoder(WondexProtocol.this));
             }
         });
     }

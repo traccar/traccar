@@ -32,8 +32,8 @@ public class UlbotechProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new UlbotechFrameDecoder());
-                pipeline.addLast("objectDecoder", new UlbotechProtocolDecoder(UlbotechProtocol.this));
+                pipeline.addLast(new UlbotechFrameDecoder());
+                pipeline.addLast(new UlbotechProtocolDecoder(UlbotechProtocol.this));
             }
         });
     }

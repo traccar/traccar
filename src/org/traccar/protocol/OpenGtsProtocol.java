@@ -35,10 +35,10 @@ public class OpenGtsProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("httpEncoder", new HttpResponseEncoder());
-                pipeline.addLast("httpDecoder", new HttpRequestDecoder());
-                pipeline.addLast("httpAggregator", new HttpObjectAggregator(16384));
-                pipeline.addLast("objectDecoder", new OpenGtsProtocolDecoder(OpenGtsProtocol.this));
+                pipeline.addLast(new HttpResponseEncoder());
+                pipeline.addLast(new HttpRequestDecoder());
+                pipeline.addLast(new HttpObjectAggregator(16384));
+                pipeline.addLast(new OpenGtsProtocolDecoder(OpenGtsProtocol.this));
             }
         });
     }

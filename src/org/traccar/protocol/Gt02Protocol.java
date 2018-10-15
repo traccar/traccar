@@ -33,8 +33,8 @@ public class Gt02Protocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(256, 2, 1, 2, 0));
-                pipeline.addLast("objectDecoder", new Gt02ProtocolDecoder(Gt02Protocol.this));
+                pipeline.addLast(new LengthFieldBasedFrameDecoder(256, 2, 1, 2, 0));
+                pipeline.addLast(new Gt02ProtocolDecoder(Gt02Protocol.this));
             }
         });
     }

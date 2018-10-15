@@ -33,14 +33,14 @@ public class PricolProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new FixedLengthFrameDecoder(64));
-                pipeline.addLast("objectDecoder", new PricolProtocolDecoder(PricolProtocol.this));
+                pipeline.addLast(new FixedLengthFrameDecoder(64));
+                pipeline.addLast(new PricolProtocolDecoder(PricolProtocol.this));
             }
         });
         serverList.add(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("objectDecoder", new PricolProtocolDecoder(PricolProtocol.this));
+                pipeline.addLast(new PricolProtocolDecoder(PricolProtocol.this));
             }
         });
     }

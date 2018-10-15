@@ -32,8 +32,8 @@ public class Gps056Protocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new Gps056FrameDecoder());
-                pipeline.addLast("objectDecoder", new Gps056ProtocolDecoder(Gps056Protocol.this));
+                pipeline.addLast(new Gps056FrameDecoder());
+                pipeline.addLast(new Gps056ProtocolDecoder(Gps056Protocol.this));
             }
         });
     }

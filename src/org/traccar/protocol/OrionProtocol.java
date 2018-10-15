@@ -32,8 +32,8 @@ public class OrionProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new OrionFrameDecoder());
-                pipeline.addLast("objectDecoder", new OrionProtocolDecoder(OrionProtocol.this));
+                pipeline.addLast(new OrionFrameDecoder());
+                pipeline.addLast(new OrionProtocolDecoder(OrionProtocol.this));
             }
         });
     }

@@ -32,8 +32,8 @@ public class NavigilProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new NavigilFrameDecoder());
-                pipeline.addLast("objectDecoder", new NavigilProtocolDecoder(NavigilProtocol.this));
+                pipeline.addLast(new NavigilFrameDecoder());
+                pipeline.addLast(new NavigilProtocolDecoder(NavigilProtocol.this));
             }
         });
     }

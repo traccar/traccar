@@ -34,9 +34,8 @@ public class NavisProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder",
-                        new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 4 * 1024, 12, 2, 2, 0, true));
-                pipeline.addLast("objectDecoder", new NavisProtocolDecoder(NavisProtocol.this));
+                pipeline.addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 4096, 12, 2, 2, 0, true));
+                pipeline.addLast(new NavisProtocolDecoder(NavisProtocol.this));
             }
         });
     }

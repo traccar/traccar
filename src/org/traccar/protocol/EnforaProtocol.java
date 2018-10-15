@@ -38,9 +38,9 @@ public class EnforaProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 0, 2, -2, 2));
-                pipeline.addLast("objectEncoder", new EnforaProtocolEncoder());
-                pipeline.addLast("objectDecoder", new EnforaProtocolDecoder(EnforaProtocol.this));
+                pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 0, 2, -2, 2));
+                pipeline.addLast(new EnforaProtocolEncoder());
+                pipeline.addLast(new EnforaProtocolDecoder(EnforaProtocol.this));
             }
         });
     }

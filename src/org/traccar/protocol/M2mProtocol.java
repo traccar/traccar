@@ -33,8 +33,8 @@ public class M2mProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new FixedLengthFrameDecoder(23));
-                pipeline.addLast("objectDecoder", new M2mProtocolDecoder(M2mProtocol.this));
+                pipeline.addLast(new FixedLengthFrameDecoder(23));
+                pipeline.addLast(new M2mProtocolDecoder(M2mProtocol.this));
             }
         });
     }

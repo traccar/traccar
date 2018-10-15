@@ -35,10 +35,10 @@ public class Gt30Protocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectDecoder", new Gt30ProtocolDecoder(Gt30Protocol.this));
+                pipeline.addLast(new LineBasedFrameDecoder(1024));
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new Gt30ProtocolDecoder(Gt30Protocol.this));
             }
         });
     }

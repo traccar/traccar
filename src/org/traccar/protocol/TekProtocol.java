@@ -32,8 +32,8 @@ public class TekProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new TekFrameDecoder());
-                pipeline.addLast("objectDecoder", new TekProtocolDecoder(TekProtocol.this));
+                pipeline.addLast(new TekFrameDecoder());
+                pipeline.addLast(new TekProtocolDecoder(TekProtocol.this));
             }
         });
     }

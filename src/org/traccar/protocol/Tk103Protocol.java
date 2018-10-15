@@ -54,20 +54,20 @@ public class Tk103Protocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new Tk103FrameDecoder());
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("objectEncoder", new Tk103ProtocolEncoder());
-                pipeline.addLast("objectDecoder", new Tk103ProtocolDecoder(Tk103Protocol.this));
+                pipeline.addLast(new Tk103FrameDecoder());
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new Tk103ProtocolEncoder());
+                pipeline.addLast(new Tk103ProtocolDecoder(Tk103Protocol.this));
             }
         });
         serverList.add(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("objectEncoder", new Tk103ProtocolEncoder());
-                pipeline.addLast("objectDecoder", new Tk103ProtocolDecoder(Tk103Protocol.this));
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new Tk103ProtocolEncoder());
+                pipeline.addLast(new Tk103ProtocolDecoder(Tk103Protocol.this));
             }
         });
     }

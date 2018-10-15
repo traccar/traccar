@@ -35,10 +35,10 @@ public class MaestroProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new FixedLengthFrameDecoder(160));
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectDecoder", new MaestroProtocolDecoder(MaestroProtocol.this));
+                pipeline.addLast(new FixedLengthFrameDecoder(160));
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new MaestroProtocolDecoder(MaestroProtocol.this));
             }
         });
     }

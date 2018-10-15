@@ -32,8 +32,8 @@ public class MxtProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                    pipeline.addLast("frameDecoder", new MxtFrameDecoder());
-                    pipeline.addLast("objectDecoder", new MxtProtocolDecoder(MxtProtocol.this));
+                    pipeline.addLast(new MxtFrameDecoder());
+                    pipeline.addLast(new MxtProtocolDecoder(MxtProtocol.this));
                 }
         });
     }

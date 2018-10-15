@@ -37,9 +37,9 @@ public class KhdProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(512, 3, 2));
-                pipeline.addLast("objectEncoder", new KhdProtocolEncoder());
-                pipeline.addLast("objectDecoder", new KhdProtocolDecoder(KhdProtocol.this));
+                pipeline.addLast(new LengthFieldBasedFrameDecoder(512, 3, 2));
+                pipeline.addLast(new KhdProtocolEncoder());
+                pipeline.addLast(new KhdProtocolDecoder(KhdProtocol.this));
             }
         });
     }

@@ -32,8 +32,8 @@ public class AplicomProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new AplicomFrameDecoder());
-                pipeline.addLast("objectDecoder", new AplicomProtocolDecoder(AplicomProtocol.this));
+                pipeline.addLast(new AplicomFrameDecoder());
+                pipeline.addLast(new AplicomProtocolDecoder(AplicomProtocol.this));
             }
         });
     }

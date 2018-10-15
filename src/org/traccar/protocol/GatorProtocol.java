@@ -33,14 +33,14 @@ public class GatorProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 3, 2));
-                pipeline.addLast("objectDecoder", new GatorProtocolDecoder(GatorProtocol.this));
+                pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 3, 2));
+                pipeline.addLast(new GatorProtocolDecoder(GatorProtocol.this));
             }
         });
         serverList.add(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("objectDecoder", new GatorProtocolDecoder(GatorProtocol.this));
+                pipeline.addLast(new GatorProtocolDecoder(GatorProtocol.this));
             }
         });
     }

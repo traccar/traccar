@@ -43,14 +43,14 @@ public class XexunProtocol extends BaseProtocol {
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 boolean full = Context.getConfig().getBoolean(getName() + ".extended");
                 if (full) {
-                    pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024)); // tracker bug \n\r
+                    pipeline.addLast(new LineBasedFrameDecoder(1024)); // tracker bug \n\r
                 } else {
-                    pipeline.addLast("frameDecoder", new XexunFrameDecoder());
+                    pipeline.addLast(new XexunFrameDecoder());
                 }
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectEncoder", new XexunProtocolEncoder());
-                pipeline.addLast("objectDecoder", new XexunProtocolDecoder(XexunProtocol.this, full));
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new XexunProtocolEncoder());
+                pipeline.addLast(new XexunProtocolDecoder(XexunProtocol.this, full));
             }
         });
     }

@@ -35,10 +35,10 @@ public class TrvProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '#'));
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectDecoder", new TrvProtocolDecoder(TrvProtocol.this));
+                pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, '#'));
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new TrvProtocolDecoder(TrvProtocol.this));
             }
         });
     }

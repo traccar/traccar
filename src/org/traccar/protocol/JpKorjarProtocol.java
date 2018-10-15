@@ -34,9 +34,9 @@ public class JpKorjarProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, this.getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new JpKorjarFrameDecoder());
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectDecoder", new JpKorjarProtocolDecoder(JpKorjarProtocol.this));
+                pipeline.addLast(new JpKorjarFrameDecoder());
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new JpKorjarProtocolDecoder(JpKorjarProtocol.this));
             }
         });
     }

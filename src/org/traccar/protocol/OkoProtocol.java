@@ -34,9 +34,9 @@ public class OkoProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '}'));
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectDecoder", new OkoProtocolDecoder(OkoProtocol.this));
+                pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, '}'));
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new OkoProtocolDecoder(OkoProtocol.this));
             }
         });
     }

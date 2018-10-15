@@ -48,11 +48,11 @@ public class MiniFinderProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, ';'));
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectEncoder", new MiniFinderProtocolEncoder());
-                pipeline.addLast("objectDecoder", new MiniFinderProtocolDecoder(MiniFinderProtocol.this));
+                pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, ';'));
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new MiniFinderProtocolEncoder());
+                pipeline.addLast(new MiniFinderProtocolDecoder(MiniFinderProtocol.this));
             }
         });
     }

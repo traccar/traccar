@@ -34,9 +34,9 @@ public class Ivt401Protocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, ';'));
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectDecoder", new Ivt401ProtocolDecoder(Ivt401Protocol.this));
+                pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, ';'));
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new Ivt401ProtocolDecoder(Ivt401Protocol.this));
             }
         });
     }

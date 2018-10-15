@@ -35,10 +35,10 @@ public class ArknavProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '\r'));
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("objectDecoder", new ArknavProtocolDecoder(ArknavProtocol.this));
+                pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, '\r'));
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new ArknavProtocolDecoder(ArknavProtocol.this));
             }
         });
     }
