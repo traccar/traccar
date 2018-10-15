@@ -261,6 +261,11 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         try {
 
             Collection<Position> latestPositionsOfDevices = Context.getDataManager().getLatestPositions();
+            if (latestPositionsOfDevices.isEmpty()) {
+                this.loadingOldDataFromDB = true;
+                return;
+            }
+
             Map<Long, Date> deviceIdToLatestDateMap = new ConcurrentHashMap<>();
             latestPositionsOfDevices.stream().forEach(p -> {
                 deviceIdToLatestDateMap.put(p.getDeviceId(), p.getDeviceTime());
