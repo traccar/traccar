@@ -15,12 +15,34 @@
  */
 package org.traccar;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
+import com.google.inject.assistedinject.FactoryModuleBuilder;
+import org.traccar.database.IdentityManager;
+
+import javax.ws.rs.client.Client;
 
 public class MainModule extends AbstractModule {
 
+    @Provides
+    public static ObjectMapper getObjectMapper() {
+        return Context.getObjectMapper();
+    }
+
+    @Provides
+    public static IdentityManager getIdentityManager() {
+        return Context.getIdentityManager();
+    }
+
+    @Provides
+    public static Client getClient() {
+        return Context.getClient();
+    }
+
     @Override
     protected void configure() {
+        install(new FactoryModuleBuilder().build(WebDataHandler.Factory.class));
     }
 
 }
