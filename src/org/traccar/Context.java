@@ -64,6 +64,7 @@ import org.traccar.geocoder.OpenCageGeocoder;
 import org.traccar.geocoder.Geocoder;
 import org.traccar.geolocation.UnwiredGeolocationProvider;
 import org.traccar.helper.Log;
+import org.traccar.helper.SanitizerModule;
 import org.traccar.model.Attribute;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Calendar;
@@ -366,6 +367,7 @@ public final class Context {
         }
 
         objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new SanitizerModule());
         objectMapper.registerModule(new JSR353Module());
         objectMapper.setConfig(
                 objectMapper.getSerializationConfig().without(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS));
