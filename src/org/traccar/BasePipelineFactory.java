@@ -265,19 +265,6 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
                 }
                 pipeline.addLast(handler);
             }
-
-            // TODO remove
-            @Override
-            public void addLast(String name, ChannelHandler handler) {
-                if (!(handler instanceof BaseProtocolDecoder || handler instanceof BaseProtocolEncoder)) {
-                    if (handler instanceof ChannelInboundHandler) {
-                        handler = new WrapperInboundHandler((ChannelInboundHandler) handler);
-                    } else {
-                        handler = new WrapperOutboundHandler((ChannelOutboundHandler) handler);
-                    }
-                }
-                pipeline.addLast(name, handler);
-            }
         });
 
         addHandlers(

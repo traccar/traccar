@@ -21,6 +21,4 @@ public interface PipelineBuilder {
 
     void addLast(ChannelHandler handler);
 
-    void addLast(String name, ChannelHandler handler); // TODO remove
-
 }
