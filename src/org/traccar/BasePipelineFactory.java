@@ -249,9 +249,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
         }
         pipeline.addLast(new OpenChannelHandler(server));
         pipeline.addLast(new NetworkMessageHandler());
-        if (Context.isLoggerEnabled()) {
-            pipeline.addLast(new StandardLoggingHandler());
-        }
+        pipeline.addLast(new StandardLoggingHandler());
 
         addProtocolHandlers(new PipelineBuilder() {
             @Override

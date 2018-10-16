@@ -111,12 +111,6 @@ public final class Context {
         return config;
     }
 
-    private static boolean loggerEnabled;
-
-    public static boolean isLoggerEnabled() {
-        return loggerEnabled;
-    }
-
     private static ObjectMapper objectMapper;
 
     public static ObjectMapper getObjectMapper() {
@@ -367,8 +361,7 @@ public final class Context {
         config = new Config();
         config.load(configFile);
 
-        loggerEnabled = config.getBoolean("logger.enable");
-        if (loggerEnabled) {
+        if (config.getBoolean("logger.enable")) {
             Log.setupLogger(config);
         }
 
