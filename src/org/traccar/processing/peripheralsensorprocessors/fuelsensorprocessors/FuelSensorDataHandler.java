@@ -505,7 +505,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
         List<Position> relevantPositionsListForAlerts =
                 getRelevantPositionsSubList(positionsForDeviceSensor,
-                                            position,
+                                            positionUnderEvaluation,
                                             maxValuesForAlerts);
 
         if (!this.loadingOldDataFromDB && relevantPositionsListForAlerts.size() >= maxValuesForAlerts) {
@@ -585,7 +585,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                             Math.abs(calculatedFuelChangeVolume) -
                             expectedFuelConsumptionValues.expectedCurrentFuelConsumed;
                     FuelActivity activity =
-                            new FuelActivity(FuelActivityType.FUEL_FILL, possibleFuelDrain, lastPosition, position);
+                            new FuelActivity(FuelActivityType.FUEL_DRAIN, possibleFuelDrain, lastPosition, position);
                     return Optional.of(activity);
                 } else {
                     double possibleFuelFill =
@@ -747,14 +747,17 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         }
 
         TreeMap<Long, SensorPointsMap> sensorPointsToVolumeMap = maybeSensorPointsToVolumeMap.get();
-        SensorPointsMap previousFuelLevelInfo = sensorPointsToVolumeMap.floorEntry(sensorFuelLevelPoints).getValue();
-        SensorPointsMap nextFuelLevelInfo = sensorPointsToVolumeMap.ceilingEntry(sensorFuelLevelPoints).getValue();
+        Map.Entry<Long, SensorPointsMap> previous = sensorPointsToVolumeMap.floorEntry(sensorFuelLevelPoints);
+        Map.Entry<Long, SensorPointsMap> next = sensorPointsToVolumeMap.ceilingEntry(sensorFuelLevelPoints);
 
-        if (nextFuelLevelInfo == null) {
-            Log.debug("Null nextFuelLevelInfo - deviceID: " + deviceId
-                     + " sensorId: " + sensorId);
+        if (next == null || previous == null) {
+            Log.debug("Null FuelLevelInfo - deviceID: " + deviceId
+                              + " sensorId: " + sensorId);
             return Optional.empty();
         }
+        
+        SensorPointsMap previousFuelLevelInfo = previous.getValue();
+        SensorPointsMap nextFuelLevelInfo = next.getValue();
 
         try {
             double currentAveragePointsPerLitre = nextFuelLevelInfo.getPointsPerLitre();
