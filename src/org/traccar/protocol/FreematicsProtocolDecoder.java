@@ -19,6 +19,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -31,7 +32,7 @@ import java.util.List;
 
 public class FreematicsProtocolDecoder extends BaseProtocolDecoder {
 
-    public FreematicsProtocolDecoder(FreematicsProtocol protocol) {
+    public FreematicsProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

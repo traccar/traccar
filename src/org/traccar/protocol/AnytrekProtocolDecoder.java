@@ -22,6 +22,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -31,7 +32,7 @@ import java.net.SocketAddress;
 
 public class AnytrekProtocolDecoder extends BaseProtocolDecoder {
 
-    public AnytrekProtocolDecoder(AnytrekProtocol protocol) {
+    public AnytrekProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

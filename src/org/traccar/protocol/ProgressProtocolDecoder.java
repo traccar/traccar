@@ -22,6 +22,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.model.Position;
 
@@ -36,7 +37,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
     private long lastIndex;
     private long newIndex;
 
-    public ProgressProtocolDecoder(ProgressProtocol protocol) {
+    public ProgressProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

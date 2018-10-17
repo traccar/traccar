@@ -20,6 +20,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -34,7 +35,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
     private String format0;
     private String format1;
 
-    public GlobalSatProtocolDecoder(GlobalSatProtocol protocol) {
+    public GlobalSatProtocolDecoder(Protocol protocol) {
         super(protocol);
 
         format0 = Context.getConfig().getString(getProtocolName() + ".format0", "TSPRXAB27GHKLMnaicz*U!");

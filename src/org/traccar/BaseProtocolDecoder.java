@@ -50,7 +50,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     }
 
     public String getProtocolName() {
-        return protocol.getName();
+        return protocol != null ? protocol.getName() : null;
     }
 
     public String getServer(Channel channel) {

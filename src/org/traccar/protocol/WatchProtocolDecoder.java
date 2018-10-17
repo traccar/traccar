@@ -21,6 +21,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -37,7 +38,7 @@ import java.util.regex.Pattern;
 
 public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
-    public WatchProtocolDecoder(WatchProtocol protocol) {
+    public WatchProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

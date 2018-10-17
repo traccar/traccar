@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.PatternBuilder;
 
@@ -30,7 +31,7 @@ import org.traccar.model.Position;
 
 public class SviasProtocolDecoder extends BaseProtocolDecoder {
 
-    public SviasProtocolDecoder(SviasProtocol protocol) {
+    public SviasProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

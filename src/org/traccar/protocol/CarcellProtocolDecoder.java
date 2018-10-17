@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.Parser;
 import org.traccar.helper.Parser.CoordinateFormat;
 import org.traccar.helper.PatternBuilder;
@@ -29,7 +30,7 @@ import org.traccar.model.Position;
 
 public class CarcellProtocolDecoder extends BaseProtocolDecoder {
 
-    public CarcellProtocolDecoder(CarcellProtocol protocol) {
+    public CarcellProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

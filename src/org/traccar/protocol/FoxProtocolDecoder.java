@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -28,7 +29,7 @@ import java.util.regex.Pattern;
 
 public class FoxProtocolDecoder extends BaseProtocolDecoder {
 
-    public FoxProtocolDecoder(FoxProtocol protocol) {
+    public FoxProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

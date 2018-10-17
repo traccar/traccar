@@ -22,6 +22,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -41,7 +42,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
     private ByteBuf photo;
 
-    public MeitrackProtocolDecoder(MeitrackProtocol protocol) {
+    public MeitrackProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

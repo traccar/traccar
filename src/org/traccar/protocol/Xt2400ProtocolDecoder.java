@@ -20,6 +20,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.DataConverter;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -34,7 +35,7 @@ import java.util.regex.Pattern;
 
 public class Xt2400ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Xt2400ProtocolDecoder(Xt2400Protocol protocol) {
+    public Xt2400ProtocolDecoder(Protocol protocol) {
         super(protocol);
 
         String config = Context.getConfig().getString(getProtocolName() + ".config");

@@ -22,6 +22,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.model.Position;
 
@@ -35,7 +36,7 @@ import java.util.Set;
 
 public class BlackKiteProtocolDecoder extends BaseProtocolDecoder {
 
-    public BlackKiteProtocolDecoder(BlackKiteProtocol protocol) {
+    public BlackKiteProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

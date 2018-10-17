@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.model.Position;
@@ -35,7 +36,7 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
 
     private final long defaultMask;
 
-    public SkypatrolProtocolDecoder(SkypatrolProtocol protocol) {
+    public SkypatrolProtocolDecoder(Protocol protocol) {
         super(protocol);
         defaultMask = Context.getConfig().getInteger(getProtocolName() + ".mask");
     }

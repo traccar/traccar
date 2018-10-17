@@ -21,6 +21,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -30,7 +31,7 @@ import java.nio.charset.StandardCharsets;
 
 public class PricolProtocolDecoder extends BaseProtocolDecoder {
 
-    public PricolProtocolDecoder(PricolProtocol protocol) {
+    public PricolProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

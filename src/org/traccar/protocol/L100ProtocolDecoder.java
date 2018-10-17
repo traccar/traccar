@@ -19,6 +19,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.ObdDecoder;
@@ -33,7 +34,7 @@ import java.util.regex.Pattern;
 
 public class L100ProtocolDecoder extends BaseProtocolDecoder {
 
-    public L100ProtocolDecoder(L100Protocol protocol) {
+    public L100ProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

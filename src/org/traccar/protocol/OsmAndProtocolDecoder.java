@@ -22,6 +22,7 @@ import io.netty.handler.codec.http.QueryStringDecoder;
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
@@ -38,7 +39,7 @@ import java.util.Map;
 
 public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
 
-    public OsmAndProtocolDecoder(OsmAndProtocol protocol) {
+    public OsmAndProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
