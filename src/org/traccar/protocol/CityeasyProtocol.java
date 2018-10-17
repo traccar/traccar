@@ -21,8 +21,6 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.model.Command;
 
-import java.util.List;
-
 public class CityeasyProtocol extends BaseProtocol {
 
     public CityeasyProtocol() {
@@ -31,11 +29,7 @@ public class CityeasyProtocol extends BaseProtocol {
                 Command.TYPE_POSITION_PERIODIC,
                 Command.TYPE_POSITION_STOP,
                 Command.TYPE_SET_TIMEZONE);
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 2, 2, -4, 0));

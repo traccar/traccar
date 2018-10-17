@@ -20,23 +20,17 @@ import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 
-import java.util.List;
-
 public class GatorProtocol extends BaseProtocol {
 
     public GatorProtocol() {
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 3, 2));
                 pipeline.addLast(new GatorProtocolDecoder(GatorProtocol.this));
             }
         });
-        serverList.add(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new GatorProtocolDecoder(GatorProtocol.this));

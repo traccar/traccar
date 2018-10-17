@@ -23,7 +23,6 @@ import org.traccar.TrackerServer;
 import org.traccar.model.Command;
 
 import java.nio.ByteOrder;
-import java.util.List;
 
 public class AdmProtocol extends BaseProtocol {
 
@@ -31,11 +30,7 @@ public class AdmProtocol extends BaseProtocol {
         setSupportedDataCommands(
                 Command.TYPE_GET_DEVICE_STATUS,
                 Command.TYPE_CUSTOM);
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 1024, 2, 1, -3, 0, true));

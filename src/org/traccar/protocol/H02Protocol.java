@@ -22,8 +22,6 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.model.Command;
 
-import java.util.List;
-
 public class H02Protocol extends BaseProtocol {
 
     public H02Protocol() {
@@ -34,11 +32,7 @@ public class H02Protocol extends BaseProtocol {
                 Command.TYPE_ENGINE_RESUME,
                 Command.TYPE_POSITION_PERIODIC
         );
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 int messageLength = Context.getConfig().getInteger(getName() + ".messageLength");
@@ -48,7 +42,7 @@ public class H02Protocol extends BaseProtocol {
                 pipeline.addLast(new H02ProtocolDecoder(H02Protocol.this));
             }
         });
-        serverList.add(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new StringEncoder());

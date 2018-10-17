@@ -22,7 +22,6 @@ import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 
-import java.util.List;
 import org.traccar.model.Command;
 
 public class SviasProtocol extends BaseProtocol {
@@ -37,11 +36,7 @@ public class SviasProtocol extends BaseProtocol {
                 Command.TYPE_ALARM_ARM,
                 Command.TYPE_ALARM_DISARM,
                 Command.TYPE_ALARM_REMOVE);
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, "]"));

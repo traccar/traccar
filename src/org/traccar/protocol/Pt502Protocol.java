@@ -21,8 +21,6 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.model.Command;
 
-import java.util.List;
-
 public class Pt502Protocol extends BaseProtocol {
 
     public Pt502Protocol() {
@@ -32,11 +30,7 @@ public class Pt502Protocol extends BaseProtocol {
                 Command.TYPE_ALARM_SPEED,
                 Command.TYPE_OUTPUT_CONTROL,
                 Command.TYPE_REQUEST_PHOTO);
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new Pt502FrameDecoder());

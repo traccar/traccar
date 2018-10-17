@@ -21,16 +21,10 @@ import org.traccar.TrackerServer;
 
 import io.netty.handler.codec.string.StringDecoder;
 
-import java.util.List;
-
 public class VtfmsProtocol extends BaseProtocol {
 
     public VtfmsProtocol() {
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new VtfmsFrameDecoder());
@@ -38,7 +32,7 @@ public class VtfmsProtocol extends BaseProtocol {
                 pipeline.addLast(new VtfmsProtocolDecoder(VtfmsProtocol.this));
             }
         });
-        serverList.add(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new StringDecoder());

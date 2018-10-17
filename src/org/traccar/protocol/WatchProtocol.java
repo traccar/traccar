@@ -22,8 +22,6 @@ import org.traccar.model.Command;
 
 import io.netty.handler.codec.string.StringEncoder;
 
-import java.util.List;
-
 public class WatchProtocol extends BaseProtocol {
 
     public WatchProtocol() {
@@ -42,11 +40,7 @@ public class WatchProtocol extends BaseProtocol {
                 Command.TYPE_VOICE_MESSAGE,
                 Command.TYPE_SET_TIMEZONE,
                 Command.TYPE_SET_INDICATOR);
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new WatchFrameDecoder());

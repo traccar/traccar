@@ -20,18 +20,12 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.model.Command;
 
-import java.util.List;
-
 public class CellocatorProtocol extends BaseProtocol {
 
     public CellocatorProtocol() {
         setSupportedDataCommands(
                 Command.TYPE_OUTPUT_CONTROL);
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new CellocatorFrameDecoder());
@@ -39,7 +33,7 @@ public class CellocatorProtocol extends BaseProtocol {
                 pipeline.addLast(new CellocatorProtocolDecoder(CellocatorProtocol.this));
             }
         });
-        serverList.add(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new CellocatorProtocolEncoder());

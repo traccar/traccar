@@ -21,8 +21,6 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.model.Command;
 
-import java.util.List;
-
 public class Jt600Protocol extends BaseProtocol {
 
     public Jt600Protocol() {
@@ -31,11 +29,7 @@ public class Jt600Protocol extends BaseProtocol {
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_SET_TIMEZONE,
                 Command.TYPE_REBOOT_DEVICE);
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new Jt600FrameDecoder());

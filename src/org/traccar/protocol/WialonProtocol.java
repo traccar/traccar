@@ -26,8 +26,6 @@ import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-
 public class WialonProtocol extends BaseProtocol {
 
     public WialonProtocol() {
@@ -36,11 +34,7 @@ public class WialonProtocol extends BaseProtocol {
                 Command.TYPE_SEND_USSD,
                 Command.TYPE_IDENTIFICATION,
                 Command.TYPE_OUTPUT_CONTROL);
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new LineBasedFrameDecoder(4 * 1024));

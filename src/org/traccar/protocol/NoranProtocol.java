@@ -20,8 +20,6 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.model.Command;
 
-import java.util.List;
-
 public class NoranProtocol extends BaseProtocol {
 
     public NoranProtocol() {
@@ -31,11 +29,7 @@ public class NoranProtocol extends BaseProtocol {
                 Command.TYPE_POSITION_STOP,
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME);
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new NoranProtocolEncoder());

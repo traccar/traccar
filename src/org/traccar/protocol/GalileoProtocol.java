@@ -20,19 +20,13 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.model.Command;
 
-import java.util.List;
-
 public class GalileoProtocol extends BaseProtocol {
 
     public GalileoProtocol() {
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM,
                 Command.TYPE_OUTPUT_CONTROL);
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new GalileoFrameDecoder());

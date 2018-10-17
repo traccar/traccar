@@ -23,8 +23,6 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.model.Command;
 
-import java.util.List;
-
 public class EsealProtocol extends BaseProtocol {
 
     public EsealProtocol() {
@@ -32,11 +30,7 @@ public class EsealProtocol extends BaseProtocol {
                 Command.TYPE_CUSTOM,
                 Command.TYPE_ALARM_ARM,
                 Command.TYPE_ALARM_DISARM);
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new LineBasedFrameDecoder(1024));

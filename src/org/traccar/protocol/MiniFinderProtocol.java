@@ -23,8 +23,6 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.model.Command;
 
-import java.util.List;
-
 public class MiniFinderProtocol extends BaseProtocol {
 
     public MiniFinderProtocol() {
@@ -40,11 +38,7 @@ public class MiniFinderProtocol extends BaseProtocol {
                 Command.TYPE_MODE_DEEP_SLEEP,
                 Command.TYPE_SOS_NUMBER,
                 Command.TYPE_SET_INDICATOR);
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, ';'));

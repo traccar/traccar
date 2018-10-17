@@ -22,19 +22,13 @@ import org.traccar.TrackerServer;
 import org.traccar.model.Command;
 
 import java.nio.ByteOrder;
-import java.util.List;
-
 public class CastelProtocol extends BaseProtocol {
 
     public CastelProtocol() {
         setSupportedDataCommands(
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME);
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 1024, 2, 2, -4, 0, true));
@@ -42,7 +36,7 @@ public class CastelProtocol extends BaseProtocol {
                 pipeline.addLast(new CastelProtocolDecoder(CastelProtocol.this));
             }
         });
-        serverList.add(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new CastelProtocolEncoder());

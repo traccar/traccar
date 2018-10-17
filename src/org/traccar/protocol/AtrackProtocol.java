@@ -20,18 +20,12 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.model.Command;
 
-import java.util.List;
-
 public class AtrackProtocol extends BaseProtocol {
 
     public AtrackProtocol() {
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM);
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new AtrackFrameDecoder());
@@ -39,7 +33,7 @@ public class AtrackProtocol extends BaseProtocol {
                 pipeline.addLast(new AtrackProtocolDecoder(AtrackProtocol.this));
             }
         });
-        serverList.add(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new AtrackProtocolEncoder());

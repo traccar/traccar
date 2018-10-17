@@ -22,8 +22,6 @@ import org.traccar.model.Command;
 
 import io.netty.handler.codec.string.StringEncoder;
 
-import java.util.List;
-
 public class WondexProtocol extends BaseProtocol {
 
     public WondexProtocol() {
@@ -35,11 +33,7 @@ public class WondexProtocol extends BaseProtocol {
                 Command.TYPE_POSITION_SINGLE,
                 Command.TYPE_GET_VERSION,
                 Command.TYPE_IDENTIFICATION);
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new WondexFrameDecoder());
@@ -48,7 +42,7 @@ public class WondexProtocol extends BaseProtocol {
                 pipeline.addLast(new WondexProtocolDecoder(WondexProtocol.this));
             }
         });
-        serverList.add(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new StringEncoder());

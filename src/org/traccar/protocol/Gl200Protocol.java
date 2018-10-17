@@ -22,8 +22,6 @@ import org.traccar.model.Command;
 
 import io.netty.handler.codec.string.StringEncoder;
 
-import java.util.List;
-
 public class Gl200Protocol extends BaseProtocol {
 
     public Gl200Protocol() {
@@ -33,11 +31,7 @@ public class Gl200Protocol extends BaseProtocol {
                 Command.TYPE_ENGINE_RESUME,
                 Command.TYPE_IDENTIFICATION,
                 Command.TYPE_REBOOT_DEVICE);
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new Gl200FrameDecoder());
@@ -46,7 +40,7 @@ public class Gl200Protocol extends BaseProtocol {
                 pipeline.addLast(new Gl200ProtocolDecoder(Gl200Protocol.this));
             }
         });
-        serverList.add(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new StringEncoder());

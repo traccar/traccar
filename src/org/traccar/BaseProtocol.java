@@ -24,6 +24,8 @@ import org.traccar.model.Command;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 public abstract class BaseProtocol implements Protocol {
@@ -31,6 +33,7 @@ public abstract class BaseProtocol implements Protocol {
     private final String name;
     private final Set<String> supportedDataCommands = new HashSet<>();
     private final Set<String> supportedTextCommands = new HashSet<>();
+    private final List<TrackerServer> serverList = new LinkedList<>();
 
     private StringProtocolEncoder textCommandEncoder = null;
 
@@ -46,6 +49,15 @@ public abstract class BaseProtocol implements Protocol {
     @Override
     public String getName() {
         return name;
+    }
+
+    protected void addServer(TrackerServer server) {
+        serverList.add(server);
+    }
+
+    @Override
+    public Collection<TrackerServer> getServerList() {
+        return serverList;
     }
 
     public void setSupportedDataCommands(String... commands) {

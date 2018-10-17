@@ -15,8 +15,6 @@
  */
 package org.traccar.protocol;
 
-import java.util.List;
-
 import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
@@ -27,11 +25,7 @@ import org.traccar.TrackerServer;
 public class IdplProtocol extends BaseProtocol {
 
     public IdplProtocol() {
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new LineBasedFrameDecoder(1024));

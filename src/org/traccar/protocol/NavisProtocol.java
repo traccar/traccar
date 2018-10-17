@@ -21,16 +21,10 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 
 import java.nio.ByteOrder;
-import java.util.List;
-
 public class NavisProtocol extends BaseProtocol {
 
     public NavisProtocol() {
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 4096, 12, 2, 2, 0, true));

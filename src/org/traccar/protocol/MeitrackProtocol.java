@@ -21,8 +21,6 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.model.Command;
 
-import java.util.List;
-
 public class MeitrackProtocol extends BaseProtocol {
 
     public MeitrackProtocol() {
@@ -34,11 +32,7 @@ public class MeitrackProtocol extends BaseProtocol {
                 Command.TYPE_ALARM_DISARM,
                 Command.TYPE_REQUEST_PHOTO,
                 Command.TYPE_SEND_SMS);
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new MeitrackFrameDecoder());
@@ -47,7 +41,7 @@ public class MeitrackProtocol extends BaseProtocol {
                 pipeline.addLast(new MeitrackProtocolDecoder(MeitrackProtocol.this));
             }
         });
-        serverList.add(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new StringEncoder());
