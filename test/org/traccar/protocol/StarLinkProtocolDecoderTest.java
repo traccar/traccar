@@ -8,7 +8,7 @@ public class StarLinkProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        StarLinkProtocolDecoder decoder = new StarLinkProtocolDecoder(new StarLinkProtocol());
+        StarLinkProtocolDecoder decoder = new StarLinkProtocolDecoder(null);
 
         verifyAttributes(decoder, text(
                 "$SLU068328,06,55,170518122023,16,,,,,,000000,1,1,0,0,0,0,0,0,10443,32722,12.664,03.910,,0,0,,01000001FDB3A9*BF"));

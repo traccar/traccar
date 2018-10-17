@@ -8,7 +8,7 @@ public class Gps103ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        Gps103ProtocolDecoder decoder = new Gps103ProtocolDecoder(new Gps103Protocol());
+        Gps103ProtocolDecoder decoder = new Gps103ProtocolDecoder(null);
 
         verifyAttributes(decoder, text(
                 "imei:868683027758113,OBD,180905200218,,,,0,0,0.39%,70,9.41%,494,0.00,P0137,P0430,,;"));

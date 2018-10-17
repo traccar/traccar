@@ -8,7 +8,7 @@ public class FifotrackProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        FifotrackProtocolDecoder decoder = new FifotrackProtocolDecoder(new FifotrackProtocol());
+        FifotrackProtocolDecoder decoder = new FifotrackProtocolDecoder(null);
 
         verifyPosition(decoder, text(
                 "$$105,866104023179743,AB,A00,,161007085534,A,54.738791,25.271918,0,350,151,0,17929,0000,0,,246|1|65|96DB,936|0*0B"));

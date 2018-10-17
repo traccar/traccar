@@ -8,7 +8,7 @@ public class GotopProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        GotopProtocolDecoder decoder = new GotopProtocolDecoder(new GotopProtocol());
+        GotopProtocolDecoder decoder = new GotopProtocolDecoder(null);
 
         verifyNull(decoder, text(
                 ""));

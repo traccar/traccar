@@ -8,7 +8,7 @@ public class ItsProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        ItsProtocolDecoder decoder = new ItsProtocolDecoder(new ItsProtocol());
+        ItsProtocolDecoder decoder = new ItsProtocolDecoder(null);
 
         verifyPosition(decoder, text(
                 "$,04,XYZ123,0.0.1,TA,16,L,861359034100626,MH12AB1234,1,14,10,2018,04,50,52,018.489624,N,073.855980,E,000.0,039.86,13,584.1,01.11,00.75,AIRTEL,1,1,00.0,4.1,1,C,15,404,90,0c23,781a,0000,0000,0000,0000,0000,0000,0000,0000,0000,0000,0000,0000,1000,01,000005,13b75499,"));

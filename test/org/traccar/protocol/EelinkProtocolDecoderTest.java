@@ -8,7 +8,7 @@ public class EelinkProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        EelinkProtocolDecoder decoder = new EelinkProtocolDecoder(new EelinkProtocol());
+        EelinkProtocolDecoder decoder = new EelinkProtocolDecoder(null);
 
         verifyNull(decoder, binary(
                 "454C0027E753035254407167747167670100180002035254407167747100200205020500010432000086BD"));

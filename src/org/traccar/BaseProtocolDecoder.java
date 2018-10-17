@@ -39,6 +39,8 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseProtocolDecoder.class);
 
+    private static final String PROTOCOL_UNKNOWN = "unknown";
+
     private final Config config = Context.getConfig();
     private final IdentityManager identityManager = Context.getIdentityManager();
     private final ConnectionManager connectionManager = Context.getConnectionManager();
@@ -50,7 +52,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     }
 
     public String getProtocolName() {
-        return protocol != null ? protocol.getName() : null;
+        return protocol != null ? protocol.getName() : PROTOCOL_UNKNOWN;
     }
 
     public String getServer(Channel channel) {
