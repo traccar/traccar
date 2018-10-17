@@ -262,7 +262,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
             Collection<Position> latestPositionsOfDevices = Context.getDataManager().getLatestPositions();
             if (latestPositionsOfDevices.isEmpty()) {
-                this.loadingOldDataFromDB = true;
+                this.loadingOldDataFromDB = false;
                 return;
             }
 
