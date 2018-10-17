@@ -27,7 +27,6 @@ import java.util.List;
 public class TrvProtocol extends BaseProtocol {
 
     public TrvProtocol() {
-        super("trv");
     }
 
     @Override

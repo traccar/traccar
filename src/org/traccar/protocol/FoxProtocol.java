@@ -27,7 +27,6 @@ import java.util.List;
 public class FoxProtocol extends BaseProtocol {
 
     public FoxProtocol() {
-        super("fox");
     }
 
     @Override

@@ -27,7 +27,6 @@ import java.util.List;
 public class TelemaxProtocol extends BaseProtocol {
 
     public TelemaxProtocol() {
-        super("telemax");
     }
 
     @Override

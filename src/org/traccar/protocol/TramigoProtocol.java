@@ -24,7 +24,6 @@ import java.util.List;
 public class TramigoProtocol extends BaseProtocol {
 
     public TramigoProtocol() {
-        super("tramigo");
     }
 
     @Override

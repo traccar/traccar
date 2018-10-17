@@ -25,7 +25,6 @@ import java.util.List;
 public class Gt02Protocol extends BaseProtocol {
 
     public Gt02Protocol() {
-        super("gt02");
     }
 
     @Override

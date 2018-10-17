@@ -24,7 +24,6 @@ import java.util.List;
 public class NvsProtocol extends BaseProtocol {
 
     public NvsProtocol() {
-        super("nvs");
     }
 
     @Override

@@ -27,7 +27,6 @@ import java.util.List;
 public class TopflytechProtocol extends BaseProtocol {
 
     public TopflytechProtocol() {
-        super("topflytech");
     }
 
     @Override

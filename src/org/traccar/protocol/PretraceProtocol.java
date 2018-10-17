@@ -28,7 +28,6 @@ import java.util.List;
 public class PretraceProtocol extends BaseProtocol {
 
     public PretraceProtocol() {
-        super("pretrace");
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM,
                 Command.TYPE_POSITION_PERIODIC);

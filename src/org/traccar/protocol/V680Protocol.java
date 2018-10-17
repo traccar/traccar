@@ -27,7 +27,6 @@ import java.util.List;
 public class V680Protocol extends BaseProtocol {
 
     public V680Protocol() {
-        super("v680");
     }
 
     @Override

@@ -27,7 +27,6 @@ import java.util.List;
 public class FreedomProtocol extends BaseProtocol {
 
     public FreedomProtocol() {
-        super("freedom");
     }
 
     @Override

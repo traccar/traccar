@@ -24,7 +24,6 @@ import java.util.List;
 public class TekProtocol extends BaseProtocol {
 
     public TekProtocol() {
-        super("tek");
     }
 
     @Override

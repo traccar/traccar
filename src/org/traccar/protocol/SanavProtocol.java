@@ -26,7 +26,6 @@ import java.util.List;
 public class SanavProtocol extends BaseProtocol {
 
     public SanavProtocol() {
-        super("sanav");
     }
 
     @Override

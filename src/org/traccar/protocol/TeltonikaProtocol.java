@@ -25,7 +25,6 @@ import java.util.List;
 public class TeltonikaProtocol extends BaseProtocol {
 
     public TeltonikaProtocol() {
-        super("teltonika");
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM);
     }

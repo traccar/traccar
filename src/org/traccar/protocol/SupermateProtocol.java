@@ -27,7 +27,6 @@ import java.util.List;
 public class SupermateProtocol extends BaseProtocol {
 
     public SupermateProtocol() {
-        super("supermate");
     }
 
     @Override

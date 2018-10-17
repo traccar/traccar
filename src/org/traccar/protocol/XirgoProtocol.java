@@ -29,7 +29,6 @@ import java.util.List;
 public class XirgoProtocol extends BaseProtocol {
 
     public XirgoProtocol() {
-        super("xirgo");
         setSupportedDataCommands(
                 Command.TYPE_OUTPUT_CONTROL);
     }

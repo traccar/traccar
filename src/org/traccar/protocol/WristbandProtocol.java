@@ -25,7 +25,6 @@ import java.util.List;
 public class WristbandProtocol extends BaseProtocol {
 
     public WristbandProtocol() {
-        super("wristband");
     }
 
     @Override

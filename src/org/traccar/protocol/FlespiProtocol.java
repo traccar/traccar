@@ -27,7 +27,6 @@ import java.util.List;
 public class FlespiProtocol extends BaseProtocol {
 
     public FlespiProtocol() {
-        super("flespi");
     }
 
     @Override

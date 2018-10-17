@@ -27,7 +27,6 @@ import java.util.List;
 public class ManPowerProtocol extends BaseProtocol {
 
     public ManPowerProtocol() {
-        super("manpower");
     }
 
     @Override

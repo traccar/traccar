@@ -27,7 +27,6 @@ import java.util.List;
 public class SpotProtocol extends BaseProtocol {
 
     public SpotProtocol() {
-        super("spot");
     }
 
     @Override

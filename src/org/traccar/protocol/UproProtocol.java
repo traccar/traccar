@@ -26,7 +26,6 @@ import java.util.List;
 public class UproProtocol extends BaseProtocol {
 
     public UproProtocol() {
-        super("upro");
     }
 
     @Override

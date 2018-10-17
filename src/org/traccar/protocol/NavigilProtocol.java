@@ -24,7 +24,6 @@ import java.util.List;
 public class NavigilProtocol extends BaseProtocol {
 
     public NavigilProtocol() {
-        super("navigil");
     }
 
     @Override

@@ -24,7 +24,6 @@ import java.util.List;
 public class SkypatrolProtocol extends BaseProtocol {
 
     public SkypatrolProtocol() {
-        super("skypatrol");
     }
 
     @Override

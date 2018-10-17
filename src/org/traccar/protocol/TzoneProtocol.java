@@ -26,7 +26,6 @@ import java.util.List;
 public class TzoneProtocol extends BaseProtocol {
 
     public TzoneProtocol() {
-        super("tzone");
     }
 
     @Override

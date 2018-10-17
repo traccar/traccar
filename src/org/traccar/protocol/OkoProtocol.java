@@ -26,7 +26,6 @@ import java.util.List;
 public class OkoProtocol extends BaseProtocol {
 
     public OkoProtocol() {
-        super("oko");
     }
 
     @Override

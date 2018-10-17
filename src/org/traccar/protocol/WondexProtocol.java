@@ -27,7 +27,6 @@ import java.util.List;
 public class WondexProtocol extends BaseProtocol {
 
     public WondexProtocol() {
-        super("wondex");
         setTextCommandEncoder(new WondexProtocolEncoder());
         setSupportedCommands(
                 Command.TYPE_GET_DEVICE_STATUS,

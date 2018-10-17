@@ -27,7 +27,6 @@ import java.util.List;
 public class CastelProtocol extends BaseProtocol {
 
     public CastelProtocol() {
-        super("castel");
         setSupportedDataCommands(
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME);

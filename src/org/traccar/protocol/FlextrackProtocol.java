@@ -27,7 +27,6 @@ import java.util.List;
 public class FlextrackProtocol extends BaseProtocol {
 
     public FlextrackProtocol() {
-        super("flextrack");
     }
 
     @Override

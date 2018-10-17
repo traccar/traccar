@@ -27,7 +27,6 @@ import java.util.List;
 public class CarTrackProtocol extends BaseProtocol {
 
     public CarTrackProtocol() {
-        super("cartrack");
     }
 
     @Override

@@ -26,7 +26,6 @@ import java.util.List;
 public class GenxProtocol extends BaseProtocol {
 
     public GenxProtocol() {
-        super("genx");
     }
 
     @Override

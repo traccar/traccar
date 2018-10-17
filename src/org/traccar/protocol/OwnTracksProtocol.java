@@ -28,7 +28,6 @@ import java.util.List;
 public class OwnTracksProtocol extends BaseProtocol {
 
     public OwnTracksProtocol() {
-        super("owntracks");
     }
 
     @Override

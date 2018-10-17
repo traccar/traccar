@@ -27,7 +27,6 @@ import java.util.List;
 public class LaipacProtocol extends BaseProtocol {
 
     public LaipacProtocol() {
-        super("laipac");
     }
 
     @Override

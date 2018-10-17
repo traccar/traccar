@@ -25,7 +25,6 @@ import java.util.List;
 public class TlvProtocol extends BaseProtocol {
 
     public TlvProtocol() {
-        super("tlv");
     }
 
     @Override

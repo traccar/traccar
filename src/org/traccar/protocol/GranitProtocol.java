@@ -26,7 +26,6 @@ import java.util.List;
 public class GranitProtocol extends BaseProtocol {
 
     public GranitProtocol() {
-        super("granit");
         setSupportedDataCommands(
                 Command.TYPE_IDENTIFICATION,
                 Command.TYPE_REBOOT_DEVICE,

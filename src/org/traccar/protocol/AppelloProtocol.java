@@ -27,7 +27,6 @@ import java.util.List;
 public class AppelloProtocol extends BaseProtocol {
 
     public AppelloProtocol() {
-        super("appello");
     }
 
     @Override

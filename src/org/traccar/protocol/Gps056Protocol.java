@@ -24,7 +24,6 @@ import java.util.List;
 public class Gps056Protocol extends BaseProtocol {
 
     public Gps056Protocol() {
-        super("gps056");
     }
 
     @Override

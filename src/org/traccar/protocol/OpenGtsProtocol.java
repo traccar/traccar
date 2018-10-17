@@ -27,7 +27,6 @@ import java.util.List;
 public class OpenGtsProtocol extends BaseProtocol {
 
     public OpenGtsProtocol() {
-        super("opengts");
     }
 
     @Override

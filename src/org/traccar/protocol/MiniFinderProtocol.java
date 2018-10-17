@@ -28,7 +28,6 @@ import java.util.List;
 public class MiniFinderProtocol extends BaseProtocol {
 
     public MiniFinderProtocol() {
-        super("minifinder");
         setSupportedDataCommands(
                 Command.TYPE_SET_TIMEZONE,
                 Command.TYPE_VOICE_MONITORING,

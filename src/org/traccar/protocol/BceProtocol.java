@@ -24,7 +24,6 @@ import java.util.List;
 public class BceProtocol extends BaseProtocol {
 
     public BceProtocol() {
-        super("bce");
     }
 
     @Override

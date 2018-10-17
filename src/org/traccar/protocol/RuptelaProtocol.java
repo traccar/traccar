@@ -26,7 +26,6 @@ import java.util.List;
 public class RuptelaProtocol extends BaseProtocol {
 
     public RuptelaProtocol() {
-        super("ruptela");
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM,
                 Command.TYPE_CONFIGURATION,

@@ -26,7 +26,6 @@ import java.util.List;
 public class AlematicsProtocol extends BaseProtocol {
 
     public AlematicsProtocol() {
-        super("alematics");
     }
 
     @Override

@@ -27,7 +27,6 @@ import java.util.List;
 public class DishaProtocol extends BaseProtocol {
 
     public DishaProtocol() {
-        super("disha");
     }
 
     @Override

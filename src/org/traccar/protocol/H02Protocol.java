@@ -27,7 +27,6 @@ import java.util.List;
 public class H02Protocol extends BaseProtocol {
 
     public H02Protocol() {
-        super("h02");
         setSupportedDataCommands(
                 Command.TYPE_ALARM_ARM,
                 Command.TYPE_ALARM_DISARM,

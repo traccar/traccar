@@ -30,7 +30,6 @@ import java.util.List;
 public class XexunProtocol extends BaseProtocol {
 
     public XexunProtocol() {
-        super("xexun");
         setSupportedDataCommands(
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME);

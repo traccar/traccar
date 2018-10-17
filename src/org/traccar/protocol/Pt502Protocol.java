@@ -26,7 +26,6 @@ import java.util.List;
 public class Pt502Protocol extends BaseProtocol {
 
     public Pt502Protocol() {
-        super("pt502");
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM,
                 Command.TYPE_SET_TIMEZONE,

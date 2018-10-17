@@ -27,7 +27,6 @@ import java.util.List;
 public class SigfoxProtocol extends BaseProtocol {
 
     public SigfoxProtocol() {
-        super("sigfox");
     }
 
     @Override

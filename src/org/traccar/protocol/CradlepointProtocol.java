@@ -27,7 +27,6 @@ import java.util.List;
 public class CradlepointProtocol extends BaseProtocol {
 
     public CradlepointProtocol() {
-        super("cradlepoint");
     }
 
     @Override

@@ -27,7 +27,6 @@ import java.util.List;
 public class CguardProtocol extends BaseProtocol {
 
     public CguardProtocol() {
-        super("cguard");
     }
 
     @Override

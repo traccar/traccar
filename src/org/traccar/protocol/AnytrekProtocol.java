@@ -25,7 +25,6 @@ import java.util.List;
 public class AnytrekProtocol extends BaseProtocol {
 
     public AnytrekProtocol() {
-        super("anytrek");
     }
 
     @Override

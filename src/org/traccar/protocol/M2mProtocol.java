@@ -25,7 +25,6 @@ import java.util.List;
 public class M2mProtocol extends BaseProtocol {
 
     public M2mProtocol() {
-        super("m2m");
     }
 
     @Override

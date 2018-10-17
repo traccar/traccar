@@ -26,7 +26,6 @@ import java.util.List;
 public class EelinkProtocol extends BaseProtocol {
 
     public EelinkProtocol() {
-        super("eelink");
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM,
                 Command.TYPE_POSITION_SINGLE,

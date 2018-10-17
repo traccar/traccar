@@ -27,7 +27,6 @@ import java.util.List;
 public class AquilaProtocol extends BaseProtocol {
 
     public AquilaProtocol() {
-        super("aquila");
     }
 
     @Override

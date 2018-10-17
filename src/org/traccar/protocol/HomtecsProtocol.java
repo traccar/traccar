@@ -26,7 +26,6 @@ import java.util.List;
 public class HomtecsProtocol extends BaseProtocol {
 
     public HomtecsProtocol() {
-        super("homtecs");
     }
 
     @Override

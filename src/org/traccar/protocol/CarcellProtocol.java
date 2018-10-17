@@ -28,7 +28,6 @@ import org.traccar.model.Command;
 public class CarcellProtocol extends BaseProtocol {
 
     public CarcellProtocol() {
-        super("carcell");
         setSupportedDataCommands(
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME);

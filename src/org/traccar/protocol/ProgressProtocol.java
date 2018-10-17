@@ -26,7 +26,6 @@ import java.util.List;
 public class ProgressProtocol extends BaseProtocol {
 
     public ProgressProtocol() {
-        super("progress");
     }
 
     @Override

@@ -26,7 +26,6 @@ import java.util.List;
 public class SiwiProtocol extends BaseProtocol {
 
     public SiwiProtocol() {
-        super("siwi");
     }
 
     @Override

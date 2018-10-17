@@ -27,7 +27,6 @@ import java.util.List;
 public class OsmAndProtocol extends BaseProtocol {
 
     public OsmAndProtocol() {
-        super("osmand");
     }
 
     @Override

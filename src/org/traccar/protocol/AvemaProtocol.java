@@ -27,7 +27,6 @@ import java.util.List;
 public class AvemaProtocol extends BaseProtocol {
 
     public AvemaProtocol() {
-        super("avema");
     }
 
     @Override

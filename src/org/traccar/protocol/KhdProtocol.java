@@ -26,7 +26,6 @@ import java.util.List;
 public class KhdProtocol extends BaseProtocol {
 
     public KhdProtocol() {
-        super("khd");
         setSupportedDataCommands(
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME);

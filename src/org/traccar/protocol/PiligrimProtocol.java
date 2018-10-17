@@ -27,7 +27,6 @@ import java.util.List;
 public class PiligrimProtocol extends BaseProtocol {
 
     public PiligrimProtocol() {
-        super("piligrim");
     }
 
     @Override

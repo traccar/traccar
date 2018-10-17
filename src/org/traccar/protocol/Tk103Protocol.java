@@ -28,7 +28,6 @@ import java.util.List;
 public class Tk103Protocol extends BaseProtocol {
 
     public Tk103Protocol() {
-        super("tk103");
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM,
                 Command.TYPE_GET_DEVICE_STATUS,

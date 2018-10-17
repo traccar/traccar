@@ -27,7 +27,6 @@ import java.util.List;
 public class DwayProtocol extends BaseProtocol {
 
     public DwayProtocol() {
-        super("dway");
     }
 
     @Override

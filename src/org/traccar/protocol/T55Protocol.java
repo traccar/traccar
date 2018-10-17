@@ -27,7 +27,6 @@ import java.util.List;
 public class T55Protocol extends BaseProtocol {
 
     public T55Protocol() {
-        super("t55");
     }
 
     @Override

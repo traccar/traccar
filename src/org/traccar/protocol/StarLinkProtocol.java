@@ -27,7 +27,6 @@ import java.util.List;
 public class StarLinkProtocol extends BaseProtocol {
 
     public StarLinkProtocol() {
-        super("starlink");
     }
 
     @Override

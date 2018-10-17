@@ -24,7 +24,6 @@ import java.util.List;
 public class CalAmpProtocol extends BaseProtocol {
 
     public CalAmpProtocol() {
-        super("calamp");
     }
 
     @Override

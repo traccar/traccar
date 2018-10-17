@@ -24,7 +24,6 @@ import java.util.List;
 public class EgtsProtocol extends BaseProtocol {
 
     public EgtsProtocol() {
-        super("egts");
     }
 
     @Override

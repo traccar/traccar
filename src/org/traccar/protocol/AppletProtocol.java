@@ -27,7 +27,6 @@ import java.util.List;
 public class AppletProtocol extends BaseProtocol {
 
     public AppletProtocol() {
-        super("applet");
     }
 
     @Override

@@ -27,7 +27,6 @@ import java.util.List;
 public class FlexCommProtocol extends BaseProtocol {
 
     public FlexCommProtocol() {
-        super("flexcomm");
     }
 
     @Override

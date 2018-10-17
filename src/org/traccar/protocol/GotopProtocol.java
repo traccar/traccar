@@ -27,7 +27,6 @@ import java.util.List;
 public class GotopProtocol extends BaseProtocol {
 
     public GotopProtocol() {
-        super("gotop");
     }
 
     @Override

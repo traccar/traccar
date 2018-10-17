@@ -28,7 +28,6 @@ import org.traccar.model.Command;
 public class SviasProtocol extends BaseProtocol {
 
     public SviasProtocol() {
-        super("svias");
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM,
                 Command.TYPE_POSITION_SINGLE,

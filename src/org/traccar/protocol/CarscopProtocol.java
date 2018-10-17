@@ -27,7 +27,6 @@ import java.util.List;
 public class CarscopProtocol extends BaseProtocol {
 
     public CarscopProtocol() {
-        super("carscop");
     }
 
     @Override

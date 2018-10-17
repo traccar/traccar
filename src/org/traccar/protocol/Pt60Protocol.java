@@ -27,7 +27,6 @@ import java.util.List;
 public class Pt60Protocol extends BaseProtocol {
 
     public Pt60Protocol() {
-        super("pt60");
     }
 
     @Override

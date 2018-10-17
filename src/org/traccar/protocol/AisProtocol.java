@@ -25,7 +25,6 @@ import java.util.List;
 public class AisProtocol extends BaseProtocol {
 
     public AisProtocol() {
-        super("ais");
     }
 
     @Override

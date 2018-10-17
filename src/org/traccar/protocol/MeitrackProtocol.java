@@ -26,7 +26,6 @@ import java.util.List;
 public class MeitrackProtocol extends BaseProtocol {
 
     public MeitrackProtocol() {
-        super("meitrack");
         setSupportedDataCommands(
                 Command.TYPE_POSITION_SINGLE,
                 Command.TYPE_ENGINE_STOP,

@@ -26,7 +26,6 @@ import java.util.List;
 public class DmtProtocol extends BaseProtocol {
 
     public DmtProtocol() {
-        super("dmt");
     }
 
     @Override

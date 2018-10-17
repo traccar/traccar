@@ -24,7 +24,6 @@ import java.util.List;
 public class Xt2400Protocol extends BaseProtocol {
 
     public Xt2400Protocol() {
-        super("xt2400");
     }
 
     @Override

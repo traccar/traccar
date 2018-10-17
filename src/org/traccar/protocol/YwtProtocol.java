@@ -27,7 +27,6 @@ import java.util.List;
 public class YwtProtocol extends BaseProtocol {
 
     public YwtProtocol() {
-        super("ywt");
     }
 
     @Override

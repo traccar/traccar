@@ -28,7 +28,6 @@ import java.util.List;
 public class Xt013Protocol extends BaseProtocol {
 
     public Xt013Protocol() {
-        super("xt013");
     }
 
     @Override

@@ -27,7 +27,6 @@ import java.util.List;
 public class HunterProProtocol extends BaseProtocol {
 
     public HunterProProtocol() {
-        super("hunterpro");
     }
 
     @Override

@@ -27,7 +27,6 @@ import java.util.List;
 public class WatchProtocol extends BaseProtocol {
 
     public WatchProtocol() {
-        super("watch");
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM,
                 Command.TYPE_POSITION_SINGLE,

@@ -28,7 +28,6 @@ import java.util.List;
 public class AdmProtocol extends BaseProtocol {
 
     public AdmProtocol() {
-        super("adm");
         setSupportedDataCommands(
                 Command.TYPE_GET_DEVICE_STATUS,
                 Command.TYPE_CUSTOM);

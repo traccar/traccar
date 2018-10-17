@@ -26,7 +26,6 @@ import java.util.List;
 public class AustinNbProtocol extends BaseProtocol {
 
     public AustinNbProtocol() {
-        super("austinnb");
     }
 
     @Override

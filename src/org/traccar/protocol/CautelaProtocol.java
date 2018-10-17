@@ -27,7 +27,6 @@ import java.util.List;
 public class CautelaProtocol extends BaseProtocol {
 
     public CautelaProtocol() {
-        super("cautela");
     }
 
     @Override

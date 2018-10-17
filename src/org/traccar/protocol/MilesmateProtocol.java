@@ -27,7 +27,6 @@ import java.util.List;
 public class MilesmateProtocol extends BaseProtocol {
 
     public MilesmateProtocol() {
-        super("milesmate");
     }
 
     @Override

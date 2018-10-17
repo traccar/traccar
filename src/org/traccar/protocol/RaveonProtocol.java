@@ -27,7 +27,6 @@ import java.util.List;
 public class RaveonProtocol extends BaseProtocol {
 
     public RaveonProtocol() {
-        super("raveon");
     }
 
     @Override

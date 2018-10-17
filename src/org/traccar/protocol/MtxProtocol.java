@@ -27,7 +27,6 @@ import java.util.List;
 public class MtxProtocol extends BaseProtocol {
 
     public MtxProtocol() {
-        super("mtx");
     }
 
     @Override

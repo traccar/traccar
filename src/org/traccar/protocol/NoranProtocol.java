@@ -25,7 +25,6 @@ import java.util.List;
 public class NoranProtocol extends BaseProtocol {
 
     public NoranProtocol() {
-        super("noran");
         setSupportedDataCommands(
                 Command.TYPE_POSITION_SINGLE,
                 Command.TYPE_POSITION_PERIODIC,

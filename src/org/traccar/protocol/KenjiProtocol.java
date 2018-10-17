@@ -28,7 +28,6 @@ import java.util.List;
 public class KenjiProtocol extends BaseProtocol {
 
     public KenjiProtocol() {
-        super("kenji");
     }
 
     @Override

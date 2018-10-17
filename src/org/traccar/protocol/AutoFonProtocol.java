@@ -24,7 +24,6 @@ import java.util.List;
 public class AutoFonProtocol extends BaseProtocol {
 
     public AutoFonProtocol() {
-        super("autofon");
     }
 
     @Override

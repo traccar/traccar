@@ -26,7 +26,6 @@ import java.util.List;
 public class FreematicsProtocol extends BaseProtocol {
 
     public FreematicsProtocol() {
-        super("freematics");
     }
 
     @Override

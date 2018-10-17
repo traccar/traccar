@@ -27,7 +27,6 @@ import java.util.List;
 public class ArknavX8Protocol extends BaseProtocol {
 
     public ArknavX8Protocol() {
-        super("arknavx8");
     }
 
     @Override

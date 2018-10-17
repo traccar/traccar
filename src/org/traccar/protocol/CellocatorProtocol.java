@@ -25,7 +25,6 @@ import java.util.List;
 public class CellocatorProtocol extends BaseProtocol {
 
     public CellocatorProtocol() {
-        super("cellocator");
         setSupportedDataCommands(
                 Command.TYPE_OUTPUT_CONTROL);
     }

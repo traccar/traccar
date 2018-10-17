@@ -26,7 +26,6 @@ import java.util.List;
 public class T800xProtocol extends BaseProtocol {
 
     public T800xProtocol() {
-        super("t800x");
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM);
     }

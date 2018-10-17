@@ -24,7 +24,6 @@ import java.util.List;
 public class SmokeyProtocol extends BaseProtocol {
 
     public SmokeyProtocol() {
-        super("smokey");
     }
 
     @Override

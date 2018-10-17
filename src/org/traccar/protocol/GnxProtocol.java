@@ -27,7 +27,6 @@ import java.util.List;
 public class GnxProtocol extends BaseProtocol {
 
     public GnxProtocol() {
-        super("gnx");
     }
 
     @Override

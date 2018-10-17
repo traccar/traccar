@@ -27,7 +27,6 @@ import java.util.List;
 public class AutoGradeProtocol extends BaseProtocol {
 
     public AutoGradeProtocol() {
-        super("autograde");
     }
 
     @Override

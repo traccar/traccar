@@ -26,7 +26,6 @@ import java.util.List;
 public class GpsmtaProtocol extends BaseProtocol {
 
     public GpsmtaProtocol() {
-        super("gpsmta");
     }
 
     @Override

@@ -25,7 +25,6 @@ import java.util.List;
 public class GalileoProtocol extends BaseProtocol {
 
     public GalileoProtocol() {
-        super("galileo");
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM,
                 Command.TYPE_OUTPUT_CONTROL);

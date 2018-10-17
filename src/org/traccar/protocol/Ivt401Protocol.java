@@ -26,7 +26,6 @@ import java.util.List;
 public class Ivt401Protocol extends BaseProtocol {
 
     public Ivt401Protocol() {
-        super("ivt401");
     }
 
     @Override

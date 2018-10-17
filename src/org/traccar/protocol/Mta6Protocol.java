@@ -28,7 +28,6 @@ import java.util.List;
 public class Mta6Protocol extends BaseProtocol {
 
     public Mta6Protocol() {
-        super("mta6");
     }
 
     @Override

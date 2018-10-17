@@ -27,7 +27,6 @@ import java.util.List;
 public class MaestroProtocol extends BaseProtocol {
 
     public MaestroProtocol() {
-        super("maestro");
     }
 
     @Override

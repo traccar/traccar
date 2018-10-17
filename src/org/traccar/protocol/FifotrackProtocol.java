@@ -26,7 +26,6 @@ import java.util.List;
 public class FifotrackProtocol extends BaseProtocol {
 
     public FifotrackProtocol() {
-        super("fifotrack");
     }
 
     @Override

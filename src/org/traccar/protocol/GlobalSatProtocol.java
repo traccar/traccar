@@ -27,7 +27,6 @@ import java.util.List;
 public class GlobalSatProtocol extends BaseProtocol {
 
     public GlobalSatProtocol() {
-        super("globalsat");
     }
 
     @Override

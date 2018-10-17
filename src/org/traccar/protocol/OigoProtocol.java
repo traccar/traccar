@@ -24,7 +24,6 @@ import java.util.List;
 public class OigoProtocol extends BaseProtocol {
 
     public OigoProtocol() {
-        super("oigo");
     }
 
     @Override

@@ -27,7 +27,6 @@ import java.util.List;
 public class M2cProtocol extends BaseProtocol {
 
     public M2cProtocol() {
-        super("m2c");
     }
 
     @Override

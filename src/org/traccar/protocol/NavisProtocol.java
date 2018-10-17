@@ -26,7 +26,6 @@ import java.util.List;
 public class NavisProtocol extends BaseProtocol {
 
     public NavisProtocol() {
-        super("navis");
     }
 
     @Override

@@ -24,7 +24,6 @@ import java.util.List;
 public class UlbotechProtocol extends BaseProtocol {
 
     public UlbotechProtocol() {
-        super("ulbotech");
     }
 
     @Override

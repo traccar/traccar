@@ -26,7 +26,6 @@ import java.util.List;
 public class IntellitracProtocol extends BaseProtocol {
 
     public IntellitracProtocol() {
-        super("intellitrac");
     }
 
     @Override

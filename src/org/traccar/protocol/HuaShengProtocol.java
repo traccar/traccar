@@ -24,7 +24,6 @@ import java.util.List;
 public class HuaShengProtocol extends BaseProtocol {
 
     public HuaShengProtocol() {
-        super("huasheng");
     }
 
     @Override

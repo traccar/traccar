@@ -25,7 +25,6 @@ import java.util.List;
 public class AtrackProtocol extends BaseProtocol {
 
     public AtrackProtocol() {
-        super("atrack");
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM);
     }

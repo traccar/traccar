@@ -27,7 +27,6 @@ import java.util.List;
 public class TrakMateProtocol extends BaseProtocol {
 
     public TrakMateProtocol() {
-        super("trakmate");
     }
 
     @Override

@@ -27,7 +27,6 @@ import java.util.List;
 public class AuroProtocol extends BaseProtocol {
 
     public AuroProtocol() {
-        super("auro");
     }
 
     @Override

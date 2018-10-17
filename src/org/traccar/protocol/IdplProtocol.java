@@ -27,7 +27,6 @@ import org.traccar.TrackerServer;
 public class IdplProtocol extends BaseProtocol {
 
     public IdplProtocol() {
-        super("idpl");
     }
 
     @Override

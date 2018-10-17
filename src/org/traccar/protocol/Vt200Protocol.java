@@ -24,7 +24,6 @@ import java.util.List;
 public class Vt200Protocol extends BaseProtocol {
 
     public Vt200Protocol() {
-        super("vt200");
     }
 
     @Override

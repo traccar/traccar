@@ -27,7 +27,6 @@ import java.util.List;
 public class ArnaviProtocol extends BaseProtocol {
 
     public ArnaviProtocol() {
-        super("arnavi");
     }
 
     @Override

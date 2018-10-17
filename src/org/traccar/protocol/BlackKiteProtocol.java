@@ -25,7 +25,6 @@ import java.util.List;
 public class BlackKiteProtocol extends BaseProtocol {
 
     public BlackKiteProtocol() {
-        super("blackkite");
     }
 
     @Override

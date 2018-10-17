@@ -27,7 +27,6 @@ import java.util.List;
 public class ExtremTracProtocol extends BaseProtocol {
 
     public ExtremTracProtocol() {
-        super("extremtrac");
     }
 
     @Override

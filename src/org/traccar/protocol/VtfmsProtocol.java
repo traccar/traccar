@@ -26,7 +26,6 @@ import java.util.List;
 public class VtfmsProtocol extends BaseProtocol {
 
     public VtfmsProtocol() {
-        super("vtfms");
     }
 
     @Override

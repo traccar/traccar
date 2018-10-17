@@ -26,7 +26,6 @@ import java.util.List;
 public class MegastekProtocol extends BaseProtocol {
 
     public MegastekProtocol() {
-        super("megastek");
     }
 
     @Override

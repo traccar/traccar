@@ -25,7 +25,6 @@ import java.util.List;
 public class Tk102Protocol extends BaseProtocol {
 
     public Tk102Protocol() {
-        super("tk102");
     }
 
     @Override

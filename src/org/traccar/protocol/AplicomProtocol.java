@@ -24,7 +24,6 @@ import java.util.List;
 public class AplicomProtocol extends BaseProtocol {
 
     public AplicomProtocol() {
-        super("aplicom");
     }
 
     @Override

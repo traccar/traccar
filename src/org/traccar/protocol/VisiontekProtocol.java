@@ -27,7 +27,6 @@ import java.util.List;
 public class VisiontekProtocol extends BaseProtocol {
 
     public VisiontekProtocol() {
-        super("visiontek");
     }
 
     @Override

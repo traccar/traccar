@@ -25,7 +25,6 @@ import java.util.List;
 public class ContinentalProtocol extends BaseProtocol {
 
     public ContinentalProtocol() {
-        super("continental");
     }
 
     @Override

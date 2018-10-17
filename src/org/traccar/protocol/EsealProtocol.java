@@ -28,7 +28,6 @@ import java.util.List;
 public class EsealProtocol extends BaseProtocol {
 
     public EsealProtocol() {
-        super("eseal");
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM,
                 Command.TYPE_ALARM_ARM,

@@ -27,7 +27,6 @@ import java.util.List;
 public class EasyTrackProtocol extends BaseProtocol {
 
     public EasyTrackProtocol() {
-        super("easytrack");
     }
 
     @Override

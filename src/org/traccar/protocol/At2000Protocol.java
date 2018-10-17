@@ -24,7 +24,6 @@ import java.util.List;
 public class At2000Protocol extends BaseProtocol {
 
     public At2000Protocol() {
-        super("at2000");
     }
 
     @Override

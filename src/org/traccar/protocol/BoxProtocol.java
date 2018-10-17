@@ -27,7 +27,6 @@ import java.util.List;
 public class BoxProtocol extends BaseProtocol {
 
     public BoxProtocol() {
-        super("box");
     }
 
     @Override

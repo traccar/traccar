@@ -31,7 +31,6 @@ import java.util.List;
 public class WialonProtocol extends BaseProtocol {
 
     public WialonProtocol() {
-        super("wialon");
         setSupportedDataCommands(
                 Command.TYPE_REBOOT_DEVICE,
                 Command.TYPE_SEND_USSD,

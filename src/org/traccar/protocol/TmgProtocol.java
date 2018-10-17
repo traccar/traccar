@@ -26,7 +26,6 @@ import java.util.List;
 public class TmgProtocol extends BaseProtocol {
 
     public TmgProtocol() {
-        super("tmg");
     }
 
     @Override

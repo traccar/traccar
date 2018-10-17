@@ -27,7 +27,6 @@ import java.util.List;
 public class TrackboxProtocol extends BaseProtocol {
 
     public TrackboxProtocol() {
-        super("trackbox");
     }
 
     @Override

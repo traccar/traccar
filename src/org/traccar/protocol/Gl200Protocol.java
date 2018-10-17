@@ -27,7 +27,6 @@ import java.util.List;
 public class Gl200Protocol extends BaseProtocol {
 
     public Gl200Protocol() {
-        super("gl200");
         setSupportedDataCommands(
                 Command.TYPE_POSITION_SINGLE,
                 Command.TYPE_ENGINE_STOP,

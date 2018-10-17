@@ -26,7 +26,6 @@ import java.util.List;
 public class EskyProtocol extends BaseProtocol {
 
     public EskyProtocol() {
-        super("esky");
     }
 
     @Override

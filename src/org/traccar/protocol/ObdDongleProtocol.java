@@ -25,7 +25,6 @@ import java.util.List;
 public class ObdDongleProtocol extends BaseProtocol {
 
     public ObdDongleProtocol() {
-        super("obddongle");
     }
 
     @Override

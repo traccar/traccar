@@ -26,7 +26,6 @@ import java.util.List;
 public class RecodaProtocol extends BaseProtocol {
 
     public RecodaProtocol() {
-        super("recoda");
     }
 
     @Override

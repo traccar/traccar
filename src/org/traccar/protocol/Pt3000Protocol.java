@@ -27,7 +27,6 @@ import java.util.List;
 public class Pt3000Protocol extends BaseProtocol {
 
     public Pt3000Protocol() {
-        super("pt3000");
     }
 
     @Override

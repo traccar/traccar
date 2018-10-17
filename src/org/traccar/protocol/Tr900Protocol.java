@@ -27,7 +27,6 @@ import java.util.List;
 public class Tr900Protocol extends BaseProtocol {
 
     public Tr900Protocol() {
-        super("tr900");
     }
 
     @Override

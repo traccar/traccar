@@ -27,7 +27,6 @@ import java.util.List;
 public class GpsMarkerProtocol extends BaseProtocol {
 
     public GpsMarkerProtocol() {
-        super("gpsmarker");
     }
 
     @Override

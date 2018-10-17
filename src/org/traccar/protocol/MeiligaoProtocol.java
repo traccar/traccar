@@ -25,7 +25,6 @@ import java.util.List;
 public class MeiligaoProtocol extends BaseProtocol {
 
     public MeiligaoProtocol() {
-        super("meiligao");
         setSupportedDataCommands(
                 Command.TYPE_POSITION_SINGLE,
                 Command.TYPE_POSITION_PERIODIC,

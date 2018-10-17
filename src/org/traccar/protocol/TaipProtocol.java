@@ -27,7 +27,6 @@ import java.util.List;
 public class TaipProtocol extends BaseProtocol {
 
     public TaipProtocol() {
-        super("taip");
     }
 
     @Override

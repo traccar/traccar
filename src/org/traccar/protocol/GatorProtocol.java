@@ -25,7 +25,6 @@ import java.util.List;
 public class GatorProtocol extends BaseProtocol {
 
     public GatorProtocol() {
-        super("gator");
     }
 
     @Override

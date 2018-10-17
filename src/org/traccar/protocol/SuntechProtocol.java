@@ -28,7 +28,6 @@ import java.util.List;
 public class SuntechProtocol extends BaseProtocol {
 
     public SuntechProtocol() {
-        super("suntech");
         setSupportedDataCommands(
                 Command.TYPE_OUTPUT_CONTROL,
                 Command.TYPE_REBOOT_DEVICE,

@@ -24,7 +24,6 @@ import java.util.List;
 public class RoboTrackProtocol extends BaseProtocol {
 
     public RoboTrackProtocol() {
-        super("robotrack");
     }
 
     @Override

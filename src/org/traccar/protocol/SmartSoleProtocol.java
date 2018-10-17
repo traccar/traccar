@@ -27,7 +27,6 @@ import java.util.List;
 public class SmartSoleProtocol extends BaseProtocol {
 
     public SmartSoleProtocol() {
-        super("smartsole");
     }
 
     @Override

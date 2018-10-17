@@ -27,7 +27,6 @@ import java.util.List;
 public class Ardi01Protocol extends BaseProtocol {
 
     public Ardi01Protocol() {
-        super("ardi01");
     }
 
     @Override

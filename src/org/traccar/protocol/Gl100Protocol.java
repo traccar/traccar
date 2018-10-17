@@ -27,7 +27,6 @@ import java.util.List;
 public class Gl100Protocol extends BaseProtocol {
 
     public Gl100Protocol() {
-        super("gl100");
     }
 
     @Override

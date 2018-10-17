@@ -26,7 +26,6 @@ import java.util.List;
 public class RitiProtocol extends BaseProtocol {
 
     public RitiProtocol() {
-        super("riti");
     }
 
     @Override

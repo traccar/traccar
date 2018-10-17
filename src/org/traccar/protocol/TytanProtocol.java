@@ -24,7 +24,6 @@ import java.util.List;
 public class TytanProtocol extends BaseProtocol {
 
     public TytanProtocol() {
-        super("tytan");
     }
 
     @Override

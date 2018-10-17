@@ -24,7 +24,6 @@ import java.util.List;
 public class OrionProtocol extends BaseProtocol {
 
     public OrionProtocol() {
-        super("orion");
     }
 
     @Override

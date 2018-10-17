@@ -26,7 +26,6 @@ import java.util.List;
 public class JpKorjarProtocol extends BaseProtocol {
 
     public JpKorjarProtocol() {
-        super("jpkorjar");
     }
 
     @Override

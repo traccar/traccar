@@ -27,7 +27,6 @@ import java.util.List;
 public class DmtHttpProtocol extends BaseProtocol {
 
     public DmtHttpProtocol() {
-        super("dmthttp");
     }
 
     @Override

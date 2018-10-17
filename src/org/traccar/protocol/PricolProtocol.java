@@ -25,7 +25,6 @@ import java.util.List;
 public class PricolProtocol extends BaseProtocol {
 
     public PricolProtocol() {
-        super("pricol");
     }
 
     @Override

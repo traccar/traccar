@@ -26,7 +26,6 @@ import java.util.List;
 public class Jt600Protocol extends BaseProtocol {
 
     public Jt600Protocol() {
-        super("jt600");
         setSupportedDataCommands(
                 Command.TYPE_ENGINE_RESUME,
                 Command.TYPE_ENGINE_STOP,

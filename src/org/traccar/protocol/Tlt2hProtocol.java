@@ -27,7 +27,6 @@ import java.util.List;
 public class Tlt2hProtocol extends BaseProtocol {
 
     public Tlt2hProtocol() {
-        super("tlt2h");
     }
 
     @Override

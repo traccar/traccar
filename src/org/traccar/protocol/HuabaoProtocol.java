@@ -25,7 +25,6 @@ import java.util.List;
 public class HuabaoProtocol extends BaseProtocol {
 
     public HuabaoProtocol() {
-        super("huabao");
         setSupportedDataCommands(
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME);

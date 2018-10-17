@@ -25,7 +25,6 @@ import java.util.List;
 public class SabertekProtocol extends BaseProtocol {
 
     public SabertekProtocol() {
-        super("sabertek");
     }
 
     @Override

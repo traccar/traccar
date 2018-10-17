@@ -25,7 +25,6 @@ import java.util.List;
 public class ThinkRaceProtocol extends BaseProtocol {
 
     public ThinkRaceProtocol() {
-        super("thinkrace");
     }
 
     @Override

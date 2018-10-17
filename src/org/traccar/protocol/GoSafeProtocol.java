@@ -27,7 +27,6 @@ import java.util.List;
 public class GoSafeProtocol extends BaseProtocol {
 
     public GoSafeProtocol() {
-        super("gosafe");
     }
 
     @Override

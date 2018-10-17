@@ -26,7 +26,6 @@ import java.util.List;
 public class Stl060Protocol extends BaseProtocol {
 
     public Stl060Protocol() {
-        super("stl060");
     }
 
     @Override

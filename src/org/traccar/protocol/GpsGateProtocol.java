@@ -27,7 +27,6 @@ import java.util.List;
 public class GpsGateProtocol extends BaseProtocol {
 
     public GpsGateProtocol() {
-        super("gpsgate");
     }
 
     @Override

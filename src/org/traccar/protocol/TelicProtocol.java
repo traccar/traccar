@@ -26,7 +26,6 @@ import java.util.List;
 public class TelicProtocol extends BaseProtocol {
 
     public TelicProtocol() {
-        super("telic");
     }
 
     @Override

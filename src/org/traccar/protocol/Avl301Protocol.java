@@ -25,7 +25,6 @@ import java.util.List;
 public class Avl301Protocol extends BaseProtocol {
 
     public Avl301Protocol() {
-        super("avl301");
     }
 
     @Override

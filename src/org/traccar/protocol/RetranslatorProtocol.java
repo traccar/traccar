@@ -24,7 +24,6 @@ import java.util.List;
 public class RetranslatorProtocol extends BaseProtocol {
 
     public RetranslatorProtocol() {
-        super("retranslator");
     }
 
     @Override

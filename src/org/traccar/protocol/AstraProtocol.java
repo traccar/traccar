@@ -25,7 +25,6 @@ import java.util.List;
 public class AstraProtocol extends BaseProtocol {
 
     public AstraProtocol() {
-        super("astra");
     }
 
     @Override

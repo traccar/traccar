@@ -27,7 +27,6 @@ import java.util.List;
 public class PathAwayProtocol extends BaseProtocol {
 
     public PathAwayProtocol() {
-        super("pathaway");
     }
 
     @Override

@@ -27,7 +27,6 @@ import java.util.List;
 public class Tt8850Protocol extends BaseProtocol {
 
     public Tt8850Protocol() {
-        super("tt8850");
     }
 
     @Override

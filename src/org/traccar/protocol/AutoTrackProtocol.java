@@ -26,7 +26,6 @@ import java.util.List;
 public class AutoTrackProtocol extends BaseProtocol {
 
     public AutoTrackProtocol() {
-        super("autotrack");
     }
 
     @Override

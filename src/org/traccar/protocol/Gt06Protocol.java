@@ -25,7 +25,6 @@ import java.util.List;
 public class Gt06Protocol extends BaseProtocol {
 
     public Gt06Protocol() {
-        super("gt06");
         setSupportedDataCommands(
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME,

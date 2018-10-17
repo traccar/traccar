@@ -34,8 +34,13 @@ public abstract class BaseProtocol implements Protocol {
 
     private StringProtocolEncoder textCommandEncoder = null;
 
-    public BaseProtocol(String name) {
-        this.name = name;
+    public static String nameFromClass(Class<?> clazz) {
+        String className = clazz.getSimpleName();
+        return className.substring(0, className.length() - 8).toLowerCase();
+    }
+
+    public BaseProtocol() {
+        name = nameFromClass(getClass());
     }
 
     @Override

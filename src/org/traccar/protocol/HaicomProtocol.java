@@ -27,7 +27,6 @@ import java.util.List;
 public class HaicomProtocol extends BaseProtocol {
 
     public HaicomProtocol() {
-        super("haicom");
     }
 
     @Override

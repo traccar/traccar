@@ -26,7 +26,6 @@ import java.util.List;
 public class L100Protocol extends BaseProtocol {
 
     public L100Protocol() {
-        super("l100");
     }
 
     @Override

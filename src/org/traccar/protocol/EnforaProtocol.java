@@ -26,7 +26,6 @@ import java.util.List;
 public class EnforaProtocol extends BaseProtocol {
 
     public EnforaProtocol() {
-        super("enfora");
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM,
                 Command.TYPE_ENGINE_STOP,
