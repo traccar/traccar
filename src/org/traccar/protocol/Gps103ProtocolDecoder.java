@@ -276,11 +276,11 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
         String sentence = (String) msg;
 
-        if (sentence.contains("##")) {
+        if (sentence.contains("imei:") && sentence.length() <= 25) {
             if (channel != null) {
                 channel.writeAndFlush(new NetworkMessage("LOAD", remoteAddress));
-                Matcher matcher = Pattern.compile("##,imei:(\\d+),A").matcher(sentence);
-                if (matcher.matches()) {
+                Matcher matcher = Pattern.compile("imei:(\\d+),").matcher(sentence);
+                if (matcher.find()) {
                     getDeviceSession(channel, remoteAddress, matcher.group(1));
                 }
             }
