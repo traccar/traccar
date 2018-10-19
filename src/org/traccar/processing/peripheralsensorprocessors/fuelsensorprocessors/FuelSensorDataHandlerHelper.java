@@ -1,5 +1,6 @@
 package org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors;
 
+import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
@@ -13,7 +14,17 @@ import java.util.Optional;
  */
 public class FuelSensorDataHandlerHelper {
 
-    public static final double TWO_MULTIPLIER = 2.0;
+    private final static double TWO_MULTIPLIER = 2.0;
+
+    private static double MINIMUM_AVERAGE_MILEAGE;
+    private static double MAXIMUM_AVERAGE_MILEAGE;
+    private static double CURRENT_AVERAGE_MILEAGE;
+
+    static {
+        MINIMUM_AVERAGE_MILEAGE = Context.getConfig().getDouble("processing.minimumAverageMileage");
+        MAXIMUM_AVERAGE_MILEAGE = Context.getConfig().getDouble("processing.maximumAverageMileage");
+        CURRENT_AVERAGE_MILEAGE = Context.getConfig().getDouble("processing.currentAverageMileage");
+    }
 
     public static boolean isOutlierPresentInSublist(List<Position> rawFuelOutlierSublist,
                                                     int indexOfPositionEvaluated,
@@ -163,13 +174,9 @@ public class FuelSensorDataHandlerHelper {
 
         // max distance in KM
         double maximumDistanceTravelled = Math.max(differenceTotalDistanceInMeters, differenceOdometerInMeters) / 1000;
-        double minimumAverageMileage = 1.5; // KM/L. This has to be a self learning value
-        double maximumAverageMileage = 4.0; // KM/L. This has to be a self learning value
-        double currentAverageMileage = 2.5; // KM/L. This has to be a self learning value
-
-        double expectedMaxFuelConsumed = maximumDistanceTravelled / minimumAverageMileage;
-        double expectedMinFuelConsumed = maximumDistanceTravelled / maximumAverageMileage;
-        double expectedCurrentFuelConsumed = maximumDistanceTravelled / currentAverageMileage;
+        double expectedMaxFuelConsumed = maximumDistanceTravelled / MINIMUM_AVERAGE_MILEAGE;
+        double expectedMinFuelConsumed = maximumDistanceTravelled / MAXIMUM_AVERAGE_MILEAGE;
+        double expectedCurrentFuelConsumed = maximumDistanceTravelled / CURRENT_AVERAGE_MILEAGE;
 
         double allowedDeviation = 1.0; // Default, if maxCapacity is absent.
 
