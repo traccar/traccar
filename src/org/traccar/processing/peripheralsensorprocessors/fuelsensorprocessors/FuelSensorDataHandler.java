@@ -750,12 +750,14 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         Map.Entry<Long, SensorPointsMap> previous = sensorPointsToVolumeMap.floorEntry(sensorFuelLevelPoints);
         Map.Entry<Long, SensorPointsMap> next = sensorPointsToVolumeMap.ceilingEntry(sensorFuelLevelPoints);
 
-        if (next == null || previous == null) {
-            Log.debug("Null FuelLevelInfo - deviceID: " + deviceId
-                              + " sensorId: " + sensorId);
-            return Optional.empty();
+        if (next == null) {
+            next = sensorPointsToVolumeMap.lastEntry();
         }
-        
+
+        if (previous == null) {
+            previous = sensorPointsToVolumeMap.firstEntry();
+        }
+
         SensorPointsMap previousFuelLevelInfo = previous.getValue();
         SensorPointsMap nextFuelLevelInfo = next.getValue();
 
