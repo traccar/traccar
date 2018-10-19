@@ -508,16 +508,16 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                 indexOfPositionEvaluation,
                 fuelTankMaxVolume);
 
+        Position outlierPosition = relevantPositionsListForOutliers.get(indexOfPositionEvaluation);
+        outlierPosition.set(Position.KEY_FUEL_IS_OUTLIER, outlierPresent);
+        // Note: Need to do this in a better way since this is a direct write to the db and can slow things down.
+        // We could use an external queue and update these positions from there, without affecting processing here.
+        // Also, we do not want to lose any data coming in, so we'll only mark the position as an outlier rather
+        // than deleting it.
+        updatePosition(outlierPosition);
+
         if (outlierPresent) {
             // Remove the outlier
-            Position outlierPosition = relevantPositionsListForOutliers.get(indexOfPositionEvaluation);
-            outlierPosition.set(Position.KEY_FUEL_IS_OUTLIER, true);
-
-            // Note: Need to do this in a better way since this is a direct write to the db and can slow things down.
-            // We could use an external queue and update these positions from there, without affecting processing here.
-            // Also, we do not want to lose any data coming in, so we'll only mark the position as an outlier rather
-            // than deleting it.
-            updatePosition(outlierPosition);
             positionsForDeviceSensor.remove(outlierPosition);
             return;
         }
@@ -528,7 +528,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         relevantPositionsListForAverages =
                 getRelevantPositionsSubList(positionsForDeviceSensor,
                                             positionUnderEvaluation,
-                                            minValuesForMovingAvg);
+                                            minValuesForMovingAvg, true);
 
         currentFuelLevelAverage = getAverageValue(relevantPositionsListForAverages);
         positionUnderEvaluation.set(Position.KEY_FUEL_LEVEL, currentFuelLevelAverage);
@@ -541,7 +541,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         List<Position> relevantPositionsListForAlerts =
                 getRelevantPositionsSubList(positionsForDeviceSensor,
                                             positionUnderEvaluation,
-                                            maxValuesForAlerts);
+                                            maxValuesForAlerts, true);
 
         if (!this.loadingOldDataFromDB && relevantPositionsListForAlerts.size() >= maxValuesForAlerts) {
             // We'll use the smoothed values to check for activity.
@@ -694,13 +694,20 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         return avg;
     }
 
-
     private List<Position> getRelevantPositionsSubList(TreeMultiset<Position> positionsForSensor,
                                                        Position position,
                                                        int minListSize) {
+        return getRelevantPositionsSubList(positionsForSensor, position, minListSize, false);
+    }
+
+    private List<Position> getRelevantPositionsSubList(TreeMultiset<Position> positionsForSensor,
+                                                       Position position,
+                                                       int minListSize,
+                                                       boolean excludeOutliers) {
 
         if (positionsForSensor.size() <= minListSize) {
             return positionsForSensor.stream()
+                                     .filter(p -> !excludeOutliers || !p.getBoolean(Position.KEY_FUEL_IS_OUTLIER))
                                      .collect(Collectors.toList());
         }
 
@@ -716,14 +723,17 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             Log.debug("[RELEVANT_SUBLIST] sublist is lesser than "
                       + minListSize + " returning " + positionsSubset.size());
             return positionsSubset.stream()
+                                  .filter(p -> !excludeOutliers || !p.getBoolean(Position.KEY_FUEL_IS_OUTLIER))
                                   .collect(Collectors.toList());
         }
 
         int listMaxIndex = positionsSubset.size();
 
-        List<Position> sublistToReturn =  positionsSubset.stream()
-                                                         .collect(Collectors.toList())
-                                                         .subList(listMaxIndex - minListSize, listMaxIndex);
+        List<Position> sublistToReturn =
+                positionsSubset.stream()
+                               .filter(p -> !excludeOutliers || !p.getBoolean(Position.KEY_FUEL_IS_OUTLIER))
+                               .collect(Collectors.toList())
+                               .subList(listMaxIndex - minListSize, listMaxIndex);
 
         Log.debug("[RELEVANT_SUBLIST] sublist size: " + sublistToReturn.size());
 
