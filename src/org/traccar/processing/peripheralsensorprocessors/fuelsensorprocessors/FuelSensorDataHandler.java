@@ -231,7 +231,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
         Map<Integer, TreeMultiset<Position>> sensorReadingsFromDevice = previousPositions.get(deviceId);
 
-        if (sensorReadingsFromDevice.size() < 1) {
+        if (sensorReadingsFromDevice.isEmpty()) {
             Log.debug("No readings for sensors found on deviceId: " + deviceId);
             return Optional.empty();
         }
@@ -251,6 +251,36 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                                                              .getElement();
 
         return Optional.of(lastKnownPosition);
+    }
+
+    private Optional<Position> getLastWindowMidpoint(Position position, int windowSize, int currentWindowOffset) {
+        long deviceId = position.getDeviceId();
+        if (!previousPositions.containsKey(deviceId)) {
+            Log.debug("deviceId not found in previousPositions" + deviceId);
+            return Optional.empty();
+        }
+
+        Map<Integer, TreeMultiset<Position>> sensorReadingsFromDevice = previousPositions.get(deviceId);
+
+        if (sensorReadingsFromDevice.isEmpty()) {
+            Log.debug("No readings for sensors found on deviceId: " + deviceId);
+            return Optional.empty();
+        }
+
+        Optional<Integer> sensorId = sensorReadingsFromDevice.keySet().stream().findFirst();
+
+        if (!sensorId.isPresent() || sensorReadingsFromDevice.get(sensorId.get()).size() < (windowSize / 2) + currentWindowOffset) {
+            Log.debug(String.format("Not enough positions in list to get last window midpoint for device %d", deviceId));
+            return Optional.empty();
+        }
+
+        List<Position> reversePositions = sensorReadingsFromDevice.get(sensorId.get())
+                                                                  .descendingMultiset()
+                                                                  .stream()
+                                                                  .limit(currentWindowOffset + (windowSize / 2))
+                                                                  .collect(Collectors.toList());
+
+        return Optional.of(reversePositions.get(reversePositions.size() - 1));
     }
 
     private void loadOldPositions() {
@@ -452,9 +482,14 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         Optional<Long> fuelTankMaxVolume = getFuelTankMaxCapacity(deviceId, sensorId);
 
         // Detect data loss if size of relevantPositionsListForOutliers is = 1
-        if (relevantPositionsListForOutliers.size() == 1 && lastPacketProcessed.isPresent()) {
+        int minCurrentWindowValues = (minValuesForOutlierDetection/2 - 1);
+
+        Optional<Position> lastWindowMidpoint =
+                getLastWindowMidpoint(position, minValuesForOutlierDetection, minCurrentWindowValues);
+
+        if (relevantPositionsListForOutliers.size() == minCurrentWindowValues && lastWindowMidpoint.isPresent()) {
             Optional<FuelActivity> fuelActivity =
-                    checkForActivityIfDataLoss(position, lastPacketProcessed.get(), fuelTankMaxVolume);
+                    checkForActivityIfDataLoss(position, lastWindowMidpoint.get(), fuelTankMaxVolume);
 
             if(fuelActivity.isPresent()) {
                 sendNotificationIfNecessary(deviceId, fuelActivity.get());
