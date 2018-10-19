@@ -482,7 +482,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         Optional<Long> fuelTankMaxVolume = getFuelTankMaxCapacity(deviceId, sensorId);
 
         // Detect data loss if size of relevantPositionsListForOutliers is = 1
-        int minCurrentWindowValues = (minValuesForOutlierDetection/2 - 1);
+        int minCurrentWindowValues = (minValuesForOutlierDetection + 1)/2;
 
         Optional<Position> lastWindowMidpoint =
                 getLastWindowMidpoint(position, minValuesForOutlierDetection, minCurrentWindowValues);
