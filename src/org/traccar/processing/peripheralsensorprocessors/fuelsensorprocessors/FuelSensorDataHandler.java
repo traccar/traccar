@@ -45,8 +45,8 @@ public class FuelSensorDataHandler extends BaseDataHandler {
     private double fuelLevelChangeThresholdLitresDigital;
     private double fuelLevelChangeThresholdLitresAnalog;
 
-    private boolean possibleDataLoss = false;
-    private Optional<Position> nonOutlierInLastWindow = Optional.empty();
+    private final Map<Long, Boolean> possibleDataLossByDevice = new ConcurrentHashMap<>();
+    private final Map<Long, Position> nonOutlierInLastWindowByDevice = new ConcurrentHashMap<>();
 
     private final Map<Long, Map<Integer, TreeMultiset<Position>>> previousPositions =
             new ConcurrentHashMap<>();
@@ -487,7 +487,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                 getRelevantPositionsSubList(positionsForDeviceSensor, position, minValuesForOutlierDetection);
 
         if (relevantPositionsListForAverages.size() == 1) {
-            possibleDataLoss = true;
+            possibleDataLossByDevice.put(deviceId, true);
         }
 
         if (relevantPositionsListForOutliers.size() < minValuesForOutlierDetection) {
@@ -523,20 +523,26 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
         // At this point we know indexOfPositionEvaluation in the new window is not an outlier. So if we haven't found
         // the first outlier in the last window yet, go find it.
-        if (possibleDataLoss && !nonOutlierInLastWindow.isPresent()) {
-            nonOutlierInLastWindow =
+        boolean possibleDataLoss = possibleDataLossByDevice.getOrDefault(deviceId, false);
+        if (possibleDataLoss && !nonOutlierInLastWindowByDevice.containsKey(deviceId)) {
+            Optional<Position> nonOutlierInLastWindow =
                     findFirstNonOutlierInLastWindow(outlierCheckPosition, relevantPositionsListForOutliers.size());
+            if (nonOutlierInLastWindow.isPresent()) {
+                nonOutlierInLastWindowByDevice.put(deviceId, nonOutlierInLastWindow.get());
+            }
         }
 
-        if (possibleDataLoss && nonOutlierInLastWindow.isPresent()) {
+        if (possibleDataLoss && nonOutlierInLastWindowByDevice.containsKey(deviceId)) {
             Optional<FuelActivity> fuelActivity =
-                    checkForActivityIfDataLoss(outlierCheckPosition, nonOutlierInLastWindow.get(), fuelTankMaxVolume);
+                    checkForActivityIfDataLoss(outlierCheckPosition,
+                                               nonOutlierInLastWindowByDevice.get(deviceId),
+                                               fuelTankMaxVolume);
 
             if(fuelActivity.isPresent()) {
                 sendNotificationIfNecessary(deviceId, fuelActivity.get());
             }
-            possibleDataLoss = false;
-            nonOutlierInLastWindow = Optional.empty();
+            possibleDataLossByDevice.remove(deviceId);
+            nonOutlierInLastWindowByDevice.remove(deviceId);
         }
 
         Position positionUnderEvaluation = relevantPositionsListForOutliers.get(indexOfPositionEvaluation);
