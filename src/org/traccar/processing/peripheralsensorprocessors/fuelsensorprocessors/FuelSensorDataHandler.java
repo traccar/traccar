@@ -45,6 +45,9 @@ public class FuelSensorDataHandler extends BaseDataHandler {
     private double fuelLevelChangeThresholdLitresDigital;
     private double fuelLevelChangeThresholdLitresAnalog;
 
+    private boolean possibleDataLoss = false;
+    private Optional<Position> nonOutlierInLastWindow = Optional.empty();
+
     private final Map<Long, Map<Integer, TreeMultiset<Position>>> previousPositions =
             new ConcurrentHashMap<>();
 
@@ -211,7 +214,8 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
         Position lastKnownPosition = possibleLastKnownPosition.get();
         if (!lastKnownPosition.getAttributes().containsKey(attributeToUpdate)) {
-            Log.debug(String.format("Last known position for deviceId %d doesn't have property %s set.", position.getDeviceId(), attributeToUpdate));
+            Log.debug(String.format("Last known position for deviceId %d doesn't have property %s set.",
+                                    position.getDeviceId(), attributeToUpdate));
             return;
         }
 
@@ -253,7 +257,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         return Optional.of(lastKnownPosition);
     }
 
-    private Optional<Position> getLastWindowMidpoint(Position position, int windowSize, int currentWindowOffset) {
+    private Optional<Position> findFirstNonOutlierInLastWindow(Position position, int currentWindowOffset) {
         long deviceId = position.getDeviceId();
         if (!previousPositions.containsKey(deviceId)) {
             Log.debug("deviceId not found in previousPositions" + deviceId);
@@ -269,18 +273,21 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
         Optional<Integer> sensorId = sensorReadingsFromDevice.keySet().stream().findFirst();
 
-        if (!sensorId.isPresent() || sensorReadingsFromDevice.get(sensorId.get()).size() < (windowSize / 2) + currentWindowOffset) {
-            Log.debug(String.format("Not enough positions in list to get last window midpoint for device %d", deviceId));
+        if (!sensorId.isPresent()) {
+            Log.debug(String.format("No sensor detected on device %d",
+                                    deviceId));
             return Optional.empty();
         }
 
-        List<Position> reversePositions = sensorReadingsFromDevice.get(sensorId.get())
-                                                                  .descendingMultiset()
-                                                                  .stream()
-                                                                  .limit(currentWindowOffset + (windowSize / 2))
-                                                                  .collect(Collectors.toList());
-
-        return Optional.of(reversePositions.get(reversePositions.size() - 1));
+        // Will return Optional.empty if there aren't enough elements in the list.
+        return sensorReadingsFromDevice
+                .get(sensorId.get())
+                .descendingMultiset()
+                .stream()
+                .skip(currentWindowOffset)
+                .filter(p -> p.getAttributes().containsKey(Position.KEY_FUEL_IS_OUTLIER) &&
+                             !(boolean) p.getAttributes().get(Position.KEY_FUEL_IS_OUTLIER))
+                .findFirst();
     }
 
     private void loadOldPositions() {
@@ -479,27 +486,18 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         List<Position> relevantPositionsListForOutliers =
                 getRelevantPositionsSubList(positionsForDeviceSensor, position, minValuesForOutlierDetection);
 
-        Optional<Long> fuelTankMaxVolume = getFuelTankMaxCapacity(deviceId, sensorId);
-
-        // Detect data loss if size of relevantPositionsListForOutliers is = 1
-        int minCurrentWindowValues = (minValuesForOutlierDetection + 1)/2;
-
-        Optional<Position> lastWindowMidpoint =
-                getLastWindowMidpoint(position, minValuesForOutlierDetection, minCurrentWindowValues);
-
-        if (relevantPositionsListForOutliers.size() == minCurrentWindowValues && lastWindowMidpoint.isPresent()) {
-            Optional<FuelActivity> fuelActivity =
-                    checkForActivityIfDataLoss(position, lastWindowMidpoint.get(), fuelTankMaxVolume);
-
-            if(fuelActivity.isPresent()) {
-                sendNotificationIfNecessary(deviceId, fuelActivity.get());
-            }
+        if (relevantPositionsListForAverages.size() == 1) {
+            possibleDataLoss = true;
         }
 
         if (relevantPositionsListForOutliers.size() < minValuesForOutlierDetection) {
+            // positions in this case will have isFuelOutlier left blank (neither true nor false) i.e.
+            // not evaluated.
             Log.debug("List too small for outlier detection");
             return;
         }
+
+        Optional<Long> fuelTankMaxVolume = getFuelTankMaxCapacity(deviceId, sensorId);
 
         int indexOfPositionEvaluation = (minValuesForOutlierDetection - 1) / 2;
 
@@ -508,18 +506,37 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                 indexOfPositionEvaluation,
                 fuelTankMaxVolume);
 
-        Position outlierPosition = relevantPositionsListForOutliers.get(indexOfPositionEvaluation);
-        outlierPosition.set(Position.KEY_FUEL_IS_OUTLIER, outlierPresent);
+        Position outlierCheckPosition = relevantPositionsListForOutliers.get(indexOfPositionEvaluation);
+        outlierCheckPosition.set(Position.KEY_FUEL_IS_OUTLIER, outlierPresent);
+
         // Note: Need to do this in a better way since this is a direct write to the db and can slow things down.
         // We could use an external queue and update these positions from there, without affecting processing here.
         // Also, we do not want to lose any data coming in, so we'll only mark the position as an outlier rather
         // than deleting it.
-        updatePosition(outlierPosition);
+        updatePosition(outlierCheckPosition);
 
         if (outlierPresent) {
-            // Remove the outlier
-            positionsForDeviceSensor.remove(outlierPosition);
+            // Remove the outlier from our in memory list and move on.
+            positionsForDeviceSensor.remove(outlierCheckPosition);
             return;
+        }
+
+        // At this point we know indexOfPositionEvaluation in the new window is not an outlier. So if we haven't found
+        // the first outlier in the last window yet, go find it.
+        if (possibleDataLoss && !nonOutlierInLastWindow.isPresent()) {
+            nonOutlierInLastWindow =
+                    findFirstNonOutlierInLastWindow(outlierCheckPosition, relevantPositionsListForOutliers.size());
+        }
+
+        if (possibleDataLoss && nonOutlierInLastWindow.isPresent()) {
+            Optional<FuelActivity> fuelActivity =
+                    checkForActivityIfDataLoss(outlierCheckPosition, nonOutlierInLastWindow.get(), fuelTankMaxVolume);
+
+            if(fuelActivity.isPresent()) {
+                sendNotificationIfNecessary(deviceId, fuelActivity.get());
+            }
+            possibleDataLoss = false;
+            nonOutlierInLastWindow = Optional.empty();
         }
 
         Position positionUnderEvaluation = relevantPositionsListForOutliers.get(indexOfPositionEvaluation);
@@ -620,21 +637,24 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                             Math.abs(calculatedFuelChangeVolume) -
                             expectedFuelConsumptionValues.expectedCurrentFuelConsumed;
                     FuelActivity activity =
-                            new FuelActivity(FuelActivityType.FUEL_DRAIN, possibleFuelDrain, lastPosition, position);
+                            new FuelActivity(FuelActivityType.FUEL_DRAIN,
+                                             possibleFuelDrain, lastPosition, position);
                     return Optional.of(activity);
                 } else {
                     double possibleFuelFill =
                             expectedFuelConsumptionValues.expectedCurrentFuelConsumed -
                             Math.abs(calculatedFuelChangeVolume);
                     FuelActivity activity =
-                            new FuelActivity(FuelActivityType.FUEL_FILL, possibleFuelFill, lastPosition, position);
+                            new FuelActivity(FuelActivityType.FUEL_FILL,
+                                             possibleFuelFill, lastPosition, position);
                     return Optional.of(activity);
                 }
             } else {
                 double expectedFuelFill =
                         calculatedFuelChangeVolume + expectedFuelConsumptionValues.expectedCurrentFuelConsumed;
                 FuelActivity activity =
-                        new FuelActivity(FuelActivityType.FUEL_FILL, expectedFuelFill, lastPosition, position);
+                        new FuelActivity(FuelActivityType.FUEL_FILL,
+                                         expectedFuelFill, lastPosition, position);
                 return Optional.of(activity);
             }
         }
@@ -707,7 +727,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
         if (positionsForSensor.size() <= minListSize) {
             return positionsForSensor.stream()
-                                     .filter(p -> !excludeOutliers || !p.getBoolean(Position.KEY_FUEL_IS_OUTLIER))
+                                     .filter(p -> !excludeOutliers || positionIsMarkedOutlier(p))
                                      .collect(Collectors.toList());
         }
 
@@ -723,7 +743,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             Log.debug("[RELEVANT_SUBLIST] sublist is lesser than "
                       + minListSize + " returning " + positionsSubset.size());
             return positionsSubset.stream()
-                                  .filter(p -> !excludeOutliers || !p.getBoolean(Position.KEY_FUEL_IS_OUTLIER))
+                                  .filter(p -> !excludeOutliers || positionIsMarkedOutlier(p))
                                   .collect(Collectors.toList());
         }
 
@@ -731,13 +751,18 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
         List<Position> sublistToReturn =
                 positionsSubset.stream()
-                               .filter(p -> !excludeOutliers || !p.getBoolean(Position.KEY_FUEL_IS_OUTLIER))
+                               .filter(p -> !excludeOutliers || positionIsMarkedOutlier(p))
                                .collect(Collectors.toList())
                                .subList(listMaxIndex - minListSize, listMaxIndex);
 
         Log.debug("[RELEVANT_SUBLIST] sublist size: " + sublistToReturn.size());
 
         return sublistToReturn;
+    }
+
+    private static boolean positionIsMarkedOutlier(final Position position) {
+        return position.getAttributes().containsKey(Position.KEY_FUEL_IS_OUTLIER)
+               && !(boolean) position.getAttributes().get(Position.KEY_FUEL_IS_OUTLIER);
     }
 
     private Optional<Long> getFuelTankMaxCapacity(Long deviceId, Integer sensorId) {
