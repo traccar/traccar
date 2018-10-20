@@ -20,6 +20,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.model.CellTower;
@@ -30,7 +31,7 @@ import java.net.SocketAddress;
 
 public class TzoneProtocolDecoder extends BaseProtocolDecoder {
 
-    public TzoneProtocolDecoder(TzoneProtocol protocol) {
+    public TzoneProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

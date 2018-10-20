@@ -20,21 +20,14 @@ import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 
-import java.util.List;
-
 public class M2mProtocol extends BaseProtocol {
 
     public M2mProtocol() {
-        super("m2m");
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new FixedLengthFrameDecoder(23));
-                pipeline.addLast("objectDecoder", new M2mProtocolDecoder(M2mProtocol.this));
+                pipeline.addLast(new FixedLengthFrameDecoder(23));
+                pipeline.addLast(new M2mProtocolDecoder(M2mProtocol.this));
             }
         });
     }

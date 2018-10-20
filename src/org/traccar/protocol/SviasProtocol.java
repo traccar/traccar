@@ -22,13 +22,11 @@ import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 
-import java.util.List;
 import org.traccar.model.Command;
 
 public class SviasProtocol extends BaseProtocol {
 
     public SviasProtocol() {
-        super("svias");
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM,
                 Command.TYPE_POSITION_SINGLE,
@@ -38,18 +36,14 @@ public class SviasProtocol extends BaseProtocol {
                 Command.TYPE_ALARM_ARM,
                 Command.TYPE_ALARM_DISARM,
                 Command.TYPE_ALARM_REMOVE);
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, "]"));
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectEncoder", new SviasProtocolEncoder());
-                pipeline.addLast("objectDecoder", new SviasProtocolDecoder(SviasProtocol.this));
+                pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, "]"));
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new SviasProtocolEncoder());
+                pipeline.addLast(new SviasProtocolDecoder(SviasProtocol.this));
             }
         });
     }

@@ -27,6 +27,7 @@ import io.netty.handler.codec.http.QueryStringDecoder;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.model.Position;
@@ -38,7 +39,7 @@ import java.util.List;
 
 public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
 
-    public PiligrimProtocolDecoder(PiligrimProtocol protocol) {
+    public PiligrimProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

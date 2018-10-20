@@ -22,6 +22,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.DateBuilder;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
@@ -35,7 +36,7 @@ import java.time.temporal.ChronoUnit;
 
 public class SmokeyProtocolDecoder extends BaseProtocolDecoder {
 
-    public SmokeyProtocolDecoder(SmokeyProtocol protocol) {
+    public SmokeyProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

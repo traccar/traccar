@@ -21,6 +21,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -34,7 +35,7 @@ import java.util.List;
 
 public class DmtProtocolDecoder extends BaseProtocolDecoder {
 
-    public DmtProtocolDecoder(DmtProtocol protocol) {
+    public DmtProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

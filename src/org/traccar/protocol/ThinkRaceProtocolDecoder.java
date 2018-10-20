@@ -21,6 +21,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
@@ -32,7 +33,7 @@ import java.util.Date;
 
 public class ThinkRaceProtocolDecoder extends BaseProtocolDecoder {
 
-    public ThinkRaceProtocolDecoder(ThinkRaceProtocol protocol) {
+    public ThinkRaceProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

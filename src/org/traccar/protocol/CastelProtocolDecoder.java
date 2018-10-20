@@ -22,6 +22,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.ObdDecoder;
@@ -72,7 +73,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    public CastelProtocolDecoder(CastelProtocol protocol) {
+    public CastelProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

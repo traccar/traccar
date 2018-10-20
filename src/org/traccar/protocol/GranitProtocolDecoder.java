@@ -22,6 +22,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Position;
@@ -41,7 +42,7 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
     private double adc3Ratio;
     private double adc4Ratio;
 
-    public GranitProtocolDecoder(GranitProtocol protocol) {
+    public GranitProtocolDecoder(Protocol protocol) {
         super(protocol);
         adc1Ratio = Context.getConfig().getDouble("granit.adc1Ratio", 1);
         adc2Ratio = Context.getConfig().getDouble("granit.adc2Ratio", 1);

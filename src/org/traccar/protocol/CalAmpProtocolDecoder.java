@@ -22,6 +22,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -31,7 +32,7 @@ import java.util.Date;
 
 public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
 
-    public CalAmpProtocolDecoder(CalAmpProtocol protocol) {
+    public CalAmpProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

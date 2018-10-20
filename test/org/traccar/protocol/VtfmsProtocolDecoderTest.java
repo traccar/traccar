@@ -8,7 +8,7 @@ public class VtfmsProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        VtfmsProtocolDecoder decoder = new VtfmsProtocolDecoder(new VtfmsProtocol());
+        VtfmsProtocolDecoder decoder = new VtfmsProtocolDecoder(null);
 
         verifyPosition(decoder, text(
                 "(865733028143493,00I76,00,000,,,,,A,133755,210617,10.57354,077.24912,SW,000,00598,00000,K,0017368,1,12.7,,,0.000,,,0,0,0,0,1,1,0,,)074"));

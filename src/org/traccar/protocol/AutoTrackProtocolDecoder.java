@@ -22,6 +22,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -31,7 +32,7 @@ import java.util.Date;
 
 public class AutoTrackProtocolDecoder extends BaseProtocolDecoder {
 
-    public AutoTrackProtocolDecoder(AutoTrackProtocol protocol) {
+    public AutoTrackProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
@@ -41,8 +42,10 @@ public class AutoTrackProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_TELEMETRY_2 = 66;
     public static final int MSG_TELEMETRY_3 = 67;
     public static final int MSG_KEEP_ALIVE = 114;
+    public static final int MSG_TELEMETRY_CONFIRM = 123;
 
-    private Position decodeTelemetry(DeviceSession deviceSession, ByteBuf buf) {
+    private Position decodeTelemetry(
+            Channel channel, SocketAddress remoteAddress, DeviceSession deviceSession, ByteBuf buf) {
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
@@ -55,6 +58,7 @@ public class AutoTrackProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_FUEL_USED, buf.readUnsignedIntLE());
 
         position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShortLE()));
+        buf.readUnsignedShortLE(); // max speed
 
         position.set(Position.KEY_INPUT, buf.readUnsignedShortLE());
         buf.readUnsignedIntLE(); // di 3 count
@@ -69,9 +73,20 @@ public class AutoTrackProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_STATUS, buf.readUnsignedShortLE());
         position.set(Position.KEY_EVENT, buf.readUnsignedShortLE());
         position.set(Position.KEY_DRIVER_UNIQUE_ID, buf.readLongLE());
-        position.set(Position.KEY_INDEX, buf.readUnsignedShortLE());
+
+        int index = buf.readUnsignedShortLE();
 
         buf.readUnsignedShortLE(); // checksum
+
+        if (channel != null) {
+            ByteBuf response = Unpooled.buffer();
+            response.writeInt(0xF1F1F1F1); // sync
+            response.writeByte(MSG_TELEMETRY_CONFIRM);
+            response.writeShortLE(2); // length
+            response.writeShortLE(index);
+            response.writeShort(Checksum.crc16(Checksum.CRC16_XMODEM, response.nioBuffer()));
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+        }
 
         return position;
     }
@@ -114,7 +129,7 @@ public class AutoTrackProtocolDecoder extends BaseProtocolDecoder {
                 if (deviceSession == null) {
                     return null;
                 }
-                return decodeTelemetry(deviceSession, buf);
+                return decodeTelemetry(channel, remoteAddress, deviceSession, buf);
             default:
                 return null;
         }

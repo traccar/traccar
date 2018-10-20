@@ -8,7 +8,7 @@ public class EasyTrackProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        EasyTrackProtocolDecoder decoder = new EasyTrackProtocolDecoder(new EasyTrackProtocol());
+        EasyTrackProtocolDecoder decoder = new EasyTrackProtocolDecoder(null);
 
         verifyPosition(decoder, text(
                 "*ET,358155100054249,HB,A,100b06,053318,803a0b51,03d507c9,0017,0000,00400000,07,100,0000,1435,63"));

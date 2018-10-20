@@ -22,6 +22,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
@@ -41,7 +42,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
     private Map<Byte, ByteBuf> photos = new HashMap<>();
 
-    public MeiligaoProtocolDecoder(MeiligaoProtocol protocol) {
+    public MeiligaoProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

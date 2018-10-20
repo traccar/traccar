@@ -19,6 +19,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
@@ -38,7 +39,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
     private boolean includeAdc;
     private boolean includeTemp;
 
-    public SuntechProtocolDecoder(SuntechProtocol protocol) {
+    public SuntechProtocolDecoder(Protocol protocol) {
         super(protocol);
 
         protocolType = Context.getConfig().getInteger(getProtocolName() + ".protocolType");

@@ -8,7 +8,7 @@ public class EgtsProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        EgtsProtocolDecoder decoder = new EgtsProtocolDecoder(new EgtsProtocol());
+        EgtsProtocolDecoder decoder = new EgtsProtocolDecoder(null);
 
         verifyNull(decoder, binary(
                 "0100010b002200c06401f21700c1640171360d00010101140071360d000238363539303500000000000000000047fc"));

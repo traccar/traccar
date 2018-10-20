@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
@@ -28,7 +29,7 @@ import java.util.regex.Pattern;
 
 public class AustinNbProtocolDecoder extends BaseProtocolDecoder {
 
-    public AustinNbProtocolDecoder(AustinNbProtocol protocol) {
+    public AustinNbProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

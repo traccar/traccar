@@ -23,12 +23,9 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.model.Command;
 
-import java.util.List;
-
 public class Gps103Protocol extends BaseProtocol {
 
     public Gps103Protocol() {
-        super("gps103");
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM,
                 Command.TYPE_POSITION_SINGLE,
@@ -39,27 +36,23 @@ public class Gps103Protocol extends BaseProtocol {
                 Command.TYPE_ALARM_ARM,
                 Command.TYPE_ALARM_DISARM,
                 Command.TYPE_REQUEST_PHOTO);
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(2048, "\r\n", "\n", ";"));
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectEncoder", new Gps103ProtocolEncoder());
-                pipeline.addLast("objectDecoder", new Gps103ProtocolDecoder(Gps103Protocol.this));
+                pipeline.addLast(new CharacterDelimiterFrameDecoder(2048, "\r\n", "\n", ";", "*"));
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new Gps103ProtocolEncoder());
+                pipeline.addLast(new Gps103ProtocolDecoder(Gps103Protocol.this));
             }
         });
-        serverList.add(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectEncoder", new Gps103ProtocolEncoder());
-                pipeline.addLast("objectDecoder", new Gps103ProtocolDecoder(Gps103Protocol.this));
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new Gps103ProtocolEncoder());
+                pipeline.addLast(new Gps103ProtocolDecoder(Gps103Protocol.this));
             }
         });
     }

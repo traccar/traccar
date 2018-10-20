@@ -68,6 +68,35 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         refreshLastPositions();
     }
 
+    @Override
+    public long addUnknownDevice(String uniqueId) {
+        Device device = new Device();
+        device.setName(uniqueId);
+        device.setUniqueId(uniqueId);
+        device.setCategory(Context.getConfig().getString("database.registerUnknown.defaultCategory"));
+
+        long defaultGroupId = Context.getConfig().getLong("database.registerUnknown.defaultGroupId");
+        if (defaultGroupId != 0) {
+            device.setGroupId(defaultGroupId);
+        }
+
+        try {
+            addItem(device);
+
+            LOGGER.info("Automatically registered device " + uniqueId);
+
+            if (defaultGroupId != 0) {
+                Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
+                Context.getPermissionsManager().refreshAllExtendedPermissions();
+            }
+
+            return device.getId();
+        } catch (SQLException e) {
+            LOGGER.warn("Automatic device registration error", e);
+            return 0;
+        }
+    }
+
     public void updateDeviceCache(boolean force) throws SQLException {
         long lastUpdate = devicesLastUpdate.get();
         if ((force || System.currentTimeMillis() - lastUpdate > dataRefreshDelay)

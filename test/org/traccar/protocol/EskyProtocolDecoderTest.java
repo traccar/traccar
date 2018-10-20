@@ -8,7 +8,7 @@ public class EskyProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        EskyProtocolDecoder decoder = new EskyProtocolDecoder(new EskyProtocol());
+        EskyProtocolDecoder decoder = new EskyProtocolDecoder(null);
 
         verifyPosition(decoder, text(
                 "EO;0;861311006461908;R;6;180420104751;2.97896;101.65091;0.75;320;3398;1;|"));

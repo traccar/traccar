@@ -8,7 +8,7 @@ public class CellocatorProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        CellocatorProtocolDecoder decoder = new CellocatorProtocolDecoder(new CellocatorProtocol());
+        CellocatorProtocolDecoder decoder = new CellocatorProtocolDecoder(null);
 
         verifyPosition(decoder, binary(
                 "4D434750008AD01500080103011804000000460020000000005E750000000000000000000000C34300040204DA4DA30367195703E803000000000000000001030F0802E10778"));

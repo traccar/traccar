@@ -21,22 +21,15 @@ import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 
-import java.util.List;
-
 public class OkoProtocol extends BaseProtocol {
 
     public OkoProtocol() {
-        super("oko");
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '}'));
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectDecoder", new OkoProtocolDecoder(OkoProtocol.this));
+                pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, '}'));
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new OkoProtocolDecoder(OkoProtocol.this));
             }
         });
     }

@@ -20,21 +20,14 @@ import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 
-import java.util.List;
-
 public class AnytrekProtocol extends BaseProtocol {
 
     public AnytrekProtocol() {
-        super("anytrek");
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 2, 2, 2, 0));
-                pipeline.addLast("objectDecoder", new AnytrekProtocolDecoder(AnytrekProtocol.this));
+                pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 2, 2, 2, 0));
+                pipeline.addLast(new AnytrekProtocolDecoder(AnytrekProtocol.this));
             }
         });
     }

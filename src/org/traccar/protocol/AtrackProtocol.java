@@ -20,31 +20,24 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.model.Command;
 
-import java.util.List;
-
 public class AtrackProtocol extends BaseProtocol {
 
     public AtrackProtocol() {
-        super("atrack");
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM);
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new AtrackFrameDecoder());
-                pipeline.addLast("objectEncoder", new AtrackProtocolEncoder());
-                pipeline.addLast("objectDecoder", new AtrackProtocolDecoder(AtrackProtocol.this));
+                pipeline.addLast(new AtrackFrameDecoder());
+                pipeline.addLast(new AtrackProtocolEncoder());
+                pipeline.addLast(new AtrackProtocolDecoder(AtrackProtocol.this));
             }
         });
-        serverList.add(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("objectEncoder", new AtrackProtocolEncoder());
-                pipeline.addLast("objectDecoder", new AtrackProtocolDecoder(AtrackProtocol.this));
+                pipeline.addLast(new AtrackProtocolEncoder());
+                pipeline.addLast(new AtrackProtocolDecoder(AtrackProtocol.this));
             }
         });
     }

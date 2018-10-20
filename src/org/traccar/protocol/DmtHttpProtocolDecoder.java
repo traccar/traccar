@@ -20,6 +20,7 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -38,7 +39,7 @@ import java.util.TimeZone;
 
 public class DmtHttpProtocolDecoder extends BaseHttpProtocolDecoder {
 
-    public DmtHttpProtocolDecoder(DmtHttpProtocol protocol) {
+    public DmtHttpProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

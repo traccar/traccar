@@ -22,23 +22,16 @@ import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 
-import java.util.List;
-
 public class GpsGateProtocol extends BaseProtocol {
 
     public GpsGateProtocol() {
-        super("gpsgate");
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, "\0", "\n", "\r\n"));
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectDecoder", new GpsGateProtocolDecoder(GpsGateProtocol.this));
+                pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, "\0", "\n", "\r\n"));
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new GpsGateProtocolDecoder(GpsGateProtocol.this));
             }
         });
     }

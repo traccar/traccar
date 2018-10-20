@@ -19,21 +19,14 @@ import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 
-import java.util.List;
-
 public class AplicomProtocol extends BaseProtocol {
 
     public AplicomProtocol() {
-        super("aplicom");
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new AplicomFrameDecoder());
-                pipeline.addLast("objectDecoder", new AplicomProtocolDecoder(AplicomProtocol.this));
+                pipeline.addLast(new AplicomFrameDecoder());
+                pipeline.addLast(new AplicomProtocolDecoder(AplicomProtocol.this));
             }
         });
     }

@@ -20,6 +20,7 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.model.Position;
 
 import javax.json.Json;
@@ -38,7 +39,7 @@ import java.util.Map;
 
 public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
 
-    public FlespiProtocolDecoder(FlespiProtocol protocol) {
+    public FlespiProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

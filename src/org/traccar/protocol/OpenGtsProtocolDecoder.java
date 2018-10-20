@@ -21,6 +21,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -47,7 +48,7 @@ public class OpenGtsProtocolDecoder extends BaseHttpProtocolDecoder {
             .any()
             .compile();
 
-    public OpenGtsProtocolDecoder(OpenGtsProtocol protocol) {
+    public OpenGtsProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

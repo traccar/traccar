@@ -19,21 +19,14 @@ import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 
-import java.util.List;
-
 public class OrionProtocol extends BaseProtocol {
 
     public OrionProtocol() {
-        super("orion");
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new OrionFrameDecoder());
-                pipeline.addLast("objectDecoder", new OrionProtocolDecoder(OrionProtocol.this));
+                pipeline.addLast(new OrionFrameDecoder());
+                pipeline.addLast(new OrionProtocolDecoder(OrionProtocol.this));
             }
         });
     }

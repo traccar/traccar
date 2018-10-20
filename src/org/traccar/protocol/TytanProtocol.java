@@ -19,20 +19,13 @@ import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 
-import java.util.List;
-
 public class TytanProtocol extends BaseProtocol {
 
     public TytanProtocol() {
-        super("tytan");
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("objectDecoder", new TytanProtocolDecoder(TytanProtocol.this));
+                pipeline.addLast(new TytanProtocolDecoder(TytanProtocol.this));
             }
         });
     }

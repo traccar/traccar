@@ -23,6 +23,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.model.CellTower;
@@ -36,7 +37,7 @@ import java.util.List;
 
 public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
 
-    public AutoFonProtocolDecoder(AutoFonProtocol protocol) {
+    public AutoFonProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

@@ -21,22 +21,15 @@ import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 
-import java.util.List;
-
 public class JpKorjarProtocol extends BaseProtocol {
 
     public JpKorjarProtocol() {
-        super("jpkorjar");
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, this.getName()) {
+        addServer(new TrackerServer(false, this.getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new JpKorjarFrameDecoder());
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectDecoder", new JpKorjarProtocolDecoder(JpKorjarProtocol.this));
+                pipeline.addLast(new JpKorjarFrameDecoder());
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new JpKorjarProtocolDecoder(JpKorjarProtocol.this));
             }
         });
     }

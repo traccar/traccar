@@ -9,7 +9,7 @@ public class H02ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        H02ProtocolDecoder decoder = new H02ProtocolDecoder(new H02Protocol());
+        H02ProtocolDecoder decoder = new H02ProtocolDecoder(null);
 
         verifyPosition(decoder, binary(
                 "2435248308419329301047591808172627335900074412294E024138FEFFFFFFFF01120064BA73005ECC"));
@@ -239,7 +239,7 @@ public class H02ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecodeStatus() throws Exception {
 
-        H02ProtocolDecoder decoder = new H02ProtocolDecoder(new H02Protocol());
+        H02ProtocolDecoder decoder = new H02ProtocolDecoder(null);
 
         verifyAttribute(decoder, buffer(
                 "*HQ,2705171109,V1,213324,A,5002.5849,N,01433.7822,E,0.00,000,140613,FFFFFFFF#"),

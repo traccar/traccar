@@ -8,7 +8,7 @@ public class TotemProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        TotemProtocolDecoder decoder = new TotemProtocolDecoder(new TotemProtocol());
+        TotemProtocolDecoder decoder = new TotemProtocolDecoder(null);
 
         verifyPosition(decoder, text(
                 "$$011602867119025755430|50099800180420045019401400000000000000B8797D110816811201.500002132615.7037S02801.8099E056149"));

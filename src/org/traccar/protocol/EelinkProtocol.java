@@ -21,35 +21,28 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.model.Command;
 
-import java.util.List;
-
 public class EelinkProtocol extends BaseProtocol {
 
     public EelinkProtocol() {
-        super("eelink");
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM,
                 Command.TYPE_POSITION_SINGLE,
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME,
                 Command.TYPE_REBOOT_DEVICE);
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 3, 2));
-                pipeline.addLast("objectEncoder", new EelinkProtocolEncoder(false));
-                pipeline.addLast("objectDecoder", new EelinkProtocolDecoder(EelinkProtocol.this));
+                pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 3, 2));
+                pipeline.addLast(new EelinkProtocolEncoder(false));
+                pipeline.addLast(new EelinkProtocolDecoder(EelinkProtocol.this));
             }
         });
-        serverList.add(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("objectEncoder", new EelinkProtocolEncoder(true));
-                pipeline.addLast("objectDecoder", new EelinkProtocolDecoder(EelinkProtocol.this));
+                pipeline.addLast(new EelinkProtocolEncoder(true));
+                pipeline.addLast(new EelinkProtocolDecoder(EelinkProtocol.this));
             }
         });
     }

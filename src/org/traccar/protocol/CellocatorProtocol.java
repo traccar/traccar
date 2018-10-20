@@ -20,31 +20,24 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.model.Command;
 
-import java.util.List;
-
 public class CellocatorProtocol extends BaseProtocol {
 
     public CellocatorProtocol() {
-        super("cellocator");
         setSupportedDataCommands(
                 Command.TYPE_OUTPUT_CONTROL);
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new CellocatorFrameDecoder());
-                pipeline.addLast("objectEncoder", new CellocatorProtocolEncoder());
-                pipeline.addLast("objectDecoder", new CellocatorProtocolDecoder(CellocatorProtocol.this));
+                pipeline.addLast(new CellocatorFrameDecoder());
+                pipeline.addLast(new CellocatorProtocolEncoder());
+                pipeline.addLast(new CellocatorProtocolDecoder(CellocatorProtocol.this));
             }
         });
-        serverList.add(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("objectEncoder", new CellocatorProtocolEncoder());
-                pipeline.addLast("objectDecoder", new CellocatorProtocolDecoder(CellocatorProtocol.this));
+                pipeline.addLast(new CellocatorProtocolEncoder());
+                pipeline.addLast(new CellocatorProtocolDecoder(CellocatorProtocol.this));
             }
         });
     }

@@ -18,13 +18,9 @@ package org.traccar.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.traccar.BaseFrameDecoder;
 
 public class CellocatorFrameDecoder extends BaseFrameDecoder {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(CellocatorFrameDecoder.class);
 
     private static final int MESSAGE_MINIMUM_LENGTH = 15;
 

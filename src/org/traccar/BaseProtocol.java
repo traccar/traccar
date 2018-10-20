@@ -16,6 +16,7 @@
 package org.traccar;
 
 import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.database.ActiveDevice;
 import org.traccar.helper.DataConverter;
 import org.traccar.model.Command;
@@ -23,6 +24,8 @@ import org.traccar.model.Command;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 public abstract class BaseProtocol implements Protocol {
@@ -30,16 +33,31 @@ public abstract class BaseProtocol implements Protocol {
     private final String name;
     private final Set<String> supportedDataCommands = new HashSet<>();
     private final Set<String> supportedTextCommands = new HashSet<>();
+    private final List<TrackerServer> serverList = new LinkedList<>();
 
     private StringProtocolEncoder textCommandEncoder = null;
 
-    public BaseProtocol(String name) {
-        this.name = name;
+    public static String nameFromClass(Class<?> clazz) {
+        String className = clazz.getSimpleName();
+        return className.substring(0, className.length() - 8).toLowerCase();
+    }
+
+    public BaseProtocol() {
+        name = nameFromClass(getClass());
     }
 
     @Override
     public String getName() {
         return name;
+    }
+
+    protected void addServer(TrackerServer server) {
+        serverList.add(server);
+    }
+
+    @Override
+    public Collection<TrackerServer> getServerList() {
+        return serverList;
     }
 
     public void setSupportedDataCommands(String... commands) {
@@ -75,7 +93,7 @@ public abstract class BaseProtocol implements Protocol {
             activeDevice.write(command);
         } else if (command.getType().equals(Command.TYPE_CUSTOM)) {
             String data = command.getString(Command.KEY_DATA);
-            if (activeDevice.getChannel().pipeline().get("stringEncoder") != null) {
+            if (activeDevice.getChannel().pipeline().get(StringEncoder.class) != null) {
                 activeDevice.write(data);
             } else {
                 activeDevice.write(Unpooled.wrappedBuffer(DataConverter.parseHex(data)));
