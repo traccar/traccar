@@ -140,7 +140,7 @@ public abstract class WindowsService {
             Advapi32.INSTANCE.CloseServiceHandle(serviceManager);
         }
 
-        return (success);
+        return success;
     }
 
     public void init() throws URISyntaxException {

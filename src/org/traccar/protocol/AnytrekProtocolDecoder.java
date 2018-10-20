@@ -48,7 +48,7 @@ public class AnytrekProtocolDecoder extends BaseProtocolDecoder {
             response.writeShortLE(0); // checksum
             response.writeByte('\r');
             response.writeByte('\n');
-            channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
     }
 
