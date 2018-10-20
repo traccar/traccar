@@ -20,21 +20,14 @@ import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 
-import java.util.List;
-
 public class Gt02Protocol extends BaseProtocol {
 
     public Gt02Protocol() {
-        super("gt02");
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(256, 2, 1, 2, 0));
-                pipeline.addLast("objectDecoder", new Gt02ProtocolDecoder(Gt02Protocol.this));
+                pipeline.addLast(new LengthFieldBasedFrameDecoder(256, 2, 1, 2, 0));
+                pipeline.addLast(new Gt02ProtocolDecoder(Gt02Protocol.this));
             }
         });
     }

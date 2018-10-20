@@ -22,23 +22,16 @@ import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 
-import java.util.List;
-
 public class M2cProtocol extends BaseProtocol {
 
     public M2cProtocol() {
-        super("m2c");
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(32 * 1024, ']'));
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("objectDecoder", new M2cProtocolDecoder(M2cProtocol.this));
+                pipeline.addLast(new CharacterDelimiterFrameDecoder(32 * 1024, ']'));
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new M2cProtocolDecoder(M2cProtocol.this));
             }
         });
     }

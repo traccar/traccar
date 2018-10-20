@@ -70,10 +70,11 @@ public class ServerManager {
 
         for (String name : names) {
             Class protocolClass = Class.forName(packageName + '.' + name);
-            if (BaseProtocol.class.isAssignableFrom(protocolClass)) {
-                BaseProtocol baseProtocol = (BaseProtocol) protocolClass.newInstance();
-                initProtocolServer(baseProtocol);
-                protocolList.put(baseProtocol.getName(), baseProtocol);
+            if (BaseProtocol.class.isAssignableFrom(protocolClass)
+                    && Context.getConfig().hasKey(BaseProtocol.nameFromClass(protocolClass) + ".port")) {
+                BaseProtocol protocol = (BaseProtocol) protocolClass.newInstance();
+                serverList.addAll(protocol.getServerList());
+                protocolList.put(protocol.getName(), protocol);
             }
         }
     }
@@ -97,12 +98,6 @@ public class ServerManager {
             server.stop();
         }
         GlobalTimer.release();
-    }
-
-    private void initProtocolServer(final Protocol protocol) {
-        if (Context.getConfig().hasKey(protocol.getName() + ".port")) {
-            protocol.initTrackerServers(serverList);
-        }
     }
 
 }

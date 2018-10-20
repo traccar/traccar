@@ -21,6 +21,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -29,7 +30,7 @@ import java.util.Date;
 
 public class RetranslatorProtocolDecoder extends BaseProtocolDecoder {
 
-    public RetranslatorProtocolDecoder(RetranslatorProtocol protocol) {
+    public RetranslatorProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

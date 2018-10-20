@@ -8,7 +8,7 @@ public class WatchProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        WatchProtocolDecoder decoder = new WatchProtocolDecoder(new WatchProtocol());
+        WatchProtocolDecoder decoder = new WatchProtocolDecoder(null);
 
         verifyPosition(decoder, buffer(
                 "[ZJ*014111001332708*0075*0064*AL,040418,052156,A,22.536207,N,113.938673,E,0,0,0,5,100,82,1000,50,00100000,1,255,460,0,9340,3663,35]"));

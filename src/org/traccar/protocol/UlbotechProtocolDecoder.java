@@ -22,6 +22,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
@@ -40,7 +41,7 @@ import java.util.regex.Pattern;
 
 public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
 
-    public UlbotechProtocolDecoder(UlbotechProtocol protocol) {
+    public UlbotechProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

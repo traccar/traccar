@@ -22,6 +22,7 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.DataConverter;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -36,7 +37,7 @@ import java.util.Date;
 
 public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
 
-    public SigfoxProtocolDecoder(SigfoxProtocol protocol) {
+    public SigfoxProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

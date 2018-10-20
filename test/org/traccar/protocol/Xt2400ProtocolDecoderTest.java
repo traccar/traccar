@@ -8,7 +8,7 @@ public class Xt2400ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        Xt2400ProtocolDecoder decoder = new Xt2400ProtocolDecoder(new Xt2400Protocol());
+        Xt2400ProtocolDecoder decoder = new Xt2400ProtocolDecoder(null);
 
         decoder.setConfig("\n:wycfg pcr[0] 001001030406070809570a13121714100565\n");
 

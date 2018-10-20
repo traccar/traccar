@@ -22,23 +22,16 @@ import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 
-import java.util.List;
-
 public class Tr20Protocol extends BaseProtocol {
 
     public Tr20Protocol() {
-        super("tr20");
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectDecoder", new Tr20ProtocolDecoder(Tr20Protocol.this));
+                pipeline.addLast(new LineBasedFrameDecoder(1024));
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new Tr20ProtocolDecoder(Tr20Protocol.this));
             }
         });
     }

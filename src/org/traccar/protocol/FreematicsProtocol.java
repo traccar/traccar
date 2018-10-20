@@ -21,22 +21,15 @@ import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 
-import java.util.List;
-
 public class FreematicsProtocol extends BaseProtocol {
 
     public FreematicsProtocol() {
-        super("freematics");
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectDecoder", new FreematicsProtocolDecoder(FreematicsProtocol.this));
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new FreematicsProtocolDecoder(FreematicsProtocol.this));
             }
         });
     }

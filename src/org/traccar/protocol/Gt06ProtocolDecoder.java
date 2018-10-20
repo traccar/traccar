@@ -23,6 +23,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.BcdUtil;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
@@ -48,7 +49,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
     private final Map<Integer, ByteBuf> photos = new HashMap<>();
 
-    public Gt06ProtocolDecoder(Gt06Protocol protocol) {
+    public Gt06ProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

@@ -8,7 +8,7 @@ public class Pt60ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        Pt60ProtocolDecoder decoder = new Pt60ProtocolDecoder(new Pt60Protocol());
+        Pt60ProtocolDecoder decoder = new Pt60ProtocolDecoder(null);
 
         verifyAttributes(decoder, text(
                 "@G#@,V01,14,357653051059785,9404223001501310,20180419165604,101,26,"));

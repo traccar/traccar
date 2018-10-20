@@ -8,7 +8,7 @@ public class OkoProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        OkoProtocolDecoder decoder = new OkoProtocolDecoder(new OkoProtocol());
+        OkoProtocolDecoder decoder = new OkoProtocolDecoder(null);
 
         verifyPosition(decoder, text(
                 "{861694033681089,045403.00,A,4924.14181,N,03207.43787,E,0.080,,151117,07,0.00,01,24.8,1,02,5n4}"));

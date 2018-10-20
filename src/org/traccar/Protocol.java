@@ -19,17 +19,16 @@ import org.traccar.database.ActiveDevice;
 import org.traccar.model.Command;
 
 import java.util.Collection;
-import java.util.List;
 
 public interface Protocol {
 
     String getName();
 
+    Collection<TrackerServer> getServerList();
+
     Collection<String> getSupportedDataCommands();
 
     void sendDataCommand(ActiveDevice activeDevice, Command command);
-
-    void initTrackerServers(List<TrackerServer> serverList);
 
     Collection<String> getSupportedTextCommands();
 

@@ -20,6 +20,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -32,7 +33,7 @@ public class EsealProtocolDecoder extends BaseProtocolDecoder {
 
     private String config;
 
-    public EsealProtocolDecoder(EsealProtocol protocol) {
+    public EsealProtocolDecoder(Protocol protocol) {
         super(protocol);
         config = Context.getConfig().getString(getProtocolName() + ".config");
     }

@@ -22,23 +22,16 @@ import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 
-import java.util.List;
-
 public class Pt3000Protocol extends BaseProtocol {
 
     public Pt3000Protocol() {
-        super("pt3000");
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, 'd')); // probably wrong
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectDecoder", new Pt3000ProtocolDecoder(Pt3000Protocol.this));
+                pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, 'd')); // probably wrong
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new Pt3000ProtocolDecoder(Pt3000Protocol.this));
             }
         });
     }

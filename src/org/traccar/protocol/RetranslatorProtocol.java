@@ -19,21 +19,14 @@ import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 
-import java.util.List;
-
 public class RetranslatorProtocol extends BaseProtocol {
 
     public RetranslatorProtocol() {
-        super("retranslator");
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new RetranslatorFrameDecoder());
-                pipeline.addLast("objectDecoder", new RetranslatorProtocolDecoder(RetranslatorProtocol.this));
+                pipeline.addLast(new RetranslatorFrameDecoder());
+                pipeline.addLast(new RetranslatorProtocolDecoder(RetranslatorProtocol.this));
             }
         });
     }

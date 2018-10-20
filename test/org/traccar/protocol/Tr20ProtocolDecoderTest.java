@@ -8,7 +8,7 @@ public class Tr20ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        Tr20ProtocolDecoder decoder = new Tr20ProtocolDecoder(new Tr20Protocol());
+        Tr20ProtocolDecoder decoder = new Tr20ProtocolDecoder(null);
 
         verifyNull(decoder, text(
                 "%%TRACKPRO01,1"));

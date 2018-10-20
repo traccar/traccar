@@ -23,12 +23,9 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.model.Command;
 
-import java.util.List;
-
 public class SuntechProtocol extends BaseProtocol {
 
     public SuntechProtocol() {
-        super("suntech");
         setSupportedDataCommands(
                 Command.TYPE_OUTPUT_CONTROL,
                 Command.TYPE_REBOOT_DEVICE,
@@ -37,18 +34,14 @@ public class SuntechProtocol extends BaseProtocol {
                 Command.TYPE_ENGINE_RESUME,
                 Command.TYPE_ALARM_ARM,
                 Command.TYPE_ALARM_DISARM);
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '\r'));
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectEncoder", new SuntechProtocolEncoder());
-                pipeline.addLast("objectDecoder", new SuntechProtocolDecoder(SuntechProtocol.this));
+                pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, '\r'));
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new SuntechProtocolEncoder());
+                pipeline.addLast(new SuntechProtocolDecoder(SuntechProtocol.this));
             }
         });
     }

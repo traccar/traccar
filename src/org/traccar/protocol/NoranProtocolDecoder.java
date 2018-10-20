@@ -21,6 +21,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -33,7 +34,7 @@ import java.text.SimpleDateFormat;
 
 public class NoranProtocolDecoder extends BaseProtocolDecoder {
 
-    public NoranProtocolDecoder(NoranProtocol protocol) {
+    public NoranProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

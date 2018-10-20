@@ -23,12 +23,9 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.model.Command;
 
-import java.util.List;
-
 public class MiniFinderProtocol extends BaseProtocol {
 
     public MiniFinderProtocol() {
-        super("minifinder");
         setSupportedDataCommands(
                 Command.TYPE_SET_TIMEZONE,
                 Command.TYPE_VOICE_MONITORING,
@@ -41,18 +38,14 @@ public class MiniFinderProtocol extends BaseProtocol {
                 Command.TYPE_MODE_DEEP_SLEEP,
                 Command.TYPE_SOS_NUMBER,
                 Command.TYPE_SET_INDICATOR);
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, ';'));
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectEncoder", new MiniFinderProtocolEncoder());
-                pipeline.addLast("objectDecoder", new MiniFinderProtocolDecoder(MiniFinderProtocol.this));
+                pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, ';'));
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new MiniFinderProtocolEncoder());
+                pipeline.addLast(new MiniFinderProtocolDecoder(MiniFinderProtocol.this));
             }
         });
     }

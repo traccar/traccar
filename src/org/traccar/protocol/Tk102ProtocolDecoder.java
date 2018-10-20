@@ -21,6 +21,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -32,7 +33,7 @@ import java.util.regex.Pattern;
 
 public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Tk102ProtocolDecoder(Tk102Protocol protocol) {
+    public Tk102ProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

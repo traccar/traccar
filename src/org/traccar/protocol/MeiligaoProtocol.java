@@ -20,12 +20,9 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.model.Command;
 
-import java.util.List;
-
 public class MeiligaoProtocol extends BaseProtocol {
 
     public MeiligaoProtocol() {
-        super("meiligao");
         setSupportedDataCommands(
                 Command.TYPE_POSITION_SINGLE,
                 Command.TYPE_POSITION_PERIODIC,
@@ -35,23 +32,19 @@ public class MeiligaoProtocol extends BaseProtocol {
                 Command.TYPE_SET_TIMEZONE,
                 Command.TYPE_REQUEST_PHOTO,
                 Command.TYPE_REBOOT_DEVICE);
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new MeiligaoFrameDecoder());
-                pipeline.addLast("objectEncoder", new MeiligaoProtocolEncoder());
-                pipeline.addLast("objectDecoder", new MeiligaoProtocolDecoder(MeiligaoProtocol.this));
+                pipeline.addLast(new MeiligaoFrameDecoder());
+                pipeline.addLast(new MeiligaoProtocolEncoder());
+                pipeline.addLast(new MeiligaoProtocolDecoder(MeiligaoProtocol.this));
             }
         });
-        serverList.add(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("objectEncoder", new MeiligaoProtocolEncoder());
-                pipeline.addLast("objectDecoder", new MeiligaoProtocolDecoder(MeiligaoProtocol.this));
+                pipeline.addLast(new MeiligaoProtocolEncoder());
+                pipeline.addLast(new MeiligaoProtocolDecoder(MeiligaoProtocol.this));
             }
         });
     }

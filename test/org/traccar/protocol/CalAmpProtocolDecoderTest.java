@@ -8,7 +8,7 @@ public class CalAmpProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        CalAmpProtocolDecoder decoder = new CalAmpProtocolDecoder(new CalAmpProtocol());
+        CalAmpProtocolDecoder decoder = new CalAmpProtocolDecoder(null);
 
         verifyPosition(decoder, binary(
                 "83051633033459010101028afd59ae7c1459ae7c140b06bbce2c01520e0000d916000001b900450900005affa50f091f00260d040000000f24000001b90000000000003714"));

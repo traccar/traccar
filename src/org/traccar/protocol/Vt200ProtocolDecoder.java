@@ -20,6 +20,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.BcdUtil;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
@@ -32,7 +33,7 @@ import java.util.Date;
 
 public class Vt200ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Vt200ProtocolDecoder(Vt200Protocol protocol) {
+    public Vt200ProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

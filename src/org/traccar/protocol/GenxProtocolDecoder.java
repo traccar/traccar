@@ -19,6 +19,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
@@ -29,7 +30,7 @@ public class GenxProtocolDecoder extends BaseProtocolDecoder {
 
     private int[] reportColumns;
 
-    public GenxProtocolDecoder(GenxProtocol protocol) {
+    public GenxProtocolDecoder(Protocol protocol) {
         super(protocol);
         setReportColumns(Context.getConfig().getString(getProtocolName() + ".reportColumns", "1,2,3,4"));
     }

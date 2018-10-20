@@ -19,21 +19,14 @@ import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 
-import java.util.List;
-
 public class TramigoProtocol extends BaseProtocol {
 
     public TramigoProtocol() {
-        super("tramigo");
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new TramigoFrameDecoder());
-                pipeline.addLast("objectDecoder", new TramigoProtocolDecoder(TramigoProtocol.this));
+                pipeline.addLast(new TramigoFrameDecoder());
+                pipeline.addLast(new TramigoProtocolDecoder(TramigoProtocol.this));
             }
         });
     }

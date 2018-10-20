@@ -19,6 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.DateBuilder;
 import org.traccar.model.Position;
 
@@ -26,7 +27,7 @@ import java.net.SocketAddress;
 
 public class M2mProtocolDecoder extends BaseProtocolDecoder {
 
-    public M2mProtocolDecoder(M2mProtocol protocol) {
+    public M2mProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

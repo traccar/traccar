@@ -8,7 +8,7 @@ public class GoSafeProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        GoSafeProtocolDecoder decoder = new GoSafeProtocolDecoder(new GoSafeProtocol());
+        GoSafeProtocolDecoder decoder = new GoSafeProtocolDecoder(null);
 
         verifyPositions(decoder, text(
                 "*GS06,359913060650380,152248050718,,SYS:G3C;V1.38;V05,GPS:A;10;N31.914370;E35.914640;0;0,COT:689,ADC:0.18;3.55,DTT:4025;E6;0;0;0;1#"));

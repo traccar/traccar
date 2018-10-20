@@ -22,23 +22,16 @@ import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 
-import java.util.List;
-
 public class Tlt2hProtocol extends BaseProtocol {
 
     public Tlt2hProtocol() {
-        super("tlt2h");
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(32 * 1024, "##\r\n"));
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("objectDecoder", new Tlt2hProtocolDecoder(Tlt2hProtocol.this));
+                pipeline.addLast(new CharacterDelimiterFrameDecoder(32 * 1024, "##\r\n"));
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new Tlt2hProtocolDecoder(Tlt2hProtocol.this));
             }
         });
     }

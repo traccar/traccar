@@ -8,7 +8,7 @@ public class Gl200TextProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        Gl200TextProtocolDecoder decoder = new Gl200TextProtocolDecoder(new Gl200Protocol());
+        Gl200TextProtocolDecoder decoder = new Gl200TextProtocolDecoder(null);
 
         verifyPositions(decoder, buffer(
                 "+RESP:GTSTR,440502,866427030112088,GL530,0,0,2,,100,3,0.6,0,127.5,2.413963,48.877096,20180704180102,0208,0001,0310,E625,,,0000,20180704180100,004C$"));

@@ -9,7 +9,7 @@ public class OwnTracksProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        OwnTracksProtocolDecoder decoder = new OwnTracksProtocolDecoder(new OwnTracksProtocol());
+        OwnTracksProtocolDecoder decoder = new OwnTracksProtocolDecoder(null);
 
         verifyPosition(decoder, request(HttpMethod.POST, "/",
                 buffer("{\"lon\":2.29513,\"lat\":48.85833,\"tst\":1497349316,\"_type\":\"location\",\"tid\":\"JJ\"}")));

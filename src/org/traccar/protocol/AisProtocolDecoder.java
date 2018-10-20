@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.BitBuffer;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -34,7 +35,7 @@ import java.util.regex.Pattern;
 
 public class AisProtocolDecoder extends BaseProtocolDecoder {
 
-    public AisProtocolDecoder(AisProtocol protocol) {
+    public AisProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

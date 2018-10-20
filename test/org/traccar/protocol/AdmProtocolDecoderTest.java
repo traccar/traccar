@@ -8,7 +8,7 @@ public class AdmProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        AdmProtocolDecoder decoder = new AdmProtocolDecoder(new AdmProtocol());
+        AdmProtocolDecoder decoder = new AdmProtocolDecoder(null);
 
         verifyNull(decoder, binary(
                 "010042033836313331313030323639343838320501000000000000000000000000000000000000000000000000000000000000000000000000000000000000000073"));

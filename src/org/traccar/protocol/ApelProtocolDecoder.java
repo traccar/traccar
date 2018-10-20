@@ -21,6 +21,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -36,7 +37,7 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
     private long lastIndex;
     private long newIndex;
 
-    public ApelProtocolDecoder(ApelProtocol protocol) {
+    public ApelProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

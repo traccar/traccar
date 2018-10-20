@@ -8,7 +8,7 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        Gt06ProtocolDecoder decoder = new Gt06ProtocolDecoder(new Gt06Protocol());
+        Gt06ProtocolDecoder decoder = new Gt06ProtocolDecoder(null);
 
         verifyNull(decoder, binary(
                 "787805120099abec0d0a"));

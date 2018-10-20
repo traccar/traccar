@@ -19,6 +19,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -30,7 +31,7 @@ import java.util.regex.Pattern;
 
 public class MilesmateProtocolDecoder extends BaseProtocolDecoder {
 
-    public MilesmateProtocolDecoder(MilesmateProtocol protocol) {
+    public MilesmateProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

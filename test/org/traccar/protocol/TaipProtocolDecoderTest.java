@@ -8,7 +8,7 @@ public class TaipProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        TaipProtocolDecoder decoder = new TaipProtocolDecoder(new TaipProtocol());
+        TaipProtocolDecoder decoder = new TaipProtocolDecoder(null);
 
         verifyPosition(decoder, text(
                 ">RGP211217112154-2748332-058946350000000FF7F2100;ID=AA01;#0002;*2D<"));

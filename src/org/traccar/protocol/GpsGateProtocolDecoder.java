@@ -19,6 +19,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
@@ -30,7 +31,7 @@ import java.util.regex.Pattern;
 
 public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
 
-    public GpsGateProtocolDecoder(GpsGateProtocol protocol) {
+    public GpsGateProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

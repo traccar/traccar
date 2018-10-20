@@ -8,7 +8,7 @@ public class MeiligaoProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        MeiligaoProtocolDecoder decoder = new MeiligaoProtocolDecoder(new MeiligaoProtocol());
+        MeiligaoProtocolDecoder decoder = new MeiligaoProtocolDecoder(null);
 
         verifyNull(decoder, binary(
                 "24240012254748594772ff080002ffff0d0a"));

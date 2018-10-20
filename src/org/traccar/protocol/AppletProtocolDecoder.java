@@ -20,12 +20,13 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 
 import java.net.SocketAddress;
 
 public class AppletProtocolDecoder extends BaseHttpProtocolDecoder {
 
-    public AppletProtocolDecoder(AppletProtocol protocol) {
+    public AppletProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

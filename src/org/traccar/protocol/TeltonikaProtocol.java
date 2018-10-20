@@ -20,31 +20,24 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.model.Command;
 
-import java.util.List;
-
 public class TeltonikaProtocol extends BaseProtocol {
 
     public TeltonikaProtocol() {
-        super("teltonika");
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM);
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new TeltonikaFrameDecoder());
-                pipeline.addLast("objectEncoder", new TeltonikaProtocolEncoder());
-                pipeline.addLast("objectDecoder", new TeltonikaProtocolDecoder(TeltonikaProtocol.this, false));
+                pipeline.addLast(new TeltonikaFrameDecoder());
+                pipeline.addLast(new TeltonikaProtocolEncoder());
+                pipeline.addLast(new TeltonikaProtocolDecoder(TeltonikaProtocol.this, false));
             }
         });
-        serverList.add(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("objectEncoder", new TeltonikaProtocolEncoder());
-                pipeline.addLast("objectDecoder", new TeltonikaProtocolDecoder(TeltonikaProtocol.this, true));
+                pipeline.addLast(new TeltonikaProtocolEncoder());
+                pipeline.addLast(new TeltonikaProtocolDecoder(TeltonikaProtocol.this, true));
             }
         });
     }

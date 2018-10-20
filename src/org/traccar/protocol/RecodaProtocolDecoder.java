@@ -19,6 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -29,7 +30,7 @@ import java.util.Date;
 
 public class RecodaProtocolDecoder extends BaseProtocolDecoder {
 
-    public RecodaProtocolDecoder(RecodaProtocol protocol) {
+    public RecodaProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

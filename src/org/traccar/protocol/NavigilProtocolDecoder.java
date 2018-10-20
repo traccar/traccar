@@ -21,6 +21,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -30,7 +31,7 @@ import java.util.Date;
 
 public class NavigilProtocolDecoder extends BaseProtocolDecoder {
 
-    public NavigilProtocolDecoder(NavigilProtocol protocol) {
+    public NavigilProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
