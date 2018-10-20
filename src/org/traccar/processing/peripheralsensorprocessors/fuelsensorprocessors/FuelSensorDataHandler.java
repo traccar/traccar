@@ -753,13 +753,18 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                                   .collect(Collectors.toList());
         }
 
-        int listMaxIndex = positionsSubset.size();
-
-        List<Position> sublistToReturn =
+        List<Position> filteredSublistToReturn =
                 positionsSubset.stream()
                                .filter(p -> !excludeOutliers || positionIsMarkedOutlier(p))
-                               .collect(Collectors.toList())
-                               .subList(listMaxIndex - minListSize, listMaxIndex);
+                               .collect(Collectors.toList());
+
+        int listMaxIndex = filteredSublistToReturn.size();
+
+        if (filteredSublistToReturn.size() <= minListSize) {
+            return filteredSublistToReturn;
+        }
+
+        List<Position> sublistToReturn = filteredSublistToReturn.subList(listMaxIndex - minListSize, listMaxIndex);
 
         Log.debug("[RELEVANT_SUBLIST] sublist size: " + sublistToReturn.size());
 
