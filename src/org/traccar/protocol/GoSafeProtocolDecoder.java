@@ -70,7 +70,12 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
     private void decodeFragment(Position position, String fragment) {
         int dataIndex = fragment.indexOf(':');
         int index = 0;
-        String[] values = fragment.substring(dataIndex + 1).split(";");
+        String[] values;
+        if (fragment.length() == dataIndex + 1) {
+            values = new String[0];
+        } else {
+            values = fragment.substring(dataIndex + 1).split(";");
+        }
         switch (fragment.substring(0, dataIndex)) {
             case "GPS":
                 position.setValid(values[index++].equals("A"));
