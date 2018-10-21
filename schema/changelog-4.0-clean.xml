@@ -652,6 +652,9 @@
   <changeSet author="author" id="changelog-4.0-clean-mssql">
 
     <preConditions onFail="MARK_RAN">
+      <not>
+        <changeSetExecuted changeLogFile="changelog-3.3" id="changelog-3.3" author="author" />
+      </not>
       <dbms type="mssql" />
     </preConditions>
 
