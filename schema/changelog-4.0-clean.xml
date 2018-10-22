@@ -646,45 +646,4 @@
 
   </changeSet>
 
-  <changeSet author="author" id="changelog-4.0-clean-mssql">
-
-    <preConditions onFail="MARK_RAN">
-      <not>
-        <changeSetExecuted changeLogFile="changelog-3.3" id="changelog-3.3" author="author" />
-      </not>
-      <dbms type="mssql" />
-    </preConditions>
-
-    <sql>
-      IF EXISTS (SELECT * FROM sysobjects WHERE type = 'TR' AND name = 'tg_groups_delete')
-      BEGIN
-      DROP TRIGGER tg_groups_delete
-      END;
-    </sql>
-
-    <sql>
-      CREATE TRIGGER tg_groups_delete
-      ON tc_groups FOR DELETE
-      AS BEGIN
-      UPDATE tc_groups SET groupid = NULL WHERE groupid IN (SELECT deleted.id FROM deleted)
-      END
-    </sql>
-
-    <sql>
-      IF EXISTS (SELECT * FROM sysobjects WHERE type = 'TR' AND name = 'tg_users_delete')
-      BEGIN
-      DROP TRIGGER tg_users_delete
-      END;
-    </sql>
-
-    <sql>
-      CREATE TRIGGER tg_users_delete
-      ON tc_users FOR DELETE
-      AS BEGIN
-      DELETE FROM tc_user_user WHERE manageduserid IN (SELECT deleted.id FROM deleted)
-      END
-    </sql>
-
-  </changeSet>
-
 </databaseChangeLog>
