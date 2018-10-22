@@ -66,21 +66,21 @@ public class PermissionsManager {
 
     public Set<Long> getGroupPermissions(long userId) {
         if (!groupPermissions.containsKey(userId)) {
-            groupPermissions.put(userId, new HashSet<Long>());
+            groupPermissions.put(userId, new HashSet<>());
         }
         return groupPermissions.get(userId);
     }
 
     public Set<Long> getDevicePermissions(long userId) {
         if (!devicePermissions.containsKey(userId)) {
-            devicePermissions.put(userId, new HashSet<Long>());
+            devicePermissions.put(userId, new HashSet<>());
         }
         return devicePermissions.get(userId);
     }
 
     private Set<Long> getAllDeviceUsers(long deviceId) {
         if (!deviceUsers.containsKey(deviceId)) {
-            deviceUsers.put(deviceId, new HashSet<Long>());
+            deviceUsers.put(deviceId, new HashSet<>());
         }
         return deviceUsers.get(deviceId);
     }
@@ -102,7 +102,7 @@ public class PermissionsManager {
 
     public Set<Long> getGroupDevices(long groupId) {
         if (!groupDevices.containsKey(groupId)) {
-            groupDevices.put(groupId, new HashSet<Long>());
+            groupDevices.put(groupId, new HashSet<>());
         }
         return groupDevices.get(groupId);
     }
@@ -193,7 +193,7 @@ public class PermissionsManager {
         }
     }
 
-    public void checkDeviceLimit(long userId) throws SecurityException, SQLException {
+    public void checkDeviceLimit(long userId) throws SecurityException {
         int deviceLimit = getUser(userId).getDeviceLimit();
         if (deviceLimit != -1) {
             int deviceCount = 0;

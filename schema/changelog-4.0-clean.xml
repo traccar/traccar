@@ -6,9 +6,6 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
   logicalFilePath="changelog-4.0-clean">
 
-  <property name="blob.type" value="BLOB" dbms="h2,mysql,mssql,oracle" />
-  <property name="blob.type" value="bytea" dbms="postgresql" />
-
   <changeSet author="author" id="changelog-4.0-clean">
 
     <preConditions onFail="MARK_RAN">
@@ -42,7 +39,7 @@
       <column name="name" type="VARCHAR(128)">
         <constraints nullable="false" />
       </column>
-      <column name="data" type="${blob.type}">
+      <column name="data" type="MEDIUMBLOB">
         <constraints nullable="false" />
       </column>
       <column name="attributes" type="VARCHAR(4000)">
@@ -646,44 +643,6 @@
 
     <addForeignKeyConstraint baseTableName="tc_groups" baseColumnNames="groupid" constraintName="fk_groups_groupid" onDelete="SET NULL" onUpdate="RESTRICT" referencedColumnNames="id" referencedTableName="tc_groups" />
     <addForeignKeyConstraint baseTableName="tc_user_user" baseColumnNames="manageduserid" constraintName="fk_user_user_manageduserid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_users" />
-
-  </changeSet>
-
-  <changeSet author="author" id="changelog-4.0-clean-mssql">
-
-    <preConditions onFail="MARK_RAN">
-      <dbms type="mssql" />
-    </preConditions>
-
-    <sql>
-      IF EXISTS (SELECT * FROM sysobjects WHERE type = 'TR' AND name = 'tg_groups_delete')
-      BEGIN
-      DROP TRIGGER tg_groups_delete
-      END;
-    </sql>
-
-    <sql>
-      CREATE TRIGGER tg_groups_delete
-      ON tc_groups FOR DELETE
-      AS BEGIN
-      UPDATE tc_groups SET groupid = NULL WHERE groupid IN (SELECT deleted.id FROM deleted)
-      END
-    </sql>
-
-    <sql>
-      IF EXISTS (SELECT * FROM sysobjects WHERE type = 'TR' AND name = 'tg_users_delete')
-      BEGIN
-      DROP TRIGGER tg_users_delete
-      END;
-    </sql>
-
-    <sql>
-      CREATE TRIGGER tg_users_delete
-      ON tc_users FOR DELETE
-      AS BEGIN
-      DELETE FROM tc_user_user WHERE manageduserid IN (SELECT deleted.id FROM deleted)
-      END
-    </sql>
 
   </changeSet>
 
