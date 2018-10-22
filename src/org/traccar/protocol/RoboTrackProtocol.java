@@ -19,21 +19,14 @@ import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 
-import java.util.List;
-
 public class RoboTrackProtocol extends BaseProtocol {
 
     public RoboTrackProtocol() {
-        super("robotrack");
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new RoboTrackFrameDecoder());
-                pipeline.addLast("objectDecoder", new RoboTrackProtocolDecoder(RoboTrackProtocol.this));
+                pipeline.addLast(new RoboTrackFrameDecoder());
+                pipeline.addLast(new RoboTrackProtocolDecoder(RoboTrackProtocol.this));
             }
         });
     }

@@ -8,7 +8,7 @@ public class CarscopProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        CarscopProtocolDecoder decoder = new CarscopProtocolDecoder(new CarscopProtocol());
+        CarscopProtocolDecoder decoder = new CarscopProtocolDecoder(null);
 
         verifyNull(decoder, text(
                 "*170821223045UB00HSO"));

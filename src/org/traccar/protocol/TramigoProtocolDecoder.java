@@ -21,6 +21,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.DateUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -37,7 +38,7 @@ import java.util.regex.Pattern;
 
 public class TramigoProtocolDecoder extends BaseProtocolDecoder {
 
-    public TramigoProtocolDecoder(TramigoProtocol protocol) {
+    public TramigoProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

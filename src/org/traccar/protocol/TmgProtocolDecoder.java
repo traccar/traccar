@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -29,7 +30,7 @@ import java.util.regex.Pattern;
 
 public class TmgProtocolDecoder extends BaseProtocolDecoder {
 
-    public TmgProtocolDecoder(TmgProtocol protocol) {
+    public TmgProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

@@ -8,7 +8,7 @@ public class T55ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        T55ProtocolDecoder decoder = new T55ProtocolDecoder(new T55Protocol());
+        T55ProtocolDecoder decoder = new T55ProtocolDecoder(null);
 
         verifyNull(decoder, text(
                 "$IMEI=355797031609284"));
@@ -107,7 +107,7 @@ public class T55ProtocolDecoderTest extends ProtocolTest {
 
         // Maxon devices can send NMEA before identification
 
-        T55ProtocolDecoder decoder = new T55ProtocolDecoder(new T55Protocol());
+        T55ProtocolDecoder decoder = new T55ProtocolDecoder(null);
 
         verifyNull(decoder, text(
                 "$GPRMC,012006,A,4828.10,N,1353.52,E,0.00,0.00,180915,020.3,E*42"));

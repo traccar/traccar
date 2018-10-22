@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -30,7 +31,7 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
 
     private final boolean full;
 
-    public XexunProtocolDecoder(XexunProtocol protocol, boolean full) {
+    public XexunProtocolDecoder(Protocol protocol, boolean full) {
         super(protocol);
         this.full = full;
     }

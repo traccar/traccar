@@ -19,21 +19,14 @@ import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 
-import java.util.List;
-
 public class AutoFonProtocol extends BaseProtocol {
 
     public AutoFonProtocol() {
-        super("autofon");
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new AutoFonFrameDecoder());
-                pipeline.addLast("objectDecoder", new AutoFonProtocolDecoder(AutoFonProtocol.this));
+                pipeline.addLast(new AutoFonFrameDecoder());
+                pipeline.addLast(new AutoFonProtocolDecoder(AutoFonProtocol.this));
             }
         });
     }

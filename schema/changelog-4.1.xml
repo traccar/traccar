@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+  logicalFilePath="changelog-4.1">
+
+  <changeSet author="author" id="changelog-4.1-mssql">
+
+    <preConditions onFail="MARK_RAN">
+      <dbms type="mssql" />
+    </preConditions>
+
+    <sql>
+      IF EXISTS (SELECT * FROM sysobjects WHERE type = 'TR' AND name = 'tg_groups_delete')
+      BEGIN
+      DROP TRIGGER tg_groups_delete
+      END;
+    </sql>
+
+    <sql>
+      CREATE TRIGGER tg_groups_delete
+      ON tc_groups FOR DELETE
+      AS BEGIN
+      UPDATE tc_groups SET groupid = NULL WHERE groupid IN (SELECT deleted.id FROM deleted)
+      END
+    </sql>
+
+    <sql>
+      IF EXISTS (SELECT * FROM sysobjects WHERE type = 'TR' AND name = 'tg_users_delete')
+      BEGIN
+      DROP TRIGGER tg_users_delete
+      END;
+    </sql>
+
+    <sql>
+      CREATE TRIGGER tg_users_delete
+      ON tc_users FOR DELETE
+      AS BEGIN
+      DELETE FROM tc_user_user WHERE manageduserid IN (SELECT deleted.id FROM deleted)
+      END
+    </sql>
+
+  </changeSet>
+
+</databaseChangeLog>

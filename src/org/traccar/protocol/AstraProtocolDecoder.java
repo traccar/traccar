@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -37,7 +38,7 @@ public class AstraProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AstraProtocolDecoder.class);
 
-    public AstraProtocolDecoder(AstraProtocol protocol) {
+    public AstraProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

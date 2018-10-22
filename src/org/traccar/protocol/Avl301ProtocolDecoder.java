@@ -21,6 +21,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.DateBuilder;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
@@ -30,7 +31,7 @@ import java.net.SocketAddress;
 
 public class Avl301ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Avl301ProtocolDecoder(Avl301Protocol protocol) {
+    public Avl301ProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

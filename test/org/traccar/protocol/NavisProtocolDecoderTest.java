@@ -9,7 +9,7 @@ public class NavisProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        NavisProtocolDecoder decoder = new NavisProtocolDecoder(new NavisProtocol());
+        NavisProtocolDecoder decoder = new NavisProtocolDecoder(null);
 
         verifyNull(decoder, binary(
                 "404E5443010000007B000000130044342A3E533A383631373835303035323035303739"));

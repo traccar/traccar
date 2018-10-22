@@ -19,21 +19,14 @@ import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 
-import java.util.List;
-
 public class TekProtocol extends BaseProtocol {
 
     public TekProtocol() {
-        super("tek");
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new TekFrameDecoder());
-                pipeline.addLast("objectDecoder", new TekProtocolDecoder(TekProtocol.this));
+                pipeline.addLast(new TekFrameDecoder());
+                pipeline.addLast(new TekProtocolDecoder(TekProtocol.this));
             }
         });
     }

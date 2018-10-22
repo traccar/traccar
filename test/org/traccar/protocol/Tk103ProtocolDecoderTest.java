@@ -9,7 +9,7 @@ public class Tk103ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        Tk103ProtocolDecoder decoder = new Tk103ProtocolDecoder(new Tk103Protocol());
+        Tk103ProtocolDecoder decoder = new Tk103ProtocolDecoder(null);
 
         verifyPosition(decoder, text(
                 "(019358704260BR00180725A2300.0957N07235.2748E032.412092187.58001100166L000D9779)"));

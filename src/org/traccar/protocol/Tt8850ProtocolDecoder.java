@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -30,7 +31,7 @@ import java.util.regex.Pattern;
 
 public class Tt8850ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Tt8850ProtocolDecoder(Tt8850Protocol protocol) {
+    public Tt8850ProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -28,7 +29,7 @@ import java.util.regex.Pattern;
 
 public class AuroProtocolDecoder extends BaseProtocolDecoder {
 
-    public AuroProtocolDecoder(AuroProtocol protocol) {
+    public AuroProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

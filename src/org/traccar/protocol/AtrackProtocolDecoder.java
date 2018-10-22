@@ -22,6 +22,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -55,7 +56,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
     private final Map<Integer, String> alarmMap = new HashMap<>();
 
-    public AtrackProtocolDecoder(AtrackProtocol protocol) {
+    public AtrackProtocolDecoder(Protocol protocol) {
         super(protocol);
 
         longDate = Context.getConfig().getBoolean(getProtocolName() + ".longDate");

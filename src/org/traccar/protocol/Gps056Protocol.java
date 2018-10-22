@@ -19,21 +19,14 @@ import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 
-import java.util.List;
-
 public class Gps056Protocol extends BaseProtocol {
 
     public Gps056Protocol() {
-        super("gps056");
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new Gps056FrameDecoder());
-                pipeline.addLast("objectDecoder", new Gps056ProtocolDecoder(Gps056Protocol.this));
+                pipeline.addLast(new Gps056FrameDecoder());
+                pipeline.addLast(new Gps056ProtocolDecoder(Gps056Protocol.this));
             }
         });
     }

@@ -21,6 +21,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.UnitsConverter;
@@ -34,7 +35,7 @@ import java.util.List;
 
 public class EgtsProtocolDecoder extends BaseProtocolDecoder {
 
-    public EgtsProtocolDecoder(EgtsProtocol protocol) {
+    public EgtsProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

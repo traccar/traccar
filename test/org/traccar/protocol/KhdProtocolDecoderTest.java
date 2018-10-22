@@ -8,7 +8,7 @@ public class KhdProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        KhdProtocolDecoder decoder = new KhdProtocolDecoder(new KhdProtocol());
+        KhdProtocolDecoder decoder = new KhdProtocolDecoder(null);
 
         verifyNull(decoder, binary(
                 "2929b1000605162935b80d"));

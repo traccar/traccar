@@ -21,6 +21,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.BcdUtil;
 import org.traccar.helper.BitBuffer;
 import org.traccar.helper.BitUtil;
@@ -40,7 +41,7 @@ import java.util.regex.Pattern;
 
 public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Jt600ProtocolDecoder(Jt600Protocol protocol) {
+    public Jt600ProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

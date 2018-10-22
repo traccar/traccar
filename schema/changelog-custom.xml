@@ -8,7 +8,7 @@
 
   <changeSet author="author" id="changelog-custom">
 
-    <addColumn tableName="devices">
+    <addColumn tableName="tc_devices">
       <column name="movement" type="VARCHAR(128)" />
     </addColumn>
 

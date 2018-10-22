@@ -19,21 +19,14 @@ import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 
-import java.util.List;
-
 public class NavigilProtocol extends BaseProtocol {
 
     public NavigilProtocol() {
-        super("navigil");
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new NavigilFrameDecoder());
-                pipeline.addLast("objectDecoder", new NavigilProtocolDecoder(NavigilProtocol.this));
+                pipeline.addLast(new NavigilFrameDecoder());
+                pipeline.addLast(new NavigilProtocolDecoder(NavigilProtocol.this));
             }
         });
     }

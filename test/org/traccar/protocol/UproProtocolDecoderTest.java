@@ -8,7 +8,7 @@ public class UproProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        UproProtocolDecoder decoder = new UproProtocolDecoder(new UproProtocol());
+        UproProtocolDecoder decoder = new UproProtocolDecoder(null);
 
         verifyPosition(decoder, buffer(
                 "*HQ200999999,AB1&A1656512233362911356523660000230618&B0100060010&C00000<6<&F0000&R2405&V0109&W0000003E&K00100&T65&X(k89860045191536000374)#"));

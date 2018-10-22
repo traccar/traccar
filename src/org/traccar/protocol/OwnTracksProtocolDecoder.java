@@ -21,6 +21,7 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
@@ -33,7 +34,7 @@ import java.util.Date;
 
 public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
 
-    public OwnTracksProtocolDecoder(OwnTracksProtocol protocol) {
+    public OwnTracksProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

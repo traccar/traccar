@@ -19,6 +19,7 @@ import org.traccar.BaseProtocolDecoder;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
+import org.traccar.Protocol;
 
 import java.net.SocketAddress;
 
@@ -27,7 +28,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
     private final Gl200TextProtocolDecoder textProtocolDecoder;
     private final Gl200BinaryProtocolDecoder binaryProtocolDecoder;
 
-    public Gl200ProtocolDecoder(Gl200Protocol protocol) {
+    public Gl200ProtocolDecoder(Protocol protocol) {
         super(protocol);
         textProtocolDecoder = new Gl200TextProtocolDecoder(protocol);
         binaryProtocolDecoder = new Gl200BinaryProtocolDecoder(protocol);

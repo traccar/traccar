@@ -22,6 +22,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -32,7 +33,7 @@ import java.nio.charset.StandardCharsets;
 
 public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Gt02ProtocolDecoder(Gt02Protocol protocol) {
+    public Gt02ProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

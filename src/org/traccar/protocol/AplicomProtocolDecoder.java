@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -36,7 +37,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AplicomProtocolDecoder.class);
 
-    public AplicomProtocolDecoder(AplicomProtocol protocol) {
+    public AplicomProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

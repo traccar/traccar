@@ -8,7 +8,7 @@ public class AtrackProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        AtrackProtocolDecoder decoder = new AtrackProtocolDecoder(new AtrackProtocol());
+        AtrackProtocolDecoder decoder = new AtrackProtocolDecoder(null);
 
         verifyPositions(decoder, buffer(
                 "@P,3A34,146,41431,353816057242284,20180622015809,20180622015809,20180622015809,9720689,4014230,61,2,0,20,1,0,0,0,0,2000,2000,12160,42,624,002,20009,20014,\r\n"));

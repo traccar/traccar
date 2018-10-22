@@ -21,6 +21,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.BcdUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
@@ -31,7 +32,7 @@ import java.net.SocketAddress;
 
 public class KhdProtocolDecoder extends BaseProtocolDecoder {
 
-    public KhdProtocolDecoder(KhdProtocol protocol) {
+    public KhdProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

@@ -15,6 +15,8 @@
  */
 package org.traccar;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +35,12 @@ public final class Main {
     private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
     private static final long CLEAN_PERIOD = 24 * 60 * 60 * 1000;
+
+    private static Injector injector;
+
+    public static Injector getInjector() {
+        return injector;
+    }
 
     private Main() {
     }
@@ -100,6 +108,7 @@ public final class Main {
     public static void run(String configFile) {
         try {
             Context.init(configFile);
+            injector = Guice.createInjector(new MainModule());
             logSystemInfo();
             LOGGER.info("Version: " + Context.getAppVersion());
             LOGGER.info("Starting server...");

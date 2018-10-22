@@ -19,21 +19,14 @@ import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 
-import java.util.List;
-
 public class HuaShengProtocol extends BaseProtocol {
 
     public HuaShengProtocol() {
-        super("huasheng");
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new HuaShengFrameDecoder());
-                pipeline.addLast("objectDecoder", new HuaShengProtocolDecoder(HuaShengProtocol.this));
+                pipeline.addLast(new HuaShengFrameDecoder());
+                pipeline.addLast(new HuaShengProtocolDecoder(HuaShengProtocol.this));
             }
         });
     }

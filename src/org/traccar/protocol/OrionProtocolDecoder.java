@@ -21,6 +21,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.DateBuilder;
 import org.traccar.model.Position;
 
@@ -30,7 +31,7 @@ import java.util.List;
 
 public class OrionProtocolDecoder extends BaseProtocolDecoder {
 
-    public OrionProtocolDecoder(OrionProtocol protocol) {
+    public OrionProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

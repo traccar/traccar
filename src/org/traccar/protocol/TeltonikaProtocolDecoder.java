@@ -23,6 +23,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
@@ -44,7 +45,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         this.extended = extended;
     }
 
-    public TeltonikaProtocolDecoder(TeltonikaProtocol protocol, boolean connectionless) {
+    public TeltonikaProtocolDecoder(Protocol protocol, boolean connectionless) {
         super(protocol);
         this.connectionless = connectionless;
         this.extended = Context.getConfig().getBoolean(getProtocolName() + ".extended");

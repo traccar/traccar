@@ -22,23 +22,16 @@ import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 
-import java.util.List;
-
 public class FlextrackProtocol extends BaseProtocol {
 
     public FlextrackProtocol() {
-        super("flextrack");
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, "\r"));
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectDecoder", new FlextrackProtocolDecoder(FlextrackProtocol.this));
+                pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, "\r"));
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new FlextrackProtocolDecoder(FlextrackProtocol.this));
             }
         });
     }

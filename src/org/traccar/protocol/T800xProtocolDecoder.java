@@ -22,6 +22,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.BcdUtil;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
@@ -34,7 +35,7 @@ import java.net.SocketAddress;
 
 public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
-    public T800xProtocolDecoder(T800xProtocol protocol) {
+    public T800xProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

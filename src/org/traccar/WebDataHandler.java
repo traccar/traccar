@@ -16,12 +16,17 @@
 package org.traccar;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.assistedinject.Assisted;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.database.IdentityManager;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 
+import javax.inject.Inject;
+import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,12 +42,27 @@ public class WebDataHandler extends BaseDataHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WebDataHandler.class);
 
-    private final String url;
-    private final boolean json;
     private static final String KEY_POSITION = "position";
     private static final String KEY_DEVICE = "device";
 
-    public WebDataHandler(String url, boolean json) {
+    private final IdentityManager identityManager;
+    private final ObjectMapper objectMapper;
+    private final Client client;
+
+    private final String url;
+    private final boolean json;
+
+    public interface Factory {
+        WebDataHandler create(String url, boolean json);
+    }
+
+    @Inject
+    public WebDataHandler(
+            IdentityManager identityManager, ObjectMapper objectMapper, Client client,
+            @Assisted String url, @Assisted boolean json) {
+        this.identityManager = identityManager;
+        this.objectMapper = objectMapper;
+        this.client = client;
         this.url = url;
         this.json = json;
     }
@@ -85,7 +105,7 @@ public class WebDataHandler extends BaseDataHandler {
 
     public String formatRequest(Position position) throws UnsupportedEncodingException, JsonProcessingException {
 
-        Device device = Context.getIdentityManager().getById(position.getDeviceId());
+        Device device = identityManager.getById(position.getDeviceId());
 
         String request = url
                 .replace("{name}", URLEncoder.encode(device.getName(), StandardCharsets.UTF_8.name()))
@@ -110,7 +130,7 @@ public class WebDataHandler extends BaseDataHandler {
         }
 
         if (request.contains("{attributes}")) {
-            String attributes = Context.getObjectMapper().writeValueAsString(position.getAttributes());
+            String attributes = objectMapper.writeValueAsString(position.getAttributes());
             request = request.replace(
                     "{attributes}", URLEncoder.encode(attributes, StandardCharsets.UTF_8.name()));
         }
@@ -125,10 +145,10 @@ public class WebDataHandler extends BaseDataHandler {
     @Override
     protected Position handlePosition(Position position) {
         if (json) {
-            Context.getClient().target(url).request().async().post(Entity.json(prepareJsonPayload(position)));
+            client.target(url).request().async().post(Entity.json(prepareJsonPayload(position)));
         } else {
             try {
-                Context.getClient().target(formatRequest(position)).request().async().get();
+                client.target(formatRequest(position)).request().async().get();
             } catch (UnsupportedEncodingException | JsonProcessingException e) {
                 LOGGER.warn("Forwarding formatting error", e);
             }
@@ -139,7 +159,7 @@ public class WebDataHandler extends BaseDataHandler {
     protected Map<String, Object> prepareJsonPayload(Position position) {
 
         Map<String, Object> data = new HashMap<>();
-        Device device = Context.getIdentityManager().getById(position.getDeviceId());
+        Device device = identityManager.getById(position.getDeviceId());
 
         data.put(KEY_POSITION, position);
 

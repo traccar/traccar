@@ -19,6 +19,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.CellTower;
@@ -36,7 +37,7 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
     private String[] dataTags;
     private DateFormat dateFormat;
 
-    public StarLinkProtocolDecoder(StarLinkProtocol protocol) {
+    public StarLinkProtocolDecoder(Protocol protocol) {
         super(protocol);
 
         String format = Context.getConfig().getString(

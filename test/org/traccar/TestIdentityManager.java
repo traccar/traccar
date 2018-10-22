@@ -15,6 +15,11 @@ public final class TestIdentityManager implements IdentityManager {
     }
 
     @Override
+    public long addUnknownDevice(String uniqueId) {
+        return 1;
+    }
+
+    @Override
     public Device getById(long id) {
         return createDevice();
     }

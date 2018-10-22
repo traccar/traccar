@@ -19,6 +19,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -33,7 +34,7 @@ import java.util.regex.Pattern;
 
 public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Gps103ProtocolDecoder(Gps103Protocol protocol) {
+    public Gps103ProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
@@ -275,11 +276,11 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
         String sentence = (String) msg;
 
-        if (sentence.contains("##")) {
+        if (sentence.contains("imei:") && sentence.length() <= 25) {
             if (channel != null) {
                 channel.writeAndFlush(new NetworkMessage("LOAD", remoteAddress));
-                Matcher matcher = Pattern.compile("##,imei:(\\d+),A").matcher(sentence);
-                if (matcher.matches()) {
+                Matcher matcher = Pattern.compile("imei:(\\d+),").matcher(sentence);
+                if (matcher.find()) {
                     getDeviceSession(channel, remoteAddress, matcher.group(1));
                 }
             }

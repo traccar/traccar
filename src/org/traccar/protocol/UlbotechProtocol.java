@@ -19,21 +19,14 @@ import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 
-import java.util.List;
-
 public class UlbotechProtocol extends BaseProtocol {
 
     public UlbotechProtocol() {
-        super("ulbotech");
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast("frameDecoder", new UlbotechFrameDecoder());
-                pipeline.addLast("objectDecoder", new UlbotechProtocolDecoder(UlbotechProtocol.this));
+                pipeline.addLast(new UlbotechFrameDecoder());
+                pipeline.addLast(new UlbotechProtocolDecoder(UlbotechProtocol.this));
             }
         });
     }

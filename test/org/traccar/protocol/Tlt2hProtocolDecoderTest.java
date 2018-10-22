@@ -8,7 +8,7 @@ public class Tlt2hProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        Tlt2hProtocolDecoder decoder = new Tlt2hProtocolDecoder(new Tlt2hProtocol());
+        Tlt2hProtocolDecoder decoder = new Tlt2hProtocolDecoder(null);
 
         verifyPositions(decoder, text(
                 "#868323028789359#MT600#0000#AUTOLOW#1\r\n",

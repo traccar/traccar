@@ -8,7 +8,7 @@ public class T800xProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        T800xProtocolDecoder decoder = new T800xProtocolDecoder(new T800xProtocol());
+        T800xProtocolDecoder decoder = new T800xProtocolDecoder(null);
 
         verifyNull(decoder, binary(
                 "252501001504050880061689888888111111250350"));

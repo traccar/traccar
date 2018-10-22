@@ -20,6 +20,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
@@ -32,7 +33,7 @@ import java.util.regex.Pattern;
 
 public class TekProtocolDecoder extends BaseProtocolDecoder {
 
-    public TekProtocolDecoder(TekProtocol protocol) {
+    public TekProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

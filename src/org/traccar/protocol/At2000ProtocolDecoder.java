@@ -21,6 +21,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.DataConverter;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -38,7 +39,7 @@ public class At2000ProtocolDecoder extends BaseProtocolDecoder {
 
     private static final int BLOCK_LENGTH = 16;
 
-    public At2000ProtocolDecoder(At2000Protocol protocol) {
+    public At2000ProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

@@ -8,7 +8,7 @@ public class AquilaProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecodeA() throws Exception {
 
-        AquilaProtocolDecoder decoder = new AquilaProtocolDecoder(new AquilaProtocol());
+        AquilaProtocolDecoder decoder = new AquilaProtocolDecoder(null);
 
         verifyPosition(decoder, text(
                 "$$CLIENT_1ZF,170215089,20,18.462809,73.824188,170613182744,A,01,123456,*37"));
@@ -54,7 +54,7 @@ public class AquilaProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecodeB() throws Exception {
 
-        AquilaProtocolDecoder decoder = new AquilaProtocolDecoder(new AquilaProtocol());
+        AquilaProtocolDecoder decoder = new AquilaProtocolDecoder(null);
 
         verifyPosition(decoder, text(
                 "$Header,nliven,EMR,861693034634154,NM,09112017155133,A,12.976495,N,77.549713,E,906.0,0.0,23,G,KA01I2000,+919844098440*4B"));
