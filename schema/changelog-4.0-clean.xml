@@ -6,9 +6,6 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
   logicalFilePath="changelog-4.0-clean">
 
-  <property name="blob.type" value="BLOB" dbms="h2,mysql,mssql,oracle" />
-  <property name="blob.type" value="bytea" dbms="postgresql" />
-
   <changeSet author="author" id="changelog-4.0-clean">
 
     <preConditions onFail="MARK_RAN">
@@ -42,7 +39,7 @@
       <column name="name" type="VARCHAR(128)">
         <constraints nullable="false" />
       </column>
-      <column name="data" type="${blob.type}">
+      <column name="data" type="MEDIUMBLOB">
         <constraints nullable="false" />
       </column>
       <column name="attributes" type="VARCHAR(4000)">
