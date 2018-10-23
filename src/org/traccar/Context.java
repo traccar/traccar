@@ -367,14 +367,14 @@ public final class Context {
 
     public static void init(String configFile) throws Exception {
 
-        cacheManager = Caching.getCachingProvider().getCacheManager();
-
         config = new Config();
         config.load(configFile);
 
         if (config.getBoolean("logger.enable")) {
             Log.setupLogger(config);
         }
+
+        cacheManager = Caching.getCachingProvider().getCacheManager();
 
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new SanitizerModule());
