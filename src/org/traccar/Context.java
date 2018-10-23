@@ -87,6 +87,8 @@ import org.traccar.reports.model.TripsConfig;
 import org.traccar.sms.SmsManager;
 import org.traccar.web.WebServer;
 
+import javax.cache.CacheManager;
+import javax.cache.Caching;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.ext.ContextResolver;
@@ -146,6 +148,12 @@ public final class Context {
 
     public static MediaManager getMediaManager() {
         return mediaManager;
+    }
+
+    private static CacheManager cacheManager;
+
+    public static CacheManager getCacheManager() {
+        return cacheManager;
     }
 
     private static UsersManager usersManager;
@@ -358,6 +366,8 @@ public final class Context {
     }
 
     public static void init(String configFile) throws Exception {
+
+        cacheManager = Caching.getCachingProvider().getCacheManager();
 
         config = new Config();
         config.load(configFile);

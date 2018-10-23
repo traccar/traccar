@@ -17,10 +17,11 @@
 package org.traccar.database;
 
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,29 +30,39 @@ import org.traccar.model.BaseModel;
 import org.traccar.model.Permission;
 import org.traccar.model.User;
 
+import javax.cache.Cache;
+import javax.cache.configuration.MutableConfiguration;
+
 public abstract class SimpleObjectManager<T extends BaseModel> extends BaseObjectManager<T>
         implements ManagableObjects {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleObjectManager.class);
 
-    private Map<Long, Set<Long>> userItems;
+    private Cache<Long, Set<Long>> userItems;
 
     protected SimpleObjectManager(DataManager dataManager, Class<T> baseClass) {
         super(dataManager, baseClass);
     }
 
+    private synchronized Cache<Long, Set<Long>> getUserItemsCache() {
+        if (userItems == null) {
+            userItems = Context.getCacheManager().createCache(
+                    this.getClass().getSimpleName() + "UserItems", new MutableConfiguration<>());
+        }
+        return userItems;
+    }
+
     @Override
     public final Set<Long> getUserItems(long userId) {
-        if (!userItems.containsKey(userId)) {
-            userItems.put(userId, new HashSet<Long>());
+        if (!getUserItemsCache().containsKey(userId)) {
+            return Collections.emptySet();
         }
-        return userItems.get(userId);
+        return getUserItemsCache().get(userId);
     }
 
     @Override
     public Set<Long> getManagedItems(long userId) {
-        Set<Long> result = new HashSet<>();
-        result.addAll(getUserItems(userId));
+        Set<Long> result = new HashSet<>(getUserItems(userId));
         for (long managedUserId : Context.getUsersManager().getUserItems(userId)) {
             result.addAll(getUserItems(managedUserId));
         }
@@ -68,17 +79,30 @@ public abstract class SimpleObjectManager<T extends BaseModel> extends BaseObjec
         refreshUserItems();
     }
 
+    protected final void updateCache(Cache<Long, Set<Long>> cache, Map<Long, Set<Long>> data) {
+        for (Cache.Entry<Long, Set<Long>> entry : cache) {
+            if (!data.containsKey(entry.getKey())) {
+                cache.remove(entry.getKey());
+            }
+        }
+        for (Map.Entry<Long, Set<Long>> entry : data.entrySet()) {
+            if (!entry.getValue().equals(cache.get(entry.getKey()))) {
+                cache.put(entry.getKey(), entry.getValue());
+            }
+        }
+    }
+
     public final void refreshUserItems() {
         if (getDataManager() != null) {
             try {
-                if (userItems != null) {
-                    userItems.clear();
-                } else {
-                    userItems = new ConcurrentHashMap<>();
-                }
+                Map<Long, Set<Long>> updatedUserItems = new HashMap<>();
                 for (Permission permission : getDataManager().getPermissions(User.class, getBaseClass())) {
-                    getUserItems(permission.getOwnerId()).add(permission.getPropertyId());
+                    if (!updatedUserItems.containsKey(permission.getOwnerId())) {
+                        updatedUserItems.put(permission.getOwnerId(), new HashSet<>());
+                    }
+                    updatedUserItems.get(permission.getOwnerId()).add(permission.getPropertyId());
                 }
+                updateCache(getUserItemsCache(), updatedUserItems);
             } catch (SQLException | ClassNotFoundException error) {
                 LOGGER.warn("Error getting permissions", error);
             }

@@ -18,10 +18,11 @@ package org.traccar.database;
 
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,36 +32,45 @@ import org.traccar.model.Group;
 import org.traccar.model.Permission;
 import org.traccar.model.BaseModel;
 
+import javax.cache.Cache;
+import javax.cache.configuration.MutableConfiguration;
+
 public abstract class ExtendedObjectManager<T extends BaseModel> extends SimpleObjectManager<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExtendedObjectManager.class);
 
-    private final Map<Long, Set<Long>> deviceItems = new ConcurrentHashMap<>();
-    private final Map<Long, Set<Long>> deviceItemsWithGroups = new ConcurrentHashMap<>();
-    private final Map<Long, Set<Long>> groupItems = new ConcurrentHashMap<>();
+    private final Cache<Long, Set<Long>> deviceItems;
+    private final Cache<Long, Set<Long>> deviceItemsWithGroups;
+    private final Cache<Long, Set<Long>> groupItems;
 
     protected ExtendedObjectManager(DataManager dataManager, Class<T> baseClass) {
         super(dataManager, baseClass);
+        deviceItems = Context.getCacheManager().createCache(
+                this.getClass().getSimpleName() + "DeviceItems", new MutableConfiguration<>());
+        deviceItemsWithGroups = Context.getCacheManager().createCache(
+                this.getClass().getSimpleName() + "DeviceItemsWithGroups", new MutableConfiguration<>());
+        groupItems = Context.getCacheManager().createCache(
+                this.getClass().getSimpleName() + "GroupItems", new MutableConfiguration<>());
         refreshExtendedPermissions();
     }
 
     public final Set<Long> getGroupItems(long groupId) {
         if (!groupItems.containsKey(groupId)) {
-            groupItems.put(groupId, new HashSet<Long>());
+            return Collections.emptySet();
         }
         return groupItems.get(groupId);
     }
 
     public final Set<Long> getDeviceItems(long deviceId) {
         if (!deviceItems.containsKey(deviceId)) {
-            deviceItems.put(deviceId, new HashSet<Long>());
+            return Collections.emptySet();
         }
         return deviceItems.get(deviceId);
     }
 
     public Set<Long> getAllDeviceItems(long deviceId) {
         if (!deviceItemsWithGroups.containsKey(deviceId)) {
-            deviceItemsWithGroups.put(deviceId, new HashSet<Long>());
+            return Collections.emptySet();
         }
         return deviceItemsWithGroups.get(deviceId);
     }
@@ -78,26 +88,40 @@ public abstract class ExtendedObjectManager<T extends BaseModel> extends SimpleO
                 Collection<Permission> databaseGroupPermissions =
                         getDataManager().getPermissions(Group.class, getBaseClass());
 
-                groupItems.clear();
+                Map<Long, Set<Long>> updatedGroupItems = new HashMap<>();
                 for (Permission groupPermission : databaseGroupPermissions) {
-                    getGroupItems(groupPermission.getOwnerId()).add(groupPermission.getPropertyId());
+                    if (!updatedGroupItems.containsKey(groupPermission.getOwnerId())) {
+                        updatedGroupItems.put(groupPermission.getOwnerId(), new HashSet<>());
+                    }
+                    updatedGroupItems.get(groupPermission.getOwnerId()).add(groupPermission.getPropertyId());
                 }
 
                 Collection<Permission> databaseDevicePermissions =
                         getDataManager().getPermissions(Device.class, getBaseClass());
 
-                deviceItems.clear();
-                deviceItemsWithGroups.clear();
+                Map<Long, Set<Long>> updatedDeviceItems = new HashMap<>();
+                Map<Long, Set<Long>> updatedDeviceItemsWithGroups = new HashMap<>();
 
                 for (Permission devicePermission : databaseDevicePermissions) {
-                    getDeviceItems(devicePermission.getOwnerId()).add(devicePermission.getPropertyId());
-                    getAllDeviceItems(devicePermission.getOwnerId()).add(devicePermission.getPropertyId());
+                    if (!updatedDeviceItems.containsKey(devicePermission.getOwnerId())) {
+                        updatedDeviceItems.put(devicePermission.getOwnerId(), new HashSet<>());
+                    }
+                    updatedDeviceItems.get(
+                            devicePermission.getOwnerId()).add(devicePermission.getPropertyId());
+                    if (!updatedDeviceItemsWithGroups.containsKey(devicePermission.getOwnerId())) {
+                        updatedDeviceItemsWithGroups.put(devicePermission.getOwnerId(), new HashSet<>());
+                    }
+                    updatedDeviceItemsWithGroups.get(
+                            devicePermission.getOwnerId()).add(devicePermission.getPropertyId());
                 }
 
                 for (Device device : Context.getDeviceManager().getAllDevices()) {
                     long groupId = device.getGroupId();
-                    while (groupId != 0) {
-                        getAllDeviceItems(device.getId()).addAll(getGroupItems(groupId));
+                    while (groupId != 0 && updatedGroupItems.containsKey(groupId)) {
+                        if (!updatedDeviceItemsWithGroups.containsKey(device.getId())) {
+                            updatedDeviceItemsWithGroups.put(device.getId(), new HashSet<>());
+                        }
+                        updatedDeviceItemsWithGroups.get(device.getId()).addAll(updatedGroupItems.get(groupId));
                         Group group = Context.getGroupsManager().getById(groupId);
                         if (group != null) {
                             groupId = group.getGroupId();
@@ -107,9 +131,14 @@ public abstract class ExtendedObjectManager<T extends BaseModel> extends SimpleO
                     }
                 }
 
+                updateCache(groupItems, updatedGroupItems);
+                updateCache(deviceItems, updatedDeviceItems);
+                updateCache(deviceItemsWithGroups, updatedDeviceItemsWithGroups);
+
             } catch (SQLException | ClassNotFoundException error) {
                 LOGGER.warn("Refresh permissions error", error);
             }
         }
     }
+
 }

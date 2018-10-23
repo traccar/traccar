@@ -19,14 +19,17 @@ package org.traccar.database;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.Context;
 import org.traccar.model.BaseModel;
+
+import javax.cache.Cache;
+import javax.cache.configuration.MutableConfiguration;
 
 public class BaseObjectManager<T extends BaseModel> {
 
@@ -34,12 +37,14 @@ public class BaseObjectManager<T extends BaseModel> {
 
     private final DataManager dataManager;
 
-    private Map<Long, T> items;
-    private Class<T> baseClass;
+    private final Class<T> baseClass;
+    private final Cache<Long, T> items;
 
     protected BaseObjectManager(DataManager dataManager, Class<T> baseClass) {
         this.dataManager = dataManager;
         this.baseClass = baseClass;
+        this.items = Context.getCacheManager().createCache(
+                this.getClass().getSimpleName() + "Items", new MutableConfiguration<>());
         refreshItems();
     }
 
@@ -59,9 +64,6 @@ public class BaseObjectManager<T extends BaseModel> {
         if (dataManager != null) {
             try {
                 Collection<T> databaseItems = dataManager.getObjects(baseClass);
-                if (items == null) {
-                    items = new ConcurrentHashMap<>(databaseItems.size());
-                }
                 Set<Long> databaseItemIds = new HashSet<>();
                 for (T item : databaseItems) {
                     databaseItemIds.add(item.getId());
@@ -71,9 +73,9 @@ public class BaseObjectManager<T extends BaseModel> {
                         addNewItem(item);
                     }
                 }
-                for (Long cachedItemId : items.keySet()) {
-                    if (!databaseItemIds.contains(cachedItemId)) {
-                        removeCachedItem(cachedItemId);
+                for (Cache.Entry<Long, T> entry : items) {
+                    if (!databaseItemIds.contains(entry.getKey())) {
+                        removeCachedItem(entry.getKey());
                     }
                 }
             } catch (SQLException error) {
@@ -121,7 +123,11 @@ public class BaseObjectManager<T extends BaseModel> {
     }
 
     public Set<Long> getAllItems() {
-        return items.keySet();
+        Set<Long> result = new LinkedHashSet<>();
+        for (Cache.Entry<Long, T> entry : items) {
+            result.add(entry.getKey());
+        }
+        return result;
     }
 
 }
