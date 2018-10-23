@@ -16,33 +16,32 @@
  */
 package org.traccar.database;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
+import org.traccar.Context;
 import org.traccar.model.Driver;
+
+import javax.cache.Cache;
+import javax.cache.configuration.MutableConfiguration;
 
 public class DriversManager extends ExtendedObjectManager<Driver> {
 
-    private Map<String, Driver> driversByUniqueId;
+    private Cache<String, Driver> driversByUniqueId;
 
     public DriversManager(DataManager dataManager) {
         super(dataManager, Driver.class);
-        if (driversByUniqueId == null) {
-            driversByUniqueId = new ConcurrentHashMap<>();
-        }
     }
 
-    private void putUniqueDriverId(Driver driver) {
+    public Cache<String, Driver> getDriversCache() {
         if (driversByUniqueId == null) {
-            driversByUniqueId = new ConcurrentHashMap<>(getAllItems().size());
+            driversByUniqueId = Context.getCacheManager().createCache(
+                    this.getClass().getSimpleName() + "DriversByUniqueId", new MutableConfiguration<>());
         }
-        driversByUniqueId.put(driver.getUniqueId(), driver);
+        return driversByUniqueId;
     }
 
     @Override
     protected void addNewItem(Driver driver) {
         super.addNewItem(driver);
-        putUniqueDriverId(driver);
+        getDriversCache().put(driver.getUniqueId(), driver);
     }
 
     @Override
@@ -50,9 +49,9 @@ public class DriversManager extends ExtendedObjectManager<Driver> {
         Driver cachedDriver = getById(driver.getId());
         cachedDriver.setName(driver.getName());
         if (!driver.getUniqueId().equals(cachedDriver.getUniqueId())) {
-            driversByUniqueId.remove(cachedDriver.getUniqueId());
+            getDriversCache().remove(cachedDriver.getUniqueId());
             cachedDriver.setUniqueId(driver.getUniqueId());
-            putUniqueDriverId(cachedDriver);
+            getDriversCache().put(cachedDriver.getUniqueId(), cachedDriver);
         }
         cachedDriver.setAttributes(driver.getAttributes());
     }
@@ -63,11 +62,12 @@ public class DriversManager extends ExtendedObjectManager<Driver> {
         if (cachedDriver != null) {
             String driverUniqueId = cachedDriver.getUniqueId();
             super.removeCachedItem(driverId);
-            driversByUniqueId.remove(driverUniqueId);
+            getDriversCache().remove(driverUniqueId);
         }
     }
 
     public Driver getDriverByUniqueId(String uniqueId) {
-        return driversByUniqueId.get(uniqueId);
+        return getDriversCache().get(uniqueId);
     }
+
 }

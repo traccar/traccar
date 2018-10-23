@@ -26,6 +26,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
+import org.traccar.helper.CacheUtil;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Permission;
 import org.traccar.model.User;
@@ -79,19 +80,6 @@ public abstract class SimpleObjectManager<T extends BaseModel> extends BaseObjec
         refreshUserItems();
     }
 
-    protected final void updateCache(Cache<Long, Set<Long>> cache, Map<Long, Set<Long>> data) {
-        for (Cache.Entry<Long, Set<Long>> entry : cache) {
-            if (!data.containsKey(entry.getKey())) {
-                cache.remove(entry.getKey());
-            }
-        }
-        for (Map.Entry<Long, Set<Long>> entry : data.entrySet()) {
-            if (!entry.getValue().equals(cache.get(entry.getKey()))) {
-                cache.put(entry.getKey(), entry.getValue());
-            }
-        }
-    }
-
     public final void refreshUserItems() {
         if (getDataManager() != null) {
             try {
@@ -102,7 +90,7 @@ public abstract class SimpleObjectManager<T extends BaseModel> extends BaseObjec
                     }
                     updatedUserItems.get(permission.getOwnerId()).add(permission.getPropertyId());
                 }
-                updateCache(getUserItemsCache(), updatedUserItems);
+                CacheUtil.updateCache(getUserItemsCache(), updatedUserItems);
             } catch (SQLException | ClassNotFoundException error) {
                 LOGGER.warn("Error getting permissions", error);
             }

@@ -21,14 +21,10 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.traccar.Context;
 import org.traccar.model.Group;
 
 public class GroupsManager extends BaseObjectManager<Group> implements ManagableObjects {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(GroupsManager.class);
 
     private AtomicLong groupsLastUpdate = new AtomicLong();
     private final long dataRefreshDelay;
@@ -50,7 +46,7 @@ public class GroupsManager extends BaseObjectManager<Group> implements Managable
         }
     }
 
-    public void updateGroupCache(boolean force) throws SQLException {
+    public void updateGroupCache(boolean force) {
         long lastUpdate = groupsLastUpdate.get();
         if ((force || System.currentTimeMillis() - lastUpdate > dataRefreshDelay)
                 && groupsLastUpdate.compareAndSet(lastUpdate, System.currentTimeMillis())) {
@@ -62,11 +58,7 @@ public class GroupsManager extends BaseObjectManager<Group> implements Managable
     public Set<Long> getAllItems() {
         Set<Long> result = super.getAllItems();
         if (result.isEmpty()) {
-            try {
-                updateGroupCache(true);
-            } catch (SQLException e) {
-                LOGGER.warn("Update group cache error", e);
-            }
+            updateGroupCache(true);
             result = super.getAllItems();
         }
         return result;
@@ -95,8 +87,7 @@ public class GroupsManager extends BaseObjectManager<Group> implements Managable
 
     @Override
     public Set<Long> getManagedItems(long userId) {
-        Set<Long> result = new HashSet<>();
-        result.addAll(getUserItems(userId));
+        Set<Long> result = new HashSet<>(getUserItems(userId));
         for (long managedUserId : Context.getUsersManager().getUserItems(userId)) {
             result.addAll(getUserItems(managedUserId));
         }

@@ -17,45 +17,47 @@
 package org.traccar.database;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
+import org.traccar.Context;
 import org.traccar.model.User;
+
+import javax.cache.Cache;
+import javax.cache.configuration.MutableConfiguration;
 
 public class UsersManager extends SimpleObjectManager<User> {
 
-    private Map<String, User> usersTokens;
+    private Cache<String, User> usersTokens;
 
     public UsersManager(DataManager dataManager) {
         super(dataManager, User.class);
-        if (usersTokens == null) {
-            usersTokens = new ConcurrentHashMap<>();
-        }
     }
 
-    private void putToken(User user) {
+    public Cache<String, User> getUsersTokensCache() {
         if (usersTokens == null) {
-            usersTokens = new ConcurrentHashMap<>();
+            usersTokens = Context.getCacheManager().createCache(
+                    this.getClass().getSimpleName() + "UsersTokens", new MutableConfiguration<>());
         }
-        if (user.getToken() != null) {
-            usersTokens.put(user.getToken(), user);
-        }
+        return usersTokens;
     }
 
     @Override
     protected void addNewItem(User user) {
         super.addNewItem(user);
-        putToken(user);
+        if (user.getToken() != null) {
+            getUsersTokensCache().put(user.getToken(), user);
+        }
     }
 
     @Override
     protected void updateCachedItem(User user) {
         User cachedUser = getById(user.getId());
         super.updateCachedItem(user);
-        putToken(user);
-        if (cachedUser.getToken() != null && !cachedUser.getToken().equals(user.getToken())) {
-            usersTokens.remove(cachedUser.getToken());
+        if (user.getToken() != null) {
+            getUsersTokensCache().put(user.getToken(), user);
+            if (!cachedUser.getToken().equals(user.getToken())) {
+                getUsersTokensCache().remove(cachedUser.getToken());
+            }
         }
     }
 
@@ -66,7 +68,7 @@ public class UsersManager extends SimpleObjectManager<User> {
             String userToken = cachedUser.getToken();
             super.removeCachedItem(userId);
             if (userToken != null) {
-                usersTokens.remove(userToken);
+                getUsersTokensCache().remove(userToken);
             }
         }
     }
@@ -80,7 +82,7 @@ public class UsersManager extends SimpleObjectManager<User> {
     }
 
     public User getUserByToken(String token) {
-        return usersTokens.get(token);
+        return getUsersTokensCache().get(token);
     }
 
 }

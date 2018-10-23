@@ -43,7 +43,7 @@ public class BaseObjectManager<T extends BaseModel> {
     protected BaseObjectManager(DataManager dataManager, Class<T> baseClass) {
         this.dataManager = dataManager;
         this.baseClass = baseClass;
-        this.items = Context.getCacheManager().createCache(
+        items = Context.getCacheManager().createCache(
                 this.getClass().getSimpleName() + "Items", new MutableConfiguration<>());
         refreshItems();
     }

@@ -123,4 +123,5 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
         }
         return types;
     }
+
 }

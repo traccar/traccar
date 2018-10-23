@@ -20,11 +20,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,16 +32,21 @@ import org.traccar.model.Command;
 import org.traccar.model.Typed;
 import org.traccar.model.Position;
 
+import javax.cache.Cache;
+import javax.cache.configuration.MutableConfiguration;
+
 public class CommandsManager  extends ExtendedObjectManager<Command> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandsManager.class);
 
-    private final Map<Long, Queue<Command>> deviceQueues = new ConcurrentHashMap<>();
+    private final Cache<Long, Queue<Command>> deviceQueues;
 
     private boolean queueing;
 
     public CommandsManager(DataManager dataManager, boolean queueing) {
         super(dataManager, Command.class);
+        deviceQueues = Context.getCacheManager().createCache(
+                this.getClass().getSimpleName() + "DeviceQueues", new MutableConfiguration<>());
         this.queueing = queueing;
     }
 
@@ -79,7 +82,12 @@ public class CommandsManager  extends ExtendedObjectManager<Command> {
             } else if (!queueing) {
                 throw new RuntimeException("Device is not online");
             } else {
-                getDeviceQueue(deviceId).add(command);
+                Queue<Command> commandQueue = deviceQueues.get(deviceId);
+                if (commandQueue == null) {
+                    commandQueue = new LinkedList<>();
+                }
+                commandQueue.add(command);
+                deviceQueues.put(deviceId, commandQueue);
                 return false;
             }
         }
@@ -136,13 +144,6 @@ public class CommandsManager  extends ExtendedObjectManager<Command> {
         return result;
     }
 
-    private Queue<Command> getDeviceQueue(long deviceId) {
-        if (!deviceQueues.containsKey(deviceId)) {
-            deviceQueues.put(deviceId, new ConcurrentLinkedQueue<Command>());
-        }
-        return deviceQueues.get(deviceId);
-    }
-
     public void sendQueuedCommands(ActiveDevice activeDevice) {
         Queue<Command> deviceQueue = deviceQueues.get(activeDevice.getDeviceId());
         if (deviceQueue != null) {
@@ -151,6 +152,7 @@ public class CommandsManager  extends ExtendedObjectManager<Command> {
                 activeDevice.sendCommand(command);
                 command = deviceQueue.poll();
             }
+            deviceQueues.put(activeDevice.getDeviceId(), deviceQueue);
         }
     }
 

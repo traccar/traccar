@@ -27,6 +27,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
+import org.traccar.helper.CacheUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.model.Permission;
@@ -131,9 +132,9 @@ public abstract class ExtendedObjectManager<T extends BaseModel> extends SimpleO
                     }
                 }
 
-                updateCache(groupItems, updatedGroupItems);
-                updateCache(deviceItems, updatedDeviceItems);
-                updateCache(deviceItemsWithGroups, updatedDeviceItemsWithGroups);
+                CacheUtil.updateCache(groupItems, updatedGroupItems);
+                CacheUtil.updateCache(deviceItems, updatedDeviceItems);
+                CacheUtil.updateCache(deviceItemsWithGroups, updatedDeviceItemsWithGroups);
 
             } catch (SQLException | ClassNotFoundException error) {
                 LOGGER.warn("Refresh permissions error", error);

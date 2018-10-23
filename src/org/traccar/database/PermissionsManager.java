@@ -18,6 +18,7 @@ package org.traccar.database;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
+import org.traccar.helper.CacheUtil;
 import org.traccar.model.Attribute;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Calendar;
@@ -33,7 +34,10 @@ import org.traccar.model.Permission;
 import org.traccar.model.Server;
 import org.traccar.model.User;
 
+import javax.cache.Cache;
+import javax.cache.configuration.MutableConfiguration;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -43,20 +47,39 @@ public class PermissionsManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PermissionsManager.class);
 
+    private static final String SERVER_KEY = "server";
+
     private final DataManager dataManager;
     private final UsersManager usersManager;
 
-    private volatile Server server;
+    private final Cache<String, Server> server;
 
-    private final Map<Long, Set<Long>> groupPermissions = new HashMap<>();
-    private final Map<Long, Set<Long>> devicePermissions = new HashMap<>();
-    private final Map<Long, Set<Long>> deviceUsers = new HashMap<>();
-    private final Map<Long, Set<Long>> groupDevices = new HashMap<>();
+    private final Cache<Long, Set<Long>> groupPermissions;
+    private final Cache<Long, Set<Long>> devicePermissions;
+    private final Cache<Long, Set<Long>> deviceUsers;
+    private final Cache<Long, Set<Long>> groupDevices;
 
     public PermissionsManager(DataManager dataManager, UsersManager usersManager) {
         this.dataManager = dataManager;
         this.usersManager = usersManager;
-        refreshServer();
+
+        server = Context.getCacheManager().createCache(
+                this.getClass().getSimpleName() + "Server", new MutableConfiguration<>());
+        groupPermissions = Context.getCacheManager().createCache(
+                this.getClass().getSimpleName() + "GroupPermissions", new MutableConfiguration<>());
+        devicePermissions = Context.getCacheManager().createCache(
+                this.getClass().getSimpleName() + "DevicePermissions", new MutableConfiguration<>());
+        deviceUsers = Context.getCacheManager().createCache(
+                this.getClass().getSimpleName() + "DeviceUsers", new MutableConfiguration<>());
+        groupDevices = Context.getCacheManager().createCache(
+                this.getClass().getSimpleName() + "GroupDevices", new MutableConfiguration<>());
+
+        try {
+            server.put(SERVER_KEY, dataManager.getServer());
+        } catch (SQLException error) {
+            LOGGER.warn("Refresh server config error", error);
+        }
+
         refreshDeviceAndGroupPermissions();
     }
 
@@ -66,21 +89,21 @@ public class PermissionsManager {
 
     public Set<Long> getGroupPermissions(long userId) {
         if (!groupPermissions.containsKey(userId)) {
-            groupPermissions.put(userId, new HashSet<>());
+            return Collections.emptySet();
         }
         return groupPermissions.get(userId);
     }
 
     public Set<Long> getDevicePermissions(long userId) {
         if (!devicePermissions.containsKey(userId)) {
-            devicePermissions.put(userId, new HashSet<>());
+            return Collections.emptySet();
         }
         return devicePermissions.get(userId);
     }
 
     private Set<Long> getAllDeviceUsers(long deviceId) {
         if (!deviceUsers.containsKey(deviceId)) {
-            deviceUsers.put(deviceId, new HashSet<>());
+            return Collections.emptySet();
         }
         return deviceUsers.get(deviceId);
     }
@@ -102,59 +125,75 @@ public class PermissionsManager {
 
     public Set<Long> getGroupDevices(long groupId) {
         if (!groupDevices.containsKey(groupId)) {
-            groupDevices.put(groupId, new HashSet<>());
+            return Collections.emptySet();
         }
         return groupDevices.get(groupId);
     }
 
-    public void refreshServer() {
-        try {
-            server = dataManager.getServer();
-        } catch (SQLException error) {
-            LOGGER.warn("Refresh server config error", error);
-        }
-    }
-
     public final void refreshDeviceAndGroupPermissions() {
-        groupPermissions.clear();
-        devicePermissions.clear();
+        Map<Long, Set<Long>> updatedGroupPermissions = new HashMap<>();
+        Map<Long, Set<Long>> updatedDevicePermissions = new HashMap<>();
+        Map<Long, Set<Long>> updatedDeviceUsers = new HashMap<>();
+        Map<Long, Set<Long>> updatedGroupDevices = new HashMap<>();
+
         try {
             GroupTree groupTree = new GroupTree(Context.getGroupsManager().getItems(
                     Context.getGroupsManager().getAllItems()),
                     Context.getDeviceManager().getAllDevices());
+
             for (Permission groupPermission : dataManager.getPermissions(User.class, Group.class)) {
-                Set<Long> userGroupPermissions = getGroupPermissions(groupPermission.getOwnerId());
-                Set<Long> userDevicePermissions = getDevicePermissions(groupPermission.getOwnerId());
+
+                if (!updatedGroupPermissions.containsKey(groupPermission.getOwnerId())) {
+                    updatedGroupPermissions.put(groupPermission.getOwnerId(), new HashSet<>());
+                }
+                Set<Long> userGroupPermissions = updatedGroupPermissions.get(groupPermission.getOwnerId());
                 userGroupPermissions.add(groupPermission.getPropertyId());
                 for (Group group : groupTree.getGroups(groupPermission.getPropertyId())) {
                     userGroupPermissions.add(group.getId());
                 }
+
+                if (!updatedDevicePermissions.containsKey(groupPermission.getOwnerId())) {
+                    updatedDevicePermissions.put(groupPermission.getOwnerId(), new HashSet<>());
+                }
+                Set<Long> userDevicePermissions = updatedDevicePermissions.get(groupPermission.getOwnerId());
                 for (Device device : groupTree.getDevices(groupPermission.getPropertyId())) {
                     userDevicePermissions.add(device.getId());
                 }
+
             }
 
             for (Permission devicePermission : dataManager.getPermissions(User.class, Device.class)) {
-                getDevicePermissions(devicePermission.getOwnerId()).add(devicePermission.getPropertyId());
+                if (!updatedDevicePermissions.containsKey(devicePermission.getOwnerId())) {
+                    updatedDevicePermissions.put(devicePermission.getOwnerId(), new HashSet<>());
+                }
+                updatedDevicePermissions.get(devicePermission.getOwnerId()).add(devicePermission.getPropertyId());
             }
 
-            groupDevices.clear();
             for (long groupId : Context.getGroupsManager().getAllItems()) {
+                Set<Long> devices = new HashSet<>();
                 for (Device device : groupTree.getDevices(groupId)) {
-                    getGroupDevices(groupId).add(device.getId());
+                    devices.add(device.getId());
                 }
+                updatedGroupDevices.put(groupId, devices);
             }
 
         } catch (SQLException | ClassNotFoundException error) {
             LOGGER.warn("Refresh device permissions error", error);
         }
 
-        deviceUsers.clear();
-        for (Map.Entry<Long, Set<Long>> entry : devicePermissions.entrySet()) {
+        for (Map.Entry<Long, Set<Long>> entry : updatedDevicePermissions.entrySet()) {
             for (long deviceId : entry.getValue()) {
-                getAllDeviceUsers(deviceId).add(entry.getKey());
+                if (!updatedDeviceUsers.containsKey(deviceId)) {
+                    updatedDeviceUsers.put(deviceId, new HashSet<>());
+                }
+                updatedDeviceUsers.get(deviceId).add(entry.getKey());
             }
         }
+
+        CacheUtil.updateCache(groupPermissions, updatedGroupPermissions);
+        CacheUtil.updateCache(devicePermissions, updatedDevicePermissions);
+        CacheUtil.updateCache(deviceUsers, updatedDeviceUsers);
+        CacheUtil.updateCache(groupDevices, updatedGroupDevices);
     }
 
     public boolean getUserAdmin(long userId) {
@@ -224,19 +263,19 @@ public class PermissionsManager {
     }
 
     public void checkReadonly(long userId) throws SecurityException {
-        if (!getUserAdmin(userId) && (server.getReadonly() || getUserReadonly(userId))) {
+        if (!getUserAdmin(userId) && (server.get(SERVER_KEY).getReadonly() || getUserReadonly(userId))) {
             throw new SecurityException("Account is readonly");
         }
     }
 
     public void checkDeviceReadonly(long userId) throws SecurityException {
-        if (!getUserAdmin(userId) && (server.getDeviceReadonly() || getUserDeviceReadonly(userId))) {
+        if (!getUserAdmin(userId) && (server.get(SERVER_KEY).getDeviceReadonly() || getUserDeviceReadonly(userId))) {
             throw new SecurityException("Account is device readonly");
         }
     }
 
     public void checkLimitCommands(long userId) throws SecurityException {
-        if (!getUserAdmin(userId) && (server.getLimitCommands() || getUserLimitCommands(userId))) {
+        if (!getUserAdmin(userId) && (server.get(SERVER_KEY).getLimitCommands() || getUserLimitCommands(userId))) {
             throw new SecurityException("Account has limit sending commands");
         }
     }
@@ -316,7 +355,7 @@ public class PermissionsManager {
     }
 
     public void checkRegistration(long userId) {
-        if (!server.getRegistration() && !getUserAdmin(userId)) {
+        if (!server.get(SERVER_KEY).getRegistration() && !getUserAdmin(userId)) {
             throw new SecurityException("Registration disabled");
         }
     }
@@ -391,7 +430,7 @@ public class PermissionsManager {
                 refreshDeviceAndGroupPermissions();
                 refreshAllExtendedPermissions();
             } else if (permission.getPropertyClass().equals(ManagedUser.class)) {
-                usersManager.refreshUserItems();
+                Context.getUsersManager().refreshUserItems();
             } else if (permission.getPropertyClass().equals(Geofence.class) && Context.getGeofenceManager() != null) {
                 Context.getGeofenceManager().refreshUserItems();
             } else if (permission.getPropertyClass().equals(Driver.class)) {
@@ -427,12 +466,12 @@ public class PermissionsManager {
     }
 
     public Server getServer() {
-        return server;
+        return server.get(SERVER_KEY);
     }
 
     public void updateServer(Server server) throws SQLException {
         dataManager.updateObject(server);
-        this.server = server;
+        this.server.put(SERVER_KEY, server);
     }
 
     public User login(String email, String password) throws SQLException {
@@ -445,10 +484,11 @@ public class PermissionsManager {
     }
 
     public Object lookupAttribute(long userId, String key, Object defaultValue) {
+        Server serverInstance = server.get(SERVER_KEY);
         Object preference;
-        Object serverPreference = server.getAttributes().get(key);
+        Object serverPreference = serverInstance.getAttributes().get(key);
         Object userPreference = getUser(userId).getAttributes().get(key);
-        if (server.getForceSettings()) {
+        if (serverInstance.getForceSettings()) {
             preference = serverPreference != null ? serverPreference : userPreference;
         } else {
             preference = userPreference != null ? userPreference : serverPreference;
