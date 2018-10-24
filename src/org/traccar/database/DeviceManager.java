@@ -123,15 +123,16 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
 
     @Override
     public Device getByUniqueId(String uniqueId) throws SQLException {
-        boolean forceUpdate = !devicesByUniqueId.containsKey(uniqueId) && !config.getBoolean("database.ignoreUnknown");
+        boolean forceUpdate =
+                !getDevicesByUniqueIdCache().containsKey(uniqueId) && !config.getBoolean("database.ignoreUnknown");
 
         updateDeviceCache(forceUpdate);
 
-        return devicesByUniqueId.get(uniqueId);
+        return getDevicesByUniqueIdCache().get(uniqueId);
     }
 
     public Device getDeviceByPhone(String phone) {
-        return devicesByPhone.get(phone);
+        return getDevicesByPhoneCache().get(phone);
     }
 
     @Override
@@ -253,7 +254,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         Device cachedDevice = getById(device.getId());
         if (cachedDevice != null) {
             cachedDevice.setStatus(device.getStatus());
-            updateCachedItem(cachedDevice);
+            super.updateCachedItem(cachedDevice);
         }
     }
 
