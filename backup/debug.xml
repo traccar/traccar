@@ -4,10 +4,10 @@
 
 <properties>
 
-    <entry key='config.default'>./setup/default.xml</entry>
+    <entry key='config.default'>./default.xml</entry>
     <entry key='hazelcast.config'>./hazelcast.xml</entry>
 
-    <entry key='web.path'>./traccar-web/web</entry>
+    <entry key='web.path'>../traccar-web/web</entry>
     <entry key='web.debug'>true</entry>
     <entry key='web.console'>true</entry>
 
@@ -16,7 +16,7 @@
     <entry key='logger.console'>true</entry>
 
     <entry key='database.driver'>org.h2.Driver</entry>
-    <entry key='database.url'>jdbc:h2:./target/database;AUTO_SERVER=TRUE</entry>
+    <entry key='database.url'>jdbc:h2:../target/database;AUTO_SERVER=TRUE</entry>
     <entry key='database.user'>sa</entry>
     <entry key='database.password'></entry>
 

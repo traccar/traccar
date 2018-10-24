@@ -1,0 +1,74 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<!DOCTYPE properties SYSTEM 'http://java.sun.com/dtd/properties.dtd'>
+
+<properties>
+
+    <entry key='web.enable'>true</entry>
+    <entry key='web.port'>8083</entry>
+    <entry key='web.path'>./web</entry>
+    <entry key='web.cacheControl'>max-age=3600,public</entry>
+
+    <entry key='geocoder.enable'>false</entry>
+    <entry key='geocoder.type'>google</entry>
+
+    <entry key='logger.enable'>true</entry>
+    <entry key='logger.level'>info</entry>
+    <entry key='logger.file'>../logs/tracker-server.log</entry>
+
+    <entry key='filter.enable'>true</entry>
+    <entry key='filter.future'>86400</entry>
+
+    <entry key='event.enable'>true</entry>
+    <entry key='event.ignoreDuplicateAlerts'>true</entry>
+    <entry key='processing.computedAttributes.enable'>true</entry>
+    <entry key='processing.engineHours.enable'>true</entry>
+
+    <entry key='media.path'>./media</entry>
+
+    <entry key='notificator.types'>web,mail</entry>
+
+    <entry key='server.statistics'>https://www.traccar.org/analytics/</entry>
+
+    <entry key='commands.queueing'>true</entry>
+
+    <entry key='database.ignoreUnknown'>true</entry>
+    <entry key='database.generateQueries'>true</entry>
+    <entry key='database.changelog'>../schema/changelog-master.xml</entry>
+ 
+    <entry key='database.loginUser'>
+        SELECT * FROM tc_users
+        WHERE email = :email OR login = :email
+    </entry>
+
+    <entry key='database.selectPositions'>
+        SELECT * FROM tc_positions WHERE deviceId = :deviceId AND fixTime BETWEEN :from AND :to ORDER BY fixTime
+    </entry>
+
+    <entry key='database.selectLatestPositions'>
+        SELECT tc_positions.* FROM tc_positions INNER JOIN tc_devices ON tc_positions.id = tc_devices.positionid;
+    </entry>
+
+    <entry key='database.updateLatestPosition'>
+        UPDATE tc_devices SET positionId = :id WHERE id = :deviceId
+    </entry>
+
+    <entry key='database.selectEvents'>
+        SELECT * FROM tc_events WHERE deviceId = :deviceId AND serverTime BETWEEN :from AND :to ORDER BY serverTime
+    </entry>
+
+    <entry key='database.deletePositions'>
+        DELETE FROM tc_positions WHERE serverTime &lt; :serverTime AND id NOT IN (SELECT positionId FROM tc_devices WHERE positionId IS NOT NULL)
+    </entry>
+
+    <entry key='database.deleteEvents'>
+        DELETE FROM tc_events WHERE serverTime &lt; :serverTime
+    </entry>
+
+    <entry key='database.selectStatistics'>
+        SELECT * FROM tc_statistics WHERE captureTime BETWEEN :from AND :to ORDER BY captureTime
+    </entry>
+
+    <entry key='osmand.port'>6055</entry>
+
+</properties>
