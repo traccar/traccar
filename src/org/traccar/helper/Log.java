@@ -151,7 +151,24 @@ public final class Log {
 
     }
 
+    public static void setupDefaultLogger() {
+        File jarPath = new File(ClassLoader.getSystemClassLoader().getResource(".").getPath());
+        File logsPath = new File(jarPath, "logs");
+        if (!logsPath.exists() || !logsPath.isDirectory()) {
+            logsPath = jarPath;
+        }
+        setupLogger(false, new File(logsPath, "tracker-server.log").getPath(), Level.WARNING.getName(), false);
+    }
+
     public static void setupLogger(Config config) {
+        setupLogger(
+                config.getBoolean("logger.console"),
+                config.getString("logger.file"),
+                config.getString("logger.level"),
+                config.getBoolean("logger.fullStackTraces"));
+    }
+
+    private static void setupLogger(boolean console, String file, String levelString, boolean fullStackTraces) {
 
         Logger rootLogger = Logger.getLogger("");
         for (Handler handler : rootLogger.getHandlers()) {
@@ -159,15 +176,15 @@ public final class Log {
         }
 
         Handler handler;
-        if (config.getBoolean("logger.console")) {
+        if (console) {
             handler = new ConsoleHandler();
         } else {
-            handler = new RollingFileHandler(config.getString("logger.file"));
+            handler = new RollingFileHandler(file);
         }
 
-        handler.setFormatter(new LogFormatter(config.getBoolean("logger.fullStackTraces")));
+        handler.setFormatter(new LogFormatter(fullStackTraces));
 
-        Level level = Level.parse(config.getString("logger.level").toUpperCase());
+        Level level = Level.parse(levelString.toUpperCase());
         rootLogger.setLevel(level);
         handler.setLevel(level);
         handler.setFilter(record -> record != null && !record.getLoggerName().startsWith("sun"));
