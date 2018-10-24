@@ -92,7 +92,6 @@ import org.traccar.sms.SmsManager;
 import org.traccar.web.WebServer;
 
 import javax.cache.CacheManager;
-import javax.cache.Caching;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.ext.ContextResolver;

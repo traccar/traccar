@@ -15,6 +15,7 @@
  */
 package org.traccar.database;
 
+import com.hazelcast.core.ITopic;
 import io.netty.channel.Channel;
 import io.netty.util.Timeout;
 import io.netty.util.TimerTask;
@@ -28,6 +29,7 @@ import org.traccar.model.Device;
 import org.traccar.model.DeviceState;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+import org.traccar.model.TopicMessage;
 
 import java.net.SocketAddress;
 import java.sql.SQLException;
@@ -53,10 +55,41 @@ public class ConnectionManager {
     private final Map<Long, Set<UpdateListener>> listeners = new ConcurrentHashMap<>();
     private final Map<Long, Timeout> timeouts = new ConcurrentHashMap<>();
 
+    private final ITopic<TopicMessage> topicDevices;
+    private final ITopic<TopicMessage> topicPositions;
+    private final ITopic<TopicMessage> topicEvents;
+
     public ConnectionManager() {
         deviceTimeout = Context.getConfig().getLong("status.timeout", DEFAULT_TIMEOUT) * 1000;
         enableStatusEvents = Context.getConfig().getBoolean("event.enable");
         updateDeviceState = Context.getConfig().getBoolean("status.updateDeviceState");
+
+        topicDevices = Context.getHazelcastInstance().getTopic("Devices");
+        topicDevices.addMessageListener(message -> {
+            if (listeners.containsKey(message.getMessageObject().getUserId())) {
+                for (UpdateListener listener : listeners.get(message.getMessageObject().getUserId())) {
+                    listener.onUpdateDevice((Device) message.getMessageObject().getData());
+                }
+            }
+        });
+
+        topicPositions = Context.getHazelcastInstance().getTopic("Positions");
+        topicPositions.addMessageListener(message -> {
+            if (listeners.containsKey(message.getMessageObject().getUserId())) {
+                for (UpdateListener listener : listeners.get(message.getMessageObject().getUserId())) {
+                    listener.onUpdatePosition((Position) message.getMessageObject().getData());
+                }
+            }
+        });
+
+        topicEvents = Context.getHazelcastInstance().getTopic("Events");
+        topicEvents.addMessageListener(message -> {
+            if (listeners.containsKey(message.getMessageObject().getUserId())) {
+                for (UpdateListener listener : listeners.get(message.getMessageObject().getUserId())) {
+                    listener.onUpdateEvent((Event) message.getMessageObject().getData());
+                }
+            }
+        });
     }
 
     public void addActiveDevice(long deviceId, Protocol protocol, Channel channel, SocketAddress remoteAddress) {
@@ -161,34 +194,20 @@ public class ConnectionManager {
         return result;
     }
 
-    public synchronized void updateDevice(Device device) {
+    public void updateDevice(Device device) {
         for (long userId : Context.getPermissionsManager().getDeviceUsers(device.getId())) {
-            if (listeners.containsKey(userId)) {
-                for (UpdateListener listener : listeners.get(userId)) {
-                    listener.onUpdateDevice(device);
-                }
-            }
+            topicDevices.publish(new TopicMessage(userId, device));
         }
     }
 
-    public synchronized void updatePosition(Position position) {
-        long deviceId = position.getDeviceId();
-
-        for (long userId : Context.getPermissionsManager().getDeviceUsers(deviceId)) {
-            if (listeners.containsKey(userId)) {
-                for (UpdateListener listener : listeners.get(userId)) {
-                    listener.onUpdatePosition(position);
-                }
-            }
+    public void updatePosition(Position position) {
+        for (long userId : Context.getPermissionsManager().getDeviceUsers(position.getDeviceId())) {
+            topicPositions.publish(new TopicMessage(userId, position));
         }
     }
 
-    public synchronized void updateEvent(long userId, Event event) {
-        if (listeners.containsKey(userId)) {
-            for (UpdateListener listener : listeners.get(userId)) {
-                listener.onUpdateEvent(event);
-            }
-        }
+    public void updateEvent(long userId, Event event) {
+        topicEvents.publish(new TopicMessage(userId, event));
     }
 
     public interface UpdateListener {
@@ -199,14 +218,14 @@ public class ConnectionManager {
 
     public synchronized void addListener(long userId, UpdateListener listener) {
         if (!listeners.containsKey(userId)) {
-            listeners.put(userId, new HashSet<UpdateListener>());
+            listeners.put(userId, new HashSet<>());
         }
         listeners.get(userId).add(listener);
     }
 
     public synchronized void removeListener(long userId, UpdateListener listener) {
         if (!listeners.containsKey(userId)) {
-            listeners.put(userId, new HashSet<UpdateListener>());
+            listeners.put(userId, new HashSet<>());
         }
         listeners.get(userId).remove(listener);
     }
