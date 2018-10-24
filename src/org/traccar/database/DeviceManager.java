@@ -20,9 +20,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
@@ -36,6 +34,9 @@ import org.traccar.model.Group;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
 
+import javax.cache.Cache;
+import javax.cache.configuration.MutableConfiguration;
+
 public class DeviceManager extends BaseObjectManager<Device> implements IdentityManager, ManagableObjects {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DeviceManager.class);
@@ -46,26 +47,41 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
     private final long dataRefreshDelay;
     private boolean lookupGroupsAttribute;
 
-    private Map<String, Device> devicesByUniqueId;
-    private Map<String, Device> devicesByPhone;
+    private Cache<String, Device> devicesByUniqueId;
+    private Cache<String, Device> devicesByPhone;
     private AtomicLong devicesLastUpdate = new AtomicLong();
 
-    private final Map<Long, Position> positions = new ConcurrentHashMap<>();
-
-    private final Map<Long, DeviceState> deviceStates = new ConcurrentHashMap<>();
+    private final Cache<Long, Position> positions;
+    private final Cache<Long, DeviceState> deviceStates;
 
     public DeviceManager(DataManager dataManager) {
         super(dataManager, Device.class);
-        this.config = Context.getConfig();
-        if (devicesByPhone == null) {
-            devicesByPhone = new ConcurrentHashMap<>();
-        }
-        if (devicesByUniqueId == null) {
-            devicesByUniqueId = new ConcurrentHashMap<>();
-        }
+        config = Context.getConfig();
+
+        positions = Context.getCacheManager().createCache(
+                this.getClass().getSimpleName() + "Positions", new MutableConfiguration<>());
+        deviceStates = Context.getCacheManager().createCache(
+                this.getClass().getSimpleName() + "DeviceStates", new MutableConfiguration<>());
+
         dataRefreshDelay = config.getLong("database.refreshDelay", DEFAULT_REFRESH_DELAY) * 1000;
         lookupGroupsAttribute = config.getBoolean("deviceManager.lookupGroupsAttribute");
         refreshLastPositions();
+    }
+
+    public Cache<String, Device> getDevicesByUniqueIdCache() {
+        if (devicesByUniqueId == null) {
+            devicesByUniqueId = Context.getCacheManager().createCache(
+                    this.getClass().getSimpleName() + "DevicesByUniqueId", new MutableConfiguration<>());
+        }
+        return devicesByUniqueId;
+    }
+
+    public Cache<String, Device> getDevicesByPhoneCache() {
+        if (devicesByPhone == null) {
+            devicesByPhone = Context.getCacheManager().createCache(
+                    this.getClass().getSimpleName() + "DevicesByPhone", new MutableConfiguration<>());
+        }
+        return devicesByPhone;
     }
 
     @Override
@@ -175,26 +191,12 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         return result;
     }
 
-    private void putUniqueDeviceId(Device device) {
-        if (devicesByUniqueId == null) {
-            devicesByUniqueId = new ConcurrentHashMap<>(getAllItems().size());
-        }
-        devicesByUniqueId.put(device.getUniqueId(), device);
-    }
-
-    private void putPhone(Device device) {
-        if (devicesByPhone == null) {
-            devicesByPhone = new ConcurrentHashMap<>(getAllItems().size());
-        }
-        devicesByPhone.put(device.getPhone(), device);
-    }
-
     @Override
     protected void addNewItem(Device device) {
         super.addNewItem(device);
-        putUniqueDeviceId(device);
-        if (device.getPhone() != null  && !device.getPhone().isEmpty()) {
-            putPhone(device);
+        getDevicesByUniqueIdCache().put(device.getUniqueId(), device);
+        if (device.getPhone() != null && !device.getPhone().isEmpty()) {
+            getDevicesByPhoneCache().put(device.getPhone(), device);
         }
         if (Context.getGeofenceManager() != null) {
             Position lastPosition = getLastPosition(device.getId());
@@ -215,19 +217,20 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         cachedDevice.setDisabled(device.getDisabled());
         cachedDevice.setAttributes(device.getAttributes());
         if (!device.getUniqueId().equals(cachedDevice.getUniqueId())) {
-            devicesByUniqueId.remove(cachedDevice.getUniqueId());
+            getDevicesByUniqueIdCache().remove(cachedDevice.getUniqueId());
             cachedDevice.setUniqueId(device.getUniqueId());
-            putUniqueDeviceId(cachedDevice);
+            getDevicesByUniqueIdCache().put(cachedDevice.getUniqueId(), cachedDevice);
         }
         if (device.getPhone() != null && !device.getPhone().isEmpty()
                 && !device.getPhone().equals(cachedDevice.getPhone())) {
             String phone = cachedDevice.getPhone();
             if (phone != null && !phone.isEmpty()) {
-                devicesByPhone.remove(phone);
+                getDevicesByPhoneCache().remove(phone);
             }
             cachedDevice.setPhone(device.getPhone());
-            putPhone(cachedDevice);
+            getDevicesByPhoneCache().put(phone, cachedDevice);
         }
+        super.updateCachedItem(cachedDevice);
     }
 
     @Override
@@ -237,9 +240,9 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
             String deviceUniqueId = cachedDevice.getUniqueId();
             String phone = cachedDevice.getPhone();
             super.removeCachedItem(deviceId);
-            devicesByUniqueId.remove(deviceUniqueId);
+            getDevicesByUniqueIdCache().remove(deviceUniqueId);
             if (phone != null && !phone.isEmpty()) {
-                devicesByPhone.remove(phone);
+                getDevicesByPhoneCache().remove(phone);
             }
         }
         positions.remove(deviceId);
@@ -250,6 +253,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         Device cachedDevice = getById(device.getId());
         if (cachedDevice != null) {
             cachedDevice.setStatus(device.getStatus());
+            updateCachedItem(cachedDevice);
         }
     }
 

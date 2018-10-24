@@ -16,7 +16,9 @@
  */
 package org.traccar.model;
 
-public class DeviceState {
+import java.io.Serializable;
+
+public class DeviceState implements Serializable {
 
     private Boolean motionState;
 
