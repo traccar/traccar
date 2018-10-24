@@ -25,6 +25,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
 import com.fasterxml.jackson.datatype.jsr353.JSR353Module;
+import com.hazelcast.cache.impl.HazelcastServerCachingProvider;
+import com.hazelcast.config.XmlConfigBuilder;
+import com.hazelcast.core.Hazelcast;
+import com.hazelcast.core.HazelcastInstance;
 import org.apache.velocity.app.VelocityEngine;
 import org.eclipse.jetty.util.URIUtil;
 import org.slf4j.Logger;
@@ -374,7 +378,13 @@ public final class Context {
             Log.setupLogger(config);
         }
 
-        cacheManager = Caching.getCachingProvider().getCacheManager();
+        if (config.hasKey("hazelcast.config")) {
+            HazelcastInstance hazelcast = Hazelcast.newHazelcastInstance(
+                    new XmlConfigBuilder(config.getString("hazelcast.config")).build());
+            cacheManager = HazelcastServerCachingProvider.createCachingProvider(hazelcast).getCacheManager();
+        } else {
+            cacheManager = Caching.getCachingProvider().getCacheManager();
+        }
 
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new SanitizerModule());
