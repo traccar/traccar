@@ -154,6 +154,12 @@ public final class Context {
         return mediaManager;
     }
 
+    private static HazelcastInstance hazelcastInstance;
+
+    public static HazelcastInstance getHazelcastInstance() {
+        return hazelcastInstance;
+    }
+
     private static CacheManager cacheManager;
 
     public static CacheManager getCacheManager() {
@@ -379,12 +385,12 @@ public final class Context {
         }
 
         if (config.hasKey("hazelcast.config")) {
-            HazelcastInstance hazelcast = Hazelcast.newHazelcastInstance(
+            hazelcastInstance = Hazelcast.newHazelcastInstance(
                     new XmlConfigBuilder(config.getString("hazelcast.config")).build());
-            cacheManager = HazelcastServerCachingProvider.createCachingProvider(hazelcast).getCacheManager();
         } else {
-            cacheManager = Caching.getCachingProvider().getCacheManager();
+            hazelcastInstance = Hazelcast.newHazelcastInstance();
         }
+        cacheManager = HazelcastServerCachingProvider.createCachingProvider(hazelcastInstance).getCacheManager();
 
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new SanitizerModule());
