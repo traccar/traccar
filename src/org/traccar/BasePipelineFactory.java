@@ -44,6 +44,7 @@ import org.traccar.processing.ComputedAttributesHandler;
 import org.traccar.processing.CopyAttributesHandler;
 
 import java.net.InetSocketAddress;
+import java.util.Map;
 
 public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
 
@@ -239,6 +240,21 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
                 pipeline.addLast(handler);
             }
         }
+    }
+
+    public static <T extends ChannelHandler> T getHandler(ChannelPipeline pipeline, Class<T> clazz) {
+        for (Map.Entry<String, ChannelHandler> handlerEntry : pipeline) {
+            ChannelHandler handler = handlerEntry.getValue();
+            if (handler instanceof WrapperInboundHandler) {
+                handler = ((WrapperInboundHandler) handler).getWrappedHandler();
+            } else if (handler instanceof WrapperOutboundHandler) {
+                handler = ((WrapperOutboundHandler) handler).getWrappedHandler();
+            }
+            if (clazz.isAssignableFrom(handler.getClass())) {
+                return (T) handler;
+            }
+        }
+        return null;
     }
 
     @Override

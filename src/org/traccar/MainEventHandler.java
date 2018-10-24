@@ -98,9 +98,8 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
         LOGGER.info(formatChannel(ctx.channel()) + " disconnected");
         closeChannel(ctx.channel());
 
-        BaseProtocolDecoder protocolDecoder = ctx.pipeline().get(BaseProtocolDecoder.class);
-        if (ctx.pipeline().get(HttpRequestDecoder.class) == null
-                && !connectionlessProtocols.contains(protocolDecoder.getProtocolName())) {
+        if (BasePipelineFactory.getHandler(ctx.pipeline(), HttpRequestDecoder.class) == null
+                && !connectionlessProtocols.contains(ctx.pipeline().get(BaseProtocolDecoder.class).getProtocolName())) {
             Context.getConnectionManager().removeActiveDevice(ctx.channel());
         }
     }
