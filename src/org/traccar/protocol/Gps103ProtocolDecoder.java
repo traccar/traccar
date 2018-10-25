@@ -100,6 +100,27 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
+    private static final Pattern PATTERN_ALT = new PatternBuilder()
+            .text("imei:")
+            .number("(d+),")                     // imei
+            .expression("[^,]+,")
+            .expression("...,")                  // event
+            .expression(".{6},")                 // sensor id
+            .expression(".{4},")                 // sensor voltage
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
+            .number("(dd)(dd)(dd),")             // date (ddmmyy)
+            .number("(d+),")                     // rssi
+            .number("(d),")                      // gps status
+            .number("(-?d+.d+),")                // latitude
+            .number("(-?d+.d+),")                // longitude
+            .number("(d+),")                     // speed
+            .number("(d+),")                     // course
+            .number("(-?d+),")                   // altitude
+            .number("(d+.d+),")                  // hdop
+            .number("(d+),")                     // satellites
+            .any()
+            .compile();
+
     private String decodeAlarm(String value) {
         if (value.startsWith("T:")) {
             return Position.ALARM_TEMPERATURE;
@@ -270,6 +291,39 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+
+    private Position decodeAlternative(Channel channel, SocketAddress remoteAddress, String sentence) {
+
+        Parser parser = new Parser(PATTERN_ALT, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY));
+
+        position.set(Position.KEY_RSSI, parser.nextInt());
+
+        position.setValid(parser.nextInt() > 0);
+        position.setLatitude(parser.nextDouble());
+        position.setLongitude(parser.nextDouble());
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt()));
+        position.setCourse(parser.nextInt());
+        position.setAltitude(parser.nextInt());
+
+        position.set(Position.KEY_HDOP, parser.nextDouble());
+        position.set(Position.KEY_SATELLITES, parser.nextInt());
+
+        return position;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -301,6 +355,8 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
         if (sentence.contains("OBD")) {
             return decodeObd(channel, remoteAddress, sentence);
+        } else if (sentence.endsWith("*")) {
+            return decodeAlternative(channel, remoteAddress, sentence);
         } else {
             return decodeRegular(channel, remoteAddress, sentence);
         }
