@@ -13,6 +13,9 @@ public class MiniFinderProtocolDecoderTest extends ProtocolTest {
         verifyNull(decoder, text(
                 "!1,867273023933661,V07S.5701.1621,100"));
 
+        verifyAttributes(decoder, text(
+                "!3,ok"));
+
         verifyNull(decoder, text(
                 "!1,123456789012345"));
 
