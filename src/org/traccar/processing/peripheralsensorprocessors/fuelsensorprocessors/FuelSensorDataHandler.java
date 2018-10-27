@@ -312,7 +312,9 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                 Optional<List<PeripheralSensor>> linkedDevices =
                         getLinkedDevices(device.getId());
 
-                if (!linkedDevices.isPresent()) {
+                long deviceId = device.getId();
+
+                if (!linkedDevices.isPresent() || !deviceIdToLatestDateMap.containsKey(deviceId)) {
                     continue;
                 }
 
