@@ -398,9 +398,9 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                                             int sensorId, double fuelLevelChangeThreshold) {
 
         if ((position.getAttributes().containsKey(Position.PREFIX_ADC + 1) &&
-                (int) position.getAttributes().get(Position.PREFIX_ADC + 1)  <= 0) ||
+                (long) position.getAttributes().get(Position.PREFIX_ADC + 1)  <= 0L) ||
                 (position.getAttributes().containsKey(Position.KEY_POWER) &&
-                        (int) position.getAttributes().get(Position.KEY_POWER)  <= 0)) {
+                        (double) position.getAttributes().get(Position.KEY_POWER)  <= 0.0)) {
 
             Log.debug("Device power too low or missing, updating with last known fuel level for deviceId"
                     + position.getDeviceId());
@@ -408,7 +408,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             return;
         }
 
-        Long fuelLevel = new Long((Integer) position.getAttributes().get(ADC_1));
+        Long fuelLevel = (long) position.getAttributes().get(ADC_1);
 
         handleSensorData(position,
                 sensorId,
