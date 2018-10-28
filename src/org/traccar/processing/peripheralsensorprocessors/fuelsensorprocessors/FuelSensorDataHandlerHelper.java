@@ -169,7 +169,11 @@ public class FuelSensorDataHandlerHelper {
         int startOdometerInMeters = (int) startPosition.getAttributes().get(Position.KEY_ODOMETER);
         int endOdometerInMeters = (int) endPosition.getAttributes().get(Position.KEY_ODOMETER);
 
-        double differenceTotalDistanceInMeters = endTotalGPSDistanceInMeters - startTotalGPSDistanceInMeters;
+        double differenceTotalDistanceInMeters = 0.0;
+        if (endTotalGPSDistanceInMeters > 0 && startTotalGPSDistanceInMeters > 0) {
+            differenceTotalDistanceInMeters = endTotalGPSDistanceInMeters - startTotalGPSDistanceInMeters;
+        }
+
         double differenceOdometerInMeters = endOdometerInMeters - startOdometerInMeters;
 
         // max distance in KM
