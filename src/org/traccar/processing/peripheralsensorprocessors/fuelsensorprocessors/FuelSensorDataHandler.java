@@ -523,6 +523,20 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             return;
         }
 
+        Position positionUnderEvaluation = relevantPositionsListForOutliers.get(indexOfPositionEvaluation);
+
+        // Re-calculate and reset averages if there were no outliers.
+        relevantPositionsListForAverages =
+                getRelevantPositionsSubList(positionsForDeviceSensor,
+                                            positionUnderEvaluation,
+                                            minValuesForMovingAvg, true);
+
+        currentFuelLevelAverage = getAverageValue(relevantPositionsListForAverages);
+        positionUnderEvaluation.set(Position.KEY_FUEL_LEVEL, currentFuelLevelAverage);
+
+        // Update the position in the db so the recalculated average is reflected there.
+        updatePosition(positionUnderEvaluation);
+
         // At this point we know indexOfPositionEvaluation in the new window is not an outlier. So if we haven't found
         // the first outlier in the last window yet, go find it.
         boolean possibleDataLoss = possibleDataLossByDevice.getOrDefault(deviceId, false);
@@ -547,19 +561,6 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             nonOutlierInLastWindowByDevice.remove(deviceId);
         }
 
-        Position positionUnderEvaluation = relevantPositionsListForOutliers.get(indexOfPositionEvaluation);
-
-        // Re-calculate and reset averages if there were no outliers.
-        relevantPositionsListForAverages =
-                getRelevantPositionsSubList(positionsForDeviceSensor,
-                                            positionUnderEvaluation,
-                                            minValuesForMovingAvg, true);
-
-        currentFuelLevelAverage = getAverageValue(relevantPositionsListForAverages);
-        positionUnderEvaluation.set(Position.KEY_FUEL_LEVEL, currentFuelLevelAverage);
-
-        // Update the position in the db so the recalculated average is reflected there.
-        updatePosition(positionUnderEvaluation);
 
         //-- End Outliers
 
