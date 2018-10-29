@@ -28,7 +28,7 @@ public class RetranslatorFrameDecoder extends BaseFrameDecoder {
 
         int length = 4 + buf.getIntLE(buf.readerIndex());
         if (buf.readableBytes() >= length) {
-            return buf.readBytes(length);
+            return buf.readRetainedSlice(length);
         } else {
             return null;
         }
