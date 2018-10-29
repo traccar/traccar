@@ -31,7 +31,7 @@ public class Pt502ProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_OUTPUT_CONTROL);
         command.set(Command.KEY_INDEX, 2);
-        command.set(Command.KEY_DATA, 1);
+        command.set(Command.KEY_DATA, "1");
         
         assertEquals("#OPC2,1\r\n", encoder.encodeCommand(command));
 
