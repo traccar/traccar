@@ -359,8 +359,13 @@ public final class Context {
 
     public static void init(String configFile) throws Exception {
 
-        config = new Config();
-        config.load(configFile);
+        try {
+            config = new Config();
+            config.load(configFile);
+        } catch (Exception e) {
+            Log.setupDefaultLogger();
+            throw e;
+        }
 
         if (config.getBoolean("logger.enable")) {
             Log.setupLogger(config);

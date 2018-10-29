@@ -160,6 +160,14 @@ public final class Checksum {
         return String.format("*%02x", checksum).toUpperCase();
     }
 
+    public static int sum(ByteBuffer buf) {
+        byte checksum = 0;
+        while (buf.hasRemaining()) {
+            checksum += buf.get();
+        }
+        return checksum;
+    }
+
     public static String sum(String msg) {
         byte checksum = 0;
         for (byte b : msg.getBytes(StandardCharsets.US_ASCII)) {
