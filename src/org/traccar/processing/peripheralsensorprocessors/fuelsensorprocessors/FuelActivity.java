@@ -8,6 +8,19 @@ public class FuelActivity {
 
     public FuelActivity() { }
 
+    public FuelActivity(FuelActivityType activityType,
+                        double changeVolume,
+                        Position activityStartPosition,
+                        Position activityEndPosition) {
+
+        this.activityType = activityType;
+        this.changeVolume = changeVolume;
+        this.activityStartTime = activityStartPosition.getDeviceTime();
+        this.activityEndTime = activityEndPosition.getDeviceTime();
+        this.activityStartPosition = activityStartPosition;
+        this.activityEndPosition = activityEndPosition;
+    }
+
     public enum FuelActivityType {
         NONE,
         FUEL_FILL,
@@ -18,7 +31,7 @@ public class FuelActivity {
     private double changeVolume = 0;
     private Date activityStartTime;
     private Date activityEndTime;
-    private Position activitystartPosition;
+    private Position activityStartPosition;
     private Position activityEndPosition;
 
     public FuelActivityType getActivityType() {
@@ -53,12 +66,12 @@ public class FuelActivity {
         this.activityEndTime = activityEndTime;
     }
 
-    public Position getActivitystartPosition() {
-        return activitystartPosition;
+    public Position getActivityStartPosition() {
+        return activityStartPosition;
     }
 
-    public void setActivitystartPosition(final Position activitystartPosition) {
-        this.activitystartPosition = activitystartPosition;
+    public void setActivityStartPosition(final Position activitystartPosition) {
+        this.activityStartPosition = activitystartPosition;
     }
 
     public Position getActivityEndPosition() {

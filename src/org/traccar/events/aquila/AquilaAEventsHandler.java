@@ -36,6 +36,7 @@ public class AquilaAEventsHandler extends BaseEventHandler {
             if (attributes.containsKey(eventString) && (boolean) attributes.get(eventString)) {
                 String eventType = positionInfoToEventTypeMap.get(eventString);
                 Event event = new Event(eventType, position.getDeviceId(), position.getId());
+                event.set("startTime", position.getDeviceTime().getTime());
                 result.put(event, position);
             }
         }

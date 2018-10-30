@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.poi.ss.util.WorkbookUtil;
@@ -41,12 +42,25 @@ public final class Route {
 
     public static Collection<Position> getObjects(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws SQLException {
+
         ReportUtils.checkPeriodLimit(from, to);
         ArrayList<Position> result = new ArrayList<>();
+
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
             Collection<Position> routePositions = Context.getDataManager().getPositionsForRoute(deviceId, from, to);
-            result.addAll(routePositions.stream().filter(Route::positionFilter).collect(Collectors.toList()));
+            List<Position> filteredRoutePositions =
+                    routePositions.stream().filter(Route::positionFilter).collect(Collectors.toList());
+
+            if (filteredRoutePositions.size() == 0 && routePositions.size() > 0) {
+                List<Position> originalPositions = routePositions.stream().collect(Collectors.toList());
+                int originalListSize = originalPositions.size();
+                filteredRoutePositions.add(originalPositions.get(0));
+                filteredRoutePositions.add(originalPositions.get(originalListSize - 1));
+            }
+
+            result.addAll(filteredRoutePositions);
+
         }
         return result;
     }
@@ -80,7 +94,9 @@ public final class Route {
                     Position current = fuelOnlyPositions.get(positionIndex);
 
                     if (current.getAttributes().containsKey("fuel")
-                        && previous.getAttributes().containsKey("fuel")) {
+                        && previous.getAttributes().containsKey("fuel")
+                        && !current.getBoolean("fuelIsOutlier")
+                        && !previous.getBoolean("fuelIsOutlier")) {
 
                         double previousFuel = (double) previous.getAttributes().get("fuel");
                         double currentFuel = (double) current.getAttributes().get("fuel");
@@ -97,6 +113,11 @@ public final class Route {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+
+        if (result.size() == 0 && fuelOnlyPositions.size() > 0 ) {
+            result.add(fuelOnlyPositions.get(0));
+            result.add(fuelOnlyPositions.get(fuelOnlyPositions.size() - 1));
         }
 
         Log.info("[FUEL_INFO_REPORT] Returning " + result.size()
