@@ -19,7 +19,6 @@ import java.beans.Introspector;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -103,10 +102,17 @@ public class DataManager {
 
             String driverFile = config.getString("database.driverFile");
             if (driverFile != null) {
-                URLClassLoader classLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-                Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-                method.setAccessible(true);
-                method.invoke(classLoader, new File(driverFile).toURI().toURL());
+                ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+                try {
+                    Method method = classLoader.getClass().getDeclaredMethod("addURL", URL.class);
+                    method.setAccessible(true);
+                    method.invoke(classLoader, new File(driverFile).toURI().toURL());
+                } catch (NoSuchMethodException e) {
+                    Method method = classLoader.getClass()
+                            .getDeclaredMethod("appendToClassPathForInstrumentation", String.class);
+                    method.setAccessible(true);
+                    method.invoke(classLoader, driverFile);
+                }
             }
 
             String driver = config.getString("database.driver");

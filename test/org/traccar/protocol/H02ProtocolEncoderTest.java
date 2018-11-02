@@ -45,7 +45,7 @@ public class H02ProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_ENGINE_STOP);
 
-        assertEquals("*HQ,123456789012345,S20,010203,1,3,10,3,5,5,3,5,3,5,3,5#", encoder.encodeCommand(command, time));
+        assertEquals("*HQ,123456789012345,S20,010203,1,1#", encoder.encodeCommand(command, time));
     }
 
     @Test
@@ -55,7 +55,7 @@ public class H02ProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_ENGINE_RESUME);
 
-        assertEquals("*HQ,123456789012345,S20,010203,0,0#", encoder.encodeCommand(command, time));
+        assertEquals("*HQ,123456789012345,S20,010203,1,0#", encoder.encodeCommand(command, time));
     }
 
     @Test

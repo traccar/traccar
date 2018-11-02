@@ -16,6 +16,7 @@
  */
 package org.traccar.protocol;
 
+import org.traccar.Context;
 import org.traccar.StringProtocolEncoder;
 import org.traccar.model.Command;
 
@@ -48,13 +49,17 @@ public class H02ProtocolEncoder extends StringProtocolEncoder {
             case Command.TYPE_ALARM_DISARM:
                 return formatCommand(time, uniqueId, "SCF", "1", "1");
             case Command.TYPE_ENGINE_STOP:
-                return formatCommand(
-                        time, uniqueId, "S20", "1", "3", "10", "3", "5", "5", "3", "5", "3", "5", "3", "5");
+                return formatCommand(time, uniqueId, "S20", "1", "1");
             case Command.TYPE_ENGINE_RESUME:
-                return formatCommand(time, uniqueId, "S20", "0", "0");
+                return formatCommand(time, uniqueId, "S20", "1", "0");
             case Command.TYPE_POSITION_PERIODIC:
-                return formatCommand(
-                        time, uniqueId, "S71", "22", command.getAttributes().get(Command.KEY_FREQUENCY).toString());
+                String frequency = command.getAttributes().get(Command.KEY_FREQUENCY).toString();
+                if (Context.getIdentityManager().lookupAttributeBoolean(
+                        command.getDeviceId(), "h02.alternative", false, true)) {
+                    return formatCommand(time, uniqueId, "D1", frequency);
+                } else {
+                    return formatCommand(time, uniqueId, "S71", "22", frequency);
+                }
             default:
                 return null;
         }
