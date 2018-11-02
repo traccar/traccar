@@ -56,4 +56,5 @@ public final class NotificatorSms extends Notificator {
                     NotificationFormatter.formatShortMessage(userId, event, position), false);
         }
     }
+
 }

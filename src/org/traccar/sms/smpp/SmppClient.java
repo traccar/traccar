@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.smpp;
+package org.traccar.sms.smpp;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -268,4 +268,5 @@ public class SmppClient implements SmsManager {
             }
         });
     }
+
 }
