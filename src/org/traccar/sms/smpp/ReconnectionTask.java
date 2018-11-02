@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.smpp;
+package org.traccar.sms.smpp;
 
 public class ReconnectionTask implements Runnable {
 
@@ -28,4 +28,5 @@ public class ReconnectionTask implements Runnable {
     public void run() {
         smppClient.reconnect();
     }
+
 }

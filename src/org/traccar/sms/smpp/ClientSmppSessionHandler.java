@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.smpp;
+package org.traccar.sms.smpp;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,4 +79,5 @@ public class ClientSmppSessionHandler extends DefaultSmppSessionHandler {
         LOGGER.warn("SMPP session channel unexpectedly closed");
         smppClient.scheduleReconnect();
     }
+
 }
