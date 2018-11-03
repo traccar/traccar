@@ -1,9 +1,11 @@
-#set($subject = "$device.name: text message received")
+#set($subject = "$device.name: Text message received")
 <!DOCTYPE html>
 <html>
 <body>
-Device: $device.name<br>
-Message:  $event.getString("message")<br>
+Asset: $device.name<br>
+<br>
 Time: $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.serverTime, $locale, $timezone)<br>
+Message:  $event.getString("message")<br>
+
 </body>
 </html>  

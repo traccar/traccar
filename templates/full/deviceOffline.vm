@@ -1,10 +1,12 @@
-#set($subject = "$device.name: offline")
+#set($subject = "$device.name: Status is Delayed")
 <!DOCTYPE html>
 <html>
 <body>
 Device: $device.name<br>
-Offline<br>
+Event: Status delayed<br>
 Time: $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.serverTime, $locale, $timezone)<br>
-Link: <a href="$webUrl?eventId=$event.id">$webUrl?eventId=$event.id</a>
+<!--Link: <a href="$webUrl?eventId=$event.id">$webUrl?eventId=$event.id</a>-->
+<br>
+<br>
 </body>
 </html>  

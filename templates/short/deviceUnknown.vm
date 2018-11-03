@@ -1,1 +1,1 @@
-$device.name status is unknown at $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.serverTime, $locale, $timezone)
+$device.name status is Offline on $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.serverTime, $locale, $timezone) at $position.address
