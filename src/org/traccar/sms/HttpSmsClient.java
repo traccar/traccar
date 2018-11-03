@@ -18,8 +18,12 @@ package org.traccar.sms;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.InvocationCallback;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.Context;
 import org.traccar.api.SecurityRequestFilter;
 import org.traccar.helper.DataConverter;
@@ -30,6 +34,8 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 public class HttpSmsClient implements SmsManager {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpSmsClient.class);
 
     private String url;
     private String authorization;
@@ -84,7 +90,17 @@ public class HttpSmsClient implements SmsManager {
 
     @Override
     public void sendMessageAsync(final String destAddress, final String message, final boolean command) {
-        getRequestBuilder().async().post(Entity.json(preparePayload(destAddress, message)));
+        getRequestBuilder().async().post(
+                Entity.entity(preparePayload(destAddress, message), mediaType), new InvocationCallback<String>() {
+            @Override
+            public void completed(String s) {
+            }
+
+            @Override
+            public void failed(Throwable throwable) {
+                LOGGER.warn("SMS send failed", throwable);
+            }
+        });
     }
 
 }
