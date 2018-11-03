@@ -1,4 +1,4 @@
-#set($subject = "$device.name: exceeds the speed")
+#set($subject = "$device.name: exceedsthe set speed limit")
 #if($speedUnit == 'kmh')
 #set($speedValue = $position.speed * 1.852)
 #set($speedString = $numberTool.format("0.0 km/h", $speedValue))
@@ -12,8 +12,11 @@
 <html>
 <body>
 Device: $device.name<br>
-Exceeds the speed: $speedString#{if}($geofence) in $geofence.name#{else}#{end}<br>
+Exceeds the set speed limit: $speedString#{if}($geofence) in $geofence.name#{else}#{end}<br>
 Time: $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.serverTime, $locale, $timezone)<br>
-Point: <a href="$webUrl?eventId=$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
+Location: <a href="http://maps.google.com/maps?f=q&q=$position.latitude,$position.longitude&z=16">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
+<br>
+Lat: $position.latitude&deg;<br>
+Lon: $position.longitude&deg;<br>
 </body>
 </html>  

@@ -1,10 +1,12 @@
-#set($subject = "$device.name: command result received")
+#set($subject = "$device.name: Responded to command")
 <!DOCTYPE html>
 <html>
 <body>
-Device: $device.name<br>
+Asset: $device.name<br>
 Result: $position.getString("result")<br>
 Time: $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.serverTime, $locale, $timezone)<br>
-Link: <a href="$webUrl?eventId=$event.id">$webUrl?eventId=$event.id</a>
+<!--Link: <a href="$webUrl?eventId=$event.id">$webUrl?eventId=$event.id</a>-->
+<br>
+<br>
 </body>
 </html>  
