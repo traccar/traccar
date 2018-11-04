@@ -90,7 +90,16 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
                 for (long notificationId : getEffectiveNotifications(userId, deviceId, event.getServerTime())) {
                     Notification notification = getById(notificationId);
                     if (getById(notificationId).getType().equals(event.getType())) {
-                        notificators.addAll(notification.getNotificatorsTypes());
+                        boolean filter = false;
+                        if (event.getType().equals(Event.TYPE_ALARM)) {
+                            String alarms = notification.getString("alarms");
+                            if (alarms == null || !alarms.contains(event.getString(Position.KEY_ALARM))) {
+                                filter = true;
+                            }
+                        }
+                        if (!filter) {
+                            notificators.addAll(notification.getNotificatorsTypes());
+                        }
                     }
                 }
                 for (String notificator : notificators) {
