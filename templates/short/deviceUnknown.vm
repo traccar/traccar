@@ -1,1 +1,1 @@
-$device.name status is Offline on $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.serverTime, $locale, $timezone) at $position.address
+$device.name device went Offline on $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.serverTime, $locale, $timezone)
