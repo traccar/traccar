@@ -104,6 +104,9 @@ public class MotionEventHandler extends BaseEventHandler {
                 Context.getConnectionManager().updateDeviceMovement(position.getDeviceId(), Device.MOVEMENT_MOVING);
             } else {
                 if (currentTime - motionTime < tripsConfig.getMinimalParkingDuration()
+                        || (ignition != null && !ignition)) {
+                    Context.getConnectionManager().updateDeviceMovement(position.getDeviceId(), Device.MOVEMENT_PARKED);
+                } else if (currentTime - motionTime < tripsConfig.getMinimalParkingDuration()
                         || ignition != null && ignition) {
                     Context.getConnectionManager().updateDeviceMovement(position.getDeviceId(), Device.MOVEMENT_IDLE);
                 } else {
