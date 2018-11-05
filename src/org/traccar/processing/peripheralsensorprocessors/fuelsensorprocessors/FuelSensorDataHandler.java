@@ -30,6 +30,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
     private static final String SENSOR_ID = "sensorId";
     private static final String SENSOR_DATA = "sensorData";
     private static final String ADC_1 = "adc1";
+    private static final String IO_201  = "io201";
     private static final String FREQUENCY_PREFIX = "F=";
     private static final String FUEL_PART_PREFIX = "N=";
 
@@ -136,7 +137,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                 handleDigitalFuelSensorData(position, sensorIdOnPosition.get(), fuelLevelChangeThresholdLitresDigital);
             }
 
-            if (position.getAttributes().containsKey(ADC_1)) {
+            if (position.getAttributes().containsKey(ADC_1) || position.getAttributes().containsKey(IO_201)) {
                 handleAnalogFuelSensorData(position, sensorIdOnPosition.get(), fuelLevelChangeThresholdLitresAnalog);
             }
         } catch (Exception e) {
@@ -408,12 +409,31 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             return;
         }
 
-        Long fuelLevel = ((Number) position.getAttributes().get(ADC_1)).longValue();
+        Optional<Object> fuelAttributeValue = getFuelAttributeValue(position);
+        if (!fuelAttributeValue.isPresent()) {
+            Log.debug("Invalid analog fuel values. Updating with last known.");
+            updateWithLastAvailable(position, Position.KEY_FUEL_LEVEL);
+            return;
+        }
+
+        Long fuelLevel = ((Number) fuelAttributeValue.get()).longValue();
 
         handleSensorData(position,
                 sensorId,
                 fuelLevel,
                 fuelLevelChangeThreshold);
+    }
+
+    private static Optional<Object> getFuelAttributeValue(Position position) {
+        if (position.getAttributes().containsKey(ADC_1)) {
+            return Optional.of(position.getAttributes().get(ADC_1));
+        }
+
+        if (position.getAttributes().containsKey(IO_201)) {
+            return Optional.of(position.getAttributes().get(IO_201));
+        }
+
+        return Optional.empty();
     }
 
     private void handleSensorData(Position position,
