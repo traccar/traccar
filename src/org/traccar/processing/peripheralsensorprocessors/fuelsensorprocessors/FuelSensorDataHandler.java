@@ -27,6 +27,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
     private static final int INVALID_FUEL_FREQUENCY = 0xFFF;
     private static final String FUEL_ANALOG = "FUEL_ANALOG";
+    private static final String FUEL_DIGITAL = "FUEL_DIGITAL";
     private static final String SENSOR_ID = "sensorId";
     private static final String SENSOR_DATA = "sensorData";
     private static final String ADC_1 = "adc1";
@@ -117,6 +118,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                     getLinkedDevices(position.getDeviceId());
 
             if (!peripheralSensorsOnDevice.isPresent()) {
+                Log.debug(String.format("There are no peripheral sensors on this device: %d", position.getDeviceId()));
                 return position;
             }
 
@@ -137,9 +139,25 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                 handleDigitalFuelSensorData(position, sensorIdOnPosition.get(), fuelLevelChangeThresholdLitresDigital);
             }
 
-            if (position.getAttributes().containsKey(ADC_1) || position.getAttributes().containsKey(IO_201)) {
-                handleAnalogFuelSensorData(position, sensorIdOnPosition.get(), fuelLevelChangeThresholdLitresAnalog);
+            if (position.getAttributes().containsKey(ADC_1)) {
+
+                if (((Number) position.getAttributes().get(Position.PREFIX_ADC + 1)).longValue()  <= 0L ||
+                        (position.getAttributes().containsKey(Position.KEY_POWER) &&
+                                ((Number) position.getAttributes().get(Position.KEY_POWER)).doubleValue()  <= 0.0)) {
+
+                    Log.debug("Device power too low or missing, updating with last known fuel level for deviceId"
+                                      + position.getDeviceId());
+                    updateWithLastAvailable(position, Position.KEY_FUEL_LEVEL);
+                    return position;
+                }
+
+                handleAnalogFuelSensorData(position, sensorIdOnPosition.get(), fuelLevelChangeThresholdLitresAnalog, ADC_1);
+
+            } else if (position.getAttributes().containsKey(IO_201)){
+                handleAnalogFuelSensorData(position, sensorIdOnPosition.get(), fuelLevelChangeThresholdLitresAnalog, IO_201);
             }
+
+
         } catch (Exception e) {
             Log.debug(String.format("Exception in processing fuel info: %s", e.getMessage()));
             e.printStackTrace();
@@ -362,6 +380,14 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             return analogSensor.map(sensor -> (int) sensor.getPeripheralSensorId());
         }
 
+        if (position.getAttributes().containsKey(IO_201)) {
+            Optional<PeripheralSensor> sensorMap =
+                    peripheralSensorsOnDevice.stream()
+                                             .filter(p -> p.getTypeName().equals(FUEL_DIGITAL)).findFirst();
+
+            return sensorMap.map(sensor -> (int) sensor.getPeripheralSensorId());
+        }
+
         return Optional.empty();
     }
 
@@ -396,20 +422,12 @@ public class FuelSensorDataHandler extends BaseDataHandler {
     }
 
     private void handleAnalogFuelSensorData(Position position,
-                                            int sensorId, double fuelLevelChangeThreshold) {
+                                            int sensorId,
+                                            double fuelLevelChangeThreshold,
+                                            String fuelAttributeName) {
 
-        if ((position.getAttributes().containsKey(Position.PREFIX_ADC + 1) &&
-             ((Number) position.getAttributes().get(Position.PREFIX_ADC + 1)).longValue()  <= 0L) ||
-                (position.getAttributes().containsKey(Position.KEY_POWER) &&
-                 ((Number) position.getAttributes().get(Position.KEY_POWER)).doubleValue()  <= 0.0)) {
+        Optional<Object> fuelAttributeValue = getFuelAttributeValue(position, fuelAttributeName);
 
-            Log.debug("Device power too low or missing, updating with last known fuel level for deviceId"
-                    + position.getDeviceId());
-            updateWithLastAvailable(position, Position.KEY_FUEL_LEVEL);
-            return;
-        }
-
-        Optional<Object> fuelAttributeValue = getFuelAttributeValue(position);
         if (!fuelAttributeValue.isPresent()) {
             Log.debug("Invalid analog fuel values. Updating with last known.");
             updateWithLastAvailable(position, Position.KEY_FUEL_LEVEL);
@@ -424,13 +442,9 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                 fuelLevelChangeThreshold);
     }
 
-    private static Optional<Object> getFuelAttributeValue(Position position) {
-        if (position.getAttributes().containsKey(ADC_1)) {
-            return Optional.of(position.getAttributes().get(ADC_1));
-        }
-
-        if (position.getAttributes().containsKey(IO_201)) {
-            return Optional.of(position.getAttributes().get(IO_201));
+    private static Optional<Object> getFuelAttributeValue(Position position, String fieldName) {
+        if (position.getAttributes().containsKey(fieldName)) {
+            return Optional.of(position.getAttributes().get(fieldName));
         }
 
         return Optional.empty();
@@ -486,11 +500,17 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
         double calibratedFuelLevel = maybeCalibratedFuelLevel.get();
         position.set(Position.KEY_CALIBRATED_FUEL_LEVEL, calibratedFuelLevel);
+        String setValue = position.getAttributes().containsKey(Position.KEY_CALIBRATED_FUEL_LEVEL)?
+                (double) position.getAttributes().get(Position.KEY_CALIBRATED_FUEL_LEVEL) + "" : "It's missing!";
+
+        Log.debug(String.format("Setting calibrated fuel value to %f on device %d. Set value: %s", calibratedFuelLevel, deviceId, setValue));
 
         List<Position> relevantPositionsListForAverages =
                 getRelevantPositionsSubList(positionsForDeviceSensor,
                                             position,
                                             minValuesForMovingAvg - 1);
+
+        Log.debug("Size of list before getting averages, deviceId: " + relevantPositionsListForAverages.size() + ", " + deviceId);
 
         relevantPositionsListForAverages.add(position);
         double currentFuelLevelAverage = getAverageValue(relevantPositionsListForAverages);
