@@ -20,8 +20,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
 import com.fasterxml.jackson.datatype.jsr353.JSR353Module;
@@ -95,10 +93,6 @@ import javax.ws.rs.ext.ContextResolver;
 public final class Context {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Context.class);
-
-    public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
-    public static final DateTimeFormatter DATE_FORMATTER =
-            DateTimeFormatter.ISO_OFFSET_DATE_TIME.withZone(ZoneId.systemDefault());
 
     private Context() {
     }
