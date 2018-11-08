@@ -31,6 +31,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
+import org.traccar.helper.DateUtil;
 
 public class CsvBuilder {
 
@@ -90,7 +91,7 @@ public class CsvBuilder {
                         addSeparator();
                     } else if (method.getReturnType().equals(Date.class)) {
                         Date value = (Date) method.invoke(object);
-                        builder.append(Context.DATE_FORMATTER.format(value.toInstant()));
+                        builder.append(DateUtil.formatDate(value));
                         addSeparator();
                     } else if (method.getReturnType().equals(Map.class)) {
                         Map value = (Map) method.invoke(object);
