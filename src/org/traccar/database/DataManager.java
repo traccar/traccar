@@ -20,7 +20,6 @@ import java.io.File;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -42,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Config;
 import org.traccar.Context;
+import org.traccar.helper.DateUtil;
 import org.traccar.model.Attribute;
 import org.traccar.model.Device;
 import org.traccar.model.Driver;
@@ -363,8 +363,7 @@ public class DataManager {
         long historyDays = config.getInteger("database.historyDays");
         if (historyDays != 0) {
             Date timeLimit = new Date(System.currentTimeMillis() - historyDays * 24 * 3600 * 1000);
-            LOGGER.info(
-                    "Clearing history earlier than " + new SimpleDateFormat(Context.DATE_FORMAT).format(timeLimit));
+            LOGGER.info("Clearing history earlier than " + DateUtil.formatDate(timeLimit, false));
             QueryBuilder.create(dataSource, getQuery("database.deletePositions"))
                     .setDate("serverTime", timeLimit)
                     .executeUpdate();

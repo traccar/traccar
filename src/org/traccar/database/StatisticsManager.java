@@ -18,6 +18,7 @@ package org.traccar.database;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
+import org.traccar.helper.DateUtil;
 import org.traccar.model.Statistics;
 
 import javax.ws.rs.client.Entity;
@@ -71,7 +72,7 @@ public class StatisticsManager {
 
             String url = Context.getConfig().getString("server.statistics");
             if (url != null) {
-                String time = Context.DATE_FORMATTER.format(statistics.getCaptureTime().toInstant());
+                String time = DateUtil.formatDate(statistics.getCaptureTime());
 
                 Form form = new Form();
                 form.param("version", Context.getAppVersion());

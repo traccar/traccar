@@ -23,10 +23,10 @@ import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.helper.DateUtil;
 import org.traccar.model.Position;
 
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -61,8 +61,7 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
             StringBuilder s = new StringBuilder();
             s.append(formatChannel(ctx.channel())).append(" ");
             s.append("id: ").append(uniqueId);
-            s.append(", time: ").append(
-                    new SimpleDateFormat(Context.DATE_FORMAT).format(position.getFixTime()));
+            s.append(", time: ").append(DateUtil.formatDate(position.getFixTime(), false));
             s.append(", lat: ").append(String.format("%.5f", position.getLatitude()));
             s.append(", lon: ").append(String.format("%.5f", position.getLongitude()));
             if (position.getSpeed() > 0) {

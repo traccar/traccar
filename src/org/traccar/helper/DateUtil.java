@@ -15,9 +15,10 @@
  */
 package org.traccar.helper;
 
-import org.traccar.Context;
-
+import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -59,7 +60,19 @@ public final class DateUtil {
     }
 
     public static Date parseDate(String value) {
-        return Date.from(Instant.from(Context.DATE_FORMATTER.parse(value)));
+        return Date.from(Instant.from(DateTimeFormatter.ISO_ZONED_DATE_TIME.parse(value)));
+    }
+
+    public static String formatDate(Date date) {
+        return formatDate(date, true);
+    }
+
+    public static String formatDate(Date date, boolean zoned) {
+        if (zoned) {
+            return DateTimeFormatter.ISO_OFFSET_DATE_TIME.withZone(ZoneId.systemDefault()).format(date.toInstant());
+        } else {
+            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
+        }
     }
 
 }
