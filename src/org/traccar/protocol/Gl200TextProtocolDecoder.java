@@ -591,8 +591,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(reportMask, 2)) {
             position.set(Position.KEY_OBD_ODOMETER, values[index++]);
         }
-        if (BitUtil.check(reportMask, 3)) {
-            position.set(Position.KEY_FUEL_USED, Double.parseDouble(values[index++]));
+        if (BitUtil.check(reportMask, 3) && !values[index++].isEmpty()) {
+            position.set(Position.KEY_FUEL_USED, Double.parseDouble(values[index - 1]));
         }
         if (BitUtil.check(reportMask, 5) && !values[index++].isEmpty()) {
             position.set(Position.KEY_RPM, Integer.parseInt(values[index - 1]));
@@ -615,8 +615,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(reportMask, 10) && !values[index++].isEmpty()) {
             position.set(Position.KEY_THROTTLE, Integer.parseInt(values[index - 1]));
         }
-        if (BitUtil.check(reportMask, 11)) {
-            position.set(Position.KEY_HOURS, UnitsConverter.msFromHours(Double.parseDouble(values[index++])));
+        if (BitUtil.check(reportMask, 11) && !values[index++].isEmpty()) {
+            position.set(Position.KEY_HOURS, UnitsConverter.msFromHours(Double.parseDouble(values[index - 1])));
         }
         if (BitUtil.check(reportMask, 12)) {
             position.set("drivingHours", Double.parseDouble(values[index++]));
