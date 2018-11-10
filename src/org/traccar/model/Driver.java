@@ -16,6 +16,8 @@
  */
 package org.traccar.model;
 
+import java.util.Date;
+
 public class Driver extends ExtendedModel {
 
     private String name;
@@ -36,5 +38,45 @@ public class Driver extends ExtendedModel {
 
     public void setUniqueId(String uniqueId) {
         this.uniqueId = uniqueId;
+    }
+
+    private Date employment;
+
+    public Date getEmployment() {
+        return employment;
+    }
+
+    public void setEmployment(Date employment) {
+        this.employment = employment;
+    }
+
+    private String driverPhone;
+
+    public String getDriverPhone() {
+        return driverPhone;
+    }
+
+    public void setDriverPhone(String driverPhone) {
+        this.driverPhone = driverPhone;
+    }
+
+    private String driverEmail;
+
+    public String getDriverEmail() {
+        return driverEmail;
+    }
+
+    public void setDriverEmail(String driverEmail) {
+        this.driverEmail = driverEmail;
+    }
+
+    private boolean disabled;
+
+    public boolean getDisabled() {
+        return disabled;
+    }
+
+    public void setDisabled(boolean disabled) {
+        this.disabled = disabled;
     }
 }
