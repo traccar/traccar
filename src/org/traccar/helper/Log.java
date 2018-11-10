@@ -19,11 +19,13 @@ import org.traccar.Config;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.ConsoleHandler;
@@ -59,11 +61,14 @@ public final class Log {
                     if (writer != null && !suffix.equals(this.suffix)) {
                         writer.close();
                         writer = null;
-                        new File(name).renameTo(new File(name + "." + this.suffix));
+                        if (!new File(name).renameTo(new File(name + "." + this.suffix))) {
+                            throw new RuntimeException("Log file renaiming failed");
+                        }
                     }
                     if (writer == null) {
                         this.suffix = suffix;
-                        writer = new BufferedWriter(new FileWriter(name, true));
+                        writer = new BufferedWriter(
+                                new OutputStreamWriter(new FileOutputStream(name, true), StandardCharsets.UTF_8));
                     }
                     writer.write(getFormatter().format(record));
                     writer.flush();
@@ -74,7 +79,7 @@ public final class Log {
         }
 
         @Override
-        public void flush() {
+        public synchronized void flush() {
             if (writer != null) {
                 try {
                     writer.flush();
@@ -85,7 +90,7 @@ public final class Log {
         }
 
         @Override
-        public void close() throws SecurityException {
+        public synchronized void close() throws SecurityException {
             if (writer != null) {
                 try {
                     writer.close();
