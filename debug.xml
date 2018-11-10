@@ -23,6 +23,10 @@
     <entry key='coordinates.filter'>true</entry>
     <entry key='coordinates.minError'>20</entry>
 
+    <!-- GPS x Analog Fuel sensor Field lookup entries -->
+    <entry key="aquila.fuel_analog">ADC_1</entry>
+    <entry key="teltonika.fuel_analog">io201</entry>
+
     <!-- Peripheral sensor processing entries-->
     <entry key='processing.peripheralSensorData.enable'>true</entry>
     <entry key='processing.peripheralSensorData.messageFrequency'>30</entry>

@@ -13,6 +13,9 @@ import org.traccar.model.PeripheralSensor;
 import org.traccar.model.Position;
 import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.FuelActivity.FuelActivityType;
 import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.FuelSensorDataHandlerHelper.ExpectedFuelConsumptionValues;
+import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.fueldataparsers.FuelDataParser;
+import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.fueldataparsers.omnicomm.AnalogLLSFuelDataParser;
+import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.fueldataparsers.omnicomm.DigitalLLSFuelDataParser;
 import org.traccar.transforms.model.FuelSensorCalibration;
 import org.traccar.transforms.model.SensorPointsMap;
 
@@ -25,15 +28,12 @@ import static org.traccar.Context.getDataManager;
 
 public class FuelSensorDataHandler extends BaseDataHandler {
 
-    private static final int INVALID_FUEL_FREQUENCY = 0xFFF;
     private static final String FUEL_ANALOG = "FUEL_ANALOG";
     private static final String FUEL_DIGITAL = "FUEL_DIGITAL";
     private static final String SENSOR_ID = "sensorId";
-    private static final String SENSOR_DATA = "sensorData";
     private static final String ADC_1 = "adc1";
     private static final String IO_201  = "io201";
-    private static final String FREQUENCY_PREFIX = "F=";
-    private static final String FUEL_PART_PREFIX = "N=";
+    private static final String SENSOR_DATA = "sensorData";
 
     private static final int SECONDS_IN_ONE_HOUR = 3600;
 
@@ -63,6 +63,9 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             new ConcurrentHashMap<>();;
 
     private boolean loadingOldDataFromDB = false;
+
+    private FuelDataParser omnicommDigitalFuelDataParser = new DigitalLLSFuelDataParser();
+    private FuelDataParser onmicommAnalogFuelDataParser = new AnalogLLSFuelDataParser();
 
     public FuelSensorDataHandler() {
         initializeConfig();
@@ -409,7 +412,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         }
 
         Optional<Long> fuelLevelPoints =
-                getFuelLevelPointsFromDigitalSensorData(sensorDataString);
+                omnicommDigitalFuelDataParser.getFuelLevelPointsFromPayload(position);
 
         if (!fuelLevelPoints.isPresent()) {
             return;
@@ -434,11 +437,15 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             return;
         }
 
-        Long fuelLevel = ((Number) fuelAttributeValue.get()).longValue();
+        Optional<Long> fuelLevelPoints = onmicommAnalogFuelDataParser.getFuelLevelPointsFromPayload(position);
+
+        if (!fuelLevelPoints.isPresent()) {
+            return;
+        }
 
         handleSensorData(position,
                 sensorId,
-                fuelLevel,
+                fuelLevelPoints.get(),
                 fuelLevelChangeThreshold);
     }
 
@@ -1040,42 +1047,5 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         }
 
         return fuelActivity;
-    }
-
-    private Optional<Long> getFuelLevelPointsFromDigitalSensorData(String sensorDataString) {
-        if (StringUtils.isBlank(sensorDataString)) {
-            return Optional.empty();
-        }
-
-        String[] sensorDataParts = sensorDataString.split(" "); // Split on space to get the 3 parts
-        String frequencyString = sensorDataParts[0];
-        String temperatureString = sensorDataParts[1];
-        String fuelLevelPointsString = sensorDataParts[2];
-
-        if (StringUtils.isBlank(frequencyString)
-            || StringUtils.isBlank(temperatureString)
-            || StringUtils.isBlank(fuelLevelPointsString)) {
-
-            return Optional.empty();
-        }
-
-        String[] frequencyParts = frequencyString.split(FREQUENCY_PREFIX);
-        if (frequencyParts.length < 2) {
-            return Optional.empty();
-        }
-
-        // If frequency is > xFFF (4096), it is invalid per the spec; so ignore it.
-        Long frequency = Long.parseLong(frequencyParts[1], 16);
-        if (frequency > INVALID_FUEL_FREQUENCY) {
-            return Optional.empty();
-        }
-
-        String[] fuelParts = fuelLevelPointsString.split(FUEL_PART_PREFIX);
-        if (fuelParts.length < 2) {
-            return Optional.empty();
-        }
-
-        Long fuelSensorPoints = Long.parseLong(fuelParts[1].split("\\.")[0], 16);
-        return Optional.of(fuelSensorPoints);
     }
 }
