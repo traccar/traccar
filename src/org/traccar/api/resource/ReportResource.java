@@ -19,7 +19,9 @@ package org.traccar.api.resource;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import javax.activation.DataHandler;
@@ -74,8 +76,8 @@ public class ReportResource extends BaseResource {
                     executor.execute(stream);
 
                     MimeBodyPart attachment = new MimeBodyPart();
-
-                    attachment.setFileName("report.xlsx");
+                    String timeRepStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+                    attachment.setFileName("report_" + timeRepStamp + "_dl.xlsx");
                     attachment.setDataHandler(new DataHandler(new ByteArrayDataSource(
                             stream.toByteArray(), "application/octet-stream")));
 

@@ -10,6 +10,7 @@
 
     <addColumn tableName="tc_devices">
       <column name="movement" type="VARCHAR(128)" />
+	  <column name="expiration" type="timestamp" />
     </addColumn>
 
   </changeSet>
