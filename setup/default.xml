@@ -255,5 +255,6 @@
     <entry key='anytrek.port'>5177</entry>
     <entry key='smartsole.port'>5178</entry>
     <entry key='its.port'>5179</entry>
+    <entry key='xrb28.port'>5180</entry>
 
 </properties>

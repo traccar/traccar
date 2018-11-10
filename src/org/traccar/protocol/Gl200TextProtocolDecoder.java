@@ -190,9 +190,6 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .expression(PATTERN_LOCATION.pattern())
             .expression(")+)")
             .groupBegin()
-            .number("(d{1,7}.d)?,").optional()   // odometer
-            .number("(d{1,3})?,")                // battery
-            .or()
             .number("(d{1,7}.d)?,")              // odometer
             .number("(d{5}:dd:dd)?,")            // hour meter
             .number("(x+)?,")                    // adc 1
@@ -202,6 +199,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)?,")                    // rpm
             .number("(?:d+.?d*|Inf|NaN)?,")      // fuel consumption
             .number("(d+)?,")                    // fuel level
+            .or()
+            .number("(d{1,7}.d)?,").optional()   // odometer
+            .number("(d{1,3})?,")                // battery
             .groupEnd()
             .any()
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
@@ -591,8 +591,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(reportMask, 2)) {
             position.set(Position.KEY_OBD_ODOMETER, values[index++]);
         }
-        if (BitUtil.check(reportMask, 3)) {
-            position.set(Position.KEY_FUEL_USED, Double.parseDouble(values[index++]));
+        if (BitUtil.check(reportMask, 3) && !values[index++].isEmpty()) {
+            position.set(Position.KEY_FUEL_USED, Double.parseDouble(values[index - 1]));
         }
         if (BitUtil.check(reportMask, 5) && !values[index++].isEmpty()) {
             position.set(Position.KEY_RPM, Integer.parseInt(values[index - 1]));
@@ -615,8 +615,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(reportMask, 10) && !values[index++].isEmpty()) {
             position.set(Position.KEY_THROTTLE, Integer.parseInt(values[index - 1]));
         }
-        if (BitUtil.check(reportMask, 11)) {
-            position.set(Position.KEY_HOURS, UnitsConverter.msFromHours(Double.parseDouble(values[index++])));
+        if (BitUtil.check(reportMask, 11) && !values[index++].isEmpty()) {
+            position.set(Position.KEY_HOURS, UnitsConverter.msFromHours(Double.parseDouble(values[index - 1])));
         }
         if (BitUtil.check(reportMask, 12)) {
             position.set("drivingHours", Double.parseDouble(values[index++]));
@@ -743,11 +743,6 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (parser.hasNext()) {
             position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
         }
-        position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
-
-        if (parser.hasNext()) {
-            position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
-        }
         position.set(Position.KEY_HOURS, parseHours(parser.next()));
         position.set(Position.PREFIX_ADC + 1, parser.next());
         position.set(Position.PREFIX_ADC + 2, parser.next());
@@ -757,6 +752,11 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_RPM, parser.nextInt());
         position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
+
+        if (parser.hasNext()) {
+            position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
+        }
+        position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
 
         decodeDeviceTime(position, parser);
         if (ignoreFixTime) {
