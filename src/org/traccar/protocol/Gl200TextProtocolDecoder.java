@@ -581,6 +581,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         index += 1; // report type
         index += 1; // canbus state
         long reportMask = Long.parseLong(values[index++], 16);
+        long reportMaskExt = 0;
 
         if (BitUtil.check(reportMask, 0)) {
             position.set(Position.KEY_VIN, values[index++]);
@@ -649,7 +650,79 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             position.set("engineOverspeed", Double.parseDouble(values[index - 1]));
         }
         if (BitUtil.check(reportMask, 29)) {
-            index += 1; // expansion
+            reportMaskExt = Long.parseLong(values[index++], 16);
+        }
+        if (BitUtil.check(reportMaskExt, 0) && !values[index++].isEmpty()) {
+            position.set("adBlueLevel", Integer.parseInt(values[index - 1]));
+        }
+        if (BitUtil.check(reportMaskExt, 1) && !values[index++].isEmpty()) {
+            position.set("axleWeight1", Integer.parseInt(values[index - 1]));
+        }
+        if (BitUtil.check(reportMaskExt, 2) && !values[index++].isEmpty()) {
+            position.set("axleWeight3", Integer.parseInt(values[index - 1]));
+        }
+        if (BitUtil.check(reportMaskExt, 3) && !values[index++].isEmpty()) {
+            position.set("axleWeight4", Integer.parseInt(values[index - 1]));
+        }
+        if (BitUtil.check(reportMaskExt, 4)) {
+            index += 1; // tachograph overspeed
+        }
+        if (BitUtil.check(reportMaskExt, 5)) {
+            index += 1; // tachograph motion
+        }
+        if (BitUtil.check(reportMaskExt, 6)) {
+            index += 1; // tachograph direction
+        }
+        if (BitUtil.check(reportMaskExt, 7) && !values[index++].isEmpty()) {
+            position.set(Position.PREFIX_ADC + 1, Integer.parseInt(values[index - 1]) * 0.001);
+        }
+        if (BitUtil.check(reportMaskExt, 8)) {
+            index += 1; // pedal breaking factor
+        }
+        if (BitUtil.check(reportMaskExt, 9)) {
+            index += 1; // engine breaking factor
+        }
+        if (BitUtil.check(reportMaskExt, 10)) {
+            index += 1; // total accelerator kick-downs
+        }
+        if (BitUtil.check(reportMaskExt, 11)) {
+            index += 1; // total effective engine speed
+        }
+        if (BitUtil.check(reportMaskExt, 12)) {
+            index += 1; // total cruise control time
+        }
+        if (BitUtil.check(reportMaskExt, 13)) {
+            index += 1; // total accelerator kick-down time
+        }
+        if (BitUtil.check(reportMaskExt, 14)) {
+            index += 1; // total brake application
+        }
+        if (BitUtil.check(reportMaskExt, 15) && !values[index++].isEmpty()) {
+            position.set("driver1Card", values[index - 1]);
+        }
+        if (BitUtil.check(reportMaskExt, 16) && !values[index++].isEmpty()) {
+            position.set("driver2Card", values[index - 1]);
+        }
+        if (BitUtil.check(reportMaskExt, 17) && !values[index++].isEmpty()) {
+            position.set("driver1Name", values[index - 1]);
+        }
+        if (BitUtil.check(reportMaskExt, 18) && !values[index++].isEmpty()) {
+            position.set("driver2Name", values[index - 1]);
+        }
+        if (BitUtil.check(reportMaskExt, 19) && !values[index++].isEmpty()) {
+            position.set("registration", values[index - 1]);
+        }
+        if (BitUtil.check(reportMaskExt, 20)) {
+            index += 1; // expansion information
+        }
+        if (BitUtil.check(reportMaskExt, 21)) {
+            index += 1; // rapid brakings
+        }
+        if (BitUtil.check(reportMaskExt, 22)) {
+            index += 1; // rapid accelerations
+        }
+        if (BitUtil.check(reportMaskExt, 23)) {
+            index += 1; // engine torque
         }
 
         DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -674,9 +747,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         if (BitUtil.check(reportMask, 31)) {
             index += 4; // cell
+            index += 1; // reserved
         }
-
-        index += 1; // reserved
 
         if (ignoreFixTime) {
             position.setTime(dateFormat.parse(values[index]));
