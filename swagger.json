@@ -2042,6 +2042,18 @@
                 "uniqueId": {
                     "type": "string"
                 },
+                "employment": {
+                    "type": "date-time"
+                },
+                "driverPhone": {
+                    "type": "string"
+                },
+                "driverEmail": {
+                    "type": "string"
+                },
+                "disabled": {
+                    "type": "boolean"
+                },
                 "atributes": {}
             }
         },
