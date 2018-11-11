@@ -55,6 +55,10 @@ public class DriversManager extends ExtendedObjectManager<Driver> {
             putUniqueDriverId(cachedDriver);
         }
         cachedDriver.setAttributes(driver.getAttributes());
+        cachedDriver.setEmployment(driver.getEmployment());
+        cachedDriver.setDriverPhone(driver.getDriverPhone());
+        cachedDriver.setDriverEmail(driver.getDriverEmail());
+        cachedDriver.setDisabled(driver.getDisabled());
     }
 
     @Override

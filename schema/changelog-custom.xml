@@ -9,7 +9,14 @@
   <changeSet author="author" id="changelog-custom">
 
     <addColumn tableName="tc_devices">
-      <column name="movement" type="VARCHAR(128)" />
+        <column name="movement" type="VARCHAR(128)" />
+        <column name="expiration" type="timestamp" />
+    </addColumn>
+    <addColumn tableName="tc_drivers">
+        <column name="employment" type="timestamp" />
+        <column name="driverPhone" type="VARCHAR(128)" />
+        <column name="driverEmail" type="VARCHAR(256)" />
+        <column name="disabled" type="BOOLEAN" defaultValueBoolean="false" />
     </addColumn>
 
   </changeSet>

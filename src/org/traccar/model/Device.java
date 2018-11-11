@@ -73,6 +73,16 @@ public class Device extends GroupedModel {
         this.movement = movement;
     }
 
+    private Date expiration;
+
+    public Date getExpiration() {
+        return expiration;
+    }
+
+    public void setExpiration(Date expiration) {
+        this.expiration = expiration;
+    }
+
     private Date lastUpdate;
 
     @QueryExtended

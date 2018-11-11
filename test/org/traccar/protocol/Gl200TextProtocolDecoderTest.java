@@ -11,6 +11,12 @@ public class Gl200TextProtocolDecoderTest extends ProtocolTest {
         Gl200TextProtocolDecoder decoder = new Gl200TextProtocolDecoder(null);
 
         verifyPositions(decoder, buffer(
+                "+RESP:GTFRI,1F0301,862193022001432,WF0GXXGBBGBM26503,,14900,41,1,1,11.6,74,356.0,14.120023,50.167894,20181104080703,0230,0003,9B14,5891,00,74.1,,,,83,220000,799,7.3,,20181104080703,099B$"));
+
+        verifyPosition(decoder, buffer(
+                "+RESP:GTCAN,4B0201,867995030001575,,10,0,C03FFFFF,,0,H0,,,,,,,,,,0.00,0.03,,,,0,,0,,,0,10.0,310,404.3,14.096743,50.143363,20181102110535,0230,0003,9B14,5066,00,20181102112101,03E0$"));
+
+        verifyPositions(decoder, buffer(
                 "+RESP:GTSTR,440502,866427030112088,GL530,0,0,2,,100,3,0.6,0,127.5,2.413963,48.877096,20180704180102,0208,0001,0310,E625,,,0000,20180704180100,004C$"));
 
         verifyPosition(decoder, buffer(

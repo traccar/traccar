@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "version": "4.1",
+        "version": "4.2",
         "title": "traccar"
     },
     "host": "demo.traccar.org",
@@ -1648,8 +1648,16 @@
                 "status": {
                     "type": "string"
                 },
+                "movement": {
+                    "type": "string"
+                },
                 "disabled": {
                     "type": "boolean"
+                },
+                "expiration": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "in IS0 8601 format. eg. `1963-11-22T18:30:00Z`"
                 },
                 "lastUpdate": {
                     "type": "string",
@@ -2033,6 +2041,18 @@
                 },
                 "uniqueId": {
                     "type": "string"
+                },
+                "employment": {
+                    "type": "date-time"
+                },
+                "driverPhone": {
+                    "type": "string"
+                },
+                "driverEmail": {
+                    "type": "string"
+                },
+                "disabled": {
+                    "type": "boolean"
                 },
                 "atributes": {}
             }
