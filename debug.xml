@@ -24,7 +24,7 @@
     <entry key='coordinates.minError'>20</entry>
 
     <!-- GPS x Analog Fuel sensor Field lookup entries -->
-    <entry key="aquila.fuel_analog">ADC_1</entry>
+    <entry key="aquila.fuel_analog">adc1</entry>
     <entry key="teltonika.fuel_analog">io201</entry>
 
     <!-- Peripheral sensor processing entries-->
@@ -38,9 +38,9 @@
     <entry key='processing.peripheralSensorData.minValuesForMovingAverage'>9</entry>
     <entry key='processing.peripheralSensorData.minValuesForOutlierDetection'>9</entry>
     <entry key='processing.peripheralSensorData.maxValuesForAlerts'>9</entry>
-    <entry key='processing.peripheralSensorData.fuelLevelChangeThresholdLitersDigital'>5.34</entry>
+    <entry key='processing.peripheralSensorData.fuelLevelChangeThresholdLitersDigital'>5</entry>
 
-    <entry key='processing.peripheralSensorData.fuelLevelChangeThresholdLitersAnalog'>12.00</entry>
+    <entry key='processing.peripheralSensorData.fuelLevelChangeThresholdLitersAnalog'>10</entry>
     <entry key='processing.peripheralSensorData.fuelErrorThreshold'>0.75</entry>
 
     <entry key='processing.minimumAverageMileage'>1.5</entry>

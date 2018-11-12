@@ -1,17 +1,15 @@
 package org.traccar.database;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.PeripheralSensor;
 import org.traccar.transforms.model.FuelSensorCalibration;
+import org.traccar.transforms.model.SensorPointsMap;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Map;
-import java.util.List;
-import java.util.Collection;
-import java.util.ArrayList;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -84,6 +82,50 @@ public class PeripheralSensorManager extends ExtendedObjectManager<PeripheralSen
         }
 
         return Optional.empty();
+    }
+
+    public Optional<PeripheralSensor> getSensorByDeviceId(long deviceId) {
+        // Note: Handles only one sensor per  gps device for now.
+
+        Optional<List<PeripheralSensor>> sensorOnDevice = getLinkedPeripheralSensors(deviceId);
+
+        if (!sensorOnDevice.isPresent()) {
+            return Optional.empty();
+        }
+
+        return sensorOnDevice.get().stream().findFirst();
+    }
+
+    public Optional<TreeMap<Long, SensorPointsMap>> getSensorCalibrationPointsMap(long deviceId, long peripheralSensorId) {
+
+        Optional<FuelSensorCalibration> fuelSensorCalibration = getDeviceSensorCalibrationData(deviceId, peripheralSensorId);
+
+        if (!fuelSensorCalibration.isPresent()) {
+            return Optional.empty();
+        }
+
+        // Make a B-tree map of the points to fuel level map
+        TreeMap<Long, SensorPointsMap> sensorPointsToVolumeMap =
+                new TreeMap<>(fuelSensorCalibration.get().getSensorPointsMap());
+
+        return Optional.of(sensorPointsToVolumeMap);
+    }
+
+    public Optional<Long> getFuelTankMaxCapacity(Long deviceId, Long sensorId) {
+
+        Optional<TreeMap<Long, SensorPointsMap>> maybeSensorPointsToVolumeMap =
+                getSensorCalibrationPointsMap(deviceId, sensorId);
+
+        if (!maybeSensorPointsToVolumeMap.isPresent()) {
+            return Optional.empty();
+        }
+
+        TreeMap<Long, SensorPointsMap> sensorPointsToVolumeMap = maybeSensorPointsToVolumeMap.get();
+
+        long lastFuelLevelKey = sensorPointsToVolumeMap.lastKey();
+        return Optional.of(sensorPointsToVolumeMap.ceilingEntry(lastFuelLevelKey)
+                                                  .getValue()
+                                                  .getFuelLevel());
     }
 
     private String buildDeviceSensorMapKey(long deviceId, long sensorId) {

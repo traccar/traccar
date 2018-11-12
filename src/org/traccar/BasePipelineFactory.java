@@ -42,6 +42,7 @@ import org.traccar.events.aquila.AquilaAEventsHandler;
 import org.traccar.helper.Log;
 import org.traccar.processing.ComputedAttributesHandler;
 import org.traccar.processing.CopyAttributesHandler;
+import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.FuelDataCalibrationHandler;
 import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.FuelSensorDataHandler;
 
 import java.net.InetSocketAddress;
@@ -61,6 +62,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
     private CopyAttributesHandler copyAttributesHandler;
     private ComputedAttributesHandler computedAttributesHandler;
     private RunningTimeHandler runningTimeHandler;
+    private FuelDataCalibrationHandler fuelDataCalibrationHandler;
     private FuelSensorDataHandler fuelSensorDataHandler;
 
     private CommandResultEventHandler commandResultEventHandler;
@@ -175,6 +177,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
         if (Context.getConfig().getBoolean("processing.peripheralSensorData.enable")) {
             runningTimeHandler = new RunningTimeHandler();
+            fuelDataCalibrationHandler = new FuelDataCalibrationHandler();
             fuelSensorDataHandler = new FuelSensorDataHandler();
         }
 
@@ -244,8 +247,14 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             pipeline.addLast("computedAttributes", computedAttributesHandler);
         }
 
+
         if (runningTimeHandler != null) {
             pipeline.addLast("runningTimeHandler", runningTimeHandler);
+        }
+
+        if (fuelDataCalibrationHandler != null) {
+            pipeline.addLast("fuelDataCalibration", fuelDataCalibrationHandler);
+
         }
 
         if (fuelSensorDataHandler != null) {
