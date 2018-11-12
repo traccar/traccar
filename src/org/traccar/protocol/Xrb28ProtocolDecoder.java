@@ -42,7 +42,8 @@ public class Xrb28ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .text("*HBCR,")
+            .text("*")
+            .expression("....,")
             .expression("..,")                   // vendor
             .number("d{15},")                    // imei
             .expression("..,")                   // type
@@ -67,25 +68,25 @@ public class Xrb28ProtocolDecoder extends BaseProtocolDecoder {
 
         String sentence = (String) msg;
 
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, sentence.substring(10, 26));
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, sentence.substring(8, 24));
         if (deviceSession == null) {
             return null;
         }
 
-        String type = sentence.substring(27, 29);
+        String type = sentence.substring(25, 27);
         if (channel != null) {
             if (type.matches("L0|L1|W0|E1")) {
                 channel.write(new NetworkMessage(
-                        sentence.substring(0, 29) + "#\n", remoteAddress));
+                        sentence.substring(0, 27) + "#\n", remoteAddress));
             } else if (type.equals("R0") && pendingCommand != null) {
                 String command = pendingCommand.equals(Command.TYPE_ALARM_ARM) ? "L1," : "L0,";
                 channel.write(new NetworkMessage(
-                        sentence.substring(0, 27) + command + sentence.substring(32) + "\n", remoteAddress));
+                        sentence.substring(0, 25) + command + sentence.substring(30) + "\n", remoteAddress));
                 pendingCommand = null;
             }
         }
 
-        Parser parser = new Parser(PATTERN, sentence.substring(2));
+        Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
             return null;
         }
