@@ -170,30 +170,30 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
         return position;
     }
 
-    private void setEventOrAlarm(Position position, String t, Integer rty) {
-        if (t.equals("9")) {
+    private void setEventOrAlarm(Position position, String trigger, Integer rty) {
+        if (trigger.equals("9")) {
             position.set(Position.KEY_EVENT, Event.TYPE_ALARM);
             position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
-        } else if (t.equals("1")) {
+        } else if (trigger.equals("1")) {
             position.set(Position.KEY_EVENT, Event.TYPE_ALARM);
             position.set(Position.KEY_ALARM, Position.ALARM_POWER_ON);
-        } else if (t.equals("i")) {
+        } else if (trigger.equals("i")) {
             position.set(Position.KEY_IGNITION, true);
-        } else if (t.equals("I")) {
+        } else if (trigger.equals("I")) {
             position.set(Position.KEY_IGNITION, false);
-        } else if (t.equals("E")) {
+        } else if (trigger.equals("E")) {
             position.set(Position.KEY_EVENT, Event.TYPE_ALARM);
             position.set(Position.KEY_ALARM, Position.ALARM_POWER_RESTORED);
-        } else if (t.equals("e")) {
+        } else if (trigger.equals("e")) {
             position.set(Position.KEY_EVENT, Event.TYPE_ALARM);
             position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
-        } else if (t.equals("!")) {
+        } else if (trigger.equals("!")) {
             position.set(Position.KEY_EVENT, Event.TYPE_ALARM);
             position.set(Position.KEY_ALARM, Position.ALARM_TOW);
-        } else if (t.equals("s")) {
+        } else if (trigger.equals("s")) {
             position.set(Position.KEY_EVENT, Event.TYPE_ALARM);
             position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
-        } else if (t.equals("h")) {
+        } else if (trigger.equals("h")) {
             position.set(Position.KEY_EVENT, Event.TYPE_ALARM);
             switch (rty) {
                 case 0:
