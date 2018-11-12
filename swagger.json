@@ -1351,10 +1351,10 @@
                 }
             }
         },
-        "/maintenances": {
+        "/maintenance": {
             "get": {
-                "summary": "Fetch a list of Maintenances",
-                "description": "Without params, it returns a list of Maintenances the user has access to",
+                "summary": "Fetch a list of Maintenance",
+                "description": "Without params, it returns a list of Maintenance the user has access to",
                 "parameters": [
                     {
                         "$ref": "#/parameters/all"
@@ -1401,7 +1401,7 @@
                 }
             }
         },
-        "/maintenances/{id}": {
+        "/maintenance/{id}": {
             "put": {
                 "summary": "Update a Maintenance",
                 "parameters": [
