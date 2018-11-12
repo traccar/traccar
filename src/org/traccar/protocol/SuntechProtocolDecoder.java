@@ -317,9 +317,11 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (includeAdc) {
-                position.set(Position.PREFIX_ADC + 1, Double.parseDouble(values[index++]));
-                position.set(Position.PREFIX_ADC + 2, Double.parseDouble(values[index++]));
-                position.set(Position.PREFIX_ADC + 3, Double.parseDouble(values[index++]));
+                for (int i = 1; i <= 3; i++) {
+                    if (!values[index++].isEmpty()) {
+                        position.set(Position.PREFIX_ADC + i, Double.parseDouble(values[index - 1]));
+                    }
+                }
             }
 
             if (values.length - index >= 2) {
