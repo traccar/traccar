@@ -24,7 +24,6 @@ import org.traccar.DeviceSession;
 import org.traccar.Context;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
-import org.traccar.model.Event;
 import org.traccar.model.Device;
 
 import javax.json.Json;
