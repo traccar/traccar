@@ -70,7 +70,8 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public static final int CODEC_GH3000 = 0x07;
-    public static final int CODEC_FM4X00 = 0x08;
+    public static final int CODEC_8 = 0x08;
+    public static final int CODEC_8_EXT = 0x8E;
     public static final int CODEC_12 = 0x0C;
     public static final int CODEC_16 = 0x10;
 
@@ -271,6 +272,21 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private int readExtByte(ByteBuf buf, int codec, int... codecs) {
+        boolean ext = false;
+        for (int c : codecs) {
+            if (codec == c) {
+                ext = true;
+                break;
+            }
+        }
+        if (ext) {
+            return buf.readUnsignedShort();
+        } else {
+            return buf.readUnsignedByte();
+        }
+    }
+
     private void decodeLocation(Position position, ByteBuf buf, int codec) {
 
         int globalMask = 0x0f;
@@ -354,59 +370,63 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
 
+            position.set(Position.KEY_EVENT, readExtByte(buf, codec, CODEC_8_EXT, CODEC_16));
             if (codec == CODEC_16) {
-                position.set(Position.KEY_EVENT, buf.readUnsignedShort());
                 buf.readUnsignedByte(); // generation type
-            } else {
-                position.set(Position.KEY_EVENT, buf.readUnsignedByte());
             }
 
-            buf.readUnsignedByte(); // total IO data records
+            readExtByte(buf, codec, CODEC_8_EXT); // total IO data records
 
         }
 
         // Read 1 byte data
         if (BitUtil.check(globalMask, 1)) {
-            int cnt = buf.readUnsignedByte();
+            int cnt = readExtByte(buf, codec, CODEC_8_EXT);
             for (int j = 0; j < cnt; j++) {
-                int id = codec == CODEC_16 ? buf.readUnsignedShort() : buf.readUnsignedByte();
-                decodeParameter(position, id, buf, 1, codec);
+                decodeParameter(position, readExtByte(buf, codec, CODEC_8_EXT, CODEC_16), buf, 1, codec);
             }
         }
 
         // Read 2 byte data
         if (BitUtil.check(globalMask, 2)) {
-            int cnt = buf.readUnsignedByte();
+            int cnt = readExtByte(buf, codec, CODEC_8_EXT);
             for (int j = 0; j < cnt; j++) {
-                int id = codec == CODEC_16 ? buf.readUnsignedShort() : buf.readUnsignedByte();
-                decodeParameter(position, id, buf, 2, codec);
+                decodeParameter(position, readExtByte(buf, codec, CODEC_8_EXT, CODEC_16), buf, 2, codec);
             }
         }
 
         // Read 4 byte data
         if (BitUtil.check(globalMask, 3)) {
-            int cnt = buf.readUnsignedByte();
+            int cnt = readExtByte(buf, codec, CODEC_8_EXT);
             for (int j = 0; j < cnt; j++) {
-                int id = codec == CODEC_16 ? buf.readUnsignedShort() : buf.readUnsignedByte();
-                decodeParameter(position, id, buf, 4, codec);
+                decodeParameter(position, readExtByte(buf, codec, CODEC_8_EXT, CODEC_16), buf, 4, codec);
             }
         }
 
         // Read 8 byte data
-        if (codec == CODEC_FM4X00 || codec == CODEC_16) {
-            int cnt = buf.readUnsignedByte();
+        if (codec == CODEC_8 || codec == CODEC_8_EXT || codec == CODEC_16) {
+            int cnt = readExtByte(buf, codec, CODEC_8_EXT);
             for (int j = 0; j < cnt; j++) {
-                int id = codec == CODEC_16 ? buf.readUnsignedShort() : buf.readUnsignedByte();
-                decodeOtherParameter(position, id, buf, 8);
+                decodeOtherParameter(position, readExtByte(buf, codec, CODEC_8_EXT, CODEC_16), buf, 8);
             }
         }
 
         // Read 16 byte data
         if (extended) {
-            int cnt = buf.readUnsignedByte();
+            int cnt = readExtByte(buf, codec, CODEC_8_EXT);
             for (int j = 0; j < cnt; j++) {
-                int id = codec == CODEC_16 ? buf.readUnsignedShort() : buf.readUnsignedByte();
+                int id = readExtByte(buf, codec, CODEC_8_EXT, CODEC_16);
                 position.set(Position.PREFIX_IO + id, ByteBufUtil.hexDump(buf.readSlice(16)));
+            }
+        }
+
+        // Read X byte data
+        if (codec == CODEC_8_EXT) {
+            int cnt = buf.readUnsignedShort();
+            for (int j = 0; j < cnt; j++) {
+                int id = buf.readUnsignedShort();
+                int length = buf.readUnsignedShort();
+                position.set(Position.PREFIX_IO + id, ByteBufUtil.hexDump(buf.readSlice(length)));
             }
         }
 
