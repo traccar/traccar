@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.traccar.protocol;
 
 import io.netty.channel.Channel;
@@ -114,13 +113,13 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
             position.setAccuracy(root.getInt("acc"));
         }
         if (root.containsKey("t")) {
-            String t = root.getString("t");
-            position.set("t", t);
+            String trigger = root.getString("t");
+            position.set("t", trigger);
             Integer rty = -1;
             if (root.containsKey("rty")) {
                  rty = root.getInt("rty");
             }
-            setEventOrAlarm(position, t, rty);
+            setEventOrAlarm(position, trigger, rty);
         }
         if (root.containsKey("batt")) {
             position.set(Position.KEY_BATTERY_LEVEL, root.getInt("batt"));
