@@ -90,7 +90,6 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
 
         position.setDeviceId(deviceSession.getDeviceId());
         position.setProtocol(getProtocolName());
-        //position.set(Position.KEY_ORIGINAL, request.getContent().toString(StandardCharsets.US_ASCII));
 
         position.setTime(new Date(root.getJsonNumber("tst").longValue() * 1000));
         if (root.containsKey("sent")) {
@@ -180,10 +179,8 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
             position.set(Position.KEY_EVENT, Event.TYPE_ALARM);
             position.set(Position.KEY_ALARM, Position.ALARM_POWER_ON);
         } else if (t.equals("i")) {
-            //position.set(Position.KEY_EVENT, Event.TYPE_IGNITION_ON);
             position.set(Position.KEY_IGNITION, true);
         } else if (t.equals("I")) {
-            //position.set(Position.KEY_EVENT, Event.TYPE_IGNITION_OFF);
             position.set(Position.KEY_IGNITION, false);
         } else if (t.equals("E")) {
             position.set(Position.KEY_EVENT, Event.TYPE_ALARM);
