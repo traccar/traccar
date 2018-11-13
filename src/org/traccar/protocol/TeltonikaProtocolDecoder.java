@@ -426,7 +426,11 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             for (int j = 0; j < cnt; j++) {
                 int id = buf.readUnsignedShort();
                 int length = buf.readUnsignedShort();
-                position.set(Position.PREFIX_IO + id, ByteBufUtil.hexDump(buf.readSlice(length)));
+                if (id == 256) {
+                    position.set(Position.KEY_VIN, buf.readSlice(length).toString(StandardCharsets.US_ASCII));
+                } else {
+                    position.set(Position.PREFIX_IO + id, ByteBufUtil.hexDump(buf.readSlice(length)));
+                }
             }
         }
 
