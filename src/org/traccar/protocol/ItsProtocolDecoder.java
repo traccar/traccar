@@ -38,7 +38,7 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             .expression("[^,]+,")                // event
             .groupBegin()
             .expression("[^,]+,")                // vendor
-            .number("d+.d+.d+,")                 // firmware version
+            .expression("[^,]+,")                // firmware version
             .groupEnd("?")
             .expression("[^,]+,")                // type
             .groupBegin()
@@ -52,8 +52,8 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             .expression("[^,]+,")                // vehicle registration
             .number("([01]),")                   // valid
             .groupEnd()
-            .number("(dd),(dd),(dddd),")         // date (ddmmyyyy)
-            .number("(dd),(dd),(dd),")           // time (hhmmss)
+            .number("(dd),?(dd),?(dddd),")       // date (ddmmyyyy)
+            .number("(dd),?(dd),?(dd),")         // time (hhmmss)
             .expression("([AV]),").optional()    // valid
             .number("(d+.d+),([NS]),")           // latitude
             .number("(d+.d+),([EW]),")           // longitude
