@@ -21,10 +21,9 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.DeviceSession;
-import org.traccar.Context;
+import org.traccar.Protocol;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
-import org.traccar.model.Device;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -35,7 +34,7 @@ import java.util.Date;
 
 public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
 
-    public OwnTracksProtocolDecoder(OwnTracksProtocol protocol) {
+    public OwnTracksProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
@@ -75,8 +74,6 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
         }
 
         if (root.getString("_type").equals("lwt")) {
-            Context.getConnectionManager().updateDevice(deviceSession.getDeviceId(), Device.STATUS_OFFLINE, new Date());
-
             sendResponse(channel, HttpResponseStatus.OK);
             return null;
         }
@@ -170,38 +167,50 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
     }
 
     private void setEventOrAlarm(Position position, String trigger, Integer reportType) {
-        if (trigger.equals("9")) {
-            position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
-        } else if (trigger.equals("1")) {
-            position.set(Position.KEY_ALARM, Position.ALARM_POWER_ON);
-        } else if (trigger.equals("i")) {
-            position.set(Position.KEY_IGNITION, true);
-        } else if (trigger.equals("I")) {
-            position.set(Position.KEY_IGNITION, false);
-        } else if (trigger.equals("E")) {
-            position.set(Position.KEY_ALARM, Position.ALARM_POWER_RESTORED);
-        } else if (trigger.equals("e")) {
-            position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
-        } else if (trigger.equals("!")) {
-            position.set(Position.KEY_ALARM, Position.ALARM_TOW);
-        } else if (trigger.equals("s")) {
-            position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
-        } else if (trigger.equals("h")) {
-            switch (reportType) {
-                case 0:
-                case 3:
-                    position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
-                    break;
-                case 1:
-                case 4:
-                    position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
-                    break;
-                case 2:
-                case 5:
-                default:
-                    position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
-                    break;
-            }
+        switch (trigger) {
+            case "9":
+                position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                break;
+            case "1":
+                position.set(Position.KEY_ALARM, Position.ALARM_POWER_ON);
+                break;
+            case "i":
+                position.set(Position.KEY_IGNITION, true);
+                break;
+            case "I":
+                position.set(Position.KEY_IGNITION, false);
+                break;
+            case "E":
+                position.set(Position.KEY_ALARM, Position.ALARM_POWER_RESTORED);
+                break;
+            case "e":
+                position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
+                break;
+            case "!":
+                position.set(Position.KEY_ALARM, Position.ALARM_TOW);
+                break;
+            case "s":
+                position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+                break;
+            case "h":
+                switch (reportType) {
+                    case 0:
+                    case 3:
+                        position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+                        break;
+                    case 1:
+                    case 4:
+                        position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+                        break;
+                    case 2:
+                    case 5:
+                    default:
+                        position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
+                        break;
+                }
+                break;
+            default:
+                break;
         }
     }
 }
