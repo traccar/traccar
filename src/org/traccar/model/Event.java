@@ -19,9 +19,13 @@ import java.util.Date;
 
 public class Event extends Message {
 
-    public Event(String type, long deviceId, long positionId) {
-        this(type, deviceId);
-        setPositionId(positionId);
+    public Event(String type, Position position) {
+        this(type, position.getDeviceId());
+        setPositionId(position.getId());
+        set("speed", position.getSpeed());
+        set("address", position.getAddress());
+        set("course", position.getCourse());
+        set(Position.KEY_IGNITION, position.getBoolean(Position.KEY_IGNITION));
     }
 
     public Event(String type, long deviceId) {
