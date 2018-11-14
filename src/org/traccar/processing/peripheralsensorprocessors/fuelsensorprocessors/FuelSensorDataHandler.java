@@ -743,7 +743,14 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         double size = 0.0;
 
         for (Position position : fuelLevelReadings) {
-            double level = (Double) position.getAttributes().get(Position.KEY_CALIBRATED_FUEL_LEVEL);
+            double level = 0.0;
+
+            // When a sensor is disconnected and connected back, old positions may not have the calib_fuel
+            // field set on them. Make sure that the field is present before using it.
+            if (position.getAttributes().containsKey(Position.KEY_CALIBRATED_FUEL_LEVEL)) {
+                level = position.getDouble(Position.KEY_CALIBRATED_FUEL_LEVEL);
+            }
+
             if (level > 0.0 && !Double.isNaN(level)) {
                 total += level;
                 size += 1.0;
