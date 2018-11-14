@@ -11,6 +11,9 @@ public class ItsProtocolDecoderTest extends ProtocolTest {
         ItsProtocolDecoder decoder = new ItsProtocolDecoder(null);
 
         verifyPosition(decoder, text(
+                "$,04,XYZ123,0.0.1,TA,16,L,861359034100626,MH12AB1234,1,12,11,2018,08,53,08,018.489645,N,073.855972,E,000.0,220.04,12,593.0,01.13,00.75,AIRTEL,1,1,00.0,4.1,1,C,18,404,90,0c23,781a,5169,0c23,-093,0000,0000,0000,0000,0000,0000,0000,0000,0000,1000,01,000006,f906c65c,"));
+
+        verifyPosition(decoder, text(
                 "$,A,MFR,7.0,NR,01,L,869026034780985,PJ09BU1234,1,12112018,121953,12.756974,N,077.800025,E,000.0,318.03,15,794.0,001.3,000.7,TAMIL NAD,0,1,13.08,04.13,0,O,22,404,80,0919,71C1,0919,7168,19,0919,71c3,17,0919,71c2,11,0919,7167,09,0011,00,000173,D8,000000.00,,,"));
 
         verifyPosition(decoder, text(
