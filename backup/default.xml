@@ -30,7 +30,7 @@
 
     <entry key='server.statistics'>https://www.traccar.org/analytics/</entry>
 
-    <entry key='commands.queueing'>true</entry>
+    <entry key='commands.queueing'>false</entry>
 
     <entry key='database.ignoreUnknown'>true</entry>
     <entry key='database.generateQueries'>true</entry>
@@ -69,6 +69,7 @@
         SELECT * FROM tc_statistics WHERE captureTime BETWEEN :from AND :to ORDER BY captureTime
     </entry>
 
+    <entry key='gps103.port'>6001</entry>
     <entry key='osmand.port'>6055</entry>
 
 </properties>

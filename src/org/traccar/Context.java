@@ -29,6 +29,9 @@ import com.hazelcast.cache.impl.HazelcastServerCachingProvider;
 import com.hazelcast.config.XmlConfigBuilder;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.instance.HazelcastInstanceImpl;
+import com.hazelcast.instance.HazelcastInstanceProxy;
+import com.hazelcast.instance.Node;
 import org.apache.velocity.app.VelocityEngine;
 import org.eclipse.jetty.util.URIUtil;
 import org.slf4j.Logger;
@@ -157,6 +160,16 @@ public final class Context {
 
     public static HazelcastInstance getHazelcastInstance() {
         return hazelcastInstance;
+    }
+
+    public static Node getHazelcastNode() {
+        HazelcastInstanceImpl implementation = null;
+        if (hazelcastInstance instanceof HazelcastInstanceProxy) {
+            implementation = ((HazelcastInstanceProxy) hazelcastInstance).getOriginal();
+        } else if (hazelcastInstance instanceof HazelcastInstanceImpl) {
+            implementation = (HazelcastInstanceImpl) hazelcastInstance;
+        }
+        return implementation != null ? implementation.node : null;
     }
 
     private static CacheManager cacheManager;

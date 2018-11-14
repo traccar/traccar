@@ -16,6 +16,7 @@
 package org.traccar.database;
 
 import com.hazelcast.core.ITopic;
+import com.hazelcast.nio.Address;
 import io.netty.channel.Channel;
 import io.netty.util.Timeout;
 import io.netty.util.TimerTask;
@@ -31,6 +32,8 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.TopicMessage;
 
+import javax.cache.Cache;
+import javax.cache.configuration.MutableConfiguration;
 import java.net.SocketAddress;
 import java.sql.SQLException;
 import java.util.Date;
@@ -51,6 +54,7 @@ public class ConnectionManager {
     private final boolean enableStatusEvents;
     private final boolean updateDeviceState;
 
+    private final Cache<Long, Address> deviceNodes;
     private final Map<Long, ActiveDevice> activeDevices = new ConcurrentHashMap<>();
     private final Map<Long, Set<UpdateListener>> listeners = new ConcurrentHashMap<>();
     private final Map<Long, Timeout> timeouts = new ConcurrentHashMap<>();
@@ -63,6 +67,9 @@ public class ConnectionManager {
         deviceTimeout = Context.getConfig().getLong("status.timeout", DEFAULT_TIMEOUT) * 1000;
         enableStatusEvents = Context.getConfig().getBoolean("event.enable");
         updateDeviceState = Context.getConfig().getBoolean("status.updateDeviceState");
+
+        deviceNodes = Context.getCacheManager().createCache(
+                this.getClass().getSimpleName() + "DeviceNodes", new MutableConfiguration<>());
 
         topicDevices = Context.getHazelcastInstance().getTopic("Devices");
         topicDevices.addMessageListener(message -> {
@@ -94,6 +101,7 @@ public class ConnectionManager {
 
     public void addActiveDevice(long deviceId, Protocol protocol, Channel channel, SocketAddress remoteAddress) {
         activeDevices.put(deviceId, new ActiveDevice(deviceId, protocol, channel, remoteAddress));
+        deviceNodes.put(deviceId, Context.getHazelcastNode().getThisAddress());
     }
 
     public void removeActiveDevice(Channel channel) {
@@ -108,6 +116,10 @@ public class ConnectionManager {
 
     public ActiveDevice getActiveDevice(long deviceId) {
         return activeDevices.get(deviceId);
+    }
+
+    public Address getActiveDeviceNode(long deviceId) {
+        return deviceNodes.get(deviceId);
     }
 
     public void updateDevice(final long deviceId, String status, Date time) {

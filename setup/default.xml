@@ -36,7 +36,7 @@
 
     <entry key='server.statistics'>https://www.traccar.org/analytics/</entry>
 
-    <entry key='commands.queueing'>true</entry>
+    <entry key='commands.queueing'>false</entry>
 
     <entry key='database.ignoreUnknown'>true</entry>
     <entry key='database.generateQueries'>true</entry>

@@ -16,6 +16,7 @@
  */
 package org.traccar.database;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -24,6 +25,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+import com.hazelcast.nio.Address;
+import com.hazelcast.nio.ObjectDataInput;
+import com.hazelcast.nio.ObjectDataOutput;
+import com.hazelcast.spi.Operation;
+import com.hazelcast.spi.OperationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocol;
@@ -54,6 +60,42 @@ public class CommandsManager  extends ExtendedObjectManager<Command> {
         return !getAllDeviceItems(deviceId).contains(commandId);
     }
 
+    public static class CommandOperation extends Operation {
+
+        private boolean result;
+        private Command command;
+
+        public CommandOperation() {
+        }
+
+        public CommandOperation(Command command) {
+            this.command = command;
+        }
+
+        @Override
+        public Object getResponse() {
+            return result;
+        }
+
+        @Override
+        public void run() throws Exception {
+            result = Context.getCommandsManager().sendCommand(command);
+        }
+
+        @Override
+        protected void writeInternal(ObjectDataOutput out) throws IOException {
+            out.writeBoolean(result);
+            out.writeObject(command);
+        }
+
+        @Override
+        protected void readInternal(ObjectDataInput in) throws IOException {
+            result = in.readBoolean();
+            command = in.readObject();
+        }
+
+    }
+
     public boolean sendCommand(Command command) throws Exception {
         long deviceId = command.getDeviceId();
         if (command.getId() != 0) {
@@ -79,16 +121,29 @@ public class CommandsManager  extends ExtendedObjectManager<Command> {
             ActiveDevice activeDevice = Context.getConnectionManager().getActiveDevice(deviceId);
             if (activeDevice != null) {
                 activeDevice.sendCommand(command);
-            } else if (!queueing) {
-                throw new RuntimeException("Device is not online");
             } else {
-                Queue<Command> commandQueue = deviceQueues.get(deviceId);
-                if (commandQueue == null) {
-                    commandQueue = new LinkedList<>();
+                Address nodeAddress = Context.getConnectionManager().getActiveDeviceNode(deviceId);
+                if (nodeAddress != null) {
+                    OperationService operationService =
+                            Context.getHazelcastNode().getNodeEngine().getOperationService();
+                    Boolean result = (Boolean) operationService.invokeOnTarget(
+                            "command", new CommandOperation(command), nodeAddress).join();
+                    if (result != null && result) {
+                        return true;
+                    } else {
+                        throw new RuntimeException("Command failed on remote node");
+                    }
+                } else if (!queueing) {
+                    throw new RuntimeException("Device is not online");
+                } else {
+                    Queue<Command> commandQueue = deviceQueues.get(deviceId);
+                    if (commandQueue == null) {
+                        commandQueue = new LinkedList<>();
+                    }
+                    commandQueue.add(command);
+                    deviceQueues.put(deviceId, commandQueue);
+                    return false;
                 }
-                commandQueue.add(command);
-                deviceQueues.put(deviceId, commandQueue);
-                return false;
             }
         }
         return true;
