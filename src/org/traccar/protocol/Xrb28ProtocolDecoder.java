@@ -68,7 +68,7 @@ public class Xrb28ProtocolDecoder extends BaseProtocolDecoder {
 
         String sentence = (String) msg;
 
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, sentence.substring(8, 24));
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, sentence.substring(9, 24));
         if (deviceSession == null) {
             return null;
         }
