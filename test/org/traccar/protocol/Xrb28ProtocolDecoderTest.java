@@ -10,6 +10,9 @@ public class Xrb28ProtocolDecoderTest extends ProtocolTest {
 
         Xrb28ProtocolDecoder decoder = new Xrb28ProtocolDecoder(null);
 
+        verifyPosition(decoder, text(
+                "*SCOR,OM,867584030387299,D0,0,012102.00,A,0608.00062,S,10659.70331,E,12,0.69,151118,30.3,M,A#"));
+
         verifyNull(decoder, text(
                 "*SCOR,OM,863158022988725,H0,0,412,28,80,0#"));
 
