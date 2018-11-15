@@ -19,7 +19,7 @@ public class Xrb28ProtocolDecoderTest extends ProtocolTest {
         verifyNull(decoder, text(
                 "*HBCR,OM,123456789123456,Q0,412,80#"));
 
-        verifyNull(decoder, text(
+        verifyAttributes(decoder, text(
                 "*HBCR,OM,123456789123456,R0,0,55,1234,1497689816#"));
 
         verifyPosition(decoder, text(
