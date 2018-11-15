@@ -88,30 +88,45 @@ public class Xrb28ProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        Parser parser = new Parser(PATTERN, sentence);
-        if (!parser.matches()) {
-            return null;
+        if (type.matches("R0|L0|L1|S4|S5|S6|S7|V0|G0|K0|I0|M0")) {
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            position.set(Position.KEY_RESULT, sentence.substring(25, sentence.length() - 1));
+
+            return position;
+
+        } else {
+
+            Parser parser = new Parser(PATTERN, sentence);
+            if (!parser.matches()) {
+                return null;
+            }
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+
+            position.setValid(parser.next().equals("A"));
+            position.setLatitude(parser.nextCoordinate());
+            position.setLongitude(parser.nextCoordinate());
+
+            position.set(Position.KEY_SATELLITES, parser.nextInt());
+            position.set(Position.KEY_HDOP, parser.nextDouble());
+
+            dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
+            position.setTime(dateBuilder.getDate());
+
+            position.setAltitude(parser.nextDouble());
+
+            return position;
+
         }
-
-        Position position = new Position(getProtocolName());
-        position.setDeviceId(deviceSession.getDeviceId());
-
-        DateBuilder dateBuilder = new DateBuilder()
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-
-        position.setValid(parser.next().equals("A"));
-        position.setLatitude(parser.nextCoordinate());
-        position.setLongitude(parser.nextCoordinate());
-
-        position.set(Position.KEY_SATELLITES, parser.nextInt());
-        position.set(Position.KEY_HDOP, parser.nextDouble());
-
-        dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
-        position.setTime(dateBuilder.getDate());
-
-        position.setAltitude(parser.nextDouble());
-
-        return position;
     }
 
 }
