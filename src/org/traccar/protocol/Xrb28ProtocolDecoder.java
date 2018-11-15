@@ -57,7 +57,7 @@ public class Xrb28ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // satellites
             .number("(d+.d+),")                  // hdop
             .number("(dd)(dd)(dd),")             // date (ddmmyy)
-            .number("(-?d+),")                   // altitude
+            .number("(-?d+.?d*),")               // altitude
             .expression(".,")                    // height unit
             .expression(".#")                    // mode
             .compile();
@@ -109,7 +109,7 @@ public class Xrb28ProtocolDecoder extends BaseProtocolDecoder {
         dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
         position.setTime(dateBuilder.getDate());
 
-        position.setAltitude(parser.nextInt());
+        position.setAltitude(parser.nextDouble());
 
         return position;
     }
