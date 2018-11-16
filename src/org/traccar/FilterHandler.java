@@ -144,7 +144,7 @@ public class FilterHandler extends BaseDataHandler {
     }
 
     private boolean filterDistance(Position position, Position last) {
-        if (filterDistance != 0 && last != null) {
+        if (filterDistance != 0 && last != null && !last.getBoolean(last.KEY_MOTION)) {
             return position.getDouble(Position.KEY_DISTANCE) < filterDistance;
         }
         return false;
@@ -196,8 +196,12 @@ public class FilterHandler extends BaseDataHandler {
             last = Context.getIdentityManager().getLastPosition(position.getDeviceId());
         }
 
-        if (skipLimit(position, last) || skipAttributes(position)) {
+        if (/*skipLimit(position, last) || */skipAttributes(position)) {
             return false;
+        }
+
+        if (skipLimit(position, last)) {
+            filterType.append("Timed ");
         }
 
         if (filterInvalid(position)) {
