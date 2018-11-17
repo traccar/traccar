@@ -68,6 +68,8 @@ public class Position extends Message {
     public static final String KEY_ARCHIVE = "archive";
     public static final String KEY_DISTANCE = "distance"; // meters
     public static final String KEY_TOTAL_DISTANCE = "totalDistance"; // meters
+    public static final String KEY_IGN_ON_MILLIS = "ignOnMillis"; // Since last on.
+    public static final String KEY_TOTAL_IGN_ON_MILLIS = "totalIgnOnMillis"; // Ever, after we started tracking.
     public static final String KEY_RPM = "rpm";
     public static final String KEY_VIN = "vin";
     public static final String KEY_APPROXIMATE = "approximate";

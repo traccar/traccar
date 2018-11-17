@@ -60,6 +60,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
     private HemisphereHandler hemisphereHandler;
     private CopyAttributesHandler copyAttributesHandler;
     private ComputedAttributesHandler computedAttributesHandler;
+    private RunningTimeHandler runningTimeHandler;
     private FuelSensorDataHandler fuelSensorDataHandler;
 
     private CommandResultEventHandler commandResultEventHandler;
@@ -173,6 +174,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
         }
 
         if (Context.getConfig().getBoolean("processing.peripheralSensorData.enable")) {
+            runningTimeHandler = new RunningTimeHandler();
             fuelSensorDataHandler = new FuelSensorDataHandler();
         }
 
@@ -240,6 +242,10 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
         if (computedAttributesHandler != null) {
             pipeline.addLast("computedAttributes", computedAttributesHandler);
+        }
+
+        if (runningTimeHandler != null) {
+            pipeline.addLast("runningTimeHandler", runningTimeHandler);
         }
 
         if (fuelSensorDataHandler != null) {

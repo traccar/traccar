@@ -103,9 +103,13 @@ public class FCMPushNotificationManager extends ExtendedObjectManager<FCMPushNot
         }
 
         Device device = Context.getDeviceManager().getById(deviceId);
+        long startTime = event.getServerTime().getTime();
+        if (event.getAttributes().containsKey("startTime")) {
+            startTime = (long) event.getAttributes().get("startTime");
+        }
+        String starTimeString = getDateTimeStringInTimezone(startTime);
         String title = String.format("%s (%s)", device.getName(), device.getRegistrationNumber());
-        String body = String.format("[%s]: Vehicle %s",
-                                    getDateTimeStringInTimezone((long) event.getAttributes().get("startTime")),
+        String body = String.format("[%s]: Vehicle %s", starTimeString,
                                     FCMPushNotificationTypeManager.getFcmPushNotificationTypeToStringMap()
                                                                   .get(eventType));
 
