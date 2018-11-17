@@ -196,12 +196,8 @@ public class FilterHandler extends BaseDataHandler {
             last = Context.getIdentityManager().getLastPosition(position.getDeviceId());
         }
 
-        if (/*skipLimit(position, last) || */skipAttributes(position)) {
+        if (skipLimit(position, last) || skipAttributes(position)) {
             return false;
-        }
-
-        if (skipLimit(position, last)) {
-            filterType.append("Timed ");
         }
 
         if (filterInvalid(position)) {
