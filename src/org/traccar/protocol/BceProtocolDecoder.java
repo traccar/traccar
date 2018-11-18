@@ -65,6 +65,11 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
 
             int dataEnd = buf.readUnsignedShortLE() + buf.readerIndex();
             int type = buf.readUnsignedByte();
+
+            if (type != MSG_ASYNC_STACK && type != MSG_TIME_TRIGGERED) {
+                return null;
+            }
+
             int confirmKey = buf.readUnsignedByte() & 0x7F;
 
             while (buf.readerIndex() < dataEnd) {
