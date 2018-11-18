@@ -1,29 +1,93 @@
 package org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors;
 
+import com.google.common.collect.BoundType;
+import com.google.common.collect.SortedMultiset;
+import com.google.common.collect.TreeMultiset;
 import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by saurako on 8/11/18.
  */
 public class FuelSensorDataHandlerHelper {
 
-    private final static double TWO_MULTIPLIER = 2.0;
-
-    private static double MINIMUM_AVERAGE_MILEAGE;
-    private static double MAXIMUM_AVERAGE_MILEAGE;
-    private static double CURRENT_AVERAGE_MILEAGE;
+    private final static double MULTIPLIER;
 
     static {
-        MINIMUM_AVERAGE_MILEAGE = Context.getConfig().getDouble("processing.minimumAverageMileage");
-        MAXIMUM_AVERAGE_MILEAGE = Context.getConfig().getDouble("processing.maximumAverageMileage");
-        CURRENT_AVERAGE_MILEAGE = Context.getConfig().getDouble("processing.currentAverageMileage");
+        MULTIPLIER = Context.getConfig()
+                            .getDouble("processing.peripheralSensorData.deviationMultiplier");
+    }
+
+    public static List<Position> getRelevantPositionsSubList(TreeMultiset<Position> positionsForSensor,
+                                                             Position position,
+                                                             int minListSize,
+                                                             int currentEventLookBackSeconds) {
+        return getRelevantPositionsSubList(positionsForSensor,
+                                           position,
+                                           minListSize,
+                                           false,
+                                           currentEventLookBackSeconds);
+    }
+
+    public static List<Position> getRelevantPositionsSubList(TreeMultiset<Position> positionsForSensor,
+                                                              Position position,
+                                                              int minListSize,
+                                                              boolean excludeOutliers,
+                                                              int currentEventLookBackSeconds) {
+
+        boolean positionIsMarkedOutlier =
+                position.getAttributes().containsKey(Position.KEY_FUEL_IS_OUTLIER)
+                        && !(boolean) position.getAttributes().get(Position.KEY_FUEL_IS_OUTLIER);
+
+        if (positionsForSensor.size() <= minListSize) {
+            return positionsForSensor.stream()
+                                     .filter(p -> !excludeOutliers || positionIsMarkedOutlier)
+                                     .collect(Collectors.toList());
+        }
+
+        Position fromPosition = new Position();
+        fromPosition.setDeviceTime(getAdjustedDate(position.getDeviceTime(),
+                                                   Calendar.SECOND,
+                                                   -currentEventLookBackSeconds));
+
+        SortedMultiset<Position> positionsSubset =
+                positionsForSensor.subMultiset(fromPosition, BoundType.OPEN, position, BoundType.CLOSED);
+
+        if (positionsSubset.size() <= minListSize) {
+            Log.debug("[RELEVANT_SUBLIST] sublist is lesser than "
+                              + minListSize + " returning " + positionsSubset.size());
+            return positionsSubset.stream()
+                                  .filter(p -> !excludeOutliers || positionIsMarkedOutlier)
+                                  .collect(Collectors.toList());
+        }
+
+        List<Position> filteredSublistToReturn =
+                positionsSubset.stream()
+                               .filter(p -> !excludeOutliers || positionIsMarkedOutlier)
+                               .collect(Collectors.toList());
+
+        int listMaxIndex = filteredSublistToReturn.size();
+
+        if (filteredSublistToReturn.size() <= minListSize) {
+            return filteredSublistToReturn;
+        }
+
+        List<Position> sublistToReturn = filteredSublistToReturn.subList(listMaxIndex - minListSize, listMaxIndex);
+
+        Log.debug("[RELEVANT_SUBLIST] sublist size: " + sublistToReturn.size());
+
+        return sublistToReturn;
+    }
+
+    public static Date getAdjustedDate(Date fromDate, int type, int amount) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(fromDate);
+        cal.add(type, amount);
+        return cal.getTime();
     }
 
     public static boolean isOutlierPresentInSublist(List<Position> rawFuelOutlierSublist,
@@ -81,14 +145,14 @@ public class FuelSensorDataHandlerHelper {
         if (fuelTankMaxCapacity.isPresent()) {
             double allowedDeviation = fuelTankMaxCapacity.get() * 0.01;
 
-            if ((allowedDeviation / 2) > standardDeviation) {
-                standardDeviation = allowedDeviation / 2;
+            if ((allowedDeviation / MULTIPLIER) > standardDeviation) {
+                standardDeviation = allowedDeviation / MULTIPLIER;
             }
         }
 
         // 2 standard deviations away
-        double lowerBoundOnRawFuelValue = medianRawFuelValue - (TWO_MULTIPLIER * standardDeviation);
-        double upperBoundOnRawFuelValue = medianRawFuelValue + (TWO_MULTIPLIER * standardDeviation);
+        double lowerBoundOnRawFuelValue = medianRawFuelValue - (MULTIPLIER * standardDeviation);
+        double upperBoundOnRawFuelValue = medianRawFuelValue + (MULTIPLIER * standardDeviation);
 
         boolean isOutlier = rawFuelOfPositionEvaluated < lowerBoundOnRawFuelValue
                             || rawFuelOfPositionEvaluated > upperBoundOnRawFuelValue;
@@ -105,127 +169,31 @@ public class FuelSensorDataHandlerHelper {
         return isOutlier;
     }
 
-    public static boolean isFuelEventDueToDataLoss(final FuelEventMetadata fuelEventMetadata,
-                                                   final Optional<Long> maxCapacity) {
+    public static Double getAverageFuelValue(List<Position> fuelLevelReadings) {
 
+        // Omit values that are 0s, to avoid skewing the average. This is mostly useful in handling 0s from the
+        // analog sensor, which are noise.
+        double total = 0.0;
+        double size = 0.0;
 
-        double fuelChangeVolume = fuelEventMetadata.getEndLevel() - fuelEventMetadata.getStartLevel();
-        return isDataLoss(fuelEventMetadata.getActivityStartPosition(),
-                          fuelEventMetadata.getActivityEndPosition(),
-                          fuelChangeVolume,
-                          maxCapacity);
-    }
-
-    public static boolean isDataLoss(Position startPosition,
-                                     Position endPosition,
-                                     double calculatedFuelChangeVolume,
-                                     Optional<Long> maxCapacity) {
-
-        boolean requiredFieldsPresent = checkRequiredFieldsPresent(startPosition, endPosition);
-        if (!requiredFieldsPresent) {
-            // Not enough info to process data loss.
-            return false;
+        for (Position position : fuelLevelReadings) {
+            double level = (Double) position.getAttributes().get(Position.KEY_CALIBRATED_FUEL_LEVEL);
+            if (level > 0.0 && !Double.isNaN(level)) {
+                total += level;
+                size += 1.0;
+            }
         }
 
-        ExpectedFuelConsumptionValues expectedFuelConsumptionValues =
-                getExpectedFuelConsumptionValues(startPosition,endPosition, maxCapacity);
-
-        boolean dataLoss =
-                possibleDataLoss(calculatedFuelChangeVolume,
-                                 expectedFuelConsumptionValues);
-
-        if (dataLoss) {
-            Log.debug(String.format("Data Loss: Distance covered %f, Exp fuel consumed: %f, actual fuel consumed: %f",
-                                    expectedFuelConsumptionValues.maximumDistanceTravelled,
-                                    expectedFuelConsumptionValues.expectedCurrentFuelConsumed,
-                                    calculatedFuelChangeVolume));
+        if (size == 0.0) {
+            return 0.0;
         }
 
-        return dataLoss;
-    }
+        double avg = total / size;
 
-    public static boolean possibleDataLoss(final double calculatedFuelChangeVolume,
-                                           final ExpectedFuelConsumptionValues expectedFuelConsumptionValues) {
+        Log.debug("[FUEL_ACTIVITY_AVERAGES] deviceId: " + fuelLevelReadings.get(0).getDeviceId()
+                          + " average: " + avg
+                          + " averages list size: " + fuelLevelReadings.size());
 
-        return Math.abs(calculatedFuelChangeVolume) > expectedFuelConsumptionValues.allowedDeviation
-        && Math.abs(calculatedFuelChangeVolume) <= expectedFuelConsumptionValues.expectedMaxFuelConsumed
-        && Math.abs(calculatedFuelChangeVolume) >= expectedFuelConsumptionValues.expectedMinFuelConsumed;
-    }
-
-    public static boolean checkRequiredFieldsPresent(Position startPosition, Position endPosition) {
-        return startPosition.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)
-                && startPosition.getAttributes().containsKey(Position.KEY_ODOMETER)
-                && endPosition.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)
-                && endPosition.getAttributes().containsKey(Position.KEY_ODOMETER);
-    }
-
-    public static ExpectedFuelConsumptionValues getExpectedFuelConsumptionValues(Position startPosition,
-                                                                                 Position endPosition,
-                                                                                 Optional<Long> maxCapacity) {
-
-        double startTotalGPSDistanceInMeters = (double) startPosition.getAttributes().get(Position.KEY_TOTAL_DISTANCE);
-        double endTotalGPSDistanceInMeters = (double) endPosition.getAttributes().get(Position.KEY_TOTAL_DISTANCE);
-
-        int startOdometerInMeters = (int) startPosition.getAttributes().get(Position.KEY_ODOMETER);
-        int endOdometerInMeters = (int) endPosition.getAttributes().get(Position.KEY_ODOMETER);
-
-        double differenceTotalDistanceInMeters = 0.0;
-        if (endTotalGPSDistanceInMeters > 0 && startTotalGPSDistanceInMeters > 0) {
-            differenceTotalDistanceInMeters = endTotalGPSDistanceInMeters - startTotalGPSDistanceInMeters;
-        }
-
-        double differenceOdometerInMeters = endOdometerInMeters - startOdometerInMeters;
-
-        // max distance in KM
-        double maximumDistanceTravelled = Math.max(differenceTotalDistanceInMeters, differenceOdometerInMeters) / 1000;
-        double expectedMaxFuelConsumed = maximumDistanceTravelled / MINIMUM_AVERAGE_MILEAGE;
-        double expectedMinFuelConsumed = maximumDistanceTravelled / MAXIMUM_AVERAGE_MILEAGE;
-        double expectedCurrentFuelConsumed = maximumDistanceTravelled / CURRENT_AVERAGE_MILEAGE;
-
-        double allowedDeviation = 1.0; // Default, if maxCapacity is absent.
-
-        if (maxCapacity.isPresent()) {
-            allowedDeviation = maxCapacity.get() * 0.01;
-        }
-
-        return new ExpectedFuelConsumptionValues(expectedMinFuelConsumed,
-                                                 expectedMaxFuelConsumed,
-                                                 expectedCurrentFuelConsumed,
-                                                 allowedDeviation,
-                                                 maximumDistanceTravelled);
-    }
-
-    public static class ExpectedFuelConsumptionValues {
-        double maximumDistanceTravelled;
-        double expectedMinFuelConsumed;
-        double expectedMaxFuelConsumed;
-        double expectedCurrentFuelConsumed;
-        double allowedDeviation;
-
-        public ExpectedFuelConsumptionValues(
-                double expectedMinFuelConsumed,
-                double expectedMaxFuelConsumed,
-                double expectedCurrentFuelConsumed,
-                double allowedDeviation,
-                double maximumDistanceTravelled) {
-
-
-            this.expectedCurrentFuelConsumed = expectedCurrentFuelConsumed;
-            this.expectedMaxFuelConsumed = expectedMaxFuelConsumed;
-            this.expectedMinFuelConsumed = expectedMinFuelConsumed;
-            this.allowedDeviation = allowedDeviation;
-            this.maximumDistanceTravelled = maximumDistanceTravelled;
-        }
-
-        @Override
-        public String toString() {
-            String maxDist = String.format("Maximum Distance Travelled: %f", maximumDistanceTravelled);
-            String minFuel = String.format("Expected Min fuel consumed: %f", expectedMinFuelConsumed);
-            String maxFuel = String.format("Expected max fuel consumed: %f", expectedMaxFuelConsumed);
-            String currentFuel = String.format("Expected current fuel consumed %f", expectedCurrentFuelConsumed);
-            String deviation = String.format("Allowed deviation: %f", allowedDeviation);
-
-            return String.format("%s%n%s%n%s%n%s%n%s%n", maxDist, minFuel, maxFuel, currentFuel, deviation);
-        }
+        return avg;
     }
 }
