@@ -3,6 +3,7 @@ package org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors;
 import com.google.common.collect.BoundType;
 import com.google.common.collect.SortedMultiset;
 import com.google.common.collect.TreeMultiset;
+import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
@@ -14,7 +15,12 @@ import java.util.stream.Collectors;
  */
 public class FuelSensorDataHandlerHelper {
 
-    private final static double MULTIPLIER = 1.0;
+    private final static double MULTIPLIER;
+
+    static {
+        MULTIPLIER = Context.getConfig()
+                            .getDouble("processing.peripheralSensorData.deviationMultiplier");
+    }
 
     public static List<Position> getRelevantPositionsSubList(TreeMultiset<Position> positionsForSensor,
                                                              Position position,

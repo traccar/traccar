@@ -1,9 +1,12 @@
 package org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors;
 
 import org.traccar.Context;
+import org.traccar.helper.DistanceCalculator;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Optional;
 
 public class FuelDataLossChecker {
@@ -41,7 +44,7 @@ public class FuelDataLossChecker {
         }
 
         ExpectedFuelConsumption expectedFuelConsumption =
-                getExpectedFuelConsumptionValues(startPosition,endPosition, maxCapacity);
+                getExpectedFuelConsumptionValues(startPosition, endPosition, maxCapacity);
 
         boolean dataLoss =
                 possibleDataLoss(calculatedFuelChangeVolume,
@@ -82,9 +85,16 @@ public class FuelDataLossChecker {
         int startOdometerInMeters = (int) startPosition.getAttributes().get(Position.KEY_ODOMETER);
         int endOdometerInMeters = (int) endPosition.getAttributes().get(Position.KEY_ODOMETER);
 
-        double differenceTotalDistanceInMeters = 0.0;
+        double differenceTotalDistanceInMeters;
         if (endTotalGPSDistanceInMeters > 0 && startTotalGPSDistanceInMeters > 0) {
             differenceTotalDistanceInMeters = endTotalGPSDistanceInMeters - startTotalGPSDistanceInMeters;
+        } else {
+            double distance = DistanceCalculator.distance(
+                    endPosition.getLatitude(), endPosition.getLongitude(),
+                    startPosition.getLatitude(), startPosition.getLongitude());
+
+            differenceTotalDistanceInMeters = BigDecimal.valueOf(distance)
+                                                        .setScale(2, RoundingMode.HALF_EVEN).doubleValue();
         }
 
         double differenceOdometerInMeters = endOdometerInMeters - startOdometerInMeters;

@@ -111,7 +111,10 @@ public class DistanceHandler extends BaseDataHandler {
             }
         }
         position.set(Position.KEY_DISTANCE, distance);
-        totalDistance = BigDecimal.valueOf(totalDistance + distance).setScale(2, RoundingMode.HALF_EVEN).doubleValue();
+        totalDistance = BigDecimal.valueOf(totalDistance + distance)
+                                  .setScale(2, RoundingMode.HALF_EVEN)
+                                  .doubleValue();
+
         position.set(Position.KEY_TOTAL_DISTANCE, totalDistance);
 
         return position;

@@ -37,6 +37,12 @@ public class AquilaAEventsHandler extends BaseEventHandler {
                 String eventType = positionInfoToEventTypeMap.get(eventString);
                 Event event = new Event(eventType, position.getDeviceId(), position.getId());
                 event.set("startTime", position.getDeviceTime().getTime());
+
+                // Setting the start and end lat long to keep it consistent with the fuel events.
+                event.set("startLat", position.getLatitude());
+                event.set("startLong", position.getLongitude());
+                event.set("endLat", position.getLatitude());
+                event.set("endLong", position.getLongitude());
                 result.put(event, position);
             }
         }

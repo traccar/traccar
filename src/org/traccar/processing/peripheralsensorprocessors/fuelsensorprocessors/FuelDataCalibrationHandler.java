@@ -38,6 +38,8 @@ public class FuelDataCalibrationHandler extends BaseDataHandler {
         Optional<PeripheralSensor> sensorOnDevice = Context.getPeripheralSensorManager().getSensorByDeviceId(deviceId);
 
         if (!sensorOnDevice.isPresent()) {
+            Log.debug(String.format("No sensor found on deviceId: %d. Refreshing sensors map.", deviceId));
+            Context.getPeripheralSensorManager().refreshPeripheralSensorsMap();
             return position;
         }
 
@@ -59,7 +61,7 @@ public class FuelDataCalibrationHandler extends BaseDataHandler {
         if (!maybeCalibratedData.isPresent()) {
             Log.debug(String.format("Calibrated fuel level could not be determined for device %d and sensor %d",
                                     deviceId, sensorId));
-            Context.getPeripheralSensorManager().refreshPeripheralSensorsMap();
+
             return position;
         }
 
@@ -78,15 +80,24 @@ public class FuelDataCalibrationHandler extends BaseDataHandler {
         }
 
         TreeMap<Long, SensorPointsMap> sensorPointsToVolumeMap = maybeSensorPointsToVolumeMap.get();
+        Map.Entry<Long, SensorPointsMap> max = sensorPointsToVolumeMap.lastEntry();
+        Map.Entry<Long, SensorPointsMap> min = sensorPointsToVolumeMap.firstEntry();
+
+        if (sensorFuelLevelPoints > max.getKey()
+                || sensorFuelLevelPoints < min.getKey()) {
+            return Optional.empty();
+        }
+
         Map.Entry<Long, SensorPointsMap> previous = sensorPointsToVolumeMap.floorEntry(sensorFuelLevelPoints);
         Map.Entry<Long, SensorPointsMap> next = sensorPointsToVolumeMap.ceilingEntry(sensorFuelLevelPoints);
 
-        if (next == null) {
-            next = sensorPointsToVolumeMap.lastEntry();
+
+        if (next == null && sensorFuelLevelPoints.equals(max.getKey())) {
+            next = max;
         }
 
-        if (previous == null) {
-            previous = sensorPointsToVolumeMap.firstEntry();
+        if (previous == null && sensorFuelLevelPoints.equals(min.getKey())) {
+            previous = min;
         }
 
         SensorPointsMap previousFuelLevelInfo = previous.getValue();

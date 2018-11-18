@@ -74,6 +74,14 @@
         JOIN devices AS d ON dp.deviceid = d.id;
     </entry>
 
+    <entry key="database.getLastPositionBefore">
+        SELECT *
+        FROM positions AS p
+        WHERE p.devicetime &lt; :deviceTime
+        ORDER BY p.devicetime desc
+        LIMIT 1
+    </entry>
+
     <entry key='database.selectPositionsForSummary'>
         SELECT a.*
         FROM positions AS a,

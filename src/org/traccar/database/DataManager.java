@@ -548,4 +548,11 @@ public class DataManager {
                 .setLong("id", entityId)
                 .executeUpdate();
     }
+
+    public Collection<Position> getLastPositionBefore(Position position) throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.getLastPositionBefore"))
+                           .setDate("deviceTime", position.getDeviceTime())
+                           .executeQuery(Position.class);
+
+    }
 }

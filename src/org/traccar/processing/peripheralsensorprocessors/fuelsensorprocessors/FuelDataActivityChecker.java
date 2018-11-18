@@ -10,10 +10,17 @@ import java.util.Optional;
 
 public class FuelDataActivityChecker {
 
+    private static final Double fuelLevelChangeThreshold;
+
+    static {
+        fuelLevelChangeThreshold =
+                Context.getConfig()
+                       .getDouble("processing.peripheralSensorData.fuelLevelChangeThresholdLiters");
+    }
+
     public static FuelActivity checkForActivity(List<Position> readingsForDevice,
                                                 Map<String, FuelEventMetadata> deviceFuelEventMetadata,
-                                                Long sensorId,
-                                                double fuelLevelChangeThreshold) {
+                                                Long sensorId) {
 
         FuelActivity fuelActivity = new FuelActivity();
 
@@ -21,8 +28,8 @@ public class FuelDataActivityChecker {
         double leftSum = 0, rightSum = 0;
 
         for (int i = 0; i <= midPoint; i++) {
-            leftSum += (double) readingsForDevice.get(i).getAttributes().get(Position.KEY_FUEL_LEVEL);
-            rightSum += (double) readingsForDevice.get(i + midPoint).getAttributes().get(Position.KEY_FUEL_LEVEL);
+            leftSum += (double) readingsForDevice.get(i).getAttributes().get(Position.KEY_CALIBRATED_FUEL_LEVEL);
+            rightSum += (double) readingsForDevice.get(i + midPoint).getAttributes().get(Position.KEY_CALIBRATED_FUEL_LEVEL);
         }
 
         double leftMean = leftSum / (midPoint + 1);
@@ -45,11 +52,11 @@ public class FuelDataActivityChecker {
 
                 FuelEventMetadata fuelEventMetadata = deviceFuelEventMetadata.get(lookupKey);
                 fuelEventMetadata.setStartLevel((double) midPointPosition.getAttributes()
-                                                                         .get(Position.KEY_FUEL_LEVEL));
+                                                                         .get(Position.KEY_CALIBRATED_FUEL_LEVEL));
 
                 fuelEventMetadata.setErrorCheckStart((double) readingsForDevice.get(0)
                                                                                .getAttributes()
-                                                                               .get(Position.KEY_FUEL_LEVEL));
+                                                                               .get(Position.KEY_CALIBRATED_FUEL_LEVEL));
 
                 fuelEventMetadata.setStartTime(midPointPosition.getDeviceTime());
                 fuelEventMetadata.setActivityStartPosition(midPointPosition);
@@ -81,10 +88,10 @@ public class FuelDataActivityChecker {
 
             FuelEventMetadata fuelEventMetadata = deviceFuelEventMetadata.get(lookupKey);
             fuelEventMetadata.setEndLevel((double) midPointPosition.getAttributes()
-                                                                   .get(Position.KEY_FUEL_LEVEL));
+                                                                   .get(Position.KEY_CALIBRATED_FUEL_LEVEL));
             fuelEventMetadata.setErrorCheckEnd((double) readingsForDevice.get(readingsForDevice.size() - 1)
                                                                          .getAttributes()
-                                                                         .get(Position.KEY_FUEL_LEVEL));
+                                                                         .get(Position.KEY_CALIBRATED_FUEL_LEVEL));
             fuelEventMetadata.setEndTime(midPointPosition.getDeviceTime());
             fuelEventMetadata.setActivityEndPosition(midPointPosition);
 
@@ -150,8 +157,8 @@ public class FuelDataActivityChecker {
                                                                              position,
                                                                              maxTankMaxVolume);
 
-        double calculatedFuelChangeVolume = position.getDouble(Position.KEY_FUEL_LEVEL)
-                - lastPosition.getDouble(Position.KEY_FUEL_LEVEL);
+        double calculatedFuelChangeVolume = position.getDouble(Position.KEY_CALIBRATED_FUEL_LEVEL)
+                - lastPosition.getDouble(Position.KEY_CALIBRATED_FUEL_LEVEL);
 
         if (Math.abs(calculatedFuelChangeVolume) > expectedFuelConsumption.allowedDeviation) {
             if (calculatedFuelChangeVolume < 0.0) {
