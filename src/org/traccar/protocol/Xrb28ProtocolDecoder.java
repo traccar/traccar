@@ -77,12 +77,12 @@ public class Xrb28ProtocolDecoder extends BaseProtocolDecoder {
         if (channel != null) {
             if (type.matches("L0|L1|W0|E1")) {
                 channel.write(new NetworkMessage(
-                        sentence.substring(0, 27).replace("SCOR", "SCOS") + "#\n",
+                        "\u00ff\u00ff*SCOS" + sentence.substring(5, 27) + "#\n",
                         remoteAddress));
             } else if (type.equals("R0") && pendingCommand != null) {
                 String command = pendingCommand.equals(Command.TYPE_ALARM_ARM) ? "L1," : "L0,";
                 channel.write(new NetworkMessage(
-                        sentence.substring(0, 25).replace("SCOR", "SCOS") + command + sentence.substring(30) + "\n",
+                        "\u00ff\u00ff*SCOS" + sentence.substring(5, 25) + command + sentence.substring(30) + "\n",
                         remoteAddress));
                 pendingCommand = null;
             }
