@@ -94,9 +94,10 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                 position.set(Position.KEY_ODOMETER, (int) lastPosition.getAttributes().get(Position.KEY_ODOMETER));
             }
 
-            if ((position.getAttributes().containsKey(Position.KEY_POWER)
-                    && ((Number) position.getAttributes().get(Position.KEY_POWER)).doubleValue()  <= 0.0)) {
-
+            if ((position.getAttributes().containsKey(Position.PREFIX_ADC + 1) &&
+                    ((Number) position.getAttributes().get(Position.PREFIX_ADC + 1)).longValue()  <= 0L) ||
+                    (position.getAttributes().containsKey(Position.KEY_POWER) &&
+                            ((Number) position.getAttributes().get(Position.KEY_POWER)).doubleValue()  <= 0.0)) {
                 Log.debug("Device power too low, updating with last known fuel level for deviceId"
                                   + position.getDeviceId());
                 updateWithLastAvailable(position, Position.KEY_FUEL_LEVEL);

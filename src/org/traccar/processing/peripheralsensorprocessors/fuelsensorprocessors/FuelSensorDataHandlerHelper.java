@@ -39,13 +39,9 @@ public class FuelSensorDataHandlerHelper {
                                                               boolean excludeOutliers,
                                                               int currentEventLookBackSeconds) {
 
-        boolean positionIsMarkedOutlier =
-                position.getAttributes().containsKey(Position.KEY_FUEL_IS_OUTLIER)
-                        && !(boolean) position.getAttributes().get(Position.KEY_FUEL_IS_OUTLIER);
-
         if (positionsForSensor.size() <= minListSize) {
             return positionsForSensor.stream()
-                                     .filter(p -> !excludeOutliers || positionIsMarkedOutlier)
+                                     .filter(p -> !excludeOutliers || positionIsMarkedOutlier(p))
                                      .collect(Collectors.toList());
         }
 
@@ -61,13 +57,13 @@ public class FuelSensorDataHandlerHelper {
             Log.debug("[RELEVANT_SUBLIST] sublist is lesser than "
                               + minListSize + " returning " + positionsSubset.size());
             return positionsSubset.stream()
-                                  .filter(p -> !excludeOutliers || positionIsMarkedOutlier)
+                                  .filter(p -> !excludeOutliers || positionIsMarkedOutlier(p))
                                   .collect(Collectors.toList());
         }
 
         List<Position> filteredSublistToReturn =
                 positionsSubset.stream()
-                               .filter(p -> !excludeOutliers || positionIsMarkedOutlier)
+                               .filter(p -> !excludeOutliers || positionIsMarkedOutlier(p))
                                .collect(Collectors.toList());
 
         int listMaxIndex = filteredSublistToReturn.size();
@@ -81,6 +77,11 @@ public class FuelSensorDataHandlerHelper {
         Log.debug("[RELEVANT_SUBLIST] sublist size: " + sublistToReturn.size());
 
         return sublistToReturn;
+    }
+
+    private static boolean positionIsMarkedOutlier(final Position position) {
+        return position.getAttributes().containsKey(Position.KEY_FUEL_IS_OUTLIER)
+                && !(boolean) position.getAttributes().get(Position.KEY_FUEL_IS_OUTLIER);
     }
 
     public static Date getAdjustedDate(Date fromDate, int type, int amount) {
