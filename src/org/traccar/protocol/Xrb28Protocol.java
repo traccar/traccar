@@ -23,6 +23,8 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.model.Command;
 
+import java.nio.charset.StandardCharsets;
+
 public class Xrb28Protocol extends BaseProtocol {
 
     public Xrb28Protocol() {
@@ -36,7 +38,7 @@ public class Xrb28Protocol extends BaseProtocol {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new LineBasedFrameDecoder(1024));
-                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new StringEncoder(StandardCharsets.ISO_8859_1));
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new Xrb28ProtocolEncoder());
                 pipeline.addLast(new Xrb28ProtocolDecoder(Xrb28Protocol.this));
