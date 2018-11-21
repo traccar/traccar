@@ -152,6 +152,12 @@ public class FuelDataActivityChecker {
                                                                     final Position lastPosition,
                                                                     final Optional<Long> maxTankMaxVolume) {
 
+        boolean requiredFieldsPresent = FuelDataLossChecker.checkRequiredFieldsPresent(lastPosition, position);
+        if (!requiredFieldsPresent) {
+            // Not enough info to process data loss.
+            return Optional.empty();
+        }
+
         ExpectedFuelConsumption expectedFuelConsumption =
                 FuelDataLossChecker.getExpectedFuelConsumptionValues(lastPosition,
                                                                              position,
