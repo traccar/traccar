@@ -10,6 +10,15 @@ public class Pt60ProtocolDecoderTest extends ProtocolTest {
 
         Pt60ProtocolDecoder decoder = new Pt60ProtocolDecoder(null);
 
+        verifyNull(decoder, text(
+                "@B#@|01|033|864891030184954|9425010450971470|0|4|20181120151744|"));
+
+        verifyPosition(decoder, text(
+                "@B#@|01|001|111112222233333|8888888888888888|1|55|20160715150323|125.48276|37.615124|111.059279|49.346383|1|"));
+
+        verifyPosition(decoder, text(
+                "@B#@|01|001|111112222233333|8888888888888888|1|55|20160715150323|125.48276|37.615124|1|"));
+
         verifyAttributes(decoder, text(
                 "@G#@,V01,14,357653051059785,9404223001501310,20180419165604,101,26,"));
 
