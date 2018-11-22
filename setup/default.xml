@@ -256,5 +256,6 @@
     <entry key='smartsole.port'>5178</entry>
     <entry key='its.port'>5179</entry>
     <entry key='xrb28.port'>5180</entry>
+    <entry key='c2stek.port'>5181</entry>
 
 </properties>
