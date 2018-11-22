@@ -48,6 +48,7 @@ public class Pt60ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)[,|]")                  // imei
             .number("d+[,|]")                    // imsi
             .groupBegin()
+            .expression("[^,|]+[,|]").optional() // firmware version
             .number("[01][,|]")                  // state
             .number("d+[,|]")                    // battery
             .groupEnd("?")
