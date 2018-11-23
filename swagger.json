@@ -286,9 +286,9 @@
                 }
             }
         },
-        "/devices/{id}/distance": {
+        "/devices/{id}/accumulators": {
             "put": {
-                "summary": "Update the distance counter of the Device",
+                "summary": "Update total distance and hours of the Device",
                 "parameters": [
                     {
                         "$ref": "#/parameters/entityId"
@@ -298,7 +298,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/DeviceTotalDistance"
+                            "$ref": "#/definitions/DeviceAccumulators"
                         }
                     }
                 ],
@@ -1977,7 +1977,7 @@
                 }
             }
         },
-        "DeviceTotalDistance": {
+        "DeviceAccumulators": {
             "properties": {
                 "deviceId": {
                     "type": "integer"
@@ -1985,6 +1985,9 @@
                 "totalDistance": {
                     "type": "number",
                     "description": "in meters"
+                },
+                "hours": {
+                    "type": "number"
                 }
             }
         },
