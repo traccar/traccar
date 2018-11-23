@@ -42,8 +42,8 @@ public class C2stekProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd)(dd)(dd)#")             // date (yymmdd)
             .number("(dd)(dd)(dd)#")             // time (hhmmss)
             .number("([01])#")                   // valid
-            .number("(-?d+.d+)#")                // latitude
-            .number("(-?d+.d+)#")                // longitude
+            .number("([+-]?d+.d+)#")             // latitude
+            .number("([+-]?d+.d+)#")             // longitude
             .number("(d+.d+)#")                  // speed
             .number("(d+.d+)#")                  // course
             .number("(-?d+.d+)#")                // altitude
