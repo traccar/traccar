@@ -739,23 +739,22 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             getLastLocation(position, null);
 
             if (subType == 0x00) {
-
                 position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
                 return position;
-
             } else if (subType == 0x05) {
-
                 int flags = buf.readUnsignedByte();
                 position.set(Position.KEY_DOOR, BitUtil.check(flags, 0));
                 position.set(Position.PREFIX_IO + 1, BitUtil.check(flags, 2));
                 return position;
-
+            } else if (subType == 0x0a) {
+                buf.skipBytes(8); // imei
+                buf.skipBytes(8); // imsi
+                position.set("iccid", ByteBufUtil.hexDump(buf.readSlice(8)));
+                return position;
             } else if (subType == 0x0d) {
-
                 buf.skipBytes(6);
                 return decodeFuelData(position, buf.toString(
                         buf.readerIndex(), buf.readableBytes() - 4 - 2, StandardCharsets.US_ASCII));
-
             }
 
         } else if (type == MSG_X1_PHOTO_DATA) {
