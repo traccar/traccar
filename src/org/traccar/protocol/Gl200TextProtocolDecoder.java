@@ -729,6 +729,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         if (BitUtil.check(reportMask, 30)) {
+            while (values[index].isEmpty()) {
+                index += 1;
+            }
             position.setValid(Integer.parseInt(values[index++]) > 0);
             if (!values[index].isEmpty()) {
                 position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(values[index++])));
