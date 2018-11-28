@@ -146,8 +146,8 @@ public class Pt60ProtocolDecoder extends BaseProtocolDecoder {
             position.setValid(true);
             position.setFixTime(position.getDeviceTime());
 
-            position.setLongitude(Double.parseDouble(values[0]));
-            position.setLatitude(Double.parseDouble(values[1]));
+            position.setLatitude(Double.parseDouble(values[0]));
+            position.setLongitude(Double.parseDouble(values[1]));
 
             return position;
 
