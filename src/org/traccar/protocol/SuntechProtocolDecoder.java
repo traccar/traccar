@@ -41,27 +41,42 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
     public SuntechProtocolDecoder(Protocol protocol) {
         super(protocol);
-
-        protocolType = Context.getConfig().getInteger(getProtocolName() + ".protocolType");
-        hbm = Context.getConfig().getBoolean(getProtocolName() + ".hbm");
-        includeAdc = Context.getConfig().getBoolean(getProtocolName() + ".includeAdc");
-        includeTemp = Context.getConfig().getBoolean(getProtocolName() + ".includeTemp");
     }
 
     public void setProtocolType(int protocolType) {
         this.protocolType = protocolType;
     }
 
+    public int getProtocolType(long deviceId) {
+        return Context.getIdentityManager().lookupAttributeInteger(
+                deviceId, getProtocolName() + ".protocolType", protocolType, true);
+    }
+
     public void setHbm(boolean hbm) {
         this.hbm = hbm;
+    }
+
+    public boolean isHbm(long deviceId) {
+        return Context.getIdentityManager().lookupAttributeBoolean(
+                deviceId, getProtocolName() + ".hbm", hbm, true);
     }
 
     public void setIncludeAdc(boolean includeAdc) {
         this.includeAdc = includeAdc;
     }
 
+    public boolean isIncludeAdc(long deviceId) {
+        return Context.getIdentityManager().lookupAttributeBoolean(
+                deviceId, getProtocolName() + ".includeAdc", includeAdc, true);
+    }
+
     public void setIncludeTemp(boolean includeTemp) {
         this.includeTemp = includeTemp;
+    }
+
+    public boolean isIncludeTemp(long deviceId) {
+        return Context.getIdentityManager().lookupAttributeBoolean(
+                deviceId, getProtocolName() + ".includeTemp", includeTemp, true);
     }
 
     private Position decode9(
@@ -86,7 +101,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
         }
 
-        if (!type.equals("Alert") || protocolType == 0) {
+        if (!type.equals("Alert") || getProtocolType(deviceSession.getDeviceId()) == 0) {
             position.set(Position.KEY_VERSION_FW, values[index++]);
         }
 
@@ -94,7 +109,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         position.setTime(dateFormat.parse(values[index++] + values[index++]));
 
-        if (protocolType == 1) {
+        if (getProtocolType(deviceSession.getDeviceId()) == 1) {
             index += 1; // cell
         }
 
@@ -105,7 +120,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
         position.setValid(values[index++].equals("1"));
 
-        if (protocolType == 1) {
+        if (getProtocolType(deviceSession.getDeviceId()) == 1) {
             position.set(Position.KEY_ODOMETER, Integer.parseInt(values[index++]));
         }
 
@@ -302,7 +317,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                 break;
         }
 
-        if (hbm) {
+        if (isHbm(deviceSession.getDeviceId())) {
 
             if (index < values.length) {
                 position.set(Position.KEY_HOURS, UnitsConverter.msFromMinutes(Integer.parseInt(values[index++])));
@@ -316,7 +331,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_ARCHIVE, true);
             }
 
-            if (includeAdc) {
+            if (isIncludeAdc(deviceSession.getDeviceId())) {
                 for (int i = 1; i <= 3; i++) {
                     if (!values[index++].isEmpty()) {
                         position.set(Position.PREFIX_ADC + i, Double.parseDouble(values[index - 1]));
@@ -331,7 +346,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
 
-            if (includeTemp) {
+            if (isIncludeTemp(deviceSession.getDeviceId())) {
                 for (int i = 1; i <= 3; i++) {
                     String temperature = values[index++];
                     String value = temperature.substring(temperature.indexOf(':') + 1);
