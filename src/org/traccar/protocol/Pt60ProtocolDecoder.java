@@ -22,6 +22,8 @@ import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -55,6 +57,7 @@ public class Pt60ProtocolDecoder extends BaseProtocolDecoder {
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
             .number("(dd)(dd)(dd)[,|]")          // time (hhmmss)
             .expression("(.*)")                  // data
+            .expression("[,|]")
             .compile();
 
     private void sendResponse(Channel channel, SocketAddress remoteAddress, String format, int type, String imei) {
@@ -143,11 +146,35 @@ public class Pt60ProtocolDecoder extends BaseProtocolDecoder {
 
             String[] values = parser.next().split("\\|");
 
-            position.setValid(true);
-            position.setFixTime(position.getDeviceTime());
+            if (Integer.parseInt(values[values.length - 1]) == 2) {
 
-            position.setLatitude(Double.parseDouble(values[0]));
-            position.setLongitude(Double.parseDouble(values[1]));
+                getLastLocation(position, position.getDeviceTime());
+
+                Network network = new Network();
+
+                for (int i = 0; i < values.length - 1; i++) {
+                    String[] cellValues = values[i].split(",");
+                    CellTower tower = new CellTower();
+                    tower.setCellId(Long.parseLong(cellValues[0]));
+                    tower.setLocationAreaCode(Integer.parseInt(cellValues[1]));
+                    tower.setMobileNetworkCode(Integer.parseInt(cellValues[2]));
+                    tower.setMobileCountryCode(Integer.parseInt(cellValues[3]));
+                    tower.setSignalStrength(Integer.parseInt(cellValues[4]));
+                    network.addCellTower(tower);
+                }
+
+                position.setNetwork(network);
+
+
+            } else {
+
+                position.setValid(true);
+                position.setFixTime(position.getDeviceTime());
+
+                position.setLatitude(Double.parseDouble(values[0]));
+                position.setLongitude(Double.parseDouble(values[1]));
+
+            }
 
             return position;
 
