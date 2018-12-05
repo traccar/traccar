@@ -220,8 +220,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_BATTERY, Double.parseDouble(values[index++]));
         position.set(Position.KEY_ARCHIVE, values[index++].equals("0") ? true : null);
         position.set(Position.KEY_INDEX, Integer.parseInt(values[index++]));
-
-        index += 1; // mode
+        position.set(Position.KEY_STATUS, Integer.parseInt(values[index++]));
 
         DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHH:mm:ss");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -301,7 +300,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
         switch (type) {
             case "STT":
-                index += 1; // mode
+                position.set(Position.KEY_STATUS, Integer.parseInt(values[index++]));
                 position.set(Position.KEY_INDEX, Integer.parseInt(values[index++]));
                 break;
             case "EMG":
