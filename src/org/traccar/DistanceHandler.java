@@ -24,15 +24,6 @@ import java.math.RoundingMode;
 
 public class DistanceHandler extends BaseDataHandler {
 
-    private static final long MILLIS_IN_SECOND = 1000L;
-    private static final double SECONDS_IN_HOUR = 3600.0;
-    private static final double METERS_IN_KM = 1000.0;
-
-    private static final long MAX_DATA_LOSS_DURATION_SECONDS = 1800L;
-    private static final double MAX_VEHICLE_SPEED_KMPH = 150.00;
-
-    private static final double MAX_SPEED_METERS_PS = (MAX_VEHICLE_SPEED_KMPH * METERS_IN_KM) / SECONDS_IN_HOUR;
-
     private final boolean filter;
     private final int coordinatesMinError;
     private final int coordinatesMaxError;
@@ -77,28 +68,6 @@ public class DistanceHandler extends BaseDataHandler {
                         last.getLatitude(), last.getLongitude());
                 distance = BigDecimal.valueOf(distance).setScale(2, RoundingMode.HALF_EVEN).doubleValue();
             }
-
-            //if data missing then check odometer readings
-            long durationBetweenPacketsSeconds =
-                    (position.getDeviceTime().getTime() - last.getDeviceTime().getTime()) / MILLIS_IN_SECOND;
-
-            if (durationBetweenPacketsSeconds >= MAX_DATA_LOSS_DURATION_SECONDS
-                && last.getAttributes().containsKey(Position.KEY_ODOMETER)
-                && position.getAttributes().containsKey(Position.KEY_ODOMETER)) {
-
-                double differenceInOdometer = (double) (Integer) position.getAttributes().get(Position.KEY_ODOMETER)
-                                              - (double) (Integer)last.getAttributes().get(Position.KEY_ODOMETER);
-                if(differenceInOdometer > distance) {
-                    distance = differenceInOdometer;
-                }
-            }
-
-            //If calculated distance doesn't look legit, reset it to 0.
-            double maxDistancePossible = MAX_SPEED_METERS_PS * durationBetweenPacketsSeconds;
-            if (distance > maxDistancePossible) {
-                distance = 0.0;
-            }
-
             if (filter && last.getValid() && last.getLatitude() != 0 && last.getLongitude() != 0) {
                 boolean satisfiesMin = coordinatesMinError == 0 || distance > coordinatesMinError;
                 boolean satisfiesMax = coordinatesMaxError == 0
@@ -106,17 +75,15 @@ public class DistanceHandler extends BaseDataHandler {
                 if (!satisfiesMin || !satisfiesMax) {
                     position.setLatitude(last.getLatitude());
                     position.setLongitude(last.getLongitude());
-                    distance = 0.0;
+                    distance = 0;
                 }
             }
         }
         position.set(Position.KEY_DISTANCE, distance);
-        totalDistance = BigDecimal.valueOf(totalDistance + distance)
-                                  .setScale(2, RoundingMode.HALF_EVEN)
-                                  .doubleValue();
-
+        totalDistance = BigDecimal.valueOf(totalDistance + distance).setScale(2, RoundingMode.HALF_EVEN).doubleValue();
         position.set(Position.KEY_TOTAL_DISTANCE, totalDistance);
 
         return position;
     }
+
 }

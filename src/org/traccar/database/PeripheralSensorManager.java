@@ -46,20 +46,6 @@ public class PeripheralSensorManager extends ExtendedObjectManager<PeripheralSen
                                                                                  p.getPeripheralSensorId()),
                                                          fuelSensorCalibration);
                 }
-
-                for (long deviceId : deviceToPeripheralSensorMap.keySet()) {
-                    List<PeripheralSensor> sensors = deviceToPeripheralSensorMap.get(deviceId);
-                    List<String> sensorInfo = sensors.stream()
-                                                     .map(s -> String.format("%s_%s", s.getPeripheralSensorId(),
-                                                                             s.getTypeName()))
-                                                     .collect(Collectors.toList());
-
-                    Log.info(String.format("Created linked peripheral devices info: %s -> %s",
-                                           deviceId,
-                                           String.join(", ", sensorInfo)));
-                }
-
-
             } catch (SQLException | IOException e) {
                 e.printStackTrace();
             }
