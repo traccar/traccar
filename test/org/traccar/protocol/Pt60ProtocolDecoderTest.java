@@ -10,6 +10,12 @@ public class Pt60ProtocolDecoderTest extends ProtocolTest {
 
         Pt60ProtocolDecoder decoder = new Pt60ProtocolDecoder(null);
 
+        verifyNull(decoder, text(
+                "@B#@|01|006|864891030184954|9425010450971470|20181213093127|2|1|"));
+
+        verifyNull(decoder, text(
+                "@B#@|01|006|864891030184954|9425010450971470|20181213093235|40412,10461,1,425,4|2|1|"));
+
         verifyNotNull(decoder, text(
                 "@B#@|01|001|864891030184852|9425010450971470|1|84|20181205161005|40412,10461,1,425,10|2|"));
 
