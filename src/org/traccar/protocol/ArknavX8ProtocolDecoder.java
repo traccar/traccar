@@ -32,7 +32,7 @@ public class ArknavX8ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern PATTERN = new PatternBuilder()
+    private static final Pattern PATTERN_1G = new PatternBuilder()
             .expression("(..),")                 // type
             .number("(dd)(dd)(dd)")              // date (yymmdd)
             .number("(dd)(dd)(dd),")             // time (hhmmss)
@@ -43,6 +43,17 @@ public class ArknavX8ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // course
             .number("(d+.d+),")                  // hdop
             .number("(d+)")                      // status
+            .compile();
+
+    private static final Pattern PATTERN_2G = new PatternBuilder()
+            .expression("..,")                   // type
+            .number("(dd)(dd)(dd)")              // date (yymmdd)
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
+            .number("(d+),")                     // satellites
+            .number("(d+.d+),")                  // altitude
+            .number("(d+.d+),")                  // power
+            .number("(d+.d+),")                  // battery
+            .number("(d+.d+)")                   // odometer
             .compile();
 
     @Override
@@ -56,7 +67,21 @@ public class ArknavX8ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Parser parser = new Parser(PATTERN, sentence);
+        switch (sentence.substring(0, 2)) {
+            case "1G":
+            case "1R":
+            case "1M":
+                return decode1G(channel, remoteAddress, sentence);
+            case "2G":
+                return decode2G(channel, remoteAddress, sentence);
+            default:
+                return null;
+        }
+    }
+
+    private Position decode1G(Channel channel, SocketAddress remoteAddress, String sentence) {
+
+        Parser parser = new Parser(PATTERN_1G, sentence);
         if (!parser.matches()) {
             return null;
         }
@@ -81,6 +106,32 @@ public class ArknavX8ProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_HDOP, parser.nextDouble(0));
         position.set(Position.KEY_STATUS, parser.next());
+
+        return position;
+    }
+
+    private Position decode2G(Channel channel, SocketAddress remoteAddress, String sentence) {
+
+        Parser parser = new Parser(PATTERN_2G, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, parser.nextDateTime());
+
+        position.set(Position.KEY_SATELLITES, parser.nextInt());
+        position.setAltitude(parser.nextDouble());
+        position.set(Position.KEY_POWER, parser.nextDouble());
+        position.set(Position.KEY_BATTERY, parser.nextDouble());
+        position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1852 / 3600);
 
         return position;
     }

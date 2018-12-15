@@ -33,6 +33,7 @@ public class Command extends Message implements Cloneable {
     public static final String TYPE_ALARM_DISARM = "alarmDisarm";
     public static final String TYPE_SET_TIMEZONE = "setTimezone";
     public static final String TYPE_REQUEST_PHOTO = "requestPhoto";
+    public static final String TYPE_POWER_OFF = "powerOff";
     public static final String TYPE_REBOOT_DEVICE = "rebootDevice";
     public static final String TYPE_SEND_SMS = "sendSms";
     public static final String TYPE_SEND_USSD = "sendUssd";
