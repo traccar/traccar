@@ -78,4 +78,11 @@ public class GeocoderTest {
         assertEquals("6 Avenue Gustave Eiffel, Paris, Île-de-France, FRA", address);
     }
 
+    @Ignore
+    @Test
+    public void testMapmyIndia() {
+        Geocoder geocoder = new MapmyIndiaGeocoder("", "", 0, new AddressFormat("%f"));
+        String address = geocoder.getAddress(28.6129602407977, 77.2294557094574, null);
+        assertEquals("New Delhi, Delhi. 1 m from India Gate pin-110001 (India)", address);
+    }
 }
