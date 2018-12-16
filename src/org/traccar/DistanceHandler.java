@@ -65,7 +65,11 @@ public class DistanceHandler extends BaseDataHandler {
                 return position;
             }
 
-            if (!position.getAttributes().containsKey(Position.KEY_DISTANCE)) {
+            // Calculate and set distance if it is not already set, AND
+            // the last position had ignition ON, indicating a very high probability that the vehicle
+            // was actually moving
+            if (!position.getAttributes().containsKey(Position.KEY_DISTANCE)
+                    && last.getBoolean(Position.KEY_IGNITION)) {
                 distance = DistanceCalculator.distance(
                         position.getLatitude(), position.getLongitude(),
                         last.getLatitude(), last.getLongitude());
