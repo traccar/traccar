@@ -33,10 +33,10 @@
     <entry key='processing.peripheralSensorData.hoursOfDataToLoad'>24</entry>
     <entry key='processing.peripheralSensorData.minHoursOfDataInMemory'>24</entry>
     <entry key='processing.peripheralSensorData.storedEventLookAroundSeconds'>300</entry>
-    <entry key='processing.peripheralSensorData.currentEventLookBackSeconds'>900</entry>
+    <entry key='processing.peripheralSensorData.currentEventLookBackSeconds'>2400</entry>
 
     <entry key='processing.peripheralSensorData.minValuesForMovingAverage'>9</entry>
-    <entry key='processing.peripheralSensorData.minValuesForOutlierDetection'>9</entry>
+    <entry key='processing.peripheralSensorData.minValuesForOutlierDetection'>21</entry>
     <entry key='processing.peripheralSensorData.maxValuesForAlerts'>9</entry>
     <entry key='processing.peripheralSensorData.fuelLevelChangeThresholdLiters'>5</entry>
     <entry key='processing.peripheralSensorData.fuelErrorThreshold'>0.75</entry>
