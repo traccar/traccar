@@ -15,9 +15,10 @@
  */
 package org.traccar.geofence;
 
+import java.io.Serializable;
 import java.text.ParseException;
 
-public abstract class GeofenceGeometry {
+public abstract class GeofenceGeometry implements Serializable {
 
     public abstract boolean containsPoint(double latitude, double longitude);
 
