@@ -18,8 +18,10 @@ package org.traccar.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.traccar.Context;
 
+import java.io.Serializable;
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class CellTower {
+public class CellTower implements Serializable {
 
     public static CellTower from(int mcc, int mnc, int lac, long cid) {
         CellTower cellTower = new CellTower();

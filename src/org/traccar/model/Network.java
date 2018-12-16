@@ -17,11 +17,12 @@ package org.traccar.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Network {
+public class Network implements Serializable {
 
     public Network() {
     }
