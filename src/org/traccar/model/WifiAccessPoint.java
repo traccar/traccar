@@ -17,8 +17,10 @@ package org.traccar.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import java.io.Serializable;
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class WifiAccessPoint {
+public class WifiAccessPoint implements Serializable {
 
     public static WifiAccessPoint from(String macAddress, int signalStrength) {
         WifiAccessPoint wifiAccessPoint = new WifiAccessPoint();
