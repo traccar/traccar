@@ -140,16 +140,19 @@ public class WebDataHandler extends BaseDataHandler {
             request = request.replace("{gprmc}", formatSentence(position));
         }
 
-        String deviceGroupName = "";
-
-        if (device.getGroupId() != 0) {
-            Group group = Context.getGroupsManager().getById(device.getGroupId());
-            if (group != null) {
+        if (request.contains("{group}")) {
+            String deviceGroupName = "";
+            if (device.getGroupId() != 0) {
+                Group group = Context.getGroupsManager().getById(device.getGroupId());
+                if (group != null) {
                 deviceGroupName = group.getName();
+                }
             }
+
+            request = request.replace("{group}", URLEncoder.encode(deviceGroupName, StandardCharsets.UTF_8.name()));
         }
 
-        return request.replace("{group}", URLEncoder.encode(deviceGroupName, StandardCharsets.UTF_8.name()));
+        return request;
     }
 
     @Override
