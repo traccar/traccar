@@ -145,7 +145,7 @@ public class WebDataHandler extends BaseDataHandler {
             if (device.getGroupId() != 0) {
                 Group group = Context.getGroupsManager().getById(device.getGroupId());
                 if (group != null) {
-                deviceGroupName = group.getName();
+                    deviceGroupName = group.getName();
                 }
             }
 
