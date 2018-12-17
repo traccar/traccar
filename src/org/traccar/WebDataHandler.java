@@ -24,6 +24,7 @@ import org.traccar.database.IdentityManager;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
+import org.traccar.model.Group;
 
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;
@@ -137,6 +138,18 @@ public class WebDataHandler extends BaseDataHandler {
 
         if (request.contains("{gprmc}")) {
             request = request.replace("{gprmc}", formatSentence(position));
+        }
+
+        if (request.contains("{group}")) {
+            String deviceGroupName = "";
+            if (device.getGroupId() != 0) {
+                Group group = Context.getGroupsManager().getById(device.getGroupId());
+                if (group != null) {
+                    deviceGroupName = group.getName();
+                }
+            }
+
+            request = request.replace("{group}", URLEncoder.encode(deviceGroupName, StandardCharsets.UTF_8.name()));
         }
 
         return request;
