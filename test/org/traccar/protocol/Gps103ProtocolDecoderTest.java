@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class Gps103ProtocolDecoderTest extends ProtocolTest {
 
@@ -9,6 +10,13 @@ public class Gps103ProtocolDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         Gps103ProtocolDecoder decoder = new Gps103ProtocolDecoder(null);
+
+        verifyPosition(decoder, text(
+                "imei:868683026321020,T:+11,181217080050,,F,080047.000,A,3227.3057,N,11649.4754,W,0.00,0,,0,0,0.00%,,+11;"));
+
+        verifyAttribute(decoder, text(
+                "imei:868683026321020,tracker,181217080106,,F,080102.000,A,3227.3057,N,11649.4754,W,0.00,0,,0,0,0.00%,0,+11;"),
+                Position.PREFIX_TEMP + 1, 11);
 
         verifyPosition(decoder, text(
                 "imei:861359038609986,Equipo 1,---,------,----,214734,241018,26,1,-33.42317,-70.61930,067,229,0674,1.00,08,0,1,---,*"));
@@ -22,8 +30,9 @@ public class Gps103ProtocolDecoderTest extends ProtocolTest {
         verifyAttributes(decoder, text(
                 "imei:868683027758113,OBD,180905200218,,,,0,0,0.39%,70,9.41%,494,0.00,P0137,P0430,,;"));
 
-        verifyPosition(decoder, text(
-                "imei:353451044508750,001,0809231929,13554900601,F,055403.000,A,2233.1870,N,11354.3067,E,0.00,30.1,65.43,1,0,10.5%,0.0%,28;"));
+        verifyAttribute(decoder, text(
+                "imei:353451044508750,001,0809231929,13554900601,F,055403.000,A,2233.1870,N,11354.3067,E,0.00,30.1,65.43,1,0,10.5%,0.0%,28;"),
+                "fuel1", 10.5);
 
         verifyPosition(decoder, text(
                 "imei:864180036029895,acc on,180508145653,,F,065645.000,A,4729.1497,N,01904.2342,E,0.00,0,,1,,0.00%,,;"));
