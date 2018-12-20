@@ -24,6 +24,9 @@ import java.math.RoundingMode;
 
 public class DistanceHandler extends BaseDataHandler {
 
+    private static final long MILLIS_IN_SECOND = 1000L;
+    private static final long MAX_DATA_LOSS_DURATION_SECONDS = 1800L;
+
     private final boolean filter;
     private final int coordinatesMinError;
     private final int coordinatesMaxError;
@@ -62,12 +65,33 @@ public class DistanceHandler extends BaseDataHandler {
                 return position;
             }
 
-            if (!position.getAttributes().containsKey(Position.KEY_DISTANCE)) {
+            // Calculate and set distance if it is not already set, AND
+            // the last position had ignition ON, indicating a very high probability that the vehicle
+            // was actually moving
+            if (!position.getAttributes().containsKey(Position.KEY_DISTANCE)
+                    && last.getBoolean(Position.KEY_IGNITION)) {
                 distance = DistanceCalculator.distance(
                         position.getLatitude(), position.getLongitude(),
                         last.getLatitude(), last.getLongitude());
                 distance = BigDecimal.valueOf(distance).setScale(2, RoundingMode.HALF_EVEN).doubleValue();
             }
+
+            // If data missing then check odometer readings. Knowing ignition was on may not help in this case, coz we
+            // don't know for sure what happened during data loss.
+            long durationBetweenPacketsSeconds =
+                    (position.getDeviceTime().getTime() - last.getDeviceTime().getTime()) / MILLIS_IN_SECOND;
+
+            if (durationBetweenPacketsSeconds >= MAX_DATA_LOSS_DURATION_SECONDS
+                && last.getAttributes().containsKey(Position.KEY_ODOMETER)
+                && position.getAttributes().containsKey(Position.KEY_ODOMETER)) {
+
+                double differenceInOdometer = (double) (Integer) position.getAttributes().get(Position.KEY_ODOMETER)
+                                              - (double) (Integer)last.getAttributes().get(Position.KEY_ODOMETER);
+                if(differenceInOdometer > distance) {
+                    distance = differenceInOdometer;
+                }
+            }
+
             if (filter && last.getValid() && last.getLatitude() != 0 && last.getLongitude() != 0) {
                 boolean satisfiesMin = coordinatesMinError == 0 || distance > coordinatesMinError;
                 boolean satisfiesMax = coordinatesMaxError == 0

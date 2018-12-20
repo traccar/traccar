@@ -45,8 +45,24 @@ public class FuelDataActivityChecker {
         if (diffInMeans > fuelLevelChangeThreshold) {
 
             if (!deviceFuelEventMetadata.containsKey(lookupKey)) {
+                Position midPointPosition = readingsForDevice.get(readingsForDevice.size()-1);
 
-                Position midPointPosition = readingsForDevice.get(midPoint);
+                double thresholdForStart = rightMean > leftMean? 0.05 : -0.05;
+
+                for (int j = midPoint; j < readingsForDevice.size(); j++) {
+                    double diffInRaw = readingsForDevice.get(j).getDouble(Position.KEY_CALIBRATED_FUEL_LEVEL) -
+                        readingsForDevice.get(j-1).getDouble(Position.KEY_CALIBRATED_FUEL_LEVEL);;
+
+                    if (rightMean > leftMean && diffInRaw >= thresholdForStart) {
+                        midPointPosition = readingsForDevice.get(j-1);
+                        break;
+                    } else if (rightMean < leftMean && diffInRaw <= thresholdForStart) {
+                        midPointPosition = readingsForDevice.get(j-1);
+                        break;
+                    }
+                }
+
+
 
                 deviceFuelEventMetadata.put(lookupKey, new FuelEventMetadata());
 
@@ -84,7 +100,22 @@ public class FuelDataActivityChecker {
 
         if (diffInMeans < fuelLevelChangeThreshold && deviceFuelEventMetadata.containsKey(lookupKey)) {
 
-            Position midPointPosition = readingsForDevice.get(midPoint);
+                Position midPointPosition = readingsForDevice.get(0);
+
+                double thresholdForEnd = rightMean > leftMean? 0.05 : -0.05;
+
+                for (int j = midPoint; j > 0; j--) {
+                    double diffInRaw = readingsForDevice.get(j).getDouble(Position.KEY_CALIBRATED_FUEL_LEVEL) -
+                                       readingsForDevice.get(j-1).getDouble(Position.KEY_CALIBRATED_FUEL_LEVEL);
+
+                    if (rightMean > leftMean && diffInRaw >= thresholdForEnd) {
+                        midPointPosition = readingsForDevice.get(j);
+                        break;
+                    } else if (rightMean < leftMean && diffInRaw <= thresholdForEnd) {
+                        midPointPosition = readingsForDevice.get(j);
+                        break;
+                    }
+                }
 
             FuelEventMetadata fuelEventMetadata = deviceFuelEventMetadata.get(lookupKey);
             fuelEventMetadata.setEndLevel((double) midPointPosition.getAttributes()
