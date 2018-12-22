@@ -112,7 +112,7 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
                 break;
             case "COT":
                 if (index < values.length) {
-                    position.set(Position.KEY_ODOMETER, Integer.parseInt(values[index++]));
+                    position.set(Position.KEY_ODOMETER, Long.parseLong(values[index++]));
                 }
                 if (index < values.length) {
                     String[] hours = values[index].split("-");
