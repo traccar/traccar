@@ -109,6 +109,27 @@ public class L100ProtocolDecoder extends BaseProtocolDecoder {
             .expression("(.+)")                  // data
             .compile();
 
+    private static final Pattern PATTERN_NEW = new PatternBuilder()
+            .groupBegin()
+            .text("ATL,")
+            .expression("[LH],")                 // archive
+            .number("(d{15}),")                  // imei
+            .groupEnd("?")
+            .expression("([NPT]),")              // alarm
+            .number("(dd)(dd)(dd),")             // date (ddmmyy)
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
+            .expression("([AV]),")               // validity
+            .number("(d+.d+),([NS]),")           // latitude
+            .number("(d+.d+),([EW]),")           // longitude
+            .number("(d+.?d*),")                 // speed
+            .expression("(?:GPS|GSM|INV),")
+            .number("(d+),")                     // battery
+            .number("(d+),")                     // mcc
+            .number("(d+),")                     // mnc
+            .number("(d+),")                     // lac
+            .number("(d+)")                      // cid
+            .compile();
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -121,6 +142,8 @@ public class L100ProtocolDecoder extends BaseProtocolDecoder {
             } else {
                 return decodeObdLocation(channel, remoteAddress, sentence);
             }
+        } else if (sentence.startsWith("ATL,") || sentence.substring(0, 1).matches("[NPT]")) {
+            return decodeNew(channel, remoteAddress, sentence);
         } else {
             return decodeNormal(channel, remoteAddress, sentence);
         }
@@ -260,6 +283,52 @@ public class L100ProtocolDecoder extends BaseProtocolDecoder {
                         Integer.parseInt(values[0].substring(2), 16), Integer.parseInt(values[1], 16), true));
             }
         }
+
+        return position;
+    }
+
+    private Object decodeNew(Channel channel, SocketAddress remoteAddress, String sentence) {
+
+        Parser parser = new Parser(PATTERN_NEW, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        String imei = parser.next();
+        DeviceSession deviceSession;
+        if (imei != null) {
+            deviceSession = getDeviceSession(channel, remoteAddress, imei);
+        } else {
+            deviceSession = getDeviceSession(channel, remoteAddress);
+        }
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        switch (parser.next()) {
+            case "P":
+                position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+                break;
+            case "T":
+                position.set(Position.KEY_ALARM, Position.ALARM_TAMPERING);
+                break;
+            default:
+                break;
+        }
+
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
+        position.setValid(parser.next().equals("A"));
+        position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
+        position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
+        position.setSpeed(parser.nextDouble());
+
+        position.set(Position.KEY_BATTERY, parser.nextInt() * 0.001);
+
+        position.setNetwork(new Network(CellTower.from(
+                parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextHexInt())));
 
         return position;
     }

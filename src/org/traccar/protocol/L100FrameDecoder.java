@@ -20,6 +20,8 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseFrameDecoder;
 
+import java.nio.charset.StandardCharsets;
+
 public class L100FrameDecoder extends BaseFrameDecoder {
 
     @Override
@@ -30,6 +32,15 @@ public class L100FrameDecoder extends BaseFrameDecoder {
             return null;
         }
 
+        if (buf.getCharSequence(buf.readerIndex(), 4, StandardCharsets.US_ASCII).equals("ATL,")) {
+            return decodeNew(buf);
+        } else {
+            return decodeOld(buf);
+        }
+    }
+
+    private Object decodeOld(ByteBuf buf) {
+
         int header = buf.getByte(buf.readerIndex());
         boolean obd = header == 'L' || header == 'H';
 
@@ -38,9 +49,9 @@ public class L100FrameDecoder extends BaseFrameDecoder {
             index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '*');
         } else {
             index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) 0x02);
-            if (index == -1) {
+            if (index < 0) {
                 index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) 0x04);
-                if (index == -1) {
+                if (index < 0) {
                     return null;
                 }
             }
@@ -54,6 +65,22 @@ public class L100FrameDecoder extends BaseFrameDecoder {
             }
             ByteBuf frame = buf.readRetainedSlice(index - buf.readerIndex() - 2);
             buf.skipBytes(2); // footer
+            return frame;
+        }
+
+        return null;
+    }
+
+    private Object decodeNew(ByteBuf buf) {
+
+        int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '@');
+        if (index < 0) {
+            return null;
+        }
+
+        if (buf.writerIndex() >= index + 1) {
+            ByteBuf frame = buf.readRetainedSlice(index - buf.readerIndex());
+            buf.skipBytes(1); // delimiter
             return frame;
         }
 
