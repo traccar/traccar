@@ -59,7 +59,7 @@ public class WristbandProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN = new PatternBuilder()
             .expression("..")                    // header
             .number("(d+)|")                     // imei
-            .number("(vd+.d+)|")                 // version
+            .number("([vV]d+.d+)|")              // version
             .number("d+|")                       // model
             .text("{")
             .number("F(d+)")                     // function
