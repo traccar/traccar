@@ -38,6 +38,7 @@ public class HttpSmsClient implements SmsManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpSmsClient.class);
 
     private String url;
+    private String authorizationHeader;
     private String authorization;
     private String template;
     private boolean encode;
@@ -45,6 +46,8 @@ public class HttpSmsClient implements SmsManager {
 
     public HttpSmsClient() {
         url = Context.getConfig().getString("sms.http.url");
+        authorizationHeader = Context.getConfig().getString("sms.http.authorizationHeader",
+                SecurityRequestFilter.AUTHORIZATION_HEADER);
         authorization = Context.getConfig().getString("sms.http.authorization");
         if (authorization == null) {
             String user = Context.getConfig().getString("sms.http.user");
@@ -70,7 +73,7 @@ public class HttpSmsClient implements SmsManager {
         try {
             return template
                     .replace("{phone}", prepareValue(destAddress))
-                    .replace("{message}", prepareValue(message));
+                    .replace("{message}", prepareValue(message.trim()));
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
@@ -78,7 +81,7 @@ public class HttpSmsClient implements SmsManager {
 
     private Invocation.Builder getRequestBuilder() {
         return Context.getClient().target(url).request()
-                .header(SecurityRequestFilter.AUTHORIZATION_HEADER, authorization);
+                .header(authorizationHeader, authorization);
     }
 
     @Override
