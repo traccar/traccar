@@ -16,7 +16,6 @@
 package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
@@ -47,12 +46,7 @@ public class WristbandProtocolDecoder extends BaseProtocolDecoder {
 
         if (channel != null) {
             String sentence = String.format("YX%s|%s|0|{F%d#%s}\r\n", imei, version, type, data);
-            ByteBuf response = Unpooled.buffer();
-            response.writeBytes(new byte[]{0x00, 0x01, 0x02});
-            response.writeShort(sentence.length());
-            response.writeCharSequence(sentence, StandardCharsets.US_ASCII);
-            response.writeBytes(new byte[]{(byte) 0xFF, (byte) 0xFE, (byte) 0xFC});
-            channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
+            channel.writeAndFlush(new NetworkMessage(sentence, channel.remoteAddress()));
         }
     }
 

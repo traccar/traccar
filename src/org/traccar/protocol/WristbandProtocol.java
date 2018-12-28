@@ -16,6 +16,7 @@
 package org.traccar.protocol;
 
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
@@ -27,6 +28,7 @@ public class WristbandProtocol extends BaseProtocol {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 3, 2, 3, 0));
+                pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new WristbandProtocolDecoder(WristbandProtocol.this));
             }
         });
