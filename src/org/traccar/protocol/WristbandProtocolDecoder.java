@@ -108,11 +108,11 @@ public class WristbandProtocolDecoder extends BaseProtocolDecoder {
 
         switch (type) {
             case 90:
-                sendResponse(channel, imei, version, type, getServer(channel));
+                sendResponse(channel, imei, version, type, getServer(channel, ','));
                 break;
             case 91:
                 String time = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date());
-                sendResponse(channel, imei, version, type, time + "|" + getServer(channel));
+                sendResponse(channel, imei, version, type, time + "|" + getServer(channel, ','));
                 break;
             case 1:
                 sendResponse(channel, imei, version, type, "0");
