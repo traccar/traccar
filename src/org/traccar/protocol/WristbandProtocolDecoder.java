@@ -46,7 +46,7 @@ public class WristbandProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, String imei, String version, int type, String data) {
 
         if (channel != null) {
-            String sentence = String.format("YX%s|%s|0|{F%d#%s}\r\n", imei, version, type, data);
+            String sentence = String.format("YX%s|%s|0|{F%02d#%s}\r\n", imei, version, type, data);
             ByteBuf response = Unpooled.buffer();
             if (type != 91) {
                 response.writeBytes(new byte[]{0x00, 0x01, 0x02});
