@@ -85,7 +85,7 @@ public class WristbandProtocolDecoder extends BaseProtocolDecoder {
         position.setValid(true);
         position.setLongitude(Double.parseDouble(values[0]));
         position.setLatitude(Double.parseDouble(values[1]));
-        position.setTime(new SimpleDateFormat("yyyyMMddHHmmss").parse(values[2]));
+        position.setTime(new SimpleDateFormat("yyyyMMddHHmm").parse(values[2]));
         position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(values[3])));
 
         return position;
@@ -125,6 +125,9 @@ public class WristbandProtocolDecoder extends BaseProtocolDecoder {
                 for (String fragment : parser.next().split("\\|")) {
                     positions.add(decodePosition(deviceSession, fragment));
                 }
+                break;
+            case 64:
+                sendResponse(channel, imei, version, type, "0");
                 break;
             default:
                 break;
