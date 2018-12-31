@@ -25,7 +25,10 @@ import org.traccar.Protocol;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.model.WifiAccessPoint;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -91,6 +94,50 @@ public class WristbandProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private Position decodeStatus(DeviceSession deviceSession, String sentence) {
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, null);
+
+        position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(sentence.split(",")[0]));
+
+        return position;
+    }
+
+    private Position decodeNetwork(DeviceSession deviceSession, String sentence, boolean wifi) {
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, null);
+
+        Network network = new Network();
+        String[] fragments = sentence.split("\\|");
+
+        if (wifi) {
+            for (String item : fragments[0].split("_")) {
+                String[] values = item.split(",");
+                network.addWifiAccessPoint(WifiAccessPoint.from(values[0], Integer.parseInt(values[1])));
+            }
+        }
+
+        for (String item : fragments[wifi ? 1 : 0].split(":")) {
+            String[] values = item.split(",");
+            int lac = Integer.parseInt(values[0]);
+            int mnc = Integer.parseInt(values[1]);
+            int mcc = Integer.parseInt(values[2]);
+            int cid = Integer.parseInt(values[3]);
+            int rssi = Integer.parseInt(values[4]);
+            network.addCellTower(CellTower.from(mcc, mnc, lac, cid, rssi));
+        }
+
+        position.setNetwork(network);
+
+        return position;
+    }
+
     private List<Position> decodeMessage(
             Channel channel, SocketAddress remoteAddress, String sentence) throws ParseException {
 
@@ -109,6 +156,7 @@ public class WristbandProtocolDecoder extends BaseProtocolDecoder {
         int type = parser.nextInt();
 
         List<Position> positions = new LinkedList<>();
+        String data = parser.next();
 
         switch (type) {
             case 90:
@@ -119,13 +167,20 @@ public class WristbandProtocolDecoder extends BaseProtocolDecoder {
                 sendResponse(channel, imei, version, type, time + "|" + getServer(channel, ','));
                 break;
             case 1:
-            case 64:
-                sendResponse(channel, imei, version, type, "1");
+                positions.add(decodeStatus(deviceSession, data));
+                sendResponse(channel, imei, version, type, data.split(",")[1]);
                 break;
             case 2:
-                for (String fragment : parser.next().split("\\|")) {
+                for (String fragment : data.split("\\|")) {
                     positions.add(decodePosition(deviceSession, fragment));
                 }
+                break;
+            case 3:
+            case 4:
+                positions.add(decodeNetwork(deviceSession, data, type == 3));
+                break;
+            case 64:
+                sendResponse(channel, imei, version, type, data);
                 break;
             default:
                 break;
