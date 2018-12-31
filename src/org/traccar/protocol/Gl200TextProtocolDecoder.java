@@ -1079,9 +1079,11 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        int hdop = parser.nextInt();
-        position.setValid(hdop > 0);
-        position.set(Position.KEY_HDOP, hdop);
+        if (parser.hasNext()) {
+            int hdop = parser.nextInt();
+            position.setValid(hdop > 0);
+            position.set(Position.KEY_HDOP, hdop);
+        }
 
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
         position.setCourse(parser.nextDouble(0));
