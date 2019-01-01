@@ -1494,7 +1494,10 @@
                 "network": {
                     "type": "string"
                 },
-                "attributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "User": {
@@ -1561,7 +1564,10 @@
                 "token": {
                     "type": "string"
                 },
-                "attributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "Server": {
@@ -1614,7 +1620,10 @@
                 "coordinateFormat": {
                     "type": "string"
                 },
-                "attributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "Command": {
@@ -1631,7 +1640,10 @@
                 "type": {
                     "type": "string"
                 },
-                "attributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "Device": {
@@ -1680,7 +1692,10 @@
                         "type": "integer"
                     }
                 },
-                "attributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "Group": {
@@ -1694,7 +1709,10 @@
                 "groupId": {
                     "type": "integer"
                 },
-                "attributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "Permission": {
@@ -1758,7 +1776,10 @@
                 "calendarId": {
                     "type": "integer"
                 },
-                "attributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "Notification": {
@@ -1784,7 +1805,10 @@
                 "calendarId": {
                     "type": "integer"
                 },
-                "attributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "NotificationType": {
@@ -1819,7 +1843,10 @@
                 "maintenanceId": {
                     "type": "integer"
                 },
-                "attributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "ReportSummary": {
@@ -2003,7 +2030,10 @@
                     "type": "string",
                     "description": "base64 encoded in iCalendar format"
                 },
-                "atributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "Attribute": {
@@ -2037,7 +2067,10 @@
                 "uniqueId": {
                     "type": "string"
                 },
-                "atributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "Maintenance": {
@@ -2057,7 +2090,10 @@
                 "period": {
                     "type": "number"
                 },
-                "atributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         }
     },
