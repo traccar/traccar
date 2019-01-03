@@ -144,7 +144,7 @@ public class FilterHandler extends BaseDataHandler {
     }
 
     private boolean filterDistance(Position position, Position last) {
-        if (filterDistance != 0 && last != null) {
+        if (filterDistance != 0 && last != null && !last.getBoolean(last.KEY_MOTION)) {
             return position.getDouble(Position.KEY_DISTANCE) < filterDistance;
         }
         return false;
