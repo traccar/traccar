@@ -13,6 +13,12 @@ public class ArknavX8ProtocolDecoderTest extends ProtocolTest {
         verifyNull(decoder, text(
                 "351856045213782,241111"));
 
+        verifyPosition(decoder, text(
+                "1G,181213092101,A,0347.0756N,09842.7435E,0.0,183,1.1,11008000"));
+
+        verifyAttributes(decoder, text(
+                "2G,181213092101,08,4084.0,00.04,04.01,000396255.0"));
+
         verifyNull(decoder, text(
                 "2R,090214235955,00,,00.04,03.76,001892024.9"));
 

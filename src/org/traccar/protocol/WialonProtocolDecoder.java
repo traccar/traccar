@@ -47,7 +47,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             .expression("([EW]);")
             .number("(d+.?d*)?;")                // speed
             .number("(d+.?d*)?;")                // course
-            .number("(?:NA|(d+.?d*));")          // altitude
+            .number("(?:NA|(-?d+.?d*));")        // altitude
             .number("(?:NA|(d+))")               // satellites
             .groupBegin().text(";")
             .number("(?:NA|(d+.?d*));")          // hdop

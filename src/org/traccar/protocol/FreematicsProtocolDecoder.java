@@ -37,9 +37,10 @@ public class FreematicsProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private Object decodeEvent(
-            Channel channel, SocketAddress remoteAddress, String sentence) throws Exception {
+            Channel channel, SocketAddress remoteAddress, String sentence) {
 
         DeviceSession deviceSession = null;
+        String event = null;
         String time = null;
 
         for (String pair : sentence.split(",")) {
@@ -53,6 +54,8 @@ public class FreematicsProtocolDecoder extends BaseProtocolDecoder {
                         deviceSession = getDeviceSession(channel, remoteAddress, value);
                     }
                     break;
+                case "EV":
+                    event = value;
                 case "TS":
                     time = value;
                     break;
@@ -61,8 +64,8 @@ public class FreematicsProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        if (channel != null && deviceSession != null && time != null) {
-            String message = "1#EV=1,RX=1,TS=" + time;
+        if (channel != null && deviceSession != null && event != null && time != null) {
+            String message = String.format("1#EV=%s,RX=1,TS=%s", event, time);
             message += '*' + Checksum.sum(message);
             channel.writeAndFlush(new NetworkMessage(message, remoteAddress));
         }

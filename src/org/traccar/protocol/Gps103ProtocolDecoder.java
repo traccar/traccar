@@ -73,9 +73,11 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             .number(",(d+.?d*)?").optional()     // altitude
             .number(",([01])?").optional()       // ignition
             .number(",([01])?").optional()       // door
-            .number(",(?:(d+.d+)%)?").optional() // fuel 1
-            .number(",(?:(d+.d+)%)?").optional() // fuel 2
-            .number("(-?d+)?")                   // temperature
+            .groupBegin()
+            .number(",(?:(d+.d+)%)?")  // fuel 1
+            .number(",(?:(d+.d+)%|d+)?")  // fuel 2
+            .groupEnd("?")
+            .number(",([-+]?d+)?")               // temperature
             .groupEnd()
             .any()
             .compile();
@@ -104,9 +106,9 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             .text("imei:")
             .number("(d+),")                     // imei
             .expression("[^,]+,")
-            .expression("...,")                  // event
-            .expression(".{6},")                 // sensor id
-            .expression(".{4},")                 // sensor voltage
+            .expression("(?:-+|(.+)),")          // event
+            .expression("(?:-+|(.+)),")          // sensor id
+            .expression("(?:-+|(.+)),")          // sensor voltage
             .number("(dd)(dd)(dd),")             // time (hhmmss)
             .number("(dd)(dd)(dd),")             // date (ddmmyy)
             .number("(d+),")                     // rssi
@@ -118,6 +120,9 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             .number("(-?d+),")                   // altitude
             .number("(d+.d+),")                  // hdop
             .number("(d+),")                     // satellites
+            .number("([01]),")                   // ignition
+            .number("([01]),")                   // charge
+            .expression("(?:-+|(.+))")           // error
             .any()
             .compile();
 
@@ -190,7 +195,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         } else if (alarm.equals("acc off")) {
             position.set(Position.KEY_IGNITION, false);
         } else if (alarm.startsWith("T:")) {
-            position.set(Position.PREFIX_TEMP + 1, alarm.substring(2));
+            position.set(Position.PREFIX_TEMP + 1, Double.parseDouble(alarm.substring(2)));
         } else if (alarm.startsWith("oil ")) {
             position.set(Position.KEY_FUEL_LEVEL, Double.parseDouble(alarm.substring(4)));
         } else if (!position.getAttributes().containsKey(Position.KEY_ALARM) && !alarm.equals("tracker")) {
@@ -307,6 +312,10 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
+        position.set(Position.KEY_EVENT, parser.next());
+        position.set("sensorId", parser.next());
+        position.set("sensorVoltage", parser.nextDouble());
+
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY));
 
         position.set(Position.KEY_RSSI, parser.nextInt());
@@ -320,6 +329,9 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_HDOP, parser.nextDouble());
         position.set(Position.KEY_SATELLITES, parser.nextInt());
+        position.set(Position.KEY_IGNITION, parser.nextInt() > 0);
+        position.set(Position.KEY_CHARGE, parser.nextInt() > 0);
+        position.set("error", parser.next());
 
         return position;
     }

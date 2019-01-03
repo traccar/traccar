@@ -39,6 +39,7 @@ public class Tk103Protocol extends BaseProtocol {
                 Command.TYPE_POSITION_PERIODIC,
                 Command.TYPE_POSITION_STOP,
                 Command.TYPE_GET_VERSION,
+                Command.TYPE_POWER_OFF,
                 Command.TYPE_REBOOT_DEVICE,
                 Command.TYPE_SET_ODOMETER,
                 Command.TYPE_ENGINE_STOP,

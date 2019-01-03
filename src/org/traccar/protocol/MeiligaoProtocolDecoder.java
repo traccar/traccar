@@ -402,7 +402,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             sendResponse(channel, remoteAddress, id, MSG_HEARTBEAT, response);
             return null;
         } else if (command == MSG_SERVER) {
-            ByteBuf response = Unpooled.copiedBuffer(getServer(channel), StandardCharsets.US_ASCII);
+            ByteBuf response = Unpooled.copiedBuffer(getServer(channel, ':'), StandardCharsets.US_ASCII);
             sendResponse(channel, remoteAddress, id, MSG_SERVER, response);
             return null;
         } else if (command == MSG_UPLOAD_PHOTO) {

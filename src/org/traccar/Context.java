@@ -56,9 +56,11 @@ import org.traccar.geocoder.GeocodeXyzGeocoder;
 import org.traccar.geocoder.GisgraphyGeocoder;
 import org.traccar.geocoder.BanGeocoder;
 import org.traccar.geocoder.GoogleGeocoder;
+import org.traccar.geocoder.HereGeocoder;
 import org.traccar.geocoder.MapQuestGeocoder;
 import org.traccar.geocoder.NominatimGeocoder;
 import org.traccar.geocoder.OpenCageGeocoder;
+import org.traccar.geocoder.MapmyIndiaGeocoder;
 import org.traccar.geocoder.Geocoder;
 import org.traccar.geolocation.UnwiredGeolocationProvider;
 import org.traccar.helper.Log;
@@ -316,6 +318,7 @@ public final class Context {
     public static Geocoder initGeocoder() {
         String type = config.getString("geocoder.type", "google");
         String url = config.getString("geocoder.url");
+        String id = config.getString("geocoder.id");
         String key = config.getString("geocoder.key");
         String language = config.getString("geocoder.language");
 
@@ -347,6 +350,10 @@ public final class Context {
                 return new GeocodeXyzGeocoder(key, cacheSize, addressFormat);
             case "ban":
                 return new BanGeocoder(cacheSize, addressFormat);
+            case "here":
+                return new HereGeocoder(id, key, language, cacheSize, addressFormat);
+            case "mapmyindia":
+                return new MapmyIndiaGeocoder(url, key, cacheSize, addressFormat);
             default:
                 return new GoogleGeocoder(key, language, cacheSize, addressFormat);
         }

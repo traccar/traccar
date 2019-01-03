@@ -10,6 +10,12 @@ public class L100ProtocolDecoderTest extends ProtocolTest {
 
         L100ProtocolDecoder decoder = new L100ProtocolDecoder(null);
 
+        verifyPosition(decoder, text(
+                "ATL,L,868345038171963,N,201218,093016,A,025.067144,N,055.144833,E,000.0,GPS,3939,424,03,00405,008834"));
+
+        verifyPosition(decoder, text(
+                "N,111116,090031,A,028.123456,N,077.123456,E,000.0,GPS,4180,404,11,00159,064753"));
+
         verifyAttributes(decoder, text(
                 "L,ATLOBD,866795030475584,03,7429,143344,130918,CAN,0101:00076100,0103:0200,0104:3C,0105:84,010A:XX,010B:19,010C:0F98,010D:22,010E:68,010F:5A,0110:XXXX,0111:28,011C:20,011F:XXXX,0121:0000,0122:XXXX,012F:XX,0162:XX,0132:XXXX,0133:61,0143:00A8,0145:0F,0146:XX,0147:30,0148:XX,0149:31,014A:18,014B:XX,014C:92,0151:XX,0131:00BB,0144:8000,015E:XXXX,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,0902:XXXXXXXXXXXXXXX"));
 

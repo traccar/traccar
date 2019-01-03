@@ -286,9 +286,9 @@
                 }
             }
         },
-        "/devices/{id}/distance": {
+        "/devices/{id}/accumulators": {
             "put": {
-                "summary": "Update the distance counter of the Device",
+                "summary": "Update total distance and hours of the Device",
                 "parameters": [
                     {
                         "$ref": "#/parameters/entityId"
@@ -298,7 +298,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/DeviceTotalDistance"
+                            "$ref": "#/definitions/DeviceAccumulators"
                         }
                     }
                 ],
@@ -1351,10 +1351,10 @@
                 }
             }
         },
-        "/maintenances": {
+        "/maintenance": {
             "get": {
-                "summary": "Fetch a list of Maintenances",
-                "description": "Without params, it returns a list of Maintenances the user has access to",
+                "summary": "Fetch a list of Maintenance",
+                "description": "Without params, it returns a list of Maintenance the user has access to",
                 "parameters": [
                     {
                         "$ref": "#/parameters/all"
@@ -1401,7 +1401,7 @@
                 }
             }
         },
-        "/maintenances/{id}": {
+        "/maintenance/{id}": {
             "put": {
                 "summary": "Update a Maintenance",
                 "parameters": [
@@ -1494,7 +1494,10 @@
                 "network": {
                     "type": "string"
                 },
-                "attributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "User": {
@@ -1561,7 +1564,10 @@
                 "token": {
                     "type": "string"
                 },
-                "attributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "Server": {
@@ -1614,7 +1620,10 @@
                 "coordinateFormat": {
                     "type": "string"
                 },
-                "attributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "Command": {
@@ -1631,7 +1640,10 @@
                 "type": {
                     "type": "string"
                 },
-                "attributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "Device": {
@@ -1688,7 +1700,10 @@
                         "type": "integer"
                     }
                 },
-                "attributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "Group": {
@@ -1702,7 +1717,10 @@
                 "groupId": {
                     "type": "integer"
                 },
-                "attributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "Permission": {
@@ -1766,7 +1784,10 @@
                 "calendarId": {
                     "type": "integer"
                 },
-                "attributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "Notification": {
@@ -1792,7 +1813,10 @@
                 "calendarId": {
                     "type": "integer"
                 },
-                "attributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "NotificationType": {
@@ -1827,7 +1851,10 @@
                 "maintenanceId": {
                     "type": "integer"
                 },
-                "attributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "ReportSummary": {
@@ -1985,7 +2012,7 @@
                 }
             }
         },
-        "DeviceTotalDistance": {
+        "DeviceAccumulators": {
             "properties": {
                 "deviceId": {
                     "type": "integer"
@@ -1993,6 +2020,9 @@
                 "totalDistance": {
                     "type": "number",
                     "description": "in meters"
+                },
+                "hours": {
+                    "type": "number"
                 }
             }
         },
@@ -2008,7 +2038,10 @@
                     "type": "string",
                     "description": "base64 encoded in iCalendar format"
                 },
-                "atributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "Attribute": {
@@ -2054,7 +2087,10 @@
                 "disabled": {
                     "type": "boolean"
                 },
-                "atributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "Maintenance": {
@@ -2074,7 +2110,10 @@
                 "period": {
                     "type": "number"
                 },
-                "atributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         }
     },

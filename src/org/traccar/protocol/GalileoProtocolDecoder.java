@@ -160,10 +160,10 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_STATUS, buf.readUnsignedShortLE());
                 break;
             case 0x41:
-                position.set(Position.KEY_POWER, buf.readUnsignedShortLE());
+                position.set(Position.KEY_POWER, buf.readUnsignedShortLE() / 1000.0);
                 break;
             case 0x42:
-                position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE());
+                position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() / 1000.0);
                 break;
             case 0x43:
                 position.set(Position.KEY_DEVICE_TEMP, buf.readByte());

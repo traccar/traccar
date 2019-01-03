@@ -50,6 +50,8 @@ public class Tk103ProtocolEncoder extends StringProtocolEncoder {
                     return formatAlt(command, "{%s}", Command.KEY_DATA);
                 case Command.TYPE_GET_VERSION:
                     return formatAlt(command, "*about*");
+                case Command.TYPE_POWER_OFF:
+                    return formatAlt(command, "*turnoff*");
                 case Command.TYPE_REBOOT_DEVICE:
                     return formatAlt(command, "88888888");
                 case Command.TYPE_POSITION_SINGLE:

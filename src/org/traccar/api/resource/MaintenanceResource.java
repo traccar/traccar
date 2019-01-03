@@ -24,7 +24,7 @@ import javax.ws.rs.core.MediaType;
 import org.traccar.api.ExtendedObjectResource;
 import org.traccar.model.Maintenance;
 
-@Path("maintenances")
+@Path("maintenance")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class MaintenanceResource extends ExtendedObjectResource<Maintenance> {

@@ -15,33 +15,23 @@
  */
 package org.traccar.protocol;
 
-import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
+import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
-import org.traccar.model.Command;
 
-import java.nio.charset.StandardCharsets;
+public class C2stekProtocol extends BaseProtocol {
 
-public class Xrb28Protocol extends BaseProtocol {
-
-    public Xrb28Protocol() {
-        setSupportedDataCommands(
-                Command.TYPE_CUSTOM,
-                Command.TYPE_POSITION_SINGLE,
-                Command.TYPE_POSITION_PERIODIC,
-                Command.TYPE_ALARM_ARM,
-                Command.TYPE_ALARM_DISARM);
+    public C2stekProtocol() {
         addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast(new LineBasedFrameDecoder(1024));
-                pipeline.addLast(new StringEncoder(StandardCharsets.ISO_8859_1));
+                pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, false, "$AP"));
+                pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
-                pipeline.addLast(new Xrb28ProtocolEncoder());
-                pipeline.addLast(new Xrb28ProtocolDecoder(Xrb28Protocol.this));
+                pipeline.addLast(new C2stekProtocolDecoder(C2stekProtocol.this));
             }
         });
     }
