@@ -142,7 +142,7 @@ public class L100ProtocolDecoder extends BaseProtocolDecoder {
             } else {
                 return decodeObdLocation(channel, remoteAddress, sentence);
             }
-        } else if (sentence.contains("$GPRMC")) {
+        } else if (sentence.startsWith("ATL,") || sentence.substring(0, 1).matches("[NPT]")) {
             return decodeNew(channel, remoteAddress, sentence);
         } else {
             return decodeNormal(channel, remoteAddress, sentence);
