@@ -257,5 +257,6 @@
     <entry key='its.port'>5179</entry>
     <entry key='xrb28.port'>5180</entry>
     <entry key='c2stek.port'>5181</entry>
+    <entry key='nyitech.port'>5182</entry>
 
 </properties>
