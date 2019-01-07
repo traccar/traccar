@@ -65,7 +65,7 @@ public abstract class JsonGeocoder implements Geocoder {
             return formattedAddress;
         } else {
             if (callback != null) {
-                callback.onFailure(new GeocoderException("Empty address"));
+                callback.onFailure(new GeocoderException("Empty address. " + json.getString("error_message")));
             } else {
                 LOGGER.warn("Empty address");
             }
