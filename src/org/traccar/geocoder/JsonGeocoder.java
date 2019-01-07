@@ -64,10 +64,11 @@ public abstract class JsonGeocoder implements Geocoder {
             }
             return formattedAddress;
         } else {
+            String msg = "Empty address. " + getError(json);
             if (callback != null) {
-                callback.onFailure(new GeocoderException("Empty address. " + json.getString("error_message")));
+                callback.onFailure(new GeocoderException(msg));
             } else {
-                LOGGER.warn("Empty address");
+                LOGGER.warn(msg);
             }
         }
         return null;
@@ -112,5 +113,9 @@ public abstract class JsonGeocoder implements Geocoder {
     }
 
     public abstract Address parseAddress(JsonObject json);
+
+    protected String getError(JsonObject json) {
+        return "";
+    }
 
 }

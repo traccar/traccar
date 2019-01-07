@@ -90,4 +90,9 @@ public class GoogleGeocoder extends JsonGeocoder {
         return null;
     }
 
+    @Override
+    protected String getError(JsonObject json) {
+        return json.getString("error_message");
+    }
+
 }
