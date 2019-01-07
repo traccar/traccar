@@ -71,6 +71,16 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
             if (position.getAccuracy() > 0) {
                 s.append(", accuracy: ").append(String.format("%.1f", position.getAccuracy()));
             }
+            if (position.getOutdated()) {
+                s.append(", outdated");
+            }
+            if (!position.getValid()) {
+                s.append(", invalid");
+            }
+            Object batteryLevel = position.getInteger(Position.KEY_BATTERY_LEVEL);
+            if (batteryLevel != null) {
+                s.append(", battery: ").append(batteryLevel).append('%');
+            }
             Object cmdResult = position.getAttributes().get(Position.KEY_RESULT);
             if (cmdResult != null) {
                 s.append(", result: ").append(cmdResult);
