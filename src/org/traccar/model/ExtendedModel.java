@@ -108,12 +108,16 @@ public class ExtendedModel extends BaseModel {
         }
     }
 
-    public int getInteger(String key) {
+    public Integer getInteger(String key, Integer defaultValue) {
         if (attributes.containsKey(key)) {
             return ((Number) attributes.get(key)).intValue();
         } else {
-            return 0;
+            return defaultValue;
         }
+    }
+
+    public int getInteger(String key) {
+        return getInteger(key, 0);
     }
 
     public long getLong(String key) {

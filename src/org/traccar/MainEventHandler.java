@@ -77,7 +77,7 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
             if (!position.getValid()) {
                 s.append(", invalid");
             }
-            Object batteryLevel = position.getInteger(Position.KEY_BATTERY_LEVEL);
+            Object batteryLevel = position.getInteger(Position.KEY_BATTERY_LEVEL, null);
             if (batteryLevel != null) {
                 s.append(", battery: ").append(batteryLevel).append('%');
             }
