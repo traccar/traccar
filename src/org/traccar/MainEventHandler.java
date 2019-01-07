@@ -15,6 +15,7 @@
  */
 package org.traccar;
 
+import com.google.common.collect.Sets;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -34,14 +35,17 @@ import java.util.Set;
 public class MainEventHandler extends ChannelInboundHandlerAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GeocoderHandler.class);
+    private static final String DEFAULT_LOGGER_EVENTS = "time,position,speed,course,accuracy,result";
 
     private final Set<String> connectionlessProtocols = new HashSet<>();
+    private final Set<String> logEvents;
 
     public MainEventHandler() {
         String connectionlessProtocolList = Context.getConfig().getString("status.ignoreOffline");
         if (connectionlessProtocolList != null) {
             connectionlessProtocols.addAll(Arrays.asList(connectionlessProtocolList.split(",")));
         }
+        logEvents = Sets.newHashSet(Context.getConfig().getString("logger.events", DEFAULT_LOGGER_EVENTS).split(","));
     }
 
     @Override
@@ -56,34 +60,43 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
             }
 
             String uniqueId = Context.getIdentityManager().getById(position.getDeviceId()).getUniqueId();
-
             // Log position
             StringBuilder s = new StringBuilder();
             s.append(formatChannel(ctx.channel())).append(" ");
             s.append("id: ").append(uniqueId);
-            s.append(", time: ").append(DateUtil.formatDate(position.getFixTime(), false));
-            s.append(", lat: ").append(String.format("%.5f", position.getLatitude()));
-            s.append(", lon: ").append(String.format("%.5f", position.getLongitude()));
-            if (position.getSpeed() > 0) {
+            if (logEvents.contains("time")) {
+                s.append(", time: ").append(DateUtil.formatDate(position.getFixTime(), false));
+            }
+            if (logEvents.contains("position")) {
+                s.append(", lat: ").append(String.format("%.5f", position.getLatitude()));
+                s.append(", lon: ").append(String.format("%.5f", position.getLongitude()));
+            }
+            if (position.getSpeed() > 0 && logEvents.contains("speed")) {
                 s.append(", speed: ").append(String.format("%.1f", position.getSpeed()));
             }
-            s.append(", course: ").append(String.format("%.1f", position.getCourse()));
-            if (position.getAccuracy() > 0) {
+            if (logEvents.contains("course")) {
+                s.append(", course: ").append(String.format("%.1f", position.getCourse()));
+            }
+            if (position.getAccuracy() > 0 && logEvents.contains("accuracy")) {
                 s.append(", accuracy: ").append(String.format("%.1f", position.getAccuracy()));
             }
-            if (position.getOutdated()) {
+            if (position.getOutdated() && logEvents.contains("outdated")) {
                 s.append(", outdated");
             }
-            if (!position.getValid()) {
+            if (!position.getValid() && logEvents.contains("invalid")) {
                 s.append(", invalid");
             }
-            Object batteryLevel = position.getInteger(Position.KEY_BATTERY_LEVEL, null);
-            if (batteryLevel != null) {
-                s.append(", battery: ").append(batteryLevel).append('%');
+            if (logEvents.contains(Position.KEY_BATTERY_LEVEL)) {
+                Object batteryLevel = position.getInteger(Position.KEY_BATTERY_LEVEL, null);
+                if (batteryLevel != null) {
+                    s.append(", battery: ").append(batteryLevel).append('%');
+                }
             }
-            Object cmdResult = position.getAttributes().get(Position.KEY_RESULT);
-            if (cmdResult != null) {
-                s.append(", result: ").append(cmdResult);
+            if (logEvents.contains(Position.KEY_RESULT)) {
+                Object cmdResult = position.getAttributes().get(Position.KEY_RESULT);
+                if (cmdResult != null) {
+                    s.append(", result: ").append(cmdResult);
+                }
             }
             LOGGER.info(s.toString());
 
