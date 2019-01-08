@@ -65,38 +65,44 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
             StringBuilder s = new StringBuilder();
             s.append(formatChannel(ctx.channel())).append(" ");
             s.append("id: ").append(uniqueId);
-            if (logEvents.contains("time")) {
-                s.append(", time: ").append(DateUtil.formatDate(position.getFixTime(), false));
-            }
-            if (logEvents.contains("position")) {
-                s.append(", lat: ").append(String.format("%.5f", position.getLatitude()));
-                s.append(", lon: ").append(String.format("%.5f", position.getLongitude()));
-            }
-            if (position.getSpeed() > 0 && logEvents.contains("speed")) {
-                s.append(", speed: ").append(String.format("%.1f", position.getSpeed()));
-            }
-            if (logEvents.contains("course")) {
-                s.append(", course: ").append(String.format("%.1f", position.getCourse()));
-            }
-            if (position.getAccuracy() > 0 && logEvents.contains("accuracy")) {
-                s.append(", accuracy: ").append(String.format("%.1f", position.getAccuracy()));
-            }
-            if (position.getOutdated() && logEvents.contains("outdated")) {
-                s.append(", outdated");
-            }
-            if (!position.getValid() && logEvents.contains("invalid")) {
-                s.append(", invalid");
-            }
-            if (logEvents.contains(Position.KEY_BATTERY_LEVEL)) {
-                Object batteryLevel = position.getInteger(Position.KEY_BATTERY_LEVEL, null);
-                if (batteryLevel != null) {
-                    s.append(", battery: ").append(batteryLevel).append('%');
-                }
-            }
-            if (logEvents.contains(Position.KEY_RESULT)) {
-                Object cmdResult = position.getAttributes().get(Position.KEY_RESULT);
-                if (cmdResult != null) {
-                    s.append(", result: ").append(cmdResult);
+            for (String event : logEvents) {
+                switch (event) {
+                    case "time":
+                        s.append(", time: ").append(DateUtil.formatDate(position.getFixTime(), false));
+                        break;
+                    case "position":
+                        s.append(", lat: ").append(String.format("%.5f", position.getLatitude()));
+                        s.append(", lon: ").append(String.format("%.5f", position.getLongitude()));
+                        break;
+                    case "speed":
+                        if (position.getSpeed() > 0) {
+                            s.append(", speed: ").append(String.format("%.1f", position.getSpeed()));
+                        }
+                        break;
+                    case "course":
+                        s.append(", course: ").append(String.format("%.1f", position.getCourse()));
+                        break;
+                    case "accuracy":
+                        if (position.getAccuracy() > 0) {
+                            s.append(", accuracy: ").append(String.format("%.1f", position.getAccuracy()));
+                        }
+                        break;
+                    case "outdated":
+                        if (position.getOutdated()) {
+                            s.append(", outdated");
+                        }
+                        break;
+                    case "invalid":
+                        if (!position.getValid()) {
+                            s.append(", invalid");
+                        }
+                        break;
+                    default:
+                        Object value = position.getAttributes().get(event);
+                        if (value != null) {
+                            s.append(", ").append(event).append(": ").append(value);
+                        }
+                        break;
                 }
             }
             LOGGER.info(s.toString());
