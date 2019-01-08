@@ -27,7 +27,7 @@ send_hex_udp () {
 }
 
 send_hex_tcp () {
-  echo "$hex" | xxd -r -p | nc -N "$host" "$port"
+  echo "$hex" | xxd -r -p | nc "$host" "$port"
 }
 
 send_text_udp () {
