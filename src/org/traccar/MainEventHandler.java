@@ -44,7 +44,8 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
         if (connectionlessProtocolList != null) {
             connectionlessProtocols.addAll(Arrays.asList(connectionlessProtocolList.split(",")));
         }
-        logEvents = new HashSet<>(Arrays.asList(Context.getConfig().getString("logger.events", DEFAULT_LOGGER_EVENTS).split(",")));
+        logEvents = new HashSet<>(Arrays.asList(
+                Context.getConfig().getString("logger.events", DEFAULT_LOGGER_EVENTS).split(",")));
     }
 
     @Override
