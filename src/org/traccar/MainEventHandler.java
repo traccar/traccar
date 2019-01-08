@@ -15,7 +15,6 @@
  */
 package org.traccar;
 
-import com.google.common.collect.Sets;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -45,7 +44,7 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
         if (connectionlessProtocolList != null) {
             connectionlessProtocols.addAll(Arrays.asList(connectionlessProtocolList.split(",")));
         }
-        logEvents = Sets.newHashSet(Context.getConfig().getString("logger.events", DEFAULT_LOGGER_EVENTS).split(","));
+        logEvents = new HashSet<>(Arrays.asList(Context.getConfig().getString("logger.events", DEFAULT_LOGGER_EVENTS).split(",")));
     }
 
     @Override
@@ -60,6 +59,7 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
             }
 
             String uniqueId = Context.getIdentityManager().getById(position.getDeviceId()).getUniqueId();
+
             // Log position
             StringBuilder s = new StringBuilder();
             s.append(formatChannel(ctx.channel())).append(" ");
