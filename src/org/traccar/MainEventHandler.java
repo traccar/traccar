@@ -34,14 +34,18 @@ import java.util.Set;
 public class MainEventHandler extends ChannelInboundHandlerAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GeocoderHandler.class);
+    private static final String DEFAULT_LOGGER_EVENTS = "time,position,speed,course,accuracy,result";
 
     private final Set<String> connectionlessProtocols = new HashSet<>();
+    private final Set<String> logEvents;
 
     public MainEventHandler() {
         String connectionlessProtocolList = Context.getConfig().getString("status.ignoreOffline");
         if (connectionlessProtocolList != null) {
             connectionlessProtocols.addAll(Arrays.asList(connectionlessProtocolList.split(",")));
         }
+        logEvents = new HashSet<>(Arrays.asList(
+                Context.getConfig().getString("logger.events", DEFAULT_LOGGER_EVENTS).split(",")));
     }
 
     @Override
@@ -61,19 +65,45 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
             StringBuilder s = new StringBuilder();
             s.append(formatChannel(ctx.channel())).append(" ");
             s.append("id: ").append(uniqueId);
-            s.append(", time: ").append(DateUtil.formatDate(position.getFixTime(), false));
-            s.append(", lat: ").append(String.format("%.5f", position.getLatitude()));
-            s.append(", lon: ").append(String.format("%.5f", position.getLongitude()));
-            if (position.getSpeed() > 0) {
-                s.append(", speed: ").append(String.format("%.1f", position.getSpeed()));
-            }
-            s.append(", course: ").append(String.format("%.1f", position.getCourse()));
-            if (position.getAccuracy() > 0) {
-                s.append(", accuracy: ").append(String.format("%.1f", position.getAccuracy()));
-            }
-            Object cmdResult = position.getAttributes().get(Position.KEY_RESULT);
-            if (cmdResult != null) {
-                s.append(", result: ").append(cmdResult);
+            for (String event : logEvents) {
+                switch (event) {
+                    case "time":
+                        s.append(", time: ").append(DateUtil.formatDate(position.getFixTime(), false));
+                        break;
+                    case "position":
+                        s.append(", lat: ").append(String.format("%.5f", position.getLatitude()));
+                        s.append(", lon: ").append(String.format("%.5f", position.getLongitude()));
+                        break;
+                    case "speed":
+                        if (position.getSpeed() > 0) {
+                            s.append(", speed: ").append(String.format("%.1f", position.getSpeed()));
+                        }
+                        break;
+                    case "course":
+                        s.append(", course: ").append(String.format("%.1f", position.getCourse()));
+                        break;
+                    case "accuracy":
+                        if (position.getAccuracy() > 0) {
+                            s.append(", accuracy: ").append(String.format("%.1f", position.getAccuracy()));
+                        }
+                        break;
+                    case "outdated":
+                        if (position.getOutdated()) {
+                            s.append(", outdated");
+                        }
+                        break;
+                    case "invalid":
+                        if (!position.getValid()) {
+                            s.append(", invalid");
+                        }
+                        break;
+                    default:
+                        Object value = position.getAttributes().get(event);
+                        if (value != null) {
+                            s.append(", ").append(event).append(": ").append(value);
+                        }
+                        break;
+                }
             }
             LOGGER.info(s.toString());
 

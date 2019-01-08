@@ -88,7 +88,7 @@ public class ServerManager {
             try {
                 server.start();
             } catch (BindException e) {
-                LOGGER.warn("One of the protocols is disabled due to port conflict");
+                LOGGER.warn("Port %d is disabled due to conflict", server.getPort());
             }
         }
     }
