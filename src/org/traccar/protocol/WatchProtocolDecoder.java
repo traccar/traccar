@@ -294,7 +294,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
             return position;
 
-        } else if (type.equals("TK")) {
+        } else if (type.equals("TK") || type.equals("TK2")) {
 
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
