@@ -29,6 +29,7 @@ import org.traccar.model.Position;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class MainEventHandler extends ChannelInboundHandlerAdapter {
@@ -44,7 +45,7 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
         if (connectionlessProtocolList != null) {
             connectionlessProtocols.addAll(Arrays.asList(connectionlessProtocolList.split(",")));
         }
-        logEvents = new HashSet<>(Arrays.asList(
+        logEvents = new LinkedHashSet<>(Arrays.asList(
                 Context.getConfig().getString("logger.events", DEFAULT_LOGGER_EVENTS).split(",")));
     }
 
