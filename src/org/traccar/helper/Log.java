@@ -48,21 +48,26 @@ public final class Log {
         private String name;
         private String suffix;
         private Writer writer;
+        private boolean rotate;
 
-        RollingFileHandler(String name) {
+        RollingFileHandler(String name, boolean rotate) {
             this.name = name;
+            this.rotate = rotate;
         }
 
         @Override
         public synchronized void publish(LogRecord record) {
             if (isLoggable(record)) {
                 try {
-                    String suffix = new SimpleDateFormat("yyyyMMdd").format(new Date(record.getMillis()));
-                    if (writer != null && !suffix.equals(this.suffix)) {
-                        writer.close();
-                        writer = null;
-                        if (!new File(name).renameTo(new File(name + "." + this.suffix))) {
-                            throw new RuntimeException("Log file renaiming failed");
+                    String suffix = "";
+                    if (rotate) {
+                        suffix = new SimpleDateFormat("yyyyMMdd").format(new Date(record.getMillis()));
+                        if (writer != null && !suffix.equals(this.suffix)) {
+                            writer.close();
+                            writer = null;
+                            if (!new File(name).renameTo(new File(name + "." + this.suffix))) {
+                                throw new RuntimeException("Log file renaiming failed");
+                            }
                         }
                     }
                     if (writer == null) {
@@ -162,7 +167,7 @@ public final class Log {
         if (!logsPath.exists() || !logsPath.isDirectory()) {
             logsPath = jarPath;
         }
-        setupLogger(false, new File(logsPath, "tracker-server.log").getPath(), Level.WARNING.getName(), false);
+        setupLogger(false, new File(logsPath, "tracker-server.log").getPath(), Level.WARNING.getName(), false, true);
     }
 
     public static void setupLogger(Config config) {
@@ -170,10 +175,12 @@ public final class Log {
                 config.getBoolean("logger.console"),
                 config.getString("logger.file"),
                 config.getString("logger.level"),
-                config.getBoolean("logger.fullStackTraces"));
+                config.getBoolean("logger.fullStackTraces"),
+                config.getBoolean("logger.rotate"));
     }
 
-    private static void setupLogger(boolean console, String file, String levelString, boolean fullStackTraces) {
+    private static void setupLogger(
+            boolean console, String file, String levelString, boolean fullStackTraces, boolean rotate) {
 
         Logger rootLogger = Logger.getLogger("");
         for (Handler handler : rootLogger.getHandlers()) {
@@ -184,7 +191,7 @@ public final class Log {
         if (console) {
             handler = new ConsoleHandler();
         } else {
-            handler = new RollingFileHandler(file);
+            handler = new RollingFileHandler(file, rotate);
         }
 
         handler.setFormatter(new LogFormatter(fullStackTraces));
