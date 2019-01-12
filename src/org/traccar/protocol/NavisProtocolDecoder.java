@@ -48,6 +48,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
     public static final int F50 = 0x05;
     public static final int F51 = 0x15;
     public static final int F52 = 0x25;
+    public static final int F60 = 0x06;
 
     private static boolean isFormat(int type, int... types) {
         for (int i : types) {
@@ -97,59 +98,113 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         buf.skipBytes(6); // event time
 
         short armedStatus = buf.readUnsignedByte();
-        position.set(Position.KEY_ARMED, armedStatus & 0x7F);
-        if (BitUtil.check(armedStatus, 7)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+        if (isFormat(format, F10, F20, F30, F40, F50, F51, F52)) {
+            position.set(Position.KEY_ARMED, armedStatus & 0x7F);
+            if (BitUtil.check(armedStatus, 7)) {
+                position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+            }
+        } else if (isFormat(format, F60)) {
+            position.set(Position.KEY_ARMED, armedStatus & 0x1);
+            if (BitUtil.check(armedStatus, 1)) {
+                position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+            }
         }
+
         position.set(Position.KEY_STATUS, buf.readUnsignedByte());
         position.set(Position.KEY_RSSI, buf.readUnsignedByte());
 
+        // NOTE: Needs testing
         if (isFormat(format, F10, F20, F30)) {
             position.set(Position.KEY_OUTPUT, buf.readUnsignedShortLE());
         } else if (isFormat(format, F40, F50, F51, F52)) {
-            position.set(Position.KEY_OUTPUT, buf.readUnsignedByte());
+            int extField = buf.readUnsignedByte();
+            position.set(Position.KEY_OUTPUT, extField & 0x3);
+            position.set(Position.KEY_SATELLITES, extField >> 2);
+        } else if (isFormat(format, F60)) {
+            position.set(Position.KEY_OUTPUT, buf.readUnsignedByte() & 0xF);
         }
 
         if (isFormat(format, F10, F20, F30, F40)) {
             position.set(Position.KEY_INPUT, buf.readUnsignedShortLE());
-        } else if (isFormat(format, F50, F51, F52)) {
+        } else if (isFormat(format, F50, F51, F52, F60)) {
             position.set(Position.KEY_INPUT, buf.readUnsignedByte());
         }
 
         position.set(Position.KEY_POWER, buf.readUnsignedShortLE() * 0.001);
-        position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE());
+        position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.001);
 
         if (isFormat(format, F10, F20, F30)) {
             position.set(Position.PREFIX_TEMP + 1, buf.readShortLE());
         }
 
-        if (isFormat(format, F10, F20, F50, F52)) {
+        if (isFormat(format, F10, F20, F50, F51, F52, F60)) {
             position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShortLE());
             position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShortLE());
         }
+        if (isFormat(format, F60)) {
+            position.set(Position.PREFIX_ADC + 3, buf.readUnsignedShortLE());
+        }
 
         // Impulse counters
-        if (isFormat(format, F20, F50, F51, F52)) {
+        if (isFormat(format, F20, F50, F51, F52, F60)) {
             buf.readUnsignedIntLE();
             buf.readUnsignedIntLE();
         }
 
-        if (isFormat(format, F20, F50, F51, F52)) {
-            int locationStatus = buf.readUnsignedByte();
-            position.setValid(BitUtil.check(locationStatus, 1));
+        if (isFormat(format, F60)) {
+            // Fuel
+            buf.readUnsignedShortLE();
+            buf.readUnsignedShortLE();
+            buf.readByte();
+            buf.readShortLE();
+            buf.readByte();
+            buf.readUnsignedShortLE();
+            buf.readByte();
+            buf.readUnsignedShortLE();
+            buf.readByte();
+            buf.readUnsignedShortLE();
+            buf.readByte();
+            buf.readUnsignedShortLE();
+            buf.readByte();
+            buf.readUnsignedShortLE();
+            buf.readByte();
+            buf.readUnsignedShortLE();
+            buf.readByte();
+            buf.readUnsignedShortLE();
+
+            position.set(Position.PREFIX_TEMP + 1, buf.readByte());
+            position.set(Position.PREFIX_TEMP + 2, buf.readByte());
+            position.set(Position.PREFIX_TEMP + 3, buf.readByte());
+            position.set(Position.PREFIX_TEMP + 4, buf.readByte());
+            position.set(Position.KEY_AXLE_WEIGHT + 3, buf.readIntLE());
+            position.set(Position.KEY_RPM + 3, buf.readUnsignedShortLE());
+        }
+
+        if (isFormat(format, F20, F50, F51, F52, F60)) {
+            int navSensorState = buf.readUnsignedByte();
+            position.setValid(BitUtil.check(navSensorState, 1));
+            if (isFormat(format, F60)) {
+                position.set(Position.KEY_SATELLITES, navSensorState >> 2);
+            }
 
             DateBuilder dateBuilder = new DateBuilder()
                     .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
                     .setDateReverse(buf.readUnsignedByte(), buf.readUnsignedByte() + 1, buf.readUnsignedByte());
             position.setTime(dateBuilder.getDate());
 
-            position.setLatitude(buf.readFloatLE() / Math.PI * 180);
-            position.setLongitude(buf.readFloatLE() / Math.PI * 180);
+            if (isFormat(format, F60)) {
+                position.setLatitude(buf.readIntLE() / 600000.0);
+                position.setLongitude(buf.readIntLE() / 600000.0);
+                position.setAltitude(buf.readIntLE() * 0.01);
+            } else {
+                position.setLatitude(buf.readFloatLE() / Math.PI * 180);
+                position.setLongitude(buf.readFloatLE() / Math.PI * 180);
+            }
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readFloatLE()));
             position.setCourse(buf.readUnsignedShortLE());
 
             position.set(Position.KEY_ODOMETER, buf.readFloatLE() * 1000);
-            position.set(Position.KEY_DISTANCE, buf.readFloatLE());
+            position.set(Position.KEY_DISTANCE, buf.readFloatLE() * 1000);
 
             // Segment times
             buf.readUnsignedShortLE();
@@ -171,10 +226,10 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
         // Four temperature sensors
         if (isFormat(format, F40, F52)) {
-            buf.readByte();
-            buf.readByte();
-            buf.readByte();
-            buf.readByte();
+            position.set(Position.PREFIX_TEMP + 1, buf.readByte());
+            position.set(Position.PREFIX_TEMP + 2, buf.readByte());
+            position.set(Position.PREFIX_TEMP + 3, buf.readByte());
+            position.set(Position.PREFIX_TEMP + 4, buf.readByte());
         }
 
         return new ParseResult(index, position);
@@ -219,7 +274,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private Object processHandshake(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
-        buf.readByte(); // semicolon symbol
+        buf.readByte(); // colon symbol
         if (getDeviceSession(channel, remoteAddress, buf.toString(StandardCharsets.US_ASCII)) != null) {
             sendReply(channel, Unpooled.copiedBuffer("*<S", StandardCharsets.US_ASCII));
         }
