@@ -27,6 +27,7 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.model.WifiAccessPoint;
 
 import java.net.SocketAddress;
 import java.text.SimpleDateFormat;
@@ -84,6 +85,25 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
             .number("(d)")                       // movement status
             .groupEnd("?")
             .any()
+            .compile();
+
+    private static final Pattern PATTERN_LBS = new PatternBuilder()
+            .expression("[A-Z]{2,3}")
+            .text("AP02,")
+            .expression("[^,]+,")                // language
+            .number("[01],")                     // reply
+            .number("d+,")                       // cell count
+            .number("(d+),")                     // mcc
+            .number("(d+),")                     // mnc
+            .expression("(")
+            .groupBegin()
+            .number("d+|")                       // lac
+            .number("d+|")                       // cid
+            .number("d+,")                       // rssi
+            .groupEnd("+")
+            .expression(")")
+            .number("d+,")                       // wifi count
+            .expression("(.*)")                  // wifi
             .compile();
 
     private Boolean decodeOptionalValue(Parser parser, int activeValue) {
@@ -188,6 +208,45 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
 
             position.setNetwork(new Network(CellTower.from(
                     parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextInt())));
+
+            return position;
+
+        } else if (type.equals("AP02")) {
+
+            Parser parser = new Parser(PATTERN_LBS, sentence);
+            if (!parser.matches()) {
+                return null;
+            }
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            int mcc = parser.nextInt();
+            int mnc = parser.nextInt();
+
+            Network network = new Network();
+
+            for (String cell : parser.next().split(",")) {
+                if (!cell.isEmpty()) {
+                    String[] values = cell.split("\\|");
+                    network.addCellTower(CellTower.from(
+                            mcc, mnc,
+                            Integer.parseInt(values[0]),
+                            Integer.parseInt(values[1]),
+                            Integer.parseInt(values[2])));
+                }
+            }
+
+            for (String wifi : parser.next().split("&")) {
+                if (!wifi.isEmpty()) {
+                    String[] values = wifi.split("\\|");
+                    network.addWifiAccessPoint(WifiAccessPoint.from(values[1], Integer.parseInt(values[2])));
+                }
+            }
+
+            position.setNetwork(network);
 
             return position;
 
