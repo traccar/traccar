@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class SuntechProtocolDecoderTest extends ProtocolTest {
 
@@ -22,6 +23,19 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, text(
                 "ST600STT;008349958;35;523;20181112;00:49:30;0bf10d4e;334;20;2f19;22;+20.552718;-100.824478;050.021;095.41;12;1;1303603;14.30;10000000;4;8911;001987;4.1;0;0.00;;;;00000000000000;0;2826C8A70800000C:+26.6;:;:"));
+
+    }
+
+    @Test
+    public void testDecodeHours() throws Exception {
+
+        SuntechProtocolDecoder decoder = new SuntechProtocolDecoder(null);
+
+        decoder.setHbm(true);
+
+        verifyAttribute(decoder, text(
+                "ST300ALT;007239104;40;313;20190112;01:07:16;c99139;+04.703287;-074.148897;000.000;189.72;21;1;425512;12.61;100000;33;003188;4.1;1"),
+                Position.KEY_HOURS, 3188 * 60000L);
 
     }
 
