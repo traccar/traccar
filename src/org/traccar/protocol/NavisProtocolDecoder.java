@@ -195,7 +195,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
             if (isFormat(format, F60)) {
                 position.setLatitude(buf.readIntLE() / 600000.0);
                 position.setLongitude(buf.readIntLE() / 600000.0);
-                position.setAltitude(buf.readIntLE() * 0.01);
+                position.setAltitude(buf.readIntLE() * 0.1);
             } else {
                 position.setLatitude(buf.readFloatLE() / Math.PI * 180);
                 position.setLongitude(buf.readFloatLE() / Math.PI * 180);
