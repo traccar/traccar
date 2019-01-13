@@ -135,7 +135,7 @@ public class WatchProtocolEncoder extends StringProtocolEncoder implements Strin
             case Command.TYPE_SET_PHONEBOOK:
                 return formatCommand(channel, command, "PHB,{%s}", Command.KEY_DATA);
             case Command.TYPE_VOICE_MESSAGE:
-                return formatCommand(channel, command, "TK,{%s}", getBinaryData(command));
+                return formatCommand(channel, command, "TK,%s", getBinaryData(command));
             case Command.TYPE_POSITION_PERIODIC:
                 return formatCommand(channel, command, "UPLOAD,{%s}", Command.KEY_FREQUENCY);
             case Command.TYPE_SET_TIMEZONE:
