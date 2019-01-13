@@ -64,9 +64,6 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             .expression("(.*)")                  // cell and wifi
             .compile();
 
-    private static final String STATE = "State";
-    private static final String ALARM = "Alarm";
-
     private static final int STATUS_LOW_BATTERY_STATUS_BIT = 0;
     private static final int STATUS_GEOFENCE_EXIT_STATUS_BIT = 1;
     private static final int STATUS_GEOFENCE_ENTER_STATUS_BIT = 2;
@@ -79,19 +76,46 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
     private static final int STATUS_WATCH_REMOVED_ALARM_BIT = 20;
     private static final int STATUS_FALL_DOWN_ALARM_BIT = 21;
 
+    private static final Map<Integer, String> STATUS_BIT_2_NAME = new LinkedHashMap<>();
+    static {
+        STATUS_BIT_2_NAME.put(STATUS_LOW_BATTERY_STATUS_BIT, Position.ALARM_LOW_BATTERY);
+        STATUS_BIT_2_NAME.put(STATUS_GEOFENCE_EXIT_STATUS_BIT, Position.ALARM_GEOFENCE_EXIT);
+        STATUS_BIT_2_NAME.put(STATUS_GEOFENCE_ENTER_STATUS_BIT, Position.ALARM_GEOFENCE_ENTER);
+        STATUS_BIT_2_NAME.put(STATUS_OVERSPEED_STATUS_BIT, Position.ALARM_REMOVING);
+    }
+
     private static final Map<Integer, String> ALARM_BIT_2_NAME = new LinkedHashMap<>();
     static {
-        ALARM_BIT_2_NAME.put(STATUS_LOW_BATTERY_STATUS_BIT, Position.ALARM_LOW_BATTERY + STATE);
-        ALARM_BIT_2_NAME.put(STATUS_GEOFENCE_EXIT_STATUS_BIT, Position.ALARM_GEOFENCE_EXIT + STATE);
-        ALARM_BIT_2_NAME.put(STATUS_GEOFENCE_ENTER_STATUS_BIT, Position.ALARM_GEOFENCE_ENTER + STATE);
-        ALARM_BIT_2_NAME.put(STATUS_OVERSPEED_STATUS_BIT, Position.ALARM_REMOVING + STATE);
+        ALARM_BIT_2_NAME.put(STATUS_SOS_ALARM_BIT, Position.ALARM_SOS);
+        ALARM_BIT_2_NAME.put(STATUS_LOW_BATTERY_ALARM_BIT, Position.ALARM_LOW_BATTERY);
+        ALARM_BIT_2_NAME.put(STATUS_GEOFENCE_EXIT_ALARM_BIT, Position.ALARM_GEOFENCE_EXIT);
+        ALARM_BIT_2_NAME.put(STATUS_GEOFENCE_ENTER_ALARM_BIT, Position.ALARM_GEOFENCE_ENTER);
+        ALARM_BIT_2_NAME.put(STATUS_WATCH_REMOVED_ALARM_BIT, Position.ALARM_REMOVING);
+        ALARM_BIT_2_NAME.put(STATUS_FALL_DOWN_ALARM_BIT, Position.ALARM_FALL_DOWN);
+    }
 
-        ALARM_BIT_2_NAME.put(STATUS_SOS_ALARM_BIT, Position.ALARM_SOS + ALARM);
-        ALARM_BIT_2_NAME.put(STATUS_LOW_BATTERY_ALARM_BIT, Position.ALARM_LOW_BATTERY + ALARM);
-        ALARM_BIT_2_NAME.put(STATUS_GEOFENCE_EXIT_ALARM_BIT, Position.ALARM_GEOFENCE_EXIT + ALARM);
-        ALARM_BIT_2_NAME.put(STATUS_GEOFENCE_ENTER_ALARM_BIT, Position.ALARM_GEOFENCE_ENTER + ALARM);
-        ALARM_BIT_2_NAME.put(STATUS_WATCH_REMOVED_ALARM_BIT, Position.ALARM_REMOVING + ALARM);
-        ALARM_BIT_2_NAME.put(STATUS_FALL_DOWN_ALARM_BIT, Position.ALARM_FALL_DOWN + ALARM);
+    private String decodeBits(int status, Map<Integer, String> bit2name) {
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (Map.Entry<Integer, String> entry : bit2name.entrySet()) {
+            if (BitUtil.check(status, entry.getKey())) {
+                if (first) {
+                    first = false;
+                } else {
+                    sb.append(',');
+                }
+                sb.append(entry.getValue());
+            }
+        }
+        return first ? null : sb.toString();
+    }
+
+    private String decodeStatus(int status) {
+        return decodeBits(status, STATUS_BIT_2_NAME);
+    }
+
+    private String decodeAlarm(int status) {
+        return decodeBits(status, ALARM_BIT_2_NAME);
     }
 
     private void sendResponse(Channel channel, String id, String index, String content) {
@@ -104,22 +128,6 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
                         manufacturer, id, content.length(), content), channel.remoteAddress()));
             }
         }
-    }
-
-    private String decodeAlarm(int status) {
-        StringBuilder sb = new StringBuilder();
-        boolean first = true;
-        for (Map.Entry<Integer, String> entry : ALARM_BIT_2_NAME.entrySet()) {
-            if (BitUtil.check(status, entry.getKey())) {
-                if (first) {
-                    first = false;
-                } else {
-                    sb.append(',');
-                }
-                sb.append(entry.getValue());
-            }
-        }
-        return first ? null : sb.toString();
     }
 
     private Position decodePosition(DeviceSession deviceSession, String data) {
@@ -148,6 +156,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_STEPS, parser.nextInt(0));
 
         int status = parser.nextHexInt(0);
+        position.set(Position.KEY_STATUS, decodeStatus(status));
         position.set(Position.KEY_ALARM, decodeAlarm(status));
         if (BitUtil.check(status, STATUS_MOTION_BIT)) {
             position.set(Position.KEY_MOTION, true);
