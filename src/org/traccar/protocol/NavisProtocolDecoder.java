@@ -176,8 +176,8 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.PREFIX_TEMP + 2, buf.readByte());
             position.set(Position.PREFIX_TEMP + 3, buf.readByte());
             position.set(Position.PREFIX_TEMP + 4, buf.readByte());
-            position.set(Position.KEY_AXLE_WEIGHT + 3, buf.readIntLE());
-            position.set(Position.KEY_RPM + 3, buf.readUnsignedShortLE());
+            position.set(Position.KEY_AXLE_WEIGHT, buf.readIntLE());
+            position.set(Position.KEY_RPM, buf.readUnsignedShortLE());
         }
 
         if (isFormat(format, F20, F50, F51, F52, F60)) {
