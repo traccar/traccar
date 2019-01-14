@@ -40,6 +40,7 @@ public class Command extends Message implements Cloneable {
     public static final String TYPE_SOS_NUMBER = "sosNumber";
     public static final String TYPE_SILENCE_TIME = "silenceTime";
     public static final String TYPE_SET_PHONEBOOK = "setPhonebook";
+    public static final String TYPE_MESSAGE = "message";
     public static final String TYPE_VOICE_MESSAGE = "voiceMessage";
     public static final String TYPE_OUTPUT_CONTROL = "outputControl";
     public static final String TYPE_VOICE_MONITORING = "voiceMonitoring";
