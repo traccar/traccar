@@ -299,4 +299,27 @@ public class Position extends Message {
         return super.getType();
     }
 
+    @Override
+    public String toString() {
+        return "Position{"
+                + "id=" + getId()
+                + ", deviceId=" + getDeviceId()
+                + ", type=" + getType()
+                + ", protocol='" + protocol + '\''
+                + ", serverTime='" + serverTime + '\''
+                + ", deviceTime='" + deviceTime + '\''
+                + ", fixTime='" + fixTime + '\''
+                + ", outdated=" + outdated
+                + ", valid=" + valid
+                + ", latitude=" + latitude
+                + ", longitude=" + longitude
+                + ", altitude=" + altitude
+                + ", speed=" + speed
+                + ", course=" + course
+                + ", address='" + address + '\''
+                + ", accuracy=" + accuracy
+                + ", network=" + network
+                + ", attributes=" + getAttributes()
+                + '}';
+    }
 }

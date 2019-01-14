@@ -64,7 +64,7 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
 
             // Log position
             StringBuilder s = new StringBuilder();
-            s.append(formatChannel(ctx.channel())).append(" ");
+            s.append(formatChannel(ctx.channel())).append(' ');
             s.append("id: ").append(uniqueId);
             for (String event : logEvents) {
                 switch (event) {
@@ -98,6 +98,9 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
                             s.append(", invalid");
                         }
                         break;
+                    case "debug":
+                        s.append(", ").append(position);
+                        break;
                     default:
                         Object value = position.getAttributes().get(event);
                         if (value != null) {
@@ -109,6 +112,8 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
             LOGGER.info(s.toString());
 
             Context.getStatisticsManager().registerMessageStored(position.getDeviceId());
+        } else if (logEvents.contains("debug")) {
+            LOGGER.info(formatChannel(ctx.channel()) + ' ' + msg);
         }
     }
 
