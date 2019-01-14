@@ -41,6 +41,12 @@ public class WatchProtocolEncoderTest extends ProtocolTest {
 
         command = new Command();
         command.setDeviceId(1);
+        command.setType(Command.TYPE_MESSAGE);
+        command.set(Command.KEY_MESSAGE, "text");
+        assertEquals("[CS*123456789012345*0010*MESSAGE,74657874]", encoder.encodeCommand(null, command));
+
+        command = new Command();
+        command.setDeviceId(1);
         command.setType(Command.TYPE_CUSTOM);
         command.set(Command.KEY_DATA, "WORK,6-9,11-13,13-15,17-19");
         assertEquals("[CS*123456789012345*001a*WORK,6-9,11-13,13-15,17-19]", encoder.encodeCommand(null, command));
