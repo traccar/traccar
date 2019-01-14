@@ -66,7 +66,7 @@ public final class Log {
                             writer.close();
                             writer = null;
                             if (!new File(name).renameTo(new File(name + "." + this.suffix))) {
-                                throw new RuntimeException("Log file renaiming failed");
+                                throw new RuntimeException("Log file renaming failed");
                             }
                         }
                     }
