@@ -44,7 +44,10 @@ import org.traccar.processing.ComputedAttributesHandler;
 import org.traccar.processing.CopyAttributesHandler;
 
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
 
@@ -125,6 +128,18 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
 
     private static class StandardLoggingHandler extends ChannelDuplexHandler {
 
+        enum NetworkLogFormat {
+            HexOnly, RawAndHex, RawOrHex
+        }
+
+        private static final Pattern NON_ASCII_PATTERN = Pattern.compile("[^\\p{ASCII}].*", Pattern.DOTALL);
+
+        private NetworkLogFormat networkLogFormat;
+
+        StandardLoggingHandler(NetworkLogFormat networkLogFormat) {
+            this.networkLogFormat = networkLogFormat;
+        }
+
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
             log(ctx, false, msg);
@@ -141,7 +156,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
             NetworkMessage networkMessage = (NetworkMessage) o;
             StringBuilder message = new StringBuilder();
 
-            message.append("[").append(ctx.channel().id().asShortText()).append(": ");
+            message.append('[').append(ctx.channel().id().asShortText()).append(": ");
             message.append(((InetSocketAddress) ctx.channel().localAddress()).getPort());
             if (downstream) {
                 message.append(" > ");
@@ -154,10 +169,29 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
             } else {
                 message.append("null");
             }
-            message.append("]");
+            message.append(']');
 
-            message.append(" HEX: ");
-            message.append(ByteBufUtil.hexDump((ByteBuf) networkMessage.getMessage()));
+            boolean logRaw = networkLogFormat != NetworkLogFormat.HexOnly;
+            boolean logHex = true;
+            String rawMessage = null;
+            if (logRaw) {
+                rawMessage = ((ByteBuf) networkMessage.getMessage()).toString(StandardCharsets.UTF_8);
+                Matcher matcher = NON_ASCII_PATTERN.matcher(rawMessage);
+                if (matcher.find()) {
+                    rawMessage = matcher.replaceFirst("<binary...>");
+                } else {
+                    logHex = networkLogFormat != NetworkLogFormat.RawOrHex;
+                }
+            }
+            if (logRaw) {
+                message.append(' ');
+                message.append(rawMessage);
+            }
+            if (logHex) {
+                String hexMessage = ByteBufUtil.hexDump((ByteBuf) networkMessage.getMessage());
+                message.append(" HEX: ");
+                message.append(hexMessage);
+            }
 
             LOGGER.info(message.toString());
         }
@@ -265,7 +299,9 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
         }
         pipeline.addLast(new OpenChannelHandler(server));
         pipeline.addLast(new NetworkMessageHandler());
-        pipeline.addLast(new StandardLoggingHandler());
+        pipeline.addLast(new StandardLoggingHandler(StandardLoggingHandler.NetworkLogFormat.valueOf(
+                Context.getConfig().getString("logger.networkLogFormat",
+                        StandardLoggingHandler.NetworkLogFormat.RawOrHex.name()))));
 
         addProtocolHandlers(new PipelineBuilder() {
             @Override
