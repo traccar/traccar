@@ -25,17 +25,13 @@ public class NavisFrameDecoder extends BaseFrameDecoder {
 
     private static final int NTCB_HEADER_LENGHT = 16;
     private static final int NTCB_LENGHT_OFFSET = 12;
+    private static final int FLEX_HEADER_LENGHT = 2;
     private static final int MAX_FRAME_LENGHT = 65551;
 
-    private static byte src8Checksum(ByteBuf buf, int length) {
-        byte sum = (byte) 0xFF;
-        for (int i = 0; i < length; i++) {
-            sum ^= buf.getUnsignedByte(i);
-            for (int j = 0; j < 8; j++) {
-                sum = (sum & 0x80) != 0 ? (byte) ((sum << 1) ^ 0x31) : (byte) (sum << 1);
-            }
-        }
-        return sum;
+    private final NavisProtocolDecoder protocolDecoder;
+
+    public NavisFrameDecoder(NavisProtocolDecoder protocolDecoder) {
+        this.protocolDecoder = protocolDecoder;
     }
 
     @Override
@@ -52,12 +48,49 @@ public class NavisFrameDecoder extends BaseFrameDecoder {
             return buf.readRetainedSlice(1);
         } else if (buf.getByte(buf.readerIndex()) == 0x7E /* "~" */) {
             // FLEX frame
+            if (protocolDecoder.getFLEXDataSize() == 0) {
+                return null;
+            }
             if (buf.readableBytes() > MAX_FRAME_LENGHT) {
                 throw new TooLongFrameException();
             }
 
-            if (src8Checksum(buf, buf.readableBytes() - 1) == buf.getByte(buf.readableBytes() - 1)) {
-                return buf.readRetainedSlice(buf.readableBytes());
+            if (buf.readableBytes() > FLEX_HEADER_LENGHT) {
+                int length = 0;
+                switch (buf.getByte(buf.readerIndex() + 1)) {
+                    // FLEX 1.0
+                    case 0x41:  // "A"
+                        length = protocolDecoder.getFLEXDataSize()
+                                * buf.getByte(buf.readerIndex() + FLEX_HEADER_LENGHT) + 2;
+                        break;
+                    case 0x54:  // "T"
+                        length = protocolDecoder.getFLEXDataSize() + 5;
+                        break;
+                    case 0x43:  // "C"
+                        length = protocolDecoder.getFLEXDataSize() + 1;
+                        break;
+                    // FLEX 2.0 (Extra packages)
+                    case 0x45:  // "E"
+                        length++;
+                        for (int i = 0; i < buf.getByte(buf.readerIndex() + FLEX_HEADER_LENGHT); i++) {
+                            if (buf.readableBytes() > FLEX_HEADER_LENGHT + length + 1) {
+                                length += buf.getUnsignedShort(length + FLEX_HEADER_LENGHT) + 2;
+                            } else {
+                                return null;
+                            }
+                        }
+                        length++;
+                        break;
+                    case 0x58:  // "X"
+                        length = buf.getUnsignedShortLE(buf.readerIndex() + FLEX_HEADER_LENGHT) + 7;
+                        break;
+                    default:
+                        break;
+                }
+
+                if (buf.readableBytes() >= FLEX_HEADER_LENGHT + length) {
+                    return buf.readRetainedSlice(buf.readableBytes());
+                }
             }
         } else {
             // NTCB frame
