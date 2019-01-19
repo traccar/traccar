@@ -51,6 +51,19 @@ public class NavisProtocolDecoderTest extends ProtocolTest {
         // FLEX 1.0 - Array (1 message)
         verifyPositions(decoder, binary(
                 "7e4101080000000917c057405c002b001833c057405cbbce030225129101a00300007c6102408900400c1b3cfce3b23a12004710e000000000001bff7f000080bfffff80000080bfffffffffb2"));
+
+        // FLEX 2.0 - Negotiation
+        verifyNull(decoder, binary(
+                "404e544301000000a9eef6021a003f8e2a3e464c4558b014147afffff008080800000e00000000000000"));
+
+        // FLEX 2.0 - Single
+        verifyPosition(decoder, binary(
+                "7e5428000000280000002111d16b435c00a900154bd16b435ce19e030259f6920133050000b7623e429300c9e7f03f2ba45a3e1f001f007b6c5910850f0100001629080a000000000000060947"),
+                position("2019-01-19 18:26:25.000", true, 56.31952, 44.01423));
+
+        // FLEX 2.0 - Array (1 message)
+        verifyPositions(decoder, binary(
+                "7e4101270000000b17b16b435c00a9000d4bb26b435caaa2030229f29201620500000000000093004493d53fee892d3e1f001f00ac6c591081f00000001700080a0000000000000609f2"));
     }
 
 }
