@@ -56,6 +56,7 @@ public class NeosProtocolDecoder extends BaseProtocolDecoder {
             .number("([01]{8})")                 // input
             .text("*")
             .number("xx!")
+            .any()
             .compile();
 
     @Override
