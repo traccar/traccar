@@ -23,10 +23,10 @@ import org.traccar.BaseFrameDecoder;
 
 public class NavisFrameDecoder extends BaseFrameDecoder {
 
-    private static final int NTCB_HEADER_LENGHT = 16;
-    private static final int NTCB_LENGHT_OFFSET = 12;
-    private static final int FLEX_HEADER_LENGHT = 2;
-    private static final int MAX_FRAME_LENGHT = 65551;
+    private static final int NTCB_HEADER_LENGTH = 16;
+    private static final int NTCB_LENGTH_OFFSET = 12;
+    private static final int FLEX_HEADER_LENGTH = 2;
+    private static final int MAX_FRAME_LENGTH = 65551;
 
     private final NavisProtocolDecoder protocolDecoder;
 
@@ -51,17 +51,17 @@ public class NavisFrameDecoder extends BaseFrameDecoder {
             if (protocolDecoder.getFLEXDataSize() == 0) {
                 return null;
             }
-            if (buf.readableBytes() > MAX_FRAME_LENGHT) {
+            if (buf.readableBytes() > MAX_FRAME_LENGTH) {
                 throw new TooLongFrameException();
             }
 
-            if (buf.readableBytes() > FLEX_HEADER_LENGHT) {
+            if (buf.readableBytes() > FLEX_HEADER_LENGTH) {
                 int length = 0;
                 switch (buf.getByte(buf.readerIndex() + 1)) {
                     // FLEX 1.0
                     case 0x41:  // "A"
                         length = protocolDecoder.getFLEXDataSize()
-                                * buf.getByte(buf.readerIndex() + FLEX_HEADER_LENGHT) + 2;
+                                * buf.getByte(buf.readerIndex() + FLEX_HEADER_LENGTH) + 2;
                         break;
                     case 0x54:  // "T"
                         length = protocolDecoder.getFLEXDataSize() + 5;
@@ -72,9 +72,9 @@ public class NavisFrameDecoder extends BaseFrameDecoder {
                     // FLEX 2.0 (Extra packages)
                     case 0x45:  // "E"
                         length++;
-                        for (int i = 0; i < buf.getByte(buf.readerIndex() + FLEX_HEADER_LENGHT); i++) {
-                            if (buf.readableBytes() > FLEX_HEADER_LENGHT + length + 1) {
-                                length += buf.getUnsignedShort(length + FLEX_HEADER_LENGHT) + 2;
+                        for (int i = 0; i < buf.getByte(buf.readerIndex() + FLEX_HEADER_LENGTH); i++) {
+                            if (buf.readableBytes() > FLEX_HEADER_LENGTH + length + 1) {
+                                length += buf.getUnsignedShort(length + FLEX_HEADER_LENGTH) + 2;
                             } else {
                                 return null;
                             }
@@ -82,28 +82,28 @@ public class NavisFrameDecoder extends BaseFrameDecoder {
                         length++;
                         break;
                     case 0x58:  // "X"
-                        length = buf.getUnsignedShortLE(buf.readerIndex() + FLEX_HEADER_LENGHT) + 7;
+                        length = buf.getUnsignedShortLE(buf.readerIndex() + FLEX_HEADER_LENGTH) + 7;
                         break;
                     default:
                         break;
                 }
 
-                if (buf.readableBytes() >= FLEX_HEADER_LENGHT + length) {
+                if (buf.readableBytes() >= FLEX_HEADER_LENGTH + length) {
                     return buf.readRetainedSlice(buf.readableBytes());
                 }
             }
         } else {
             // NTCB frame
-            if (buf.readableBytes() < NTCB_HEADER_LENGHT) {
+            if (buf.readableBytes() < NTCB_HEADER_LENGTH) {
                 return null;
             }
 
-            int length = buf.getUnsignedShortLE(buf.readerIndex() + NTCB_LENGHT_OFFSET);
-            if (buf.readableBytes() >= NTCB_HEADER_LENGHT + length) {
-                if (buf.readableBytes() > MAX_FRAME_LENGHT) {
+            int length = buf.getUnsignedShortLE(buf.readerIndex() + NTCB_LENGTH_OFFSET);
+            if (buf.readableBytes() >= NTCB_HEADER_LENGTH + length) {
+                if (buf.readableBytes() > MAX_FRAME_LENGTH) {
                     throw new TooLongFrameException();
                 }
-                return buf.readRetainedSlice(NTCB_HEADER_LENGHT + length);
+                return buf.readRetainedSlice(NTCB_HEADER_LENGTH + length);
             }
         }
 
