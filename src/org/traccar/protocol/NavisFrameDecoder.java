@@ -48,7 +48,7 @@ public class NavisFrameDecoder extends BaseFrameDecoder {
             return buf.readRetainedSlice(1);
         } else if (buf.getByte(buf.readerIndex()) == 0x7E /* "~" */) {
             // FLEX frame
-            if (protocolDecoder.getFLEXDataSize() == 0) {
+            if (protocolDecoder.getFlexDataSize() == 0) {
                 return null;
             }
             if (buf.readableBytes() > MAX_FRAME_LENGTH) {
@@ -60,14 +60,14 @@ public class NavisFrameDecoder extends BaseFrameDecoder {
                 switch (buf.getByte(buf.readerIndex() + 1)) {
                     // FLEX 1.0
                     case 0x41:  // "A"
-                        length = protocolDecoder.getFLEXDataSize()
+                        length = protocolDecoder.getFlexDataSize()
                                 * buf.getByte(buf.readerIndex() + FLEX_HEADER_LENGTH) + 2;
                         break;
                     case 0x54:  // "T"
-                        length = protocolDecoder.getFLEXDataSize() + 5;
+                        length = protocolDecoder.getFlexDataSize() + 5;
                         break;
                     case 0x43:  // "C"
-                        length = protocolDecoder.getFLEXDataSize() + 1;
+                        length = protocolDecoder.getFlexDataSize() + 1;
                         break;
                     // FLEX 2.0 (Extra packages)
                     case 0x45:  // "E"
