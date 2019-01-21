@@ -228,7 +228,9 @@
     </entry>
 
     <entry key='database.selectLatestPositions'>
-        SELECT positions.* FROM positions INNER JOIN devices ON positions.id = devices.positionid;
+        SELECT positions.* FROM positions p
+        INNER JOIN devices d ON p.id = d.positionid
+        ORDER BY p.devicetime;
     </entry>
 
     <entry key='database.updateLatestPosition'>

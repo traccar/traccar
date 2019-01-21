@@ -31,7 +31,7 @@ public class AnalogLLSFuelDataParser implements FuelDataParser {
 
         String fuelDataFieldName = gpsProtocolToFuelFieldMap.getOrDefault(gpsDeviceProtocol, null);
 
-        if (StringUtils.isBlank(fuelDataFieldName)) {
+        if (StringUtils.isBlank(fuelDataFieldName) || !position.getAttributes().containsKey(fuelDataFieldName)) {
             Log.debug(String.format(
                     "Fuel data not found on payload for %s, on %s", gpsDeviceProtocol, fuelDataFieldName));
             return Optional.empty();
