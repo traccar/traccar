@@ -458,7 +458,22 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
                 case 69:
                     int satVisible = 0;
                     for (int k = 0; k < 8; k++) {
-                        satVisible += buf.readUnsignedByte();
+                        switch (k) {
+                            case 0:
+                                int satVisibleGLONASS = buf.readUnsignedByte();
+                                position.set("sat-visible-glonass", satVisibleGLONASS);
+                                satVisible += satVisibleGLONASS;
+                                break;
+                            case 1:
+                                int satVisibleGPS = buf.readUnsignedByte();
+                                position.set("sat-visible-gps", satVisibleGPS);
+                                satVisible += satVisibleGPS;
+                                break;
+                            default:
+                                // Don't detalize Galileo, Compass, Beidou, DORIS, IRNSS, QZSS
+                                satVisible += buf.readUnsignedByte();
+                                break;
+                }
                     }
                     position.set(Position.KEY_SATELLITES_VISIBLE, satVisible);
                     break;
