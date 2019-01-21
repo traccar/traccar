@@ -329,16 +329,15 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         long index = 0;
+        int status = 0;
+        short input = 0;
+        short output = 0;
 
         for (int i = 0; i < flexBitfieldDataSize; i++) {
             if ((flexBitfield[(int) (i / 8)] & (0x80 >> i % 8)) == 0) {
                 // Skip FLEX field
                 continue;
             }
-
-            int status = 0;
-            short input = 0;
-            short output = 0;
 
             switch (i) {
                 case 0:
@@ -361,7 +360,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case 5:
                     int status2 = buf.readUnsignedByte();
-                    position.set(Position.KEY_STATUS, (short) ((status & 0xFF) | (status2 << 1)));
+                    position.set(Position.KEY_STATUS, (short) ((status & 0xFF) | (status2 << 8)));
                     break;
                 case 6:
                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());
@@ -420,7 +419,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case 29:
                     short input2 = buf.readUnsignedByte();
-                    position.set(Position.KEY_INPUT, (short) ((input & 0xFF) | (input2 << 1)));
+                    position.set(Position.KEY_INPUT, (short) ((input & 0xFF) | (input2 << 8)));
                     for (int k = 0; k < 8; k++) {
                         position.set(Position.PREFIX_IN + (k + 9), BitUtil.check(input2, k));
                     }
@@ -434,7 +433,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case 31:
                     short output2 = buf.readUnsignedByte();
-                    position.set(Position.KEY_OUTPUT, (short) ((output & 0xFF) | (output2 << 1)));
+                    position.set(Position.KEY_OUTPUT, (short) ((output & 0xFF) | (output2 << 8)));
                     for (int k = 0; k < 8; k++) {
                         position.set(Position.PREFIX_OUT + (k + 9), BitUtil.check(output2, k));
                     }
