@@ -661,46 +661,16 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
                     switch (buf.readShortLE()) {
                         // FLEX 1.0
                         case 0x417E:  // "~A"
-                            return processFLEXArray(new FLEXPositionParser() {
-                                        @Override
-                                        public ParseResult parsePosition(DeviceSession deviceSession, ByteBuf buf) {
-                                            return NavisProtocolDecoder.this.parseFLEXPosition(deviceSession, buf);
-                                        }
-                                    },
-                                    "~A", deviceSession, channel, buf);
+                            return processFLEXArray(this::parseFLEXPosition, "~A", deviceSession, channel, buf);
                         case 0x547E:  // "~T"
-                            return processFLEXSingle(new FLEXPositionParser() {
-                                        @Override
-                                        public ParseResult parsePosition(DeviceSession deviceSession, ByteBuf buf) {
-                                            return NavisProtocolDecoder.this.parseFLEXPosition(deviceSession, buf);
-                                        }
-                                    },
-                                    "~T", deviceSession, channel, buf);
+                            return processFLEXSingle(this::parseFLEXPosition, "~T", deviceSession, channel, buf);
                         case 0x437E:  // "~C"
-                            return processFLEXSingle(new FLEXPositionParser() {
-                                        @Override
-                                        public ParseResult parsePosition(DeviceSession deviceSession, ByteBuf buf) {
-                                            return NavisProtocolDecoder.this.parseFLEXPosition(deviceSession, buf);
-                                        }
-                                    },
-                                    "~C", deviceSession, channel, buf);
+                            return processFLEXSingle(this::parseFLEXPosition, "~C", deviceSession, channel, buf);
                         // FLEX 2.0 (Extra packages)
                         case 0x457E:  // "~E"
-                            return processFLEXArray(new FLEXPositionParser() {
-                                        @Override
-                                        public ParseResult parsePosition(DeviceSession deviceSession, ByteBuf buf) {
-                                            return NavisProtocolDecoder.this.parseFLEX20Position(deviceSession, buf);
-                                        }
-                                    },
-                                    "~E", deviceSession, channel, buf);
+                            return processFLEXArray(this::parseFLEX20Position, "~E", deviceSession, channel, buf);
                         case 0x587E:  // "~X"
-                            return processFLEXSingle(new FLEXPositionParser() {
-                                        @Override
-                                        public ParseResult parsePosition(DeviceSession deviceSession, ByteBuf buf) {
-                                            return NavisProtocolDecoder.this.parseFLEX20Position(deviceSession, buf);
-                                        }
-                                    },
-                                    "~X", deviceSession, channel, buf);
+                            return processFLEXSingle(this::parseFLEX20Position, "~X", deviceSession, channel, buf);
                         default:
                             break;
                     }
