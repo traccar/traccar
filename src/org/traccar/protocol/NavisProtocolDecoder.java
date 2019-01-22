@@ -501,13 +501,13 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
         // Check buffer size and struct version
         if (length <= buf.readableBytes() && buf.readUnsignedByte() == 0x0A) {
-            buf.skipBytes(1);  // Length of static part
+            buf.readUnsignedByte();  // Length of static part
 
             index = buf.readUnsignedIntLE();
             position.set(Position.KEY_INDEX, index);
 
             position.set(Position.KEY_EVENT, buf.readUnsignedShortLE());
-            buf.skipBytes(4); // event time
+            buf.readUnsignedInt(); // event time
 
             int navSensorState = buf.readUnsignedByte();
             position.setValid(BitUtil.check(navSensorState, 1));
@@ -533,7 +533,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
     private Object processFlexSingle(
             FlexPositionParser parser, String flexHeader, DeviceSession deviceSession, Channel channel, ByteBuf buf) {
-        buf.skipBytes(4); // Event index
+        buf.readUnsignedInt(); // Event index
 
         ParseResult result = parser.parsePosition(deviceSession, buf);
 
