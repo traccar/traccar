@@ -25,6 +25,8 @@ import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.Checksum;
+import org.traccar.helper.Checksum.Algorithm;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -617,25 +619,6 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
-    private static byte xorChecksum(ByteBuf buf) {
-        byte sum = 0;
-        for (int i = 0; i < buf.readableBytes(); i++) {
-            sum ^= buf.getUnsignedByte(i);
-        }
-        return sum;
-    }
-
-    private static byte src8Checksum(ByteBuf buf) {
-        byte sum = (byte) 0xFF;
-        for (int i = 0; i < buf.readableBytes(); i++) {
-            sum ^= buf.getUnsignedByte(i);
-            for (int j = 0; j < 8; j++) {
-                sum = (sum & 0x80) != 0 ? (byte) ((sum << 1) ^ 0x31) : (byte) (sum << 1);
-            }
-        }
-        return sum;
-    }
-
     private void sendNtcbReply(Channel channel, ByteBuf data) {
         if (channel != null) {
             ByteBuf header = Unpooled.buffer(16);
@@ -643,8 +626,8 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
             header.writeIntLE((int) deviceUniqueId);
             header.writeIntLE((int) serverId);
             header.writeShortLE(data.readableBytes());
-            header.writeByte(xorChecksum(data));
-            header.writeByte(xorChecksum(header));
+            header.writeByte(Checksum.xor(data.nioBuffer()));
+            header.writeByte(Checksum.xor(header.nioBuffer()));
 
             channel.writeAndFlush(new NetworkMessage(Unpooled.wrappedBuffer(header, data), channel.remoteAddress()));
         }
@@ -653,7 +636,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
     private void sendFlexReply(Channel channel, ByteBuf data) {
         if (channel != null) {
             ByteBuf cs = Unpooled.buffer(1);
-            cs.writeByte(src8Checksum(data));
+            cs.writeByte(Checksum.crc8(new Algorithm(8, 0x31, 0xFF, false, false, 0x00), data.nioBuffer()));
 
             channel.writeAndFlush(new NetworkMessage(Unpooled.wrappedBuffer(data, cs), channel.remoteAddress()));
         }
