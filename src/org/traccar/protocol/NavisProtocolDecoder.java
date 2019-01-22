@@ -111,7 +111,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_EVENT, buf.readUnsignedShortLE());
 
-        buf.skipBytes(6); // Event time
+        buf.skipBytes(6); // event time
 
         short armedStatus = buf.readUnsignedByte();
         if (isFormat(format, F10, F20, F30, F40, F50, F51, F52)) {
@@ -508,7 +508,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_INDEX, index);
 
             position.set(Position.KEY_EVENT, buf.readUnsignedShortLE());
-            buf.skipBytes(4); // Event time
+            buf.skipBytes(4); // event time
 
             int navSensorState = buf.readUnsignedByte();
             position.setValid(BitUtil.check(navSensorState, 1));
@@ -612,7 +612,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private Object processHandshake(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
-        buf.skipBytes(1);  // Colon symbol
+        buf.readByte(); // colon symbol
         if (getDeviceSession(channel, remoteAddress, buf.toString(StandardCharsets.US_ASCII)) != null) {
             sendNtcbReply(channel, Unpooled.copiedBuffer("*<S", StandardCharsets.US_ASCII));
         }
