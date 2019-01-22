@@ -44,7 +44,6 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
     private int flexDataSize;  // Bytes
     private int flexBitfieldDataSize;  // Bits
     private final byte[] flexBitfield;
-    private byte flexProtocolVersion, flexStructVersion;
     private static final Logger LOGGER = LoggerFactory.getLogger(NavisProtocolDecoder.class);
     private static final int[] FLEX_FIELDS_SIZES = {4, 2, 4, 1, 1, 1, 1, 1, 4, 4, 4, 4, 4, 2, 4, 4, 2, 2,
         2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 4, 4, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1,
@@ -578,6 +577,8 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         if ((byte) buf.readUnsignedByte() != (byte) 0xB0) {
             return null;
         }
+
+        byte flexProtocolVersion, flexStructVersion;
 
         flexProtocolVersion = (byte) buf.readUnsignedByte();
         flexStructVersion = (byte) buf.readUnsignedByte();
