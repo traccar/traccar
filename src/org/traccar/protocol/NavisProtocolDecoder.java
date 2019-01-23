@@ -137,7 +137,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         } else if (isFormat(format, F50, F51, F52)) {
             short extField = buf.readUnsignedByte();
             position.set(Position.KEY_OUTPUT, extField & 0x3);
-            position.set(Position.KEY_SATELLITES, extField >> 2);
+            position.set(Position.KEY_SATELLITES, BitUtil.from(extField, 2));
             position.set(Position.PREFIX_OUT + 1, BitUtil.check(extField, 0));
             position.set(Position.PREFIX_OUT + 2, BitUtil.check(extField, 1));
         } else if (isFormat(format, F40, F60)) {
@@ -160,10 +160,10 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.PREFIX_IN + 2, BitUtil.check(input, 1));
                 position.set(Position.PREFIX_IN + 3, BitUtil.check(input, 2));
                 position.set(Position.PREFIX_IN + 4, BitUtil.check(input, 3));
-                position.set(Position.PREFIX_IN + 5, (input & 0x70) >> 4);
-                position.set(Position.PREFIX_IN + 6, (input & 0x380) >> 7);
-                position.set(Position.PREFIX_IN + 7, (input & 0xC00) >> 10);
-                position.set(Position.PREFIX_IN + 8, (input & 0x3000) >> 12);
+                position.set(Position.PREFIX_IN + 5, BitUtil.between(input, 4, 7));
+                position.set(Position.PREFIX_IN + 6, BitUtil.between(input, 7, 10));
+                position.set(Position.PREFIX_IN + 7, BitUtil.between(input, 10, 12));
+                position.set(Position.PREFIX_IN + 5, BitUtil.between(input, 12, 14));
             }
         } else if (isFormat(format, F50, F51, F52, F60)) {
             short input = buf.readUnsignedByte();
@@ -227,7 +227,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
             int navSensorState = buf.readUnsignedByte();
             position.setValid(BitUtil.check(navSensorState, 1));
             if (isFormat(format, F60)) {
-                position.set(Position.KEY_SATELLITES, navSensorState >> 2);
+                position.set(Position.KEY_SATELLITES, BitUtil.from(navSensorState, 2));
             }
 
             DateBuilder dateBuilder = new DateBuilder()
@@ -369,7 +369,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
                 case 7:
                     int navSensorState = buf.readUnsignedByte();
                     position.setValid(BitUtil.check(navSensorState, 1));
-                    position.set(Position.KEY_SATELLITES, navSensorState >> 2);
+                    position.set(Position.KEY_SATELLITES, BitUtil.from(navSensorState, 2));
                     break;
                 case 8:
                      position.setTime(new DateBuilder(new Date(buf.readUnsignedIntLE() * 1000)).getDate());
@@ -511,7 +511,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
             int navSensorState = buf.readUnsignedByte();
             position.setValid(BitUtil.check(navSensorState, 1));
-            position.set(Position.KEY_SATELLITES, navSensorState >> 2);
+            position.set(Position.KEY_SATELLITES, BitUtil.from(navSensorState, 2));
 
             position.setTime(new DateBuilder(new Date(buf.readUnsignedIntLE() * 1000)).getDate());
             position.setLatitude(buf.readIntLE() / 600000.0);
