@@ -114,12 +114,12 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
         short armedStatus = buf.readUnsignedByte();
         if (isFormat(format, F10, F20, F30, F40, F50, F51, F52)) {
-            position.set(Position.KEY_ARMED, armedStatus & 0x7F);
+            position.set(Position.KEY_ARMED, BitUtil.to(armedStatus, 7));
             if (BitUtil.check(armedStatus, 7)) {
                 position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
             }
         } else if (isFormat(format, F60)) {
-            position.set(Position.KEY_ARMED, armedStatus & 0x1);
+            position.set(Position.KEY_ARMED, BitUtil.check(armedStatus, 0));
             if (BitUtil.check(armedStatus, 1)) {
                 position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
             }
@@ -136,13 +136,13 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
             }
         } else if (isFormat(format, F50, F51, F52)) {
             short extField = buf.readUnsignedByte();
-            position.set(Position.KEY_OUTPUT, extField & 0x3);
-            position.set(Position.KEY_SATELLITES, BitUtil.from(extField, 2));
+            position.set(Position.KEY_OUTPUT, BitUtil.to(extField, 2));
             position.set(Position.PREFIX_OUT + 1, BitUtil.check(extField, 0));
             position.set(Position.PREFIX_OUT + 2, BitUtil.check(extField, 1));
+            position.set(Position.KEY_SATELLITES, BitUtil.from(extField, 2));
         } else if (isFormat(format, F40, F60)) {
             short output = buf.readUnsignedByte();
-            position.set(Position.KEY_OUTPUT, output & 0xF);
+            position.set(Position.KEY_OUTPUT, BitUtil.to(output, 4));
             for (int i = 0; i < 4; i++) {
                 position.set(Position.PREFIX_OUT + (i + 1), BitUtil.check(output, i));
             }
@@ -350,7 +350,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case 3:
                     short armedStatus = buf.readUnsignedByte();
-                    position.set(Position.KEY_ARMED, armedStatus & 0x1);
+                    position.set(Position.KEY_ARMED, BitUtil.check(armedStatus, 0));
                     if (BitUtil.check(armedStatus, 1)) {
                         position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
                     }
@@ -361,7 +361,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case 5:
                     int status2 = buf.readUnsignedByte();
-                    position.set(Position.KEY_STATUS, (short) ((status & 0xFF) | (status2 << 8)));
+                    position.set(Position.KEY_STATUS, (short) (BitUtil.to(status, 8) | (status2 << 8)));
                     break;
                 case 6:
                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());
@@ -420,7 +420,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case 29:
                     short input2 = buf.readUnsignedByte();
-                    position.set(Position.KEY_INPUT, (short) ((input & 0xFF) | (input2 << 8)));
+                    position.set(Position.KEY_INPUT, (short) (BitUtil.to(input, 8) | (input2 << 8)));
                     for (int k = 0; k < 8; k++) {
                         position.set(Position.PREFIX_IN + (k + 9), BitUtil.check(input2, k));
                     }
@@ -434,7 +434,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case 31:
                     short output2 = buf.readUnsignedByte();
-                    position.set(Position.KEY_OUTPUT, (short) ((output & 0xFF) | (output2 << 8)));
+                    position.set(Position.KEY_OUTPUT, (short) (BitUtil.to(output, 8) | (output2 << 8)));
                     for (int k = 0; k < 8; k++) {
                         position.set(Position.PREFIX_OUT + (k + 9), BitUtil.check(output2, k));
                     }
