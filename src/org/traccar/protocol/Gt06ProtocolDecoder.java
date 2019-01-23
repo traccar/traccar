@@ -67,7 +67,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_GPS_LBS_STATUS_3 = 0x27;
     public static final int MSG_LBS_MULTIPLE = 0x28;
     public static final int MSG_LBS_WIFI = 0x2C;
-    public static final int MSG_LBS_PHONE = 0x17;
     public static final int MSG_LBS_EXTEND = 0x18;
     public static final int MSG_LBS_STATUS = 0x19;
     public static final int MSG_GPS_PHONE = 0x1A;
@@ -389,7 +388,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private Object decodeBasic(Channel channel, SocketAddress remoteAddress, ByteBuf buf) throws Exception {
+    private Object decodeBasic(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
 
         int length = buf.readUnsignedByte();
         int dataLength = length - 5;
@@ -488,7 +487,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == MSG_WIFI || type == MSG_WIFI_2) {
 
-            return decodeWifi(buf, deviceSession);
+            return decodeWifi(channel, buf, deviceSession, type);
 
         } else if (type == MSG_INFO) {
 
@@ -559,18 +558,19 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
-    private Object decodeWifi(ByteBuf buf, DeviceSession deviceSession) throws Exception {
+    private Object decodeWifi(Channel channel, ByteBuf buf, DeviceSession deviceSession, int type) {
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
+        ByteBuf time = buf.readSlice(6);
         DateBuilder dateBuilder = new DateBuilder()
-                .setYear(BcdUtil.readInteger(buf, 2))
-                .setMonth(BcdUtil.readInteger(buf, 2))
-                .setDay(BcdUtil.readInteger(buf, 2))
-                .setHour(BcdUtil.readInteger(buf, 2))
-                .setMinute(BcdUtil.readInteger(buf, 2))
-                .setSecond(BcdUtil.readInteger(buf, 2));
+                .setYear(BcdUtil.readInteger(time, 2))
+                .setMonth(BcdUtil.readInteger(time, 2))
+                .setDay(BcdUtil.readInteger(time, 2))
+                .setHour(BcdUtil.readInteger(time, 2))
+                .setMinute(BcdUtil.readInteger(time, 2))
+                .setSecond(BcdUtil.readInteger(time, 2));
         getLastLocation(position, dateBuilder.getDate());
 
         Network network = new Network();
@@ -593,11 +593,21 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
         position.setNetwork(network);
 
+        if (channel != null) {
+            ByteBuf response = Unpooled.buffer();
+            response.writeByte(0);
+            response.writeByte(type);
+            response.writeBytes(time.resetReaderIndex());
+            response.writeByte('\r');
+            response.writeByte('\n');
+            channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
+        }
+
         return position;
     }
 
     private Object decodeBasicOther(Channel channel, ByteBuf buf,
-            DeviceSession deviceSession, int type, int dataLength) throws Exception {
+            DeviceSession deviceSession, int type, int dataLength) {
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
@@ -701,7 +711,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private Object decodeExtended(Channel channel, SocketAddress remoteAddress, ByteBuf buf) throws Exception {
+    private Object decodeExtended(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
         if (deviceSession == null) {
