@@ -45,30 +45,11 @@ public class FuelDataActivityChecker {
         if (diffInMeans > fuelLevelChangeThreshold) {
 
             if (!deviceFuelEventMetadata.containsKey(lookupKey)) {
-                Position midPointPosition = readingsForDevice.get(readingsForDevice.size()-1);
-
-                double thresholdForStart = rightMean > leftMean? 0.05 : -0.05;
-
-                for (int j = midPoint; j < readingsForDevice.size(); j++) {
-                    double diffInRaw = readingsForDevice.get(j).getDouble(Position.KEY_CALIBRATED_FUEL_LEVEL) -
-                        readingsForDevice.get(j-1).getDouble(Position.KEY_CALIBRATED_FUEL_LEVEL);;
-
-                    if (rightMean > leftMean && diffInRaw >= thresholdForStart) {
-                        midPointPosition = readingsForDevice.get(j-1);
-                        break;
-                    } else if (rightMean < leftMean && diffInRaw <= thresholdForStart) {
-                        midPointPosition = readingsForDevice.get(j-1);
-                        break;
-                    }
-                }
-
-
-
+                Position midPointPosition = readingsForDevice.get(midPoint);
                 deviceFuelEventMetadata.put(lookupKey, new FuelEventMetadata());
 
                 FuelEventMetadata fuelEventMetadata = deviceFuelEventMetadata.get(lookupKey);
-                fuelEventMetadata.setStartLevel((double) midPointPosition.getAttributes()
-                                                                         .get(Position.KEY_CALIBRATED_FUEL_LEVEL));
+                fuelEventMetadata.setStartLevel(leftMean);
 
                 fuelEventMetadata.setErrorCheckStart((double) readingsForDevice.get(0)
                                                                                .getAttributes()
@@ -93,6 +74,8 @@ public class FuelDataActivityChecker {
                 Log.debug("[FUEL_ACTIVITY_START] Midpoint: "
                                   + midPointPosition.getAttributes()
                                                     .get(Position.KEY_CALIBRATED_FUEL_LEVEL));
+
+                Log.debug("[FUEL_ACTIVITY_START] Left mean: " + leftMean);
                 Log.debug("[FUEL_ACTIVITY_START] metadata: " + fuelEventMetadata);
 
             }
@@ -100,29 +83,13 @@ public class FuelDataActivityChecker {
 
         if (diffInMeans < fuelLevelChangeThreshold && deviceFuelEventMetadata.containsKey(lookupKey)) {
 
-                Position midPointPosition = readingsForDevice.get(0);
-
-                double thresholdForEnd = rightMean > leftMean? 0.05 : -0.05;
-
-                for (int j = midPoint; j > 0; j--) {
-                    double diffInRaw = readingsForDevice.get(j).getDouble(Position.KEY_CALIBRATED_FUEL_LEVEL) -
-                                       readingsForDevice.get(j-1).getDouble(Position.KEY_CALIBRATED_FUEL_LEVEL);
-
-                    if (rightMean > leftMean && diffInRaw >= thresholdForEnd) {
-                        midPointPosition = readingsForDevice.get(j);
-                        break;
-                    } else if (rightMean < leftMean && diffInRaw <= thresholdForEnd) {
-                        midPointPosition = readingsForDevice.get(j);
-                        break;
-                    }
-                }
-
+            Position midPointPosition = readingsForDevice.get(midPoint);
             FuelEventMetadata fuelEventMetadata = deviceFuelEventMetadata.get(lookupKey);
-            fuelEventMetadata.setEndLevel((double) midPointPosition.getAttributes()
-                                                                   .get(Position.KEY_CALIBRATED_FUEL_LEVEL));
+            fuelEventMetadata.setEndLevel(rightMean);
             fuelEventMetadata.setErrorCheckEnd((double) readingsForDevice.get(readingsForDevice.size() - 1)
                                                                          .getAttributes()
                                                                          .get(Position.KEY_CALIBRATED_FUEL_LEVEL));
+
             fuelEventMetadata.setEndTime(midPointPosition.getDeviceTime());
             fuelEventMetadata.setActivityEndPosition(midPointPosition);
 
@@ -142,6 +109,7 @@ public class FuelDataActivityChecker {
             Log.debug("[FUEL_ACTIVITY_END] rawFuelValues that crossed threshold for deviceId: " + deviceId
                               + " - " + rawFuelValuesInReadings);
             Log.debug("[FUEL_ACTIVITY_END] corresponding timestamps: " + timestamps);
+            Log.debug("[FUEL_ACTIVITY_START] Right mean: " + rightMean);
             Log.debug("[FUEL_ACTIVITY_END] Midpoint: " + midPointPosition.getAttributes()
                                                                          .get(Position.KEY_CALIBRATED_FUEL_LEVEL));
             Log.debug("[FUEL_ACTIVITY_END] metadata: " + fuelEventMetadata);

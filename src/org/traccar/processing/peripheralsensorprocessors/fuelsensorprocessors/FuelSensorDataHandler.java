@@ -261,6 +261,10 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         this.loadingOldDataFromDB = true;
         Collection<Device> devices = Context.getDeviceManager().getAllDevices();
 
+        if (this.hoursOfDataToLoad == 0) {
+            return;
+        }
+
         // Load latest 24 hour of data for device
         try {
 

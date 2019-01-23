@@ -21,7 +21,7 @@ public class AquilaAEventsHandlerTest {
         Position position = new Position();
 
         position.set(Position.KEY_CASE_OPEN, true);
-        position.set(Position.KEY_EXTERNAL_BATTERY_DISCONNECT, true);
+        position.set(Position.KEY_OVERSPEED_START, true);
         position.setValid(true);
         position.setDeviceTime(new Date());
         Map<Event, Position> events = aquilaAEventsHandler.analyzePosition(position);
