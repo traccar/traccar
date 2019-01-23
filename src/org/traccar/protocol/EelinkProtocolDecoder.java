@@ -273,6 +273,10 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 position.set("co2", buf.readUnsignedInt());
             }
 
+            if (buf.readableBytes() >= 2) {
+                position.set(Position.PREFIX_TEMP + 2, buf.readUnsignedShort() / 16.0);
+            }
+
         }
 
         return position;
