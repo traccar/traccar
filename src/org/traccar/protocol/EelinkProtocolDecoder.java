@@ -17,6 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.socket.DatagramChannel;
 import org.traccar.BaseProtocolDecoder;
@@ -61,13 +62,6 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_OBD_CODE = 0x19;
     public static final int MSG_CAMERA_INFO = 0x1E;
     public static final int MSG_CAMERA_DATA = 0x1F;
-
-    private void sendResponse(Channel channel, SocketAddress remoteAddress, String uniqueId, int type, int index) {
-        if (channel != null) {
-            channel.writeAndFlush(new NetworkMessage(EelinkProtocolEncoder.encodeContent(
-                    channel instanceof DatagramChannel, uniqueId, type, index, null), remoteAddress));
-        }
-    }
 
     private String decodeAlarm(Short value) {
         switch (value) {
@@ -356,7 +350,18 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         int index = buf.readUnsignedShort();
 
         if (type != MSG_GPS && type != MSG_DATA) {
-            sendResponse(channel, remoteAddress, uniqueId, type, index);
+            ByteBuf content = Unpooled.buffer();
+            if (type == MSG_LOGIN) {
+                content.writeInt((int) (System.currentTimeMillis() / 1000));
+                content.writeByte(1); // protocol version
+                content.writeByte(0); // action mask
+            }
+            ByteBuf response = EelinkProtocolEncoder.encodeContent(
+                    channel instanceof DatagramChannel, uniqueId, type, index, content);
+            content.release();
+            if (channel != null) {
+                channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+            }
         }
 
         if (type == MSG_LOGIN) {
