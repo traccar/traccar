@@ -595,6 +595,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
         if (channel != null) {
             ByteBuf response = Unpooled.buffer();
+            response.writeShort(0x7878);
             response.writeByte(0);
             response.writeByte(type);
             response.writeBytes(time.resetReaderIndex());
