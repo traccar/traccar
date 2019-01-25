@@ -766,7 +766,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 position.set("iccid", ByteBufUtil.hexDump(buf.readSlice(8)));
                 return position;
             } else if (subType == 0x0d) {
-                buf.skipBytes(6);
+                if (buf.getByte(buf.readerIndex()) != '!') {
+                    buf.skipBytes(6);
+                }
                 return decodeFuelData(position, buf.toString(
                         buf.readerIndex(), buf.readableBytes() - 4 - 2, StandardCharsets.US_ASCII));
             }
