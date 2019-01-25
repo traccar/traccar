@@ -317,6 +317,12 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         return positions;
     }
 
+    private boolean checkFlexBitfield(int index) {
+        int byteIndex = Math.floorDiv(index, 8);
+        int bitIndex = Math.floorMod(index, 8);
+        return BitUtil.check(flexBitfield[byteIndex], 7 - bitIndex);
+    }
+
     private void skipFlexField(int index, ByteBuf buf) {
         if (index < FLEX_FIELDS_SIZES.length) {
             buf.skipBytes(FLEX_FIELDS_SIZES[index]);
@@ -335,7 +341,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         short output = 0;
 
         for (int i = 0; i < flexBitfieldDataSize; i++) {
-            if ((flexBitfield[(int) (i / 8)] & (0x80 >> i % 8)) == 0) {
+            if (!checkFlexBitfield(i)) {
                 // Skip FLEX field
                 continue;
             }
@@ -597,7 +603,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
         flexDataSize = 0;
         for (int i = 0; i < flexBitfieldDataSize; i++) {
-            if ((flexBitfield[(int) (i / 8)] & (0x80 >> i % 8)) != 0) {
+            if (checkFlexBitfield(i)) {
                 flexDataSize += FLEX_FIELDS_SIZES[i];
             }
         }
