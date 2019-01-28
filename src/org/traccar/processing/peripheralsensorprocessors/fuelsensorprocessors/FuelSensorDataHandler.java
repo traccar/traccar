@@ -425,7 +425,8 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
         // At this point we know indexOfPositionEvaluation in the new window is not an outlier. So if we haven't found
         // the first outlier in the last window yet, go find it.
-        boolean possibleDataLoss = possibleDataLossByDevice.getOrDefault(deviceId, false);
+        // TODO: REMOVE TEMP SKIPPING FOR DEVICE 6
+        boolean possibleDataLoss = deviceId == 6? false : possibleDataLossByDevice.getOrDefault(deviceId, false);
         if (possibleDataLoss && !nonOutlierInLastWindowByDevice.containsKey(deviceId)) {
             Optional<Position> nonOutlierInLastWindow =
                     findFirstNonOutlierInLastWindow(outlierCheckPosition, relevantPositionsListForOutliers.size());

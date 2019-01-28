@@ -41,6 +41,7 @@
     <entry key='processing.peripheralSensorData.fuelLevelChangeThresholdLiters'>5</entry>
     <entry key='processing.peripheralSensorData.fuelErrorThreshold'>0.75</entry>
     <entry key='processing.peripheralSensorData.deviationMultiplier'>1.0</entry>
+    <entry key='processing.peripheralSensorData.batteryEventsThreshold'>5</entry>
 
     <entry key='processing.minimumAverageMileage'>1.5</entry>
     <entry key='processing.maximumAverageMileage'>4.0</entry>
