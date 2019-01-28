@@ -693,6 +693,11 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodeFlex(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
 
+        if (buf.getByte(buf.readerIndex()) == 0x7F) {
+            // Keep alive message
+            return null;
+        }
+
         String type = buf.toString(buf.readerIndex(), 2, StandardCharsets.US_ASCII);
         buf.skipBytes(type.length());
 
@@ -727,11 +732,6 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ByteBuf buf = (ByteBuf) msg;
-
-        if (buf.getByte(buf.readerIndex()) == 0x7F) {
-            // FLEX keep alive message
-            return null;
-        }
 
         if (flexDataSize > 0) {
             return decodeFlex(channel, remoteAddress, buf);
