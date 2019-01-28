@@ -41,15 +41,15 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
     private String prefix;
     private long deviceUniqueId, serverId;
-    private int flexDataSize;  // Bytes
-    private int flexBitfieldDataSize;  // Bits
+    private int flexDataSize; // bytes
+    private int flexBitfieldDataSize; // bits
     private final byte[] flexBitfield;
     private static final Logger LOGGER = LoggerFactory.getLogger(NavisProtocolDecoder.class);
     private static final int[] FLEX_FIELDS_SIZES = {4, 2, 4, 1, 1, 1, 1, 1, 4, 4, 4, 4, 4, 2, 4, 4, 2, 2,
         2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 4, 4, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1,
         1, 2, 4, 2, 1, 4, 2, 2, 2, 2, 2, 1, 1, 1, 2, 4, 2, 1, /* FLEX 2.0 */ 8, 2, 1, 16, 4, 2, 4, 37, 1,
         1, 1, 1, 1, 1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 6, 12, 24, 48, 1, 1, 1, 1, 4, 4, 1, 4, 2, 6, 2, 6, 2,
-        2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1};  // Bytes
+        2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1}; // bytes
 
     public NavisProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -342,7 +342,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
         for (int i = 0; i < flexBitfieldDataSize; i++) {
             if (!checkFlexBitfield(i)) {
-                // Skip FLEX field
+                // skip FLEX field
                 continue;
             }
 
@@ -458,7 +458,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
                 case 51:
                     position.set(Position.PREFIX_TEMP + (i - 43), buf.readByte());
                     break;
-                case 68:  // CAN Speed
+                case 68: // CAN Speed
                     position.set("can-speed", buf.readUnsignedByte());
                     break;
                 // FLEX 2.0
@@ -507,7 +507,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
         // Check buffer size and struct version
         if (length <= buf.readableBytes() && buf.readUnsignedByte() == 0x0A) {
-            buf.readUnsignedByte();  // Length of static part
+            buf.readUnsignedByte(); // length of static part
 
             index = buf.readUnsignedIntLE();
             position.set(Position.KEY_INDEX, index);
@@ -527,7 +527,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
             position.setCourse(buf.readUnsignedShortLE());
             position.set(Position.KEY_ODOMETER, buf.readFloatLE() * 1000);
 
-            buf.skipBytes(length - buf.readerIndex() - 1);  // Skip unused part
+            buf.skipBytes(length - buf.readerIndex() - 1); // skip unused part
         }
 
         return new ParseResult(index, position);
@@ -539,7 +539,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
     private Object processFlexSingle(
             FlexPositionParser parser, String flexHeader, DeviceSession deviceSession, Channel channel, ByteBuf buf) {
-        buf.readUnsignedInt(); // Event index
+        buf.readUnsignedInt(); // event index
 
         ParseResult result = parser.parsePosition(deviceSession, buf);
 
@@ -652,14 +652,14 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
     private Object decodeNtcb(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
 
         prefix = buf.toString(buf.readerIndex(), 4, StandardCharsets.US_ASCII);
-        buf.skipBytes(prefix.length());  // Prefix @NTC by default
+        buf.skipBytes(prefix.length()); // prefix @NTC by default
         serverId = buf.readUnsignedIntLE();
         deviceUniqueId = buf.readUnsignedIntLE();
         int length = buf.readUnsignedShortLE();
-        buf.skipBytes(2);  // Header and data XOR checksum
+        buf.skipBytes(2); // header and data XOR checksum
 
         if (length == 0) {
-            return null;  // Keep alive message
+            return null; // keep alive message
         }
 
         String type = buf.toString(buf.readerIndex(), 3, StandardCharsets.US_ASCII);
@@ -676,7 +676,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
                             return processNtcbArray(deviceSession, channel, buf);
                         case "*>T":
                             return processNtcbSingle(deviceSession, channel, buf);
-                        case "*>F":  // "*>FLEX"
+                        case "*>F": // "*>FLEX"
                             buf.skipBytes(3);
                             return processFlexNegotiation(channel, buf);
                         default:
@@ -694,7 +694,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
     private Object decodeFlex(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
 
         if (buf.getByte(buf.readerIndex()) == 0x7F) {
-            // Keep alive message
+            // keep alive message
             return null;
         }
 
