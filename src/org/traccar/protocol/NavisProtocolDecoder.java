@@ -649,6 +649,79 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private Object decodeNtcb(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
+
+        prefix = buf.toString(buf.readerIndex(), 4, StandardCharsets.US_ASCII);
+        buf.skipBytes(prefix.length());  // Prefix @NTC by default
+        serverId = buf.readUnsignedIntLE();
+        deviceUniqueId = buf.readUnsignedIntLE();
+        int length = buf.readUnsignedShortLE();
+        buf.skipBytes(2);  // Header and data XOR checksum
+
+        if (length == 0) {
+            return null;  // Keep alive message
+        }
+
+        String type = buf.toString(buf.readerIndex(), 3, StandardCharsets.US_ASCII);
+        buf.skipBytes(type.length());
+
+        if (type.equals("*>S")) {
+            return processHandshake(channel, remoteAddress, buf);
+        } else {
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+            if (deviceSession != null) {
+                try {
+                    switch (type) {
+                        case "*>A":
+                            return processNtcbArray(deviceSession, channel, buf);
+                        case "*>T":
+                            return processNtcbSingle(deviceSession, channel, buf);
+                        case "*>F":  // "*>FLEX"
+                            buf.skipBytes(3);
+                            return processFlexNegotiation(channel, buf);
+                        default:
+                            break;
+                    }
+                } catch (IndexOutOfBoundsException error) {
+                    LOGGER.warn("Navis NTCB message parsing error", error);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private Object decodeFlex(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
+
+        String type = buf.toString(buf.readerIndex(), 2, StandardCharsets.US_ASCII);
+        buf.skipBytes(type.length());
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+        if (deviceSession != null) {
+            try {
+                switch (type) {
+                    // FLEX 1.0
+                    case "~A":
+                        return processFlexArray(this::parseFlexPosition, type, deviceSession, channel, buf);
+                    case "~T":
+                    case "~C":
+                        return processFlexSingle(this::parseFlexPosition, type, deviceSession, channel, buf);
+                    // FLEX 2.0 (Extra packages)
+                    case "~E":
+                        return processFlexArray(this::parseFlex20Position, type, deviceSession, channel, buf);
+                    case "~X":
+                        return processFlexSingle(this::parseFlex20Position, type, deviceSession, channel, buf);
+                    default:
+                        break;
+                }
+            } catch (IndexOutOfBoundsException error) {
+                LOGGER.warn("Navis FLEX message parsing error", error);
+            }
+        }
+
+        return null;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -658,71 +731,13 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         if (buf.getByte(buf.readerIndex()) == 0x7F) {
             // FLEX keep alive message
             return null;
-        } else if (buf.getByte(buf.readerIndex()) == 0x7E) {  // "~"
-            // FLEX message
-            try {
-                DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
-                if (deviceSession != null) {
-                    switch (buf.readShortLE()) {
-                        // FLEX 1.0
-                        case 0x417E:  // "~A"
-                            return processFlexArray(this::parseFlexPosition, "~A", deviceSession, channel, buf);
-                        case 0x547E:  // "~T"
-                            return processFlexSingle(this::parseFlexPosition, "~T", deviceSession, channel, buf);
-                        case 0x437E:  // "~C"
-                            return processFlexSingle(this::parseFlexPosition, "~C", deviceSession, channel, buf);
-                        // FLEX 2.0 (Extra packages)
-                        case 0x457E:  // "~E"
-                            return processFlexArray(this::parseFlex20Position, "~E", deviceSession, channel, buf);
-                        case 0x587E:  // "~X"
-                            return processFlexSingle(this::parseFlex20Position, "~X", deviceSession, channel, buf);
-                        default:
-                            break;
-                    }
-                }
-            } catch (IndexOutOfBoundsException error) {
-                LOGGER.warn("Navis FLEX message parsing error", error);
-            }
-        } else {
-            // NTCB message
-            prefix = buf.toString(buf.readerIndex(), 4, StandardCharsets.US_ASCII);
-            buf.skipBytes(prefix.length());  // Prefix @NTC by default
-            serverId = buf.readUnsignedIntLE();
-            deviceUniqueId = buf.readUnsignedIntLE();
-            int length = buf.readUnsignedShortLE();
-            buf.skipBytes(2);  // Header and data XOR checksum
-
-            if (length == 0) {
-                return null;  // Keep alive message
-            }
-
-            int type = buf.getIntLE(buf.readerIndex());
-            buf.skipBytes(3);
-            if ((type & 0xFFFFFF) == 0x533E2AL) {  // "*>S"
-                return processHandshake(channel, remoteAddress, buf);
-            } else {
-                DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
-                if (deviceSession != null) {
-                    try {
-                        switch (type & 0xFFFFFF) {
-                            case 0x413E2A:  // "*>A"
-                                return processNtcbArray(deviceSession, channel, buf);
-                            case 0x543E2A:  // "*>T"
-                                return processNtcbSingle(deviceSession, channel, buf);
-                            case 0x463E2A:  // "*>F" (*>FLEX)
-                                buf.skipBytes(3);
-                                return processFlexNegotiation(channel, buf);
-                            default:
-                                break;
-                        }
-                    } catch (IndexOutOfBoundsException error) {
-                        LOGGER.warn("Navis NTCB message parsing error", error);
-                    }
-                }
-            }
         }
 
-        return null;
+        if (flexDataSize > 0) {
+            return decodeFlex(channel, remoteAddress, buf);
+        } else {
+            return decodeNtcb(channel, remoteAddress, buf);
+        }
     }
 
     public int getFlexDataSize() {

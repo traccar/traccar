@@ -15,9 +15,6 @@ public class NavisProtocolDecoderTest extends ProtocolTest {
         verifyNull(decoder, binary(
                 "404E5443010000007B000000130044342A3E533A383631373835303035323035303739"));
 
-        verifyNull(decoder, binary(
-                "404E5443010000007B000000130047372A3E533A383631373835303035313236303639"));
-
         // NTCB F5.2 - Single
         verifyPosition(decoder, binary(
                 "404e5443010000000000000059009adb2a3e54250000000000ff1500040b0a1008291838001200760ee600000000000000000000000f1500040b0a10ac20703fb1aec23f00000000320149668f430000000000000000000000000000000000000000000000f3808080"),
@@ -54,6 +51,12 @@ public class NavisProtocolDecoderTest extends ProtocolTest {
         // FLEX 1.0 - Array (1 message)
         verifyPositions(decoder, binary(
                 "7e4101080000000917c057405c002b001833c057405cbbce030225129101a00300007c6102408900400c1b3cfce3b23a12004710e000000000001bff7f000080bfffff80000080bfffffffffb2"));
+
+        decoder = new NavisProtocolDecoder(null);
+
+        // Handshake
+        verifyNull(decoder, binary(
+                "404E5443010000007B000000130047372A3E533A383631373835303035313236303639"));
 
         // FLEX 2.0 - Negotiation
         verifyNull(decoder, binary(
