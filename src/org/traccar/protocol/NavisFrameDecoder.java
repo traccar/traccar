@@ -19,6 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.TooLongFrameException;
+import java.nio.charset.StandardCharsets;
 import org.traccar.BaseFrameDecoder;
 
 public class NavisFrameDecoder extends BaseFrameDecoder {
@@ -46,31 +47,31 @@ public class NavisFrameDecoder extends BaseFrameDecoder {
         if (buf.getByte(buf.readerIndex()) == 0x7F) {
             // FLEX keep alive frame
             return buf.readRetainedSlice(1);
-        } else if (buf.getByte(buf.readerIndex()) == 0x7E /* "~" */) {
+        }
+
+        if (protocolDecoder.getFlexDataSize() > 0) {
             // FLEX frame
-            if (protocolDecoder.getFlexDataSize() == 0) {
-                return null;
-            }
             if (buf.readableBytes() > MAX_FRAME_LENGTH) {
                 throw new TooLongFrameException();
             }
 
             if (buf.readableBytes() > FLEX_HEADER_LENGTH) {
                 int length = 0;
-                switch (buf.getByte(buf.readerIndex() + 1)) {
+                String type = buf.toString(buf.readerIndex(), 2, StandardCharsets.US_ASCII);
+                switch (type) {
                     // FLEX 1.0
-                    case 0x41:  // "A"
+                    case "~A":
                         length = protocolDecoder.getFlexDataSize()
-                                * buf.getByte(buf.readerIndex() + FLEX_HEADER_LENGTH) + 2;
+                                * buf.getByte(buf.readerIndex() + FLEX_HEADER_LENGTH) + 1 + 1;
                         break;
-                    case 0x54:  // "T"
-                        length = protocolDecoder.getFlexDataSize() + 5;
+                    case "~T":
+                        length = protocolDecoder.getFlexDataSize() + 4 + 1;
                         break;
-                    case 0x43:  // "C"
+                    case "~C":
                         length = protocolDecoder.getFlexDataSize() + 1;
                         break;
                     // FLEX 2.0 (Extra packages)
-                    case 0x45:  // "E"
+                    case "~E":
                         length++;
                         for (int i = 0; i < buf.getByte(buf.readerIndex() + FLEX_HEADER_LENGTH); i++) {
                             if (buf.readableBytes() > FLEX_HEADER_LENGTH + length + 1) {
@@ -81,11 +82,11 @@ public class NavisFrameDecoder extends BaseFrameDecoder {
                         }
                         length++;
                         break;
-                    case 0x58:  // "X"
-                        length = buf.getUnsignedShortLE(buf.readerIndex() + FLEX_HEADER_LENGTH) + 7;
+                    case "~X":
+                        length = buf.getUnsignedShortLE(buf.readerIndex() + FLEX_HEADER_LENGTH) + 4 + 1;
                         break;
                     default:
-                        break;
+                        return null;
                 }
 
                 if (buf.readableBytes() >= FLEX_HEADER_LENGTH + length) {
