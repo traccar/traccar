@@ -539,7 +539,9 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
     private Object processFlexSingle(
             FlexPositionParser parser, String flexHeader, DeviceSession deviceSession, Channel channel, ByteBuf buf) {
-        buf.readUnsignedInt(); // event index
+        if (!flexHeader.equals("~C")) {
+            buf.readUnsignedInt(); // event index
+        }
 
         ParseResult result = parser.parsePosition(deviceSession, buf);
 
