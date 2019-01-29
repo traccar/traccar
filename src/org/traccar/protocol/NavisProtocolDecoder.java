@@ -588,24 +588,26 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
         flexProtocolVersion = (byte) buf.readUnsignedByte();
         flexStructVersion = (byte) buf.readUnsignedByte();
-        if (flexProtocolVersion != (byte) 0x0A && flexProtocolVersion != (byte) 0x14) {
-            return null;
-        }
-        if (flexStructVersion != (byte) 0x0A && flexStructVersion != (byte) 0x14) {
-            return null;
-        }
+        if ((flexProtocolVersion == (byte) 0x0A ||  flexProtocolVersion == (byte) 0x14)
+            && (flexStructVersion == (byte) 0x0A || flexStructVersion == (byte) 0x14)) {
 
-        flexBitfieldDataSize = buf.readUnsignedByte();
-        if (flexBitfieldDataSize > 122) {
-            return null;
-        }
-        buf.readBytes(flexBitfield, 0, (int) Math.ceil((double) flexBitfieldDataSize / 8));
-
-        flexDataSize = 0;
-        for (int i = 0; i < flexBitfieldDataSize; i++) {
-            if (checkFlexBitfield(i)) {
-                flexDataSize += FLEX_FIELDS_SIZES[i];
+            flexBitfieldDataSize = buf.readUnsignedByte();
+            if (flexBitfieldDataSize > 122) {
+                return null;
             }
+
+            buf.readBytes(flexBitfield, 0, (int) Math.ceil((double) flexBitfieldDataSize / 8));
+
+            flexDataSize = 0;
+            for (int i = 0; i < flexBitfieldDataSize; i++) {
+                if (checkFlexBitfield(i)) {
+                    flexDataSize += FLEX_FIELDS_SIZES[i];
+                }
+            }
+        } else {
+            // Prepare request for downgrade of protocol version to FLEX 2.0
+            flexProtocolVersion = 0x14;
+            flexStructVersion = 0x14;
         }
 
         ByteBuf response = Unpooled.buffer(9);
