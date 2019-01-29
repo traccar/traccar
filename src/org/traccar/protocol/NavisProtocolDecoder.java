@@ -588,7 +588,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
         flexProtocolVersion = (byte) buf.readUnsignedByte();
         flexStructVersion = (byte) buf.readUnsignedByte();
-        if ((flexProtocolVersion == (byte) 0x0A ||  flexProtocolVersion == (byte) 0x14)
+        if ((flexProtocolVersion == (byte) 0x0A || flexProtocolVersion == (byte) 0x14)
             && (flexStructVersion == (byte) 0x0A || flexStructVersion == (byte) 0x14)) {
 
             flexBitfieldDataSize = buf.readUnsignedByte();
@@ -605,7 +605,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
         } else {
-            // Prepare request for downgrade of protocol version to FLEX 2.0
+            // Preparing request to downgrade protocol version to FLEX 2.0
             flexProtocolVersion = 0x14;
             flexStructVersion = 0x14;
         }
