@@ -89,11 +89,11 @@ public class SatsolProtocolDecoder extends BaseProtocolDecoder {
 
         if (channel != null) {
             ByteBuf response = Unpooled.buffer();
-            buf.writeShortLE(0);
-            buf.writeShortLE(0x4CBF); // preamble
-            buf.writeIntLE((int) id);
-            buf.writeShortLE(0);
-            buf.setShortLE(0, Checksum.crc16(
+            response.writeShortLE(0);
+            response.writeShortLE(0x4CBF); // preamble
+            response.writeIntLE((int) id);
+            response.writeShortLE(0);
+            response.setShortLE(0, Checksum.crc16(
                     Checksum.CRC16_CCITT_FALSE, response.nioBuffer(2, response.readableBytes() - 2)));
             channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
