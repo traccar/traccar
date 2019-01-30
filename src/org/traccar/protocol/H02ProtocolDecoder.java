@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -163,16 +163,12 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .expression("..,")                   // manufacturer
             .number("(d+)?,")                    // imei
             .groupBegin()
-            .text("VP1,")
-            .or()
-            .groupBegin()
             .text("V4,")
             .expression("(.*),")                 // response
             .or()
             .expression("(V[^,]*),")
             .groupEnd()
             .number("(?:(dd)(dd)(dd))?,")        // time (hhmmss)
-            .groupEnd()
             .groupBegin()
             .expression("([ABV])?,")             // validity
             .or()
@@ -266,6 +262,28 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd)(dd)(dd),")             // date (ddmmyy)
             .number("(x{8})")                    // status
             .text("#").optional()
+            .compile();
+
+    private static final Pattern PATTERN_VP1 = new PatternBuilder()
+            .text("*hq,")
+            .number("(d{15}),")                  // imei
+            .text("VP1,")
+            .groupBegin()
+            .text("V,")
+            .number("(d+),")                     // mcc
+            .number("(d+),")                     // mnc
+            .expression("([^#]+)")               // cells
+            .or()
+            .expression("[AB],")                 // validity
+            .number("(d+)(dd.d+),")              // latitude
+            .expression("([NS]),")
+            .number("(d+)(dd.d+),")              // longitude
+            .expression("([EW]),")
+            .number("(d+.d+),")                  // speed
+            .number("(d+.d+),")                  // course
+            .number("(dd)(dd)(dd)")              // date (ddmmyy)
+            .groupEnd()
+            .any()
             .compile();
 
     private void sendResponse(Channel channel, SocketAddress remoteAddress, String id, String type) {
@@ -478,6 +496,53 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private Position decodeVp1(String sentence, Channel channel, SocketAddress remoteAddress) {
+
+        Parser parser = new Parser(PATTERN_VP1, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        if (parser.hasNext(3)) {
+
+            getLastLocation(position, null);
+
+            int mcc = parser.nextInt();
+            int mnc = parser.nextInt();
+
+            Network network = new Network();
+            for (String cell : parser.next().split("Y")) {
+                String[] values = cell.split(",");
+                network.addCellTower(CellTower.from(mcc, mnc,
+                        Integer.parseInt(values[0]), Integer.parseInt(values[1]), Integer.parseInt(values[2])));
+            }
+
+            position.setNetwork(network);
+
+        } else {
+
+            position.setValid(true);
+            position.setLatitude(parser.nextCoordinate());
+            position.setLongitude(parser.nextCoordinate());
+            position.setSpeed(parser.nextDouble());
+            position.setCourse(parser.nextDouble());
+
+            position.setTime(new DateBuilder()
+                    .setDateReverse(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0)).getDate());
+
+        }
+
+        return position;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -499,6 +564,8 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
                             return decodeLink(sentence, channel, remoteAddress);
                         case "V3":
                             return decodeV3(sentence, channel, remoteAddress);
+                        case "VP1":
+                            return decodeVp1(sentence, channel, remoteAddress);
                         default:
                             return decodeText(sentence, channel, remoteAddress);
                     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,6 +88,8 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
 
         ByteBuf buf = (ByteBuf) msg;
 
+        boolean alternative = buf.getByte(buf.readerIndex() + 3) != 'P';
+
         buf.skipBytes(4); // system code
         int type = buf.readUnsignedByte();
         long deviceUniqueId = buf.readUnsignedIntLE();
@@ -111,40 +113,60 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Position.KEY_VERSION_HW, buf.readUnsignedByte());
             position.set(Position.KEY_VERSION_FW, buf.readUnsignedByte());
-            position.set("protocolVersion", buf.readUnsignedByte());
+            buf.readUnsignedByte(); // protocol version
 
-            position.set(Position.KEY_STATUS, buf.getUnsignedByte(buf.readerIndex()) & 0x0f);
+            position.set(Position.KEY_STATUS, buf.readUnsignedByte() & 0x0f);
 
-            int operator = (buf.readUnsignedByte() & 0xf0) << 4;
-            operator += buf.readUnsignedByte();
+            if (alternative) {
+                buf.readUnsignedByte(); // configuration flags
+            } else {
+                buf.readUnsignedByte(); // operator
+            }
 
             buf.readUnsignedByte(); // reason data
             position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
 
             position.set("mode", buf.readUnsignedByte());
-            position.set(Position.PREFIX_IO + 1, buf.readUnsignedIntLE());
+            position.set(Position.KEY_INPUT, buf.readUnsignedIntLE());
 
-            operator <<= 8;
-            operator += buf.readUnsignedByte();
-            position.set(Position.KEY_OPERATOR, operator);
+            if (alternative) {
+                buf.readUnsignedByte(); // input
+                position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShortLE());
+                position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShortLE());
+            } else {
+                buf.readUnsignedByte(); // operator
+                position.set(Position.PREFIX_ADC + 1, buf.readUnsignedIntLE());
+            }
 
-            position.set(Position.PREFIX_ADC + 1, buf.readUnsignedIntLE());
             position.set(Position.KEY_ODOMETER, buf.readUnsignedMediumLE());
-            buf.skipBytes(6); // multi-purpose data
 
-            position.set(Position.KEY_GPS, buf.readUnsignedShortLE());
-            position.set("locationStatus", buf.readUnsignedByte());
-            position.set("mode1", buf.readUnsignedByte());
-            position.set("mode2", buf.readUnsignedByte());
+            buf.skipBytes(6); // multi-purpose data
+            buf.readUnsignedShortLE(); // fix time
+            buf.readUnsignedByte(); // location status
+            buf.readUnsignedByte(); // mode 1
+            buf.readUnsignedByte(); // mode 2
 
             position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
 
             position.setValid(true);
-            position.setLongitude(buf.readIntLE() / Math.PI * 180 / 100000000);
-            position.setLatitude(buf.readIntLE() / Math.PI * 180 / 100000000.0);
+
+            if (alternative) {
+                position.setLongitude(buf.readIntLE() / 10000000.0);
+                position.setLatitude(buf.readIntLE() / 10000000.0);
+            } else {
+                position.setLongitude(buf.readIntLE() / Math.PI * 180 / 100000000);
+                position.setLatitude(buf.readIntLE() / Math.PI * 180 / 100000000);
+            }
+
             position.setAltitude(buf.readIntLE() * 0.01);
-            position.setSpeed(UnitsConverter.knotsFromMps(buf.readIntLE() * 0.01));
-            position.setCourse(buf.readUnsignedShortLE() / Math.PI * 180.0 / 1000.0);
+
+            if (alternative) {
+                position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedIntLE()));
+                position.setCourse(buf.readUnsignedShortLE() / 1000.0);
+            } else {
+                position.setSpeed(UnitsConverter.knotsFromMps(buf.readUnsignedIntLE() * 0.01));
+                position.setCourse(buf.readUnsignedShortLE() / Math.PI * 180.0 / 1000.0);
+            }
 
             DateBuilder dateBuilder = new DateBuilder()
                     .setTimeReverse(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())

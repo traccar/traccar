@@ -37,6 +37,7 @@ public class WatchProtocol extends BaseProtocol {
                 Command.TYPE_SILENCE_TIME,
                 Command.TYPE_ALARM_CLOCK,
                 Command.TYPE_SET_PHONEBOOK,
+                Command.TYPE_MESSAGE,
                 Command.TYPE_VOICE_MESSAGE,
                 Command.TYPE_SET_TIMEZONE,
                 Command.TYPE_SET_INDICATOR);

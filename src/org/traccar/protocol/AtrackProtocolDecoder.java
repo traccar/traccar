@@ -381,7 +381,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // speed
             .number("(d+),")                     // outputs
             .number("(d+),")                     // adc
-            .number("[^,]*,")                    // driver
+            .number("([^,]+)?,")                 // driver
             .number("(d+),")                     // temp1
             .number("(d+),")                     // temp2
             .expression("[^,]*,")                // text message
@@ -455,6 +455,11 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_OUTPUT, parser.nextInt());
         position.set(Position.PREFIX_ADC + 1, parser.nextInt());
+
+        if (parser.hasNext()) {
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
+        }
+
         position.set(Position.PREFIX_TEMP + 1, parser.nextInt());
         position.set(Position.PREFIX_TEMP + 2, parser.nextInt());
 
