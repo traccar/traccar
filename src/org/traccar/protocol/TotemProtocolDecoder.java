@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,10 +150,14 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             .number("(dddd)")                    // adc 4
             .groupEnd("?")
             .number("(dddd)")                    // temperature 1
-            .number("(dddd)")                    // temperature 2
+            .number("(dddd)?")                   // temperature 2
             .groupEnd("?")
             .number("(xxxx)")                    // lac
             .number("(xxxx)")                    // cid
+            .groupBegin()
+            .number("(dd)")                      // mcc
+            .number("(ddd)")                     // mnc
+            .groupEnd("?")
             .number("(dd)")                      // satellites
             .number("(dd)")                      // gsm (rssi)
             .number("(ddd)")                     // course
@@ -337,29 +341,43 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 18) ? Position.ALARM_LOW_BATTERY : null);
         position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 22) ? Position.ALARM_JAMMING : null);
 
-        position.setValid(BitUtil.check(status, 32 - 20));
 
         position.setTime(parser.nextDateTime());
 
-        position.set(Position.KEY_BATTERY, parser.nextDouble(0) * 0.1);
-        position.set(Position.KEY_POWER, parser.nextDouble(0));
+        position.set(Position.KEY_BATTERY, parser.nextDouble() * 0.1);
+        position.set(Position.KEY_POWER, parser.nextDouble());
 
         position.set(Position.PREFIX_ADC + 1, parser.next());
         position.set(Position.PREFIX_ADC + 2, parser.next());
         position.set(Position.PREFIX_ADC + 3, parser.next());
         position.set(Position.PREFIX_ADC + 4, parser.next());
         position.set(Position.PREFIX_TEMP + 1, parser.next());
-        position.set(Position.PREFIX_TEMP + 2, parser.next());
 
-        CellTower cellTower = CellTower.fromLacCid(parser.nextHexInt(0), parser.nextHexInt(0));
-        position.set(Position.KEY_SATELLITES, parser.nextInt(0));
-        cellTower.setSignalStrength(parser.nextInt(0));
+        if (parser.hasNext()) {
+            position.set(Position.PREFIX_TEMP + 2, parser.next());
+            position.setValid(BitUtil.check(status, 32 - 20));
+        } else {
+            position.setValid(BitUtil.check(status, 32 - 18));
+        }
+
+        int lac = parser.nextHexInt();
+        int cid = parser.nextHexInt();
+        CellTower cellTower;
+        if (parser.hasNext(2)) {
+            int mnc = parser.nextInt();
+            int mcc = parser.nextInt();
+            cellTower = CellTower.from(mcc, mnc, lac, cid);
+        } else {
+            cellTower = CellTower.fromLacCid(lac, cid);
+        }
+        position.set(Position.KEY_SATELLITES, parser.nextInt());
+        cellTower.setSignalStrength(parser.nextInt());
         position.setNetwork(new Network(cellTower));
 
-        position.setCourse(parser.nextDouble(0));
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
-        position.set(Position.KEY_HDOP, parser.nextDouble(0));
-        position.set(Position.KEY_ODOMETER, parser.nextInt(0) * 1000);
+        position.setCourse(parser.nextDouble());
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+        position.set(Position.KEY_HDOP, parser.nextDouble());
+        position.set(Position.KEY_ODOMETER, parser.nextInt() * 1000);
 
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());

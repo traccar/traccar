@@ -13,6 +13,9 @@ public class TrvProtocolDecoderTest extends ProtocolTest {
         verifyNull(decoder, text(
                 "TRVAP00352121088015548"));
 
+        verifyNotNull(decoder, text(
+                "IWAP02,zh_cn,0,6,260,1,11002|39252|9,11002|35112|23,11002|11043|24,11002|39253|24,11002|13751|24,11018|8102|26,3,a|c0-4a-00-b6-9c-f5|64&a|c0-4a-00-b6-9c-f5|64&a|18-a6-f7-92-35-da|84"));
+
         verifyPosition(decoder, text(
                 "TRVAP01170905A5227.1382N00541.4256E001.7095844000.0008100610020100,204,8,3230,13007"));
 
@@ -25,7 +28,7 @@ public class TrvProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "IWAP01080524A2232.9806N11404.9355E000.1061830323.8706000908000102,460,0,9520,3671,Home|74-DE-2B-44-88-8C|97& Home1|74-DE-2B-44-88-8C|97&Home2|74-DE-2B-44-88-8C|97& Home3|74-DE-2B-44-88-8C|97"));
 
-        verifyNull(decoder, text(
+        verifyNotNull(decoder, text(
                 "IWAP02,zh_cn,0,7,460,0,9520|3671|13,9520|3672|12,9520|3673|11,9520|3674|10,9520|3675|9,9520|3676|8,9520|3677|7,4,1|D8-24-BD-79-FA-1F|59&2|3C-46-D8-6D-CE-01|81&3|0C-4C-39-1A-7C-65|69&4|70-A8-E3-5D-D7-C0|65"));
 
         verifyPosition(decoder, text(

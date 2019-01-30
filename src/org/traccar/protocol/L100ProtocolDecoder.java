@@ -40,6 +40,7 @@ public class L100ProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN = new PatternBuilder()
             .text("ATL")
+            .expression(",[^,]+,").optional()
             .number("(d{15}),")                  // imei
             .text("$GPRMC,")
             .number("(dd)(dd)(dd)")              // time (hhmmss.sss)
@@ -142,7 +143,7 @@ public class L100ProtocolDecoder extends BaseProtocolDecoder {
             } else {
                 return decodeObdLocation(channel, remoteAddress, sentence);
             }
-        } else if (sentence.startsWith("ATL,") || sentence.substring(0, 1).matches("[NPT]")) {
+        } else if (!sentence.contains("$GPRMC")) {
             return decodeNew(channel, remoteAddress, sentence);
         } else {
             return decodeNormal(channel, remoteAddress, sentence);

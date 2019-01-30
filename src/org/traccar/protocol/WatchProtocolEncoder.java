@@ -36,6 +36,8 @@ public class WatchProtocolEncoder extends StringProtocolEncoder implements Strin
             double offset = TimeZone.getTimeZone((String) value).getRawOffset() / 3600000.0;
             DecimalFormat fmt = new DecimalFormat("+#.##;-#.##", DecimalFormatSymbols.getInstance(Locale.US));
             return fmt.format(offset);
+        } else if (key.equals(Command.KEY_MESSAGE)) {
+            return DataConverter.printHex(value.toString().getBytes());
         }
 
         return null;
@@ -134,8 +136,10 @@ public class WatchProtocolEncoder extends StringProtocolEncoder implements Strin
                 return formatCommand(channel, command, "REMIND,{%s}", Command.KEY_DATA);
             case Command.TYPE_SET_PHONEBOOK:
                 return formatCommand(channel, command, "PHB,{%s}", Command.KEY_DATA);
+            case Command.TYPE_MESSAGE:
+                return formatCommand(channel, command, "MESSAGE,{%s}", Command.KEY_MESSAGE);
             case Command.TYPE_VOICE_MESSAGE:
-                return formatCommand(channel, command, "TK," + getBinaryData(command));
+                return formatCommand(channel, command, "TK,%s", getBinaryData(command));
             case Command.TYPE_POSITION_PERIODIC:
                 return formatCommand(channel, command, "UPLOAD,{%s}", Command.KEY_FREQUENCY);
             case Command.TYPE_SET_TIMEZONE:
