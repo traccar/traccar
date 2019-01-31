@@ -21,19 +21,16 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.TooLongFrameException;
 import java.nio.charset.StandardCharsets;
 import org.traccar.BaseFrameDecoder;
+import org.traccar.BasePipelineFactory;
 
 public class NavisFrameDecoder extends BaseFrameDecoder {
+
+    private int flexDataSize; // bytes
 
     private static final int NTCB_HEADER_LENGTH = 16;
     private static final int NTCB_LENGTH_OFFSET = 12;
     private static final int FLEX_HEADER_LENGTH = 2;
     private static final int MAX_FRAME_LENGTH = 65551;
-
-    private final NavisProtocolDecoder protocolDecoder;
-
-    public NavisFrameDecoder(NavisProtocolDecoder protocolDecoder) {
-        this.protocolDecoder = protocolDecoder;
-    }
 
     @Override
     protected Object decode(
@@ -53,7 +50,15 @@ public class NavisFrameDecoder extends BaseFrameDecoder {
             return buf.readRetainedSlice(1);
         }
 
-        if (protocolDecoder.getFlexDataSize() > 0) {
+        if (ctx != null) {
+            NavisProtocolDecoder protocolDecoder =
+                    BasePipelineFactory.getHandler(ctx.pipeline(), NavisProtocolDecoder.class);
+            if (protocolDecoder != null) {
+                flexDataSize = protocolDecoder.getFlexDataSize();
+            }
+        }
+
+        if (flexDataSize > 0) {
             // FLEX frame
             if (buf.readableBytes() > FLEX_HEADER_LENGTH) {
                 int length = 0;
@@ -61,14 +66,13 @@ public class NavisFrameDecoder extends BaseFrameDecoder {
                 switch (type) {
                     // FLEX 1.0
                     case "~A":
-                        length = protocolDecoder.getFlexDataSize()
-                                * buf.getByte(buf.readerIndex() + FLEX_HEADER_LENGTH) + 1 + 1;
+                        length = flexDataSize  * buf.getByte(buf.readerIndex() + FLEX_HEADER_LENGTH) + 1 + 1;
                         break;
                     case "~T":
-                        length = protocolDecoder.getFlexDataSize() + 4 + 1;
+                        length = flexDataSize + 4 + 1;
                         break;
                     case "~C":
-                        length = protocolDecoder.getFlexDataSize() + 1;
+                        length = flexDataSize + 1;
                         break;
                     // FLEX 2.0 (Extra packages)
                     case "~E":
@@ -106,6 +110,10 @@ public class NavisFrameDecoder extends BaseFrameDecoder {
         }
 
         return null;
+    }
+
+    public void setFlexDataSize(int flexDataSize) {
+        this.flexDataSize = flexDataSize;
     }
 
 }

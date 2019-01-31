@@ -25,9 +25,8 @@ public class NavisProtocol extends BaseProtocol {
         addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                NavisProtocolDecoder protocolDecoder = new NavisProtocolDecoder(NavisProtocol.this);
-                pipeline.addLast(new NavisFrameDecoder(protocolDecoder));
-                pipeline.addLast(protocolDecoder);
+                pipeline.addLast(new NavisFrameDecoder());
+                pipeline.addLast(new NavisProtocolDecoder(NavisProtocol.this));
             }
         });
     }
