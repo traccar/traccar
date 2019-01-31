@@ -562,8 +562,8 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        byte flexProtocolVersion = (byte) buf.readUnsignedByte();
-        byte flexStructVersion = (byte) buf.readUnsignedByte();
+        short flexProtocolVersion = buf.readUnsignedByte();
+        short flexStructVersion = buf.readUnsignedByte();
         if ((flexProtocolVersion == 0x0A || flexProtocolVersion == 0x14)
             && (flexStructVersion == 0x0A || flexStructVersion == 0x14)) {
 
