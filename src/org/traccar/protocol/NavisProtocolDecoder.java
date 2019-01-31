@@ -18,8 +18,6 @@ package org.traccar.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
@@ -44,7 +42,6 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
     private int flexDataSize; // bytes
     private int flexBitfieldDataSize; // bits
     private final byte[] flexBitfield;
-    private static final Logger LOGGER = LoggerFactory.getLogger(NavisProtocolDecoder.class);
     private static final int[] FLEX_FIELDS_SIZES = {4, 2, 4, 1, 1, 1, 1, 1, 4, 4, 4, 4, 4, 2, 4, 4, 2, 2,
         2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 4, 4, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1,
         1, 2, 4, 2, 1, 4, 2, 2, 2, 2, 2, 1, 1, 1, 2, 4, 2, 1, /* FLEX 2.0 */ 8, 2, 1, 16, 4, 2, 4, 37, 1,
@@ -323,12 +320,6 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         return BitUtil.check(flexBitfield[byteIndex], 7 - bitIndex);
     }
 
-    private void skipFlexField(int index, ByteBuf buf) {
-        if (index < FLEX_FIELDS_SIZES.length) {
-            buf.skipBytes(FLEX_FIELDS_SIZES[index]);
-        }
-    }
-
     private ParseResult parseFlexPosition(DeviceSession deviceSession, ByteBuf buf) {
 
         Position position = new Position(getProtocolName());
@@ -342,7 +333,6 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
         for (int i = 0; i < flexBitfieldDataSize; i++) {
             if (!checkFlexBitfield(i)) {
-                // skip FLEX field
                 continue;
             }
 
@@ -458,29 +448,14 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
                 case 51:
                     position.set(Position.PREFIX_TEMP + (i - 43), buf.readByte());
                     break;
-                case 68: // CAN Speed
+                case 68:
                     position.set("can-speed", buf.readUnsignedByte());
                     break;
                 // FLEX 2.0
                 case 69:
                     int satVisible = 0;
                     for (int k = 0; k < 8; k++) {
-                        switch (k) {
-                            case 0:
-                                int satVisibleGLONASS = buf.readUnsignedByte();
-                                position.set("sat-visible-glonass", satVisibleGLONASS);
-                                satVisible += satVisibleGLONASS;
-                                break;
-                            case 1:
-                                int satVisibleGPS = buf.readUnsignedByte();
-                                position.set("sat-visible-gps", satVisibleGPS);
-                                satVisible += satVisibleGPS;
-                                break;
-                            default:
-                                // Don't detalize Galileo, Compass, Beidou, DORIS, IRNSS, QZSS
-                                satVisible += buf.readUnsignedByte();
-                                break;
-                }
+                        satVisible += buf.readUnsignedByte();
                     }
                     position.set(Position.KEY_SATELLITES_VISIBLE, satVisible);
                     break;
@@ -489,7 +464,9 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_PDOP, buf.readUnsignedByte() * 0.1);
                     break;
                 default:
-                    skipFlexField(i, buf);
+                    if (i < FLEX_FIELDS_SIZES.length) {
+                        buf.skipBytes(FLEX_FIELDS_SIZES[i]);
+                    }
                     break;
             }
         }
@@ -505,7 +482,6 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         long index = 0;
         int length = buf.readUnsignedShort();
 
-        // Check buffer size and struct version
         if (length <= buf.readableBytes() && buf.readUnsignedByte() == 0x0A) {
             buf.readUnsignedByte(); // length of static part
 
@@ -586,12 +562,10 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        byte flexProtocolVersion, flexStructVersion;
-
-        flexProtocolVersion = (byte) buf.readUnsignedByte();
-        flexStructVersion = (byte) buf.readUnsignedByte();
-        if ((flexProtocolVersion == (byte) 0x0A || flexProtocolVersion == (byte) 0x14)
-            && (flexStructVersion == (byte) 0x0A || flexStructVersion == (byte) 0x14)) {
+        byte flexProtocolVersion = (byte) buf.readUnsignedByte();
+        byte flexStructVersion = (byte) buf.readUnsignedByte();
+        if ((flexProtocolVersion == 0x0A || flexProtocolVersion == 0x14)
+            && (flexStructVersion == 0x0A || flexStructVersion == 0x14)) {
 
             flexBitfieldDataSize = buf.readUnsignedByte();
             if (flexBitfieldDataSize > 122) {
@@ -674,20 +648,16 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         } else {
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
             if (deviceSession != null) {
-                try {
-                    switch (type) {
-                        case "*>A":
-                            return processNtcbArray(deviceSession, channel, buf);
-                        case "*>T":
-                            return processNtcbSingle(deviceSession, channel, buf);
-                        case "*>F": // "*>FLEX"
-                            buf.skipBytes(3);
-                            return processFlexNegotiation(channel, buf);
-                        default:
-                            break;
-                    }
-                } catch (IndexOutOfBoundsException error) {
-                    LOGGER.warn("Navis NTCB message parsing error", error);
+                switch (type) {
+                    case "*>A":
+                        return processNtcbArray(deviceSession, channel, buf);
+                    case "*>T":
+                        return processNtcbSingle(deviceSession, channel, buf);
+                    case "*>F":
+                        buf.skipBytes(3);
+                        return processFlexNegotiation(channel, buf);
+                    default:
+                        break;
                 }
             }
         }
@@ -707,24 +677,20 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
         if (deviceSession != null) {
-            try {
-                switch (type) {
-                    // FLEX 1.0
-                    case "~A":
-                        return processFlexArray(this::parseFlexPosition, type, deviceSession, channel, buf);
-                    case "~T":
-                    case "~C":
-                        return processFlexSingle(this::parseFlexPosition, type, deviceSession, channel, buf);
-                    // FLEX 2.0 (Extra packages)
-                    case "~E":
-                        return processFlexArray(this::parseFlex20Position, type, deviceSession, channel, buf);
-                    case "~X":
-                        return processFlexSingle(this::parseFlex20Position, type, deviceSession, channel, buf);
-                    default:
-                        break;
-                }
-            } catch (IndexOutOfBoundsException error) {
-                LOGGER.warn("Navis FLEX message parsing error", error);
+            switch (type) {
+                // FLEX 1.0
+                case "~A":
+                    return processFlexArray(this::parseFlexPosition, type, deviceSession, channel, buf);
+                case "~T":
+                case "~C":
+                    return processFlexSingle(this::parseFlexPosition, type, deviceSession, channel, buf);
+                // FLEX 2.0 (Extra packages)
+                case "~E":
+                    return processFlexArray(this::parseFlex20Position, type, deviceSession, channel, buf);
+                case "~X":
+                    return processFlexSingle(this::parseFlex20Position, type, deviceSession, channel, buf);
+                default:
+                    break;
             }
         }
 

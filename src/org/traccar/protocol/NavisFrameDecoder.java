@@ -44,6 +44,10 @@ public class NavisFrameDecoder extends BaseFrameDecoder {
             return null;
         }
 
+        if (buf.readableBytes() > MAX_FRAME_LENGTH) {
+            throw new TooLongFrameException();
+        }
+
         if (buf.getByte(buf.readerIndex()) == 0x7F) {
             // FLEX keep alive frame
             return buf.readRetainedSlice(1);
@@ -51,10 +55,6 @@ public class NavisFrameDecoder extends BaseFrameDecoder {
 
         if (protocolDecoder.getFlexDataSize() > 0) {
             // FLEX frame
-            if (buf.readableBytes() > MAX_FRAME_LENGTH) {
-                throw new TooLongFrameException();
-            }
-
             if (buf.readableBytes() > FLEX_HEADER_LENGTH) {
                 int length = 0;
                 String type = buf.toString(buf.readerIndex(), 2, StandardCharsets.US_ASCII);
@@ -101,9 +101,6 @@ public class NavisFrameDecoder extends BaseFrameDecoder {
 
             int length = buf.getUnsignedShortLE(buf.readerIndex() + NTCB_LENGTH_OFFSET);
             if (buf.readableBytes() >= NTCB_HEADER_LENGTH + length) {
-                if (buf.readableBytes() > MAX_FRAME_LENGTH) {
-                    throw new TooLongFrameException();
-                }
                 return buf.readRetainedSlice(NTCB_HEADER_LENGTH + length);
             }
         }
