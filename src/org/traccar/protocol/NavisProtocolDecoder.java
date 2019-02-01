@@ -23,6 +23,8 @@ import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.Checksum;
+import org.traccar.helper.Checksum.Algorithm;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -31,14 +33,24 @@ import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Date;
 
 public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
     private String prefix;
     private long deviceUniqueId, serverId;
+    private int flexDataSize; // bytes
+    private int flexBitfieldDataSize; // bits
+    private final byte[] flexBitfield;
+    private static final int[] FLEX_FIELDS_SIZES = {4, 2, 4, 1, 1, 1, 1, 1, 4, 4, 4, 4, 4, 2, 4, 4, 2, 2,
+        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 4, 4, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1,
+        1, 2, 4, 2, 1, 4, 2, 2, 2, 2, 2, 1, 1, 1, 2, 4, 2, 1, /* FLEX 2.0 */ 8, 2, 1, 16, 4, 2, 4, 37, 1,
+        1, 1, 1, 1, 1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 6, 12, 24, 48, 1, 1, 1, 1, 4, 4, 1, 4, 2, 6, 2, 6, 2,
+        2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1}; // bytes
 
     public NavisProtocolDecoder(Protocol protocol) {
         super(protocol);
+        this.flexBitfield = new byte[16];
     }
 
     public static final int F10 = 0x01;
@@ -77,7 +89,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private ParseResult parsePosition(DeviceSession deviceSession, ByteBuf buf) {
+    private ParseResult parseNtcbPosition(DeviceSession deviceSession, ByteBuf buf) {
         Position position = new Position(getProtocolName());
 
         position.setDeviceId(deviceSession.getDeviceId());
@@ -99,12 +111,12 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
         short armedStatus = buf.readUnsignedByte();
         if (isFormat(format, F10, F20, F30, F40, F50, F51, F52)) {
-            position.set(Position.KEY_ARMED, armedStatus & 0x7F);
+            position.set(Position.KEY_ARMED, BitUtil.to(armedStatus, 7));
             if (BitUtil.check(armedStatus, 7)) {
                 position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
             }
         } else if (isFormat(format, F60)) {
-            position.set(Position.KEY_ARMED, armedStatus & 0x1);
+            position.set(Position.KEY_ARMED, BitUtil.check(armedStatus, 0));
             if (BitUtil.check(armedStatus, 1)) {
                 position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
             }
@@ -114,19 +126,48 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_RSSI, buf.readUnsignedByte());
 
         if (isFormat(format, F10, F20, F30)) {
-            position.set(Position.KEY_OUTPUT, buf.readUnsignedShortLE());
+            int output = buf.readUnsignedShortLE();
+            position.set(Position.KEY_OUTPUT, output);
+            for (int i = 0; i < 16; i++) {
+                position.set(Position.PREFIX_OUT + (i + 1), BitUtil.check(output, i));
+            }
         } else if (isFormat(format, F50, F51, F52)) {
-            int extField = buf.readUnsignedByte();
-            position.set(Position.KEY_OUTPUT, extField & 0x3);
-            position.set(Position.KEY_SATELLITES, extField >> 2);
+            short extField = buf.readUnsignedByte();
+            position.set(Position.KEY_OUTPUT, BitUtil.to(extField, 2));
+            position.set(Position.PREFIX_OUT + 1, BitUtil.check(extField, 0));
+            position.set(Position.PREFIX_OUT + 2, BitUtil.check(extField, 1));
+            position.set(Position.KEY_SATELLITES, BitUtil.from(extField, 2));
         } else if (isFormat(format, F40, F60)) {
-            position.set(Position.KEY_OUTPUT, buf.readUnsignedByte() & 0xF);
+            short output = buf.readUnsignedByte();
+            position.set(Position.KEY_OUTPUT, BitUtil.to(output, 4));
+            for (int i = 0; i < 4; i++) {
+                position.set(Position.PREFIX_OUT + (i + 1), BitUtil.check(output, i));
+            }
         }
 
         if (isFormat(format, F10, F20, F30, F40)) {
-            position.set(Position.KEY_INPUT, buf.readUnsignedShortLE());
+            int input = buf.readUnsignedShortLE();
+            position.set(Position.KEY_INPUT, input);
+            if (!isFormat(format, F40)) {
+                for (int i = 0; i < 16; i++) {
+                    position.set(Position.PREFIX_IN + (i + 1), BitUtil.check(input, i));
+                }
+            } else {
+                position.set(Position.PREFIX_IN + 1, BitUtil.check(input, 0));
+                position.set(Position.PREFIX_IN + 2, BitUtil.check(input, 1));
+                position.set(Position.PREFIX_IN + 3, BitUtil.check(input, 2));
+                position.set(Position.PREFIX_IN + 4, BitUtil.check(input, 3));
+                position.set(Position.PREFIX_IN + 5, BitUtil.between(input, 4, 7));
+                position.set(Position.PREFIX_IN + 6, BitUtil.between(input, 7, 10));
+                position.set(Position.PREFIX_IN + 7, BitUtil.between(input, 10, 12));
+                position.set(Position.PREFIX_IN + 8, BitUtil.between(input, 12, 14));
+            }
         } else if (isFormat(format, F50, F51, F52, F60)) {
-            position.set(Position.KEY_INPUT, buf.readUnsignedByte());
+            short input = buf.readUnsignedByte();
+            position.set(Position.KEY_INPUT, input);
+            for (int i = 0; i < 8; i++) {
+                position.set(Position.PREFIX_IN + (i + 1), BitUtil.check(input, i));
+            }
         }
 
         position.set(Position.KEY_POWER, buf.readUnsignedShortLE() * 0.001);
@@ -183,7 +224,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
             int navSensorState = buf.readUnsignedByte();
             position.setValid(BitUtil.check(navSensorState, 1));
             if (isFormat(format, F60)) {
-                position.set(Position.KEY_SATELLITES, navSensorState >> 2);
+                position.set(Position.KEY_SATELLITES, BitUtil.from(navSensorState, 2));
             }
 
             DateBuilder dateBuilder = new DateBuilder()
@@ -199,6 +240,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
                 position.setLatitude(buf.readFloatLE() / Math.PI * 180);
                 position.setLongitude(buf.readFloatLE() / Math.PI * 180);
             }
+
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readFloatLE()));
             position.setCourse(buf.readUnsignedShortLE());
 
@@ -234,13 +276,13 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         return new ParseResult(index, position);
     }
 
-    private Object processSingle(DeviceSession deviceSession, Channel channel, ByteBuf buf) {
-        ParseResult result = parsePosition(deviceSession, buf);
+    private Object processNtcbSingle(DeviceSession deviceSession, Channel channel, ByteBuf buf) {
+        ParseResult result = parseNtcbPosition(deviceSession, buf);
 
-        ByteBuf response = Unpooled.buffer(8);
+        ByteBuf response = Unpooled.buffer(7);
         response.writeCharSequence("*<T", StandardCharsets.US_ASCII);
         response.writeIntLE((int) result.getId());
-        sendReply(channel, response);
+        sendNtcbReply(channel, response);
 
         if (result.getPosition().getFixTime() == null) {
             return null;
@@ -249,21 +291,21 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         return result.getPosition();
     }
 
-    private Object processArray(DeviceSession deviceSession, Channel channel, ByteBuf buf) {
+    private Object processNtcbArray(DeviceSession deviceSession, Channel channel, ByteBuf buf) {
         List<Position> positions = new LinkedList<>();
         int count = buf.readUnsignedByte();
 
         for (int i = 0; i < count; i++) {
-            Position position = parsePosition(deviceSession, buf).getPosition();
+            Position position = parseNtcbPosition(deviceSession, buf).getPosition();
             if (position.getFixTime() != null) {
                 positions.add(position);
             }
         }
 
-        ByteBuf response = Unpooled.buffer(8);
+        ByteBuf response = Unpooled.buffer(7);
         response.writeCharSequence("*<A", StandardCharsets.US_ASCII);
         response.writeByte(count);
-        sendReply(channel, response);
+        sendNtcbReply(channel, response);
 
         if (positions.isEmpty()) {
             return null;
@@ -272,41 +314,320 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         return positions;
     }
 
+    private boolean checkFlexBitfield(int index) {
+        int byteIndex = Math.floorDiv(index, 8);
+        int bitIndex = Math.floorMod(index, 8);
+        return BitUtil.check(flexBitfield[byteIndex], 7 - bitIndex);
+    }
+
+    private ParseResult parseFlexPosition(DeviceSession deviceSession, ByteBuf buf) {
+
+        Position position = new Position(getProtocolName());
+
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        long index = 0;
+        int status = 0;
+        short input = 0;
+        short output = 0;
+
+        for (int i = 0; i < flexBitfieldDataSize; i++) {
+            if (!checkFlexBitfield(i)) {
+                continue;
+            }
+
+            switch (i) {
+                case 0:
+                    index = buf.readUnsignedIntLE();
+                    position.set(Position.KEY_INDEX, index);
+                    break;
+                case 1:
+                    position.set(Position.KEY_EVENT, buf.readUnsignedShortLE());
+                    break;
+                case 3:
+                    short armedStatus = buf.readUnsignedByte();
+                    position.set(Position.KEY_ARMED, BitUtil.check(armedStatus, 0));
+                    if (BitUtil.check(armedStatus, 1)) {
+                        position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+                    }
+                    break;
+                case 4:
+                    status = buf.readUnsignedByte();
+                    position.set(Position.KEY_STATUS, status);
+                    break;
+                case 5:
+                    int status2 = buf.readUnsignedByte();
+                    position.set(Position.KEY_STATUS, (short) (BitUtil.to(status, 8) | (status2 << 8)));
+                    break;
+                case 6:
+                    position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+                    break;
+                case 7:
+                    int navSensorState = buf.readUnsignedByte();
+                    position.setValid(BitUtil.check(navSensorState, 1));
+                    position.set(Position.KEY_SATELLITES, BitUtil.from(navSensorState, 2));
+                    break;
+                case 8:
+                     position.setTime(new DateBuilder(new Date(buf.readUnsignedIntLE() * 1000)).getDate());
+                    break;
+                case 9:
+                    position.setLatitude(buf.readIntLE() / 600000.0);
+                    break;
+                case 10:
+                    position.setLongitude(buf.readIntLE() / 600000.0);
+                    break;
+                case 11:
+                    position.setAltitude(buf.readIntLE() * 0.1);
+                    break;
+                case 12:
+                    position.setSpeed(UnitsConverter.knotsFromKph(buf.readFloatLE()));
+                    break;
+                case 13:
+                    position.setCourse(buf.readUnsignedShortLE());
+                    break;
+                case 14:
+                    position.set(Position.KEY_ODOMETER, buf.readFloatLE() * 1000);
+                    break;
+                case 15:
+                    position.set(Position.KEY_DISTANCE, buf.readFloatLE() * 1000);
+                    break;
+                case 18:
+                    position.set(Position.KEY_POWER, buf.readUnsignedShortLE() * 0.001);
+                    break;
+                case 19:
+                    position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.001);
+                    break;
+                case 20:
+                case 21:
+                case 22:
+                case 23:
+                case 24:
+                case 25:
+                case 26:
+                case 27:
+                    position.set(Position.PREFIX_ADC + (i - 19), buf.readUnsignedShortLE());
+                    break;
+                case 28:
+                    input = buf.readUnsignedByte();
+                    position.set(Position.KEY_INPUT, input);
+                    for (int k = 0; k < 8; k++) {
+                        position.set(Position.PREFIX_IN + (k + 1), BitUtil.check(input, k));
+                    }
+                    break;
+                case 29:
+                    short input2 = buf.readUnsignedByte();
+                    position.set(Position.KEY_INPUT, (short) (BitUtil.to(input, 8) | (input2 << 8)));
+                    for (int k = 0; k < 8; k++) {
+                        position.set(Position.PREFIX_IN + (k + 9), BitUtil.check(input2, k));
+                    }
+                    break;
+                case 30:
+                    output = buf.readUnsignedByte();
+                    position.set(Position.KEY_OUTPUT, output);
+                    for (int k = 0; k < 8; k++) {
+                        position.set(Position.PREFIX_OUT + (k + 1), BitUtil.check(output, k));
+                    }
+                    break;
+                case 31:
+                    short output2 = buf.readUnsignedByte();
+                    position.set(Position.KEY_OUTPUT, (short) (BitUtil.to(output, 8) | (output2 << 8)));
+                    for (int k = 0; k < 8; k++) {
+                        position.set(Position.PREFIX_OUT + (k + 9), BitUtil.check(output2, k));
+                    }
+                    break;
+                case 36:
+                    position.set(Position.KEY_HOURS, buf.readUnsignedIntLE() * 1000);
+                    break;
+                case 44:
+                case 45:
+                case 46:
+                case 47:
+                case 48:
+                case 49:
+                case 50:
+                case 51:
+                    position.set(Position.PREFIX_TEMP + (i - 43), buf.readByte());
+                    break;
+                case 68:
+                    position.set("can-speed", buf.readUnsignedByte());
+                    break;
+                // FLEX 2.0
+                case 69:
+                    int satVisible = 0;
+                    for (int k = 0; k < 8; k++) {
+                        satVisible += buf.readUnsignedByte();
+                    }
+                    position.set(Position.KEY_SATELLITES_VISIBLE, satVisible);
+                    break;
+                case 70:
+                    position.set(Position.KEY_HDOP, buf.readUnsignedByte() * 0.1);
+                    position.set(Position.KEY_PDOP, buf.readUnsignedByte() * 0.1);
+                    break;
+                default:
+                    if (i < FLEX_FIELDS_SIZES.length) {
+                        buf.skipBytes(FLEX_FIELDS_SIZES[i]);
+                    }
+                    break;
+            }
+        }
+
+        return new ParseResult(index, position);
+    }
+
+    private ParseResult parseFlex20Position(DeviceSession deviceSession, ByteBuf buf) {
+        Position position = new Position(getProtocolName());
+
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        long index = 0;
+        int length = buf.readUnsignedShort();
+
+        if (length <= buf.readableBytes() && buf.readUnsignedByte() == 0x0A) {
+            buf.readUnsignedByte(); // length of static part
+
+            index = buf.readUnsignedIntLE();
+            position.set(Position.KEY_INDEX, index);
+
+            position.set(Position.KEY_EVENT, buf.readUnsignedShortLE());
+            buf.readUnsignedInt(); // event time
+
+            int navSensorState = buf.readUnsignedByte();
+            position.setValid(BitUtil.check(navSensorState, 1));
+            position.set(Position.KEY_SATELLITES, BitUtil.from(navSensorState, 2));
+
+            position.setTime(new DateBuilder(new Date(buf.readUnsignedIntLE() * 1000)).getDate());
+            position.setLatitude(buf.readIntLE() / 600000.0);
+            position.setLongitude(buf.readIntLE() / 600000.0);
+            position.setAltitude(buf.readIntLE() * 0.1);
+            position.setSpeed(UnitsConverter.knotsFromKph(buf.readFloatLE()));
+            position.setCourse(buf.readUnsignedShortLE());
+            position.set(Position.KEY_ODOMETER, buf.readFloatLE() * 1000);
+
+            buf.skipBytes(length - buf.readerIndex() - 1); // skip unused part
+        }
+
+        return new ParseResult(index, position);
+    }
+
+    private interface FlexPositionParser {
+        ParseResult parsePosition(DeviceSession deviceSession, ByteBuf buf);
+    }
+
+    private Object processFlexSingle(
+            FlexPositionParser parser, String flexHeader, DeviceSession deviceSession, Channel channel, ByteBuf buf) {
+        if (!flexHeader.equals("~C")) {
+            buf.readUnsignedInt(); // event index
+        }
+
+        ParseResult result = parser.parsePosition(deviceSession, buf);
+
+        ByteBuf response = Unpooled.buffer(6);
+        response.writeCharSequence(flexHeader, StandardCharsets.US_ASCII);
+        response.writeIntLE((int) result.getId());
+        sendFlexReply(channel, response);
+
+        if (result.getPosition().getFixTime() == null) {
+            return null;
+        }
+
+        return result.getPosition();
+    }
+
+    private Object processFlexArray(
+            FlexPositionParser parser, String flexHeader, DeviceSession deviceSession, Channel channel, ByteBuf buf) {
+        List<Position> positions = new LinkedList<>();
+        int count = buf.readUnsignedByte();
+
+        for (int i = 0; i < count; i++) {
+            Position position = parser.parsePosition(deviceSession, buf).getPosition();
+            if (position.getFixTime() != null) {
+                positions.add(position);
+            }
+        }
+
+        ByteBuf response = Unpooled.buffer(6);
+        response.writeCharSequence(flexHeader, StandardCharsets.US_ASCII);
+        response.writeByte(count);
+        sendFlexReply(channel, response);
+
+        if (positions.isEmpty()) {
+            return null;
+        }
+
+        return positions;
+    }
+
+    private Object processFlexNegotiation(Channel channel, ByteBuf buf) {
+        if ((byte) buf.readUnsignedByte() != (byte) 0xB0) {
+            return null;
+        }
+
+        short flexProtocolVersion = buf.readUnsignedByte();
+        short flexStructVersion = buf.readUnsignedByte();
+        if ((flexProtocolVersion == 0x0A || flexProtocolVersion == 0x14)
+            && (flexStructVersion == 0x0A || flexStructVersion == 0x14)) {
+
+            flexBitfieldDataSize = buf.readUnsignedByte();
+            if (flexBitfieldDataSize > 122) {
+                return null;
+            }
+
+            buf.readBytes(flexBitfield, 0, (int) Math.ceil((double) flexBitfieldDataSize / 8));
+
+            flexDataSize = 0;
+            for (int i = 0; i < flexBitfieldDataSize; i++) {
+                if (checkFlexBitfield(i)) {
+                    flexDataSize += FLEX_FIELDS_SIZES[i];
+                }
+            }
+        } else {
+            // Preparing request to downgrade protocol version to FLEX 2.0
+            flexProtocolVersion = 0x14;
+            flexStructVersion = 0x14;
+        }
+
+        ByteBuf response = Unpooled.buffer(9);
+        response.writeCharSequence("*<FLEX", StandardCharsets.US_ASCII);
+        response.writeByte(0xB0);
+        response.writeByte(flexProtocolVersion);
+        response.writeByte(flexStructVersion);
+        sendNtcbReply(channel, response);
+
+        return null;
+    }
+
     private Object processHandshake(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
         buf.readByte(); // colon symbol
         if (getDeviceSession(channel, remoteAddress, buf.toString(StandardCharsets.US_ASCII)) != null) {
-            sendReply(channel, Unpooled.copiedBuffer("*<S", StandardCharsets.US_ASCII));
+            sendNtcbReply(channel, Unpooled.copiedBuffer("*<S", StandardCharsets.US_ASCII));
         }
         return null;
     }
 
-    private static short checksum(ByteBuf buf) {
-        short sum = 0;
-        for (int i = 0; i < buf.readableBytes(); i++) {
-            sum ^= buf.getUnsignedByte(i);
-        }
-        return sum;
-    }
-
-    private void sendReply(Channel channel, ByteBuf data) {
+    private void sendNtcbReply(Channel channel, ByteBuf data) {
         if (channel != null) {
             ByteBuf header = Unpooled.buffer(16);
             header.writeCharSequence(prefix, StandardCharsets.US_ASCII);
             header.writeIntLE((int) deviceUniqueId);
             header.writeIntLE((int) serverId);
             header.writeShortLE(data.readableBytes());
-            header.writeByte(checksum(data));
-            header.writeByte(checksum(header));
+            header.writeByte(Checksum.xor(data.nioBuffer()));
+            header.writeByte(Checksum.xor(header.nioBuffer()));
 
             channel.writeAndFlush(new NetworkMessage(Unpooled.wrappedBuffer(header, data), channel.remoteAddress()));
         }
     }
 
-    @Override
-    protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+    private void sendFlexReply(Channel channel, ByteBuf data) {
+        if (channel != null) {
+            ByteBuf cs = Unpooled.buffer(1);
+            cs.writeByte(Checksum.crc8(new Algorithm(8, 0x31, 0xFF, false, false, 0x00), data.nioBuffer()));
 
-        ByteBuf buf = (ByteBuf) msg;
+            channel.writeAndFlush(new NetworkMessage(Unpooled.wrappedBuffer(data, cs), channel.remoteAddress()));
+        }
+    }
+
+    private Object decodeNtcb(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
 
         prefix = buf.toString(buf.readerIndex(), 4, StandardCharsets.US_ASCII);
         buf.skipBytes(prefix.length()); // prefix @NTC by default
@@ -327,10 +648,16 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         } else {
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
             if (deviceSession != null) {
-                if (type.equals("*>T")) {
-                    return processSingle(deviceSession, channel, buf);
-                } else if (type.equals("*>A")) {
-                    return processArray(deviceSession, channel, buf);
+                switch (type) {
+                    case "*>A":
+                        return processNtcbArray(deviceSession, channel, buf);
+                    case "*>T":
+                        return processNtcbSingle(deviceSession, channel, buf);
+                    case "*>F":
+                        buf.skipBytes(3);
+                        return processFlexNegotiation(channel, buf);
+                    default:
+                        break;
                 }
             }
         }
@@ -338,4 +665,52 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
+    private Object decodeFlex(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
+
+        if (buf.getByte(buf.readerIndex()) == 0x7F) {
+            // keep alive message
+            return null;
+        }
+
+        String type = buf.toString(buf.readerIndex(), 2, StandardCharsets.US_ASCII);
+        buf.skipBytes(type.length());
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+        if (deviceSession != null) {
+            switch (type) {
+                // FLEX 1.0
+                case "~A":
+                    return processFlexArray(this::parseFlexPosition, type, deviceSession, channel, buf);
+                case "~T":
+                case "~C":
+                    return processFlexSingle(this::parseFlexPosition, type, deviceSession, channel, buf);
+                // FLEX 2.0 (Extra packages)
+                case "~E":
+                    return processFlexArray(this::parseFlex20Position, type, deviceSession, channel, buf);
+                case "~X":
+                    return processFlexSingle(this::parseFlex20Position, type, deviceSession, channel, buf);
+                default:
+                    break;
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    protected Object decode(
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+
+        ByteBuf buf = (ByteBuf) msg;
+
+        if (flexDataSize > 0) {
+            return decodeFlex(channel, remoteAddress, buf);
+        } else {
+            return decodeNtcb(channel, remoteAddress, buf);
+        }
+    }
+
+    public int getFlexDataSize() {
+        return flexDataSize;
+    }
 }
