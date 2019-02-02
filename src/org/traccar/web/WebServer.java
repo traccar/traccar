@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.InetSocketAddress;
@@ -121,7 +122,7 @@ public class WebServer {
 
     private void initWebApp(Config config, ServletContextHandler servletHandler) {
         ServletHolder servletHolder = new ServletHolder(DefaultServlet.class);
-        servletHolder.setInitParameter("resourceBase", config.getString("web.path"));
+        servletHolder.setInitParameter("resourceBase", new File(config.getString("web.path")).getAbsolutePath());
         if (config.getBoolean("web.debug")) {
             servletHandler.setWelcomeFiles(new String[] {"debug.html", "index.html"});
         } else {
@@ -139,7 +140,7 @@ public class WebServer {
 
         if (config.hasKey("media.path")) {
             ServletHolder servletHolder = new ServletHolder(DefaultServlet.class);
-            servletHolder.setInitParameter("resourceBase", config.getString("media.path"));
+            servletHolder.setInitParameter("resourceBase", new File(config.getString("media.path")).getAbsolutePath());
             servletHolder.setInitParameter("dirAllowed", config.getString("media.dirAllowed", "false"));
             servletHolder.setInitParameter("pathInfoOnly", "true");
             servletHandler.addServlet(servletHolder, "/api/media/*");
