@@ -117,12 +117,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Position.KEY_STATUS, buf.readUnsignedByte() & 0x0f);
 
-            if (alternative) {
-                buf.readUnsignedByte(); // configuration flags
-            } else {
-                buf.readUnsignedByte(); // operator
-            }
-
+            buf.readUnsignedByte(); // operator / configuration flags
             buf.readUnsignedByte(); // reason data
             position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
 

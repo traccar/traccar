@@ -56,6 +56,7 @@ public class FreematicsProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case "EV":
                     event = value;
+                    break;
                 case "TS":
                     time = value;
                     break;
