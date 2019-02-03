@@ -55,7 +55,10 @@ public abstract class WindowsService {
         String javaBinary = javaHome + "\\bin\\java.exe";
 
         File jar = new File(WindowsService.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-        String command = javaBinary + " -jar \"" + jar.getAbsolutePath() + "\" --service \"" + config + "\"";
+        String command = javaBinary
+                + " -Duser.dir=\"" + jar.getAbsolutePath() + "\""
+                + " -jar \"" + jar.getParentFile().getAbsolutePath() + "\""
+                + " --service \"" + config + "\"";
 
         boolean success = false;
         StringBuilder dep = new StringBuilder();
@@ -148,7 +151,6 @@ public abstract class WindowsService {
                 WindowsService.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent();
 
         POSIXFactory.getPOSIX().chdir(path);
-        System.setProperty("user.dir", path);
 
         serviceMain = new ServiceMain();
         SERVICE_TABLE_ENTRY entry = new SERVICE_TABLE_ENTRY();
