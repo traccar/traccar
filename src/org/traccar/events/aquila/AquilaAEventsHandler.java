@@ -1,6 +1,7 @@
 package org.traccar.events.aquila;
 
 import org.traccar.BaseEventHandler;
+import org.traccar.Context;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -14,16 +15,21 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class AquilaAEventsHandler extends BaseEventHandler {
 
-    public static final int MILLIS_IN_15_MINS = 900_000;
+    private static int batteryEventsAlertThreshold;
+
+    static {
+        batteryEventsAlertThreshold = Context.getConfig().getInteger("processing.peripheralSensorData.batteryEventsThreshold");
+    }
+
     private Map<String, String> positionInfoToEventTypeMap = new ConcurrentHashMap<>();
 
     private Map<Long, List<Event>> deviceIdToExtBatteryDisconnectMap = new ConcurrentHashMap<>();
+    private Map<Long, List<Event>> deviceIdToIntBatteryLowMap = new ConcurrentHashMap<>();
 
     public AquilaAEventsHandler() {
         positionInfoToEventTypeMap.put(Position.KEY_CASE_OPEN, Event.TYPE_CASE_OPEN);
         positionInfoToEventTypeMap.put(Position.KEY_HARD_ACCELERATION, Event.TYPE_HARD_ACCELERATION);
         positionInfoToEventTypeMap.put(Position.KEY_HARD_BRAKING, Event.TYPE_HARD_BRAKING);
-        positionInfoToEventTypeMap.put(Position.KEY_INTERNAL_BATTERY_LOW, Event.TYPE_INTERNAL_BATTERY_LOW);
         positionInfoToEventTypeMap.put(Position.KEY_OVERSPEED_START, Event.TYPE_OVERSPEED_START);
         positionInfoToEventTypeMap.put(Position.KEY_OVERSPEED_END, Event.TYPE_OVERSPEED_END);
     }
@@ -33,37 +39,17 @@ public class AquilaAEventsHandler extends BaseEventHandler {
         Map<Event, Position> result = new ConcurrentHashMap<>();
         Map<String, Object> attributes = position.getAttributes();
 
-        // Special logic to handle Position.KEY_EXTERNAL_BATTERY_DISCONNECT
-        if (attributes.containsKey(Position.KEY_EXTERNAL_BATTERY_DISCONNECT)
-            && (boolean) attributes.get(Position.KEY_EXTERNAL_BATTERY_DISCONNECT)) {
+        handleBatteryEvent(position,
+                           Position.KEY_EXTERNAL_BATTERY_DISCONNECT,
+                           deviceIdToExtBatteryDisconnectMap,
+                           result,
+                           attributes);
 
-            long deviceId = position.getDeviceId();
-            String eventType = Event.TYPE_EXTERNAL_BATTERY_DISCONNECT;
-            Event extDisconnectEvent = createEvent(position, eventType);
-
-            if (!deviceIdToExtBatteryDisconnectMap.containsKey(deviceId)) {
-                List<Event> extDisconnectList = new ArrayList<>();
-                extDisconnectList.add(extDisconnectEvent);
-                deviceIdToExtBatteryDisconnectMap.put(deviceId, extDisconnectList);
-            } else if (deviceIdToExtBatteryDisconnectMap.get(deviceId).size() < 3) {
-                deviceIdToExtBatteryDisconnectMap.get(deviceId).add(extDisconnectEvent);
-            } else if (deviceIdToExtBatteryDisconnectMap.get(deviceId).size() >= 3) {
-                Event firstEvent = deviceIdToExtBatteryDisconnectMap.get(deviceId).get(0);
-                long firstEventTime = (long) firstEvent.getAttributes().get("startTime");
-                long currentEventTime = position.getDeviceTime().getTime();
-
-                // If we see 3 or more ext battery disconnects within 15 mins for this device,
-                // generate an alert
-                long diffInTimes = currentEventTime - firstEventTime;
-                if (diffInTimes <= MILLIS_IN_15_MINS) {
-                    Event currentEvent = createEvent(position, eventType);
-                    result.put(currentEvent, position);
-                }
-
-                // Clear the list of these events
-                deviceIdToExtBatteryDisconnectMap.get(deviceId).clear();
-            }
-        }
+        handleBatteryEvent(position,
+                           Position.KEY_INTERNAL_BATTERY_LOW,
+                           deviceIdToIntBatteryLowMap,
+                           result,
+                           attributes);
 
         for (String eventString : positionInfoToEventTypeMap.keySet()) {
              if (attributes.containsKey(eventString) && (boolean) attributes.get(eventString)) {
@@ -74,6 +60,62 @@ public class AquilaAEventsHandler extends BaseEventHandler {
         }
 
         return result;
+    }
+
+    private static void handleBatteryEvent(final Position position,
+                                           final String eventType,
+                                           final Map<Long, List<Event>> eventsMap,
+                                           final Map<Event, Position> result,
+                                           final Map<String, Object> attributes) {
+
+        long deviceId = position.getDeviceId();
+
+        boolean isExpectedBatteryEvent = attributes.containsKey(eventType)
+                                         && (boolean) attributes.get(eventType);
+
+        if (!isExpectedBatteryEvent) {
+            if (eventsMap.containsKey(deviceId)) {
+                eventsMap.get(deviceId).clear();
+            }
+            return;
+        }
+
+        Event batteryEvent = createEvent(position, eventType);
+
+        if (!eventsMap.containsKey(deviceId)) {
+            List<Event> eventsList = new ArrayList<>();
+            eventsList.add(batteryEvent);
+            eventsMap.put(deviceId, eventsList);
+            return;
+        }
+
+        List<Event> eventsListForDevice = eventsMap.get(deviceId);
+
+        if (eventsListForDevice.isEmpty()) {
+            eventsMap.get(deviceId).add(batteryEvent);
+            return;
+        }
+
+        if (eventsListForDevice.size() > 0 && eventsListForDevice.size() < batteryEventsAlertThreshold) {
+
+            Event lastEventInList = eventsListForDevice.get(eventsListForDevice.size() - 1);
+
+            long lastEventTime = (long) lastEventInList.getAttributes().get("startTime");
+            long currentEventTime = position.getDeviceTime().getTime();
+
+            if (currentEventTime > lastEventTime) {
+                eventsListForDevice.add(batteryEvent);
+            }
+        }
+
+        if (eventsListForDevice.size() >= batteryEventsAlertThreshold) {
+            // Generate an alert if we see the configured number or more ext battery disconnects consecutively
+            Event currentEvent = createEvent(position, eventType);
+            result.put(currentEvent, position);
+
+            // Clear the list of these events
+            eventsMap.get(deviceId).clear();
+        }
     }
 
     private static Event createEvent(final Position position, final String eventType) {
