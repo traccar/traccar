@@ -27,6 +27,10 @@ public class PeripheralSensorManager extends ExtendedObjectManager<PeripheralSen
     }
 
     public void refreshPeripheralSensorsMap() {
+
+        deviceToPeripheralSensorMap.clear();
+        deviceSensorToCalibrationDataMap.clear();
+
         if (getDataManager() != null) {
             try {
                 Collection<PeripheralSensor> peripheralSensors = getDataManager().getPeripheralSensors();

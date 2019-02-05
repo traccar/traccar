@@ -45,6 +45,9 @@ public class FCMPushNotificationManager extends ExtendedObjectManager<FCMPushNot
     public void refreshFCMNotificationsMap() {
 
         try {
+
+            fcmNotificationsMap.clear();
+
             Collection<FCMPushNotification> fcmPushNotifications =
                     Context.getDataManager().getFCMPushNotifications();
 
