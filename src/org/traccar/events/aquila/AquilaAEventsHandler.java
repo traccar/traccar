@@ -71,7 +71,9 @@ public class AquilaAEventsHandler extends BaseEventHandler {
         long deviceId = position.getDeviceId();
 
         boolean isExpectedBatteryEvent = attributes.containsKey(eventType)
-                                         && (boolean) attributes.get(eventType);
+                                         && (boolean) attributes.get(eventType)
+                                         && attributes.containsKey("charge")
+                                         && (boolean) attributes.get("charge");
 
         if (!isExpectedBatteryEvent) {
             if (eventsMap.containsKey(deviceId)) {
