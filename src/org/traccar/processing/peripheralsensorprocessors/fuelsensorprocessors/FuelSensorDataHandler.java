@@ -103,6 +103,13 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                 updateWithLastAvailable(position, Position.KEY_FUEL_LEVEL);
                 return position;
             }
+            
+            if (position.getBoolean("charge")) {
+                Log.debug("Device on internal charge. Ignoring reported fuel value and updating with last known fuel level for deviceId"
+                          + position.getDeviceId());
+                updateWithLastAvailable(position, Position.KEY_FUEL_LEVEL);
+                return position;
+            }
 
             handleSensorData(position,
                              peripheralSensorOnDevice.get().getPeripheralSensorId());

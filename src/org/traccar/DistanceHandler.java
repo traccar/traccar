@@ -54,12 +54,14 @@ public class DistanceHandler extends BaseDataHandler {
         double totalDistance = 0.0;
 
         Position last = getLastPosition(position.getDeviceId());
+
         if (last != null && position.getDeviceTime().compareTo((last.getDeviceTime())) >= 0) {
             totalDistance = last.getDouble(Position.KEY_TOTAL_DISTANCE);
 
-            // If the current position is not valid (esp when lat=long=0), we want to carry forward the
-            // total distance on it, so that calculations on future positions stay correct.
-            if (!position.getValid()) {
+            // If the current or last position is not valid (esp when lat=long=0), we want to carry forward the
+            // total distance previously recorded, so that calculations on future positions stay correct.
+            boolean valid = allValid(position, last);
+            if (!valid) {
                 position.set(Position.KEY_DISTANCE, 0);
                 position.set(Position.KEY_TOTAL_DISTANCE, totalDistance);
                 return position;
@@ -110,4 +112,12 @@ public class DistanceHandler extends BaseDataHandler {
         return position;
     }
 
+    private boolean allValid(final Position position, final Position last) {
+        return position.getValid()
+                && position.getLatitude() != 0.0
+                && position.getLongitude() != 0.0
+                && last.getValid()
+                && last.getLatitude() != 0.0
+                && last.getLongitude() != 0.0;
+    }
 }

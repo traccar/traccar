@@ -158,12 +158,13 @@ public class FCMPushNotificationManager extends ExtendedObjectManager<FCMPushNot
     }
 
     private ConcurrentHashSet<String> getEffectiveFCMTokens(String eventType, long deviceId) {
+        refreshFCMNotificationsMap();
 
         Map<String, Long> fcmNotificationTypes = FCMPushNotificationTypeManager.getFCMPushNotificationStringToIdMap();
         ConcurrentHashSet<String> tokens = new ConcurrentHashSet<>();
         Set<Long> userIds = Context.getPermissionsManager().getDeviceUsers(deviceId);
+        Log.debug("FCM Push notification - device users list: " + userIds.size());
 
-        Log.debug("FCM Push notification users list: " + userIds.size());
         for (long userId : userIds) {
             Optional<Set<Long>> fcmNotificationsForUser = getFCMDeviceNotificationForUser(deviceId, userId);
             if (fcmNotificationsForUser.isPresent()) {
@@ -175,6 +176,8 @@ public class FCMPushNotificationManager extends ExtendedObjectManager<FCMPushNot
                 }
             }
         }
+
+        Log.debug("FCM Push notification - activated users list: " + tokens.size());
         return tokens;
     }
 }
