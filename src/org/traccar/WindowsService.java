@@ -56,8 +56,8 @@ public abstract class WindowsService {
 
         File jar = new File(WindowsService.class.getProtectionDomain().getCodeSource().getLocation().toURI());
         String command = javaBinary
-                + " -Duser.dir=\"" + jar.getAbsolutePath() + "\""
-                + " -jar \"" + jar.getParentFile().getAbsolutePath() + "\""
+                + " -Duser.dir=\"" + jar.getParentFile().getAbsolutePath() + "\""
+                + " -jar \"" + jar.getAbsolutePath() + "\""
                 + " --service \"" + config + "\"";
 
         boolean success = false;
