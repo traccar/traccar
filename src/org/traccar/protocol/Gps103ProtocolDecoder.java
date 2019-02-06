@@ -81,10 +81,10 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             .number(",([01])?").optional()       // ignition
             .number(",([01])?").optional()       // door
             .groupBegin()
-            .number(",(?:(d+.d+)%)?")  // fuel 1
-            .number(",(?:(d+.d+)%|d+)?")  // fuel 2
+            .number(",(?:(d+.d+)%)?")            // fuel 1
+            .number(",(?:(d+.d+)%|d+)?")         // fuel 2
             .groupEnd("?")
-            .number(",([-+]?d+)?")               // temperature
+            .number(",([-+]?d+)?").optional()    // temperature
             .groupEnd()
             .any()
             .compile();
