@@ -62,7 +62,7 @@ public class AquilaAEventsHandler extends BaseEventHandler {
         return result;
     }
 
-    private static void handleBatteryEvent(final Position position,
+    private void handleBatteryEvent(final Position position,
                                            final String eventType,
                                            final Map<Long, List<Event>> eventsMap,
                                            final Map<Event, Position> result,
@@ -71,16 +71,34 @@ public class AquilaAEventsHandler extends BaseEventHandler {
         long deviceId = position.getDeviceId();
 
         boolean isExpectedBatteryEvent = attributes.containsKey(eventType)
-                                         && (boolean) attributes.get(eventType)
-                                         && attributes.containsKey("charge")
-                                         && (boolean) attributes.get("charge");
+                                         && (boolean) attributes.get(eventType);
 
-        if (!isExpectedBatteryEvent) {
-            if (eventsMap.containsKey(deviceId)) {
-                eventsMap.get(deviceId).clear();
-            }
+        boolean charge =  attributes.containsKey(Position.KEY_CHARGE)
+                          && (boolean) attributes.get(Position.KEY_CHARGE);
+
+        if (isExpectedBatteryEvent) {
+            registerEventIfNecessary(position, eventType, eventsMap, result, deviceId);
             return;
         }
+
+        if (eventsMap.containsKey(deviceId)
+            && !eventsMap.get(deviceId).isEmpty()) {
+
+            if (charge) {
+                registerEventIfNecessary(position, eventType, eventsMap, result, deviceId);
+                return;
+            }
+
+            eventsMap.get(deviceId).clear();
+        }
+
+    }
+
+    private static void registerEventIfNecessary(final Position position,
+                                                 final String eventType,
+                                                 final Map<Long, List<Event>> eventsMap,
+                                                 final Map<Event, Position> result,
+                                                 final long deviceId) {
 
         Event batteryEvent = createEvent(position, eventType);
 
