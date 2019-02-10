@@ -63,6 +63,9 @@ public class Event extends Message {
 
     public static final String TYPE_FUEL_DRAIN = "fuelDrain";
     public static final String TYPE_FUEL_FILL = "fuelFill";
+    public static final String TYPE_PROBABLE_FILL = "probableFuelFill";
+    public static final String TYPE_PROBABLE_DRAIN = "probableFuelDrain";
+    public static final String TYPE_EXPECTED_FILL = "expectedFill";
 
     public static final String TYPE_CASE_OPEN = "caseOpen";
     public static final String TYPE_OVERSPEED_START = "overspeedStart";

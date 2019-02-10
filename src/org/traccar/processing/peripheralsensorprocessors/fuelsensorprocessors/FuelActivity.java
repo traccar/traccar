@@ -1,5 +1,6 @@
 package org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors;
 
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.util.Date;
@@ -22,12 +23,23 @@ public class FuelActivity {
     }
 
     public enum FuelActivityType {
-        NONE,
-        FUEL_FILL,
-        FUEL_DRAIN,
-        PROBABLE_FILL,
-        PROBABLE_DRAIN,
-        EXPECTED_FILL
+        NONE("none"),
+        FUEL_FILL(Event.TYPE_FUEL_FILL),
+        FUEL_DRAIN(Event.TYPE_FUEL_DRAIN),
+        PROBABLE_FILL(Event.TYPE_PROBABLE_FILL),
+        PROBABLE_DRAIN(Event.TYPE_PROBABLE_DRAIN),
+        EXPECTED_FILL(Event.TYPE_EXPECTED_FILL);
+
+        private String nameString;
+
+        FuelActivityType(String name) {
+            nameString = name;
+        }
+
+        @Override
+        public String toString() {
+            return nameString;
+        }
     }
 
     private FuelActivityType activityType = FuelActivityType.NONE;
@@ -50,7 +62,8 @@ public class FuelActivity {
     }
 
     public void setChangeVolume(double amount) {
-        this.changeVolume = amount;
+
+        this.changeVolume = Math.abs(amount);
     }
 
     public Date getActivityStartTime() {
