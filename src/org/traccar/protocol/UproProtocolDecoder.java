@@ -164,11 +164,13 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                     position.set("statusExtended", data.toString(StandardCharsets.US_ASCII));
                     break;
                 case 'P':
-                    position.setNetwork(new Network(CellTower.from(
-                            Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII)),
-                            Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII)),
-                            Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII), 16),
-                            Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII), 16))));
+                    if (data.readableBytes() >= 16) {
+                        position.setNetwork(new Network(CellTower.from(
+                                Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII)),
+                                Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII)),
+                                Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII), 16),
+                                Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII), 16))));
+                    }
                     break;
                 case 'Q':
                     position.set("obdPid", ByteBufUtil.hexDump(data));

@@ -10,6 +10,9 @@ public class Tr20ProtocolDecoderTest extends ProtocolTest {
 
         Tr20ProtocolDecoder decoder = new Tr20ProtocolDecoder(null);
 
+        verifyPosition(decoder, text(
+                "%%123456789012345,A,120101121800,N6000.0000E13000.0000,0,000,0,01034802,150,[Message]"));
+
         verifyNull(decoder, text(
                 "%%TRACKPRO01,1"));
 

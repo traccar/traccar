@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,23 @@
  */
 package org.traccar.protocol;
 
+import io.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 
-public class NavisProtocol extends BaseProtocol {
+public class NeosProtocol extends BaseProtocol {
 
-    public NavisProtocol() {
-        addServer(new TrackerServer(false, getName()) {
+    public NeosProtocol() {
+        addServer(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast(new NavisFrameDecoder());
-                pipeline.addLast(new NavisProtocolDecoder(NavisProtocol.this));
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new NeosProtocolDecoder(NeosProtocol.this));
             }
         });
     }
+
 }

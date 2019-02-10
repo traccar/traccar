@@ -497,6 +497,10 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private void skipLocation(Parser parser) {
+        parser.skip(19);
+    }
+
     private void decodeLocation(Position position, Parser parser) {
         Integer hdop = parser.nextInt();
         position.setValid(hdop == null || hdop > 0);
@@ -806,7 +810,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = positions.getLast();
 
-        decodeLocation(position, parser);
+        skipLocation(parser);
 
         if (power != null && power > 10) {
             position.set(Position.KEY_POWER, power * 0.001); // only on some devices
@@ -871,7 +875,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = positions.getLast();
 
-        decodeLocation(position, parser);
+        skipLocation(parser);
 
         if (power != null) {
             position.set(Position.KEY_POWER, power * 0.001);

@@ -32,7 +32,7 @@ public class L100FrameDecoder extends BaseFrameDecoder {
             return null;
         }
 
-        if (buf.getCharSequence(buf.readerIndex(), 4, StandardCharsets.US_ASCII).equals("ATL,")) {
+        if (buf.getCharSequence(buf.readerIndex(), 4, StandardCharsets.US_ASCII).toString().equals("ATL,")) {
             return decodeNew(buf);
         } else {
             return decodeOld(buf);

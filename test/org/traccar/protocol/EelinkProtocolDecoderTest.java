@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class EelinkProtocolDecoderTest extends ProtocolTest {
 
@@ -12,6 +13,14 @@ public class EelinkProtocolDecoderTest extends ProtocolTest {
 
         verifyNull(decoder, binary(
                 "454C0027E753035254407167747167670100180002035254407167747100200205020500010432000086BD"));
+
+        verifyAttribute(decoder, binary(
+                "676712003400e45c5b0ade02012e03702d87064546aa24066a1086018a0000002dc1a0ffffffff0afd074d000000000000000000000000fce0"),
+                Position.PREFIX_TEMP + 2, -50.0);
+
+        verifyAttribute(decoder, binary(
+                "6767120043000e5c37387c0304e4e1b4f8194fa800160013009408012e03702d8706453c6e5b066f115f05710000001b067f8d248d240313020500000000000000000000000001cc"),
+                Position.PREFIX_TEMP + 2, 28.75);
 
         verifyPosition(decoder, binary(
                 "676714002414B05AD43A7D03026B92B10C395499FFD7000000000701CC00002495000014203604067B"));
