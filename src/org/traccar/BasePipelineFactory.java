@@ -190,7 +190,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
             boolean logHex = true;
             String rawMessage = null;
             if (logRaw) {
-                rawMessage = ((ByteBuf) networkMessage.getMessage()).toString(StandardCharsets.UTF_8);
+                rawMessage = buf.toString(StandardCharsets.UTF_8);
                 Matcher matcher = NON_ASCII_PATTERN.matcher(rawMessage);
                 if (matcher.find()) {
                     rawMessage = matcher.replaceFirst("<binary...>");
