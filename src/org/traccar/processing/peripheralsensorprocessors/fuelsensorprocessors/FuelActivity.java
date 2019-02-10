@@ -24,7 +24,9 @@ public class FuelActivity {
     public enum FuelActivityType {
         NONE,
         FUEL_FILL,
-        FUEL_DRAIN
+        FUEL_DRAIN,
+        PROBABLE_FILL,
+        PROBABLE_DRAIN
     }
 
     private FuelActivityType activityType = FuelActivityType.NONE;

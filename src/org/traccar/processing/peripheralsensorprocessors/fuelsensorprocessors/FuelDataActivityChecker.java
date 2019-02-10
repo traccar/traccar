@@ -183,7 +183,7 @@ public class FuelDataActivityChecker {
                             Math.abs(calculatedFuelChangeVolume) -
                                     expectedFuelConsumption.expectedCurrentFuelConsumed;
                     FuelActivity activity =
-                            new FuelActivity(FuelActivity.FuelActivityType.FUEL_DRAIN,
+                            new FuelActivity(FuelActivity.FuelActivityType.PROBABLE_DRAIN,
                                              possibleFuelDrain, lastPosition, position);
                     return Optional.of(activity);
                 } else {
@@ -191,7 +191,7 @@ public class FuelDataActivityChecker {
                             expectedFuelConsumption.expectedCurrentFuelConsumed -
                                     Math.abs(calculatedFuelChangeVolume);
                     FuelActivity activity =
-                            new FuelActivity(FuelActivity.FuelActivityType.FUEL_FILL,
+                            new FuelActivity(FuelActivity.FuelActivityType.PROBABLE_FILL,
                                              possibleFuelFill, lastPosition, position);
                     return Optional.of(activity);
                 }

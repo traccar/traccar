@@ -492,9 +492,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
             // Add event to events table
             String eventType =
-                    fuelActivity.getActivityType() == FuelActivityType.FUEL_FILL
-                            ? Event.TYPE_FUEL_FILL
-                            : Event.TYPE_FUEL_DRAIN;
+                    fuelActivity.getActivityType().toString();
 
             Event event = new Event(eventType, deviceId,
                                     fuelActivity.getActivityStartPosition().getId());
