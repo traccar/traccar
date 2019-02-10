@@ -26,6 +26,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
     private static int hoursOfDataToLoad;
     private static int maxValuesForAlerts;
     private static int currentEventLookBackSeconds;
+    private static int dataLossThresholdSeconds;
 
     private final Map<Long, Boolean> possibleDataLossByDevice = new ConcurrentHashMap<>();
     private final Map<Long, Position> nonOutlierInLastWindowByDevice = new ConcurrentHashMap<>();
@@ -60,6 +61,12 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         currentEventLookBackSeconds =
                 Context.getConfig()
                        .getInteger("processing.peripheralSensorData.currentEventLookBackSeconds");
+
+        dataLossThresholdSeconds =
+                Context.getConfig()
+                       .getInteger("processing.peripheralSensorData.dataLossThresholdSeconds");
+
+
     }
 
     public FuelSensorDataHandler() {
@@ -378,7 +385,8 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                 FuelSensorDataHandlerHelper.getRelevantPositionsSubList(
                         positionsForDeviceSensor, position, minValuesForOutlierDetection, currentEventLookBackSeconds);
 
-        if (relevantPositionsListForAverages.size() == 1) {
+        if (lastPacketProcessed.isPresent()
+            && position.getDeviceTime().compareTo((lastPacketProcessed.get().getDeviceTime())) > dataLossThresholdSeconds) {
             possibleDataLossByDevice.put(deviceId, true);
         }
 

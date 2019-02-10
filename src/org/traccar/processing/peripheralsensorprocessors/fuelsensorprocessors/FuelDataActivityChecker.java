@@ -167,18 +167,22 @@ public class FuelDataActivityChecker {
 
         if (Math.abs(calculatedFuelChangeVolume) > expectedFuelConsumption.allowedDeviation) {
             if (calculatedFuelChangeVolume < 0.0) {
-                boolean isDataLoss = FuelDataLossChecker.possibleDataLoss(calculatedFuelChangeVolume,
-                                                                          expectedFuelConsumption);
+                boolean isDataLoss = FuelDataLossChecker.isFuelConsumptionAsExpected(calculatedFuelChangeVolume,
+                                                                                     expectedFuelConsumption);
 
                 if (isDataLoss) {
                     Log.info(String.format(
-                            "Determined data loss, but cannot identify fuel event since calculatedVolume" +
-                                    " is outside expected range: %s", expectedFuelConsumption));
+                            "Determined data loss, but cannot identify fuel event since fuel consumption " +
+                                    " is within expected range: %s", expectedFuelConsumption));
 
                     return Optional.empty();
                 }
 
                 if (Math.abs(calculatedFuelChangeVolume) > expectedFuelConsumption.expectedMaxFuelConsumed) {
+                    // TODO: if Math.abs(calculatedFuelChangeVolume) > expectedFuelConsumption.expectedMaxFuelConsumed
+                    // then the following calculation will return a +ve number. Same in the FILL part. Fix this or
+                    // real drain - based on what we
+                    // want in the db actually.
                     double possibleFuelDrain =
                             Math.abs(calculatedFuelChangeVolume) -
                                     expectedFuelConsumption.expectedCurrentFuelConsumed;
@@ -199,7 +203,7 @@ public class FuelDataActivityChecker {
                 double expectedFuelFill =
                         calculatedFuelChangeVolume + expectedFuelConsumption.expectedCurrentFuelConsumed;
                 FuelActivity activity =
-                        new FuelActivity(FuelActivity.FuelActivityType.FUEL_FILL,
+                        new FuelActivity(FuelActivity.FuelActivityType.EXPECTED_FILL,
                                          expectedFuelFill, lastPosition, position);
                 return Optional.of(activity);
             }

@@ -47,8 +47,8 @@ public class FuelDataLossChecker {
                 getExpectedFuelConsumptionValues(startPosition, endPosition, maxCapacity);
 
         boolean dataLoss =
-                possibleDataLoss(calculatedFuelChangeVolume,
-                                 expectedFuelConsumption);
+                isFuelConsumptionAsExpected(calculatedFuelChangeVolume,
+                                            expectedFuelConsumption);
 
         if (dataLoss) {
             Log.debug(String.format("Data Loss: Distance covered %f, Exp fuel consumed: %f, actual fuel consumed: %f",
@@ -60,12 +60,12 @@ public class FuelDataLossChecker {
         return dataLoss;
     }
 
-    public static boolean possibleDataLoss(final double calculatedFuelChangeVolume,
-                                           final ExpectedFuelConsumption expectedFuelConsumption) {
+    public static boolean isFuelConsumptionAsExpected(final double calculatedFuelChangeVolume,
+                                                      final ExpectedFuelConsumption expectedFuelConsumption) {
 
         return Math.abs(calculatedFuelChangeVolume) > expectedFuelConsumption.allowedDeviation
-                && Math.abs(calculatedFuelChangeVolume) <= expectedFuelConsumption.expectedMaxFuelConsumed
-                && Math.abs(calculatedFuelChangeVolume) >= expectedFuelConsumption.expectedMinFuelConsumed;
+               && Math.abs(calculatedFuelChangeVolume) >= expectedFuelConsumption.expectedMinFuelConsumed
+               && Math.abs(calculatedFuelChangeVolume) <= expectedFuelConsumption.expectedMaxFuelConsumed;
     }
 
     public static boolean checkRequiredFieldsPresent(Position startPosition, Position endPosition) {

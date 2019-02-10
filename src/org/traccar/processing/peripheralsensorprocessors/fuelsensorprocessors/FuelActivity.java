@@ -26,7 +26,8 @@ public class FuelActivity {
         FUEL_FILL,
         FUEL_DRAIN,
         PROBABLE_FILL,
-        PROBABLE_DRAIN
+        PROBABLE_DRAIN,
+        EXPECTED_FILL
     }
 
     private FuelActivityType activityType = FuelActivityType.NONE;
