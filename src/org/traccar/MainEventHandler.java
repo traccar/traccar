@@ -117,14 +117,14 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+    public void channelActive(ChannelHandlerContext ctx) {
         if (!(ctx.channel() instanceof DatagramChannel)) {
             LOGGER.info(formatChannel(ctx.channel()) + " connected");
         }
     }
 
     @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+    public void channelInactive(ChannelHandlerContext ctx) {
         LOGGER.info(formatChannel(ctx.channel()) + " disconnected");
         closeChannel(ctx.channel());
 
