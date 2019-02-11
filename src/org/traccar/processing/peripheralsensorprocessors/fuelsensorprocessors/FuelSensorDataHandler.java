@@ -26,6 +26,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
     private static int hoursOfDataToLoad;
     private static int maxValuesForAlerts;
     private static int currentEventLookBackSeconds;
+    private static int dataLossThresholdSeconds;
 
     private final Map<Long, Boolean> possibleDataLossByDevice = new ConcurrentHashMap<>();
     private final Map<Long, Position> nonOutlierInLastWindowByDevice = new ConcurrentHashMap<>();
@@ -60,6 +61,12 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         currentEventLookBackSeconds =
                 Context.getConfig()
                        .getInteger("processing.peripheralSensorData.currentEventLookBackSeconds");
+
+        dataLossThresholdSeconds =
+                Context.getConfig()
+                       .getInteger("processing.peripheralSensorData.dataLossThresholdSeconds");
+
+
     }
 
     public FuelSensorDataHandler() {
@@ -104,7 +111,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                 return position;
             }
             
-            if (position.getBoolean("charge")) {
+            if (position.getBoolean(Position.KEY_CHARGE)) {
                 Log.debug("Device on internal charge. Ignoring reported fuel value and updating with last known fuel level for deviceId"
                           + position.getDeviceId());
                 updateWithLastAvailable(position, Position.KEY_FUEL_LEVEL);
@@ -378,7 +385,8 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                 FuelSensorDataHandlerHelper.getRelevantPositionsSubList(
                         positionsForDeviceSensor, position, minValuesForOutlierDetection, currentEventLookBackSeconds);
 
-        if (relevantPositionsListForAverages.size() == 1) {
+        if (lastPacketProcessed.isPresent()
+            && position.getDeviceTime().compareTo((lastPacketProcessed.get().getDeviceTime())) > dataLossThresholdSeconds) {
             possibleDataLossByDevice.put(deviceId, true);
         }
 
@@ -491,10 +499,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                       + ", " + fuelActivity.getActivityEndPosition().getLongitude());
 
             // Add event to events table
-            String eventType =
-                    fuelActivity.getActivityType() == FuelActivityType.FUEL_FILL
-                            ? Event.TYPE_FUEL_FILL
-                            : Event.TYPE_FUEL_DRAIN;
+            String eventType = fuelActivity.getActivityType().toString();
 
             Event event = new Event(eventType, deviceId,
                                     fuelActivity.getActivityStartPosition().getId());

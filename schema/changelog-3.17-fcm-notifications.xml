@@ -141,6 +141,24 @@
         </insert>
     </changeSet>
 
+    <changeSet author="saurako" id="changelog-3.17-fcm-notifications-add-probable-fuel-events">
+        <insert tableName="fcmpushnotificationtypes">
+            <column name="eventtype" value="PROBABLE_FUEL_DRAIN" />
+            <column name="prettyName" value="Probable Fuel Drain" />
+            <column name="notificationString" value="Probable Fuel drain detected"/>
+        </insert>
+        <insert tableName="fcmpushnotificationtypes">
+            <column name="eventtype" value="PROBABLE_FUEL_FILL" />
+            <column name="prettyName" value="Probable Fuel Fill" />
+            <column name="notificationString" value="Probable Fuel fill detected"/>
+        </insert>
+        <insert tableName="fcmpushnotificationtypes">
+            <column name="eventtype" value="EXPECTED_FUEL_FILL" />
+            <column name="prettyName" value="Expected Fuel Fill" />
+            <column name="notificationString" value="Expected Fuel fill "/>
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>
 
 
