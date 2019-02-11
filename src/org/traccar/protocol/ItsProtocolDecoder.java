@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
+            .expression("[^$]*")
             .text("$,")
             .expression("[^,]+,")                // event
             .groupBegin()
@@ -59,8 +60,8 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d+),([NS]),")           // latitude
             .number("(d+.d+),([EW]),")           // longitude
             .groupBegin()
-            .number("(d+.d+),")                  // speed
-            .number("(d+.d+),")                  // course
+            .number("(d+.?d*),")                 // speed
+            .number("(d+.?d*),")                 // course
             .number("(d+),")                     // satellites
             .or()
             .number("(-?d+.d+),")                // altitude
@@ -108,8 +109,8 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_SATELLITES, parser.nextInt());
         }
 
-        if (parser.hasNext()) {
-            position.setAltitude(parser.nextDouble(0));
+        if (parser.hasNext(2)) {
+            position.setAltitude(parser.nextDouble());
             position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
         }
 
