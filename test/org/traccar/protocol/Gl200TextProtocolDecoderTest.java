@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class Gl200TextProtocolDecoderTest extends ProtocolTest {
 
@@ -9,6 +10,14 @@ public class Gl200TextProtocolDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         Gl200TextProtocolDecoder decoder = new Gl200TextProtocolDecoder(null);
+
+        verifyAttribute(decoder, buffer(
+                "+RESP:GTPFA,F50201,866425030235982,GL300M,20190208124849,0BD4$"),
+                Position.KEY_ALARM, Position.ALARM_POWER_OFF);
+
+        verifyAttribute(decoder, buffer(
+                "+RESP:GTPNA,F50201,866425030235982,GL300M,20190208124909,0BD5$"),
+                Position.KEY_ALARM, Position.ALARM_POWER_ON);
 
         verifyAttributes(decoder, buffer(
                 "+BUFF:GTSTC,410301,864802030022424,,,0,,,,,,,0228,0002,4EE8,1BFF489,00,20181207134332,EC90$"));
