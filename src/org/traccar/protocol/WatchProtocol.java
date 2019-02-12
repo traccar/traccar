@@ -22,6 +22,8 @@ import org.traccar.model.Command;
 
 import io.netty.handler.codec.string.StringEncoder;
 
+import java.nio.charset.StandardCharsets;
+
 public class WatchProtocol extends BaseProtocol {
 
     public WatchProtocol() {
@@ -45,7 +47,7 @@ public class WatchProtocol extends BaseProtocol {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new WatchFrameDecoder());
-                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new StringEncoder(StandardCharsets.ISO_8859_1));
                 pipeline.addLast(new WatchProtocolEncoder());
                 pipeline.addLast(new WatchProtocolDecoder(WatchProtocol.this));
             }

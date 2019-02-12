@@ -109,7 +109,7 @@ public class WatchProtocolEncoder extends StringProtocolEncoder implements Strin
             index += 1;
         }
 
-        return new String(encodedData, StandardCharsets.US_ASCII);
+        return new String(encodedData, StandardCharsets.ISO_8859_1);
     }
 
     @Override
