@@ -10,6 +10,9 @@ public class T55ProtocolDecoderTest extends ProtocolTest {
 
         T55ProtocolDecoder decoder = new T55ProtocolDecoder(null);
 
+        verifyNull(decoder, text(
+                "$DEVID,0x0103846677F21422*41"));
+
         verifyPosition(decoder, text(
                 "660420156A0066AA$GPRMC,122806.0,A,0119.212178,N,10355.000942,E,0.0,,230119,0.0,E,A*27"));
 

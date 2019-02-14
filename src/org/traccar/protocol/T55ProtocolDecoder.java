@@ -249,6 +249,8 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
         if (sentence.startsWith("$PGID")) {
             getDeviceSession(channel, remoteAddress, sentence.substring(6, sentence.length() - 3));
+        } else if (sentence.startsWith("$DEVID")) {
+            getDeviceSession(channel, remoteAddress, sentence.substring(7, sentence.lastIndexOf('*')));
         } else if (sentence.startsWith("$PCPTI")) {
             getDeviceSession(channel, remoteAddress, sentence.substring(7, sentence.indexOf(",", 7)));
         } else if (sentence.startsWith("IMEI")) {
