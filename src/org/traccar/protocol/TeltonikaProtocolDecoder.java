@@ -186,6 +186,12 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             case 21:
                 position.set(Position.KEY_RSSI, readValue(buf, length, false));
                 break;
+            case 25:
+            case 26:
+            case 27:
+            case 28:
+                position.set(Position.PREFIX_TEMP + (id - 24), readValue(buf, length, true) * 0.1);
+                break;
             case 66:
                 position.set(Position.KEY_POWER, readValue(buf, length, false) * 0.001);
                 break;
@@ -196,13 +202,9 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set("gpsStatus", readValue(buf, length, false));
                 break;
             case 72:
-                position.set(Position.PREFIX_TEMP + 1, readValue(buf, length, true) * 0.1);
-                break;
             case 73:
-                position.set(Position.PREFIX_TEMP + 2, readValue(buf, length, true) * 0.1);
-                break;
             case 74:
-                position.set(Position.PREFIX_TEMP + 3, readValue(buf, length, true) * 0.1);
+                position.set(Position.PREFIX_TEMP + (id - 71), readValue(buf, length, true) * 0.1);
                 break;
             case 78:
                 long driverUniqueId = readValue(buf, length, false);
