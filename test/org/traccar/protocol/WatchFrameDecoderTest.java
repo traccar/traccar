@@ -26,6 +26,10 @@ public class WatchFrameDecoderTest extends ProtocolTest {
                 binary("5b5a4a2a3031343131313030313335303330342a303033342a303030392a4c4b2c302c302c31395d"),
                 decoder.decode(null, null, binary("5b5a4a2a3031343131313030313335303330342a303033342a303030392a4c4b2c302c302c31395d")));
 
+        verifyFrame(
+                concatenateBuffers(buffer("[CS*1234567890*000e*TK,#!AMR"), binary("7d5b5d2c2aff"), buffer("]")),
+                decoder.decode(null, null, concatenateBuffers(buffer("[CS*1234567890*000e*TK,#!AMR"), binary("7d017d027d037d047d05ff"), buffer("]"))));
+
     }
 
 }

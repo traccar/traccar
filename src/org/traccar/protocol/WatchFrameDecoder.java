@@ -33,7 +33,8 @@ public class WatchFrameDecoder extends BaseFrameDecoder {
             while (buf.readerIndex() < endIndex) {
                 byte b = buf.readByte();
                 if (b == '}') {
-                    switch (buf.readByte()) {
+                    byte c = buf.readByte();
+                    switch (c) {
                         case 0x01:
                             frame.writeByte('}');
                             break;
@@ -50,7 +51,8 @@ public class WatchFrameDecoder extends BaseFrameDecoder {
                             frame.writeByte('*');
                             break;
                         default:
-                            throw new IllegalArgumentException();
+                            throw new IllegalArgumentException(String.format(
+                                    "unexpected byte at %d: 0x%02x", buf.readerIndex() - 1, c));
                     }
                 } else {
                     frame.writeByte(b);
