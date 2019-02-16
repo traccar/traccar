@@ -4,8 +4,6 @@ import org.junit.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Command;
 
-import java.nio.charset.StandardCharsets;
-
 import static org.junit.Assert.assertEquals;
 
 public class WatchProtocolEncoderTest extends ProtocolTest {
@@ -33,25 +31,25 @@ public class WatchProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_VOICE_MESSAGE);
         command.set(Command.KEY_DATA, "3333");
-        assertEquals("[CS*123456789012345*0005*TK,33]", encoder.encodeCommand(null, command));
+        assertEquals(buffer("[CS*123456789012345*0005*TK,33]"), encoder.encodeCommand(null, command));
 
         command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_VOICE_MESSAGE);
         command.set(Command.KEY_DATA, "2321414d520a2573");
-        assertEquals("[CS*123456789012345*000b*TK,#!AMR\n%s]", encoder.encodeCommand(null, command));
-
-        command = new Command();
-        command.setDeviceId(1);
-        command.setType(Command.TYPE_VOICE_MESSAGE);
-        command.set(Command.KEY_DATA, "ff");
-        assertEquals("[CS*123456789012345*0004*TK," + binary("ff").toString(StandardCharsets.ISO_8859_1) + ']', encoder.encodeCommand(null, command));
+        assertEquals(buffer("[CS*123456789012345*000b*TK,#!AMR\n%s]"), encoder.encodeCommand(null, command));
 
         command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_VOICE_MESSAGE);
         command.set(Command.KEY_DATA, "7d5b5d2c2a");
-        assertEquals("[CS*123456789012345*000d*TK," + binary("7d017d027d037d047d05").toString(StandardCharsets.ISO_8859_1) + ']', encoder.encodeCommand(null, command));
+        verifyFrame(concatenateBuffers(buffer("[CS*123456789012345*000d*TK,"), binary("7d017d027d037d047d05"), buffer("]")), encoder.encodeCommand(null, command));
+
+        command = new Command();
+        command.setDeviceId(1);
+        command.setType(Command.TYPE_VOICE_MESSAGE);
+        command.set(Command.KEY_DATA, "ff");
+        verifyFrame(concatenateBuffers(buffer("[CS*123456789012345*0004*TK,"), binary("ff"), buffer("]")), encoder.encodeCommand(null, command));
 
         command = new Command();
         command.setDeviceId(1);

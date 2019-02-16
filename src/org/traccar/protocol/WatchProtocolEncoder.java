@@ -15,6 +15,8 @@
  */
 package org.traccar.protocol;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.StringProtocolEncoder;
 import org.traccar.helper.DataConverter;
@@ -38,13 +40,21 @@ public class WatchProtocolEncoder extends StringProtocolEncoder implements Strin
             return fmt.format(offset);
         } else if (key.equals(Command.KEY_MESSAGE)) {
             return DataConverter.printHex(value.toString().getBytes(StandardCharsets.UTF_16BE));
+        } else if (key.equals(Command.KEY_ENABLE)) {
+            return (boolean) value ? "1" : "0";
         }
 
         return null;
     }
 
-    protected String formatCommand(Channel channel, Command command, String format, String... keys) {
+    protected String formatTextCommand(Channel channel, Command command, String format, String... keys) {
+        String content = formatCommand(command, format, this, keys);
+        ByteBuf buf = Unpooled.copiedBuffer(content, StandardCharsets.US_ASCII);
 
+        return formatBinaryCommand(channel, command, "", buf).toString(StandardCharsets.US_ASCII);
+    }
+
+    protected ByteBuf formatBinaryCommand(Channel channel, Command command, String textPrefix, ByteBuf data) {
         boolean hasIndex = false;
         String manufacturer = "CS";
         if (channel != null) {
@@ -55,23 +65,23 @@ public class WatchProtocolEncoder extends StringProtocolEncoder implements Strin
             }
         }
 
-        String content = formatCommand(command, format, this, keys);
-
+        ByteBuf buf = Unpooled.buffer();
+        buf.writeByte('[');
+        buf.writeCharSequence(manufacturer, StandardCharsets.US_ASCII);
+        buf.writeByte('*');
+        buf.writeCharSequence(getUniqueId(command.getDeviceId()), StandardCharsets.US_ASCII);
+        buf.writeByte('*');
         if (hasIndex) {
-            return String.format("[%s*%s*0001*%04x*%s]",
-                    manufacturer, getUniqueId(command.getDeviceId()), content.length(), content);
-        } else {
-            return String.format("[%s*%s*%04x*%s]",
-                    manufacturer, getUniqueId(command.getDeviceId()), content.length(), content);
+            buf.writeCharSequence("0001", StandardCharsets.US_ASCII);
+            buf.writeByte('*');
         }
-    }
+        buf.writeCharSequence(String.format("%04x", data.readableBytes() + textPrefix.length()), StandardCharsets.US_ASCII);
+        buf.writeByte('*');
+        buf.writeCharSequence(textPrefix, StandardCharsets.US_ASCII);
+        buf.writeBytes(data);
+        buf.writeByte(']');
 
-    private int getEnableFlag(Command command) {
-        if (command.getBoolean(Command.KEY_ENABLE)) {
-            return 1;
-        } else {
-            return 0;
-        }
+        return buf;
     }
 
     private static Map<Byte, Byte> mapping = new HashMap<>();
@@ -84,7 +94,7 @@ public class WatchProtocolEncoder extends StringProtocolEncoder implements Strin
         mapping.put((byte) 0x2A, (byte) 0x05);
     }
 
-    private String getBinaryData(Command command) {
+    private ByteBuf getBinaryData(Command command) {
         byte[] data = DataConverter.parseHex(command.getString(Command.KEY_DATA));
 
         int encodedLength = data.length;
@@ -109,7 +119,7 @@ public class WatchProtocolEncoder extends StringProtocolEncoder implements Strin
             index += 1;
         }
 
-        return new String(encodedData, StandardCharsets.ISO_8859_1);
+        return Unpooled.copiedBuffer(encodedData);
     }
 
     @Override
@@ -117,35 +127,35 @@ public class WatchProtocolEncoder extends StringProtocolEncoder implements Strin
 
         switch (command.getType()) {
             case Command.TYPE_CUSTOM:
-                return formatCommand(channel, command, command.getString(Command.KEY_DATA));
+                return formatTextCommand(channel, command, command.getString(Command.KEY_DATA));
             case Command.TYPE_POSITION_SINGLE:
-                return formatCommand(channel, command, "RG");
+                return formatTextCommand(channel, command, "RG");
             case Command.TYPE_SOS_NUMBER:
-                return formatCommand(channel, command, "SOS{%s},{%s}", Command.KEY_INDEX, Command.KEY_PHONE);
+                return formatTextCommand(channel, command, "SOS{%s},{%s}", Command.KEY_INDEX, Command.KEY_PHONE);
             case Command.TYPE_ALARM_SOS:
-                return formatCommand(channel, command, "SOSSMS," + getEnableFlag(command));
+                return formatTextCommand(channel, command, "SOSSMS,{%s}", Command.KEY_ENABLE);
             case Command.TYPE_ALARM_BATTERY:
-                return formatCommand(channel, command, "LOWBAT," + getEnableFlag(command));
+                return formatTextCommand(channel, command, "LOWBAT,{%s}", Command.KEY_ENABLE);
             case Command.TYPE_REBOOT_DEVICE:
-                return formatCommand(channel, command, "RESET");
+                return formatTextCommand(channel, command, "RESET");
             case Command.TYPE_ALARM_REMOVE:
-                return formatCommand(channel, command, "REMOVE," + getEnableFlag(command));
+                return formatTextCommand(channel, command, "REMOVE,{%s}", Command.KEY_ENABLE);
             case Command.TYPE_SILENCE_TIME:
-                return formatCommand(channel, command, "SILENCETIME,{%s}", Command.KEY_DATA);
+                return formatTextCommand(channel, command, "SILENCETIME,{%s}", Command.KEY_DATA);
             case Command.TYPE_ALARM_CLOCK:
-                return formatCommand(channel, command, "REMIND,{%s}", Command.KEY_DATA);
+                return formatTextCommand(channel, command, "REMIND,{%s}", Command.KEY_DATA);
             case Command.TYPE_SET_PHONEBOOK:
-                return formatCommand(channel, command, "PHB,{%s}", Command.KEY_DATA);
+                return formatTextCommand(channel, command, "PHB,{%s}", Command.KEY_DATA);
             case Command.TYPE_MESSAGE:
-                return formatCommand(channel, command, "MESSAGE,{%s}", Command.KEY_MESSAGE);
+                return formatTextCommand(channel, command, "MESSAGE,{%s}", Command.KEY_MESSAGE);
             case Command.TYPE_VOICE_MESSAGE:
-                return formatCommand(channel, command, "TK,%s", getBinaryData(command));
+                return formatBinaryCommand(channel, command, "TK,", getBinaryData(command));
             case Command.TYPE_POSITION_PERIODIC:
-                return formatCommand(channel, command, "UPLOAD,{%s}", Command.KEY_FREQUENCY);
+                return formatTextCommand(channel, command, "UPLOAD,{%s}", Command.KEY_FREQUENCY);
             case Command.TYPE_SET_TIMEZONE:
-                return formatCommand(channel, command, "LZ,,{%s}", Command.KEY_TIMEZONE);
+                return formatTextCommand(channel, command, "LZ,,{%s}", Command.KEY_TIMEZONE);
             case Command.TYPE_SET_INDICATOR:
-                return formatCommand(channel, command, "FLOWER,{%s}", Command.KEY_DATA);
+                return formatTextCommand(channel, command, "FLOWER,{%s}", Command.KEY_DATA);
             default:
                 return null;
         }
