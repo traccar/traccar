@@ -36,7 +36,7 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.47</version> <!-- version 8 has a bug: https://bugs.mysql.com/bug.php?id=92485 -->
+            <version>5.1.47</version> <!-- bug should be fixed in 8.0.13 -->
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
