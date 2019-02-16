@@ -17,6 +17,8 @@ package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
@@ -37,6 +39,8 @@ import java.util.Date;
 import java.util.regex.Pattern;
 
 public class WatchProtocolDecoder extends BaseProtocolDecoder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(WatchProtocolDecoder.class);
 
     public WatchProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -174,41 +178,45 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
         return manufacturer;
     }
 
+    protected int nextIndexOf(ByteBuf buf, char delimiter) {
+        return buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) delimiter);
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ByteBuf buf = (ByteBuf) msg;
 
-        buf.skipBytes(1); // header
+        buf.skipBytes(1); // '[' header
         manufacturer = buf.readSlice(2).toString(StandardCharsets.US_ASCII);
-        buf.skipBytes(1); // delimiter
+        buf.skipBytes(1); // '*' delimiter
 
-        int idIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '*');
+        int idIndex = nextIndexOf(buf, '*');
         String id = buf.readSlice(idIndex - buf.readerIndex()).toString(StandardCharsets.US_ASCII);
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
         if (deviceSession == null) {
             return null;
         }
 
-        buf.skipBytes(1); // delimiter
+        buf.skipBytes(1); // '*' delimiter
 
         String index = null;
-        int contentIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '*');
+        int contentIndex = nextIndexOf(buf, '*');
         if (contentIndex + 5 < buf.writerIndex() && buf.getByte(contentIndex + 5) == '*'
                 && buf.toString(contentIndex + 1, 4, StandardCharsets.US_ASCII).matches("\\p{XDigit}+")) {
-            int indexLength = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '*') - buf.readerIndex();
+            int indexLength = nextIndexOf(buf, '*') - buf.readerIndex();
             hasIndex = true;
             index = buf.readSlice(indexLength).toString(StandardCharsets.US_ASCII);
-            buf.skipBytes(1); // delimiter
+            buf.skipBytes(1); // '*' delimiter
         }
 
         buf.skipBytes(4); // length
-        buf.skipBytes(1); // delimiter
+        buf.skipBytes(1); // '*' delimiter
 
-        buf.writerIndex(buf.writerIndex() - 1); // ignore ending
+        buf.writerIndex(buf.writerIndex() - 1); // ']' ignore ending
 
-        contentIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ',');
+        contentIndex = nextIndexOf(buf, ',');
         if (contentIndex < 0) {
             contentIndex = buf.writerIndex();
         }
@@ -295,6 +303,14 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             return position;
 
         } else if (type.equals("TK")) {
+
+            if (buf.readableBytes() == 1) {
+                byte result = buf.readByte();
+                if (result != '1') {
+                    LOGGER.error(type + "," + result);
+                }
+                return null;
+            }
 
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());

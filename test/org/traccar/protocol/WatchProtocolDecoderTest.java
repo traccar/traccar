@@ -1,7 +1,17 @@
 package org.traccar.protocol;
 
+import io.netty.buffer.ByteBuf;
 import org.junit.Test;
+import org.traccar.Context;
 import org.traccar.ProtocolTest;
+import org.traccar.database.MediaManager;
+import org.traccar.model.Position;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class WatchProtocolDecoderTest extends ProtocolTest {
 
@@ -101,7 +111,40 @@ public class WatchProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, buffer(
                 "[ZJ*014111001350304*0038*008a*UD,070318,021027,V,00.000000,N,000.000000,E,0,0,0,0,100,18,1000,50,00000000,4,255,460,0,9346,5223,42,9346,5214,20,9784,4083,11,9346,5221,5]"));
-
     }
 
+    @Test
+    public void testDecodeTK() throws Exception {
+        WatchProtocolDecoder decoder = new WatchProtocolDecoder(null);
+
+        verifyNull(decoder.decode(null, null, buffer("[CS*1234567890*0004*TK,1]")));
+
+        MockMediaManager mockMediaManager = new MockMediaManager("/tmp");
+        Context.initMediaManager(mockMediaManager);
+        String hex = "7d5b5d2c2aff";
+        Object decodedObject = decoder.decode(null, null, concatenateBuffers(buffer("[CS*1234567890*000e*TK,#!AMR"), binary(hex), buffer("]")));
+        assertTrue("not a position", decodedObject instanceof Position);
+        Position position = (Position) decodedObject;
+        assertEquals("1234567890/mock.amr", position.getAttributes().get("audio"));
+        verifyFrame(concatenateBuffers(buffer("#!AMR"), binary(hex)), mockMediaManager.readFile("1234567890/mock.amr"));
+    }
+
+    private static class MockMediaManager extends MediaManager {
+        Map<String, ByteBuf> files = new HashMap<>();
+
+        MockMediaManager(String path) {
+            super(path);
+        }
+
+        @Override
+        public String writeFile(String uniqueId, ByteBuf buf, String extension) {
+            String fileName = uniqueId + "/mock." + extension;
+            files.put(fileName, buf);
+            return fileName;
+        }
+
+        ByteBuf readFile(String fileName) {
+            return files.get(fileName);
+        }
+    }
 }

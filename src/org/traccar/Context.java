@@ -516,6 +516,10 @@ public final class Context {
         identityManager = testIdentityManager;
     }
 
+    public static void initMediaManager(MediaManager mediaManager) {
+        Context.mediaManager = mediaManager;
+    }
+
     public static <T extends BaseModel> BaseObjectManager<T> getManager(Class<T> clazz) {
         if (clazz.equals(Device.class)) {
             return (BaseObjectManager<T>) deviceManager;
