@@ -47,11 +47,11 @@ public class WatchProtocolEncoder extends StringProtocolEncoder implements Strin
         return null;
     }
 
-    protected String formatTextCommand(Channel channel, Command command, String format, String... keys) {
+    protected ByteBuf formatTextCommand(Channel channel, Command command, String format, String... keys) {
         String content = formatCommand(command, format, this, keys);
         ByteBuf buf = Unpooled.copiedBuffer(content, StandardCharsets.US_ASCII);
 
-        return formatBinaryCommand(channel, command, "", buf).toString(StandardCharsets.US_ASCII);
+        return formatBinaryCommand(channel, command, "", buf);
     }
 
     protected ByteBuf formatBinaryCommand(Channel channel, Command command, String textPrefix, ByteBuf data) {
