@@ -67,7 +67,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             .expression("(.*)")                  // cell and wifi
             .compile();
 
-    private void sendTextResponse(Channel channel, String id, String index, String content) {
+    private void sendResponse(Channel channel, String id, String index, String content) {
         if (channel != null) {
             String response;
             if (index != null) {
@@ -182,10 +182,6 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
         return manufacturer;
     }
 
-    protected int nextIndexOf(ByteBuf buf, char delimiter) {
-        return buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) delimiter);
-    }
-
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -196,7 +192,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
         manufacturer = buf.readSlice(2).toString(StandardCharsets.US_ASCII);
         buf.skipBytes(1); // '*' delimiter
 
-        int idIndex = nextIndexOf(buf, '*');
+        int idIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '*');
         String id = buf.readSlice(idIndex - buf.readerIndex()).toString(StandardCharsets.US_ASCII);
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
         if (deviceSession == null) {
@@ -206,10 +202,10 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
         buf.skipBytes(1); // '*' delimiter
 
         String index = null;
-        int contentIndex = nextIndexOf(buf, '*');
+        int contentIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '*');
         if (contentIndex + 5 < buf.writerIndex() && buf.getByte(contentIndex + 5) == '*'
                 && buf.toString(contentIndex + 1, 4, StandardCharsets.US_ASCII).matches("\\p{XDigit}+")) {
-            int indexLength = nextIndexOf(buf, '*') - buf.readerIndex();
+            int indexLength = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '*') - buf.readerIndex();
             hasIndex = true;
             index = buf.readSlice(indexLength).toString(StandardCharsets.US_ASCII);
             buf.skipBytes(1); // '*' delimiter
@@ -220,7 +216,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
         buf.writerIndex(buf.writerIndex() - 1); // ']' ignore ending
 
-        contentIndex = nextIndexOf(buf, ',');
+        contentIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ',');
         if (contentIndex < 0) {
             contentIndex = buf.writerIndex();
         }
@@ -233,11 +229,11 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
         if (type.equals("INIT")) {
 
-            sendTextResponse(channel, id, index, "INIT,1");
+            sendResponse(channel, id, index, "INIT,1");
 
         } else if (type.equals("LK")) {
 
-            sendTextResponse(channel, id, index, "LK");
+            sendResponse(channel, id, index, "LK");
 
             if (buf.isReadable()) {
                 String[] values = buf.toString(StandardCharsets.US_ASCII).split(",");
@@ -262,14 +258,14 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
                 if (position != null) {
                     position.set(Position.KEY_ALARM, Position.ALARM_SOS);
                 }
-                sendTextResponse(channel, id, index, "AL");
+                sendResponse(channel, id, index, "AL");
             }
 
             return position;
 
         } else if (type.equals("TKQ")) {
 
-            sendTextResponse(channel, id, index, "TKQ");
+            sendResponse(channel, id, index, "TKQ");
 
         } else if (type.equals("PULSE") || type.equals("heart") || type.equals("bphrt")) {
 
@@ -311,7 +307,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             if (buf.readableBytes() == 1) {
                 byte result = buf.readByte();
                 if (result != '1') {
-                    LOGGER.error(type + "," + result);
+                    LOGGER.warn(type + "," + result);
                 }
                 return null;
             }

@@ -114,7 +114,7 @@ public class WatchProtocolDecoderTest extends ProtocolTest {
     }
 
     @Test
-    public void testDecodeTK() throws Exception {
+    public void testDecodeVoiceMessage() throws Exception {
         WatchProtocolDecoder decoder = new WatchProtocolDecoder(null);
 
         verifyNull(decoder.decode(null, null, buffer("[CS*1234567890*0004*TK,1]")));

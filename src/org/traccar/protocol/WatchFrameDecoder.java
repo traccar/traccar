@@ -31,10 +31,10 @@ public class WatchFrameDecoder extends BaseFrameDecoder {
         if (endIndex > 0) {
             ByteBuf frame = Unpooled.buffer();
             while (buf.readerIndex() < endIndex) {
-                byte b = buf.readByte();
-                if (b == '}') {
-                    byte c = buf.readByte();
-                    switch (c) {
+                byte b1 = buf.readByte();
+                if (b1 == '}') {
+                    byte b2 = buf.readByte();
+                    switch (b2) {
                         case 0x01:
                             frame.writeByte('}');
                             break;
@@ -52,10 +52,10 @@ public class WatchFrameDecoder extends BaseFrameDecoder {
                             break;
                         default:
                             throw new IllegalArgumentException(String.format(
-                                    "unexpected byte at %d: 0x%02x", buf.readerIndex() - 1, c));
+                                    "unexpected byte at %d: 0x%02x", buf.readerIndex() - 1, b2));
                     }
                 } else {
-                    frame.writeByte(b);
+                    frame.writeByte(b1);
                 }
             }
             return frame;
