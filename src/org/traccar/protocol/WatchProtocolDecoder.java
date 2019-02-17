@@ -16,6 +16,7 @@
 package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,15 +67,18 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             .expression("(.*)")                  // cell and wifi
             .compile();
 
-    private void sendResponse(Channel channel, String id, String index, String content) {
+    private void sendTextResponse(Channel channel, String id, String index, String content) {
         if (channel != null) {
+            String response;
             if (index != null) {
-                channel.writeAndFlush(new NetworkMessage(String.format("[%s*%s*%s*%04x*%s]",
-                        manufacturer, id, index, content.length(), content), channel.remoteAddress()));
+                response = String.format("[%s*%s*%s*%04x*%s]",
+                        manufacturer, id, index, content.length(), content);
             } else {
-                channel.writeAndFlush(new NetworkMessage(String.format("[%s*%s*%04x*%s]",
-                        manufacturer, id, content.length(), content), channel.remoteAddress()));
+                response = String.format("[%s*%s*%04x*%s]",
+                        manufacturer, id, content.length(), content);
             }
+            ByteBuf buf = Unpooled.copiedBuffer(response, StandardCharsets.US_ASCII);
+            channel.writeAndFlush(new NetworkMessage(buf, channel.remoteAddress()));
         }
     }
 
@@ -229,11 +233,11 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
         if (type.equals("INIT")) {
 
-            sendResponse(channel, id, index, "INIT,1");
+            sendTextResponse(channel, id, index, "INIT,1");
 
         } else if (type.equals("LK")) {
 
-            sendResponse(channel, id, index, "LK");
+            sendTextResponse(channel, id, index, "LK");
 
             if (buf.isReadable()) {
                 String[] values = buf.toString(StandardCharsets.US_ASCII).split(",");
@@ -258,14 +262,14 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
                 if (position != null) {
                     position.set(Position.KEY_ALARM, Position.ALARM_SOS);
                 }
-                sendResponse(channel, id, index, "AL");
+                sendTextResponse(channel, id, index, "AL");
             }
 
             return position;
 
         } else if (type.equals("TKQ")) {
 
-            sendResponse(channel, id, index, "TKQ");
+            sendTextResponse(channel, id, index, "TKQ");
 
         } else if (type.equals("PULSE") || type.equals("heart") || type.equals("bphrt")) {
 
