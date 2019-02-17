@@ -119,32 +119,11 @@ public class WatchProtocolDecoderTest extends ProtocolTest {
 
         verifyNull(decoder.decode(null, null, buffer("[CS*1234567890*0004*TK,1]")));
 
-        MockMediaManager mockMediaManager = new MockMediaManager("/tmp");
-        Context.initMediaManager(mockMediaManager);
         String hex = "7d5b5d2c2aff";
         Object decodedObject = decoder.decode(null, null, concatenateBuffers(buffer("[CS*1234567890*000e*TK,#!AMR"), binary(hex), buffer("]")));
         assertTrue("not a position", decodedObject instanceof Position);
         Position position = (Position) decodedObject;
         assertEquals("1234567890/mock.amr", position.getAttributes().get("audio"));
-        verifyFrame(concatenateBuffers(buffer("#!AMR"), binary(hex)), mockMediaManager.readFile("1234567890/mock.amr"));
-    }
-
-    private static class MockMediaManager extends MediaManager {
-        Map<String, ByteBuf> files = new HashMap<>();
-
-        MockMediaManager(String path) {
-            super(path);
-        }
-
-        @Override
-        public String writeFile(String uniqueId, ByteBuf buf, String extension) {
-            String fileName = uniqueId + "/mock." + extension;
-            files.put(fileName, buf);
-            return fileName;
-        }
-
-        ByteBuf readFile(String fileName) {
-            return files.get(fileName);
-        }
+        verifyFrame(concatenateBuffers(buffer("#!AMR"), binary(hex)), ((MockMediaManager) Context.getMediaManager()).readFile("1234567890/mock.amr"));
     }
 }

@@ -508,16 +508,13 @@ public final class Context {
                 Context.getConfig().getBoolean("event.overspeed.preferLowest"));
     }
 
-    public static void init(IdentityManager testIdentityManager) {
+    public static void init(IdentityManager testIdentityManager, MediaManager testMediaManager) {
         config = new Config();
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JSR353Module());
         client = ClientBuilder.newClient().register(new ObjectMapperContextResolver());
         identityManager = testIdentityManager;
-    }
-
-    public static void initMediaManager(MediaManager mediaManager) {
-        Context.mediaManager = mediaManager;
+        mediaManager = testMediaManager;
     }
 
     public static <T extends BaseModel> BaseObjectManager<T> getManager(Class<T> clazz) {
