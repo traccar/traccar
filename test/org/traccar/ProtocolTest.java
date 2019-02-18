@@ -68,10 +68,6 @@ public class ProtocolTest extends BaseTest {
         return concatenateStrings(data);
     }
 
-    protected String text(ByteBuf data) {
-        return data.toString(StandardCharsets.ISO_8859_1);
-    }
-
     protected ByteBuf buffer(String... data) {
         return Unpooled.copiedBuffer(concatenateStrings(data), StandardCharsets.ISO_8859_1);
     }
