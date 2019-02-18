@@ -52,12 +52,24 @@ public class ProtocolTest extends BaseTest {
         return builder.toString();
     }
 
+    protected ByteBuf concatenateBuffers(ByteBuf... buffers) {
+        ByteBuf result = Unpooled.buffer();
+        for (ByteBuf buf : buffers) {
+            result.writeBytes(buf);
+        }
+        return result;
+    }
+
     protected ByteBuf binary(String... data) {
         return Unpooled.wrappedBuffer(DataConverter.parseHex(concatenateStrings(data)));
     }
 
     protected String text(String... data) {
         return concatenateStrings(data);
+    }
+
+    protected String text(ByteBuf data) {
+        return data.toString(StandardCharsets.ISO_8859_1);
     }
 
     protected ByteBuf buffer(String... data) {
