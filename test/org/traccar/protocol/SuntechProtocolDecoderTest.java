@@ -45,6 +45,9 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
         SuntechProtocolDecoder decoder = new SuntechProtocolDecoder(null);
 
         verifyPosition(decoder, text(
+                "SA200STT;608945;129;20190215;15:04:53;3dce071558;+22.006721;-098.771016;001.198;000.00;11;1;2632589;12.21;010000;1;3211"));
+
+        verifyPosition(decoder, text(
                 "ST410STT;007272376;408;01;10217;732;103;-87;51511;1;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;3.8;1;2503;6;20181031;20:12:58;+04.741277;-074.048238;052.375;189.87;20;1"));
 
         verifyPosition(decoder, text(
@@ -94,7 +97,7 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
 
         verifyNull(decoder, text(
                 "SA200ALV;317652"));
-        
+
         verifyPosition(decoder, text(
                 "ST910;Alert;123456;410;20141018;18:30:12;+37.478774;+126.889690;000.000;000.00;0;4.0;1;6002"),
                 position("2014-10-18 18:30:12.000", false, 37.47877, 126.88969));

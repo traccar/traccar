@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -268,7 +268,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(dateFormat.parse(values[index++] + values[index++]));
 
         if (!protocol.equals("ST500")) {
-            int cid = Integer.parseInt(values[index++], 16);
+            long cid = Long.parseLong(values[index++], 16);
             if (protocol.equals("ST600")) {
                 position.setNetwork(new Network(CellTower.from(
                         Integer.parseInt(values[index++]), Integer.parseInt(values[index++]),
