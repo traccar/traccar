@@ -317,7 +317,9 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
 
         if (Context.getConfig().getBoolean("forward.enable")) {
             pipeline.addLast(Main.getInjector().getInstance(WebDataHandler.Factory.class).create(
-                    Context.getConfig().getString("forward.url"), Context.getConfig().getBoolean("forward.json")));
+                    Context.getConfig().getString("forward.url"),
+                    Context.getConfig().getString("forward.header"),
+                    Context.getConfig().getBoolean("forward.json")));
         }
 
         addHandlers(
