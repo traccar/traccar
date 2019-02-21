@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -193,7 +193,24 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 .setSecond(BcdUtil.readInteger(buf, 2));
         position.setTime(dateBuilder.getDate());
 
-        // additional information
+        while (buf.readableBytes() > 2) {
+            int subtype = buf.readUnsignedByte();
+            int length = buf.readUnsignedByte();
+            switch (subtype) {
+                case 0x01:
+                    position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 100);
+                    break;
+                case 0x30:
+                    position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+                    break;
+                case 0x31:
+                    position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+                    break;
+                default:
+                    buf.skipBytes(length);
+                    break;
+            }
+        }
 
         return position;
     }
