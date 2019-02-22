@@ -19,7 +19,9 @@ package org.traccar.notification;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -115,4 +117,25 @@ public final class NotificationFormatter {
         return writer.toString();
     }
 
+    public static Map<String, String> buildData(long userId, Event event, Position position) {
+        Map<String, String> data = new HashMap<>();
+        putIfNotEmpty(data, "event_type", event.getType());
+        putIfNotEmpty(data, "device_id", event.getDeviceId());
+        putIfNotEmpty(data, "geofence_id", event.getGeofenceId());
+        putIfNotEmpty(data, "alarm", position.getString(Position.KEY_ALARM));
+        putIfNotEmpty(data, "audio", position.getString(Position.KEY_AUDIO));
+        putIfNotEmpty(data, "batteryLevel", position.getInteger(Position.KEY_BATTERY_LEVEL));
+        putIfNotEmpty(data, "latitude", position.getLatitude());
+        putIfNotEmpty(data, "longitude", position.getLongitude());
+        return data;
+    }
+
+    private static void putIfNotEmpty(Map<String, String> data, String key, Object val) {
+        if (val != null) {
+            String str = String.valueOf(val);
+            if (!str.isEmpty()) {
+                data.put(key, str);
+            }
+        }
+    }
 }

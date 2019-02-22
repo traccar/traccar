@@ -27,6 +27,7 @@ import org.traccar.notification.NotificationFormatter;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.InvocationCallback;
+import java.util.Map;
 
 public class NotificatorFirebase extends Notificator {
 
@@ -46,6 +47,8 @@ public class NotificatorFirebase extends Notificator {
         private String[] tokens;
         @JsonProperty("notification")
         private Notification notification;
+        @JsonProperty("data")
+        private Map<String, String> data;
     }
 
     public NotificatorFirebase() {
@@ -63,6 +66,7 @@ public class NotificatorFirebase extends Notificator {
             Message message = new Message();
             message.tokens = user.getString("notificationTokens").split("[, ]");
             message.notification = notification;
+            message.data = NotificationFormatter.buildData(userId, event, position);
 
             Context.getClient().target(URL).request()
                     .header("Authorization", "key=" + key)

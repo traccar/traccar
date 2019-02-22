@@ -89,7 +89,7 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
                 final Set<String> notificators = new HashSet<>();
                 for (long notificationId : getEffectiveNotifications(userId, deviceId, event.getServerTime())) {
                     Notification notification = getById(notificationId);
-                    if (getById(notificationId).getType().equals(event.getType())) {
+                    if (notification.getType().equals(event.getType())) {
                         boolean filter = false;
                         if (event.getType().equals(Event.TYPE_ALARM)) {
                             String alarms = notification.getString("alarms");
