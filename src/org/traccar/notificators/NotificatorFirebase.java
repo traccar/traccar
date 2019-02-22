@@ -25,6 +25,7 @@ import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.notification.NotificationFormatter;
 
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.InvocationCallback;
 import java.util.Map;
@@ -68,11 +69,12 @@ public class NotificatorFirebase extends Notificator {
             message.notification = notification;
             message.data = NotificationFormatter.buildData(userId, event, position);
 
-            Context.getClient().target(URL).request()
+            ClientBuilder.newClient().target(URL).request()
                     .header("Authorization", "key=" + key)
                     .async().post(Entity.json(message), new InvocationCallback<Object>() {
                 @Override
                 public void completed(Object o) {
+                    LOGGER.info("Firebase notification sent to user: {}", userId);
                 }
 
                 @Override

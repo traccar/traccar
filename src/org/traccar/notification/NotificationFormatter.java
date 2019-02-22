@@ -121,22 +121,17 @@ public final class NotificationFormatter {
     public static Map<String, String> buildData(long userId, Event event, Position position) {
         Map<String, String> data = new HashMap<>();
         try {
-            String eventJson = Context.getObjectMapper().writeValueAsString(event);
-            String positionJson = Context.getObjectMapper().writeValueAsString(position);
-            putIfNotEmpty(data, "eventJson", eventJson);
-            putIfNotEmpty(data, "positionJson", positionJson);
+            if (event != null) {
+                String eventJson = Context.getObjectMapper().writeValueAsString(event);
+                data.put("eventJson", eventJson);
+            }
+            if (position != null) {
+                String positionJson = Context.getObjectMapper().writeValueAsString(position);
+                data.put("positionJson", positionJson);
+            }
         } catch (JsonProcessingException e) {
             LOGGER.warn("Notification JSON formatting error", e);
         }
         return data;
-    }
-
-    private static void putIfNotEmpty(Map<String, String> data, String key, Object val) {
-        if (val != null) {
-            String str = String.valueOf(val);
-            if (!str.isEmpty()) {
-                data.put(key, str);
-            }
-        }
     }
 }
