@@ -122,11 +122,12 @@ public final class NotificationFormatter {
         putIfNotEmpty(data, "event_type", event.getType());
         putIfNotEmpty(data, "device_id", event.getDeviceId());
         putIfNotEmpty(data, "geofence_id", event.getGeofenceId());
-        putIfNotEmpty(data, "alarm", position.getString(Position.KEY_ALARM));
-        putIfNotEmpty(data, "audio", position.getString(Position.KEY_AUDIO));
-        putIfNotEmpty(data, "batteryLevel", position.getInteger(Position.KEY_BATTERY_LEVEL));
-        putIfNotEmpty(data, "latitude", position.getLatitude());
-        putIfNotEmpty(data, "longitude", position.getLongitude());
+        if (position != null) {
+            putIfNotEmpty(data, "alarm", position.getString(Position.KEY_ALARM));
+            putIfNotEmpty(data, "batteryLevel", position.getInteger(Position.KEY_BATTERY_LEVEL));
+            putIfNotEmpty(data, "latitude", position.getLatitude());
+            putIfNotEmpty(data, "longitude", position.getLongitude());
+        }
         return data;
     }
 
