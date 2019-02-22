@@ -18,8 +18,6 @@ package org.traccar;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.assistedinject.Assisted;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.traccar.database.IdentityManager;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Device;
@@ -42,8 +40,6 @@ import java.util.TimeZone;
 
 public class WebDataHandler extends BaseDataHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(WebDataHandler.class);
-
     private static final String KEY_POSITION = "position";
     private static final String KEY_DEVICE = "device";
 
@@ -56,13 +52,14 @@ public class WebDataHandler extends BaseDataHandler {
     private final boolean json;
 
     public interface Factory {
-        WebDataHandler create(String url, String header, boolean json);
+        WebDataHandler create(
+                @Assisted("url") String url, @Assisted("header") String header, boolean json);
     }
 
     @Inject
     public WebDataHandler(
             IdentityManager identityManager, ObjectMapper objectMapper, Client client,
-            @Assisted String url, @Assisted String header, @Assisted boolean json) {
+            @Assisted("url") String url, @Assisted("header") String header, @Assisted boolean json) {
         this.identityManager = identityManager;
         this.objectMapper = objectMapper;
         this.client = client;
