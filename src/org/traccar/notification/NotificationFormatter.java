@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.exception.ResourceNotFoundException;
@@ -119,14 +120,13 @@ public final class NotificationFormatter {
 
     public static Map<String, String> buildData(long userId, Event event, Position position) {
         Map<String, String> data = new HashMap<>();
-        putIfNotEmpty(data, "event_type", event.getType());
-        putIfNotEmpty(data, "device_id", event.getDeviceId());
-        putIfNotEmpty(data, "geofence_id", event.getGeofenceId());
-        if (position != null) {
-            putIfNotEmpty(data, "alarm", position.getString(Position.KEY_ALARM));
-            putIfNotEmpty(data, "batteryLevel", position.getInteger(Position.KEY_BATTERY_LEVEL));
-            putIfNotEmpty(data, "latitude", position.getLatitude());
-            putIfNotEmpty(data, "longitude", position.getLongitude());
+        try {
+            String eventJson = Context.getObjectMapper().writeValueAsString(event);
+            String positionJson = Context.getObjectMapper().writeValueAsString(position);
+            putIfNotEmpty(data, "eventJson", eventJson);
+            putIfNotEmpty(data, "positionJson", positionJson);
+        } catch (JsonProcessingException e) {
+            LOGGER.warn("Notification JSON formatting error", e);
         }
         return data;
     }
