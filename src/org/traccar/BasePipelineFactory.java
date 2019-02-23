@@ -40,6 +40,7 @@ import org.traccar.handler.DistanceHandler;
 import org.traccar.handler.FilterHandler;
 import org.traccar.handler.NetworkMessageHandler;
 import org.traccar.handler.OpenChannelHandler;
+import org.traccar.handler.RemoteAddressHandler;
 import org.traccar.handler.StandardLoggingHandler;
 
 import java.util.Map;
@@ -52,7 +53,6 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
     private int timeout;
 
     private EngineHoursHandler engineHoursHandler;
-    private RemoteAddressHandler remoteAddressHandler;
     private MotionHandler motionHandler;
     private GeocoderHandler geocoderHandler;
     private GeolocationHandler geolocationHandler;
@@ -78,10 +78,6 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
             timeout = Context.getConfig().getInteger(Keys.SERVER_TIMEOUT);
         }
 
-        if (Context.getConfig().getBoolean("handler.remoteAddress.enable")) {
-            remoteAddressHandler = new RemoteAddressHandler();
-        }
-
         if (Context.getGeocoder() != null && !Context.getConfig().getBoolean("geocoder.ignorePositions")) {
             geocoderHandler = new GeocoderHandler(
                     Context.getGeocoder(),
@@ -105,7 +101,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
             hemisphereHandler = new HemisphereHandler();
         }
 
-        if (Context.getConfig().getBoolean("handler.copyAttributes.enable")) {
+        if (Context.getConfig().getBoolean("processing.copyAttributes.enable")) {
             copyAttributesHandler = new CopyAttributesHandler();
         }
 
@@ -178,7 +174,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
                 geolocationHandler,
                 hemisphereHandler,
                 Main.getInjector().getInstance(DistanceHandler.class),
-                remoteAddressHandler);
+                Main.getInjector().getInstance(RemoteAddressHandler.class));
 
         addDynamicHandlers(pipeline);
 

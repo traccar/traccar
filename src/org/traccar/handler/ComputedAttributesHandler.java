@@ -51,7 +51,7 @@ public class ComputedAttributesHandler extends BaseDataHandler {
         engine.setStrict(true);
         engine.setFunctions(Collections.singletonMap("math", (Object) Math.class));
         if (Context.getConfig() != null) {
-            mapDeviceAttributes = Context.getConfig().getBoolean("handler.computedAttributes.deviceAttributes");
+            mapDeviceAttributes = Context.getConfig().getBoolean("processing.computedAttributes.deviceAttributes");
         }
     }
 

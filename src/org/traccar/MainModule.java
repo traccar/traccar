@@ -24,6 +24,7 @@ import org.traccar.config.Keys;
 import org.traccar.database.IdentityManager;
 import org.traccar.handler.DistanceHandler;
 import org.traccar.handler.FilterHandler;
+import org.traccar.handler.RemoteAddressHandler;
 
 import javax.ws.rs.client.Client;
 
@@ -60,6 +61,15 @@ public class MainModule extends AbstractModule {
     public static FilterHandler provideFilterHandler(Config config) {
         if (config.getBoolean(Keys.FILTER_ENABLE)) {
             return new FilterHandler(config);
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public static RemoteAddressHandler provideRemoteAddressHandler(Config config) {
+        if (config.getBoolean(Keys.PROCESSING_REMOTE_ADDRESS_ENABLE)) {
+            return new RemoteAddressHandler();
         }
         return null;
     }

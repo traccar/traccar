@@ -143,6 +143,10 @@ public final class Keys {
             "Distance in meters. Distances above this value gets handled like explained in 'coordinates.filter', but "
                     + "only if Position is also marked as 'invalid'.");
 
+    public static final ConfigKey PROCESSING_REMOTE_ADDRESS_ENABLE = new ConfigKey(
+            "processing.remoteAddress.enable",
+            Boolean.class,
+            "Enable to save device IP addresses information. Disabled by default.");
 
     private Keys() {
     }

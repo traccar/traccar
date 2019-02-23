@@ -34,7 +34,7 @@ public class CopyAttributesHandler extends BaseDataHandler {
     @Override
     protected Position handlePosition(Position position) {
         String attributesString = Context.getDeviceManager().lookupAttributeString(
-                position.getDeviceId(), "handler.copyAttributes", "", true);
+                position.getDeviceId(), "processing.copyAttributes", "", true);
         Position last = getLastPosition(position.getDeviceId());
         if (attributesString.isEmpty()) {
             attributesString = Position.KEY_DRIVER_UNIQUE_ID;
