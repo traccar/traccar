@@ -25,8 +25,8 @@ public final class Keys {
     public static final ConfigKey FORWARD_URL = new ConfigKey(
             "forward.url",
             String.class,
-            "URL to forward positions. Data is passed through URL parameters. For example, {uniqueId} for device" +
-                    "identifier, {latitude} and {longitude} for coordinates.");
+            "URL to forward positions. Data is passed through URL parameters. For example, {uniqueId} for device "
+                    + "identifier, {latitude} and {longitude} for coordinates.");
 
     public static final ConfigKey FORWARD_HEADER = new ConfigKey(
             "forward.header",
