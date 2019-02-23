@@ -22,6 +22,7 @@ import com.google.inject.Singleton;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.IdentityManager;
+import org.traccar.processing.FilterHandler;
 
 import javax.ws.rs.client.Client;
 
@@ -45,6 +46,16 @@ public class MainModule extends AbstractModule {
     @Provides
     public static Client provideClient() {
         return Context.getClient();
+    }
+
+    @Singleton
+    @Provides
+    public static FilterHandler provideFilterHandler(Config config) {
+        if (config.getBoolean(Keys.FILTER_ENABLE)) {
+            return new FilterHandler(config);
+        } else {
+            return null;
+        }
     }
 
     @Singleton

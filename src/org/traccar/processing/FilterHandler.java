@@ -13,12 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar;
+package org.traccar.processing;
 
 import io.netty.channel.ChannelHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.BaseDataHandler;
+import org.traccar.Context;
 import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
@@ -40,70 +43,19 @@ public class FilterHandler extends BaseDataHandler {
     private long skipLimit;
     private boolean skipAttributes;
 
-    public void setFilterInvalid(boolean filterInvalid) {
-        this.filterInvalid = filterInvalid;
-    }
-
-    public void setFilterZero(boolean filterZero) {
-        this.filterZero = filterZero;
-    }
-
-    public void setFilterDuplicate(boolean filterDuplicate) {
-        this.filterDuplicate = filterDuplicate;
-    }
-
-    public void setFilterFuture(long filterFuture) {
-        this.filterFuture = filterFuture;
-    }
-
-    public void setFilterAccuracy(int filterAccuracy) {
-        this.filterAccuracy = filterAccuracy;
-    }
-
-    public void setFilterApproximate(boolean filterApproximate) {
-        this.filterApproximate = filterApproximate;
-    }
-
-    public void setFilterStatic(boolean filterStatic) {
-        this.filterStatic = filterStatic;
-    }
-
-    public void setFilterDistance(int filterDistance) {
-        this.filterDistance = filterDistance;
-    }
-
-    public void setFilterMaxSpeed(int filterMaxSpeed) {
-        this.filterMaxSpeed = filterMaxSpeed;
-    }
-
-    public void setFilterMinPeriod(int filterMinPeriod) {
-        this.filterMinPeriod = filterMinPeriod;
-    }
-
-    public void setSkipLimit(long skipLimit) {
-        this.skipLimit = skipLimit;
-    }
-
-    public void setSkipAttributes(boolean skipAttributes) {
-        this.skipAttributes = skipAttributes;
-    }
-
-    public FilterHandler() {
-        Config config = Context.getConfig();
-        if (config != null) {
-            filterInvalid = config.getBoolean("filter.invalid");
-            filterZero = config.getBoolean("filter.zero");
-            filterDuplicate = config.getBoolean("filter.duplicate");
-            filterFuture = config.getLong("filter.future") * 1000;
-            filterAccuracy = config.getInteger("filter.accuracy");
-            filterApproximate = config.getBoolean("filter.approximate");
-            filterStatic = config.getBoolean("filter.static");
-            filterDistance = config.getInteger("filter.distance");
-            filterMaxSpeed = config.getInteger("filter.maxSpeed");
-            filterMinPeriod = config.getInteger("filter.minPeriod") * 1000;
-            skipLimit = config.getLong("filter.skipLimit") * 1000;
-            skipAttributes = config.getBoolean("filter.skipAttributes.enable");
-        }
+    public FilterHandler(Config config) {
+        filterInvalid = config.getBoolean(Keys.FILTER_INVALID);
+        filterZero = config.getBoolean(Keys.FILTER_ZERO);
+        filterDuplicate = config.getBoolean(Keys.FILTER_DUPLICATE);
+        filterFuture = config.getLong(Keys.FILTER_FUTURE) * 1000;
+        filterAccuracy = config.getInteger(Keys.FILTER_ACCURACY);
+        filterApproximate = config.getBoolean(Keys.FILTER_APPROXIMATE);
+        filterStatic = config.getBoolean(Keys.FILTER_STATIC);
+        filterDistance = config.getInteger(Keys.FILTER_DISTANCE);
+        filterMaxSpeed = config.getInteger(Keys.FILTER_MAX_SPEED);
+        filterMinPeriod = config.getInteger(Keys.FILTER_MIN_PERIOD) * 1000;
+        skipLimit = config.getLong(Keys.FILTER_SKIP_LIMIT) * 1000;
+        skipAttributes = config.getBoolean(Keys.FILTER_SKIP_ATTRIBUTES_ENABLE);
     }
 
     private boolean filterInvalid(Position position) {

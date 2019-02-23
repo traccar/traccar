@@ -31,6 +31,7 @@ import io.netty.channel.socket.DatagramPacket;
 import io.netty.handler.timeout.IdleStateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.config.Keys;
 import org.traccar.events.CommandResultEventHandler;
 import org.traccar.events.DriverEventHandler;
 import org.traccar.events.FuelDropEventHandler;
@@ -42,6 +43,7 @@ import org.traccar.events.OverspeedEventHandler;
 import org.traccar.events.AlertEventHandler;
 import org.traccar.processing.ComputedAttributesHandler;
 import org.traccar.processing.CopyAttributesHandler;
+import org.traccar.processing.FilterHandler;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -54,7 +56,6 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
     private final TrackerServer server;
     private int timeout;
 
-    private FilterHandler filterHandler;
     private DistanceHandler distanceHandler;
     private EngineHoursHandler engineHoursHandler;
     private RemoteAddressHandler remoteAddressHandler;
@@ -199,10 +200,6 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
             remoteAddressHandler = new RemoteAddressHandler();
         }
 
-        if (Context.getConfig().getBoolean("filter.enable")) {
-            filterHandler = new FilterHandler();
-        }
-
         if (Context.getGeocoder() != null && !Context.getConfig().getBoolean("geocoder.ignorePositions")) {
             geocoderHandler = new GeocoderHandler(
                     Context.getGeocoder(),
@@ -304,7 +301,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
 
         addHandlers(
                 pipeline,
-                filterHandler,
+                Main.getInjector().getInstance(FilterHandler.class),
                 geocoderHandler,
                 motionHandler,
                 engineHoursHandler,
@@ -332,12 +329,12 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
     }
 
     private void addDynamicHandlers(ChannelPipeline pipeline) {
-        if (Context.getConfig().hasKey("extra.handlers")) {
-            String[] handlers = Context.getConfig().getString("extra.handlers").split(",");
-            for (String handler : handlers) {
+        String handlers = Context.getConfig().getString(Keys.EXTRA_HANDLERS);
+        if (handlers != null) {
+            for (String handler : handlers.split(",")) {
                 try {
-                    pipeline.addLast((ChannelHandler) Class.forName(handler).newInstance());
-                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException error) {
+                    pipeline.addLast((ChannelHandler) Class.forName(handler).getDeclaredConstructor().newInstance());
+                } catch (ReflectiveOperationException error) {
                     LOGGER.warn("Dynamic handler error", error);
                 }
             }
