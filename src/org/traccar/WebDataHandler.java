@@ -17,6 +17,8 @@ package org.traccar;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.database.IdentityManager;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Device;
@@ -56,9 +58,9 @@ public class WebDataHandler extends BaseDataHandler {
         this.identityManager = identityManager;
         this.objectMapper = objectMapper;
         this.client = client;
-        this.url = config.getString("forward.url");
-        this.header = config.getString("forward.header");
-        this.json = config.getBoolean("forward.json");
+        this.url = config.getString(Keys.FORWARD_URL);
+        this.header = config.getString(Keys.FORWARD_HEADER);
+        this.json = config.getBoolean(Keys.FORWARD_JSON);
     }
 
     private static String formatSentence(Position position) {

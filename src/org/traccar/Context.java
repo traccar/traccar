@@ -27,6 +27,7 @@ import org.apache.velocity.app.VelocityEngine;
 import org.eclipse.jetty.util.URIUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.config.Config;
 import org.traccar.database.CalendarManager;
 import org.traccar.database.CommandsManager;
 import org.traccar.database.AttributesManager;
@@ -362,9 +363,9 @@ public final class Context {
     public static void init(String configFile) throws Exception {
 
         try {
-            config = new Config();
-            config.load(configFile);
+            config = new Config(configFile);
         } catch (Exception e) {
+            config = new Config();
             Log.setupDefaultLogger();
             throw e;
         }

@@ -25,7 +25,7 @@ import javax.naming.directory.SearchResult;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.Config;
+import org.traccar.config.Config;
 import org.traccar.model.User;
 
 import java.util.Hashtable;

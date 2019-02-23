@@ -18,6 +18,7 @@ package org.traccar;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import org.traccar.config.Config;
 import org.traccar.database.IdentityManager;
 
 import javax.ws.rs.client.Client;

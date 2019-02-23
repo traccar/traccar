@@ -31,6 +31,7 @@ import io.netty.channel.socket.DatagramPacket;
 import io.netty.handler.timeout.IdleStateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.config.Keys;
 import org.traccar.events.CommandResultEventHandler;
 import org.traccar.events.DriverEventHandler;
 import org.traccar.events.FuelDropEventHandler;
@@ -315,7 +316,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
             pipeline.addLast(new DefaultDataHandler());
         }
 
-        if (Context.getConfig().getBoolean("forward.enable")) {
+        if (Context.getConfig().getBoolean(Keys.FORWARD_ENABLE)) {
             pipeline.addLast(Main.getInjector().getInstance(WebDataHandler.class));
         }
 

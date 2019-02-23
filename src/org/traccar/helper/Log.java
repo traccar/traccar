@@ -15,7 +15,7 @@
  */
 package org.traccar.helper;
 
-import org.traccar.Config;
+import org.traccar.config.Config;
 
 import java.io.BufferedWriter;
 import java.io.File;

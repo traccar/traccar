@@ -15,7 +15,7 @@
  */
 package org.traccar.notification;
 
-import org.traccar.Config;
+import org.traccar.config.Config;
 import org.traccar.model.ExtendedModel;
 
 public class PropertiesProvider {

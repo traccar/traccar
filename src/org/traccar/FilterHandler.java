@@ -18,6 +18,7 @@ package org.traccar;
 import io.netty.channel.ChannelHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.config.Config;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
