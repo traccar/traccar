@@ -1,6 +1,7 @@
-package org.traccar;
+package org.traccar.handler;
 
 import org.junit.Test;
+import org.traccar.config.Config;
 import org.traccar.model.Position;
 
 import static org.junit.Assert.assertEquals;
@@ -8,9 +9,9 @@ import static org.junit.Assert.assertEquals;
 public class DistanceHandlerTest {
 
     @Test
-    public void testCalculateDistance() throws Exception {
+    public void testCalculateDistance() {
 
-        DistanceHandler distanceHandler = new DistanceHandler(false, 0, 0);
+        DistanceHandler distanceHandler = new DistanceHandler(new Config(), null);
 
         Position position = distanceHandler.handlePosition(new Position());
 

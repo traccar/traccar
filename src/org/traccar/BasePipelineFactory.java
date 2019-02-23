@@ -36,6 +36,7 @@ import org.traccar.events.MotionEventHandler;
 import org.traccar.events.OverspeedEventHandler;
 import org.traccar.handler.ComputedAttributesHandler;
 import org.traccar.handler.CopyAttributesHandler;
+import org.traccar.handler.DistanceHandler;
 import org.traccar.handler.FilterHandler;
 import org.traccar.handler.NetworkMessageHandler;
 import org.traccar.handler.OpenChannelHandler;
@@ -50,7 +51,6 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
     private final TrackerServer server;
     private int timeout;
 
-    private DistanceHandler distanceHandler;
     private EngineHoursHandler engineHoursHandler;
     private RemoteAddressHandler remoteAddressHandler;
     private MotionHandler motionHandler;
@@ -77,11 +77,6 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
         if (timeout == 0) {
             timeout = Context.getConfig().getInteger(Keys.SERVER_TIMEOUT);
         }
-
-        distanceHandler = new DistanceHandler(
-                Context.getConfig().getBoolean("coordinates.filter"),
-                Context.getConfig().getInteger("coordinates.minError"),
-                Context.getConfig().getInteger("coordinates.maxError"));
 
         if (Context.getConfig().getBoolean("handler.remoteAddress.enable")) {
             remoteAddressHandler = new RemoteAddressHandler();
@@ -182,7 +177,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
                 pipeline,
                 geolocationHandler,
                 hemisphereHandler,
-                distanceHandler,
+                Main.getInjector().getInstance(DistanceHandler.class),
                 remoteAddressHandler);
 
         addDynamicHandlers(pipeline);

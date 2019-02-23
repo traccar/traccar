@@ -126,6 +126,24 @@ public final class Keys {
             Boolean.class,
             "Enable attributes skipping. Attribute skipping can be enabled in the config or device attributes");
 
+    public static final ConfigKey COORDINATES_FILTER = new ConfigKey(
+            "coordinates.filter",
+            Boolean.class,
+            "Replaces coordinates with last known if change is less than a 'coordinates.error' meters. Helps to avoid "
+                    + "coordinates jumps during parking period.");
+
+    public static final ConfigKey COORDINATES_MIN_ERROR = new ConfigKey(
+            "coordinates.minError",
+            Integer.class,
+            "Distance in meters. Distances below this value gets handled like explained in 'coordinates.filter'.");
+
+    public static final ConfigKey COORDINATES_MAX_ERROR = new ConfigKey(
+            "filter.maxError",
+            Integer.class,
+            "Distance in meters. Distances above this value gets handled like explained in 'coordinates.filter', but "
+                    + "only if Position is also marked as 'invalid'.");
+
+
     private Keys() {
     }
 

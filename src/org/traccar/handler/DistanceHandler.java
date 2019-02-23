@@ -1,6 +1,6 @@
 /*
  * Copyright 2015 Amila Silva
- * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar;
+package org.traccar.handler;
 
 import io.netty.channel.ChannelHandler;
+import org.traccar.BaseDataHandler;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
+import org.traccar.database.IdentityManager;
 import org.traccar.helper.DistanceCalculator;
 import org.traccar.model.Position;
 
@@ -26,21 +30,17 @@ import java.math.RoundingMode;
 @ChannelHandler.Sharable
 public class DistanceHandler extends BaseDataHandler {
 
+    private final IdentityManager identityManager;
+
     private final boolean filter;
     private final int coordinatesMinError;
     private final int coordinatesMaxError;
 
-    public DistanceHandler(boolean filter, int coordinatesMinError, int coordinatesMaxError) {
-        this.filter = filter;
-        this.coordinatesMinError = coordinatesMinError;
-        this.coordinatesMaxError = coordinatesMaxError;
-    }
-
-    private Position getLastPosition(long deviceId) {
-        if (Context.getIdentityManager() != null) {
-            return Context.getIdentityManager().getLastPosition(deviceId);
-        }
-        return null;
+    public DistanceHandler(Config config, IdentityManager identityManager) {
+        this.identityManager = identityManager;
+        this.filter = config.getBoolean(Keys.COORDINATES_FILTER);
+        this.coordinatesMinError = config.getInteger(Keys.COORDINATES_MIN_ERROR);
+        this.coordinatesMaxError = config.getInteger(Keys.COORDINATES_MAX_ERROR);
     }
 
     @Override
@@ -52,7 +52,7 @@ public class DistanceHandler extends BaseDataHandler {
         }
         double totalDistance = 0.0;
 
-        Position last = getLastPosition(position.getDeviceId());
+        Position last = identityManager != null ? identityManager.getLastPosition(position.getDeviceId()) : null;
         if (last != null) {
             totalDistance = last.getDouble(Position.KEY_TOTAL_DISTANCE);
             if (!position.getAttributes().containsKey(Position.KEY_DISTANCE)) {

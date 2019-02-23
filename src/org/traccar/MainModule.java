@@ -22,6 +22,7 @@ import com.google.inject.Singleton;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.IdentityManager;
+import org.traccar.handler.DistanceHandler;
 import org.traccar.handler.FilterHandler;
 
 import javax.ws.rs.client.Client;
@@ -46,6 +47,12 @@ public class MainModule extends AbstractModule {
     @Provides
     public static Client provideClient() {
         return Context.getClient();
+    }
+
+    @Singleton
+    @Provides
+    public static DistanceHandler provideDistanceHandler(Config config, IdentityManager identityManager) {
+        return new DistanceHandler(config, identityManager);
     }
 
     @Singleton
