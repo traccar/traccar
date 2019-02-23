@@ -243,7 +243,7 @@ public final class Log {
                         s.append("*");
                     } else {
                         file = element.getFileName();
-                        s.append(file.substring(0, file.length() - 5)); // remove ".java"
+                        s.append(file, 0, file.length() - 5); // remove ".java"
                         count -= 1;
                     }
                     s.append(":").append(element.getLineNumber());
