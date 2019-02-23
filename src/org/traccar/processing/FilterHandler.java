@@ -149,17 +149,13 @@ public class FilterHandler extends BaseDataHandler {
             last = Context.getIdentityManager().getLastPosition(position.getDeviceId());
         }
 
-        if (skipLimit(position, last) || skipAttributes(position)) {
-            return false;
-        }
-
         if (filterInvalid(position)) {
             filterType.append("Invalid ");
         }
         if (filterZero(position)) {
             filterType.append("Zero ");
         }
-        if (filterDuplicate(position, last)) {
+        if (filterDuplicate(position, last) && !skipLimit(position, last) && !skipAttributes(position)) {
             filterType.append("Duplicate ");
         }
         if (filterFuture(position)) {
@@ -171,10 +167,10 @@ public class FilterHandler extends BaseDataHandler {
         if (filterApproximate(position)) {
             filterType.append("Approximate ");
         }
-        if (filterStatic(position)) {
+        if (filterStatic(position) && !skipLimit(position, last) && !skipAttributes(position)) {
             filterType.append("Static ");
         }
-        if (filterDistance(position, last)) {
+        if (filterDistance(position, last) && !skipLimit(position, last) && !skipAttributes(position)) {
             filterType.append("Distance ");
         }
         if (filterMaxSpeed(position, last)) {

@@ -78,7 +78,7 @@ public class FilterHandlerTest extends BaseTest {
     @Test
     public void testSkipAttributes() {
 
-        Position position = createPosition(0, new Date(), false, 10, 10, 10, 10, 10);
+        Position position = createPosition(0, new Date(), true, 10, 10, 10, 0, 10);
         position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
 
         assertNotNull(filteringHandler.handlePosition(position));
