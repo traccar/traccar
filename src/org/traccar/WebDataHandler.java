@@ -17,7 +17,6 @@ package org.traccar;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.inject.assistedinject.Assisted;
 import org.traccar.database.IdentityManager;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Device;
@@ -51,21 +50,15 @@ public class WebDataHandler extends BaseDataHandler {
     private final String header;
     private final boolean json;
 
-    public interface Factory {
-        WebDataHandler create(
-                @Assisted("url") String url, @Assisted("header") String header, boolean json);
-    }
-
     @Inject
     public WebDataHandler(
-            IdentityManager identityManager, ObjectMapper objectMapper, Client client,
-            @Assisted("url") String url, @Assisted("header") String header, @Assisted boolean json) {
+            Config config, IdentityManager identityManager, ObjectMapper objectMapper, Client client) {
         this.identityManager = identityManager;
         this.objectMapper = objectMapper;
         this.client = client;
-        this.url = url;
-        this.header = header;
-        this.json = json;
+        this.url = config.getString("forward.url");
+        this.header = config.getString("forward.header");
+        this.json = config.getBoolean("forward.json");
     }
 
     private static String formatSentence(Position position) {
@@ -187,7 +180,7 @@ public class WebDataHandler extends BaseDataHandler {
         return position;
     }
 
-    protected Map<String, Object> prepareJsonPayload(Position position) {
+    private Map<String, Object> prepareJsonPayload(Position position) {
 
         Map<String, Object> data = new HashMap<>();
         Device device = identityManager.getById(position.getDeviceId());

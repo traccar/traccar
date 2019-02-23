@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.traccar;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
-import com.google.inject.assistedinject.FactoryModuleBuilder;
 import org.traccar.database.IdentityManager;
 
 import javax.ws.rs.client.Client;
@@ -26,23 +25,23 @@ import javax.ws.rs.client.Client;
 public class MainModule extends AbstractModule {
 
     @Provides
-    public static ObjectMapper getObjectMapper() {
+    public static ObjectMapper provideObjectMapper() {
         return Context.getObjectMapper();
     }
 
     @Provides
-    public static IdentityManager getIdentityManager() {
+    public static Config provideConfig() {
+        return Context.getConfig();
+    }
+
+    @Provides
+    public static IdentityManager provideIdentityManager() {
         return Context.getIdentityManager();
     }
 
     @Provides
-    public static Client getClient() {
+    public static Client provideClient() {
         return Context.getClient();
-    }
-
-    @Override
-    protected void configure() {
-        install(new FactoryModuleBuilder().build(WebDataHandler.Factory.class));
     }
 
 }
