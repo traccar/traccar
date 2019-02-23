@@ -17,6 +17,19 @@ package org.traccar.config;
 
 public final class Keys {
 
+    public static final ConfigSuffix PROTOCOL_TIMEOUT = new ConfigSuffix(
+            ".timeout",
+            Integer.class,
+            "Connection timeout value in seconds. Because sometimes there is no way to detect lost TCP connection, "
+                    + "old connections stay in open state. On most systems there is a limit on number of open "
+                    + "connection, so this leads to problems with establishing new connections when number of "
+                    + "devices is high or devices data connections are unstable.");
+
+    public static final ConfigKey SERVER_TIMEOUT = new ConfigKey(
+            "server.timeout",
+            Integer.class,
+            "Server wide connection timeout value in seconds. See protocol timeout for more information.");
+
     public static final ConfigKey EXTRA_HANDLERS = new ConfigKey(
             "extra.handlers",
             String.class,

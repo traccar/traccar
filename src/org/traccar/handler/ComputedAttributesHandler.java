@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.processing;
+package org.traccar.handler;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -51,7 +51,7 @@ public class ComputedAttributesHandler extends BaseDataHandler {
         engine.setStrict(true);
         engine.setFunctions(Collections.singletonMap("math", (Object) Math.class));
         if (Context.getConfig() != null) {
-            mapDeviceAttributes = Context.getConfig().getBoolean("processing.computedAttributes.deviceAttributes");
+            mapDeviceAttributes = Context.getConfig().getBoolean("handler.computedAttributes.deviceAttributes");
         }
     }
 

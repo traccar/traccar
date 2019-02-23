@@ -1,4 +1,4 @@
-package org.traccar.processing;
+package org.traccar.handler;
 
 import java.util.Date;
 

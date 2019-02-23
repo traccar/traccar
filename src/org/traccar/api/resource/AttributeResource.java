@@ -33,7 +33,7 @@ import org.traccar.Context;
 import org.traccar.api.ExtendedObjectResource;
 import org.traccar.model.Attribute;
 import org.traccar.model.Position;
-import org.traccar.processing.ComputedAttributesHandler;
+import org.traccar.handler.ComputedAttributesHandler;
 
 @Path("attributes/computed")
 @Produces(MediaType.APPLICATION_JSON)

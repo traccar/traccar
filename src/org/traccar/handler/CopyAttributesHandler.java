@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.processing;
+package org.traccar.handler;
 
 import io.netty.channel.ChannelHandler;
 import org.traccar.BaseDataHandler;
@@ -34,7 +34,7 @@ public class CopyAttributesHandler extends BaseDataHandler {
     @Override
     protected Position handlePosition(Position position) {
         String attributesString = Context.getDeviceManager().lookupAttributeString(
-                position.getDeviceId(), "processing.copyAttributes", "", true);
+                position.getDeviceId(), "handler.copyAttributes", "", true);
         Position last = getLastPosition(position.getDeviceId());
         if (attributesString.isEmpty()) {
             attributesString = Position.KEY_DRIVER_UNIQUE_ID;

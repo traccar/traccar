@@ -22,7 +22,7 @@ import com.google.inject.Singleton;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.IdentityManager;
-import org.traccar.processing.FilterHandler;
+import org.traccar.handler.FilterHandler;
 
 import javax.ws.rs.client.Client;
 
