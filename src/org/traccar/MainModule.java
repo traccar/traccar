@@ -53,9 +53,8 @@ public class MainModule extends AbstractModule {
     public static FilterHandler provideFilterHandler(Config config) {
         if (config.getBoolean(Keys.FILTER_ENABLE)) {
             return new FilterHandler(config);
-        } else {
-            return null;
         }
+        return null;
     }
 
     @Singleton
@@ -64,9 +63,8 @@ public class MainModule extends AbstractModule {
             Config config, IdentityManager identityManager, ObjectMapper objectMapper, Client client) {
         if (config.getBoolean(Keys.FORWARD_ENABLE)) {
             return new WebDataHandler(config, identityManager, objectMapper, client);
-        } else {
-            return null;
         }
+        return null;
     }
 
     @Override
