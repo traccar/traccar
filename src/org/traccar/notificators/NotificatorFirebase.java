@@ -37,6 +37,7 @@ public class NotificatorFirebase extends Notificator {
     private static final String URL = "https://fcm.googleapis.com/fcm/send";
 
     private String key;
+    private boolean isFormatDataOnly;
 
     public static class Notification {
         @JsonProperty("body")
@@ -54,6 +55,7 @@ public class NotificatorFirebase extends Notificator {
 
     public NotificatorFirebase() {
         key = Context.getConfig().getString("notificator.firebase.key");
+        isFormatDataOnly = Context.getConfig().getBoolean("notificator.firebase.dataOnly");
     }
 
     @Override
@@ -61,13 +63,17 @@ public class NotificatorFirebase extends Notificator {
         final User user = Context.getPermissionsManager().getUser(userId);
         if (user.getAttributes().containsKey("notificationTokens")) {
 
-            Notification notification = new Notification();
-            notification.body = NotificationFormatter.formatShortMessage(userId, event, position).trim();
-
             Message message = new Message();
             message.tokens = user.getString("notificationTokens").split("[, ]");
-            message.notification = notification;
             message.data = NotificationFormatter.buildData(userId, event, position);
+            String body = NotificationFormatter.formatShortMessage(userId, event, position).trim();
+            if (isFormatDataOnly) {
+                message.data.put("body", body);
+            } else {
+                Notification notification = new Notification();
+                notification.body = body;
+                message.notification = notification;
+            }
 
             ClientBuilder.newClient().target(URL).request()
                     .header("Authorization", "key=" + key)
