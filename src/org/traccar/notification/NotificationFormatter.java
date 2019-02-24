@@ -42,6 +42,9 @@ public final class NotificationFormatter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificationFormatter.class);
 
+    public static final String KEY_DATA_EVENT = "event";
+    public static final String KEY_DATA_POSITION = "position";
+
     private NotificationFormatter() {
     }
 
@@ -122,12 +125,10 @@ public final class NotificationFormatter {
         Map<String, String> data = new HashMap<>();
         try {
             if (event != null) {
-                String eventJson = Context.getObjectMapper().writeValueAsString(event);
-                data.put("eventJson", eventJson);
+                data.put(KEY_DATA_EVENT, Context.getObjectMapper().writeValueAsString(event));
             }
             if (position != null) {
-                String positionJson = Context.getObjectMapper().writeValueAsString(position);
-                data.put("positionJson", positionJson);
+                data.put(KEY_DATA_POSITION, Context.getObjectMapper().writeValueAsString(position));
             }
         } catch (JsonProcessingException e) {
             LOGGER.warn("Notification JSON formatting error", e);

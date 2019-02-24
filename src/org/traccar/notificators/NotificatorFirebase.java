@@ -25,6 +25,7 @@ import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.notification.NotificationFormatter;
 
+import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.InvocationCallback;
@@ -37,7 +38,8 @@ public class NotificatorFirebase extends Notificator {
     private static final String URL = "https://fcm.googleapis.com/fcm/send";
 
     private String key;
-    private boolean isFormatDataOnly;
+    private boolean formatDataOnly;
+    private Client client;
 
     public static class Notification {
         @JsonProperty("body")
@@ -55,7 +57,8 @@ public class NotificatorFirebase extends Notificator {
 
     public NotificatorFirebase() {
         key = Context.getConfig().getString("notificator.firebase.key");
-        isFormatDataOnly = Context.getConfig().getBoolean("notificator.firebase.dataOnly");
+        formatDataOnly = Context.getConfig().getBoolean("notificator.firebase.dataOnly");
+        client = ClientBuilder.newClient();
     }
 
     @Override
@@ -67,7 +70,7 @@ public class NotificatorFirebase extends Notificator {
             message.tokens = user.getString("notificationTokens").split("[, ]");
             message.data = NotificationFormatter.buildData(userId, event, position);
             String body = NotificationFormatter.formatShortMessage(userId, event, position).trim();
-            if (isFormatDataOnly) {
+            if (formatDataOnly) {
                 message.data.put("body", body);
             } else {
                 Notification notification = new Notification();
@@ -75,12 +78,12 @@ public class NotificatorFirebase extends Notificator {
                 message.notification = notification;
             }
 
-            ClientBuilder.newClient().target(URL).request()
+            client.target(URL).request()
                     .header("Authorization", "key=" + key)
                     .async().post(Entity.json(message), new InvocationCallback<Object>() {
                 @Override
                 public void completed(Object o) {
-                    LOGGER.info("Firebase notification sent to user: {}", userId);
+                    LOGGER.debug("Firebase notification sent to user: {}", userId);
                 }
 
                 @Override
