@@ -42,10 +42,6 @@ public final class Main {
         return injector;
     }
 
-    public static String getAppVersion() {
-        return Context.class.getPackage().getImplementationVersion();
-    }
-
     private Main() {
     }
 
