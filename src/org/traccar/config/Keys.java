@@ -180,6 +180,74 @@ public final class Keys {
             "processing.remoteAddress.enable", Boolean.class);
 
     /**
+     * Boolean flag to enable or disable reverse geocoder.
+     */
+    public static final ConfigKey GEOCODER_ENABLE = new ConfigKey(
+            "geocoder.enable", Boolean.class);
+
+    /**
+     * Reverse geocoder type. Check reverse geocoding documentation for more info. By default (if the value is not
+     * specified) server uses Google API.
+     */
+    public static final ConfigKey GEOCODER_TYPE = new ConfigKey(
+            "geocoder.type", String.class);
+
+    /**
+     * Geocoder server URL. Applicable only to Nominatim and Gisgraphy providers.
+     */
+    public static final ConfigKey GEOCODER_URL = new ConfigKey(
+            "geocoder.url", String.class);
+
+    /**
+     * App id for use with Here provider.
+     */
+    public static final ConfigKey GEOCODER_ID = new ConfigKey(
+            "geocoder.id", String.class);
+
+    /**
+     * Provider API key. Most providers require API keys.
+     */
+    public static final ConfigKey GEOCODER_KEY = new ConfigKey(
+            "geocoder.key", String.class);
+
+    /**
+     * Language parameter for providers that support localization (e.g. Google and Nominatim).
+     */
+    public static final ConfigKey GEOCODER_LANGUAGE = new ConfigKey(
+            "geocoder.language", String.class);
+
+    /**
+     * Address format string. Default value is %h %r, %t, %s, %c. See AddressFormat for more info.
+     */
+    public static final ConfigKey GEOCODER_FORMAT = new ConfigKey(
+            "geocoder.format", String.class);
+
+    /**
+     * Cache size for geocoding results.
+     */
+    public static final ConfigKey GEOCODER_CACHE_SIZE = new ConfigKey(
+            "geocoder.cacheSize", Integer.class);
+
+    /**
+     * Disable automatic reverse geocoding requests for all positions.
+     */
+    public static final ConfigKey GEOCODER_IGNORE_POSITIONS = new ConfigKey(
+            "geocoder.ignorePositions", Boolean.class);
+
+    /**
+     * Boolean flag to apply reverse geocoding to invalid positions.
+     */
+    public static final ConfigKey GEOCODER_PROCESS_INVALID_POSITIONS = new ConfigKey(
+            "geocoder.processInvalidPositions", Boolean.class);
+
+    /**
+     * Optional parameter to specify minimum distance for new reverse geocoding request. If distance is less than
+     * specified value (in meters), then Traccar will reuse last known address.
+     */
+    public static final ConfigKey GEOCODER_REUSE_DISTANCE = new ConfigKey(
+            "geocoder.reuseDistance", Integer.class);
+
+    /**
      * Boolean flag to enable LBS location resolution. Some devices send cell towers information and WiFi point when GPS
      * location is not available. Traccar can determine coordinates based on that information using third party
      * services. Default value is false.

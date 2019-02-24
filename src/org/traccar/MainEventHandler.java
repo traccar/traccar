@@ -24,6 +24,7 @@ import io.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.database.StatisticsManager;
+import org.traccar.handler.GeocoderHandler;
 import org.traccar.helper.DateUtil;
 import org.traccar.model.Position;
 

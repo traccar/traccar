@@ -24,6 +24,20 @@ import org.traccar.config.Keys;
 import org.traccar.database.DataManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.database.StatisticsManager;
+import org.traccar.geocoder.AddressFormat;
+import org.traccar.geocoder.BanGeocoder;
+import org.traccar.geocoder.BingMapsGeocoder;
+import org.traccar.geocoder.FactualGeocoder;
+import org.traccar.geocoder.GeocodeFarmGeocoder;
+import org.traccar.geocoder.GeocodeXyzGeocoder;
+import org.traccar.geocoder.Geocoder;
+import org.traccar.geocoder.GisgraphyGeocoder;
+import org.traccar.geocoder.GoogleGeocoder;
+import org.traccar.geocoder.HereGeocoder;
+import org.traccar.geocoder.MapQuestGeocoder;
+import org.traccar.geocoder.MapmyIndiaGeocoder;
+import org.traccar.geocoder.NominatimGeocoder;
+import org.traccar.geocoder.OpenCageGeocoder;
 import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.geolocation.GoogleGeolocationProvider;
 import org.traccar.geolocation.MozillaGeolocationProvider;
@@ -69,6 +83,49 @@ public class MainModule extends AbstractModule {
     @Provides
     public static StatisticsManager provideStatisticsManager(Config config, DataManager dataManager, Client client) {
         return new StatisticsManager(config, dataManager, client);
+    }
+
+    @Singleton
+    @Provides
+    public static Geocoder provideGeocoder(Config config) {
+        if (config.getBoolean(Keys.GEOCODER_ENABLE)) {
+            String type = config.getString(Keys.GEOCODER_TYPE, "google");
+            String url = config.getString(Keys.GEOCODER_URL);
+            String id = config.getString(Keys.GEOCODER_ID);
+            String key = config.getString(Keys.GEOCODER_KEY);
+            String language = config.getString(Keys.GEOCODER_LANGUAGE);
+            String formatString = config.getString(Keys.GEOCODER_FORMAT);
+            AddressFormat addressFormat = formatString != null ? new AddressFormat(formatString) : new AddressFormat();
+
+            int cacheSize = config.getInteger(Keys.GEOCODER_CACHE_SIZE);
+            switch (type) {
+                case "nominatim":
+                    return new NominatimGeocoder(url, key, language, cacheSize, addressFormat);
+                case "gisgraphy":
+                    return new GisgraphyGeocoder(url, cacheSize, addressFormat);
+                case "mapquest":
+                    return new MapQuestGeocoder(url, key, cacheSize, addressFormat);
+                case "opencage":
+                    return new OpenCageGeocoder(url, key, cacheSize, addressFormat);
+                case "bingmaps":
+                    return new BingMapsGeocoder(url, key, cacheSize, addressFormat);
+                case "factual":
+                    return new FactualGeocoder(url, key, cacheSize, addressFormat);
+                case "geocodefarm":
+                    return new GeocodeFarmGeocoder(key, language, cacheSize, addressFormat);
+                case "geocodexyz":
+                    return new GeocodeXyzGeocoder(key, cacheSize, addressFormat);
+                case "ban":
+                    return new BanGeocoder(cacheSize, addressFormat);
+                case "here":
+                    return new HereGeocoder(id, key, language, cacheSize, addressFormat);
+                case "mapmyindia":
+                    return new MapmyIndiaGeocoder(url, key, cacheSize, addressFormat);
+                default:
+                    return new GoogleGeocoder(key, language, cacheSize, addressFormat);
+            }
+        }
+        return null;
     }
 
     @Singleton
