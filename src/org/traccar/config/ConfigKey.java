@@ -19,12 +19,10 @@ public class ConfigKey {
 
     private final String key;
     private final Class clazz;
-    private final String description;
 
-    ConfigKey(String key, Class clazz, String description) {
+    ConfigKey(String key, Class clazz) {
         this.key = key;
         this.clazz = clazz;
-        this.description = description;
     }
 
     String getKey() {
@@ -33,10 +31,6 @@ public class ConfigKey {
 
     Class getValueClass() {
         return clazz;
-    }
-
-    String getDescription() {
-        return description;
     }
 
 }
