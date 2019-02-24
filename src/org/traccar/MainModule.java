@@ -32,6 +32,7 @@ import org.traccar.geolocation.UnwiredGeolocationProvider;
 import org.traccar.handler.DistanceHandler;
 import org.traccar.handler.FilterHandler;
 import org.traccar.handler.GeolocationHandler;
+import org.traccar.handler.HemisphereHandler;
 import org.traccar.handler.RemoteAddressHandler;
 
 import javax.annotation.Nullable;
@@ -102,6 +103,15 @@ public class MainModule extends AbstractModule {
     public static FilterHandler provideFilterHandler(Config config) {
         if (config.getBoolean(Keys.FILTER_ENABLE)) {
             return new FilterHandler(config);
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public static HemisphereHandler provideHemisphereHandler(Config config) {
+        if (config.hasKey(Keys.LOCATION_LATITUDE_HEMISPHERE) || config.hasKey(Keys.LOCATION_LONGITUDE_HEMISPHERE)) {
+            return new HemisphereHandler(config);
         }
         return null;
     }

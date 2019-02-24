@@ -213,6 +213,20 @@ public final class Keys {
     public static final ConfigKey GEOLOCATION_PROCESS_INVALID_POSITIONS = new ConfigKey(
             "geolocation.processInvalidPositions", Boolean.class);
 
+    /**
+     * Override latitude sign / hemisphere. Useful in cases where value is incorrect because of device bug. Value can be
+     * N for North or S for South.
+     */
+    public static final ConfigKey LOCATION_LATITUDE_HEMISPHERE = new ConfigKey(
+            "location.latitudeHemisphere", Boolean.class);
+
+    /**
+     * Override longitude sign / hemisphere. Useful in cases where value is incorrect because of device bug. Value can
+     * be E for East or W for West.
+     */
+    public static final ConfigKey LOCATION_LONGITUDE_HEMISPHERE = new ConfigKey(
+            "location.longitudeHemisphere", Boolean.class);
+
     private Keys() {
     }
 

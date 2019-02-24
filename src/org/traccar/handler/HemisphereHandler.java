@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar;
+package org.traccar.handler;
 
 import io.netty.channel.ChannelHandler;
+import org.traccar.BaseDataHandler;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.model.Position;
 
 @ChannelHandler.Sharable
@@ -24,8 +27,8 @@ public class HemisphereHandler extends BaseDataHandler {
     private int latitudeFactor;
     private int longitudeFactor;
 
-    public HemisphereHandler() {
-        String latitudeHemisphere = Context.getConfig().getString("location.latitudeHemisphere");
+    public HemisphereHandler(Config config) {
+        String latitudeHemisphere = config.getString(Keys.LOCATION_LATITUDE_HEMISPHERE);
         if (latitudeHemisphere != null) {
             if (latitudeHemisphere.equalsIgnoreCase("N")) {
                 latitudeFactor = 1;
@@ -33,7 +36,7 @@ public class HemisphereHandler extends BaseDataHandler {
                 latitudeFactor = -1;
             }
         }
-        String longitudeHemisphere = Context.getConfig().getString("location.longitudeHemisphere");
+        String longitudeHemisphere = config.getString(Keys.LOCATION_LATITUDE_HEMISPHERE);
         if (longitudeHemisphere != null) {
             if (longitudeHemisphere.equalsIgnoreCase("E")) {
                 longitudeFactor = 1;
