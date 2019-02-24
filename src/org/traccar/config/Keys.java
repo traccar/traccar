@@ -30,6 +30,12 @@ public final class Keys {
             Integer.class,
             "Server wide connection timeout value in seconds. See protocol timeout for more information.");
 
+    public static final ConfigKey SERVER_STATISTICS = new ConfigKey(
+            "server.statistics",
+            Boolean.class,
+            "Address for uploading aggregated anonymous usage statistics. Uploaded information is the same you can see "
+                    + "on the statistics screen in the web app. It does not include any sensitive (e.g. locations).");
+
     public static final ConfigKey EXTRA_HANDLERS = new ConfigKey(
             "extra.handlers",
             String.class,
@@ -147,6 +153,35 @@ public final class Keys {
             "processing.remoteAddress.enable",
             Boolean.class,
             "Enable to save device IP addresses information. Disabled by default.");
+
+    public static final ConfigKey GEOLOCATION_ENABLE = new ConfigKey(
+            "geolocation.enable",
+            Boolean.class,
+            "Boolean flag to enable LBS location resolution. Some devices send cell towers information and WiFi point "
+                    + "when GPS location is not available. Traccar can determine coordinates based on that information "
+                    + "using third party services. Default value is false.");
+
+    public static final ConfigKey GEOLOCATION_TYPE = new ConfigKey(
+            "geolocation.type",
+            String.class,
+            "Provider to use for LBS location. Available options: google, mozilla and opencellid. By default "
+                    + "opencellid is used. You have to supply a key that you get from corresponding provider. For more "
+                    + "information see LBS geolocation documentation.");
+
+    public static final ConfigKey GEOLOCATION_URL = new ConfigKey(
+            "geolocation.url",
+            String.class,
+            "Geolocation provider URL address.");
+
+    public static final ConfigKey GEOLOCATION_KEY = new ConfigKey(
+            "geolocation.key",
+            String.class,
+            "Provider API key. OpenCellID service requires API key.");
+
+    public static final ConfigKey GEOLOCATION_PROCESS_INVALID_POSITIONS = new ConfigKey(
+            "geolocation.processInvalidPositions",
+            Boolean.class,
+            "Boolean flag to apply geolocation to invalid positions.");
 
     private Keys() {
     }

@@ -38,6 +38,7 @@ import org.traccar.handler.ComputedAttributesHandler;
 import org.traccar.handler.CopyAttributesHandler;
 import org.traccar.handler.DistanceHandler;
 import org.traccar.handler.FilterHandler;
+import org.traccar.handler.GeolocationHandler;
 import org.traccar.handler.NetworkMessageHandler;
 import org.traccar.handler.OpenChannelHandler;
 import org.traccar.handler.RemoteAddressHandler;
@@ -55,7 +56,6 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
     private EngineHoursHandler engineHoursHandler;
     private MotionHandler motionHandler;
     private GeocoderHandler geocoderHandler;
-    private GeolocationHandler geolocationHandler;
     private HemisphereHandler hemisphereHandler;
     private CopyAttributesHandler copyAttributesHandler;
     private ComputedAttributesHandler computedAttributesHandler;
@@ -82,12 +82,6 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
             geocoderHandler = new GeocoderHandler(
                     Context.getGeocoder(),
                     Context.getConfig().getBoolean("geocoder.processInvalidPositions"));
-        }
-
-        if (Context.getGeolocationProvider() != null) {
-            geolocationHandler = new GeolocationHandler(
-                    Context.getGeolocationProvider(),
-                    Context.getConfig().getBoolean("geolocation.processInvalidPositions"));
         }
 
         motionHandler = new MotionHandler(Context.getTripsConfig().getSpeedThreshold());
@@ -171,7 +165,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
 
         addHandlers(
                 pipeline,
-                geolocationHandler,
+                Main.getInjector().getInstance(GeolocationHandler.class),
                 hemisphereHandler,
                 Main.getInjector().getInstance(DistanceHandler.class),
                 Main.getInjector().getInstance(RemoteAddressHandler.class));

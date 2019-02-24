@@ -20,6 +20,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.database.StatisticsManager;
 import org.traccar.geocoder.Geocoder;
 import org.traccar.model.Position;
 
@@ -54,7 +55,7 @@ public class GeocoderHandler extends ChannelInboundHandlerAdapter {
                     }
                 }
 
-                Context.getStatisticsManager().registerGeocoderRequest();
+                Main.getInjector().getInstance(StatisticsManager.class).registerGeocoderRequest();
 
                 geocoder.getAddress(position.getLatitude(), position.getLongitude(),
                         new Geocoder.ReverseGeocoderCallback() {

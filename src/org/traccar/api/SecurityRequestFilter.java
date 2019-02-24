@@ -18,7 +18,9 @@ package org.traccar.api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
+import org.traccar.Main;
 import org.traccar.api.resource.SessionResource;
+import org.traccar.database.StatisticsManager;
 import org.traccar.helper.DataConverter;
 import org.traccar.model.User;
 
@@ -77,7 +79,7 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
                     String[] auth = decodeBasicAuth(authHeader);
                     User user = Context.getPermissionsManager().login(auth[0], auth[1]);
                     if (user != null) {
-                        Context.getStatisticsManager().registerRequest(user.getId());
+                        Main.getInjector().getInstance(StatisticsManager.class).registerRequest(user.getId());
                         securityContext = new UserSecurityContext(new UserPrincipal(user.getId()));
                     }
                 } catch (SQLException e) {
@@ -89,7 +91,7 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
                 Long userId = (Long) request.getSession().getAttribute(SessionResource.USER_ID_KEY);
                 if (userId != null) {
                     Context.getPermissionsManager().checkUserEnabled(userId);
-                    Context.getStatisticsManager().registerRequest(userId);
+                    Main.getInjector().getInstance(StatisticsManager.class).registerRequest(userId);
                     securityContext = new UserSecurityContext(new UserPrincipal(userId));
                 }
 

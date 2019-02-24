@@ -45,11 +45,12 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     private final Config config = Context.getConfig();
     private final IdentityManager identityManager = Context.getIdentityManager();
     private final ConnectionManager connectionManager = Context.getConnectionManager();
-    private final StatisticsManager statisticsManager = Context.getStatisticsManager();
+    private final StatisticsManager statisticsManager;
     private final Protocol protocol;
 
     public BaseProtocolDecoder(Protocol protocol) {
         this.protocol = protocol;
+        statisticsManager = Main.getInjector() != null ? Main.getInjector().getInstance(StatisticsManager.class) : null;
     }
 
     public String getProtocolName() {

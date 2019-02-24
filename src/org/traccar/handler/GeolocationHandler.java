@@ -13,13 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar;
+package org.traccar.handler;
 
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
+import org.traccar.database.StatisticsManager;
 import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.model.Position;
 
@@ -29,20 +32,25 @@ public class GeolocationHandler extends ChannelInboundHandlerAdapter {
     private static final Logger LOGGER = LoggerFactory.getLogger(GeolocationHandler.class);
 
     private final GeolocationProvider geolocationProvider;
+    private final StatisticsManager statisticsManager;
     private final boolean processInvalidPositions;
 
-    public GeolocationHandler(GeolocationProvider geolocationProvider, boolean processInvalidPositions) {
+    public GeolocationHandler(
+            Config config, GeolocationProvider geolocationProvider, StatisticsManager statisticsManager) {
         this.geolocationProvider = geolocationProvider;
-        this.processInvalidPositions = processInvalidPositions;
+        this.statisticsManager = statisticsManager;
+        this.processInvalidPositions = config.getBoolean(Keys.GEOLOCATION_PROCESS_INVALID_POSITIONS);
     }
 
     @Override
-    public void channelRead(final ChannelHandlerContext ctx, Object message) throws Exception {
+    public void channelRead(final ChannelHandlerContext ctx, Object message) {
         if (message instanceof Position) {
             final Position position = (Position) message;
             if ((position.getOutdated() || processInvalidPositions && !position.getValid())
                     && position.getNetwork() != null) {
-                Context.getStatisticsManager().registerGeolocationRequest();
+                if (statisticsManager != null) {
+                    statisticsManager.registerGeolocationRequest();
+                }
 
                 geolocationProvider.getLocation(position.getNetwork(),
                         new GeolocationProvider.LocationProviderCallback() {
