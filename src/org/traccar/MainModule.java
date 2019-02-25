@@ -47,7 +47,9 @@ import org.traccar.handler.DistanceHandler;
 import org.traccar.handler.FilterHandler;
 import org.traccar.handler.GeolocationHandler;
 import org.traccar.handler.HemisphereHandler;
+import org.traccar.handler.MotionHandler;
 import org.traccar.handler.RemoteAddressHandler;
+import org.traccar.reports.model.TripsConfig;
 
 import javax.annotation.Nullable;
 import javax.ws.rs.client.Client;
@@ -77,6 +79,11 @@ public class MainModule extends AbstractModule {
     @Provides
     public static Client provideClient() {
         return Context.getClient();
+    }
+
+    @Provides
+    public static TripsConfig provideTripsConfig() {
+        return Context.getTripsConfig();
     }
 
     @Singleton
@@ -200,6 +207,12 @@ public class MainModule extends AbstractModule {
             return new GeolocationHandler(config, geolocationProvider, statisticsManager);
         }
         return null;
+    }
+
+    @Singleton
+    @Provides
+    public static MotionHandler provideMotionHandler(TripsConfig tripsConfig) {
+        return new MotionHandler(tripsConfig.getSpeedThreshold());
     }
 
     @Override

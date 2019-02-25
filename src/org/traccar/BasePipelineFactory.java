@@ -41,6 +41,7 @@ import org.traccar.handler.FilterHandler;
 import org.traccar.handler.GeocoderHandler;
 import org.traccar.handler.GeolocationHandler;
 import org.traccar.handler.HemisphereHandler;
+import org.traccar.handler.MotionHandler;
 import org.traccar.handler.NetworkMessageHandler;
 import org.traccar.handler.OpenChannelHandler;
 import org.traccar.handler.RemoteAddressHandler;
@@ -56,7 +57,6 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
     private int timeout;
 
     private EngineHoursHandler engineHoursHandler;
-    private MotionHandler motionHandler;
     private CopyAttributesHandler copyAttributesHandler;
     private ComputedAttributesHandler computedAttributesHandler;
 
@@ -77,8 +77,6 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
         if (timeout == 0) {
             timeout = Context.getConfig().getInteger(Keys.SERVER_TIMEOUT);
         }
-
-        motionHandler = new MotionHandler(Context.getTripsConfig().getSpeedThreshold());
 
         if (Context.getConfig().getBoolean("processing.engineHours.enable")) {
             engineHoursHandler = new EngineHoursHandler();
@@ -165,7 +163,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
                 pipeline,
                 Main.getInjector().getInstance(FilterHandler.class),
                 Main.getInjector().getInstance(GeocoderHandler.class),
-                motionHandler,
+                Main.getInjector().getInstance(MotionHandler.class),
                 engineHoursHandler,
                 copyAttributesHandler,
                 computedAttributesHandler);
