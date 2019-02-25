@@ -20,7 +20,11 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.*;
+import org.traccar.BaseProtocolDecoder;
+import org.traccar.Context;
+import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.config.Keys;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
@@ -139,12 +143,12 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
         while (buf.readableBytes() >= 11) {
 
             short packetFlags = buf.getUnsignedByte(buf.readerIndex() + 2);
-            if (BitUtil.check(packetFlags, 5)) {
+//            if (BitUtil.check(packetFlags, 5)) {
 //                int pra = buf.getUnsignedShortLE(10);
 //                int rca = buf.getUnsignedShortLE(12);
 //                short ttl = buf.getUnsignedByte(14);
 //                LOGGER.trace("PRA:{} RCA:{} TTL: {}", pra, rca, ttl);
-            }
+//            }
 
             short headerLength = buf.getUnsignedByte(buf.readerIndex() + 3);
             int frameDataLength = buf.getUnsignedShortLE(buf.readerIndex() + 5);
@@ -173,10 +177,10 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
 //                    LOGGER.trace("[{}] OID: {}", channel.id(), oid);
                 }
 
-                if (BitUtil.check(recordFlags, 1)) {
+//                if (BitUtil.check(recordFlags, 1)) {
 //                    long evid = buf.readUnsignedIntLE(); // event id
 //                    LOGGER.trace("EVID:{}", evid);
-                }
+//                }
                 if (BitUtil.check(recordFlags, 2)) {
                     buf.readUnsignedIntLE(); // time
                 }
@@ -205,8 +209,8 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
                     if (type == MSG_TERM_IDENTITY) {
                         if (useOidAsDeviceId) {
                             throw new IllegalArgumentException(
-                                    "There should not be MSG_TERM_IDENTITY when using oid. " +
-                                            "Use simple EGTS decoder instead?");
+                                    "There should not be MSG_TERM_IDENTITY when using oid. "
+                                            + "Use simple EGTS decoder instead?");
                         }
 
                         int flags = buf.readUnsignedByte();
