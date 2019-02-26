@@ -142,7 +142,7 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
         // buf possibly contains multiple packets
         while (buf.readableBytes() >= 11) {
 
-            short packetFlags = buf.getUnsignedByte(buf.readerIndex() + 2);
+//            short packetFlags = buf.getUnsignedByte(buf.readerIndex() + 2);
 //            if (BitUtil.check(packetFlags, 5)) {
 //                int pra = buf.getUnsignedShortLE(10);
 //                int rca = buf.getUnsignedShortLE(12);
@@ -177,10 +177,10 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
 //                    LOGGER.trace("[{}] OID: {}", channel.id(), oid);
                 }
 
-//                if (BitUtil.check(recordFlags, 1)) {
-//                    long evid = buf.readUnsignedIntLE(); // event id
+                if (BitUtil.check(recordFlags, 1)) {
+                    long evid = buf.readUnsignedIntLE(); // event id
 //                    LOGGER.trace("EVID:{}", evid);
-//                }
+                }
                 if (BitUtil.check(recordFlags, 2)) {
                     buf.readUnsignedIntLE(); // time
                 }
@@ -213,6 +213,7 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
                                             + "Use simple EGTS decoder instead?");
                         }
 
+                        buf.readUnsignedIntLE(); // object id
                         int flags = buf.readUnsignedByte();
 
                         if (BitUtil.check(flags, 0)) {
