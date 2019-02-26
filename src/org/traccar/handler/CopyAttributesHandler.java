@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2019 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 - 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,29 +18,28 @@ package org.traccar.handler;
 
 import io.netty.channel.ChannelHandler;
 import org.traccar.BaseDataHandler;
-import org.traccar.Context;
+import org.traccar.database.IdentityManager;
 import org.traccar.model.Position;
 
 @ChannelHandler.Sharable
 public class CopyAttributesHandler extends BaseDataHandler {
 
-    private Position getLastPosition(long deviceId) {
-        if (Context.getIdentityManager() != null) {
-            return Context.getIdentityManager().getLastPosition(deviceId);
-        }
-        return null;
+    private IdentityManager identityManager;
+
+    public CopyAttributesHandler(IdentityManager identityManager) {
+        this.identityManager = identityManager;
     }
 
     @Override
     protected Position handlePosition(Position position) {
-        String attributesString = Context.getDeviceManager().lookupAttributeString(
+        String attributesString = identityManager.lookupAttributeString(
                 position.getDeviceId(), "processing.copyAttributes", "", true);
-        Position last = getLastPosition(position.getDeviceId());
         if (attributesString.isEmpty()) {
             attributesString = Position.KEY_DRIVER_UNIQUE_ID;
         } else {
             attributesString += "," + Position.KEY_DRIVER_UNIQUE_ID;
         }
+        Position last = identityManager.getLastPosition(position.getDeviceId());
         if (last != null) {
             for (String attribute : attributesString.split("[ ,]")) {
                 if (last.getAttributes().containsKey(attribute) && !position.getAttributes().containsKey(attribute)) {

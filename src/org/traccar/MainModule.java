@@ -43,6 +43,7 @@ import org.traccar.geolocation.GoogleGeolocationProvider;
 import org.traccar.geolocation.MozillaGeolocationProvider;
 import org.traccar.geolocation.OpenCellIdGeolocationProvider;
 import org.traccar.geolocation.UnwiredGeolocationProvider;
+import org.traccar.handler.CopyAttributesHandler;
 import org.traccar.handler.DistanceHandler;
 import org.traccar.handler.EngineHoursHandler;
 import org.traccar.handler.FilterHandler;
@@ -233,6 +234,15 @@ public class MainModule extends AbstractModule {
     public static EngineHoursHandler provideEngineHoursHandler(Config config, IdentityManager identityManager) {
         if (config.getBoolean(Keys.PROCESSING_ENGINE_HOURS_ENABLE)) {
             return new EngineHoursHandler(identityManager);
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public static CopyAttributesHandler provideCopyAttributesHandler(Config config, IdentityManager identityManager) {
+        if (config.getBoolean(Keys.PROCESSING_COPY_ATTRIBUTES_ENABLE)) {
+            return new CopyAttributesHandler(identityManager);
         }
         return null;
     }

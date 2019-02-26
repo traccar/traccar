@@ -186,6 +186,13 @@ public final class Keys {
             "processing.engineHours.enable", Boolean.class);
 
     /**
+     * Enable copying of missing attributes from last position to the current one. Might be useful if device doesn't
+     * send some values in every message.
+     */
+    public static final ConfigKey PROCESSING_COPY_ATTRIBUTES_ENABLE = new ConfigKey(
+            "processing.copyAttributes.enable", Boolean.class);
+
+    /**
      * Boolean flag to enable or disable reverse geocoder.
      */
     public static final ConfigKey GEOCODER_ENABLE = new ConfigKey(

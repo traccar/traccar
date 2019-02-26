@@ -57,7 +57,6 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
     private final TrackerServer server;
     private int timeout;
 
-    private CopyAttributesHandler copyAttributesHandler;
     private ComputedAttributesHandler computedAttributesHandler;
 
     private CommandResultEventHandler commandResultEventHandler;
@@ -76,10 +75,6 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
         timeout = Context.getConfig().getInteger(Keys.PROTOCOL_TIMEOUT.withPrefix(protocol));
         if (timeout == 0) {
             timeout = Context.getConfig().getInteger(Keys.SERVER_TIMEOUT);
-        }
-
-        if (Context.getConfig().getBoolean("processing.copyAttributes.enable")) {
-            copyAttributesHandler = new CopyAttributesHandler();
         }
 
         if (Context.getConfig().getBoolean("processing.computedAttributes.enable")) {
@@ -161,7 +156,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
                 Main.getInjector().getInstance(GeocoderHandler.class),
                 Main.getInjector().getInstance(MotionHandler.class),
                 Main.getInjector().getInstance(EngineHoursHandler.class),
-                copyAttributesHandler,
+                Main.getInjector().getInstance(CopyAttributesHandler.class),
                 computedAttributesHandler);
 
         if (Context.getDataManager() != null) {
