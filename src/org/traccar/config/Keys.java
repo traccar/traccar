@@ -180,6 +180,12 @@ public final class Keys {
             "processing.remoteAddress.enable", Boolean.class);
 
     /**
+     * Enable engine hours calculation on the server side. It uses ignition value to determine engine state.
+     */
+    public static final ConfigKey PROCESSING_ENGINE_HOURS_ENABLE = new ConfigKey(
+            "processing.engineHours.enable", Boolean.class);
+
+    /**
      * Boolean flag to enable or disable reverse geocoder.
      */
     public static final ConfigKey GEOCODER_ENABLE = new ConfigKey(

@@ -37,6 +37,7 @@ import org.traccar.events.OverspeedEventHandler;
 import org.traccar.handler.ComputedAttributesHandler;
 import org.traccar.handler.CopyAttributesHandler;
 import org.traccar.handler.DistanceHandler;
+import org.traccar.handler.EngineHoursHandler;
 import org.traccar.handler.FilterHandler;
 import org.traccar.handler.GeocoderHandler;
 import org.traccar.handler.GeolocationHandler;
@@ -56,7 +57,6 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
     private final TrackerServer server;
     private int timeout;
 
-    private EngineHoursHandler engineHoursHandler;
     private CopyAttributesHandler copyAttributesHandler;
     private ComputedAttributesHandler computedAttributesHandler;
 
@@ -76,10 +76,6 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
         timeout = Context.getConfig().getInteger(Keys.PROTOCOL_TIMEOUT.withPrefix(protocol));
         if (timeout == 0) {
             timeout = Context.getConfig().getInteger(Keys.SERVER_TIMEOUT);
-        }
-
-        if (Context.getConfig().getBoolean("processing.engineHours.enable")) {
-            engineHoursHandler = new EngineHoursHandler();
         }
 
         if (Context.getConfig().getBoolean("processing.copyAttributes.enable")) {
@@ -164,7 +160,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
                 Main.getInjector().getInstance(FilterHandler.class),
                 Main.getInjector().getInstance(GeocoderHandler.class),
                 Main.getInjector().getInstance(MotionHandler.class),
-                engineHoursHandler,
+                Main.getInjector().getInstance(EngineHoursHandler.class),
                 copyAttributesHandler,
                 computedAttributesHandler);
 
