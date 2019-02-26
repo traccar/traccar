@@ -44,6 +44,7 @@ import org.traccar.geolocation.MozillaGeolocationProvider;
 import org.traccar.geolocation.OpenCellIdGeolocationProvider;
 import org.traccar.geolocation.UnwiredGeolocationProvider;
 import org.traccar.handler.DistanceHandler;
+import org.traccar.handler.EngineHoursHandler;
 import org.traccar.handler.FilterHandler;
 import org.traccar.handler.GeocoderHandler;
 import org.traccar.handler.GeolocationHandler;
@@ -213,8 +214,8 @@ public class MainModule extends AbstractModule {
     @Singleton
     @Provides
     public static GeocoderHandler provideGeocoderHandler(
-            Config config, @Nullable Geocoder geocoder,
-            IdentityManager identityManager, StatisticsManager statisticsManager) {
+            Config config, @Nullable Geocoder geocoder, IdentityManager identityManager,
+            StatisticsManager statisticsManager) {
         if (geocoder != null) {
             return new GeocoderHandler(config, geocoder, identityManager, statisticsManager);
         }
@@ -225,6 +226,15 @@ public class MainModule extends AbstractModule {
     @Provides
     public static MotionHandler provideMotionHandler(TripsConfig tripsConfig) {
         return new MotionHandler(tripsConfig.getSpeedThreshold());
+    }
+
+    @Singleton
+    @Provides
+    public static EngineHoursHandler provideEngineHoursHandler(Config config, IdentityManager identityManager) {
+        if (config.getBoolean(Keys.PROCESSING_ENGINE_HOURS_ENABLE)) {
+            return new EngineHoursHandler(identityManager);
+        }
+        return null;
     }
 
     @Override
