@@ -47,7 +47,7 @@ public class RetranslatorProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedInt(); // length
 
         int idLength = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) 0x00) - buf.readerIndex();
-        String id = buf.readBytes(idLength).toString(StandardCharsets.US_ASCII);
+        String id = buf.readSlice(idLength).toString(StandardCharsets.US_ASCII);
         buf.readByte();
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
         if (deviceSession == null) {
@@ -68,7 +68,7 @@ public class RetranslatorProtocolDecoder extends BaseProtocolDecoder {
             int dataType = buf.readUnsignedByte();
 
             int nameLength = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) 0x00) - buf.readerIndex();
-            String name = buf.readBytes(nameLength).toString(StandardCharsets.US_ASCII);
+            String name = buf.readSlice(nameLength).toString(StandardCharsets.US_ASCII);
             buf.readByte();
 
             if (name.equals("posinfo")) {
@@ -83,7 +83,7 @@ public class RetranslatorProtocolDecoder extends BaseProtocolDecoder {
                 switch (dataType) {
                     case 1:
                         int len = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) 0x00) - buf.readerIndex();
-                        position.set(name, buf.readBytes(len).toString(StandardCharsets.US_ASCII));
+                        position.set(name, buf.readSlice(len).toString(StandardCharsets.US_ASCII));
                         buf.readByte();
                         break;
                     case 3:
