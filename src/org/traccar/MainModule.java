@@ -45,6 +45,7 @@ import org.traccar.geolocation.OpenCellIdGeolocationProvider;
 import org.traccar.geolocation.UnwiredGeolocationProvider;
 import org.traccar.handler.DistanceHandler;
 import org.traccar.handler.FilterHandler;
+import org.traccar.handler.GeocoderHandler;
 import org.traccar.handler.GeolocationHandler;
 import org.traccar.handler.HemisphereHandler;
 import org.traccar.handler.MotionHandler;
@@ -205,6 +206,17 @@ public class MainModule extends AbstractModule {
             Config config, @Nullable GeolocationProvider geolocationProvider, StatisticsManager statisticsManager) {
         if (geolocationProvider != null) {
             return new GeolocationHandler(config, geolocationProvider, statisticsManager);
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public static GeocoderHandler provideGeocoderHandler(
+            Config config, @Nullable Geocoder geocoder,
+            IdentityManager identityManager, StatisticsManager statisticsManager) {
+        if (geocoder != null) {
+            return new GeocoderHandler(config, geocoder, identityManager, statisticsManager);
         }
         return null;
     }
