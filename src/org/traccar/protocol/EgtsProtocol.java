@@ -26,7 +26,7 @@ public class EgtsProtocol extends BaseProtocol {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new EgtsFrameDecoder());
-                pipeline.addLast(new EgtsProtocolDecoder(EgtsProtocol.this, false));
+                pipeline.addLast(new EgtsProtocolDecoder(EgtsProtocol.this));
             }
         });
     }

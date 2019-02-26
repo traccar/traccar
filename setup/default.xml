@@ -262,7 +262,5 @@
     <entry key='nyitech.port'>5182</entry>
     <entry key='neos.port'>5183</entry>
     <entry key='satsol.port'>5184</entry>
-    <entry key='egtsoid.port'>5185</entry>
-    <entry key='egtsoid.decoder.ignoreSessionCache'>true</entry>
 
 </properties>

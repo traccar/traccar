@@ -21,11 +21,9 @@ import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
-import org.traccar.config.Keys;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.UnitsConverter;
@@ -41,19 +39,11 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EgtsProtocolDecoder.class);
 
-    public EgtsProtocolDecoder(Protocol protocol, boolean useOidAsDeviceId) {
+    public EgtsProtocolDecoder(Protocol protocol) {
         super(protocol);
-        if (useOidAsDeviceId) {
-            // EGTS oid mode only supported with ignoreSessionCache is true
-            if (!Context.getConfig().getBoolean(Keys.PROTOCOL_IGNORE_SESSION_CACHE.withPrefix(getProtocolName()))
-                    && !Context.getConfig().getBoolean(Keys.SERVER_IGNORE_SESSION_CACHE)) {
-                LOGGER.warn("EGTS oid mode should be used with ignoreSessionCache set to 'true'");
-            }
-        }
-        this.useOidAsDeviceId = useOidAsDeviceId;
     }
 
-    private final boolean useOidAsDeviceId;
+    private boolean useOidAsDeviceId = true;
 
     public static final int PT_RESPONSE = 0;
     public static final int PT_APPDATA = 1;
@@ -207,11 +197,7 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
 //                    LOGGER.trace("{} {} {}", buf.readerIndex(), end, type);
 
                     if (type == MSG_TERM_IDENTITY) {
-                        if (useOidAsDeviceId) {
-                            throw new IllegalArgumentException(
-                                    "There should not be MSG_TERM_IDENTITY when using oid. "
-                                            + "Use simple EGTS decoder instead?");
-                        }
+                        useOidAsDeviceId = false;
 
                         buf.readUnsignedIntLE(); // object id
                         int flags = buf.readUnsignedByte();
@@ -308,7 +294,7 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
                 if (serviceType == SERVICE_TELEDATA && position.getFixTime() != null) {
                     if (useOidAsDeviceId && oid != 0L) {
                         LOGGER.debug("[{}] Using OID as deviceId: {}", channel == null ? "" : channel.id(), oid);
-                        deviceSession = getDeviceSession(channel, remoteAddress, String.valueOf(oid));
+                        deviceSession = getDeviceSession(channel, remoteAddress, true, String.valueOf(oid));
                         if (deviceSession != null) {
                             position.setDeviceId(deviceSession.getDeviceId());
                         }
