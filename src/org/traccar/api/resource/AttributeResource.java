@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2019 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -46,12 +46,15 @@ public class AttributeResource extends ExtendedObjectResource<Attribute> {
 
     @POST
     @Path("test")
-    public Response test(@QueryParam("deviceId") long deviceId, Attribute entity) throws SQLException {
+    public Response test(@QueryParam("deviceId") long deviceId, Attribute entity) {
         Context.getPermissionsManager().checkAdmin(getUserId());
         Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
         Position last = Context.getIdentityManager().getLastPosition(deviceId);
         if (last != null) {
-            Object result = new ComputedAttributesHandler().computeAttribute(entity, last);
+            Object result = new ComputedAttributesHandler(
+                    Context.getConfig(),
+                    Context.getIdentityManager(),
+                    Context.getAttributesManager()).computeAttribute(entity, last);
             if (result != null) {
                 switch (entity.getType()) {
                     case "number":

@@ -57,8 +57,6 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
     private final TrackerServer server;
     private int timeout;
 
-    private ComputedAttributesHandler computedAttributesHandler;
-
     private CommandResultEventHandler commandResultEventHandler;
     private OverspeedEventHandler overspeedEventHandler;
     private FuelDropEventHandler fuelDropEventHandler;
@@ -75,10 +73,6 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
         timeout = Context.getConfig().getInteger(Keys.PROTOCOL_TIMEOUT.withPrefix(protocol));
         if (timeout == 0) {
             timeout = Context.getConfig().getInteger(Keys.SERVER_TIMEOUT);
-        }
-
-        if (Context.getConfig().getBoolean("processing.computedAttributes.enable")) {
-            computedAttributesHandler = new ComputedAttributesHandler();
         }
 
         if (Context.getConfig().getBoolean("event.enable")) {
@@ -157,7 +151,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
                 Main.getInjector().getInstance(MotionHandler.class),
                 Main.getInjector().getInstance(EngineHoursHandler.class),
                 Main.getInjector().getInstance(CopyAttributesHandler.class),
-                computedAttributesHandler);
+                Main.getInjector().getInstance(ComputedAttributesHandler.class));
 
         if (Context.getDataManager() != null) {
             pipeline.addLast(new DefaultDataHandler());

@@ -21,6 +21,7 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.database.AttributesManager;
 import org.traccar.database.DataManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.database.StatisticsManager;
@@ -43,6 +44,7 @@ import org.traccar.geolocation.GoogleGeolocationProvider;
 import org.traccar.geolocation.MozillaGeolocationProvider;
 import org.traccar.geolocation.OpenCellIdGeolocationProvider;
 import org.traccar.geolocation.UnwiredGeolocationProvider;
+import org.traccar.handler.ComputedAttributesHandler;
 import org.traccar.handler.CopyAttributesHandler;
 import org.traccar.handler.DistanceHandler;
 import org.traccar.handler.EngineHoursHandler;
@@ -87,6 +89,11 @@ public class MainModule extends AbstractModule {
     @Provides
     public static TripsConfig provideTripsConfig() {
         return Context.getTripsConfig();
+    }
+
+    @Provides
+    public static AttributesManager provideAttributesManager() {
+        return Context.getAttributesManager();
     }
 
     @Singleton
@@ -243,6 +250,16 @@ public class MainModule extends AbstractModule {
     public static CopyAttributesHandler provideCopyAttributesHandler(Config config, IdentityManager identityManager) {
         if (config.getBoolean(Keys.PROCESSING_COPY_ATTRIBUTES_ENABLE)) {
             return new CopyAttributesHandler(identityManager);
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public static ComputedAttributesHandler provideComputedAttributesHandler(
+            Config config, IdentityManager identityManager, AttributesManager attributesManager) {
+        if (config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_ENABLE)) {
+            return new ComputedAttributesHandler(config, identityManager, attributesManager);
         }
         return null;
     }

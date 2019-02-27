@@ -193,6 +193,18 @@ public final class Keys {
             "processing.copyAttributes.enable", Boolean.class);
 
     /**
+     * Enable computed attributes processing.
+     */
+    public static final ConfigKey PROCESSING_COMPUTED_ATTRIBUTES_ENABLE = new ConfigKey(
+            "processing.computedAttributes.enable", Boolean.class);
+
+    /**
+     * Enable computed attributes processing.
+     */
+    public static final ConfigKey PROCESSING_COMPUTED_ATTRIBUTES_DEVICE_ATTRIBUTES = new ConfigKey(
+            "processing.computedAttributes.deviceAttributes", Boolean.class);
+
+    /**
      * Boolean flag to enable or disable reverse geocoder.
      */
     public static final ConfigKey GEOCODER_ENABLE = new ConfigKey(

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2019 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,7 +32,10 @@ import org.apache.commons.jexl2.MapContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.BaseDataHandler;
-import org.traccar.Context;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
+import org.traccar.database.AttributesManager;
+import org.traccar.database.IdentityManager;
 import org.traccar.model.Attribute;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
@@ -42,23 +45,27 @@ public class ComputedAttributesHandler extends BaseDataHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComputedAttributesHandler.class);
 
-    private JexlEngine engine;
+    private final IdentityManager identityManager;
+    private final AttributesManager attributesManager;
 
-    private boolean mapDeviceAttributes;
+    private final JexlEngine engine;
 
-    public ComputedAttributesHandler() {
+    private final boolean includeDeviceAttributes;
+
+    public ComputedAttributesHandler(
+            Config config, IdentityManager identityManager, AttributesManager attributesManager) {
+        this.identityManager = identityManager;
+        this.attributesManager = attributesManager;
         engine = new JexlEngine();
         engine.setStrict(true);
-        engine.setFunctions(Collections.singletonMap("math", (Object) Math.class));
-        if (Context.getConfig() != null) {
-            mapDeviceAttributes = Context.getConfig().getBoolean("processing.computedAttributes.deviceAttributes");
-        }
+        engine.setFunctions(Collections.singletonMap("math", Math.class));
+        includeDeviceAttributes = config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_DEVICE_ATTRIBUTES);
     }
 
     private MapContext prepareContext(Position position) {
         MapContext result = new MapContext();
-        if (mapDeviceAttributes) {
-            Device device = Context.getIdentityManager().getById(position.getDeviceId());
+        if (includeDeviceAttributes) {
+            Device device = identityManager.getById(position.getDeviceId());
             if (device != null) {
                 for (Object key : device.getAttributes().keySet()) {
                     result.set((String) key, device.getAttributes().get(key));
@@ -87,14 +94,18 @@ public class ComputedAttributesHandler extends BaseDataHandler {
         return result;
     }
 
+    /**
+     * @deprecated logic needs to be extracted to be used in API resource
+     */
+    @Deprecated
     public Object computeAttribute(Attribute attribute, Position position) throws JexlException {
         return engine.createExpression(attribute.getExpression()).evaluate(prepareContext(position));
     }
 
     @Override
     protected Position handlePosition(Position position) {
-        Collection<Attribute> attributes = Context.getAttributesManager().getItems(
-                Context.getAttributesManager().getAllDeviceItems(position.getDeviceId()));
+        Collection<Attribute> attributes = attributesManager.getItems(
+                attributesManager.getAllDeviceItems(position.getDeviceId()));
         for (Attribute attribute : attributes) {
             if (attribute.getAttribute() != null) {
                 Object result = null;
