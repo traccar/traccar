@@ -54,6 +54,7 @@ import org.traccar.handler.GeolocationHandler;
 import org.traccar.handler.HemisphereHandler;
 import org.traccar.handler.MotionHandler;
 import org.traccar.handler.RemoteAddressHandler;
+import org.traccar.handler.events.CommandResultEventHandler;
 import org.traccar.reports.model.TripsConfig;
 
 import javax.annotation.Nullable;
@@ -262,6 +263,12 @@ public class MainModule extends AbstractModule {
             return new ComputedAttributesHandler(config, identityManager, attributesManager);
         }
         return null;
+    }
+
+    @Singleton
+    @Provides
+    public static CommandResultEventHandler provideCommandResultEventHandler() {
+        return new CommandResultEventHandler();
     }
 
     @Override

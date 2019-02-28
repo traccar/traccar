@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar;
+package org.traccar.handler.events;
 
 import java.util.Map;
 
+import org.traccar.BaseDataHandler;
+import org.traccar.Context;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 

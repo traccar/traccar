@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.Map;
 
 import io.netty.channel.ChannelHandler;
-import org.traccar.BaseEventHandler;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 

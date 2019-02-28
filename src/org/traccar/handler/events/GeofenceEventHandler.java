@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 
 import io.netty.channel.ChannelHandler;
-import org.traccar.BaseEventHandler;
 import org.traccar.Context;
 import org.traccar.database.GeofenceManager;
 import org.traccar.model.Calendar;

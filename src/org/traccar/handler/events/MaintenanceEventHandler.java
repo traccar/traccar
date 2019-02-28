@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.netty.channel.ChannelHandler;
-import org.traccar.BaseEventHandler;
 import org.traccar.Context;
 import org.traccar.model.Event;
 import org.traccar.model.Maintenance;
