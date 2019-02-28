@@ -1,4 +1,4 @@
-package org.traccar.events;
+package org.traccar.handler.events;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

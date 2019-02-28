@@ -25,15 +25,15 @@ import io.netty.handler.timeout.IdleStateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Keys;
-import org.traccar.events.AlertEventHandler;
-import org.traccar.events.CommandResultEventHandler;
-import org.traccar.events.DriverEventHandler;
-import org.traccar.events.FuelDropEventHandler;
-import org.traccar.events.GeofenceEventHandler;
-import org.traccar.events.IgnitionEventHandler;
-import org.traccar.events.MaintenanceEventHandler;
-import org.traccar.events.MotionEventHandler;
-import org.traccar.events.OverspeedEventHandler;
+import org.traccar.handler.events.AlertEventHandler;
+import org.traccar.handler.events.CommandResultEventHandler;
+import org.traccar.handler.events.DriverEventHandler;
+import org.traccar.handler.events.FuelDropEventHandler;
+import org.traccar.handler.events.GeofenceEventHandler;
+import org.traccar.handler.events.IgnitionEventHandler;
+import org.traccar.handler.events.MaintenanceEventHandler;
+import org.traccar.handler.events.MotionEventHandler;
+import org.traccar.handler.events.OverspeedEventHandler;
 import org.traccar.handler.ComputedAttributesHandler;
 import org.traccar.handler.CopyAttributesHandler;
 import org.traccar.handler.DistanceHandler;
@@ -55,6 +55,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
     private static final Logger LOGGER = LoggerFactory.getLogger(BasePipelineFactory.class);
 
     private final TrackerServer server;
+    private boolean eventsEnabled;
     private int timeout;
 
     private CommandResultEventHandler commandResultEventHandler;
@@ -69,13 +70,13 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
 
     public BasePipelineFactory(TrackerServer server, String protocol) {
         this.server = server;
-
+        eventsEnabled = Context.getConfig().getBoolean(Keys.EVENT_ENABLE);
         timeout = Context.getConfig().getInteger(Keys.PROTOCOL_TIMEOUT.withPrefix(protocol));
         if (timeout == 0) {
             timeout = Context.getConfig().getInteger(Keys.SERVER_TIMEOUT);
         }
 
-        if (Context.getConfig().getBoolean("event.enable")) {
+        if (eventsEnabled) {
             commandResultEventHandler = new CommandResultEventHandler();
             overspeedEventHandler = Context.getOverspeedEventHandler();
             fuelDropEventHandler = new FuelDropEventHandler();
@@ -151,24 +152,26 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
                 Main.getInjector().getInstance(MotionHandler.class),
                 Main.getInjector().getInstance(EngineHoursHandler.class),
                 Main.getInjector().getInstance(CopyAttributesHandler.class),
-                Main.getInjector().getInstance(ComputedAttributesHandler.class));
+                Main.getInjector().getInstance(ComputedAttributesHandler.class),
+                Main.getInjector().getInstance(WebDataHandler.class));
 
         if (Context.getDataManager() != null) {
             pipeline.addLast(new DefaultDataHandler());
         }
 
-        addHandlers(
-                pipeline,
-                Main.getInjector().getInstance(WebDataHandler.class),
-                commandResultEventHandler,
-                overspeedEventHandler,
-                fuelDropEventHandler,
-                motionEventHandler,
-                geofenceEventHandler,
-                alertEventHandler,
-                ignitionEventHandler,
-                maintenanceEventHandler,
-                driverEventHandler);
+        if (eventsEnabled) {
+            addHandlers(
+                    pipeline,
+                    commandResultEventHandler,
+                    overspeedEventHandler,
+                    fuelDropEventHandler,
+                    motionEventHandler,
+                    geofenceEventHandler,
+                    alertEventHandler,
+                    ignitionEventHandler,
+                    maintenanceEventHandler,
+                    driverEventHandler);
+        }
 
         pipeline.addLast(new MainEventHandler());
     }

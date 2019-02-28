@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.events;
+package org.traccar.handler.events;
 
 import io.netty.channel.ChannelHandler;
 import org.traccar.BaseEventHandler;

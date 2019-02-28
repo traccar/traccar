@@ -40,6 +40,12 @@ public final class Keys {
             "server.statistics", Boolean.class);
 
     /**
+     * Enable events subsystem. Flag to enable all events handlers.
+     */
+    public static final ConfigKey EVENT_ENABLE = new ConfigKey(
+            "event.enable", Boolean.class);
+
+    /**
      * List of external handler classes to use in Netty pipeline.
      */
     public static final ConfigKey EXTRA_HANDLERS = new ConfigKey(

@@ -18,7 +18,7 @@ package org.traccar.sms.smpp;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.events.TextMessageEventHandler;
+import org.traccar.handler.events.TextMessageEventHandler;
 
 import com.cloudhopper.commons.charset.CharsetUtil;
 import com.cloudhopper.smpp.SmppConstants;
