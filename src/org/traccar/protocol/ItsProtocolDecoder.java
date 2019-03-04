@@ -36,22 +36,22 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN = new PatternBuilder()
             .expression("[^$]*")
-            .text("$,")
-            .expression("[^,]+,")                // event
+            .text("$")
+            .expression(",?[^,]+,")              // event
             .groupBegin()
             .expression("[^,]+,")                // vendor
             .expression("[^,]+,")                // firmware version
-            .groupEnd("?")
             .expression("[^,]+,")                // type
-            .groupBegin()
             .number("d+,")
             .expression("[LH],")                 // history
-            .groupEnd("?")
+            .or()
+            .expression("[^,]+,")                // type
+            .groupEnd()
             .number("(d{15}),")                  // imei
             .groupBegin()
             .expression("(?:NM|SP),")            // status
             .or()
-            .expression("[^,]+,")                // vehicle registration
+            .expression("[^,]*,")                // vehicle registration
             .number("([01]),")                   // valid
             .groupEnd()
             .number("(dd),?(dd),?(dddd),")       // date (ddmmyyyy)

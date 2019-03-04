@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.traccar.Context;
 import org.traccar.GlobalTimer;
 import org.traccar.Protocol;
-import org.traccar.events.OverspeedEventHandler;
+import org.traccar.handler.events.OverspeedEventHandler;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceState;
 import org.traccar.model.Event;

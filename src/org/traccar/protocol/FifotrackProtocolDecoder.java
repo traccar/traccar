@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,15 @@
  */
 package org.traccar.protocol;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.helper.Checksum;
+import org.traccar.helper.DataConverter;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -30,6 +35,8 @@ import java.net.SocketAddress;
 import java.util.regex.Pattern;
 
 public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
+
+    private ByteBuf photo;
 
     public FifotrackProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -65,11 +72,43 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
-    @Override
-    protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+    private static final Pattern PATTERN_PHOTO = new PatternBuilder()
+            .text("$$")
+            .number("d+,")                       // length
+            .number("(d+),")                     // imei
+            .any()
+            .number("(d+),")                     // length
+            .expression("([^*]+)")               // photo id
+            .text("*")
+            .number("xx")
+            .compile();
 
-        Parser parser = new Parser(PATTERN, (String) msg);
+    private static final Pattern PATTERN_PHOTO_DATA = new PatternBuilder()
+            .text("$$")
+            .number("d+,")                       // length
+            .number("(d+),")                     // imei
+            .expression("([^*]+)")               // photo id
+            .number("(d+),")                     // offset
+            .number("(d+),")                     // size
+            .number("(x+)")                      // data
+            .text("*")
+            .number("xx")
+            .compile();
+
+    private void requestPhoto(Channel channel, SocketAddress socketAddress, String imei, String file) {
+        if (channel != null) {
+            String content = "D06," + file + "," + photo.writerIndex() + "," + Math.min(1024, photo.writableBytes());
+            int length = 1 + imei.length() + 1 + content.length() + 5;
+            String response = String.format("@@%02d,%s,%s*", length, imei, content);
+            response += Checksum.sum(response) + "\r\n";
+            channel.writeAndFlush(new NetworkMessage(response, socketAddress));
+        }
+    }
+
+    private Object decodeLocation(
+            Channel channel, SocketAddress remoteAddress, String sentence) {
+
+        Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
             return null;
         }
@@ -120,6 +159,40 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
         }
 
         return position;
+    }
+
+    @Override
+    protected Object decode(
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+
+        String sentence = (String) msg;
+        int typeIndex = sentence.indexOf(',', sentence.indexOf(',', sentence.indexOf(',') + 1) + 1) + 1;
+        String type = sentence.substring(typeIndex, typeIndex + 3);
+
+        if (type.equals("D05")) {
+            Parser parser = new Parser(PATTERN_PHOTO, sentence);
+            if (parser.matches()) {
+                String imei = parser.next();
+                int length = parser.nextInt();
+                String photoId = parser.next();
+                photo = Unpooled.buffer(length);
+                requestPhoto(channel, remoteAddress, imei, photoId);
+            }
+        } else if (type.equals("D06")) {
+            Parser parser = new Parser(PATTERN_PHOTO_DATA, sentence);
+            if (parser.matches()) {
+                String imei = parser.next();
+                String photoId = parser.next();
+                parser.nextInt(); // offset
+                parser.nextInt(); // size
+                photo.writeBytes(DataConverter.parseHex(parser.next()));
+                requestPhoto(channel, remoteAddress, imei, photoId);
+            }
+        } else {
+            return decodeLocation(channel, remoteAddress, sentence);
+        }
+
+        return null;
     }
 
 }

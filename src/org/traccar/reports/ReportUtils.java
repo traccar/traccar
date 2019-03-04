@@ -26,7 +26,7 @@ import org.jxls.transform.Transformer;
 import org.jxls.transform.poi.PoiTransformer;
 import org.jxls.util.TransformerFactory;
 import org.traccar.Context;
-import org.traccar.events.MotionEventHandler;
+import org.traccar.handler.events.MotionEventHandler;
 import org.traccar.model.DeviceState;
 import org.traccar.model.Driver;
 import org.traccar.model.Event;

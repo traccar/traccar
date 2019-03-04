@@ -21,9 +21,43 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.database.AttributesManager;
+import org.traccar.database.DataManager;
 import org.traccar.database.IdentityManager;
-import org.traccar.processing.FilterHandler;
+import org.traccar.database.StatisticsManager;
+import org.traccar.geocoder.AddressFormat;
+import org.traccar.geocoder.BanGeocoder;
+import org.traccar.geocoder.BingMapsGeocoder;
+import org.traccar.geocoder.FactualGeocoder;
+import org.traccar.geocoder.GeocodeFarmGeocoder;
+import org.traccar.geocoder.GeocodeXyzGeocoder;
+import org.traccar.geocoder.Geocoder;
+import org.traccar.geocoder.GisgraphyGeocoder;
+import org.traccar.geocoder.GoogleGeocoder;
+import org.traccar.geocoder.HereGeocoder;
+import org.traccar.geocoder.MapQuestGeocoder;
+import org.traccar.geocoder.MapmyIndiaGeocoder;
+import org.traccar.geocoder.NominatimGeocoder;
+import org.traccar.geocoder.OpenCageGeocoder;
+import org.traccar.geolocation.GeolocationProvider;
+import org.traccar.geolocation.GoogleGeolocationProvider;
+import org.traccar.geolocation.MozillaGeolocationProvider;
+import org.traccar.geolocation.OpenCellIdGeolocationProvider;
+import org.traccar.geolocation.UnwiredGeolocationProvider;
+import org.traccar.handler.ComputedAttributesHandler;
+import org.traccar.handler.CopyAttributesHandler;
+import org.traccar.handler.DistanceHandler;
+import org.traccar.handler.EngineHoursHandler;
+import org.traccar.handler.FilterHandler;
+import org.traccar.handler.GeocoderHandler;
+import org.traccar.handler.GeolocationHandler;
+import org.traccar.handler.HemisphereHandler;
+import org.traccar.handler.MotionHandler;
+import org.traccar.handler.RemoteAddressHandler;
+import org.traccar.handler.events.CommandResultEventHandler;
+import org.traccar.reports.model.TripsConfig;
 
+import javax.annotation.Nullable;
 import javax.ws.rs.client.Client;
 
 public class MainModule extends AbstractModule {
@@ -39,6 +73,11 @@ public class MainModule extends AbstractModule {
     }
 
     @Provides
+    public static DataManager provideDataManager() {
+        return Context.getDataManager();
+    }
+
+    @Provides
     public static IdentityManager provideIdentityManager() {
         return Context.getIdentityManager();
     }
@@ -46,6 +85,92 @@ public class MainModule extends AbstractModule {
     @Provides
     public static Client provideClient() {
         return Context.getClient();
+    }
+
+    @Provides
+    public static TripsConfig provideTripsConfig() {
+        return Context.getTripsConfig();
+    }
+
+    @Provides
+    public static AttributesManager provideAttributesManager() {
+        return Context.getAttributesManager();
+    }
+
+    @Singleton
+    @Provides
+    public static StatisticsManager provideStatisticsManager(Config config, DataManager dataManager, Client client) {
+        return new StatisticsManager(config, dataManager, client);
+    }
+
+    @Singleton
+    @Provides
+    public static Geocoder provideGeocoder(Config config) {
+        if (config.getBoolean(Keys.GEOCODER_ENABLE)) {
+            String type = config.getString(Keys.GEOCODER_TYPE, "google");
+            String url = config.getString(Keys.GEOCODER_URL);
+            String id = config.getString(Keys.GEOCODER_ID);
+            String key = config.getString(Keys.GEOCODER_KEY);
+            String language = config.getString(Keys.GEOCODER_LANGUAGE);
+            String formatString = config.getString(Keys.GEOCODER_FORMAT);
+            AddressFormat addressFormat = formatString != null ? new AddressFormat(formatString) : new AddressFormat();
+
+            int cacheSize = config.getInteger(Keys.GEOCODER_CACHE_SIZE);
+            switch (type) {
+                case "nominatim":
+                    return new NominatimGeocoder(url, key, language, cacheSize, addressFormat);
+                case "gisgraphy":
+                    return new GisgraphyGeocoder(url, cacheSize, addressFormat);
+                case "mapquest":
+                    return new MapQuestGeocoder(url, key, cacheSize, addressFormat);
+                case "opencage":
+                    return new OpenCageGeocoder(url, key, cacheSize, addressFormat);
+                case "bingmaps":
+                    return new BingMapsGeocoder(url, key, cacheSize, addressFormat);
+                case "factual":
+                    return new FactualGeocoder(url, key, cacheSize, addressFormat);
+                case "geocodefarm":
+                    return new GeocodeFarmGeocoder(key, language, cacheSize, addressFormat);
+                case "geocodexyz":
+                    return new GeocodeXyzGeocoder(key, cacheSize, addressFormat);
+                case "ban":
+                    return new BanGeocoder(cacheSize, addressFormat);
+                case "here":
+                    return new HereGeocoder(id, key, language, cacheSize, addressFormat);
+                case "mapmyindia":
+                    return new MapmyIndiaGeocoder(url, key, cacheSize, addressFormat);
+                default:
+                    return new GoogleGeocoder(key, language, cacheSize, addressFormat);
+            }
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public static GeolocationProvider provideGeolocationProvider(Config config) {
+        if (config.getBoolean(Keys.GEOLOCATION_ENABLE)) {
+            String type = config.getString(Keys.GEOLOCATION_TYPE, "mozilla");
+            String url = config.getString(Keys.GEOLOCATION_URL);
+            String key = config.getString(Keys.GEOLOCATION_KEY);
+            switch (type) {
+                case "google":
+                    return new GoogleGeolocationProvider(key);
+                case "opencellid":
+                    return new OpenCellIdGeolocationProvider(key);
+                case "unwired":
+                    return new UnwiredGeolocationProvider(url, key);
+                default:
+                    return new MozillaGeolocationProvider(key);
+            }
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public static DistanceHandler provideDistanceHandler(Config config, IdentityManager identityManager) {
+        return new DistanceHandler(config, identityManager);
     }
 
     @Singleton
@@ -59,12 +184,91 @@ public class MainModule extends AbstractModule {
 
     @Singleton
     @Provides
+    public static HemisphereHandler provideHemisphereHandler(Config config) {
+        if (config.hasKey(Keys.LOCATION_LATITUDE_HEMISPHERE) || config.hasKey(Keys.LOCATION_LONGITUDE_HEMISPHERE)) {
+            return new HemisphereHandler(config);
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public static RemoteAddressHandler provideRemoteAddressHandler(Config config) {
+        if (config.getBoolean(Keys.PROCESSING_REMOTE_ADDRESS_ENABLE)) {
+            return new RemoteAddressHandler();
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
     public static WebDataHandler provideWebDataHandler(
             Config config, IdentityManager identityManager, ObjectMapper objectMapper, Client client) {
         if (config.getBoolean(Keys.FORWARD_ENABLE)) {
             return new WebDataHandler(config, identityManager, objectMapper, client);
         }
         return null;
+    }
+
+    @Singleton
+    @Provides
+    public static GeolocationHandler provideGeolocationHandler(
+            Config config, @Nullable GeolocationProvider geolocationProvider, StatisticsManager statisticsManager) {
+        if (geolocationProvider != null) {
+            return new GeolocationHandler(config, geolocationProvider, statisticsManager);
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public static GeocoderHandler provideGeocoderHandler(
+            Config config, @Nullable Geocoder geocoder, IdentityManager identityManager,
+            StatisticsManager statisticsManager) {
+        if (geocoder != null) {
+            return new GeocoderHandler(config, geocoder, identityManager, statisticsManager);
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public static MotionHandler provideMotionHandler(TripsConfig tripsConfig) {
+        return new MotionHandler(tripsConfig.getSpeedThreshold());
+    }
+
+    @Singleton
+    @Provides
+    public static EngineHoursHandler provideEngineHoursHandler(Config config, IdentityManager identityManager) {
+        if (config.getBoolean(Keys.PROCESSING_ENGINE_HOURS_ENABLE)) {
+            return new EngineHoursHandler(identityManager);
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public static CopyAttributesHandler provideCopyAttributesHandler(Config config, IdentityManager identityManager) {
+        if (config.getBoolean(Keys.PROCESSING_COPY_ATTRIBUTES_ENABLE)) {
+            return new CopyAttributesHandler(identityManager);
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public static ComputedAttributesHandler provideComputedAttributesHandler(
+            Config config, IdentityManager identityManager, AttributesManager attributesManager) {
+        if (config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_ENABLE)) {
+            return new ComputedAttributesHandler(config, identityManager, attributesManager);
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public static CommandResultEventHandler provideCommandResultEventHandler() {
+        return new CommandResultEventHandler();
     }
 
     @Override

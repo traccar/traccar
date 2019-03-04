@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,7 +110,7 @@ public final class Main {
             Context.init(configFile);
             injector = Guice.createInjector(new MainModule());
             logSystemInfo();
-            LOGGER.info("Version: " + Context.getAppVersion());
+            LOGGER.info("Version: " + Main.class.getPackage().getImplementationVersion());
             LOGGER.info("Starting server...");
 
             Context.getServerManager().start();

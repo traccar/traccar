@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,13 @@ package org.traccar.database;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.Context;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.helper.DateUtil;
 import org.traccar.model.Statistics;
 
+import javax.inject.Inject;
+import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Form;
 import java.sql.SQLException;
@@ -36,6 +39,10 @@ public class StatisticsManager {
 
     private static final int SPLIT_MODE = Calendar.DAY_OF_MONTH;
 
+    private final Config config;
+    private final DataManager dataManager;
+    private final Client client;
+
     private AtomicInteger lastUpdate = new AtomicInteger(Calendar.getInstance().get(SPLIT_MODE));
 
     private Set<Long> users = new HashSet<>();
@@ -48,6 +55,13 @@ public class StatisticsManager {
     private int smsSent;
     private int geocoderRequests;
     private int geolocationRequests;
+
+    @Inject
+    public StatisticsManager(Config config, DataManager dataManager, Client client) {
+        this.config = config;
+        this.dataManager = dataManager;
+        this.client = client;
+    }
 
     private void checkSplit() {
         int currentUpdate = Calendar.getInstance().get(SPLIT_MODE);
@@ -65,17 +79,17 @@ public class StatisticsManager {
             statistics.setGeolocationRequests(geolocationRequests);
 
             try {
-                Context.getDataManager().addObject(statistics);
+                dataManager.addObject(statistics);
             } catch (SQLException e) {
                 LOGGER.warn("Error saving statistics", e);
             }
 
-            String url = Context.getConfig().getString("server.statistics");
+            String url = config.getString(Keys.SERVER_STATISTICS);
             if (url != null) {
                 String time = DateUtil.formatDate(statistics.getCaptureTime());
 
                 Form form = new Form();
-                form.param("version", Context.getAppVersion());
+                form.param("version", getClass().getPackage().getImplementationVersion());
                 form.param("captureTime", time);
                 form.param("activeUsers", String.valueOf(statistics.getActiveUsers()));
                 form.param("activeDevices", String.valueOf(statistics.getActiveDevices()));
@@ -87,7 +101,7 @@ public class StatisticsManager {
                 form.param("geocoderRequests", String.valueOf(statistics.getGeocoderRequests()));
                 form.param("geolocationRequests", String.valueOf(statistics.getGeolocationRequests()));
 
-                Context.getClient().target(url).request().async().post(Entity.form(form));
+                client.target(url).request().async().post(Entity.form(form));
             }
 
             users.clear();

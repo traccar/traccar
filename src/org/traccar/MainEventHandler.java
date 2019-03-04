@@ -23,6 +23,7 @@ import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.database.StatisticsManager;
 import org.traccar.helper.DateUtil;
 import org.traccar.model.Position;
 
@@ -34,7 +35,7 @@ import java.util.Set;
 
 public class MainEventHandler extends ChannelInboundHandlerAdapter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GeocoderHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MainEventHandler.class);
 
     private static final String DEFAULT_LOGGER_ATTRIBUTES = "time,position,speed,course,accuracy,result";
 
@@ -108,7 +109,7 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
             }
             LOGGER.info(builder.toString());
 
-            Context.getStatisticsManager().registerMessageStored(position.getDeviceId());
+            Main.getInjector().getInstance(StatisticsManager.class).registerMessageStored(position.getDeviceId());
         }
     }
 

@@ -56,7 +56,7 @@ public class PatternBuilder {
     }
 
     public PatternBuilder any() {
-        fragments.add(".*?");
+        fragments.add(".*");
         return this;
     }
 

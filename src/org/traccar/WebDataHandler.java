@@ -17,6 +17,7 @@ package org.traccar;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.netty.channel.ChannelHandler;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.IdentityManager;
@@ -39,6 +40,7 @@ import java.util.Formatter;
 import java.util.Locale;
 import java.util.TimeZone;
 
+@ChannelHandler.Sharable
 public class WebDataHandler extends BaseDataHandler {
 
     private static final String KEY_POSITION = "position";
