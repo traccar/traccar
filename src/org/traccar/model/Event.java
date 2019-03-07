@@ -47,7 +47,7 @@ public class Event extends Message {
     public static final String TYPE_DEVICE_OVERSPEED = "deviceOverspeed";
     public static final String TYPE_DEVICE_FUEL_DROP = "deviceFuelDrop";
 	
-	public static final String TYPE_DEVICE_REFUEL = "deviceRefuel";
+    public static final String TYPE_DEVICE_REFUEL = "deviceRefuel";
 
     public static final String TYPE_GEOFENCE_ENTER = "geofenceEnter";
     public static final String TYPE_GEOFENCE_EXIT = "geofenceExit";
