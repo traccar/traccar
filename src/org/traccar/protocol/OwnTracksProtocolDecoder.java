@@ -56,7 +56,7 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
+        Position position = new Position(getProtocolName());
         String uniqueId;
 
         if (root.containsKey("topic")) {
@@ -84,7 +84,6 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
         }
 
         position.setDeviceId(deviceSession.getDeviceId());
-        position.setProtocol(getProtocolName());
 
         position.setTime(new Date(root.getJsonNumber("tst").longValue() * 1000));
         if (root.containsKey("sent")) {
