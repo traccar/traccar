@@ -49,7 +49,7 @@ public class RefuelEventHandler extends BaseEventHandler {
                     && lastPosition != null && lastPosition.getAttributes().containsKey(Position.KEY_FUEL_LEVEL)) {
 
                 double gain = position.getDouble(Position.KEY_FUEL_LEVEL)
-                        - lastPosition.getDouble(Position.KEY_FUEL_LEVEL); //Key Fuel is fuel tank level
+                        - lastPosition.getDouble(Position.KEY_FUEL_LEVEL);
                 if (gain >= refuelThreshold) {
                     Event event = new Event(Event.TYPE_DEVICE_REFUEL, position.getDeviceId(), position.getId());
                     event.set(ATTRIBUTE_REFUEL_THRESHOLD, refuelThreshold);
