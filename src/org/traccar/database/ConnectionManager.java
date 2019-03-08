@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
 import org.traccar.GlobalTimer;
+import org.traccar.Main;
 import org.traccar.Protocol;
 import org.traccar.handler.events.OverspeedEventHandler;
 import org.traccar.model.Device;
@@ -152,8 +153,9 @@ public class ConnectionManager {
             result.putAll(event);
         }
 
-        event = Context.getOverspeedEventHandler().updateOverspeedState(deviceState, Context.getDeviceManager().
-                lookupAttributeDouble(deviceId, OverspeedEventHandler.ATTRIBUTE_SPEED_LIMIT, 0, false));
+        event = Main.getInjector().getInstance(OverspeedEventHandler.class)
+                .updateOverspeedState(deviceState, Context.getDeviceManager().
+                        lookupAttributeDouble(deviceId, OverspeedEventHandler.ATTRIBUTE_SPEED_LIMIT, 0, false));
         if (event != null) {
             result.putAll(event);
         }

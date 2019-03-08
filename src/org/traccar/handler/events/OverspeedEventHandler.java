@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2019 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +20,10 @@ import java.util.Collections;
 import java.util.Map;
 
 import io.netty.channel.ChannelHandler;
-import org.traccar.Context;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
+import org.traccar.database.DeviceManager;
+import org.traccar.database.GeofenceManager;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceState;
 import org.traccar.model.Event;
@@ -30,22 +33,28 @@ import org.traccar.model.Position;
 @ChannelHandler.Sharable
 public class OverspeedEventHandler extends BaseEventHandler {
 
+    public static final String ATTRIBUTE_SPEED = "speed";
     public static final String ATTRIBUTE_SPEED_LIMIT = "speedLimit";
 
-    private boolean notRepeat;
-    private boolean preferLowest;
-    private long minimalDuration;
+    private final DeviceManager deviceManager;
+    private final GeofenceManager geofenceManager;
 
-    public OverspeedEventHandler(long minimalDuration, boolean notRepeat, boolean preferLowest) {
-        this.notRepeat = notRepeat;
-        this.minimalDuration = minimalDuration;
-        this.preferLowest = preferLowest;
+    private final boolean notRepeat;
+    private final long minimalDuration;
+    private final boolean preferLowest;
+
+    public OverspeedEventHandler(Config config, DeviceManager deviceManager, GeofenceManager geofenceManager) {
+        this.deviceManager = deviceManager;
+        this.geofenceManager = geofenceManager;
+        notRepeat = config.getBoolean(Keys.EVENT_OVERSPEED_NOT_REPEAT);
+        minimalDuration = config.getLong(Keys.EVENT_OVERSPEED_MINIMAL_DURATION) * 1000;
+        preferLowest = config.getBoolean(Keys.EVENT_OVERSPEED_PREFER_LOWEST);
     }
 
     private Map<Event, Position> newEvent(DeviceState deviceState, double speedLimit) {
         Position position = deviceState.getOverspeedPosition();
         Event event = new Event(Event.TYPE_DEVICE_OVERSPEED, position.getDeviceId(), position.getId());
-        event.set("speed", deviceState.getOverspeedPosition().getSpeed());
+        event.set(ATTRIBUTE_SPEED, deviceState.getOverspeedPosition().getSpeed());
         event.set(ATTRIBUTE_SPEED_LIMIT, speedLimit);
         event.setGeofenceId(deviceState.getOverspeedGeofenceId());
         deviceState.setOverspeedState(notRepeat);
@@ -103,22 +112,22 @@ public class OverspeedEventHandler extends BaseEventHandler {
     protected Map<Event, Position> analyzePosition(Position position) {
 
         long deviceId = position.getDeviceId();
-        Device device = Context.getIdentityManager().getById(deviceId);
+        Device device = deviceManager.getById(deviceId);
         if (device == null) {
             return null;
         }
-        if (!Context.getIdentityManager().isLatestPosition(position) || !position.getValid()) {
+        if (!deviceManager.isLatestPosition(position) || !position.getValid()) {
             return null;
         }
 
-        double speedLimit = Context.getDeviceManager().lookupAttributeDouble(deviceId, ATTRIBUTE_SPEED_LIMIT, 0, false);
+        double speedLimit = deviceManager.lookupAttributeDouble(deviceId, ATTRIBUTE_SPEED_LIMIT, 0, false);
 
         double geofenceSpeedLimit = 0;
         long overspeedGeofenceId = 0;
 
-        if (Context.getGeofenceManager() != null && device.getGeofenceIds() != null) {
+        if (geofenceManager != null && device.getGeofenceIds() != null) {
             for (long geofenceId : device.getGeofenceIds()) {
-                Geofence geofence = Context.getGeofenceManager().getById(geofenceId);
+                Geofence geofence = geofenceManager.getById(geofenceId);
                 if (geofence != null) {
                     double currentSpeedLimit = geofence.getDouble(ATTRIBUTE_SPEED_LIMIT);
                     if (currentSpeedLimit > 0 && geofenceSpeedLimit == 0
@@ -139,7 +148,7 @@ public class OverspeedEventHandler extends BaseEventHandler {
         }
 
         Map<Event, Position> result = null;
-        DeviceState deviceState = Context.getDeviceManager().getDeviceState(deviceId);
+        DeviceState deviceState = deviceManager.getDeviceState(deviceId);
 
         if (deviceState.getOverspeedState() == null) {
             deviceState.setOverspeedState(position.getSpeed() > speedLimit);
@@ -148,7 +157,7 @@ public class OverspeedEventHandler extends BaseEventHandler {
             result = updateOverspeedState(deviceState, position, speedLimit, overspeedGeofenceId);
         }
 
-        Context.getDeviceManager().setDeviceState(deviceId, deviceState);
+        deviceManager.setDeviceState(deviceId, deviceState);
         return result;
     }
 

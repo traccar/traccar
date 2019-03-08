@@ -58,7 +58,6 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
     private boolean eventsEnabled;
     private int timeout;
 
-    private OverspeedEventHandler overspeedEventHandler;
     private FuelDropEventHandler fuelDropEventHandler;
     private MotionEventHandler motionEventHandler;
     private GeofenceEventHandler geofenceEventHandler;
@@ -76,7 +75,6 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
         }
 
         if (eventsEnabled) {
-            overspeedEventHandler = Context.getOverspeedEventHandler();
             fuelDropEventHandler = new FuelDropEventHandler();
             motionEventHandler = Context.getMotionEventHandler();
             geofenceEventHandler = new GeofenceEventHandler();
@@ -161,7 +159,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
             addHandlers(
                     pipeline,
                     Main.getInjector().getInstance(CommandResultEventHandler.class),
-                    overspeedEventHandler,
+                    Main.getInjector().getInstance(OverspeedEventHandler.class),
                     fuelDropEventHandler,
                     motionEventHandler,
                     geofenceEventHandler,

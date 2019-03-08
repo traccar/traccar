@@ -42,7 +42,6 @@ import org.traccar.database.NotificationManager;
 import org.traccar.database.PermissionsManager;
 import org.traccar.database.UsersManager;
 import org.traccar.handler.events.MotionEventHandler;
-import org.traccar.handler.events.OverspeedEventHandler;
 import org.traccar.geocoder.Geocoder;
 import org.traccar.helper.Log;
 import org.traccar.helper.SanitizerModule;
@@ -245,12 +244,6 @@ public final class Context {
         return motionEventHandler;
     }
 
-    private static OverspeedEventHandler overspeedEventHandler;
-
-    public static OverspeedEventHandler getOverspeedEventHandler() {
-        return overspeedEventHandler;
-    }
-
     private static TripsConfig tripsConfig;
 
     public static TripsConfig getTripsConfig() {
@@ -387,10 +380,6 @@ public final class Context {
         velocityEngine.init(velocityProperties);
 
         motionEventHandler = new MotionEventHandler(tripsConfig);
-        overspeedEventHandler = new OverspeedEventHandler(
-                Context.getConfig().getLong("event.overspeed.minimalDuration") * 1000,
-                Context.getConfig().getBoolean("event.overspeed.notRepeat"),
-                Context.getConfig().getBoolean("event.overspeed.preferLowest"));
     }
 
     public static void init(IdentityManager testIdentityManager, MediaManager testMediaManager) {

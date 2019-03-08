@@ -46,6 +46,24 @@ public final class Keys {
             "event.enable", Boolean.class);
 
     /**
+     * If true, the event is generated once at the beginning of overspeeding period.
+     */
+    public static final ConfigKey EVENT_OVERSPEED_NOT_REPEAT = new ConfigKey(
+            "event.overspeed.notRepeat", Boolean.class);
+
+    /**
+     * Minimal over speed duration to trigger the event. Value in seconds.
+     */
+    public static final ConfigKey EVENT_OVERSPEED_MINIMAL_DURATION = new ConfigKey(
+            "event.overspeed.minimalDuration", Long.class);
+
+    /**
+     * Relevant only for geofence speed limits. Use lowest speed limits from all geofences.
+     */
+    public static final ConfigKey EVENT_OVERSPEED_PREFER_LOWEST = new ConfigKey(
+            "event.overspeed.preferLowest", Boolean.class);
+
+    /**
      * List of external handler classes to use in Netty pipeline.
      */
     public static final ConfigKey EXTRA_HANDLERS = new ConfigKey(

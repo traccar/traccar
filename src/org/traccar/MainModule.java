@@ -23,6 +23,8 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.AttributesManager;
 import org.traccar.database.DataManager;
+import org.traccar.database.DeviceManager;
+import org.traccar.database.GeofenceManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.database.StatisticsManager;
 import org.traccar.geocoder.AddressFormat;
@@ -55,6 +57,7 @@ import org.traccar.handler.HemisphereHandler;
 import org.traccar.handler.MotionHandler;
 import org.traccar.handler.RemoteAddressHandler;
 import org.traccar.handler.events.CommandResultEventHandler;
+import org.traccar.handler.events.OverspeedEventHandler;
 import org.traccar.reports.model.TripsConfig;
 
 import javax.annotation.Nullable;
@@ -90,6 +93,16 @@ public class MainModule extends AbstractModule {
     @Provides
     public static TripsConfig provideTripsConfig() {
         return Context.getTripsConfig();
+    }
+
+    @Provides
+    public static DeviceManager provideDeviceManager() {
+        return Context.getDeviceManager();
+    }
+
+    @Provides
+    public static GeofenceManager provideGeofenceManager() {
+        return Context.getGeofenceManager();
     }
 
     @Provides
@@ -269,6 +282,13 @@ public class MainModule extends AbstractModule {
     @Provides
     public static CommandResultEventHandler provideCommandResultEventHandler() {
         return new CommandResultEventHandler();
+    }
+
+    @Singleton
+    @Provides
+    public static OverspeedEventHandler provideOverspeedEventHandler(
+            Config config, DeviceManager deviceManager, GeofenceManager geofenceManager) {
+        return new OverspeedEventHandler(config, deviceManager, geofenceManager);
     }
 
     @Override
