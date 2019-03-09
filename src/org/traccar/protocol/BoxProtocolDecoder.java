@@ -20,6 +20,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -84,16 +85,16 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
 
             position.setTime(parser.nextDateTime());
 
-            position.setLatitude(parser.nextDouble(0));
-            position.setLongitude(parser.nextDouble(0));
-            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
-            position.setCourse(parser.nextDouble(0));
+            position.setLatitude(parser.nextDouble());
+            position.setLongitude(parser.nextDouble());
+            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+            position.setCourse(parser.nextDouble());
 
-            position.set(Position.KEY_ODOMETER_TRIP, parser.nextDouble(0) * 1000);
+            position.set(Position.KEY_ODOMETER_TRIP, parser.nextDouble() * 1000);
             position.set(Position.KEY_EVENT, parser.next());
 
-            int status = parser.nextInt(0);
-            position.setValid((status & 0x04) == 0);
+            int status = parser.nextInt();
+            position.setValid(!BitUtil.check(status, 2));
             position.set(Position.KEY_STATUS, status);
 
             return position;
