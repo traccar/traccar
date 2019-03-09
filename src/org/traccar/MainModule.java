@@ -58,6 +58,7 @@ import org.traccar.handler.MotionHandler;
 import org.traccar.handler.RemoteAddressHandler;
 import org.traccar.handler.events.CommandResultEventHandler;
 import org.traccar.handler.events.FuelDropEventHandler;
+import org.traccar.handler.events.MotionEventHandler;
 import org.traccar.handler.events.OverspeedEventHandler;
 import org.traccar.reports.model.TripsConfig;
 
@@ -296,6 +297,13 @@ public class MainModule extends AbstractModule {
     @Provides
     public static FuelDropEventHandler provideFuelDropEventHandler(IdentityManager identityManager) {
         return new FuelDropEventHandler(identityManager);
+    }
+
+    @Singleton
+    @Provides
+    public static MotionEventHandler provideMotionEventHandler(
+            IdentityManager identityManager, DeviceManager deviceManager, TripsConfig tripsConfig) {
+        return new MotionEventHandler(identityManager, deviceManager, tripsConfig);
     }
 
     @Override

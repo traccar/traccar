@@ -24,6 +24,7 @@ import org.traccar.Context;
 import org.traccar.GlobalTimer;
 import org.traccar.Main;
 import org.traccar.Protocol;
+import org.traccar.handler.events.MotionEventHandler;
 import org.traccar.handler.events.OverspeedEventHandler;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceState;
@@ -148,7 +149,8 @@ public class ConnectionManager {
         DeviceState deviceState = Context.getDeviceManager().getDeviceState(deviceId);
         Map<Event, Position> result = new HashMap<>();
 
-        Map<Event, Position> event = Context.getMotionEventHandler().updateMotionState(deviceState);
+        Map<Event, Position> event = Main.getInjector()
+                .getInstance(MotionEventHandler.class).updateMotionState(deviceState);
         if (event != null) {
             result.putAll(event);
         }

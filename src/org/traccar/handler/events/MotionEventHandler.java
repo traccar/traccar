@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2019 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +20,8 @@ import java.util.Collections;
 import java.util.Map;
 
 import io.netty.channel.ChannelHandler;
-import org.traccar.Context;
+import org.traccar.database.DeviceManager;
+import org.traccar.database.IdentityManager;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceState;
 import org.traccar.model.Event;
@@ -31,9 +32,13 @@ import org.traccar.reports.model.TripsConfig;
 @ChannelHandler.Sharable
 public class MotionEventHandler extends BaseEventHandler {
 
-    private TripsConfig tripsConfig;
+    private final IdentityManager identityManager;
+    private final DeviceManager deviceManager;
+    private final TripsConfig tripsConfig;
 
-    public MotionEventHandler(TripsConfig tripsConfig) {
+    public MotionEventHandler(IdentityManager identityManager, DeviceManager deviceManager, TripsConfig tripsConfig) {
+        this.identityManager = identityManager;
+        this.deviceManager = deviceManager;
         this.tripsConfig = tripsConfig;
     }
 
@@ -106,24 +111,24 @@ public class MotionEventHandler extends BaseEventHandler {
     protected Map<Event, Position> analyzePosition(Position position) {
 
         long deviceId = position.getDeviceId();
-        Device device = Context.getIdentityManager().getById(deviceId);
+        Device device = identityManager.getById(deviceId);
         if (device == null) {
             return null;
         }
-        if (!Context.getIdentityManager().isLatestPosition(position)
+        if (!identityManager.isLatestPosition(position)
                 || !tripsConfig.getProcessInvalidPositions() && !position.getValid()) {
             return null;
         }
 
         Map<Event, Position> result = null;
-        DeviceState deviceState = Context.getDeviceManager().getDeviceState(deviceId);
+        DeviceState deviceState = deviceManager.getDeviceState(deviceId);
 
         if (deviceState.getMotionState() == null) {
             deviceState.setMotionState(position.getBoolean(Position.KEY_MOTION));
         } else {
             result = updateMotionState(deviceState, position);
         }
-        Context.getDeviceManager().setDeviceState(deviceId, deviceState);
+        deviceManager.setDeviceState(deviceId, deviceState);
         return result;
     }
 

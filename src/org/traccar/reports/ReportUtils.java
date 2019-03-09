@@ -26,6 +26,8 @@ import org.jxls.transform.Transformer;
 import org.jxls.transform.poi.PoiTransformer;
 import org.jxls.util.TransformerFactory;
 import org.traccar.Context;
+import org.traccar.database.DeviceManager;
+import org.traccar.database.IdentityManager;
 import org.traccar.handler.events.MotionEventHandler;
 import org.traccar.model.DeviceState;
 import org.traccar.model.Driver;
@@ -323,6 +325,7 @@ public final class ReportUtils {
     }
 
     public static <T extends BaseReport> Collection<T> detectTripsAndStops(
+            IdentityManager identityManager, DeviceManager deviceManager,
             Collection<Position> positionCollection,
             TripsConfig tripsConfig, boolean ignoreOdometer, Class<T> reportClass) {
 
@@ -331,7 +334,7 @@ public final class ReportUtils {
         ArrayList<Position> positions = new ArrayList<>(positionCollection);
         if (!positions.isEmpty()) {
             boolean trips = reportClass.equals(TripReport.class);
-            MotionEventHandler  motionHandler = new MotionEventHandler(tripsConfig);
+            MotionEventHandler  motionHandler = new MotionEventHandler(identityManager, deviceManager, tripsConfig);
             DeviceState deviceState = new DeviceState();
             deviceState.setMotionState(isMoving(positions, 0, tripsConfig));
             int startEventIndex = trips == deviceState.getMotionState() ? 0 : -1;
