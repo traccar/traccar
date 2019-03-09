@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 package org.traccar.handler.events;
 
 import io.netty.channel.ChannelHandler;
-import org.traccar.Context;
+import org.traccar.database.IdentityManager;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -29,22 +29,28 @@ public class FuelDropEventHandler extends BaseEventHandler {
 
     public static final String ATTRIBUTE_FUEL_DROP_THRESHOLD = "fuelDropThreshold";
 
+    private final IdentityManager identityManager;
+
+    public FuelDropEventHandler(IdentityManager identityManager) {
+        this.identityManager = identityManager;
+    }
+
     @Override
     protected Map<Event, Position> analyzePosition(Position position) {
 
-        Device device = Context.getIdentityManager().getById(position.getDeviceId());
+        Device device = identityManager.getById(position.getDeviceId());
         if (device == null) {
             return null;
         }
-        if (!Context.getIdentityManager().isLatestPosition(position)) {
+        if (!identityManager.isLatestPosition(position)) {
             return null;
         }
 
-        double fuelDropThreshold = Context.getDeviceManager()
+        double fuelDropThreshold = identityManager
                 .lookupAttributeDouble(device.getId(), ATTRIBUTE_FUEL_DROP_THRESHOLD, 0, false);
 
         if (fuelDropThreshold > 0) {
-            Position lastPosition = Context.getIdentityManager().getLastPosition(position.getDeviceId());
+            Position lastPosition = identityManager.getLastPosition(position.getDeviceId());
             if (position.getAttributes().containsKey(Position.KEY_FUEL_LEVEL)
                     && lastPosition != null && lastPosition.getAttributes().containsKey(Position.KEY_FUEL_LEVEL)) {
 

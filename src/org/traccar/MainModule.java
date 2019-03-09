@@ -57,6 +57,7 @@ import org.traccar.handler.HemisphereHandler;
 import org.traccar.handler.MotionHandler;
 import org.traccar.handler.RemoteAddressHandler;
 import org.traccar.handler.events.CommandResultEventHandler;
+import org.traccar.handler.events.FuelDropEventHandler;
 import org.traccar.handler.events.OverspeedEventHandler;
 import org.traccar.reports.model.TripsConfig;
 
@@ -289,6 +290,12 @@ public class MainModule extends AbstractModule {
     public static OverspeedEventHandler provideOverspeedEventHandler(
             Config config, DeviceManager deviceManager, GeofenceManager geofenceManager) {
         return new OverspeedEventHandler(config, deviceManager, geofenceManager);
+    }
+
+    @Singleton
+    @Provides
+    public static FuelDropEventHandler provideFuelDropEventHandler(IdentityManager identityManager) {
+        return new FuelDropEventHandler(identityManager);
     }
 
     @Override
