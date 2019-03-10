@@ -58,7 +58,6 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
     private boolean eventsEnabled;
     private int timeout;
 
-    private IgnitionEventHandler ignitionEventHandler;
     private MaintenanceEventHandler maintenanceEventHandler;
     private DriverEventHandler driverEventHandler;
 
@@ -71,7 +70,6 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
         }
 
         if (eventsEnabled) {
-            ignitionEventHandler = new IgnitionEventHandler();
             maintenanceEventHandler = new MaintenanceEventHandler();
             driverEventHandler = new DriverEventHandler();
         }
@@ -156,7 +154,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
                     Main.getInjector().getInstance(MotionEventHandler.class),
                     Main.getInjector().getInstance(GeofenceEventHandler.class),
                     Main.getInjector().getInstance(AlertEventHandler.class),
-                    ignitionEventHandler,
+                    Main.getInjector().getInstance(IgnitionEventHandler.class),
                     maintenanceEventHandler,
                     driverEventHandler);
         }

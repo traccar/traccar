@@ -61,6 +61,7 @@ import org.traccar.handler.events.AlertEventHandler;
 import org.traccar.handler.events.CommandResultEventHandler;
 import org.traccar.handler.events.FuelDropEventHandler;
 import org.traccar.handler.events.GeofenceEventHandler;
+import org.traccar.handler.events.IgnitionEventHandler;
 import org.traccar.handler.events.MotionEventHandler;
 import org.traccar.handler.events.OverspeedEventHandler;
 import org.traccar.reports.model.TripsConfig;
@@ -325,6 +326,12 @@ public class MainModule extends AbstractModule {
     @Provides
     public static AlertEventHandler provideAlertEventHandler(Config config, IdentityManager identityManager) {
         return new AlertEventHandler(config, identityManager);
+    }
+
+    @Singleton
+    @Provides
+    public static IgnitionEventHandler provideIgnitionEventHandler(IdentityManager identityManager) {
+        return new IgnitionEventHandler(identityManager);
     }
 
     @Override
