@@ -61,6 +61,7 @@ import org.traccar.handler.MotionHandler;
 import org.traccar.handler.RemoteAddressHandler;
 import org.traccar.handler.events.AlertEventHandler;
 import org.traccar.handler.events.CommandResultEventHandler;
+import org.traccar.handler.events.DriverEventHandler;
 import org.traccar.handler.events.FuelDropEventHandler;
 import org.traccar.handler.events.GeofenceEventHandler;
 import org.traccar.handler.events.IgnitionEventHandler;
@@ -356,6 +357,12 @@ public class MainModule extends AbstractModule {
     public static MaintenanceEventHandler provideMaintenanceEventHandler(
             IdentityManager identityManager, MaintenancesManager maintenancesManager) {
         return new MaintenanceEventHandler(identityManager, maintenancesManager);
+    }
+
+    @Singleton
+    @Provides
+    public static DriverEventHandler provideDriverEventHandler(IdentityManager identityManager) {
+        return new DriverEventHandler(identityManager);
     }
 
     @Override

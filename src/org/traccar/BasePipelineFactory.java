@@ -59,18 +59,12 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
     private boolean eventsEnabled;
     private int timeout;
 
-    private DriverEventHandler driverEventHandler;
-
     public BasePipelineFactory(TrackerServer server, String protocol) {
         this.server = server;
         eventsEnabled = Context.getConfig().getBoolean(Keys.EVENT_ENABLE);
         timeout = Context.getConfig().getInteger(Keys.PROTOCOL_TIMEOUT.withPrefix(protocol));
         if (timeout == 0) {
             timeout = Context.getConfig().getInteger(Keys.SERVER_TIMEOUT);
-        }
-
-        if (eventsEnabled) {
-            driverEventHandler = new DriverEventHandler();
         }
     }
 
@@ -152,7 +146,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
                     Main.getInjector().getInstance(AlertEventHandler.class),
                     Main.getInjector().getInstance(IgnitionEventHandler.class),
                     Main.getInjector().getInstance(MaintenanceEventHandler.class),
-                    driverEventHandler);
+                    Main.getInjector().getInstance(DriverEventHandler.class));
         }
 
         pipeline.addLast(new MainEventHandler());
