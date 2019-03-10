@@ -22,6 +22,7 @@ import com.google.inject.Singleton;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.AttributesManager;
+import org.traccar.database.CalendarManager;
 import org.traccar.database.DataManager;
 import org.traccar.database.DeviceManager;
 import org.traccar.database.GeofenceManager;
@@ -58,6 +59,7 @@ import org.traccar.handler.MotionHandler;
 import org.traccar.handler.RemoteAddressHandler;
 import org.traccar.handler.events.CommandResultEventHandler;
 import org.traccar.handler.events.FuelDropEventHandler;
+import org.traccar.handler.events.GeofenceEventHandler;
 import org.traccar.handler.events.MotionEventHandler;
 import org.traccar.handler.events.OverspeedEventHandler;
 import org.traccar.reports.model.TripsConfig;
@@ -105,6 +107,11 @@ public class MainModule extends AbstractModule {
     @Provides
     public static GeofenceManager provideGeofenceManager() {
         return Context.getGeofenceManager();
+    }
+
+    @Provides
+    public static CalendarManager provideCalendarManager() {
+        return Context.getCalendarManager();
     }
 
     @Provides
@@ -304,6 +311,13 @@ public class MainModule extends AbstractModule {
     public static MotionEventHandler provideMotionEventHandler(
             IdentityManager identityManager, DeviceManager deviceManager, TripsConfig tripsConfig) {
         return new MotionEventHandler(identityManager, deviceManager, tripsConfig);
+    }
+
+    @Singleton
+    @Provides
+    public static GeofenceEventHandler provideGeofenceEventHandler(
+            IdentityManager identityManager, GeofenceManager geofenceManager, CalendarManager calendarManager) {
+        return new GeofenceEventHandler(identityManager, geofenceManager, calendarManager);
     }
 
     @Override
