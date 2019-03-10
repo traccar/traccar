@@ -49,6 +49,7 @@ import org.traccar.geolocation.OpenCellIdGeolocationProvider;
 import org.traccar.geolocation.UnwiredGeolocationProvider;
 import org.traccar.handler.ComputedAttributesHandler;
 import org.traccar.handler.CopyAttributesHandler;
+import org.traccar.handler.DefaultDataHandler;
 import org.traccar.handler.DistanceHandler;
 import org.traccar.handler.EngineHoursHandler;
 import org.traccar.handler.FilterHandler;
@@ -285,6 +286,15 @@ public class MainModule extends AbstractModule {
             Config config, IdentityManager identityManager, AttributesManager attributesManager) {
         if (config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_ENABLE)) {
             return new ComputedAttributesHandler(config, identityManager, attributesManager);
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public static DefaultDataHandler provideDefaultDataHandler(@Nullable DataManager dataManager) {
+        if (dataManager != null) {
+            return new DefaultDataHandler(dataManager);
         }
         return null;
     }

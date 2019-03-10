@@ -25,6 +25,7 @@ import io.netty.handler.timeout.IdleStateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Keys;
+import org.traccar.handler.DefaultDataHandler;
 import org.traccar.handler.events.AlertEventHandler;
 import org.traccar.handler.events.CommandResultEventHandler;
 import org.traccar.handler.events.DriverEventHandler;
@@ -139,11 +140,8 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
                 Main.getInjector().getInstance(EngineHoursHandler.class),
                 Main.getInjector().getInstance(CopyAttributesHandler.class),
                 Main.getInjector().getInstance(ComputedAttributesHandler.class),
-                Main.getInjector().getInstance(WebDataHandler.class));
-
-        if (Context.getDataManager() != null) {
-            pipeline.addLast(new DefaultDataHandler());
-        }
+                Main.getInjector().getInstance(WebDataHandler.class),
+                Main.getInjector().getInstance(DefaultDataHandler.class));
 
         if (eventsEnabled) {
             addHandlers(
