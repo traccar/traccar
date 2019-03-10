@@ -27,6 +27,7 @@ import org.traccar.database.DataManager;
 import org.traccar.database.DeviceManager;
 import org.traccar.database.GeofenceManager;
 import org.traccar.database.IdentityManager;
+import org.traccar.database.MaintenancesManager;
 import org.traccar.database.StatisticsManager;
 import org.traccar.geocoder.AddressFormat;
 import org.traccar.geocoder.BanGeocoder;
@@ -63,6 +64,7 @@ import org.traccar.handler.events.CommandResultEventHandler;
 import org.traccar.handler.events.FuelDropEventHandler;
 import org.traccar.handler.events.GeofenceEventHandler;
 import org.traccar.handler.events.IgnitionEventHandler;
+import org.traccar.handler.events.MaintenanceEventHandler;
 import org.traccar.handler.events.MotionEventHandler;
 import org.traccar.handler.events.OverspeedEventHandler;
 import org.traccar.reports.model.TripsConfig;
@@ -120,6 +122,11 @@ public class MainModule extends AbstractModule {
     @Provides
     public static AttributesManager provideAttributesManager() {
         return Context.getAttributesManager();
+    }
+
+    @Provides
+    public static MaintenancesManager provideMaintenancesManager() {
+        return Context.getMaintenancesManager();
     }
 
     @Singleton
@@ -342,6 +349,13 @@ public class MainModule extends AbstractModule {
     @Provides
     public static IgnitionEventHandler provideIgnitionEventHandler(IdentityManager identityManager) {
         return new IgnitionEventHandler(identityManager);
+    }
+
+    @Singleton
+    @Provides
+    public static MaintenanceEventHandler provideMaintenanceEventHandler(
+            IdentityManager identityManager, MaintenancesManager maintenancesManager) {
+        return new MaintenanceEventHandler(identityManager, maintenancesManager);
     }
 
     @Override

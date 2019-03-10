@@ -20,7 +20,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.netty.channel.ChannelHandler;
-import org.traccar.Context;
+import org.traccar.database.IdentityManager;
+import org.traccar.database.MaintenancesManager;
 import org.traccar.model.Event;
 import org.traccar.model.Maintenance;
 import org.traccar.model.Position;
@@ -28,21 +29,29 @@ import org.traccar.model.Position;
 @ChannelHandler.Sharable
 public class MaintenanceEventHandler extends BaseEventHandler {
 
+    private final IdentityManager identityManager;
+    private final MaintenancesManager maintenancesManager;
+
+    public MaintenanceEventHandler(IdentityManager identityManager, MaintenancesManager maintenancesManager) {
+        this.identityManager = identityManager;
+        this.maintenancesManager = maintenancesManager;
+    }
+
     @Override
     protected Map<Event, Position> analyzePosition(Position position) {
-        if (Context.getIdentityManager().getById(position.getDeviceId()) == null
-                || !Context.getIdentityManager().isLatestPosition(position)) {
+        if (identityManager.getById(position.getDeviceId()) == null
+                || !identityManager.isLatestPosition(position)) {
             return null;
         }
 
-        Position lastPosition = Context.getIdentityManager().getLastPosition(position.getDeviceId());
+        Position lastPosition = identityManager.getLastPosition(position.getDeviceId());
         if (lastPosition == null) {
             return null;
         }
 
         Map<Event, Position> events = new HashMap<>();
-        for (long maintenanceId : Context.getMaintenancesManager().getAllDeviceItems(position.getDeviceId())) {
-            Maintenance maintenance = Context.getMaintenancesManager().getById(maintenanceId);
+        for (long maintenanceId : maintenancesManager.getAllDeviceItems(position.getDeviceId())) {
+            Maintenance maintenance = maintenancesManager.getById(maintenanceId);
             if (maintenance.getPeriod() != 0) {
                 double oldValue = lastPosition.getDouble(maintenance.getType());
                 double newValue = position.getDouble(maintenance.getType());
