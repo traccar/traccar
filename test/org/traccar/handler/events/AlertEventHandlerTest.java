@@ -7,15 +7,17 @@ import java.util.Map;
 
 import org.junit.Test;
 import org.traccar.BaseTest;
+import org.traccar.TestIdentityManager;
+import org.traccar.config.Config;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class AlertEventHandlerTest extends BaseTest {
 
     @Test
-    public void testAlertEventHandler() throws Exception {
+    public void testAlertEventHandler() {
         
-        AlertEventHandler alertEventHandler = new AlertEventHandler();
+        AlertEventHandler alertEventHandler = new AlertEventHandler(new Config(), new TestIdentityManager());
         
         Position position = new Position();
         position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);

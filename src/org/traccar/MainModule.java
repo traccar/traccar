@@ -57,6 +57,7 @@ import org.traccar.handler.GeolocationHandler;
 import org.traccar.handler.HemisphereHandler;
 import org.traccar.handler.MotionHandler;
 import org.traccar.handler.RemoteAddressHandler;
+import org.traccar.handler.events.AlertEventHandler;
 import org.traccar.handler.events.CommandResultEventHandler;
 import org.traccar.handler.events.FuelDropEventHandler;
 import org.traccar.handler.events.GeofenceEventHandler;
@@ -318,6 +319,12 @@ public class MainModule extends AbstractModule {
     public static GeofenceEventHandler provideGeofenceEventHandler(
             IdentityManager identityManager, GeofenceManager geofenceManager, CalendarManager calendarManager) {
         return new GeofenceEventHandler(identityManager, geofenceManager, calendarManager);
+    }
+
+    @Singleton
+    @Provides
+    public static AlertEventHandler provideAlertEventHandler(Config config, IdentityManager identityManager) {
+        return new AlertEventHandler(config, identityManager);
     }
 
     @Override

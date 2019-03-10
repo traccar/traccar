@@ -64,6 +64,12 @@ public final class Keys {
             "event.overspeed.preferLowest", Boolean.class);
 
     /**
+     * Do not generate alert event if same alert was present in last known location.
+     */
+    public static final ConfigKey EVENT_IGNORE_DUPLICATE_ALERTS = new ConfigKey(
+            "event.ignoreDuplicateAlerts", Boolean.class);
+
+    /**
      * List of external handler classes to use in Netty pipeline.
      */
     public static final ConfigKey EXTRA_HANDLERS = new ConfigKey(

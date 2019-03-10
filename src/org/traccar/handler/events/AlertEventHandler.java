@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,21 @@ import java.util.Collections;
 import java.util.Map;
 
 import io.netty.channel.ChannelHandler;
-import org.traccar.Context;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
+import org.traccar.database.IdentityManager;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 @ChannelHandler.Sharable
 public class AlertEventHandler extends BaseEventHandler {
 
+    private final IdentityManager identityManager;
     private final boolean ignoreDuplicateAlerts;
 
-    public AlertEventHandler() {
-        ignoreDuplicateAlerts = Context.getConfig().getBoolean("event.ignoreDuplicateAlerts");
+    public AlertEventHandler(Config config, IdentityManager identityManager) {
+        this.identityManager = identityManager;
+        ignoreDuplicateAlerts = config.getBoolean(Keys.EVENT_IGNORE_DUPLICATE_ALERTS);
     }
 
     @Override
@@ -38,7 +42,7 @@ public class AlertEventHandler extends BaseEventHandler {
         if (alarm != null) {
             boolean ignoreAlert = false;
             if (ignoreDuplicateAlerts) {
-                Position lastPosition = Context.getIdentityManager().getLastPosition(position.getDeviceId());
+                Position lastPosition = identityManager.getLastPosition(position.getDeviceId());
                 if (lastPosition != null && alarm.equals(lastPosition.getAttributes().get(Position.KEY_ALARM))) {
                     ignoreAlert = true;
                 }
