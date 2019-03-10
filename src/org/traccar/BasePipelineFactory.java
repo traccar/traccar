@@ -70,10 +70,11 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
 
     protected abstract void addProtocolHandlers(PipelineBuilder pipeline);
 
-    private void addHandlers(ChannelPipeline pipeline, ChannelHandler... handlers) {
-        for (ChannelHandler handler : handlers) {
-            if (handler != null) {
-                pipeline.addLast(handler);
+    @SafeVarargs
+    private final void addHandlers(ChannelPipeline pipeline, Class<? extends ChannelHandler>... handlerClasses) {
+        for (Class<? extends ChannelHandler> handlerClass : handlerClasses) {
+            if (handlerClass != null) {
+                pipeline.addLast(Main.getInjector().getInstance(handlerClass));
             }
         }
     }
@@ -117,36 +118,36 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
 
         addHandlers(
                 pipeline,
-                Main.getInjector().getInstance(GeolocationHandler.class),
-                Main.getInjector().getInstance(HemisphereHandler.class),
-                Main.getInjector().getInstance(DistanceHandler.class),
-                Main.getInjector().getInstance(RemoteAddressHandler.class));
+                GeolocationHandler.class,
+                HemisphereHandler.class,
+                DistanceHandler.class,
+                RemoteAddressHandler.class);
 
         addDynamicHandlers(pipeline);
 
         addHandlers(
                 pipeline,
-                Main.getInjector().getInstance(FilterHandler.class),
-                Main.getInjector().getInstance(GeocoderHandler.class),
-                Main.getInjector().getInstance(MotionHandler.class),
-                Main.getInjector().getInstance(EngineHoursHandler.class),
-                Main.getInjector().getInstance(CopyAttributesHandler.class),
-                Main.getInjector().getInstance(ComputedAttributesHandler.class),
-                Main.getInjector().getInstance(WebDataHandler.class),
-                Main.getInjector().getInstance(DefaultDataHandler.class));
+                FilterHandler.class,
+                GeocoderHandler.class,
+                MotionHandler.class,
+                EngineHoursHandler.class,
+                CopyAttributesHandler.class,
+                ComputedAttributesHandler.class,
+                WebDataHandler.class,
+                DefaultDataHandler.class);
 
         if (eventsEnabled) {
             addHandlers(
                     pipeline,
-                    Main.getInjector().getInstance(CommandResultEventHandler.class),
-                    Main.getInjector().getInstance(OverspeedEventHandler.class),
-                    Main.getInjector().getInstance(FuelDropEventHandler.class),
-                    Main.getInjector().getInstance(MotionEventHandler.class),
-                    Main.getInjector().getInstance(GeofenceEventHandler.class),
-                    Main.getInjector().getInstance(AlertEventHandler.class),
-                    Main.getInjector().getInstance(IgnitionEventHandler.class),
-                    Main.getInjector().getInstance(MaintenanceEventHandler.class),
-                    Main.getInjector().getInstance(DriverEventHandler.class));
+                    CommandResultEventHandler.class,
+                    OverspeedEventHandler.class,
+                    FuelDropEventHandler.class,
+                    MotionEventHandler.class,
+                    GeofenceEventHandler.class,
+                    AlertEventHandler.class,
+                    IgnitionEventHandler.class,
+                    MaintenanceEventHandler.class,
+                    DriverEventHandler.class);
         }
 
         pipeline.addLast(new MainEventHandler());
