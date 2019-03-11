@@ -64,7 +64,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
         dataLossThresholdSeconds =
                 Context.getConfig()
-                       .getInteger("processing.peripheralSensorData.dataLossThresholdSeconds");
+                       .getInteger("processing.peripheralSensorData.dataLossThresholdSeconds") * 1000;
 
 
     }
@@ -238,8 +238,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         return Optional.of(sensorReadingsFromDevice.get(sensorId.get()).lastEntry().getElement());
     }
 
-    private Optional<Position> findFirstNonOutlierInLastWindow(Position position, int currentWindowOffset) {
-        long deviceId = position.getDeviceId();
+    private Optional<Position> findFirstNonOutlierInLastWindow(long deviceId) {
         if (!previousPositions.containsKey(deviceId)) {
             Log.debug("deviceId not found in previousPositions" + deviceId);
             return Optional.empty();
@@ -265,7 +264,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                 .get(sensorId.get())
                 .descendingMultiset()
                 .stream()
-                .skip(currentWindowOffset)
+                .skip(1) // Skip the position that's the new one after data loss gap
                 .filter(p -> p.getAttributes().containsKey(Position.KEY_FUEL_IS_OUTLIER) &&
                              !(boolean) p.getAttributes().get(Position.KEY_FUEL_IS_OUTLIER))
                 .findFirst();
@@ -386,8 +385,20 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                         positionsForDeviceSensor, position, minValuesForOutlierDetection, currentEventLookBackSeconds);
 
         if (lastPacketProcessed.isPresent()
-            && position.getDeviceTime().compareTo((lastPacketProcessed.get().getDeviceTime())) > dataLossThresholdSeconds) {
+            && position.getDeviceTime().getTime() - lastPacketProcessed.get().getDeviceTime().getTime() > dataLossThresholdSeconds) {
             possibleDataLossByDevice.put(deviceId, true);
+        }
+
+        // If we've detected data loss, find the first non outlier in the window before the loss gap, to use in further
+        // in calculating if there was any fuel activity
+        // TODO: REMOVE TEMP SKIPPING FOR DEVICE 6
+        boolean possibleDataLoss = deviceId == 6? false : possibleDataLossByDevice.getOrDefault(deviceId, false);
+        if (possibleDataLoss && !nonOutlierInLastWindowByDevice.containsKey(deviceId)) {
+            Optional<Position> nonOutlierInLastWindow =
+                    findFirstNonOutlierInLastWindow(position.getDeviceId());
+            if (nonOutlierInLastWindow.isPresent()) {
+                nonOutlierInLastWindowByDevice.put(deviceId, nonOutlierInLastWindow.get());
+            }
         }
 
         if (relevantPositionsListForOutliers.size() < minValuesForOutlierDetection) {
@@ -437,18 +448,6 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
         // Update the position in the db so the recalculated average is reflected there.
         updatePosition(positionUnderEvaluation);
-
-        // At this point we know indexOfPositionEvaluation in the new window is not an outlier. So if we haven't found
-        // the first outlier in the last window yet, go find it.
-        // TODO: REMOVE TEMP SKIPPING FOR DEVICE 6
-        boolean possibleDataLoss = deviceId == 6? false : possibleDataLossByDevice.getOrDefault(deviceId, false);
-        if (possibleDataLoss && !nonOutlierInLastWindowByDevice.containsKey(deviceId)) {
-            Optional<Position> nonOutlierInLastWindow =
-                    findFirstNonOutlierInLastWindow(outlierCheckPosition, relevantPositionsListForOutliers.size());
-            if (nonOutlierInLastWindow.isPresent()) {
-                nonOutlierInLastWindowByDevice.put(deviceId, nonOutlierInLastWindow.get());
-            }
-        }
 
         if (possibleDataLoss && nonOutlierInLastWindowByDevice.containsKey(deviceId)) {
             Optional<FuelActivity> fuelActivity =

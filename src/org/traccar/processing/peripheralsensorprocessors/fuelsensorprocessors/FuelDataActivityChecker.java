@@ -158,19 +158,18 @@ public class FuelDataActivityChecker {
         }
 
         ExpectedFuelConsumption expectedFuelConsumption =
-                FuelDataLossChecker.getExpectedFuelConsumptionValues(lastPosition,
-                                                                             position,
-                                                                             maxTankMaxVolume);
+                FuelDataLossChecker.getExpectedFuelConsumptionValues(lastPosition, position, maxTankMaxVolume);
 
         double calculatedFuelChangeVolume = position.getDouble(Position.KEY_CALIBRATED_FUEL_LEVEL)
                 - lastPosition.getDouble(Position.KEY_CALIBRATED_FUEL_LEVEL);
 
         if (Math.abs(calculatedFuelChangeVolume) > expectedFuelConsumption.allowedDeviation) {
             if (calculatedFuelChangeVolume < 0.0) {
-                boolean isDataLoss = FuelDataLossChecker.isFuelConsumptionAsExpected(calculatedFuelChangeVolume,
-                                                                                     expectedFuelConsumption);
+                boolean isConsumptionExpected =
+                        FuelDataLossChecker.isFuelConsumptionAsExpected(calculatedFuelChangeVolume,
+                                                                        expectedFuelConsumption);
 
-                if (isDataLoss) {
+                if (isConsumptionExpected) {
                     Log.info(String.format(
                             "Determined data loss, but cannot identify fuel event since fuel consumption " +
                                     " is within expected range: %s", expectedFuelConsumption));
