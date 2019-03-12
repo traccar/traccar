@@ -26,9 +26,9 @@ public class FuelActivity {
         NONE("none"),
         FUEL_FILL(Event.TYPE_FUEL_FILL),
         FUEL_DRAIN(Event.TYPE_FUEL_DRAIN),
-        PROBABLE_FILL(Event.TYPE_PROBABLE_FILL),
-        PROBABLE_DRAIN(Event.TYPE_PROBABLE_DRAIN),
-        EXPECTED_FILL(Event.TYPE_EXPECTED_FILL);
+        PROBABLE_FUEL_FILL(Event.TYPE_PROBABLE_FILL),
+        PROBABLE_FUEL_DRAIN(Event.TYPE_PROBABLE_DRAIN),
+        EXPECTED_FUEL_FILL(Event.TYPE_EXPECTED_FILL);
 
         private String nameString;
 
