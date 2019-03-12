@@ -25,6 +25,7 @@ import io.netty.handler.timeout.IdleStateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Keys;
+import org.traccar.handler.DefaultDataHandler;
 import org.traccar.handler.events.AlertEventHandler;
 import org.traccar.handler.events.CommandResultEventHandler;
 import org.traccar.handler.events.DriverEventHandler;
@@ -58,15 +59,6 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
     private boolean eventsEnabled;
     private int timeout;
 
-    private OverspeedEventHandler overspeedEventHandler;
-    private FuelDropEventHandler fuelDropEventHandler;
-    private MotionEventHandler motionEventHandler;
-    private GeofenceEventHandler geofenceEventHandler;
-    private AlertEventHandler alertEventHandler;
-    private IgnitionEventHandler ignitionEventHandler;
-    private MaintenanceEventHandler maintenanceEventHandler;
-    private DriverEventHandler driverEventHandler;
-
     public BasePipelineFactory(TrackerServer server, String protocol) {
         this.server = server;
         eventsEnabled = Context.getConfig().getBoolean(Keys.EVENT_ENABLE);
@@ -74,25 +66,15 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
         if (timeout == 0) {
             timeout = Context.getConfig().getInteger(Keys.SERVER_TIMEOUT);
         }
-
-        if (eventsEnabled) {
-            overspeedEventHandler = Context.getOverspeedEventHandler();
-            fuelDropEventHandler = new FuelDropEventHandler();
-            motionEventHandler = Context.getMotionEventHandler();
-            geofenceEventHandler = new GeofenceEventHandler();
-            alertEventHandler = new AlertEventHandler();
-            ignitionEventHandler = new IgnitionEventHandler();
-            maintenanceEventHandler = new MaintenanceEventHandler();
-            driverEventHandler = new DriverEventHandler();
-        }
     }
 
     protected abstract void addProtocolHandlers(PipelineBuilder pipeline);
 
-    private void addHandlers(ChannelPipeline pipeline, ChannelHandler... handlers) {
-        for (ChannelHandler handler : handlers) {
-            if (handler != null) {
-                pipeline.addLast(handler);
+    @SafeVarargs
+    private final void addHandlers(ChannelPipeline pipeline, Class<? extends ChannelHandler>... handlerClasses) {
+        for (Class<? extends ChannelHandler> handlerClass : handlerClasses) {
+            if (handlerClass != null) {
+                pipeline.addLast(Main.getInjector().getInstance(handlerClass));
             }
         }
     }
@@ -136,39 +118,36 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
 
         addHandlers(
                 pipeline,
-                Main.getInjector().getInstance(GeolocationHandler.class),
-                Main.getInjector().getInstance(HemisphereHandler.class),
-                Main.getInjector().getInstance(DistanceHandler.class),
-                Main.getInjector().getInstance(RemoteAddressHandler.class));
+                GeolocationHandler.class,
+                HemisphereHandler.class,
+                DistanceHandler.class,
+                RemoteAddressHandler.class);
 
         addDynamicHandlers(pipeline);
 
         addHandlers(
                 pipeline,
-                Main.getInjector().getInstance(FilterHandler.class),
-                Main.getInjector().getInstance(GeocoderHandler.class),
-                Main.getInjector().getInstance(MotionHandler.class),
-                Main.getInjector().getInstance(EngineHoursHandler.class),
-                Main.getInjector().getInstance(CopyAttributesHandler.class),
-                Main.getInjector().getInstance(ComputedAttributesHandler.class),
-                Main.getInjector().getInstance(WebDataHandler.class));
-
-        if (Context.getDataManager() != null) {
-            pipeline.addLast(new DefaultDataHandler());
-        }
+                FilterHandler.class,
+                GeocoderHandler.class,
+                MotionHandler.class,
+                EngineHoursHandler.class,
+                CopyAttributesHandler.class,
+                ComputedAttributesHandler.class,
+                WebDataHandler.class,
+                DefaultDataHandler.class);
 
         if (eventsEnabled) {
             addHandlers(
                     pipeline,
-                    Main.getInjector().getInstance(CommandResultEventHandler.class),
-                    overspeedEventHandler,
-                    fuelDropEventHandler,
-                    motionEventHandler,
-                    geofenceEventHandler,
-                    alertEventHandler,
-                    ignitionEventHandler,
-                    maintenanceEventHandler,
-                    driverEventHandler);
+                    CommandResultEventHandler.class,
+                    OverspeedEventHandler.class,
+                    FuelDropEventHandler.class,
+                    MotionEventHandler.class,
+                    GeofenceEventHandler.class,
+                    AlertEventHandler.class,
+                    IgnitionEventHandler.class,
+                    MaintenanceEventHandler.class,
+                    DriverEventHandler.class);
         }
 
         pipeline.addLast(new MainEventHandler());

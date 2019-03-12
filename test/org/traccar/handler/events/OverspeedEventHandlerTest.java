@@ -14,6 +14,8 @@ import java.util.TimeZone;
 
 import org.junit.Test;
 import org.traccar.BaseTest;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.model.DeviceState;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -26,8 +28,12 @@ public class OverspeedEventHandlerTest  extends BaseTest {
         return dateFormat.parse(time);
     }
 
-    private void testOverspeedWithPosition(boolean notRepeat, long geofenceId) throws Exception {
-        OverspeedEventHandler overspeedEventHandler = new OverspeedEventHandler(15000, notRepeat, false);
+    private void testOverspeedWithPosition(boolean notRepeat, long geofenceId) throws ParseException {
+        Config config = new Config();
+        config.setString(Keys.EVENT_OVERSPEED_NOT_REPEAT, String.valueOf(notRepeat));
+        config.setString(Keys.EVENT_OVERSPEED_MINIMAL_DURATION, String.valueOf(15));
+        config.setString(Keys.EVENT_OVERSPEED_PREFER_LOWEST, String.valueOf(false));
+        OverspeedEventHandler overspeedEventHandler = new OverspeedEventHandler(config, null, null);
 
         Position position = new Position();
         position.setTime(date("2017-01-01 00:00:00"));
@@ -85,8 +91,12 @@ public class OverspeedEventHandlerTest  extends BaseTest {
         assertEquals(0, deviceState.getOverspeedGeofenceId());
     }
 
-    private void testOverspeedWithStatus(boolean notRepeat) throws Exception {
-        OverspeedEventHandler overspeedEventHandler = new OverspeedEventHandler(15000, notRepeat, false);
+    private void testOverspeedWithStatus(boolean notRepeat) {
+        Config config = new Config();
+        config.setString(Keys.EVENT_OVERSPEED_NOT_REPEAT, String.valueOf(notRepeat));
+        config.setString(Keys.EVENT_OVERSPEED_MINIMAL_DURATION, String.valueOf(15));
+        config.setString(Keys.EVENT_OVERSPEED_PREFER_LOWEST, String.valueOf(false));
+        OverspeedEventHandler overspeedEventHandler = new OverspeedEventHandler(config, null, null);
 
         Position position = new Position();
         position.setTime(new Date(System.currentTimeMillis() - 30000));

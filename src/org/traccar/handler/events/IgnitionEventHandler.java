@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2019 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import io.netty.channel.ChannelHandler;
-import org.traccar.Context;
+import org.traccar.database.IdentityManager;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -28,10 +28,16 @@ import org.traccar.model.Position;
 @ChannelHandler.Sharable
 public class IgnitionEventHandler extends BaseEventHandler {
 
+    private final IdentityManager identityManager;
+
+    public IgnitionEventHandler(IdentityManager identityManager) {
+        this.identityManager = identityManager;
+    }
+
     @Override
     protected Map<Event, Position> analyzePosition(Position position) {
-        Device device = Context.getIdentityManager().getById(position.getDeviceId());
-        if (device == null || !Context.getIdentityManager().isLatestPosition(position)) {
+        Device device = identityManager.getById(position.getDeviceId());
+        if (device == null || !identityManager.isLatestPosition(position)) {
             return null;
         }
 
@@ -40,7 +46,7 @@ public class IgnitionEventHandler extends BaseEventHandler {
         if (position.getAttributes().containsKey(Position.KEY_IGNITION)) {
             boolean ignition = position.getBoolean(Position.KEY_IGNITION);
 
-            Position lastPosition = Context.getIdentityManager().getLastPosition(position.getDeviceId());
+            Position lastPosition = identityManager.getLastPosition(position.getDeviceId());
             if (lastPosition != null && lastPosition.getAttributes().containsKey(Position.KEY_IGNITION)) {
                 boolean oldIgnition = lastPosition.getBoolean(Position.KEY_IGNITION);
 

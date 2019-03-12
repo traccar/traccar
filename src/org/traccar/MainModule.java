@@ -22,8 +22,12 @@ import com.google.inject.Singleton;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.AttributesManager;
+import org.traccar.database.CalendarManager;
 import org.traccar.database.DataManager;
+import org.traccar.database.DeviceManager;
+import org.traccar.database.GeofenceManager;
 import org.traccar.database.IdentityManager;
+import org.traccar.database.MaintenancesManager;
 import org.traccar.database.StatisticsManager;
 import org.traccar.geocoder.AddressFormat;
 import org.traccar.geocoder.BanGeocoder;
@@ -46,6 +50,7 @@ import org.traccar.geolocation.OpenCellIdGeolocationProvider;
 import org.traccar.geolocation.UnwiredGeolocationProvider;
 import org.traccar.handler.ComputedAttributesHandler;
 import org.traccar.handler.CopyAttributesHandler;
+import org.traccar.handler.DefaultDataHandler;
 import org.traccar.handler.DistanceHandler;
 import org.traccar.handler.EngineHoursHandler;
 import org.traccar.handler.FilterHandler;
@@ -54,7 +59,15 @@ import org.traccar.handler.GeolocationHandler;
 import org.traccar.handler.HemisphereHandler;
 import org.traccar.handler.MotionHandler;
 import org.traccar.handler.RemoteAddressHandler;
+import org.traccar.handler.events.AlertEventHandler;
 import org.traccar.handler.events.CommandResultEventHandler;
+import org.traccar.handler.events.DriverEventHandler;
+import org.traccar.handler.events.FuelDropEventHandler;
+import org.traccar.handler.events.GeofenceEventHandler;
+import org.traccar.handler.events.IgnitionEventHandler;
+import org.traccar.handler.events.MaintenanceEventHandler;
+import org.traccar.handler.events.MotionEventHandler;
+import org.traccar.handler.events.OverspeedEventHandler;
 import org.traccar.reports.model.TripsConfig;
 
 import javax.annotation.Nullable;
@@ -93,8 +106,28 @@ public class MainModule extends AbstractModule {
     }
 
     @Provides
+    public static DeviceManager provideDeviceManager() {
+        return Context.getDeviceManager();
+    }
+
+    @Provides
+    public static GeofenceManager provideGeofenceManager() {
+        return Context.getGeofenceManager();
+    }
+
+    @Provides
+    public static CalendarManager provideCalendarManager() {
+        return Context.getCalendarManager();
+    }
+
+    @Provides
     public static AttributesManager provideAttributesManager() {
         return Context.getAttributesManager();
+    }
+
+    @Provides
+    public static MaintenancesManager provideMaintenancesManager() {
+        return Context.getMaintenancesManager();
     }
 
     @Singleton
@@ -267,8 +300,69 @@ public class MainModule extends AbstractModule {
 
     @Singleton
     @Provides
+    public static DefaultDataHandler provideDefaultDataHandler(@Nullable DataManager dataManager) {
+        if (dataManager != null) {
+            return new DefaultDataHandler(dataManager);
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
     public static CommandResultEventHandler provideCommandResultEventHandler() {
         return new CommandResultEventHandler();
+    }
+
+    @Singleton
+    @Provides
+    public static OverspeedEventHandler provideOverspeedEventHandler(
+            Config config, DeviceManager deviceManager, GeofenceManager geofenceManager) {
+        return new OverspeedEventHandler(config, deviceManager, geofenceManager);
+    }
+
+    @Singleton
+    @Provides
+    public static FuelDropEventHandler provideFuelDropEventHandler(IdentityManager identityManager) {
+        return new FuelDropEventHandler(identityManager);
+    }
+
+    @Singleton
+    @Provides
+    public static MotionEventHandler provideMotionEventHandler(
+            IdentityManager identityManager, DeviceManager deviceManager, TripsConfig tripsConfig) {
+        return new MotionEventHandler(identityManager, deviceManager, tripsConfig);
+    }
+
+    @Singleton
+    @Provides
+    public static GeofenceEventHandler provideGeofenceEventHandler(
+            IdentityManager identityManager, GeofenceManager geofenceManager, CalendarManager calendarManager) {
+        return new GeofenceEventHandler(identityManager, geofenceManager, calendarManager);
+    }
+
+    @Singleton
+    @Provides
+    public static AlertEventHandler provideAlertEventHandler(Config config, IdentityManager identityManager) {
+        return new AlertEventHandler(config, identityManager);
+    }
+
+    @Singleton
+    @Provides
+    public static IgnitionEventHandler provideIgnitionEventHandler(IdentityManager identityManager) {
+        return new IgnitionEventHandler(identityManager);
+    }
+
+    @Singleton
+    @Provides
+    public static MaintenanceEventHandler provideMaintenanceEventHandler(
+            IdentityManager identityManager, MaintenancesManager maintenancesManager) {
+        return new MaintenanceEventHandler(identityManager, maintenancesManager);
+    }
+
+    @Singleton
+    @Provides
+    public static DriverEventHandler provideDriverEventHandler(IdentityManager identityManager) {
+        return new DriverEventHandler(identityManager);
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2019 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,22 +20,28 @@ import java.util.Collections;
 import java.util.Map;
 
 import io.netty.channel.ChannelHandler;
-import org.traccar.Context;
+import org.traccar.database.IdentityManager;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 @ChannelHandler.Sharable
 public class DriverEventHandler extends BaseEventHandler {
 
+    private final IdentityManager identityManager;
+
+    public DriverEventHandler(IdentityManager identityManager) {
+        this.identityManager = identityManager;
+    }
+
     @Override
     protected Map<Event, Position> analyzePosition(Position position) {
-        if (!Context.getIdentityManager().isLatestPosition(position)) {
+        if (!identityManager.isLatestPosition(position)) {
             return null;
         }
         String driverUniqueId = position.getString(Position.KEY_DRIVER_UNIQUE_ID);
         if (driverUniqueId != null) {
             String oldDriverUniqueId = null;
-            Position lastPosition = Context.getIdentityManager().getLastPosition(position.getDeviceId());
+            Position lastPosition = identityManager.getLastPosition(position.getDeviceId());
             if (lastPosition != null) {
                 oldDriverUniqueId = lastPosition.getString(Position.KEY_DRIVER_UNIQUE_ID);
             }

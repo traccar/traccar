@@ -63,4 +63,10 @@ public final class TestIdentityManager implements IdentityManager {
         return defaultValue;
     }
 
+    @Override
+    public double lookupAttributeDouble(
+            long deviceId, String attributeName, double defaultValue, boolean lookupConfig) {
+        return defaultValue;
+    }
+
 }

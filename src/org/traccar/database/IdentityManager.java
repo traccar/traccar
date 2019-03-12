@@ -38,4 +38,6 @@ public interface IdentityManager {
 
     long lookupAttributeLong(long deviceId, String attributeName, long defaultValue, boolean lookupConfig);
 
+    double lookupAttributeDouble(long deviceId, String attributeName, double defaultValue, boolean lookupConfig);
+
 }
