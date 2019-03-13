@@ -139,6 +139,8 @@ public class WatchProtocolEncoder extends StringProtocolEncoder implements Strin
                 return formatTextCommand(channel, command, "LOWBAT,{%s}", Command.KEY_ENABLE);
             case Command.TYPE_REBOOT_DEVICE:
                 return formatTextCommand(channel, command, "RESET");
+            case Command.TYPE_POWER_OFF:
+                return formatTextCommand(channel, command, "POWEROFF");
             case Command.TYPE_ALARM_REMOVE:
                 return formatTextCommand(channel, command, "REMOVE,{%s}", Command.KEY_ENABLE);
             case Command.TYPE_SILENCE_TIME:

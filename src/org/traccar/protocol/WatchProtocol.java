@@ -31,6 +31,7 @@ public class WatchProtocol extends BaseProtocol {
                 Command.TYPE_ALARM_SOS,
                 Command.TYPE_ALARM_BATTERY,
                 Command.TYPE_REBOOT_DEVICE,
+                Command.TYPE_POWER_OFF,
                 Command.TYPE_ALARM_REMOVE,
                 Command.TYPE_SILENCE_TIME,
                 Command.TYPE_ALARM_CLOCK,
