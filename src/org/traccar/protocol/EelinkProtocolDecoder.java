@@ -105,7 +105,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             int type, int index, ByteBuf content) {
         ByteBuf response = EelinkProtocolEncoder.encodeContent(
                 channel instanceof DatagramChannel, uniqueId, type, index, content);
-        if(content != null) {
+        if (content != null) {
             content.release();
         }
         if (channel != null) {
