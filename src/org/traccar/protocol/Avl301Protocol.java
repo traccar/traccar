@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,27 +15,19 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.bootstrap.ServerBootstrap;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import org.traccar.BaseProtocol;
+import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
-
-import java.util.List;
 
 public class Avl301Protocol extends BaseProtocol {
 
     public Avl301Protocol() {
-        super("avl301");
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(new ServerBootstrap(), getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(256, 2, 1, -3, 0));
-                pipeline.addLast("objectDecoder", new Avl301ProtocolDecoder(Avl301Protocol.this));
+            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+                pipeline.addLast(new LengthFieldBasedFrameDecoder(256, 2, 1, -3, 0));
+                pipeline.addLast(new Avl301ProtocolDecoder(Avl301Protocol.this));
             }
         });
     }

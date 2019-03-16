@@ -8,7 +8,16 @@ public class MegastekProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        MegastekProtocolDecoder decoder = new MegastekProtocolDecoder(new MegastekProtocol());
+        MegastekProtocolDecoder decoder = new MegastekProtocolDecoder(null);
+
+        verifyPosition(decoder, text(
+                "0132$MGV002,869152024261561,,S,310818,133945,V,3814.35442,N,02144.50662,E,00,00,00,99.9,,,44.2,,202,10,,,13,0,0,0,0,90,,,,11,100,Timer;!"));
+
+        verifyPosition(decoder, text(
+                "0151$MGV002,869152024261561,ID,S,070918,155544,V,3814.35419,N,02144.52113,E,00,00,00,99.9,0.062,,12.3,,202,01,0898,D1BE,8,34,1055,0,0,600,,,,11,010,Timer;!"));
+
+        verifyPosition(decoder, text(
+                "0174$MGV002,014682001957744,014682001957744,R,260318,042537,A,3853.77301,N,07728.66673,W,00,09,00,1.06,0.147,329.51,123.3,,310,26,B46C,5E69375,5,0000,0000,0,,,,,,10,019,Timer,,;!"));
 
         verifyNull(decoder, text(
                 "0112$MGV002,,GVT900-3,S,010114,000003,,,,,,00,00,00,,0.000,0.00,,0.0,,,,,,0000,0000,14,10,0, , ,,1-0,0,Low Ext Vol;!"));

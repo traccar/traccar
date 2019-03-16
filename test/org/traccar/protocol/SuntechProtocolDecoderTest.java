@@ -2,20 +2,18 @@ package org.traccar.protocol;
 
 import org.junit.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class SuntechProtocolDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecodeTemperature() throws Exception {
 
-        SuntechProtocolDecoder decoder = new SuntechProtocolDecoder(new SuntechProtocol());
+        SuntechProtocolDecoder decoder = new SuntechProtocolDecoder(null);
 
         decoder.setHbm(true);
         decoder.setIncludeAdc(true);
         decoder.setIncludeTemp(true);
-
-        /*verifyPosition(decoder, text(
-                "ST300STT;205170303;12;561;20170816;09:10:34;173f53;+19.082370;-098.214287;006.776;000.00;0;0;52982186;12.75;100000;2;6328;155747;4.2;1;0.00;0;0.00;0.00;00000000000000;0;28F2B7600600005D:+5.2;:;:"));*/
 
         verifyPosition(decoder, text(
                 "ST300STT;205173382;07;564;20160322;23:23:18;232e19;+19.288278;-099.128750;000.122;000.00;9;1;478391;11.53;000100;1;9498;079324;4.3;1;0.00;0.00;0.00;00000000000000;0;2898E16006000058:-20.8;2861626006000039:+2.5;:"));
@@ -23,12 +21,52 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "ST300EVT;205173382;07;564;20160322;23:23:18;232e19;+19.288278;-099.128750;000.122;000.00;9;1;478391;11.53;000100;2;1;9498;079324;4.3;1;0.00;0.00;0.00;00000000000000;0;2898E16006000058:-20.8;2861626006000039:+2.5;:"));
 
+        verifyPosition(decoder, text(
+                "ST600STT;008349958;35;523;20181112;00:49:30;0bf10d4e;334;20;2f19;22;+20.552718;-100.824478;050.021;095.41;12;1;1303603;14.30;10000000;4;8911;001987;4.1;0;0.00;;;;00000000000000;0;2826C8A70800000C:+26.6;:;:"));
+
+    }
+
+    @Test
+    public void testDecodeHours() throws Exception {
+
+        SuntechProtocolDecoder decoder = new SuntechProtocolDecoder(null);
+
+        decoder.setHbm(true);
+
+        verifyPosition(decoder, text(
+                "ST300STT;007238270;40;313;20190220;12:05:04;c99e48;+04.644623;-074.076922;010.390;202.77;20;1;997100;14.10;100000;2;8384;003634;4.1;1"));
+
+        verifyPosition(decoder, text(
+                "ST300STT;109002029;08;1080;20190220;13:00:55;85405;+04.645710;-074.078525;007.760;005.19;10;1;6520802;13.86;100100;4;1716;0000039863;4.1;1;0.00;0000;0000;0;0"));
+
+        verifyAttribute(decoder, text(
+                "ST300ALT;007239104;40;313;20190112;01:07:16;c99139;+04.703287;-074.148897;000.000;189.72;21;1;425512;12.61;100000;33;003188;4.1;1"),
+                Position.KEY_HOURS, 3188 * 60000L);
+
     }
 
     @Test
     public void testDecode() throws Exception {
 
-        SuntechProtocolDecoder decoder = new SuntechProtocolDecoder(new SuntechProtocol());
+        SuntechProtocolDecoder decoder = new SuntechProtocolDecoder(null);
+
+        verifyPosition(decoder, text(
+                "SA200STT;608945;129;20190215;15:04:53;3dce071558;+22.006721;-098.771016;001.198;000.00;11;1;2632589;12.21;010000;1;3211"));
+
+        verifyPosition(decoder, text(
+                "ST410STT;007272376;408;01;10217;732;103;-87;51511;1;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;3.8;1;2503;6;20181031;20:12:58;+04.741277;-074.048238;052.375;189.87;20;1"));
+
+        verifyPosition(decoder, text(
+                "ST410STT;007272376;408;01;21651;732;123;-65;1824;1;21654;732;123;1824;0;0;22542;732;123;1824;0;0;21656;732;123;1824;0;0;21655;732;123;1824;0;0;22541;732;123;1824;0;0;0;0;0;0;0;0;3.7;1;0156;1;20180816;05:18:52;+04.722322;-074.052776;000.074;000.00;10;1"));
+
+        verifyPosition(decoder, text(
+                "ST600STT;008084783;20;419;20180308;18:00:36;0032cc3e;736;3;445c;41;-16.530023;-068.084267;018.640;267.99;10;1;11655;13.33;100000;2;0336;000061;4.5;0;0.00"));
+
+        verifyPosition(decoder, text(
+                "ST600STT;107850496;20;419;20180227;14:30:45;00462b08;736;3;4524;50;-16.479091;-068.119119;000.346;000.00;4;1;0;13.89;000000;1;0223;000003;0.0;0;0.00"));
+
+        verifyPosition(decoder, text(
+                "ST600STT;100850000;01;010;20081017;07:41:56;0000004f;450;20;0023;24;+37.478519;+126.886819;000.012;000.00;9;1;0;15.30;00110000;1;0072;0;4.5;1;12.35"));
 
         verifyPosition(decoder, text(
                 "STT;100850000;3FFFFF;26;010;1;20161117;08:37:39;0000004F;450;0;0014;20;+37.479323;+126.887827;62.03;65.43;10;1;00000101;00001000;1;2;0492"));
@@ -65,7 +103,7 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
 
         verifyNull(decoder, text(
                 "SA200ALV;317652"));
-        
+
         verifyPosition(decoder, text(
                 "ST910;Alert;123456;410;20141018;18:30:12;+37.478774;+126.889690;000.000;000.00;0;4.0;1;6002"),
                 position("2014-10-18 18:30:12.000", false, 37.47877, 126.88969));
@@ -108,6 +146,9 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
                 "ST910;Emergency;205283272;500;20150716;19:12:01;-23.659019;-046.695403;000.602;000.00;0;4.2;1;1;02;10820;2fdb090736;724;05;0;2311;255;0;100"));
 
         decoder.setProtocolType(1);
+
+        verifyPosition(decoder, text(
+                "ST910;Location;907510186;552;20180504;23:15:45;3af54e5331;+19.301833;-099.190657;000.246;000.00;1;28462;80;1;0;0423;02;334;05;-215;20051;1;4;100"));
 
         verifyPosition(decoder, text(
                 "ST910;Alert;485195;20170409;22:37:41;3be0133057;+24.882410;-107.509152;000.070;000.00;1;286734;72;02;295;05;-415;4912;255;10;10"));

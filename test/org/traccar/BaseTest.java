@@ -1,67 +1,34 @@
 package org.traccar;
 
-import org.traccar.database.IdentityManager;
-import org.traccar.model.Device;
-import org.traccar.model.Position;
+import io.netty.buffer.ByteBuf;
+import org.traccar.database.MediaManager;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class BaseTest {
-    
+
+    public static class MockMediaManager extends MediaManager {
+        Map<String, ByteBuf> files = new HashMap<>();
+
+        MockMediaManager() {
+            super("");
+        }
+
+        @Override
+        public String writeFile(String uniqueId, ByteBuf buf, String extension) {
+            String fileName = uniqueId + "/mock." + extension;
+            files.put(fileName, buf);
+            return fileName;
+        }
+
+        public ByteBuf readFile(String fileName) {
+            return files.get(fileName);
+        }
+    }
+
     static {
-        Context.init(new IdentityManager() {
-
-            private Device createDevice() {
-                Device device = new Device();
-                device.setId(1);
-                device.setName("test");
-                device.setUniqueId("123456789012345");
-                return device;
-            }
-
-            @Override
-            public Device getById(long id) {
-                return createDevice();
-            }
-
-            @Override
-            public Device getByUniqueId(String uniqueId) {
-                return createDevice();
-            }
-            
-            @Override
-            public Position getLastPosition(long deviceId) {
-                return null;
-            }
-            
-            @Override
-            public boolean isLatestPosition(Position position) {
-                return true;
-            }
-
-            @Override
-            public boolean lookupAttributeBoolean(
-                    long deviceId, String attributeName, boolean defaultValue, boolean lookupConfig) {
-                return defaultValue;
-            }
-
-            @Override
-            public String lookupAttributeString(
-                    long deviceId, String attributeName, String defaultValue, boolean lookupConfig) {
-                return defaultValue;
-            }
-
-            @Override
-            public int lookupAttributeInteger(
-                    long deviceId, String attributeName, int defaultValue, boolean lookupConfig) {
-                return defaultValue;
-            }
-
-            @Override
-            public long lookupAttributeLong(
-                    long deviceId, String attributeName, long defaultValue, boolean lookupConfig) {
-                return defaultValue;
-            }
-
-        });
+        Context.init(new TestIdentityManager(), new MockMediaManager());
     }
 
 }

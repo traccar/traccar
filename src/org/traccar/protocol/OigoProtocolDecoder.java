@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,14 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -30,7 +33,7 @@ import java.nio.charset.StandardCharsets;
 
 public class OigoProtocolDecoder extends BaseProtocolDecoder {
 
-    public OigoProtocolDecoder(OigoProtocol protocol) {
+    public OigoProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
@@ -39,7 +42,7 @@ public class OigoProtocolDecoder extends BaseProtocolDecoder {
 
     public static final int MSG_ACKNOWLEDGEMENT = 0xE0;
 
-    private Position decodeArMessage(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
+    private Position decodeArMessage(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
 
         buf.skipBytes(1); // header
         buf.readUnsignedShort(); // length
@@ -51,12 +54,12 @@ public class OigoProtocolDecoder extends BaseProtocolDecoder {
         DeviceSession deviceSession;
         switch (BitUtil.to(tag, 3)) {
             case 0:
-                String imei = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
+                String imei = ByteBufUtil.hexDump(buf.readSlice(8)).substring(1);
                 deviceSession = getDeviceSession(channel, remoteAddress, imei);
                 break;
             case 1:
                 buf.skipBytes(1);
-                String meid = buf.readBytes(14).toString(StandardCharsets.US_ASCII);
+                String meid = buf.readSlice(14).toString(StandardCharsets.US_ASCII);
                 deviceSession = getDeviceSession(channel, remoteAddress, meid);
                 break;
             default:
@@ -68,8 +71,7 @@ public class OigoProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.set(Position.KEY_EVENT, buf.readUnsignedByte());
@@ -160,7 +162,7 @@ public class OigoProtocolDecoder extends BaseProtocolDecoder {
         return negative ? -degrees : degrees;
     }
 
-    private Position decodeMgMessage(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
+    private Position decodeMgMessage(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
 
         buf.readUnsignedByte(); // tag
         int flags = buf.getUnsignedByte(buf.readerIndex());
@@ -170,7 +172,7 @@ public class OigoProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedByte(); // flags
             deviceSession = getDeviceSession(channel, remoteAddress);
         } else {
-            String imei = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
+            String imei = ByteBufUtil.hexDump(buf.readSlice(8)).substring(1);
             deviceSession = getDeviceSession(channel, remoteAddress, imei);
         }
 
@@ -178,8 +180,7 @@ public class OigoProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         buf.skipBytes(8); // imsi
@@ -213,11 +214,11 @@ public class OigoProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_ODOMETER, (long) (buf.readUnsignedInt() * 1609.34));
 
         if (channel != null && BitUtil.check(flags, 7)) {
-            ChannelBuffer response = ChannelBuffers.dynamicBuffer();
+            ByteBuf response = Unpooled.buffer();
             response.writeByte(MSG_ACKNOWLEDGEMENT);
             response.writeByte(index);
             response.writeByte(0x00);
-            channel.write(response, remoteAddress);
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
 
         return position;
@@ -227,7 +228,7 @@ public class OigoProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         if (buf.getUnsignedByte(buf.readerIndex()) == 0x7e) {
             return decodeArMessage(channel, remoteAddress, buf);

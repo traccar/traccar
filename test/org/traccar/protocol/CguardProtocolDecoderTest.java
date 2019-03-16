@@ -8,10 +8,19 @@ public class CguardProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        CguardProtocolDecoder decoder = new CguardProtocolDecoder(new CguardProtocol());
+        CguardProtocolDecoder decoder = new CguardProtocolDecoder(null);
 
         verifyNull(decoder, text(
                 "IDRO:354868050655283"));
+
+        verifyPosition(decoder, text(
+                "NV:190225 144543:55.776505:37.729000:0:10:0:0"));
+
+        verifyAttributes(decoder, text(
+                "BC:190225 144543:CSQ1:64:NSQ1:0:NSQ2:1:BAT1:100"));
+
+        verifyAttributes(decoder, text(
+                "BC:190225 142653:CSQ1:80:NSQ1:0:NSQ2:1:BAT1:3.53"));
 
         verifyPosition(decoder, text(
                 "NV:170409 031456:56.808553:60.595476:0:NAN:0"));

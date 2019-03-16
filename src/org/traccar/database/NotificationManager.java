@@ -1,6 +1,6 @@
 /*
- * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
- * Copyright 2016 - 2017 Andrey Kunitsyn (andrey@traccar.org)
+ * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,21 +19,24 @@ package org.traccar.database;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.Context;
-import org.traccar.helper.Log;
+import org.traccar.model.Calendar;
 import org.traccar.model.Event;
 import org.traccar.model.Notification;
 import org.traccar.model.Position;
 import org.traccar.model.Typed;
-import org.traccar.notification.NotificationMail;
-import org.traccar.notification.NotificationSms;
 
 public class NotificationManager extends ExtendedObjectManager<Notification> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NotificationManager.class);
 
     private boolean geocodeOnRequest;
 
@@ -42,12 +45,16 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
         geocodeOnRequest = Context.getConfig().getBoolean("geocoder.onRequest");
     }
 
-    private Set<Long> getEffectiveNotifications(long userId, long deviceId) {
+    private Set<Long> getEffectiveNotifications(long userId, long deviceId, Date time) {
         Set<Long> result = new HashSet<>();
         Set<Long> deviceNotifications = getAllDeviceItems(deviceId);
         for (long itemId : getUserItems(userId)) {
             if (getById(itemId).getAlways() || deviceNotifications.contains(itemId)) {
-                result.add(itemId);
+                long calendarId = getById(itemId).getCalendarId();
+                Calendar calendar = calendarId != 0 ? Context.getCalendarManager().getById(calendarId) : null;
+                if (calendar == null || calendar.checkMoment(time)) {
+                    result.add(itemId);
+                }
             }
         }
         return result;
@@ -57,7 +64,7 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
         try {
             getDataManager().addObject(event);
         } catch (SQLException error) {
-            Log.warning(error);
+            LOGGER.warn("Event save error", error);
         }
 
         if (position != null && geocodeOnRequest && Context.getGeocoder() != null && position.getAddress() == null) {
@@ -67,36 +74,41 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
 
         long deviceId = event.getDeviceId();
         Set<Long> users = Context.getPermissionsManager().getDeviceUsers(deviceId);
+        Set<Long> usersToForward = null;
+        if (Context.getEventForwarder() != null) {
+            usersToForward = new HashSet<>();
+        }
         for (long userId : users) {
-            if (event.getGeofenceId() == 0 || Context.getGeofenceManager() != null
-                    && Context.getGeofenceManager().checkItemPermission(userId, event.getGeofenceId())) {
-                boolean sentWeb = false;
-                boolean sentMail = false;
-                boolean sentSms = Context.getSmppManager() == null;
-                for (long notificationId : getEffectiveNotifications(userId, deviceId)) {
+            if ((event.getGeofenceId() == 0
+                    || Context.getGeofenceManager().checkItemPermission(userId, event.getGeofenceId()))
+                    && (event.getMaintenanceId() == 0
+                    || Context.getMaintenancesManager().checkItemPermission(userId, event.getMaintenanceId()))) {
+                if (usersToForward != null) {
+                    usersToForward.add(userId);
+                }
+                final Set<String> notificators = new HashSet<>();
+                for (long notificationId : getEffectiveNotifications(userId, deviceId, event.getServerTime())) {
                     Notification notification = getById(notificationId);
                     if (getById(notificationId).getType().equals(event.getType())) {
-                        if (!sentWeb && notification.getWeb()) {
-                            Context.getConnectionManager().updateEvent(userId, event);
-                            sentWeb = true;
+                        boolean filter = false;
+                        if (event.getType().equals(Event.TYPE_ALARM)) {
+                            String alarms = notification.getString("alarms");
+                            if (alarms == null || !alarms.contains(event.getString(Position.KEY_ALARM))) {
+                                filter = true;
+                            }
                         }
-                        if (!sentMail && notification.getMail()) {
-                            NotificationMail.sendMailAsync(userId, event, position);
-                            sentMail = true;
-                        }
-                        if (!sentSms && notification.getSms()) {
-                            NotificationSms.sendSmsAsync(userId, event, position);
-                            sentSms = true;
+                        if (!filter) {
+                            notificators.addAll(notification.getNotificatorsTypes());
                         }
                     }
-                    if (sentWeb && sentMail && sentSms) {
-                        break;
-                    }
+                }
+                for (String notificator : notificators) {
+                    Context.getNotificatorManager().getNotificator(notificator).sendAsync(userId, event, position);
                 }
             }
         }
         if (Context.getEventForwarder() != null) {
-            Context.getEventForwarder().forwardEvent(event, position);
+            Context.getEventForwarder().forwardEvent(event, position, usersToForward);
         }
     }
 
@@ -114,7 +126,7 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
                 try {
                     types.add(new Typed(field.get(null).toString()));
                 } catch (IllegalArgumentException | IllegalAccessException error) {
-                    Log.warning(error);
+                    LOGGER.warn("Get event types error", error);
                 }
             }
         }

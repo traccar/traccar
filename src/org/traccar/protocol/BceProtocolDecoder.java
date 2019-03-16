@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,25 +15,27 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.nio.ByteOrder;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
 public class BceProtocolDecoder extends BaseProtocolDecoder {
 
-    public BceProtocolDecoder(BceProtocol protocol) {
+    public BceProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
@@ -49,9 +51,9 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
-        String imei = String.format("%015d", buf.readLong());
+        String imei = String.format("%015d", buf.readLongLE());
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
         if (deviceSession == null) {
             return null;
@@ -61,19 +63,23 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
 
         while (buf.readableBytes() > 1) {
 
-            int dataEnd = buf.readUnsignedShort() + buf.readerIndex();
+            int dataEnd = buf.readUnsignedShortLE() + buf.readerIndex();
             int type = buf.readUnsignedByte();
+
+            if (type != MSG_ASYNC_STACK && type != MSG_TIME_TRIGGERED) {
+                return null;
+            }
+
             int confirmKey = buf.readUnsignedByte() & 0x7F;
 
             while (buf.readerIndex() < dataEnd) {
 
-                Position position = new Position();
-                position.setProtocol(getProtocolName());
+                Position position = new Position(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());
 
                 int structEnd = buf.readUnsignedByte() + buf.readerIndex();
 
-                long time = buf.readUnsignedInt();
+                long time = buf.readUnsignedIntLE();
                 if ((time & 0x0f) == DATA_TYPE) {
 
                     time = time >> 4 << 1;
@@ -84,7 +90,7 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
                     int mask;
                     List<Integer> masks = new LinkedList<>();
                     do {
-                        mask = buf.readUnsignedShort();
+                        mask = buf.readUnsignedShortLE();
                         masks.add(mask);
                     } while (BitUtil.check(mask, 15));
 
@@ -92,27 +98,27 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
 
                     if (BitUtil.check(mask, 0)) {
                         position.setValid(true);
-                        position.setLongitude(buf.readFloat());
-                        position.setLatitude(buf.readFloat());
-                        position.setSpeed(buf.readUnsignedByte());
+                        position.setLongitude(buf.readFloatLE());
+                        position.setLatitude(buf.readFloatLE());
+                        position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
 
-                        int gps = buf.readUnsignedByte();
-                        position.set(Position.KEY_SATELLITES, gps & 0xf);
-                        position.set(Position.KEY_HDOP, gps >> 4);
+                        int status = buf.readUnsignedByte();
+                        position.set(Position.KEY_SATELLITES, BitUtil.to(status, 4));
+                        position.set(Position.KEY_HDOP, BitUtil.from(status, 4));
 
-                        position.setCourse(buf.readUnsignedByte());
-                        position.setAltitude(buf.readUnsignedShort());
+                        position.setCourse(buf.readUnsignedByte() * 2);
+                        position.setAltitude(buf.readUnsignedShortLE());
 
-                        position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+                        position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
                     }
 
                     if (BitUtil.check(mask, 1)) {
-                        position.set(Position.KEY_INPUT, buf.readUnsignedShort());
+                        position.set(Position.KEY_INPUT, buf.readUnsignedShortLE());
                     }
 
                     for (int i = 1; i <= 8; i++) {
                         if (BitUtil.check(mask, i + 1)) {
-                            position.set(Position.PREFIX_ADC + i, buf.readUnsignedShort());
+                            position.set(Position.PREFIX_ADC + i, buf.readUnsignedShortLE());
                         }
                     }
 
@@ -131,8 +137,8 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
 
                     if (BitUtil.check(mask, 14)) {
                         position.setNetwork(new Network(CellTower.from(
-                                buf.readUnsignedShort(), buf.readUnsignedByte(),
-                                buf.readUnsignedShort(), buf.readUnsignedShort(),
+                                buf.readUnsignedShortLE(), buf.readUnsignedByte(),
+                                buf.readUnsignedShortLE(), buf.readUnsignedShortLE(),
                                 buf.readUnsignedByte())));
                         buf.readUnsignedByte();
                     }
@@ -147,9 +153,9 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
 
             // Send response
             if (type == MSG_ASYNC_STACK && channel != null) {
-                ChannelBuffer response = ChannelBuffers.buffer(ByteOrder.LITTLE_ENDIAN, 8 + 2 + 2 + 1);
-                response.writeLong(Long.parseLong(imei));
-                response.writeShort(2);
+                ByteBuf response = Unpooled.buffer(8 + 2 + 2 + 1);
+                response.writeLongLE(Long.parseLong(imei));
+                response.writeShortLE(2);
                 response.writeByte(MSG_STACK_COFIRM);
                 response.writeByte(confirmKey);
 
@@ -159,7 +165,7 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
                 }
                 response.writeByte(checksum);
 
-                channel.write(response);
+                channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
             }
         }
 

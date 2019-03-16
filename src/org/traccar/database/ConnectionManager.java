@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,17 @@
  */
 package org.traccar.database;
 
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.util.Timeout;
-import org.jboss.netty.util.TimerTask;
+import io.netty.channel.Channel;
+import io.netty.util.Timeout;
+import io.netty.util.TimerTask;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.Context;
 import org.traccar.GlobalTimer;
+import org.traccar.Main;
 import org.traccar.Protocol;
-import org.traccar.events.OverspeedEventHandler;
-import org.traccar.helper.Log;
+import org.traccar.handler.events.MotionEventHandler;
+import org.traccar.handler.events.OverspeedEventHandler;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceState;
 import org.traccar.model.Event;
@@ -39,6 +42,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class ConnectionManager {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionManager.class);
 
     private static final long DEFAULT_TIMEOUT = 600;
 
@@ -57,9 +62,7 @@ public class ConnectionManager {
     }
 
     public void addActiveDevice(long deviceId, Protocol protocol, Channel channel, SocketAddress remoteAddress) {
-        ActiveDevice activeDevice = new ActiveDevice(deviceId, protocol, channel, remoteAddress);
-        activeDevices.put(deviceId, activeDevice);
-        Context.getCommandsManager().sendQueuedCommands(activeDevice);
+        activeDevices.put(deviceId, new ActiveDevice(deviceId, protocol, channel, remoteAddress));
     }
 
     public void removeActiveDevice(Channel channel) {
@@ -121,10 +124,9 @@ public class ConnectionManager {
         if (status.equals(Device.STATUS_ONLINE)) {
             timeouts.put(deviceId, GlobalTimer.getTimer().newTimeout(new TimerTask() {
                 @Override
-                public void run(Timeout timeout) throws Exception {
+                public void run(Timeout timeout) {
                     if (!timeout.isCancelled()) {
                         updateDevice(deviceId, Device.STATUS_UNKNOWN, null);
-                        activeDevices.remove(deviceId);
                     }
                 }
             }, deviceTimeout, TimeUnit.MILLISECONDS));
@@ -133,23 +135,29 @@ public class ConnectionManager {
         try {
             Context.getDeviceManager().updateDeviceStatus(device);
         } catch (SQLException error) {
-            Log.warning(error);
+            LOGGER.warn("Update device status error", error);
         }
 
         updateDevice(device);
+
+        if (status.equals(Device.STATUS_ONLINE) && !oldStatus.equals(Device.STATUS_ONLINE)) {
+            Context.getCommandsManager().sendQueuedCommands(getActiveDevice(deviceId));
+        }
     }
 
     public Map<Event, Position> updateDeviceState(long deviceId) {
         DeviceState deviceState = Context.getDeviceManager().getDeviceState(deviceId);
         Map<Event, Position> result = new HashMap<>();
 
-        Map<Event, Position> event = Context.getMotionEventHandler().updateMotionState(deviceState);
+        Map<Event, Position> event = Main.getInjector()
+                .getInstance(MotionEventHandler.class).updateMotionState(deviceState);
         if (event != null) {
             result.putAll(event);
         }
 
-        event = Context.getOverspeedEventHandler().updateOverspeedState(deviceState, Context.getDeviceManager().
-                lookupAttributeDouble(deviceId, OverspeedEventHandler.ATTRIBUTE_SPEED_LIMIT, 0, false));
+        event = Main.getInjector().getInstance(OverspeedEventHandler.class)
+                .updateOverspeedState(deviceState, Context.getDeviceManager().
+                        lookupAttributeDouble(deviceId, OverspeedEventHandler.ATTRIBUTE_SPEED_LIMIT, 0, false));
         if (event != null) {
             result.putAll(event);
         }

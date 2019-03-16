@@ -16,7 +16,6 @@
 package org.traccar.protocol;
 
 import org.traccar.StringProtocolEncoder;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 public class CarcellProtocolEncoder extends StringProtocolEncoder {
@@ -30,11 +29,8 @@ public class CarcellProtocolEncoder extends StringProtocolEncoder {
             case Command.TYPE_ENGINE_RESUME:
                 return formatCommand(command, "$SRVCMD,{%s},BD#\r\n", Command.KEY_UNIQUE_ID);
             default:
-                Log.warning(new UnsupportedOperationException(command.getType()));
-                break;
+                return null;
         }
-
-        return null;
     }
 
 }

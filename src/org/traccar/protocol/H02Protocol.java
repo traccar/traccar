@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,16 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
-import org.jboss.netty.bootstrap.ServerBootstrap;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.handler.codec.string.StringEncoder;
+import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.Context;
+import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.model.Command;
-
-import java.util.List;
 
 public class H02Protocol extends BaseProtocol {
 
     public H02Protocol() {
-        super("h02");
         setSupportedDataCommands(
                 Command.TYPE_ALARM_ARM,
                 Command.TYPE_ALARM_DISARM,
@@ -37,26 +32,22 @@ public class H02Protocol extends BaseProtocol {
                 Command.TYPE_ENGINE_RESUME,
                 Command.TYPE_POSITION_PERIODIC
         );
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(new ServerBootstrap(), getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addSpecificHandlers(ChannelPipeline pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 int messageLength = Context.getConfig().getInteger(getName() + ".messageLength");
-                pipeline.addLast("frameDecoder", new H02FrameDecoder(messageLength));
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("objectEncoder", new H02ProtocolEncoder());
-                pipeline.addLast("objectDecoder", new H02ProtocolDecoder(H02Protocol.this));
+                pipeline.addLast(new H02FrameDecoder(messageLength));
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new H02ProtocolEncoder());
+                pipeline.addLast(new H02ProtocolDecoder(H02Protocol.this));
             }
         });
-        serverList.add(new TrackerServer(new ConnectionlessBootstrap(), getName()) {
+        addServer(new TrackerServer(true, getName()) {
             @Override
-            protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("objectEncoder", new H02ProtocolEncoder());
-                pipeline.addLast("objectDecoder", new H02ProtocolDecoder(H02Protocol.this));
+            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new H02ProtocolEncoder());
+                pipeline.addLast(new H02ProtocolDecoder(H02Protocol.this));
             }
         });
     }

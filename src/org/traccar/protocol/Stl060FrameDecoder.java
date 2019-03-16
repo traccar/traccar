@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Anton Tananaev (anton@traccar.org)
+ * Copyright 2014 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,8 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
 import org.traccar.CharacterDelimiterFrameDecoder;
 
 public class Stl060FrameDecoder extends CharacterDelimiterFrameDecoder {
@@ -27,10 +26,9 @@ public class Stl060FrameDecoder extends CharacterDelimiterFrameDecoder {
     }
 
     @Override
-    protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
+    protected Object decode(ChannelHandlerContext ctx, ByteBuf buf) throws Exception {
 
-        ChannelBuffer result = (ChannelBuffer) super.decode(ctx, channel, buf);
+        ByteBuf result = (ByteBuf) super.decode(ctx, buf);
 
         if (result != null) {
 
@@ -39,7 +37,7 @@ public class Stl060FrameDecoder extends CharacterDelimiterFrameDecoder {
                 return result;
             } else {
                 result.skipBytes(index);
-                return result.readBytes(result.readableBytes());
+                return result.readRetainedSlice(result.readableBytes());
             }
 
         }

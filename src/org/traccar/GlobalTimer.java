@@ -15,8 +15,8 @@
  */
 package org.traccar;
 
-import org.jboss.netty.util.HashedWheelTimer;
-import org.jboss.netty.util.Timer;
+import io.netty.util.HashedWheelTimer;
+import io.netty.util.Timer;
 
 public final class GlobalTimer {
 

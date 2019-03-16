@@ -39,9 +39,13 @@ public class GeofenceCircle extends GeofenceGeometry {
         this.radius = radius;
     }
 
+    public double distanceFromCenter(double latitude, double longitude) {
+        return DistanceCalculator.distance(centerLatitude, centerLongitude, latitude, longitude);
+    }
+
     @Override
     public boolean containsPoint(double latitude, double longitude) {
-        return DistanceCalculator.distance(centerLatitude, centerLongitude, latitude, longitude) <= radius;
+        return distanceFromCenter(latitude, longitude) <= radius;
     }
 
     @Override

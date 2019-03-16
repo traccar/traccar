@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,13 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
@@ -31,13 +33,14 @@ import java.util.List;
 
 public class NvsProtocolDecoder extends BaseProtocolDecoder {
 
-    public NvsProtocolDecoder(NvsProtocol protocol) {
+    public NvsProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
-    private void sendResponse(Channel channel, String response) {
+    private void sendResponse(Channel channel, SocketAddress remoteAddress, String response) {
         if (channel != null) {
-            channel.write(ChannelBuffers.copiedBuffer(response, StandardCharsets.US_ASCII));
+            channel.writeAndFlush(new NetworkMessage(
+                    Unpooled.copiedBuffer(response, StandardCharsets.US_ASCII), remoteAddress));
         }
     }
 
@@ -45,7 +48,7 @@ public class NvsProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
 
         if (buf.getUnsignedByte(buf.readerIndex()) == 0) {
@@ -55,9 +58,9 @@ public class NvsProtocolDecoder extends BaseProtocolDecoder {
             String imei = buf.toString(buf.readerIndex(), 15, StandardCharsets.US_ASCII);
 
             if (getDeviceSession(channel, remoteAddress, imei) != null) {
-                sendResponse(channel, "OK");
+                sendResponse(channel, remoteAddress, "OK");
             } else {
-                sendResponse(channel, "NO01");
+                sendResponse(channel, remoteAddress, "NO01");
             }
 
         } else {
@@ -76,8 +79,7 @@ public class NvsProtocolDecoder extends BaseProtocolDecoder {
             int count = buf.readUnsignedByte();
 
             for (int i = 0; i < count; i++) {
-                Position position = new Position();
-                position.setProtocol(getProtocolName());
+                Position position = new Position(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());
 
                 position.setTime(new Date(buf.readUnsignedInt() * 1000));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,13 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -29,24 +31,24 @@ import java.nio.charset.StandardCharsets;
 
 public class Gps056ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Gps056ProtocolDecoder(Gps056Protocol protocol) {
+    public Gps056ProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
-    private static void sendResponse(Channel channel, String type, String imei, ChannelBuffer content) {
+    private static void sendResponse(Channel channel, String type, String imei, ByteBuf content) {
         if (channel != null) {
-            ChannelBuffer response = ChannelBuffers.dynamicBuffer();
+            ByteBuf response = Unpooled.buffer();
             String header = "*" + type + imei;
             response.writeBytes(header.getBytes(StandardCharsets.US_ASCII));
             if (content != null) {
                 response.writeBytes(content);
             }
             response.writeByte('#');
-            channel.write(response);
+            channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
     }
 
-    private static double decodeCoordinate(ChannelBuffer buf) {
+    private static double decodeCoordinate(ByteBuf buf) {
         double degrees = buf.getUnsignedShort(buf.readerIndex()) / 100;
         double minutes = buf.readUnsignedShort() % 100 + buf.readUnsignedShort() * 0.0001;
         degrees += minutes / 60;
@@ -57,12 +59,12 @@ public class Gps056ProtocolDecoder extends BaseProtocolDecoder {
         return degrees;
     }
 
-    private static void decodeStatus(ChannelBuffer buf, Position position) {
+    private static void decodeStatus(ByteBuf buf, Position position) {
 
         position.set(Position.KEY_INPUT, buf.readUnsignedByte());
         position.set(Position.KEY_OUTPUT, buf.readUnsignedByte());
 
-        position.set(Position.PREFIX_ADC + 1, ChannelBuffers.swapShort(buf.readShort()) * 5.06); // mV
+        position.set(Position.PREFIX_ADC + 1, buf.readShortLE() * 5.06); // mV
 
         position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
         position.set(Position.KEY_RSSI, buf.readUnsignedByte());
@@ -73,13 +75,13 @@ public class Gps056ProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         buf.skipBytes(2); // header
         buf.skipBytes(2); // length
 
-        String type = buf.readBytes(7).toString(StandardCharsets.US_ASCII);
-        String imei = buf.readBytes(15).toString(StandardCharsets.US_ASCII);
+        String type = buf.readSlice(7).toString(StandardCharsets.US_ASCII);
+        String imei = buf.readSlice(15).toString(StandardCharsets.US_ASCII);
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
         if (deviceSession == null) {
@@ -88,13 +90,16 @@ public class Gps056ProtocolDecoder extends BaseProtocolDecoder {
 
         if (type.startsWith("LOGN")) {
 
-            sendResponse(channel, "LGSA" + type.substring(4), imei,
-                    ChannelBuffers.copiedBuffer("1", StandardCharsets.US_ASCII));
+            ByteBuf content = Unpooled.copiedBuffer("1", StandardCharsets.US_ASCII);
+            try {
+                sendResponse(channel, "LGSA" + type.substring(4), imei, content);
+            } finally {
+                content.release();
+            }
 
         } else if (type.startsWith("GPSL")) {
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             DateBuilder dateBuilder = new DateBuilder()
@@ -110,14 +115,13 @@ public class Gps056ProtocolDecoder extends BaseProtocolDecoder {
 
             decodeStatus(buf, position);
 
-            sendResponse(channel, "GPSA" + type.substring(4), imei, buf.readBytes(2));
+            sendResponse(channel, "GPSA" + type.substring(4), imei, buf.readSlice(2));
 
             return position;
 
         } else if (type.startsWith("SYNC")) {
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             getLastLocation(position, null);

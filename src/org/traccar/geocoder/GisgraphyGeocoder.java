@@ -45,6 +45,9 @@ public class GisgraphyGeocoder extends JsonGeocoder {
         if (result.containsKey("countryCode")) {
             address.setCountry(result.getString("countryCode"));
         }
+        if (result.containsKey("formatedFull")) {
+            address.setFormattedAddress(result.getString("formatedFull"));
+        }
 
         return address;
     }

@@ -16,10 +16,10 @@
 package org.traccar.protocol;
 
 import org.traccar.StringProtocolEncoder;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 public class WondexProtocolEncoder extends StringProtocolEncoder {
+
     @Override
     protected Object encodeCommand(Command command) {
 
@@ -39,11 +39,8 @@ public class WondexProtocolEncoder extends StringProtocolEncoder {
             case Command.TYPE_GET_VERSION:
                 return formatCommand(command, "$WP+VER={%s}", Command.KEY_DEVICE_PASSWORD);
             default:
-                Log.warning(new UnsupportedOperationException(command.getType()));
-                break;
+                return null;
         }
-
-        return null;
     }
 
 }

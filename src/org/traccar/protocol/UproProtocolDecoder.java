@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,13 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
@@ -30,18 +32,17 @@ import org.traccar.model.Position;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
 import java.util.regex.Pattern;
 
 public class UproProtocolDecoder extends BaseProtocolDecoder {
 
-    public UproProtocolDecoder(UproProtocol protocol) {
+    public UproProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
     private static final Pattern PATTERN_HEADER = new PatternBuilder()
             .text("*")
-            .expression("..20")
+            .expression("(..20)")                // head
             .expression("([01])")                // ack
             .number("(d+),")                     // device id
             .expression("(.)")                   // type
@@ -92,23 +93,24 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         if (buf.getByte(buf.readerIndex()) != '*') {
-            throw new ParseException(null, 0);
+            return null;
         }
 
         int headerIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '&');
         if (headerIndex < 0) {
             headerIndex = buf.writerIndex();
         }
-        String header = buf.readBytes(headerIndex - buf.readerIndex()).toString(StandardCharsets.US_ASCII);
+        String header = buf.readSlice(headerIndex - buf.readerIndex()).toString(StandardCharsets.US_ASCII);
 
         Parser parser = new Parser(PATTERN_HEADER, header);
         if (!parser.matches()) {
             return null;
         }
 
+        String head = parser.next();
         boolean reply = parser.next().equals("1");
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
@@ -116,18 +118,17 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         String type = parser.next();
         String subtype = parser.next();
 
         if (reply && channel != null) {
-            channel.write("*MG20Y" + type + subtype + "#");
+            channel.writeAndFlush(new NetworkMessage("*" + head + "Y" + type + subtype + "#", remoteAddress));
         }
 
-        while (buf.readable()) {
+        while (buf.isReadable()) {
 
             buf.readByte(); // skip delimiter
 
@@ -138,7 +139,7 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                 delimiterIndex = buf.writerIndex();
             }
 
-            ChannelBuffer data = buf.readBytes(delimiterIndex - buf.readerIndex());
+            ByteBuf data = buf.readSlice(delimiterIndex - buf.readerIndex());
 
             switch (dataType) {
                 case 'A':
@@ -149,27 +150,51 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case 'C':
                     long odometer = 0;
-                    while (data.readable()) {
+                    while (data.isReadable()) {
                         odometer <<= 4;
                         odometer += data.readByte() - (byte) '0';
                     }
                     position.set(Position.KEY_ODOMETER, odometer * 2 * 1852 / 3600);
                     break;
+                case 'F':
+                    position.setSpeed(
+                            Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII)) * 0.1);
+                    break;
+                case 'K':
+                    position.set("statusExtended", data.toString(StandardCharsets.US_ASCII));
+                    break;
                 case 'P':
-                    position.setNetwork(new Network(CellTower.from(
-                            Integer.parseInt(data.readBytes(4).toString(StandardCharsets.US_ASCII)),
-                            Integer.parseInt(data.readBytes(4).toString(StandardCharsets.US_ASCII)),
-                            Integer.parseInt(data.readBytes(4).toString(StandardCharsets.US_ASCII), 16),
-                            Integer.parseInt(data.readBytes(4).toString(StandardCharsets.US_ASCII), 16))));
+                    if (data.readableBytes() >= 16) {
+                        position.setNetwork(new Network(CellTower.from(
+                                Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII)),
+                                Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII)),
+                                Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII), 16),
+                                Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII), 16))));
+                    }
                     break;
                 case 'Q':
-                    position.set("obd-pid", ChannelBuffers.hexDump(data));
+                    position.set("obdPid", ByteBufUtil.hexDump(data));
                     break;
                 case 'R':
-                    position.set("odb-travel", ChannelBuffers.hexDump(data));
+                    if (head.startsWith("HQ")) {
+                        position.set(Position.KEY_RSSI,
+                                Integer.parseInt(data.readSlice(2).toString(StandardCharsets.US_ASCII)));
+                        position.set(Position.KEY_SATELLITES,
+                                Integer.parseInt(data.readSlice(2).toString(StandardCharsets.US_ASCII)));
+                    } else {
+                        position.set("odbTravel", ByteBufUtil.hexDump(data));
+                    }
                     break;
                 case 'S':
-                    position.set("obd-traffic", ChannelBuffers.hexDump(data));
+                    position.set("obdTraffic", ByteBufUtil.hexDump(data));
+                    break;
+                case 'T':
+                    position.set(Position.KEY_BATTERY_LEVEL,
+                            Integer.parseInt(data.readSlice(2).toString(StandardCharsets.US_ASCII)));
+                    break;
+                case 'V':
+                    position.set(Position.KEY_POWER,
+                            Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII)) * 0.1);
                     break;
                 default:
                     break;

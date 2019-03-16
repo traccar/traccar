@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -28,7 +29,7 @@ import java.util.regex.Pattern;
 
 public class ArnaviProtocolDecoder extends BaseProtocolDecoder {
 
-    public ArnaviProtocolDecoder(ArnaviProtocol protocol) {
+    public ArnaviProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
@@ -47,6 +48,10 @@ public class ArnaviProtocolDecoder extends BaseProtocolDecoder {
             .number("d+,d+,").optional()         // input 2
             .expression("[01],")                 // fix type
             .number("(d+),")                     // satellites
+            .groupBegin()
+            .number("(d+.d+)?,")                 // altitude
+            .number("(?:d+.d+)?,")               // geoid height
+            .groupEnd("?")
             .number("(dd)(dd)(dd),")             // time (hhmmss)
             .number("(dd)(dd.d+)([NS]),")        // latitude
             .number("(ddd)(dd.d+)([EW]),")       // longitude
@@ -65,8 +70,7 @@ public class ArnaviProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
@@ -74,23 +78,25 @@ public class ArnaviProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.set(Position.KEY_INDEX, parser.nextInt(0));
-        position.set(Position.KEY_POWER, parser.nextInt(0) * 0.01);
-        position.set(Position.KEY_BATTERY, parser.nextInt(0) * 0.01);
-        position.set(Position.KEY_IGNITION, parser.nextInt(0) == 1);
-        position.set(Position.KEY_INPUT, parser.nextInt(0));
-        position.set(Position.KEY_SATELLITES, parser.nextInt(0));
+        position.set(Position.KEY_INDEX, parser.nextInt());
+        position.set(Position.KEY_POWER, parser.nextInt() * 0.01);
+        position.set(Position.KEY_BATTERY, parser.nextInt() * 0.01);
+        position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
+        position.set(Position.KEY_INPUT, parser.nextInt());
+        position.set(Position.KEY_SATELLITES, parser.nextInt());
+
+        position.setAltitude(parser.nextDouble(0));
 
         DateBuilder dateBuilder = new DateBuilder()
-                .setTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
 
         position.setValid(true);
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
-        position.setSpeed(parser.nextDouble(0));
-        position.setCourse(parser.nextDouble(0));
+        position.setSpeed(parser.nextDouble());
+        position.setCourse(parser.nextDouble());
 
-        dateBuilder.setDateReverse(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
+        dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
         position.setTime(dateBuilder.getDate());
 
         return position;

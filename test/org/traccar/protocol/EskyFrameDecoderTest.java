@@ -1,6 +1,5 @@
 package org.traccar.protocol;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.traccar.ProtocolTest;
 
@@ -10,6 +9,10 @@ public class EskyFrameDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         EskyFrameDecoder decoder = new EskyFrameDecoder();
+
+        verifyFrame(
+                binary("454f3b303b3836313331313030363436313930383b523b363b3138303432303130343735313b322e39373839363b3130312e36353039313b302e37353b3332303b333339383b313b7c"),
+                decoder.decode(null, null, binary("454f3b303b3836313331313030363436313930383b523b363b3138303432303130343735313b322e39373839363b3130312e36353039313b302e37353b3332303b333339383b313b7c")));
 
         verifyFrame(
                 binary("454c3b313b3836343930363032393139363632363b3137303832323134333432363b"),

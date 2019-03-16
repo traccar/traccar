@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -29,7 +30,7 @@ import java.util.regex.Pattern;
 
 public class CradlepointProtocolDecoder extends BaseProtocolDecoder {
 
-    public CradlepointProtocolDecoder(CradlepointProtocol protocol) {
+    public CradlepointProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
@@ -65,8 +66,7 @@ public class CradlepointProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         int time = parser.nextInt();
@@ -84,9 +84,9 @@ public class CradlepointProtocolDecoder extends BaseProtocolDecoder {
 
         position.set("carrid", parser.next());
         position.set("serdis", parser.next());
-        position.set("rsrp", parser.next());
-        position.set("dbm", parser.next());
-        position.set("rsrq", parser.next());
+        position.set("rsrp", parser.nextInt());
+        position.set(Position.KEY_RSSI, parser.nextInt());
+        position.set("rsrq", parser.nextInt());
         position.set("ecio", parser.next());
 
         return position;

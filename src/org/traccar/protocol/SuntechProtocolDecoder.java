@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,15 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -36,29 +39,44 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
     private boolean includeAdc;
     private boolean includeTemp;
 
-    public SuntechProtocolDecoder(SuntechProtocol protocol) {
+    public SuntechProtocolDecoder(Protocol protocol) {
         super(protocol);
-
-        protocolType = Context.getConfig().getInteger(getProtocolName() + ".protocolType");
-        hbm = Context.getConfig().getBoolean(getProtocolName() + ".hbm");
-        includeAdc = Context.getConfig().getBoolean(getProtocolName() + ".includeAdc");
-        includeTemp = Context.getConfig().getBoolean(getProtocolName() + ".includeTemp");
     }
 
     public void setProtocolType(int protocolType) {
         this.protocolType = protocolType;
     }
 
+    public int getProtocolType(long deviceId) {
+        return Context.getIdentityManager().lookupAttributeInteger(
+                deviceId, getProtocolName() + ".protocolType", protocolType, true);
+    }
+
     public void setHbm(boolean hbm) {
         this.hbm = hbm;
+    }
+
+    public boolean isHbm(long deviceId) {
+        return Context.getIdentityManager().lookupAttributeBoolean(
+                deviceId, getProtocolName() + ".hbm", hbm, true);
     }
 
     public void setIncludeAdc(boolean includeAdc) {
         this.includeAdc = includeAdc;
     }
 
+    public boolean isIncludeAdc(long deviceId) {
+        return Context.getIdentityManager().lookupAttributeBoolean(
+                deviceId, getProtocolName() + ".includeAdc", includeAdc, true);
+    }
+
     public void setIncludeTemp(boolean includeTemp) {
         this.includeTemp = includeTemp;
+    }
+
+    public boolean isIncludeTemp(long deviceId) {
+        return Context.getIdentityManager().lookupAttributeBoolean(
+                deviceId, getProtocolName() + ".includeTemp", includeTemp, true);
     }
 
     private Position decode9(
@@ -76,15 +94,14 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         if (type.equals("Emergency") || type.equals("Alert")) {
             position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
         }
 
-        if (!type.equals("Alert") || protocolType == 0) {
+        if (!type.equals("Alert") || getProtocolType(deviceSession.getDeviceId()) == 0) {
             position.set(Position.KEY_VERSION_FW, values[index++]);
         }
 
@@ -92,7 +109,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         position.setTime(dateFormat.parse(values[index++] + values[index++]));
 
-        if (protocolType == 1) {
+        if (getProtocolType(deviceSession.getDeviceId()) == 1) {
             index += 1; // cell
         }
 
@@ -103,7 +120,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
         position.setValid(values[index++].equals("1"));
 
-        if (protocolType == 1) {
+        if (getProtocolType(deviceSession.getDeviceId()) == 1) {
             position.set(Position.KEY_ODOMETER, Integer.parseInt(values[index++]));
         }
 
@@ -156,8 +173,72 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                 return null;
         }
     }
+    private Position decode4(
+            Channel channel, SocketAddress remoteAddress, String[] values) throws ParseException {
+        int index = 0;
 
-    private Position decode235(
+        String type = values[index++].substring(5);
+
+        if (!type.equals("STT") && !type.equals("ALT")) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, values[index++]);
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+        position.set(Position.KEY_TYPE, type);
+
+        position.set(Position.KEY_VERSION_FW, values[index++]);
+        index += 1; // model
+
+        Network network = new Network();
+
+        for (int i = 0; i < 7; i++) {
+            int cid = Integer.parseInt(values[index++]);
+            int mcc = Integer.parseInt(values[index++]);
+            int mnc = Integer.parseInt(values[index++]);
+            int lac, rssi;
+            if (i == 0) {
+                rssi = Integer.parseInt(values[index++]);
+                lac = Integer.parseInt(values[index++]);
+            } else {
+                lac = Integer.parseInt(values[index++]);
+                rssi = Integer.parseInt(values[index++]);
+            }
+            index += 1; // timing advance
+            if (cid > 0) {
+                network.addCellTower(CellTower.from(mcc, mnc, lac, cid, rssi));
+            }
+        }
+
+        position.setNetwork(network);
+
+        position.set(Position.KEY_BATTERY, Double.parseDouble(values[index++]));
+        position.set(Position.KEY_ARCHIVE, values[index++].equals("0") ? true : null);
+        position.set(Position.KEY_INDEX, Integer.parseInt(values[index++]));
+        position.set(Position.KEY_STATUS, Integer.parseInt(values[index++]));
+
+        DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHH:mm:ss");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        position.setTime(dateFormat.parse(values[index++] + values[index++]));
+
+        position.setLatitude(Double.parseDouble(values[index++]));
+        position.setLongitude(Double.parseDouble(values[index++]));
+        position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(values[index++])));
+        position.setCourse(Double.parseDouble(values[index++]));
+
+        position.set(Position.KEY_SATELLITES, Integer.parseInt(values[index++]));
+
+        position.setValid(values[index++].equals("1"));
+
+        return position;
+    }
+
+    private Position decode2356(
             Channel channel, SocketAddress remoteAddress, String protocol, String[] values) throws ParseException {
         int index = 0;
 
@@ -172,12 +253,11 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
         position.set(Position.KEY_TYPE, type);
 
-        if (protocol.equals("ST300") || protocol.equals("ST500")) {
+        if (protocol.equals("ST300") || protocol.equals("ST500") || protocol.equals("ST600")) {
             index += 1; // model
         }
 
@@ -188,7 +268,12 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(dateFormat.parse(values[index++] + values[index++]));
 
         if (!protocol.equals("ST500")) {
-            index += 1; // cell
+            long cid = Long.parseLong(values[index++], 16);
+            if (protocol.equals("ST600")) {
+                position.setNetwork(new Network(CellTower.from(
+                        Integer.parseInt(values[index++]), Integer.parseInt(values[index++]),
+                        Integer.parseInt(values[index++], 16), cid, Integer.parseInt(values[index++]))));
+            }
         }
 
         position.setLatitude(Double.parseDouble(values[index++]));
@@ -215,7 +300,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
         switch (type) {
             case "STT":
-                index += 1; // mode
+                position.set(Position.KEY_STATUS, Integer.parseInt(values[index++]));
                 position.set(Position.KEY_INDEX, Integer.parseInt(values[index++]));
                 break;
             case "EMG":
@@ -231,10 +316,10 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                 break;
         }
 
-        if (hbm) {
+        if (isHbm(deviceSession.getDeviceId())) {
 
             if (index < values.length) {
-                position.set(Position.KEY_HOURS, Integer.parseInt(values[index++]));
+                position.set(Position.KEY_HOURS, UnitsConverter.msFromMinutes(Integer.parseInt(values[index++])));
             }
 
             if (index < values.length) {
@@ -245,10 +330,12 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_ARCHIVE, true);
             }
 
-            if (includeAdc) {
-                position.set(Position.PREFIX_ADC + 1, Double.parseDouble(values[index++]));
-                position.set(Position.PREFIX_ADC + 2, Double.parseDouble(values[index++]));
-                position.set(Position.PREFIX_ADC + 3, Double.parseDouble(values[index++]));
+            if (isIncludeAdc(deviceSession.getDeviceId())) {
+                for (int i = 1; i <= 3; i++) {
+                    if (!values[index++].isEmpty()) {
+                        position.set(Position.PREFIX_ADC + i, Double.parseDouble(values[index - 1]));
+                    }
+                }
             }
 
             if (values.length - index >= 2) {
@@ -258,7 +345,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
 
-            if (includeTemp) {
+            if (isIncludeTemp(deviceSession.getDeviceId())) {
                 for (int i = 1; i <= 3; i++) {
                     String temperature = values[index++];
                     String value = temperature.substring(temperature.indexOf(':') + 1);
@@ -289,8 +376,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
         position.set(Position.KEY_TYPE, type);
 
@@ -369,10 +455,12 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
         if (values[0].length() < 5) {
             return decodeUniversal(channel, remoteAddress, values);
-        } else if (values[0].equals("ST910")) {
+        } else if (values[0].startsWith("ST9")) {
             return decode9(channel, remoteAddress, values);
+        } else if (values[0].startsWith("ST4")) {
+            return decode4(channel, remoteAddress, values);
         } else {
-            return decode235(channel, remoteAddress, values[0].substring(0, 5), values);
+            return decode2356(channel, remoteAddress, values[0].substring(0, 5), values);
         }
     }
 

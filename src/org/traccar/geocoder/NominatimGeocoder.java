@@ -21,7 +21,7 @@ public class NominatimGeocoder extends JsonGeocoder {
 
     private static String formatUrl(String url, String key, String language) {
         if (url == null) {
-            url = "http://nominatim.openstreetmap.org/reverse";
+            url = "https://nominatim.openstreetmap.org/reverse";
         }
         url += "?format=json&lat=%f&lon=%f&zoom=18&addressdetails=1";
         if (key != null) {
@@ -43,6 +43,10 @@ public class NominatimGeocoder extends JsonGeocoder {
 
         if (result != null) {
             Address address = new Address();
+
+            if (json.containsKey("display_name")) {
+                address.setFormattedAddress(json.getString("display_name"));
+            }
 
             if (result.containsKey("house_number")) {
                 address.setHouse(result.getString("house_number"));

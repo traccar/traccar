@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2014 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,39 +15,56 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.frame.FrameDecoder;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import org.traccar.BaseFrameDecoder;
 
-public class Pt502FrameDecoder extends FrameDecoder {
+import java.nio.charset.StandardCharsets;
+
+public class Pt502FrameDecoder extends BaseFrameDecoder {
 
     private static final int BINARY_HEADER = 5;
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
+            ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
-        if (buf.readableBytes() < BINARY_HEADER) {
+        if (buf.readableBytes() < 10) {
             return null;
         }
 
-        if (buf.getUnsignedByte(buf.readerIndex()) == 0xbf) {
-            buf.skipBytes(BINARY_HEADER);
-        }
+        if (buf.getUnsignedByte(buf.readerIndex()) == 0xbf
+                && buf.toString(buf.readerIndex() + BINARY_HEADER, 4, StandardCharsets.US_ASCII).equals("$PHD")) {
 
-        int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '\r');
-        if (index < 0) {
-            index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '\n');
-        }
-
-        if (index > 0) {
-            ChannelBuffer result = buf.readBytes(index - buf.readerIndex());
-            while (buf.readable()
-                    && (buf.getByte(buf.readerIndex()) == '\r' || buf.getByte(buf.readerIndex()) == '\n')) {
-                buf.skipBytes(1);
+            int length = buf.getUnsignedShortLE(buf.readerIndex() + 3);
+            if (buf.readableBytes() >= length) {
+                buf.skipBytes(BINARY_HEADER);
+                ByteBuf result = buf.readRetainedSlice(length - BINARY_HEADER - 2);
+                buf.skipBytes(2); // line break
+                return result;
             }
-            return result;
+
+        } else {
+
+            if (buf.getUnsignedByte(buf.readerIndex()) == 0xbf) {
+                buf.skipBytes(BINARY_HEADER);
+            }
+
+            int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '\r');
+            if (index < 0) {
+                index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '\n');
+            }
+
+            if (index > 0) {
+                ByteBuf result = buf.readRetainedSlice(index - buf.readerIndex());
+                while (buf.isReadable()
+                        && (buf.getByte(buf.readerIndex()) == '\r' || buf.getByte(buf.readerIndex()) == '\n')) {
+                    buf.skipBytes(1);
+                }
+                return result;
+            }
+
         }
 
         return null;

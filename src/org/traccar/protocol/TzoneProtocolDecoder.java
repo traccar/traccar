@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,12 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.model.CellTower;
@@ -30,7 +31,7 @@ import java.net.SocketAddress;
 
 public class TzoneProtocolDecoder extends BaseProtocolDecoder {
 
-    public TzoneProtocolDecoder(TzoneProtocol protocol) {
+    public TzoneProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
@@ -57,95 +58,13 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private void decodeCards(Position position, ChannelBuffer buf) {
-
-        int index = 1;
-        for (int i = 0; i < 4; i++) {
-
-            int blockLength = buf.readUnsignedShort();
-            int blockEnd = buf.readerIndex() + blockLength;
-
-            if (blockLength > 0) {
-
-                int count = buf.readUnsignedByte();
-                for (int j = 0; j < count; j++) {
-
-                    int length = buf.readUnsignedByte();
-
-                    boolean odd = length % 2 != 0;
-                    if (odd) {
-                        length += 1;
-                    }
-
-                    String num = ChannelBuffers.hexDump(buf.readBytes(length / 2));
-
-                    if (odd) {
-                        num = num.substring(1);
-                    }
-
-                    position.set("card" + index, num);
-                }
-            }
-
-            buf.readerIndex(blockEnd);
-        }
-
-    }
-
-    private void decodePassengers(Position position, ChannelBuffer buf) {
-
-        int blockLength = buf.readUnsignedShort();
-        int blockEnd = buf.readerIndex() + blockLength;
-
-        if (blockLength > 0) {
-
-            position.set("passengersOn", buf.readUnsignedMedium());
-            position.set("passengersOff", buf.readUnsignedMedium());
-
-        }
-
-        buf.readerIndex(blockEnd);
-
-    }
-
-    @Override
-    protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
-
-        ChannelBuffer buf = (ChannelBuffer) msg;
-
-        buf.skipBytes(2); // header
-        buf.readUnsignedShort(); // length
-        if (buf.readUnsignedShort() != 0x2424) {
-            return null;
-        }
-        int hardware = buf.readUnsignedShort();
-        long firmware = buf.readUnsignedInt();
-
-        String imei = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
-        if (deviceSession == null) {
-            return null;
-        }
-
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
-        position.setDeviceId(deviceSession.getDeviceId());
-
-        position.set(Position.KEY_VERSION_HW, hardware);
-        position.set(Position.KEY_VERSION_FW, firmware);
-
-        position.setDeviceTime(new DateBuilder()
-                .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
-                .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte()).getDate());
-
-        // GPS info
+    private boolean decodeGps(Position position, ByteBuf buf, int hardware) {
 
         int blockLength = buf.readUnsignedShort();
         int blockEnd = buf.readerIndex() + blockLength;
 
         if (blockLength < 22) {
-            return null;
+            return false;
         }
 
         position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
@@ -183,12 +102,136 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
 
         buf.readerIndex(blockEnd);
 
+        return true;
+    }
+
+    private void decodeCards(Position position, ByteBuf buf) {
+
+        int index = 1;
+        for (int i = 0; i < 4; i++) {
+
+            int blockLength = buf.readUnsignedShort();
+            int blockEnd = buf.readerIndex() + blockLength;
+
+            if (blockLength > 0) {
+
+                int count = buf.readUnsignedByte();
+                for (int j = 0; j < count; j++) {
+
+                    int length = buf.readUnsignedByte();
+
+                    boolean odd = length % 2 != 0;
+                    if (odd) {
+                        length += 1;
+                    }
+
+                    String num = ByteBufUtil.hexDump(buf.readSlice(length / 2));
+
+                    if (odd) {
+                        num = num.substring(1);
+                    }
+
+                    position.set("card" + index, num);
+                }
+            }
+
+            buf.readerIndex(blockEnd);
+        }
+
+    }
+
+    private void decodePassengers(Position position, ByteBuf buf) {
+
+        int blockLength = buf.readUnsignedShort();
+        int blockEnd = buf.readerIndex() + blockLength;
+
+        if (blockLength > 0) {
+
+            position.set("passengersOn", buf.readUnsignedMedium());
+            position.set("passengersOff", buf.readUnsignedMedium());
+
+        }
+
+        buf.readerIndex(blockEnd);
+
+    }
+
+    private void decodeTags(Position position, ByteBuf buf) {
+
+        int blockLength = buf.readUnsignedShort();
+        int blockEnd = buf.readerIndex() + blockLength;
+
+        if (blockLength > 0) {
+
+            buf.readUnsignedByte(); // tag type
+
+            int count = buf.readUnsignedByte();
+            int tagLength = buf.readUnsignedByte();
+
+            for (int i = 1; i <= count; i++) {
+                int tagEnd = buf.readerIndex() + tagLength;
+
+                buf.readUnsignedByte(); // status
+                buf.readUnsignedShortLE(); // battery voltage
+
+                position.set(Position.PREFIX_TEMP + i, (buf.readShortLE() & 0x3fff) * 0.1);
+
+                buf.readUnsignedByte(); // humidity
+                buf.readUnsignedByte(); // rssi
+
+                buf.readerIndex(tagEnd);
+            }
+
+        }
+
+        buf.readerIndex(blockEnd);
+
+    }
+
+    @Override
+    protected Object decode(
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+
+        ByteBuf buf = (ByteBuf) msg;
+
+        buf.skipBytes(2); // header
+        buf.readUnsignedShort(); // length
+        if (buf.readUnsignedShort() != 0x2424) {
+            return null;
+        }
+        int hardware = buf.readUnsignedShort();
+        long firmware = buf.readUnsignedInt();
+
+        String imei = ByteBufUtil.hexDump(buf.readSlice(8)).substring(1);
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        position.set(Position.KEY_VERSION_HW, hardware);
+        position.set(Position.KEY_VERSION_FW, firmware);
+
+        position.setDeviceTime(new DateBuilder()
+                .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
+                .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte()).getDate());
+
+        // GPS info
+
+        if (hardware == 0x406 || !decodeGps(position, buf, hardware)) {
+
+            getLastLocation(position, position.getDeviceTime());
+
+        }
+
         // LBS info
 
-        blockLength = buf.readUnsignedShort();
-        blockEnd = buf.readerIndex() + blockLength;
+        int blockLength = buf.readUnsignedShort();
+        int blockEnd = buf.readerIndex() + blockLength;
 
-        if (blockLength > 0 && (hardware == 0x10A || hardware == 0x10B)) {
+        if (blockLength > 0 && (hardware == 0x10A || hardware == 0x10B || hardware == 0x406)) {
             position.setNetwork(new Network(
                     CellTower.fromLacCid(buf.readUnsignedShort(), buf.readUnsignedShort())));
         }
@@ -227,7 +270,7 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
 
         buf.readerIndex(blockEnd);
 
-        if (hardware == 0x10A || hardware == 0x10B) {
+        if (hardware == 0x10B) {
 
             decodeCards(position, buf);
 
@@ -235,6 +278,12 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
             buf.skipBytes(buf.readUnsignedShort()); // lock
 
             decodePassengers(position, buf);
+
+        }
+
+        if (hardware == 0x406) {
+
+            decodeTags(position, buf);
 
         }
 

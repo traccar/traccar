@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2014 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,18 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.socket.DatagramChannel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import io.netty.channel.socket.DatagramChannel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
-import org.traccar.events.TextMessageEventHandler;
+import org.traccar.sms.smpp.TextMessageEventHandler;
+import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -30,10 +35,10 @@ import org.traccar.model.CellTower;
 import org.traccar.model.WifiAccessPoint;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
-import org.traccar.helper.Log;
 import org.traccar.Context;
 
 import java.net.SocketAddress;
+import java.nio.ByteBuffer;
 import java.util.Date;
 import java.util.regex.Pattern;
 
@@ -41,7 +46,9 @@ import java.nio.charset.StandardCharsets;
 
 public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
-    public EelinkProtocolDecoder(EelinkProtocol protocol) {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EelinkProtocolDecoder.class);
+
+    public EelinkProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
@@ -95,10 +102,14 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private void sendResponse(Channel channel, SocketAddress remoteAddress, String uniqueId,
-            int type, int index, ChannelBuffer content) {
+            int type, int index, ByteBuf content) {
+        ByteBuf response = EelinkProtocolEncoder.encodeContent(
+                channel instanceof DatagramChannel, uniqueId, type, index, content);
+        if(content != null) {
+            content.release();
+        }
         if (channel != null) {
-            channel.write(EelinkProtocolEncoder.encodeContent(
-                    channel instanceof DatagramChannel, uniqueId, type, index, content), remoteAddress);
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
     }
 
@@ -171,7 +182,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_STATUS, status);
     }
 
-    private Position decodeDownlink(ChannelBuffer buf, Position position, int index) {
+    private Position decodeDownlink(ByteBuf  buf, Position position, int index) {
 
         switch (buf.readUnsignedByte()) {
             case MSG_SIGN_COMMAND:
@@ -182,7 +193,6 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 Parser parser = new Parser(PATTERN, sentence);
 
                 if (parser.matches()) {
-                    System.out.println("match");
                     position.setValid(true);
                     position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG));
                     position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG));
@@ -190,7 +200,6 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                     position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
                     position.setTime(parser.nextDateTime());
                 } else {
-                    System.out.println("nomatch");
                     getLastLocation(position, null);
                 }
 
@@ -203,7 +212,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private ChannelBuffer decodeSMS(Position position, ChannelBuffer buf) {
+    private ByteBuf decodeSMS(Position position, ByteBuf buf) {
         String phone = buf.readBytes(21).toString(StandardCharsets.US_ASCII);
         String sanitizedPhone = phone.substring(phone.indexOf("+")).trim();
         int remainingbytes = buf.readableBytes();
@@ -219,7 +228,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 responseMessage = "PONG";
                 break;
             default:
-                Log.debug("Unhandled Device SMS Received: " + message.trim() + ", PhoneNum: " + sanitizedPhone);
+                LOGGER.debug("Unhandled Device SMS Received: " + message.trim() + ", PhoneNum: " + sanitizedPhone);
                 TextMessageEventHandler.handleDeviceTextMessage(
                         position.getDeviceId(), message.trim(), sanitizedPhone, position);
                 responseMessage = null;
@@ -227,20 +236,20 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (responseMessage != null && !responseMessage.isEmpty()) {
-            ChannelBuffer paddedPhone = ChannelBuffers.buffer(21);
-            paddedPhone.writeBytes(phone.getBytes(StandardCharsets.US_ASCII));
-            paddedPhone.writerIndex(paddedPhone.capacity());
+            ByteBuffer paddedPhone = ByteBuffer.allocate(21);
+            paddedPhone.put(phone.getBytes(StandardCharsets.US_ASCII));
+            paddedPhone.position(paddedPhone.capacity());
 
-            ChannelBuffer response = ChannelBuffers.dynamicBuffer();
-            response.writeBytes(paddedPhone);
-            response.writeBytes(responseMessage.getBytes(StandardCharsets.UTF_8));
-            return response;
+            ByteBuffer response = ByteBuffer.allocate(140);
+            response.put(paddedPhone);
+            response.put(responseMessage.getBytes(StandardCharsets.UTF_8));
+            return Unpooled.copiedBuffer(response);
         }
 
         return null;
     }
 
-    private Position decodeOld(ChannelBuffer buf, Channel channel, SocketAddress remoteAddress,
+    private Position decodeOld(ByteBuf buf, Channel channel, SocketAddress remoteAddress,
             String uniqueId, Position position, int type, int index) {
 
         position.setTime(new Date(buf.readUnsignedInt() * 1000));
@@ -284,7 +293,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 }
                 break;
             case MSG_SMS:
-                ChannelBuffer response = decodeSMS(position, buf);
+                ByteBuf response = decodeSMS(position, buf);
                 if (response != null) {
                     sendResponse(channel, remoteAddress, uniqueId, type, index, response);
                 } else {
@@ -299,7 +308,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private Position decodeNew(ChannelBuffer buf, Channel channel, SocketAddress remoteAddress,
+    private Position decodeNew(ByteBuf buf, Channel channel, SocketAddress remoteAddress,
             String uniqueId, Position position, int type, int index) {
 
         Date deviceTime = new Date(buf.readUnsignedInt() * 1000);
@@ -315,7 +324,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             position.setValid(Boolean.TRUE);
             position.setTime(deviceTime);
         } else {
-            getLastLocation(position, deviceTime);
+            getLastLocation(position, position.getDeviceTime());
         }
 
         Network network = new Network();
@@ -353,17 +362,17 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
         if (BitUtil.check(flags, 4)) { // bss0
             network.addWifiAccessPoint(
-                    WifiAccessPoint.from(ChannelBuffers.hexDump(buf.readBytes(6)), buf.getUnsignedByte(1)));
+                    WifiAccessPoint.from(ByteBufUtil.hexDump(buf.readSlice(6)), buf.getUnsignedByte(1)));
         }
 
         if (BitUtil.check(flags, 5)) { // bss2
             network.addWifiAccessPoint(
-                    WifiAccessPoint.from(ChannelBuffers.hexDump(buf.readBytes(6)), buf.getUnsignedByte(1)));
+                    WifiAccessPoint.from(ByteBufUtil.hexDump(buf.readSlice(6)), buf.getUnsignedByte(1)));
         }
 
         if (BitUtil.check(flags, 6)) { // bss3
             network.addWifiAccessPoint(
-                    WifiAccessPoint.from(ChannelBuffers.hexDump(buf.readBytes(6)), buf.getUnsignedByte(1)));
+                    WifiAccessPoint.from(ByteBufUtil.hexDump(buf.readSlice(6)), buf.getUnsignedByte(1)));
         }
 
         switch (type) {
@@ -385,7 +394,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 sendResponse(channel, remoteAddress, uniqueId, type, index, null);
                 break;
             case MSG_COMMAND:
-                ChannelBuffer response = decodeSMS(position, buf);
+                ByteBuf response = decodeSMS(position, buf);
                 if (response != null) {
                     sendResponse(channel, remoteAddress, uniqueId, type, index, response);
                 } else {
@@ -427,6 +436,10 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                     position.set("co2", buf.readUnsignedInt());
                 }
 
+                if (buf.readableBytes() >= 2) {
+                    position.set(Position.PREFIX_TEMP + 2, buf.readShort() / 16.0);
+                }
+
                 sendResponse(channel, remoteAddress, uniqueId, type, index, null);
                 break;
         }
@@ -438,7 +451,8 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+
+        ByteBuf buf = (ByteBuf) msg;
         DeviceSession deviceSession;
         String uniqueId = null;
 
@@ -448,26 +462,26 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             short length = buf.readShort();
 
             if (buf.readableBytes() != length) { // check remaining length matches defined packet length
-                Log.warning(new IllegalArgumentException("UDP Packet length error"));
+                LOGGER.warn(new IllegalArgumentException("UDP Packet length error").toString());
                 return null;
             }
 
-            if (buf.readShort() != (short) EelinkProtocolEncoder.checksum(buf.toByteBuffer())) {
-                Log.warning(new IllegalArgumentException("UDP Checksum error"));
+            if (buf.readShort() != (short) EelinkProtocolEncoder.checksum(buf.nioBuffer())) {
+                LOGGER.warn(new IllegalArgumentException("UDP Checksum error").toString());
                 return null;
             }
 
-            uniqueId = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
+            uniqueId = ByteBufUtil.hexDump(buf.readSlice(8)).substring(1);
             deviceSession = getDeviceSession(channel, remoteAddress, uniqueId);
 
             if (buf.readShort() != HEADER_KEY) {
-                Log.warning(new IllegalArgumentException("Invalid Header"));
+                LOGGER.warn(new IllegalArgumentException("Invalid Header").toString());
                 return null;
             }
         } else if (header == HEADER_KEY) {
             deviceSession = getDeviceSession(channel, remoteAddress);
         } else {
-            Log.warning(new IllegalArgumentException("Invalid Header"));
+            LOGGER.warn(new IllegalArgumentException("Invalid Header").toString());
             return null;
         }
 
@@ -476,7 +490,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         short length = buf.readShort();
 
         if (buf.readableBytes() != length) { // check remaining length matches defined packet length
-            Log.warning(new IllegalArgumentException("Packet length error"));
+            LOGGER.warn(new IllegalArgumentException("Packet length error").toString());
             return null;
         }
 
@@ -488,20 +502,25 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 version = 2;
             }
 
-            uniqueId = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
+            uniqueId = ByteBufUtil.hexDump(buf.readSlice(8)).substring(1);
             deviceSession = getDeviceSession(channel, remoteAddress, uniqueId);
 
             if (deviceSession != null) {
-                ChannelBuffer response = ChannelBuffers.dynamicBuffer();
+                ByteBuf content = Unpooled.buffer();
                 if (version == 1) {
-                    response.writeBytes(uniqueId.getBytes());
-                    response.writeByte(1);
-                    response.writeByte(0);
+                    content.writeBytes(uniqueId.getBytes());
+                    content.writeByte(1);
+                    content.writeByte(0);
                 } else if (version == 2) {
-                    response.writeLong(new Date().getTime() / 1000);
-                    response.writeByte(2);
+                    content.writeLong(new Date().getTime() / 1000);
+                    content.writeByte(2);
                 }
-                sendResponse(channel, remoteAddress, uniqueId, type, index, null);
+                ByteBuf response = EelinkProtocolEncoder.encodeContent(
+                        channel instanceof DatagramChannel, uniqueId, type, index, content);
+                content.release();
+                if (channel != null) {
+                    channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+                }
             }
 
             return null;
@@ -525,9 +544,8 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 }
             }*/
 
-            Position position = new Position();
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
-            position.setProtocol(getProtocolName());
             position.set(Position.KEY_INDEX, index);
 
             if (type == MSG_GPS || type == MSG_ALARM || type == MSG_STATE || type == MSG_SMS) {
@@ -556,7 +574,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                     return position;
                 }
             } else {
-                Log.warning(new UnsupportedOperationException());
+                LOGGER.warn(new UnsupportedOperationException(String.valueOf(type)).toString());
                 sendResponse(channel, remoteAddress, uniqueId, type, index, null);
             }
         }

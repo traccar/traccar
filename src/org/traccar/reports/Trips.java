@@ -27,6 +27,9 @@ import java.util.Date;
 
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.traccar.Context;
+import org.traccar.Main;
+import org.traccar.database.DeviceManager;
+import org.traccar.database.IdentityManager;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.reports.model.DeviceReport;
@@ -41,11 +44,12 @@ public final class Trips {
         boolean ignoreOdometer = Context.getDeviceManager()
                 .lookupAttributeBoolean(deviceId, "report.ignoreOdometer", false, true);
 
-        Collection<TripReport> result = ReportUtils.detectTripsAndStops(
-                Context.getDataManager().getPositions(deviceId, from, to),
-                Context.getTripsConfig(), ignoreOdometer, TripReport.class);
+        IdentityManager identityManager = Main.getInjector().getInstance(IdentityManager.class);
+        DeviceManager deviceManager = Main.getInjector().getInstance(DeviceManager.class);
 
-        return result;
+        return ReportUtils.detectTripsAndStops(
+                identityManager, deviceManager, Context.getDataManager().getPositions(deviceId, from, to),
+                Context.getTripsConfig(), ignoreOdometer, TripReport.class);
     }
 
     public static Collection<TripReport> getObjects(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,

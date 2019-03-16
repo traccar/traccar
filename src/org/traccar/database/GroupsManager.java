@@ -21,11 +21,14 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.Context;
-import org.traccar.helper.Log;
 import org.traccar.model.Group;
 
 public class GroupsManager extends BaseObjectManager<Group> implements ManagableObjects {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GroupsManager.class);
 
     private AtomicLong groupsLastUpdate = new AtomicLong();
     private final long dataRefreshDelay;
@@ -47,7 +50,7 @@ public class GroupsManager extends BaseObjectManager<Group> implements Managable
         }
     }
 
-    private void updateGroupCache(boolean force) throws SQLException {
+    public void updateGroupCache(boolean force) throws SQLException {
         long lastUpdate = groupsLastUpdate.get();
         if ((force || System.currentTimeMillis() - lastUpdate > dataRefreshDelay)
                 && groupsLastUpdate.compareAndSet(lastUpdate, System.currentTimeMillis())) {
@@ -62,7 +65,7 @@ public class GroupsManager extends BaseObjectManager<Group> implements Managable
             try {
                 updateGroupCache(true);
             } catch (SQLException e) {
-                Log.warning(e);
+                LOGGER.warn("Update group cache error", e);
             }
             result = super.getAllItems();
         }
@@ -76,9 +79,9 @@ public class GroupsManager extends BaseObjectManager<Group> implements Managable
     }
 
     @Override
-    protected void updateCachedItem(Group group) {
+    public void updateItem(Group group) throws SQLException {
         checkGroupCycles(group);
-        super.updateCachedItem(group);
+        super.updateItem(group);
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,13 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -29,7 +31,7 @@ import java.nio.charset.StandardCharsets;
 
 public class PricolProtocolDecoder extends BaseProtocolDecoder {
 
-    public PricolProtocolDecoder(PricolProtocol protocol) {
+    public PricolProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
@@ -37,18 +39,17 @@ public class PricolProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         buf.readUnsignedByte(); // header
 
         DeviceSession deviceSession = getDeviceSession(
-                channel, remoteAddress, buf.readBytes(7).toString(StandardCharsets.US_ASCII));
+                channel, remoteAddress, buf.readSlice(7).toString(StandardCharsets.US_ASCII));
         if (deviceSession == null) {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.set("eventType", buf.readUnsignedByte());
@@ -87,7 +88,8 @@ public class PricolProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_RPM, buf.readUnsignedShort());
 
         if (channel != null) {
-            channel.write(ChannelBuffers.copiedBuffer("ACK", StandardCharsets.US_ASCII), remoteAddress);
+            channel.writeAndFlush(new NetworkMessage(
+                    Unpooled.copiedBuffer("ACK", StandardCharsets.US_ASCII), remoteAddress));
         }
 
         return position;

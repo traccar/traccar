@@ -8,7 +8,7 @@ public class Gt02ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        Gt02ProtocolDecoder decoder = new Gt02ProtocolDecoder(new Gt02Protocol());
+        Gt02ProtocolDecoder decoder = new Gt02ProtocolDecoder(null);
 
         verifyAttributes(decoder, binary(
                 "6868150000035889905895258400831c07415045584f4b210d0a"));

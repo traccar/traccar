@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+  logicalFilePath="changelog-3.17">
+
+  <changeSet author="author" id="changelog-3.3-admin">
+
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="tc_servers" />
+      </not>
+      <not>
+        <columnExists tableName="users" columnName="administrator" />
+      </not>
+    </preConditions>
+
+    <renameColumn tableName="users" columnDataType="BOOLEAN" oldColumnName="admin" newColumnName="administrator" />
+
+  </changeSet>
+
+  <changeSet author="author" id="changelog-3.17">
+
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="tc_servers" />
+      </not>
+    </preConditions>
+
+    <addColumn tableName="events">
+      <column name="maintenanceid" type="INT" />
+    </addColumn>
+
+    <createTable tableName="maintenances">
+      <column name="id" type="INT" autoIncrement="true">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="name" type="VARCHAR(4000)">
+        <constraints nullable="false" />
+      </column>
+      <column name="type" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="start" type="DOUBLE" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="period" type="DOUBLE" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="attributes" type="VARCHAR(4000)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="user_maintenance">
+      <column name="userid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="maintenanceid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="user_maintenance" baseColumnNames="userid" constraintName="fk_user_maintenance_userid" referencedTableName="users" referencedColumnNames="id" onDelete="CASCADE" />
+    <addForeignKeyConstraint baseTableName="user_maintenance" baseColumnNames="maintenanceid" constraintName="fk_user_maintenance_maintenanceid" referencedTableName="maintenances" referencedColumnNames="id" onDelete="CASCADE" />
+
+    <createTable tableName="group_maintenance">
+      <column name="groupid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="maintenanceid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="group_maintenance" baseColumnNames="groupid" constraintName="fk_group_maintenance_groupid" referencedTableName="groups" referencedColumnNames="id" onDelete="CASCADE" />
+    <addForeignKeyConstraint baseTableName="group_maintenance" baseColumnNames="maintenanceid" constraintName="fk_group_maintenance_maintenanceid" referencedTableName="maintenances" referencedColumnNames="id" onDelete="CASCADE" />
+
+    <createTable tableName="device_maintenance">
+      <column name="deviceid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="maintenanceid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="device_maintenance" baseColumnNames="deviceid" constraintName="fk_device_maintenance_deviceid" referencedTableName="devices" referencedColumnNames="id" onDelete="CASCADE" />
+    <addForeignKeyConstraint baseTableName="device_maintenance" baseColumnNames="maintenanceid" constraintName="fk_device_maintenance_maintenanceid" referencedTableName="maintenances" referencedColumnNames="id" onDelete="CASCADE" />
+
+  </changeSet>
+
+</databaseChangeLog>

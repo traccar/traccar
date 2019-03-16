@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,22 +15,23 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.frame.FrameDecoder;
+import org.traccar.BaseFrameDecoder;
 
-public class VtfmsFrameDecoder extends FrameDecoder {
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+
+public class VtfmsFrameDecoder extends BaseFrameDecoder {
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
+            ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
         int endIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ')');
         if (endIndex > 0) {
             endIndex += 1 + 3;
             if (buf.writerIndex() >= endIndex) {
-                return buf.readBytes(endIndex - buf.readerIndex());
+                return buf.readRetainedSlice(endIndex - buf.readerIndex());
             }
         }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,9 @@
  */
 package org.traccar.database;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.Context;
-import org.traccar.helper.Log;
 import org.traccar.model.Attribute;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Calendar;
@@ -25,6 +26,7 @@ import org.traccar.model.Device;
 import org.traccar.model.Driver;
 import org.traccar.model.Geofence;
 import org.traccar.model.Group;
+import org.traccar.model.Maintenance;
 import org.traccar.model.ManagedUser;
 import org.traccar.model.Notification;
 import org.traccar.model.Permission;
@@ -38,6 +40,8 @@ import java.util.Map;
 import java.util.Set;
 
 public class PermissionsManager {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PermissionsManager.class);
 
     private final DataManager dataManager;
     private final UsersManager usersManager;
@@ -57,33 +61,48 @@ public class PermissionsManager {
     }
 
     public User getUser(long userId) {
-        return (User) usersManager.getById(userId);
+        return usersManager.getById(userId);
     }
 
     public Set<Long> getGroupPermissions(long userId) {
         if (!groupPermissions.containsKey(userId)) {
-            groupPermissions.put(userId, new HashSet<Long>());
+            groupPermissions.put(userId, new HashSet<>());
         }
         return groupPermissions.get(userId);
     }
 
     public Set<Long> getDevicePermissions(long userId) {
         if (!devicePermissions.containsKey(userId)) {
-            devicePermissions.put(userId, new HashSet<Long>());
+            devicePermissions.put(userId, new HashSet<>());
         }
         return devicePermissions.get(userId);
     }
 
-    public Set<Long> getDeviceUsers(long deviceId) {
+    private Set<Long> getAllDeviceUsers(long deviceId) {
         if (!deviceUsers.containsKey(deviceId)) {
-            deviceUsers.put(deviceId, new HashSet<Long>());
+            deviceUsers.put(deviceId, new HashSet<>());
         }
         return deviceUsers.get(deviceId);
     }
 
+    public Set<Long> getDeviceUsers(long deviceId) {
+        Device device = Context.getIdentityManager().getById(deviceId);
+        if (device != null && !device.getDisabled()) {
+            return getAllDeviceUsers(deviceId);
+        } else {
+            Set<Long> result = new HashSet<>();
+            for (long userId : getAllDeviceUsers(deviceId)) {
+                if (getUserAdmin(userId)) {
+                    result.add(userId);
+                }
+            }
+            return result;
+        }
+    }
+
     public Set<Long> getGroupDevices(long groupId) {
         if (!groupDevices.containsKey(groupId)) {
-            groupDevices.put(groupId, new HashSet<Long>());
+            groupDevices.put(groupId, new HashSet<>());
         }
         return groupDevices.get(groupId);
     }
@@ -92,7 +111,7 @@ public class PermissionsManager {
         try {
             server = dataManager.getServer();
         } catch (SQLException error) {
-            Log.warning(error);
+            LOGGER.warn("Refresh server config error", error);
         }
     }
 
@@ -127,20 +146,20 @@ public class PermissionsManager {
             }
 
         } catch (SQLException | ClassNotFoundException error) {
-            Log.warning(error);
+            LOGGER.warn("Refresh device permissions error", error);
         }
 
         deviceUsers.clear();
         for (Map.Entry<Long, Set<Long>> entry : devicePermissions.entrySet()) {
             for (long deviceId : entry.getValue()) {
-                getDeviceUsers(deviceId).add(entry.getKey());
+                getAllDeviceUsers(deviceId).add(entry.getKey());
             }
         }
     }
 
     public boolean getUserAdmin(long userId) {
         User user = getUser(userId);
-        return user != null && user.getAdmin();
+        return user != null && user.getAdministrator();
     }
 
     public void checkAdmin(long userId) throws SecurityException {
@@ -174,14 +193,14 @@ public class PermissionsManager {
         }
     }
 
-    public void checkDeviceLimit(long userId) throws SecurityException, SQLException {
+    public void checkDeviceLimit(long userId) throws SecurityException {
         int deviceLimit = getUser(userId).getDeviceLimit();
         if (deviceLimit != -1) {
             int deviceCount = 0;
             if (getUserManager(userId)) {
-                deviceCount = Context.getDeviceManager().getManagedItems(userId).size();
+                deviceCount = Context.getDeviceManager().getAllManagedItems(userId).size();
             } else {
-                deviceCount = Context.getDeviceManager().getUserItems(userId).size();
+                deviceCount = Context.getDeviceManager().getAllUserItems(userId).size();
             }
             if (deviceCount >= deviceLimit) {
                 throw new SecurityException("User device limit reached");
@@ -242,7 +261,7 @@ public class PermissionsManager {
     }
 
     public void checkUserUpdate(long userId, User before, User after) throws SecurityException {
-        if (before.getAdmin() != after.getAdmin()
+        if (before.getAdministrator() != after.getAdministrator()
                 || before.getDeviceLimit() != after.getDeviceLimit()
                 || before.getUserLimit() != after.getUserLimit()) {
             checkAdmin(userId);
@@ -322,6 +341,8 @@ public class PermissionsManager {
             manager = Context.getCalendarManager();
         } else if (object.equals(Command.class)) {
             manager = Context.getCommandsManager();
+        } else if (object.equals(Maintenance.class)) {
+            manager = Context.getMaintenancesManager();
         } else if (object.equals(Notification.class)) {
             manager = Context.getNotificationManager();
         } else {
@@ -347,6 +368,7 @@ public class PermissionsManager {
         Context.getDriversManager().refreshUserItems();
         Context.getAttributesManager().refreshUserItems();
         Context.getCommandsManager().refreshUserItems();
+        Context.getMaintenancesManager().refreshUserItems();
         if (Context.getNotificationManager() != null) {
             Context.getNotificationManager().refreshUserItems();
         }
@@ -359,6 +381,7 @@ public class PermissionsManager {
         Context.getDriversManager().refreshExtendedPermissions();
         Context.getAttributesManager().refreshExtendedPermissions();
         Context.getCommandsManager().refreshExtendedPermissions();
+        Context.getMaintenancesManager().refreshExtendedPermissions();
     }
 
     public void refreshPermissions(Permission permission) {
@@ -379,6 +402,8 @@ public class PermissionsManager {
                 Context.getCalendarManager().refreshUserItems();
             } else if (permission.getPropertyClass().equals(Command.class)) {
                 Context.getCommandsManager().refreshUserItems();
+            } else if (permission.getPropertyClass().equals(Maintenance.class)) {
+                Context.getMaintenancesManager().refreshUserItems();
             } else if (permission.getPropertyClass().equals(Notification.class)
                     && Context.getNotificationManager() != null) {
                 Context.getNotificationManager().refreshUserItems();
@@ -392,6 +417,8 @@ public class PermissionsManager {
                 Context.getAttributesManager().refreshExtendedPermissions();
             } else if (permission.getPropertyClass().equals(Command.class)) {
                 Context.getCommandsManager().refreshExtendedPermissions();
+            } else if (permission.getPropertyClass().equals(Maintenance.class)) {
+                Context.getMaintenancesManager().refreshExtendedPermissions();
             } else if (permission.getPropertyClass().equals(Notification.class)
                     && Context.getNotificationManager() != null) {
                 Context.getNotificationManager().refreshExtendedPermissions();

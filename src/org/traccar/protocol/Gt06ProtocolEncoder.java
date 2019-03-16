@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,26 +15,27 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.Context;
 import org.traccar.helper.Checksum;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 import java.nio.charset.StandardCharsets;
 
 public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
 
-    private ChannelBuffer encodeContent(String content) {
+    private ByteBuf encodeContent(long deviceId, String content) {
 
-        ChannelBuffer buf = ChannelBuffers.dynamicBuffer();
+        boolean language = Context.getIdentityManager().lookupAttributeBoolean(deviceId, "gt06.language", false, true);
+
+        ByteBuf buf = Unpooled.buffer();
 
         buf.writeByte(0x78);
         buf.writeByte(0x78);
 
-        buf.writeByte(1 + 1 + 4 + content.length() + 2 + 2); // message length
+        buf.writeByte(1 + 1 + 4 + content.length() + 2 + 2 + (language ? 2 : 0)); // message length
 
         buf.writeByte(0x80); // message type
 
@@ -42,9 +43,13 @@ public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
         buf.writeInt(0);
         buf.writeBytes(content.getBytes(StandardCharsets.US_ASCII)); // command
 
+        if (language) {
+            buf.writeShort(2); // english language
+        }
+
         buf.writeShort(0); // message index
 
-        buf.writeShort(Checksum.crc16(Checksum.CRC16_X25, buf.toByteBuffer(2, buf.writerIndex() - 2)));
+        buf.writeShort(Checksum.crc16(Checksum.CRC16_X25, buf.nioBuffer(2, buf.writerIndex() - 2)));
 
         buf.writeByte('\r');
         buf.writeByte('\n');
@@ -60,17 +65,14 @@ public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
 
         switch (command.getType()) {
             case Command.TYPE_ENGINE_STOP:
-                return encodeContent(alternative ? "DYD,123456#" : "Relay,1#");
+                return encodeContent(command.getDeviceId(), alternative ? "DYD,123456#" : "Relay,1#");
             case Command.TYPE_ENGINE_RESUME:
-                return encodeContent(alternative ? "HFYD,123456#" : "Relay,0#");
+                return encodeContent(command.getDeviceId(), alternative ? "HFYD,123456#" : "Relay,0#");
             case Command.TYPE_CUSTOM:
-                return encodeContent(command.getString(Command.KEY_DATA));
+                return encodeContent(command.getDeviceId(), command.getString(Command.KEY_DATA));
             default:
-                Log.warning(new UnsupportedOperationException(command.getType()));
-                break;
+                return null;
         }
-
-        return null;
     }
 
 }

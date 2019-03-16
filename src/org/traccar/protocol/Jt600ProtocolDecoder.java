@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,13 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.BcdUtil;
 import org.traccar.helper.BitBuffer;
 import org.traccar.helper.BitUtil;
@@ -39,7 +41,7 @@ import java.util.regex.Pattern;
 
 public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Jt600ProtocolDecoder(Jt600Protocol protocol) {
+    public Jt600ProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
@@ -49,7 +51,42 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         return degrees + minutes / 60;
     }
 
-    private List<Position> decodeBinary(ChannelBuffer buf, Channel channel, SocketAddress remoteAddress) {
+    private void decodeStatus(Position position, ByteBuf buf) {
+
+        int value = buf.readUnsignedByte();
+
+        position.set(Position.KEY_IGNITION, BitUtil.check(value, 0));
+        position.set(Position.KEY_DOOR, BitUtil.check(value, 6));
+
+        value = buf.readUnsignedByte();
+
+        position.set(Position.KEY_CHARGE, BitUtil.check(value, 0));
+        position.set(Position.KEY_BLOCKED, BitUtil.check(value, 1));
+
+        if (BitUtil.check(value, 2)) {
+            position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+        }
+        if (BitUtil.check(value, 3) || BitUtil.check(value, 4)) {
+            position.set(Position.KEY_ALARM, Position.ALARM_GPS_ANTENNA_CUT);
+        }
+        if (BitUtil.check(value, 4)) {
+            position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+        }
+
+        value = buf.readUnsignedByte();
+
+        if (BitUtil.check(value, 2)) {
+            position.set(Position.KEY_ALARM, Position.ALARM_FATIGUE_DRIVING);
+        }
+        if (BitUtil.check(value, 3)) {
+            position.set(Position.KEY_ALARM, Position.ALARM_TOW);
+        }
+
+        buf.readUnsignedByte(); // reserved
+
+    }
+
+    private List<Position> decodeBinary(ByteBuf buf, Channel channel, SocketAddress remoteAddress) {
 
         List<Position> positions = new LinkedList<>();
 
@@ -57,14 +94,15 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         boolean longFormat = buf.getUnsignedByte(buf.readerIndex()) == 0x75;
 
-        String id = String.valueOf(Long.parseLong(ChannelBuffers.hexDump(buf.readBytes(5))));
+        String id = String.valueOf(Long.parseLong(ByteBufUtil.hexDump(buf.readSlice(5))));
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
         if (deviceSession == null) {
             return null;
         }
 
+        int protocolVersion = 0;
         if (longFormat) {
-            buf.readUnsignedByte(); // protocol
+            protocolVersion = buf.readUnsignedByte();
         }
 
         int version = BitUtil.from(buf.readUnsignedByte(), 4);
@@ -72,8 +110,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         while (buf.readableBytes() > 1) {
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             DateBuilder dateBuilder = new DateBuilder()
@@ -109,7 +146,15 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
                 buf.readUnsignedInt(); // vehicle id combined
 
-                position.set(Position.KEY_STATUS, buf.readUnsignedShort());
+                int status = buf.readUnsignedShort();
+                position.set(Position.KEY_ALARM, BitUtil.check(status, 1) ? Position.ALARM_GEOFENCE_ENTER : null);
+                position.set(Position.KEY_ALARM, BitUtil.check(status, 2) ? Position.ALARM_GEOFENCE_EXIT : null);
+                position.set(Position.KEY_ALARM, BitUtil.check(status, 3) ? Position.ALARM_POWER_CUT : null);
+                position.set(Position.KEY_ALARM, BitUtil.check(status, 4) ? Position.ALARM_VIBRATION : null);
+                position.set(Position.KEY_BLOCKED, BitUtil.check(status, 7));
+                position.set(Position.KEY_ALARM, BitUtil.check(status, 8 + 3) ? Position.ALARM_LOW_BATTERY : null);
+                position.set(Position.KEY_ALARM, BitUtil.check(status, 8 + 6) ? Position.ALARM_FAULT : null);
+                position.set(Position.KEY_STATUS, status);
 
                 int battery = buf.readUnsignedByte();
                 if (battery == 0xff) {
@@ -121,6 +166,11 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
                 CellTower cellTower = CellTower.fromCidLac(buf.readUnsignedShort(), buf.readUnsignedShort());
                 cellTower.setSignalStrength((int) buf.readUnsignedByte());
                 position.setNetwork(new Network(cellTower));
+
+                if (protocolVersion == 0x17) {
+                    buf.readUnsignedByte(); // geofence id
+                    buf.skipBytes(3); // reserved
+                }
 
             } else if (version == 1) {
 
@@ -147,7 +197,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
                 int fuel = buf.readUnsignedByte() << 8;
 
-                position.set(Position.KEY_STATUS, buf.readUnsignedInt());
+                decodeStatus(position, buf);
                 position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 1000);
 
                 fuel += buf.readUnsignedByte();
@@ -209,8 +259,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.setLongitude(parser.nextCoordinate());
@@ -268,8 +317,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         String type = parser.next();
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
@@ -294,9 +342,9 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         if (channel != null) {
             if (type.equals("U01") || type.equals("U02") || type.equals("U03")) {
-                channel.write("(S39)");
+                channel.writeAndFlush(new NetworkMessage("(S39)", remoteAddress));
             } else if (type.equals("U06")) {
-                channel.write("(S20)");
+                channel.writeAndFlush(new NetworkMessage("(S20)", remoteAddress));
             }
         }
 
@@ -307,7 +355,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
         char first = (char) buf.getByte(0);
 
         if (first == '$') {

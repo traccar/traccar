@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,22 @@
 package org.traccar;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.netty.channel.ChannelHandler;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
+import org.traccar.database.IdentityManager;
 import org.traccar.helper.Checksum;
-import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
+import org.traccar.model.Group;
 
+import javax.inject.Inject;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
+import java.util.HashMap;
+import java.util.Map;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -29,12 +40,29 @@ import java.util.Formatter;
 import java.util.Locale;
 import java.util.TimeZone;
 
+@ChannelHandler.Sharable
 public class WebDataHandler extends BaseDataHandler {
 
-    private final String url;
+    private static final String KEY_POSITION = "position";
+    private static final String KEY_DEVICE = "device";
 
-    public WebDataHandler(String url) {
-        this.url = url;
+    private final IdentityManager identityManager;
+    private final ObjectMapper objectMapper;
+    private final Client client;
+
+    private final String url;
+    private final String header;
+    private final boolean json;
+
+    @Inject
+    public WebDataHandler(
+            Config config, IdentityManager identityManager, ObjectMapper objectMapper, Client client) {
+        this.identityManager = identityManager;
+        this.objectMapper = objectMapper;
+        this.client = client;
+        this.url = config.getString(Keys.FORWARD_URL);
+        this.header = config.getString(Keys.FORWARD_HEADER);
+        this.json = config.getBoolean(Keys.FORWARD_JSON);
     }
 
     private static String formatSentence(Position position) {
@@ -73,13 +101,14 @@ public class WebDataHandler extends BaseDataHandler {
         }
     }
 
-    public String formatRequest(Position position) {
+    public String formatRequest(Position position) throws UnsupportedEncodingException, JsonProcessingException {
 
-        Device device = Context.getIdentityManager().getById(position.getDeviceId());
+        Device device = identityManager.getById(position.getDeviceId());
 
         String request = url
-                .replace("{name}", device.getName())
+                .replace("{name}", URLEncoder.encode(device.getName(), StandardCharsets.UTF_8.name()))
                 .replace("{uniqueId}", device.getUniqueId())
+                .replace("{status}", device.getStatus())
                 .replace("{deviceId}", String.valueOf(position.getDeviceId()))
                 .replace("{protocol}", String.valueOf(position.getProtocol()))
                 .replace("{deviceTime}", String.valueOf(position.getDeviceTime().getTime()))
@@ -90,29 +119,34 @@ public class WebDataHandler extends BaseDataHandler {
                 .replace("{altitude}", String.valueOf(position.getAltitude()))
                 .replace("{speed}", String.valueOf(position.getSpeed()))
                 .replace("{course}", String.valueOf(position.getCourse()))
+                .replace("{accuracy}", String.valueOf(position.getAccuracy()))
                 .replace("{statusCode}", calculateStatus(position));
 
         if (position.getAddress() != null) {
-            try {
-                request = request.replace(
-                        "{address}", URLEncoder.encode(position.getAddress(), StandardCharsets.UTF_8.name()));
-            } catch (UnsupportedEncodingException error) {
-                Log.warning(error);
-            }
+            request = request.replace(
+                    "{address}", URLEncoder.encode(position.getAddress(), StandardCharsets.UTF_8.name()));
         }
 
         if (request.contains("{attributes}")) {
-            try {
-                String attributes = Context.getObjectMapper().writeValueAsString(position.getAttributes());
-                request = request.replace(
-                        "{attributes}", URLEncoder.encode(attributes, StandardCharsets.UTF_8.name()));
-            } catch (UnsupportedEncodingException | JsonProcessingException error) {
-                Log.warning(error);
-            }
+            String attributes = objectMapper.writeValueAsString(position.getAttributes());
+            request = request.replace(
+                    "{attributes}", URLEncoder.encode(attributes, StandardCharsets.UTF_8.name()));
         }
 
         if (request.contains("{gprmc}")) {
             request = request.replace("{gprmc}", formatSentence(position));
+        }
+
+        if (request.contains("{group}")) {
+            String deviceGroupName = "";
+            if (device.getGroupId() != 0) {
+                Group group = Context.getGroupsManager().getById(device.getGroupId());
+                if (group != null) {
+                    deviceGroupName = group.getName();
+                }
+            }
+
+            request = request.replace("{group}", URLEncoder.encode(deviceGroupName, StandardCharsets.UTF_8.name()));
         }
 
         return request;
@@ -121,9 +155,47 @@ public class WebDataHandler extends BaseDataHandler {
     @Override
     protected Position handlePosition(Position position) {
 
-        Context.getAsyncHttpClient().prepareGet(formatRequest(position)).execute();
+        String url;
+        if (json) {
+            url = this.url;
+        } else {
+            try {
+                url = formatRequest(position);
+            } catch (UnsupportedEncodingException | JsonProcessingException e) {
+                throw new RuntimeException("Forwarding formatting error", e);
+            }
+        }
+
+        Invocation.Builder requestBuilder = client.target(url).request();
+
+        if (header != null && !header.isEmpty()) {
+            for (String line: header.split("\\r?\\n")) {
+                String[] values = line.split(":", 2);
+                requestBuilder.header(values[0].trim(), values[1].trim());
+            }
+        }
+
+        if (json) {
+            requestBuilder.async().post(Entity.json(prepareJsonPayload(position)));
+        } else {
+            requestBuilder.async().get();
+        }
 
         return position;
+    }
+
+    private Map<String, Object> prepareJsonPayload(Position position) {
+
+        Map<String, Object> data = new HashMap<>();
+        Device device = identityManager.getById(position.getDeviceId());
+
+        data.put(KEY_POSITION, position);
+
+        if (device != null) {
+            data.put(KEY_DEVICE, device);
+        }
+
+        return data;
     }
 
 }

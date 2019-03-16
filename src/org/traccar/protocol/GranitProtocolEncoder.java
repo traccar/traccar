@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,43 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.traccar.protocol;
+package org.traccar.protocol;
 
 import java.nio.charset.StandardCharsets;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 public class GranitProtocolEncoder extends BaseProtocolEncoder {
+
+    private ByteBuf encodeCommand(String commandString) {
+        ByteBuf buffer = Unpooled.buffer();
+        buffer.writeBytes(commandString.getBytes(StandardCharsets.US_ASCII));
+        GranitProtocolDecoder.appendChecksum(buffer, commandString.length());
+        return buffer;
+    }
+
     @Override
     protected Object encodeCommand(Command command) {
-
-        String commandString = "";
-
         switch (command.getType()) {
             case Command.TYPE_IDENTIFICATION:
-                commandString = "BB+IDNT";
-                break;
+                return encodeCommand("BB+IDNT");
             case Command.TYPE_REBOOT_DEVICE:
-                commandString = "BB+RESET";
-                break;
+                return encodeCommand("BB+RESET");
             case Command.TYPE_POSITION_SINGLE:
-                commandString = "BB+RRCD";
-                break;
+                return encodeCommand("BB+RRCD");
             default:
-                Log.warning(new UnsupportedOperationException(command.getType()));
                 return null;
         }
-        if (!commandString.isEmpty()) {
-            ChannelBuffer commandBuf = ChannelBuffers.dynamicBuffer();
-            commandBuf.writeBytes(commandString.getBytes(StandardCharsets.US_ASCII));
-            GranitProtocolDecoder.appendChecksum(commandBuf, commandString.length());
-            return commandBuf;
-        }
-        return null;
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2013 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,16 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
-import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -30,9 +32,11 @@ import java.nio.charset.StandardCharsets;
 
 public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SkypatrolProtocolDecoder.class);
+
     private final long defaultMask;
 
-    public SkypatrolProtocolDecoder(SkypatrolProtocol protocol) {
+    public SkypatrolProtocolDecoder(Protocol protocol) {
         super(protocol);
         defaultMask = Context.getConfig().getInteger(getProtocolName() + ".mask");
     }
@@ -54,7 +58,7 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         int apiNumber = buf.readUnsignedShort();
         int commandType = buf.readUnsignedByte();
@@ -67,8 +71,7 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
         // Binary position report
         if (apiNumber == 5 && commandType == 2 && messageType == 1 && BitUtil.check(mask, 0)) {
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
 
             if (BitUtil.check(mask, 1)) {
                 position.set(Position.KEY_STATUS, buf.readUnsignedInt());
@@ -82,7 +85,7 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
                 id = buf.toString(buf.readerIndex(), 22, StandardCharsets.US_ASCII).trim();
                 buf.skipBytes(22);
             } else {
-                Log.warning("No device id field");
+                LOGGER.warn("No device id field");
                 return null;
             }
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);

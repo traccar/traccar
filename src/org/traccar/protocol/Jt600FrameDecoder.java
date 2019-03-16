@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,18 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.frame.FrameDecoder;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import org.traccar.BaseFrameDecoder;
 
 import java.text.ParseException;
 
-public class Jt600FrameDecoder extends FrameDecoder {
+public class Jt600FrameDecoder extends BaseFrameDecoder {
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
+            ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
         if (buf.readableBytes() < 10) {
             return null;
@@ -38,12 +38,12 @@ public class Jt600FrameDecoder extends FrameDecoder {
             boolean longFormat = buf.getUnsignedByte(buf.readerIndex() + 1) == 0x75;
             int length = buf.getUnsignedShort(buf.readerIndex() + (longFormat ? 8 : 7)) + 10;
             if (length <= buf.readableBytes()) {
-                return buf.readBytes(length);
+                return buf.readRetainedSlice(length);
             }
         } else if (type == '(') {
             int endIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ')');
             if (endIndex != -1) {
-                return buf.readBytes(endIndex + 1);
+                return buf.readRetainedSlice(endIndex + 1);
             }
         } else {
             throw new ParseException(null, 0); // unknown message

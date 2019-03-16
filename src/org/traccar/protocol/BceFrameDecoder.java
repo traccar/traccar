@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,18 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.frame.FrameDecoder;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import org.traccar.BaseFrameDecoder;
 
-public class BceFrameDecoder extends FrameDecoder {
+public class BceFrameDecoder extends BaseFrameDecoder {
 
     private static final int HANDSHAKE_LENGTH = 7; // "#BCE#\r\n"
 
     private boolean header = true;
 
-    private static byte checksum(ChannelBuffer buf, int end) {
+    private static byte checksum(ByteBuf buf, int end) {
         byte result = 0;
         for (int i = 0; i < end; i++) {
             result += buf.getByte(buf.readerIndex() + i);
@@ -36,9 +36,7 @@ public class BceFrameDecoder extends FrameDecoder {
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx,
-            Channel channel,
-            ChannelBuffer buf) throws Exception {
+            ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
         if (header && buf.readableBytes() >= HANDSHAKE_LENGTH) {
             buf.skipBytes(HANDSHAKE_LENGTH);
@@ -48,10 +46,10 @@ public class BceFrameDecoder extends FrameDecoder {
         int end = 8; // IMEI
 
         while (buf.readableBytes() >= end + 2 + 1 + 1 + 1) {
-            end += buf.getUnsignedShort(buf.readerIndex() + end) + 2;
+            end += buf.getUnsignedShortLE(buf.readerIndex() + end) + 2;
 
             if (buf.readableBytes() > end && checksum(buf, end) == buf.getByte(buf.readerIndex() + end)) {
-                return buf.readBytes(end + 1);
+                return buf.readRetainedSlice(end + 1);
             }
         }
 

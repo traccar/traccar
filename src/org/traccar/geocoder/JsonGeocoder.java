@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,23 +15,22 @@
  */
 package org.traccar.geocoder;
 
-import com.ning.http.client.AsyncCompletionHandler;
-import com.ning.http.client.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.Context;
-import org.traccar.helper.Log;
 
-import javax.json.Json;
 import javax.json.JsonObject;
-import javax.json.JsonReader;
-
-import java.io.IOException;
+import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.InvocationCallback;
 import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 public abstract class JsonGeocoder implements Geocoder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JsonGeocoder.class);
 
     private final String url;
     private final AddressFormat addressFormat;
@@ -51,24 +50,25 @@ public abstract class JsonGeocoder implements Geocoder {
         }
     }
 
-    private String handleResponse(double latitude, double longitude, Response response,
-            ReverseGeocoderCallback callback) throws IOException {
-        try (JsonReader reader = Json.createReader(response.getResponseBodyAsStream())) {
-            Address address = parseAddress(reader.readObject());
-            if (address != null) {
-                String formattedAddress = addressFormat.format(address);
-                if (cache != null) {
-                    cache.put(new AbstractMap.SimpleImmutableEntry<>(latitude, longitude), formattedAddress);
-                }
-                if (callback != null) {
-                    callback.onSuccess(formattedAddress);
-                }
-                return formattedAddress;
+    private String handleResponse(
+            double latitude, double longitude, JsonObject json, ReverseGeocoderCallback callback) {
+
+        Address address = parseAddress(json);
+        if (address != null) {
+            String formattedAddress = addressFormat.format(address);
+            if (cache != null) {
+                cache.put(new AbstractMap.SimpleImmutableEntry<>(latitude, longitude), formattedAddress);
+            }
+            if (callback != null) {
+                callback.onSuccess(formattedAddress);
+            }
+            return formattedAddress;
+        } else {
+            String msg = "Empty address. Error: " + parseError(json);
+            if (callback != null) {
+                callback.onFailure(new GeocoderException(msg));
             } else {
-                if (callback != null) {
-                    callback.onFailure(new GeocoderException("Empty address"));
-                }
-                Log.warning("Empty address");
+                LOGGER.warn(msg);
             }
         }
         return null;
@@ -88,31 +88,34 @@ public abstract class JsonGeocoder implements Geocoder {
             }
         }
 
+        Invocation.Builder request = Context.getClient().target(String.format(url, latitude, longitude)).request();
+
         if (callback != null) {
-            Context.getAsyncHttpClient().prepareGet(String.format(url, latitude, longitude))
-                    .execute(new AsyncCompletionHandler() {
+            request.async().get(new InvocationCallback<JsonObject>() {
                 @Override
-                public Object onCompleted(Response response) throws Exception {
-                    return handleResponse(latitude, longitude, response, callback);
+                public void completed(JsonObject json) {
+                    handleResponse(latitude, longitude, json, callback);
                 }
 
                 @Override
-                public void onThrowable(Throwable t) {
-                    callback.onFailure(t);
+                public void failed(Throwable throwable) {
+                    callback.onFailure(throwable);
                 }
             });
         } else {
             try {
-                Response response = Context.getAsyncHttpClient()
-                        .prepareGet(String.format(url, latitude, longitude)).execute().get();
-                return handleResponse(latitude, longitude, response, null);
-            } catch (InterruptedException | ExecutionException | IOException error) {
-                Log.warning("Geocoding failed", error);
+                return handleResponse(latitude, longitude, request.get(JsonObject.class), null);
+            } catch (ClientErrorException e) {
+                LOGGER.warn("Geocoder network error", e);
             }
         }
         return null;
     }
 
     public abstract Address parseAddress(JsonObject json);
+
+    protected String parseError(JsonObject json) {
+        return null;
+    }
 
 }

@@ -17,7 +17,6 @@
 package org.traccar.protocol;
 
 import org.traccar.StringProtocolEncoder;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 public class GranitProtocolSmsEncoder extends StringProtocolEncoder {
@@ -30,7 +29,6 @@ public class GranitProtocolSmsEncoder extends StringProtocolEncoder {
         case Command.TYPE_POSITION_PERIODIC:
             return formatCommand(command, "BB+BBMD={%s}", Command.KEY_FREQUENCY);
         default:
-            Log.warning(new UnsupportedOperationException(command.getType()));
             return null;
         }
     }

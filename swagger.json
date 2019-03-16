@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "version": "3.14",
+        "version": "4.3",
         "title": "traccar"
     },
     "host": "demo.traccar.org",
@@ -286,9 +286,9 @@
                 }
             }
         },
-        "/devices/{id}/distance": {
+        "/devices/{id}/accumulators": {
             "put": {
-                "summary": "Update the distance counter of the Device",
+                "summary": "Update total distance and hours of the Device",
                 "parameters": [
                     {
                         "$ref": "#/parameters/entityId"
@@ -298,7 +298,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/DeviceTotalDistance"
+                            "$ref": "#/definitions/DeviceAccumulators"
                         }
                     }
                 ],
@@ -1350,6 +1350,90 @@
                     }
                 }
             }
+        },
+        "/maintenance": {
+            "get": {
+                "summary": "Fetch a list of Maintenance",
+                "description": "Without params, it returns a list of Maintenance the user has access to",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/all"
+                    },
+                    {
+                        "$ref": "#/parameters/userId"
+                    },
+                    {
+                        "$ref": "#/parameters/deviceId"
+                    },
+                    {
+                        "$ref": "#/parameters/groupId"
+                    },
+                    {
+                        "$ref": "#/parameters/refresh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Maintenance"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create a Maintenance",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/Maintenance"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Maintenance"
+                        }
+                    }
+                }
+            }
+        },
+        "/maintenance/{id}": {
+            "put": {
+                "summary": "Update a Maintenance",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/entityId"
+                    },
+                    {
+                        "$ref": "#/parameters/Maintenance"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Maintenance"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete a Maintenance",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/entityId"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -1410,7 +1494,10 @@
                 "network": {
                     "type": "string"
                 },
-                "attributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "User": {
@@ -1427,7 +1514,7 @@
                 "readonly": {
                     "type": "boolean"
                 },
-                "admin": {
+                "administrator": {
                     "type": "boolean"
                 },
                 "map": {
@@ -1471,10 +1558,16 @@
                 "limitCommands": {
                     "type": "boolean"
                 },
+                "poiLayer": {
+                    "type": "string"
+                },
                 "token": {
                     "type": "string"
                 },
-                "attributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "Server": {
@@ -1503,6 +1596,9 @@
                 "mapUrl": {
                     "type": "string"
                 },
+                "poiLayer": {
+                    "type": "string"
+                },
                 "latitude": {
                     "type": "number"
                 },
@@ -1524,7 +1620,10 @@
                 "coordinateFormat": {
                     "type": "string"
                 },
-                "attributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "Command": {
@@ -1541,7 +1640,10 @@
                 "type": {
                     "type": "string"
                 },
-                "attributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "Device": {
@@ -1557,6 +1659,9 @@
                 },
                 "status": {
                     "type": "string"
+                },
+                "disabled": {
+                    "type": "boolean"
                 },
                 "lastUpdate": {
                     "type": "string",
@@ -1587,7 +1692,10 @@
                         "type": "integer"
                     }
                 },
-                "attributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "Group": {
@@ -1601,7 +1709,10 @@
                 "groupId": {
                     "type": "integer"
                 },
-                "attributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "Permission": {
@@ -1665,7 +1776,10 @@
                 "calendarId": {
                     "type": "integer"
                 },
-                "attributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "Notification": {
@@ -1688,7 +1802,13 @@
                 "sms": {
                     "type": "boolean"
                 },
-                "attributes": {}
+                "calendarId": {
+                    "type": "integer"
+                },
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "NotificationType": {
@@ -1720,7 +1840,13 @@
                 "geofenceId": {
                     "type": "integer"
                 },
-                "attributes": {}
+                "maintenanceId": {
+                    "type": "integer"
+                },
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "ReportSummary": {
@@ -1878,7 +2004,7 @@
                 }
             }
         },
-        "DeviceTotalDistance": {
+        "DeviceAccumulators": {
             "properties": {
                 "deviceId": {
                     "type": "integer"
@@ -1886,6 +2012,9 @@
                 "totalDistance": {
                     "type": "number",
                     "description": "in meters"
+                },
+                "hours": {
+                    "type": "number"
                 }
             }
         },
@@ -1901,7 +2030,10 @@
                     "type": "string",
                     "description": "base64 encoded in iCalendar format"
                 },
-                "atributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "Attribute": {
@@ -1935,7 +2067,33 @@
                 "uniqueId": {
                     "type": "string"
                 },
-                "atributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
+            }
+        },
+        "Maintenance": {
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "start": {
+                    "type": "number"
+                },
+                "period": {
+                    "type": "number"
+                },
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         }
     },
@@ -2054,6 +2212,14 @@
             "required": true,
             "schema": {
                 "$ref": "#/definitions/Notification"
+            }
+        },
+        "Maintenance": {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+                "$ref": "#/definitions/Maintenance"
             }
         },
         "deviceIdArray": {

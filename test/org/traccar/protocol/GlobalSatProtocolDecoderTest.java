@@ -8,7 +8,7 @@ public class GlobalSatProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        GlobalSatProtocolDecoder decoder = new GlobalSatProtocolDecoder(new GlobalSatProtocol());
+        GlobalSatProtocolDecoder decoder = new GlobalSatProtocolDecoder(null);
 
         verifyNull(decoder, text(
                 "GSh,131826789036289,3,M,ea04*3d"));
@@ -38,21 +38,19 @@ public class GlobalSatProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "$353681041893264,9,3,240913,100833,E08513.0122,N5232.9395,181.3,22.02,251.30,9,1.00"));
 
-        /*verifyPosition(decoder, text(
-                "$353681041893264,9,4,230913,052449,\"250,99,B443,422E,42,37\",\"250,99,B443,4232,43,44\",\"250,99,B443,7910,40,32\",\"250,99,B443,B456,40,28\",\"250,99,B443,B455,40,27\""));*/
-
         decoder.setFormat0("SPRXYAB27GHKLMmnaefghiotuvwb*U!");
         
         verifyPosition(decoder, text(
                 "GSr,GTR-128,013227006963064,0080,1,a080,3,190615,163816,W07407.7134,N0440.8601,2579,0.01,130,12,0.7,11540mV,0,77,14,\"732,123,0744,2fc1,41,23\",\"732,123,0744,2dfe,05,28\",\"732,123,0744,272a,15,21\",\"732,123,0744,2f02,27,23\"*3b!"));
 
         verifyPosition(decoder, text(
-                "$80050377796567,0,13,281015,173437,E08513.28616,N5232.85432,222.3,0.526,,07*37"
-        ), position("2015-10-28 17:34:37.000", true, 52.54757, 85.22144));
+                "$80050377796567,0,13,281015,173437,E08513.28616,N5232.85432,222.3,0.526,,07*37"),
+                position("2015-10-28 17:34:37.000", true, 52.54757, 85.22144));
 
         verifyPosition(decoder, text(
-                "$80050377796567,0,18,281015,191919,E08513.93290,N5232.42141,193.4,37.647,305.40,07*37"
-        ), position("2015-10-28 19:19:19.000", true, 52.54036, 85.23222));
+                "$80050377796567,0,18,281015,191919,E08513.93290,N5232.42141,193.4,37.647,305.40,07*37"),
+                position("2015-10-28 19:19:19.000", true, 52.54036, 85.23222));
+
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,15 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.bootstrap.ServerBootstrap;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import org.traccar.BaseProtocol;
+import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.model.Command;
-
-import java.util.List;
 
 public class RuptelaProtocol extends BaseProtocol {
 
     public RuptelaProtocol() {
-        super("ruptela");
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM,
                 Command.TYPE_CONFIGURATION,
@@ -36,16 +32,12 @@ public class RuptelaProtocol extends BaseProtocol {
                 Command.TYPE_OUTPUT_CONTROL,
                 Command.TYPE_SET_CONNECTION,
                 Command.TYPE_SET_ODOMETER);
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(new ServerBootstrap(), getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 0, 2, 2, 0));
-                pipeline.addLast("objectEncoder", new RuptelaProtocolEncoder());
-                pipeline.addLast("objectDecoder", new RuptelaProtocolDecoder(RuptelaProtocol.this));
+            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+                pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 0, 2, 2, 0));
+                pipeline.addLast(new RuptelaProtocolEncoder());
+                pipeline.addLast(new RuptelaProtocolDecoder(RuptelaProtocol.this));
             }
         });
     }

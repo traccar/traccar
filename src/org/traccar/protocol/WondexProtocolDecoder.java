@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,11 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -31,7 +32,7 @@ import java.util.regex.Pattern;
 
 public class WondexProtocolDecoder extends BaseProtocolDecoder {
 
-    public WondexProtocolDecoder(WondexProtocol protocol) {
+    public WondexProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
@@ -60,7 +61,7 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         if (buf.getUnsignedByte(0) == 0xD0) {
 
@@ -70,17 +71,17 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
             return null;
         } else if (buf.toString(StandardCharsets.US_ASCII).startsWith("$OK:")
                 || buf.toString(StandardCharsets.US_ASCII).startsWith("$ERR:")
-                  || buf.toString(StandardCharsets.US_ASCII).startsWith("$MSG:")) {
+                || buf.toString(StandardCharsets.US_ASCII).startsWith("$MSG:")) {
 
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
             getLastLocation(position, new Date());
             position.set(Position.KEY_RESULT, buf.toString(StandardCharsets.US_ASCII));
 
             return position;
+
         } else {
 
             Parser parser = new Parser(PATTERN, buf.toString(StandardCharsets.US_ASCII));
@@ -88,8 +89,7 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
                 return null;
             }
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
 
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
             if (deviceSession == null) {
@@ -120,6 +120,7 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_OUTPUT, parser.next());
 
             return position;
+
         }
 
     }

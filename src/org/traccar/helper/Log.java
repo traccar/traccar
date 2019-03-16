@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,137 +15,199 @@
  */
 package org.traccar.helper;
 
-import org.apache.log4j.Appender;
-import org.apache.log4j.DailyRollingFileAppender;
-import org.apache.log4j.Layout;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
-import org.apache.log4j.varia.NullAppender;
-import org.jboss.netty.logging.AbstractInternalLogger;
-import org.jboss.netty.logging.InternalLogger;
-import org.jboss.netty.logging.InternalLoggerFactory;
-import org.traccar.Config;
+import org.traccar.config.Config;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryMXBean;
-import java.lang.management.OperatingSystemMXBean;
-import java.lang.management.RuntimeMXBean;
-import java.nio.charset.Charset;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Formatter;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 public final class Log {
 
     private Log() {
     }
 
-    public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
-
-    private static final String LOGGER_NAME = "traccar";
-
     private static final String STACK_PACKAGE = "org.traccar";
     private static final int STACK_LIMIT = 3;
 
-    private static Logger logger = null;
+    private static class RollingFileHandler extends Handler {
 
-    public static String getAppVersion() {
-        return Log.class.getPackage().getImplementationVersion();
-    }
+        private String name;
+        private String suffix;
+        private Writer writer;
+        private boolean rotate;
 
-    public static void setupLogger(Config config) throws IOException {
+        RollingFileHandler(String name, boolean rotate) {
+            this.name = name;
+            this.rotate = rotate;
+        }
 
-        Layout layout = new PatternLayout("%d{" + DATE_FORMAT + "} %5p: %m%n");
-
-        Appender appender = new DailyRollingFileAppender(
-                layout, config.getString("logger.file"), "'.'yyyyMMdd");
-
-        LogManager.resetConfiguration();
-        LogManager.getRootLogger().addAppender(new NullAppender());
-
-        logger = Logger.getLogger(LOGGER_NAME);
-        logger.addAppender(appender);
-        logger.setLevel(Level.toLevel(config.getString("logger.level"), Level.ALL));
-
-        // Workaround for "Bug 745866 - (EDG-45) Possible netty logging config problem"
-        InternalLoggerFactory.setDefaultFactory(new InternalLoggerFactory() {
-            @Override
-            public InternalLogger newInstance(String string) {
-                return new NettyInternalLogger();
+        @Override
+        public synchronized void publish(LogRecord record) {
+            if (isLoggable(record)) {
+                try {
+                    String suffix = "";
+                    if (rotate) {
+                        suffix = new SimpleDateFormat("yyyyMMdd").format(new Date(record.getMillis()));
+                        if (writer != null && !suffix.equals(this.suffix)) {
+                            writer.close();
+                            writer = null;
+                            if (!new File(name).renameTo(new File(name + "." + this.suffix))) {
+                                throw new RuntimeException("Log file renaming failed");
+                            }
+                        }
+                    }
+                    if (writer == null) {
+                        this.suffix = suffix;
+                        writer = new BufferedWriter(
+                                new OutputStreamWriter(new FileOutputStream(name, true), StandardCharsets.UTF_8));
+                    }
+                    writer.write(getFormatter().format(record));
+                    writer.flush();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
-        });
-
-        Log.logSystemInfo();
-        Log.info("Version: " + getAppVersion());
-    }
-
-    public static Logger getLogger() {
-        if (logger == null) {
-            logger = Logger.getLogger(LOGGER_NAME);
-            logger.setLevel(Level.OFF);
         }
-        return logger;
-    }
 
-    public static void logSystemInfo() {
-        try {
-            OperatingSystemMXBean operatingSystemBean = ManagementFactory.getOperatingSystemMXBean();
-            Log.info("Operating system"
-                    + " name: " + operatingSystemBean.getName()
-                    + " version: " + operatingSystemBean.getVersion()
-                    + " architecture: " + operatingSystemBean.getArch());
-
-            RuntimeMXBean runtimeBean = ManagementFactory.getRuntimeMXBean();
-            Log.info("Java runtime"
-                    + " name: " + runtimeBean.getVmName()
-                    + " vendor: " + runtimeBean.getVmVendor()
-                    + " version: " + runtimeBean.getVmVersion());
-
-            MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
-            Log.info("Memory limit"
-                    + " heap: " + memoryBean.getHeapMemoryUsage().getMax() / (1024 * 1024) + "mb"
-                    + " non-heap: " + memoryBean.getNonHeapMemoryUsage().getMax() / (1024 * 1024) + "mb");
-
-            Log.info("Character encoding: "
-                    + System.getProperty("file.encoding") + " charset: " + Charset.defaultCharset());
-
-        } catch (Exception error) {
-            Log.warning("Failed to get system info");
-        }
-    }
-
-    public static void error(String msg) {
-        getLogger().error(msg);
-    }
-
-    public static void warning(String msg) {
-        getLogger().warn(msg);
-    }
-
-    public static void warning(Throwable exception) {
-        warning(null, exception);
-    }
-
-    public static void warning(String msg, Throwable exception) {
-        StringBuilder s = new StringBuilder();
-        if (msg != null) {
-            s.append(msg);
-        }
-        if (exception != null) {
-            if (msg != null) {
-                s.append(" - ");
+        @Override
+        public synchronized void flush() {
+            if (writer != null) {
+                try {
+                    writer.flush();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
-            s.append(exceptionStack(exception));
         }
-        getLogger().warn(s.toString());
+
+        @Override
+        public synchronized void close() throws SecurityException {
+            if (writer != null) {
+                try {
+                    writer.close();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
     }
 
-    public static void info(String msg) {
-        getLogger().info(msg);
+    public static class LogFormatter extends Formatter {
+
+        private boolean fullStackTraces;
+
+        LogFormatter(boolean fullStackTraces) {
+            this.fullStackTraces = fullStackTraces;
+        }
+
+        private static String formatLevel(Level level) {
+            switch (level.getName()) {
+                case "FINEST":
+                    return "TRACE";
+                case "FINER":
+                case "FINE":
+                case "CONFIG":
+                    return "DEBUG";
+                case "INFO":
+                    return "INFO";
+                case "WARNING":
+                    return "WARN";
+                case "SEVERE":
+                default:
+                    return "ERROR";
+            }
+        }
+
+        @Override
+        public String format(LogRecord record) {
+            StringBuilder message = new StringBuilder();
+
+            if (record.getMessage() != null) {
+                message.append(record.getMessage());
+            }
+
+            if (record.getThrown() != null) {
+                if (message.length() > 0) {
+                    message.append(" - ");
+                }
+                if (fullStackTraces) {
+                    StringWriter stringWriter = new StringWriter();
+                    PrintWriter printWriter = new PrintWriter(stringWriter);
+                    record.getThrown().printStackTrace(printWriter);
+                    message.append(System.lineSeparator()).append(stringWriter.toString());
+                } else {
+                    message.append(exceptionStack(record.getThrown()));
+                }
+            }
+
+            return String.format("%1$tF %1$tT %2$5s: %3$s%n",
+                    new Date(record.getMillis()), formatLevel(record.getLevel()), message.toString());
+        }
+
     }
 
-    public static void debug(String msg) {
-        getLogger().debug(msg);
+    public static void setupDefaultLogger() {
+        String path = null;
+        URL url =  ClassLoader.getSystemClassLoader().getResource(".");
+        if (url != null) {
+            File jarPath = new File(url.getPath());
+            File logsPath = new File(jarPath, "logs");
+            if (!logsPath.exists() || !logsPath.isDirectory()) {
+                logsPath = jarPath;
+            }
+            path = new File(logsPath, "tracker-server.log").getPath();
+        }
+        setupLogger(path == null, path, Level.WARNING.getName(), false, true);
+    }
+
+    public static void setupLogger(Config config) {
+        setupLogger(
+                config.getBoolean("logger.console"),
+                config.getString("logger.file"),
+                config.getString("logger.level"),
+                config.getBoolean("logger.fullStackTraces"),
+                config.getBoolean("logger.rotate"));
+    }
+
+    private static void setupLogger(
+            boolean console, String file, String levelString, boolean fullStackTraces, boolean rotate) {
+
+        Logger rootLogger = Logger.getLogger("");
+        for (Handler handler : rootLogger.getHandlers()) {
+            rootLogger.removeHandler(handler);
+        }
+
+        Handler handler;
+        if (console) {
+            handler = new ConsoleHandler();
+        } else {
+            handler = new RollingFileHandler(file, rotate);
+        }
+
+        handler.setFormatter(new LogFormatter(fullStackTraces));
+
+        Level level = Level.parse(levelString.toUpperCase());
+        rootLogger.setLevel(level);
+        handler.setLevel(level);
+        handler.setFilter(record -> record != null && !record.getLoggerName().startsWith("sun"));
+
+        rootLogger.addHandler(handler);
     }
 
     public static String exceptionStack(Throwable exception) {
@@ -181,7 +243,7 @@ public final class Log {
                         s.append("*");
                     } else {
                         file = element.getFileName();
-                        s.append(file.substring(0, file.length() - 5)); // remove ".java"
+                        s.append(file, 0, file.length() - 5); // remove ".java"
                         count -= 1;
                     }
                     s.append(":").append(element.getLineNumber());
@@ -198,71 +260,6 @@ public final class Log {
             s.append(")");
         }
         return s.toString();
-    }
-
-    /**
-     * Netty logger implementation
-     */
-    private static class NettyInternalLogger extends AbstractInternalLogger {
-
-        @Override
-        public boolean isDebugEnabled() {
-            return false;
-        }
-
-        @Override
-        public boolean isInfoEnabled() {
-            return false;
-        }
-
-        @Override
-        public boolean isWarnEnabled() {
-            return true;
-        }
-
-        @Override
-        public boolean isErrorEnabled() {
-            return true;
-        }
-
-        @Override
-        public void debug(String string) {
-            debug(string, null);
-        }
-
-        @Override
-        public void debug(String string, Throwable thrwbl) {
-        }
-
-        @Override
-        public void info(String string) {
-            info(string, null);
-        }
-
-        @Override
-        public void info(String string, Throwable thrwbl) {
-        }
-
-        @Override
-        public void warn(String string) {
-            warn(string, null);
-        }
-
-        @Override
-        public void warn(String string, Throwable thrwbl) {
-            getLogger().warn("netty warning: " + string);
-        }
-
-        @Override
-        public void error(String string) {
-            error(string, null);
-        }
-
-        @Override
-        public void error(String string, Throwable thrwbl) {
-            getLogger().error("netty error: " + string);
-        }
-
     }
 
 }

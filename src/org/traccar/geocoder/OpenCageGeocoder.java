@@ -22,7 +22,7 @@ import javax.json.JsonObject;
 public class OpenCageGeocoder extends JsonGeocoder {
 
     public OpenCageGeocoder(String url, String key, int cacheSize, AddressFormat addressFormat) {
-        super(url + "/json?q=%f,%f&key=" + key, cacheSize, addressFormat);
+        super(url + "/json?q=%f,%f&no_annotations=1&key=" + key, cacheSize, addressFormat);
     }
 
     @Override
@@ -33,6 +33,9 @@ public class OpenCageGeocoder extends JsonGeocoder {
             if (location != null) {
                 Address address = new Address();
 
+                if (result.getJsonObject(0).containsKey("formatted")) {
+                    address.setFormattedAddress(result.getJsonObject(0).getString("formatted"));
+                }
                 if (location.containsKey("building")) {
                     address.setHouse(location.getString("building"));
                 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,57 +15,50 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.frame.FrameDecoder;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import org.traccar.BaseFrameDecoder;
 
-import java.nio.charset.StandardCharsets;
-
-public class WatchFrameDecoder extends FrameDecoder {
-
-    public static final int MESSAGE_HEADER = 20;
+public class WatchFrameDecoder extends BaseFrameDecoder {
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
+            ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
-        if (buf.readableBytes() >= MESSAGE_HEADER) {
-            ChannelBuffer lengthBuffer = ChannelBuffers.dynamicBuffer();
-            buf.getBytes(buf.readerIndex() + MESSAGE_HEADER - 4 - 1, lengthBuffer, 4);
-            int length = Integer.parseInt(lengthBuffer.toString(StandardCharsets.US_ASCII), 16) + MESSAGE_HEADER + 1;
-            if (buf.readableBytes() >= length) {
-                ChannelBuffer frame = ChannelBuffers.dynamicBuffer();
-                int endIndex = buf.readerIndex() + length;
-                while (buf.readerIndex() < endIndex) {
-                    byte b = buf.readByte();
-                    if (b == 0x7D) {
-                        switch (buf.readByte()) {
-                            case 0x01:
-                                frame.writeByte(0x7D);
-                                break;
-                            case 0x02:
-                                frame.writeByte(0x5B);
-                                break;
-                            case 0x03:
-                                frame.writeByte(0x5D);
-                                break;
-                            case 0x04:
-                                frame.writeByte(0x2C);
-                                break;
-                            case 0x05:
-                                frame.writeByte(0x2A);
-                                break;
-                            default:
-                                throw new IllegalArgumentException();
-                        }
-                    } else {
-                        frame.writeByte(b);
+        int endIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ']') + 1;
+        if (endIndex > 0) {
+            ByteBuf frame = Unpooled.buffer();
+            while (buf.readerIndex() < endIndex) {
+                byte b1 = buf.readByte();
+                if (b1 == '}') {
+                    byte b2 = buf.readByte();
+                    switch (b2) {
+                        case 0x01:
+                            frame.writeByte('}');
+                            break;
+                        case 0x02:
+                            frame.writeByte('[');
+                            break;
+                        case 0x03:
+                            frame.writeByte(']');
+                            break;
+                        case 0x04:
+                            frame.writeByte(',');
+                            break;
+                        case 0x05:
+                            frame.writeByte('*');
+                            break;
+                        default:
+                            throw new IllegalArgumentException(String.format(
+                                    "unexpected byte at %d: 0x%02x", buf.readerIndex() - 1, b2));
                     }
+                } else {
+                    frame.writeByte(b1);
                 }
-                return frame;
             }
+            return frame;
         }
 
         return null;

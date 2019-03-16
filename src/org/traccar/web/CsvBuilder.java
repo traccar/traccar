@@ -28,17 +28,17 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.Context;
-import org.traccar.helper.Log;
+import org.traccar.helper.DateUtil;
 
 public class CsvBuilder {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(CsvBuilder.class);
+
     private static final String LINE_ENDING = "\r\n";
     private static final String SEPARATOR = ";";
-    private static final DateTimeFormatter DATE_FORMAT = ISODateTimeFormat.dateTime();
 
     private StringBuilder builder = new StringBuilder();
 
@@ -51,7 +51,7 @@ public class CsvBuilder {
 
     private SortedSet<Method> getSortedMethods(Object object) {
         Method[] methodArray = object.getClass().getMethods();
-        SortedSet<Method> methods = new TreeSet<Method>(new Comparator<Method>() {
+        SortedSet<Method> methods = new TreeSet<>(new Comparator<Method>() {
             @Override
             public int compare(Method m1, Method m2) {
                 if (m1.getName().equals("getAttributes") && !m1.getName().equals(m2.getName())) {
@@ -75,23 +75,23 @@ public class CsvBuilder {
             if (method.getName().startsWith("get") && method.getParameterTypes().length == 0) {
                 try {
                     if (method.getReturnType().equals(boolean.class)) {
-                        builder.append((Boolean) method.invoke(object));
+                        builder.append(method.invoke(object));
                         addSeparator();
                     } else if (method.getReturnType().equals(int.class)) {
-                        builder.append((Integer) method.invoke(object));
+                        builder.append(method.invoke(object));
                         addSeparator();
                     } else if (method.getReturnType().equals(long.class)) {
-                        builder.append((Long) method.invoke(object));
+                        builder.append(method.invoke(object));
                         addSeparator();
                     } else if (method.getReturnType().equals(double.class)) {
-                        builder.append((Double) method.invoke(object));
+                        builder.append(method.invoke(object));
                         addSeparator();
                     } else if (method.getReturnType().equals(String.class)) {
                         builder.append((String) method.invoke(object));
                         addSeparator();
                     } else if (method.getReturnType().equals(Date.class)) {
                         Date value = (Date) method.invoke(object);
-                        builder.append(DATE_FORMAT.print(new DateTime(value)));
+                        builder.append(DateUtil.formatDate(value));
                         addSeparator();
                     } else if (method.getReturnType().equals(Map.class)) {
                         Map value = (Map) method.invoke(object);
@@ -103,12 +103,12 @@ public class CsvBuilder {
                                 builder.append(map);
                                 addSeparator();
                             } catch (JsonProcessingException e) {
-                                Log.warning(e);
+                                LOGGER.warn("Map JSON formatting error", e);
                             }
                         }
                     }
                 } catch (IllegalAccessException | InvocationTargetException error) {
-                    Log.warning(error);
+                    LOGGER.warn("Reflection invocation error", error);
                 }
             }
         }
@@ -160,4 +160,5 @@ public class CsvBuilder {
     public String build() {
         return builder.toString();
     }
+
 }

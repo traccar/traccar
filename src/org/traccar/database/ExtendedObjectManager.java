@@ -23,14 +23,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.Context;
-import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.model.Permission;
 import org.traccar.model.BaseModel;
 
 public abstract class ExtendedObjectManager<T extends BaseModel> extends SimpleObjectManager<T> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExtendedObjectManager.class);
 
     private final Map<Long, Set<Long>> deviceItems = new ConcurrentHashMap<>();
     private final Map<Long, Set<Long>> deviceItemsWithGroups = new ConcurrentHashMap<>();
@@ -95,7 +98,7 @@ public abstract class ExtendedObjectManager<T extends BaseModel> extends SimpleO
                     long groupId = device.getGroupId();
                     while (groupId != 0) {
                         getAllDeviceItems(device.getId()).addAll(getGroupItems(groupId));
-                        Group group = (Group) Context.getGroupsManager().getById(groupId);
+                        Group group = Context.getGroupsManager().getById(groupId);
                         if (group != null) {
                             groupId = group.getGroupId();
                         } else {
@@ -105,7 +108,7 @@ public abstract class ExtendedObjectManager<T extends BaseModel> extends SimpleO
                 }
 
             } catch (SQLException | ClassNotFoundException error) {
-                Log.warning(error);
+                LOGGER.warn("Refresh permissions error", error);
             }
         }
     }

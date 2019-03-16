@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,17 @@
  */
 package org.traccar;
 
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.handler.codec.string.StringEncoder;
+import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.database.ActiveDevice;
+import org.traccar.helper.DataConverter;
 import org.traccar.model.Command;
 
-import javax.xml.bind.DatatypeConverter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 public abstract class BaseProtocol implements Protocol {
@@ -31,16 +33,31 @@ public abstract class BaseProtocol implements Protocol {
     private final String name;
     private final Set<String> supportedDataCommands = new HashSet<>();
     private final Set<String> supportedTextCommands = new HashSet<>();
+    private final List<TrackerServer> serverList = new LinkedList<>();
 
     private StringProtocolEncoder textCommandEncoder = null;
 
-    public BaseProtocol(String name) {
-        this.name = name;
+    public static String nameFromClass(Class<?> clazz) {
+        String className = clazz.getSimpleName();
+        return className.substring(0, className.length() - 8).toLowerCase();
+    }
+
+    public BaseProtocol() {
+        name = nameFromClass(getClass());
     }
 
     @Override
     public String getName() {
         return name;
+    }
+
+    protected void addServer(TrackerServer server) {
+        serverList.add(server);
+    }
+
+    @Override
+    public Collection<TrackerServer> getServerList() {
+        return serverList;
     }
 
     public void setSupportedDataCommands(String... commands) {
@@ -76,10 +93,10 @@ public abstract class BaseProtocol implements Protocol {
             activeDevice.write(command);
         } else if (command.getType().equals(Command.TYPE_CUSTOM)) {
             String data = command.getString(Command.KEY_DATA);
-            if (activeDevice.getChannel().getPipeline().get(StringEncoder.class) != null) {
+            if (BasePipelineFactory.getHandler(activeDevice.getChannel().pipeline(), StringEncoder.class) != null) {
                 activeDevice.write(data);
             } else {
-                activeDevice.write(ChannelBuffers.wrappedBuffer(DatatypeConverter.parseHexBinary(data)));
+                activeDevice.write(Unpooled.wrappedBuffer(DataConverter.parseHex(data)));
             }
         } else {
             throw new RuntimeException("Command " + command.getType() + " is not supported in protocol " + getName());
@@ -92,18 +109,22 @@ public abstract class BaseProtocol implements Protocol {
 
     @Override
     public void sendTextCommand(String destAddress, Command command) throws Exception {
-        if (Context.getSmppManager() != null) {
+        if (Context.getSmsManager() != null) {
             if (command.getType().equals(Command.TYPE_CUSTOM)) {
-                Context.getSmppManager().sendMessageSync(destAddress, command.getString(Command.KEY_DATA), true);
+                Context.getSmsManager().sendMessageSync(destAddress, command.getString(Command.KEY_DATA), true);
             } else if (supportedTextCommands.contains(command.getType()) && textCommandEncoder != null) {
-                Context.getSmppManager().sendMessageSync(destAddress,
-                        (String) textCommandEncoder.encodeCommand(command), true);
+                String encodedCommand = (String) textCommandEncoder.encodeCommand(command);
+                if (encodedCommand != null) {
+                    Context.getSmsManager().sendMessageSync(destAddress, encodedCommand, true);
+                } else {
+                    throw new RuntimeException("Failed to encode command");
+                }
             } else {
                 throw new RuntimeException(
                         "Command " + command.getType() + " is not supported in protocol " + getName());
             }
         } else {
-            throw new RuntimeException("SMPP client is not enabled");
+            throw new RuntimeException("SMS is not enabled");
         }
     }
 

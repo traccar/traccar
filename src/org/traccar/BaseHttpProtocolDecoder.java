@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,12 @@
  */
 package org.traccar;
 
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
-import org.jboss.netty.handler.codec.http.HttpHeaders;
-import org.jboss.netty.handler.codec.http.HttpResponse;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.jboss.netty.handler.codec.http.HttpVersion;
+import io.netty.channel.Channel;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpResponse;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpVersion;
 
 public abstract class BaseHttpProtocolDecoder extends BaseProtocolDecoder {
 
@@ -30,9 +30,9 @@ public abstract class BaseHttpProtocolDecoder extends BaseProtocolDecoder {
 
     public void sendResponse(Channel channel, HttpResponseStatus status) {
         if (channel != null) {
-            HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, status);
-            response.headers().add(HttpHeaders.Names.CONTENT_LENGTH, 0);
-            channel.write(response);
+            HttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status);
+            response.headers().add(HttpHeaderNames.CONTENT_LENGTH, 0);
+            channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
     }
 

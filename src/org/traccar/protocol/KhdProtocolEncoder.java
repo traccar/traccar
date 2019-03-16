@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,10 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.helper.Checksum;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 public class KhdProtocolEncoder extends BaseProtocolEncoder {
@@ -27,9 +26,9 @@ public class KhdProtocolEncoder extends BaseProtocolEncoder {
     public static final int MSG_CUT_OIL = 0x39;
     public static final int MSG_RESUME_OIL = 0x38;
 
-    private ChannelBuffer encodeCommand(int command) {
+    private ByteBuf encodeCommand(int command, String uniqueId) {
 
-        ChannelBuffer buf = ChannelBuffers.dynamicBuffer();
+        ByteBuf buf = Unpooled.buffer();
 
         buf.writeByte(0x29);
         buf.writeByte(0x29);
@@ -37,9 +36,14 @@ public class KhdProtocolEncoder extends BaseProtocolEncoder {
         buf.writeByte(command);
         buf.writeShort(6); // size
 
-        buf.writeInt(0); // terminal id
+        uniqueId = "00000000".concat(uniqueId);
+        uniqueId = uniqueId.substring(uniqueId.length() - 8);
+        buf.writeByte(Integer.parseInt(uniqueId.substring(0, 2)));
+        buf.writeByte(Integer.parseInt(uniqueId.substring(2, 4)) + 0x80);
+        buf.writeByte(Integer.parseInt(uniqueId.substring(4, 6)) + 0x80);
+        buf.writeByte(Integer.parseInt(uniqueId.substring(6, 8)));
 
-        buf.writeByte(Checksum.xor(buf.toByteBuffer()));
+        buf.writeByte(Checksum.xor(buf.nioBuffer()));
         buf.writeByte(0x0D); // ending
 
         return buf;
@@ -48,17 +52,16 @@ public class KhdProtocolEncoder extends BaseProtocolEncoder {
     @Override
     protected Object encodeCommand(Command command) {
 
+        String uniqueId = getUniqueId(command.getDeviceId());
+
         switch (command.getType()) {
             case Command.TYPE_ENGINE_STOP:
-                return encodeCommand(MSG_CUT_OIL);
+                return encodeCommand(MSG_CUT_OIL, uniqueId);
             case Command.TYPE_ENGINE_RESUME:
-                return encodeCommand(MSG_RESUME_OIL);
+                return encodeCommand(MSG_RESUME_OIL, uniqueId);
             default:
-                Log.warning(new UnsupportedOperationException(command.getType()));
-                break;
+                return null;
         }
-
-        return null;
     }
 
 }

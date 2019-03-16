@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,13 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.BcdUtil;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
@@ -31,16 +33,19 @@ import org.traccar.model.Position;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
-    public H02ProtocolDecoder(H02Protocol protocol) {
+    public H02ProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
-    private static double readCoordinate(ChannelBuffer buf, boolean lon) {
+    private static double readCoordinate(ByteBuf buf, boolean lon) {
 
         int degrees = BcdUtil.readInteger(buf, 2);
         if (lon) {
@@ -69,7 +74,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
         if (!BitUtil.check(status, 0)) {
             position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
-        } else if (!BitUtil.check(status, 1)) {
+        } else if (!BitUtil.check(status, 1) || !BitUtil.check(status, 18)) {
             position.set(Position.KEY_ALARM, Position.ALARM_SOS);
         } else if (!BitUtil.check(status, 2)) {
             position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
@@ -99,15 +104,22 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private Position decodeBinary(ChannelBuffer buf, Channel channel, SocketAddress remoteAddress) {
+    private Position decodeBinary(ByteBuf buf, Channel channel, SocketAddress remoteAddress) {
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
+
+        boolean longId = buf.readableBytes() == 42;
 
         buf.readByte(); // marker
 
-        DeviceSession deviceSession = getDeviceSession(
-                channel, remoteAddress, ChannelBuffers.hexDump(buf.readBytes(5)));
+        String id;
+        if (longId) {
+            id = ByteBufUtil.hexDump(buf.readSlice(8)).substring(0, 15);
+        } else {
+            id = ByteBufUtil.hexDump(buf.readSlice(5));
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
         if (deviceSession == null) {
             return null;
         }
@@ -149,18 +161,14 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN = new PatternBuilder()
             .text("*")
             .expression("..,")                   // manufacturer
-            .number("(d+),")                     // imei
-            .groupBegin()
-            .text("VP1,")
-            .or()
+            .number("(d+)?,")                    // imei
             .groupBegin()
             .text("V4,")
             .expression("(.*),")                 // response
             .or()
-            .expression("V[^,]*,")
+            .expression("(V[^,]*),")
             .groupEnd()
             .number("(?:(dd)(dd)(dd))?,")        // time (hhmmss)
-            .groupEnd()
             .groupBegin()
             .expression("([ABV])?,")             // validity
             .or()
@@ -180,6 +188,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .expression("([EW]),")
             .number("(d+.?d*),")                 // speed
             .number("(d+.?d*)?,")                // course
+            .number("(?:d+,)?")                  // battery
             .number("(?:(dd)(dd)(dd))?")         // date (ddmmyy)
             .groupBegin()
             .expression(",[^,]*,")
@@ -255,6 +264,37 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .text("#").optional()
             .compile();
 
+    private static final Pattern PATTERN_VP1 = new PatternBuilder()
+            .text("*hq,")
+            .number("(d{15}),")                  // imei
+            .text("VP1,")
+            .groupBegin()
+            .text("V,")
+            .number("(d+),")                     // mcc
+            .number("(d+),")                     // mnc
+            .expression("([^#]+)")               // cells
+            .or()
+            .expression("[AB],")                 // validity
+            .number("(d+)(dd.d+),")              // latitude
+            .expression("([NS]),")
+            .number("(d+)(dd.d+),")              // longitude
+            .expression("([EW]),")
+            .number("(d+.d+),")                  // speed
+            .number("(d+.d+),")                  // course
+            .number("(dd)(dd)(dd)")              // date (ddmmyy)
+            .groupEnd()
+            .any()
+            .compile();
+
+    private void sendResponse(Channel channel, SocketAddress remoteAddress, String id, String type) {
+        if (channel != null && id != null) {
+            DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+            String response = String.format("*HQ,%s,V4,%s,%s#", id, type, dateFormat.format(new Date()));
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+        }
+    }
+
     private Position decodeText(String sentence, Channel channel, SocketAddress remoteAddress) {
 
         Parser parser = new Parser(PATTERN, sentence);
@@ -262,17 +302,21 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        String id = parser.next();
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
         if (deviceSession == null) {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         if (parser.hasNext()) {
             position.set(Position.KEY_RESULT, parser.next());
+        }
+
+        if (parser.hasNext() && parser.next().equals("V1")) {
+            sendResponse(channel, remoteAddress, id, "V1");
         }
 
         DateBuilder dateBuilder = new DateBuilder();
@@ -343,13 +387,15 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        String id = parser.next();
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
         if (deviceSession == null) {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        sendResponse(channel, remoteAddress, id, "NBR");
+
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         DateBuilder dateBuilder = new DateBuilder()
@@ -388,8 +434,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         DateBuilder dateBuilder = new DateBuilder()
@@ -422,8 +467,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         DateBuilder dateBuilder = new DateBuilder()
@@ -452,16 +496,63 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private Position decodeVp1(String sentence, Channel channel, SocketAddress remoteAddress) {
+
+        Parser parser = new Parser(PATTERN_VP1, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        if (parser.hasNext(3)) {
+
+            getLastLocation(position, null);
+
+            int mcc = parser.nextInt();
+            int mnc = parser.nextInt();
+
+            Network network = new Network();
+            for (String cell : parser.next().split("Y")) {
+                String[] values = cell.split(",");
+                network.addCellTower(CellTower.from(mcc, mnc,
+                        Integer.parseInt(values[0]), Integer.parseInt(values[1]), Integer.parseInt(values[2])));
+            }
+
+            position.setNetwork(network);
+
+        } else {
+
+            position.setValid(true);
+            position.setLatitude(parser.nextCoordinate());
+            position.setLongitude(parser.nextCoordinate());
+            position.setSpeed(parser.nextDouble());
+            position.setCourse(parser.nextDouble());
+
+            position.setTime(new DateBuilder()
+                    .setDateReverse(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0)).getDate());
+
+        }
+
+        return position;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
         String marker = buf.toString(0, 1, StandardCharsets.US_ASCII);
 
         switch (marker) {
             case "*":
-                String sentence = buf.toString(StandardCharsets.US_ASCII);
+                String sentence = buf.toString(StandardCharsets.US_ASCII).trim();
                 int typeStart = sentence.indexOf(',', sentence.indexOf(',') + 1) + 1;
                 int typeEnd = sentence.indexOf(',', typeStart);
                 if (typeEnd > 0) {
@@ -473,6 +564,8 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
                             return decodeLink(sentence, channel, remoteAddress);
                         case "V3":
                             return decodeV3(sentence, channel, remoteAddress);
+                        case "VP1":
+                            return decodeVp1(sentence, channel, remoteAddress);
                         default:
                             return decodeText(sentence, channel, remoteAddress);
                     }

@@ -1,5 +1,6 @@
 /*
  * Copyright 2016 Nyash (nyashh@gmail.com)
+ * Copyright 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +16,16 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.frame.FrameDecoder;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import org.traccar.BaseFrameDecoder;
 
-public class JpKorjarFrameDecoder extends FrameDecoder {
+public class JpKorjarFrameDecoder extends BaseFrameDecoder {
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
+            ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
         if (buf.readableBytes() < 80) {
             return null;
@@ -40,7 +41,7 @@ public class JpKorjarFrameDecoder extends FrameDecoder {
             return null;
         }
 
-        return buf.readBytes(endIndex + 1);
+        return buf.readRetainedSlice(endIndex + 1);
     }
 
 }

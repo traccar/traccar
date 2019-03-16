@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,11 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -29,7 +30,7 @@ import java.util.Date;
 
 public class RecodaProtocolDecoder extends BaseProtocolDecoder {
 
-    public RecodaProtocolDecoder(RecodaProtocol protocol) {
+    public RecodaProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
@@ -43,19 +44,19 @@ public class RecodaProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
-        int type = buf.readInt();
-        buf.readUnsignedInt(); // length
+        int type = buf.readIntLE();
+        buf.readUnsignedIntLE(); // length
 
         if (type != MSG_HEARTBEAT) {
-            buf.readUnsignedShort(); // version
-            buf.readUnsignedShort(); // index
+            buf.readUnsignedShortLE(); // version
+            buf.readUnsignedShortLE(); // index
         }
 
         if (type == MSG_SIGNAL_LINK_REGISTRATION) {
 
-            getDeviceSession(channel, remoteAddress, buf.readBytes(12).toString(StandardCharsets.US_ASCII));
+            getDeviceSession(channel, remoteAddress, buf.readSlice(12).toString(StandardCharsets.US_ASCII));
 
         } else if (type == MSG_GPS_DATA) {
 
@@ -64,25 +65,24 @@ public class RecodaProtocolDecoder extends BaseProtocolDecoder {
                 return null;
             }
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
-            position.setTime(new Date(buf.readLong()));
+            position.setTime(new Date(buf.readLongLE()));
 
             int flags = buf.readUnsignedByte();
 
             if (BitUtil.check(flags, 0)) {
 
-                buf.readUnsignedShort(); // declination
+                buf.readUnsignedShortLE(); // declination
 
-                position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
+                position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShortLE()));
 
                 position.setLongitude(buf.readUnsignedByte() + buf.readUnsignedByte() / 60.0);
                 position.setLatitude(buf.readUnsignedByte() + buf.readUnsignedByte() / 60.0);
 
-                position.setLongitude(position.getLongitude() + buf.readUnsignedInt() / 3600.0);
-                position.setLatitude(position.getLatitude() + buf.readUnsignedInt() / 3600.0);
+                position.setLongitude(position.getLongitude() + buf.readUnsignedIntLE() / 3600.0);
+                position.setLatitude(position.getLatitude() + buf.readUnsignedIntLE() / 3600.0);
 
                 int status = buf.readUnsignedByte();
 

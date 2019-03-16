@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2014 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,12 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -33,7 +35,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
     private String format0;
     private String format1;
 
-    public GlobalSatProtocolDecoder(GlobalSatProtocol protocol) {
+    public GlobalSatProtocolDecoder(Protocol protocol) {
         super(protocol);
 
         format0 = Context.getConfig().getString(getProtocolName() + ".format0", "TSPRXAB27GHKLMnaicz*U!");
@@ -51,7 +53,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
     private Position decodeOriginal(Channel channel, SocketAddress remoteAddress, String sentence) {
 
         if (channel != null) {
-            channel.write("ACK\r");
+            channel.writeAndFlush(new NetworkMessage("ACK\r", remoteAddress));
         }
 
         String format;
@@ -76,8 +78,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
         }
         String[] values = sentence.split(",");
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
 
         for (int formatIndex = 0, valueIndex = 1; formatIndex < format.length()
                 && valueIndex < values.length; formatIndex++) {
@@ -207,8 +208,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {

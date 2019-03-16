@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,13 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
@@ -31,7 +33,7 @@ import java.util.Date;
 
 public class ThinkRaceProtocolDecoder extends BaseProtocolDecoder {
 
-    public ThinkRaceProtocolDecoder(ThinkRaceProtocol protocol) {
+    public ThinkRaceProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
@@ -52,10 +54,10 @@ public class ThinkRaceProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         buf.skipBytes(2); // header
-        ChannelBuffer id = buf.readBytes(12);
+        ByteBuf id = buf.readSlice(12);
         buf.readUnsignedByte(); // separator
         int type = buf.readUnsignedByte();
         buf.readUnsignedShort(); // length
@@ -68,7 +70,7 @@ public class ThinkRaceProtocolDecoder extends BaseProtocolDecoder {
                 String imei = buf.toString(buf.readerIndex(), 15, StandardCharsets.US_ASCII);
                 DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
                 if (deviceSession != null && channel != null) {
-                    ChannelBuffer response = ChannelBuffers.dynamicBuffer();
+                    ByteBuf response = Unpooled.buffer();
                     response.writeByte(0x48); response.writeByte(0x52); // header
                     response.writeBytes(id);
                     response.writeByte(0x2c); // separator
@@ -76,7 +78,7 @@ public class ThinkRaceProtocolDecoder extends BaseProtocolDecoder {
                     response.writeShort(0x0002); // length
                     response.writeShort(0x8000);
                     response.writeShort(0x0000); // checksum
-                    channel.write(response);
+                    channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
                 }
             }
 
@@ -87,8 +89,7 @@ public class ThinkRaceProtocolDecoder extends BaseProtocolDecoder {
                 return null;
             }
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             position.setTime(new Date(buf.readUnsignedInt() * 1000));

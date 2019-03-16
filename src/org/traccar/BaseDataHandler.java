@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,22 @@
  */
 package org.traccar;
 
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.traccar.model.Position;
 
-public abstract class BaseDataHandler extends OneToOneDecoder {
+public abstract class BaseDataHandler extends ChannelInboundHandlerAdapter {
 
     @Override
-    protected final Object decode(ChannelHandlerContext ctx, Channel channel, Object msg) throws Exception {
-
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof Position) {
-            return handlePosition((Position) msg);
+            Position position = handlePosition((Position) msg);
+            if (position != null) {
+                ctx.fireChannelRead(position);
+            }
+        } else {
+            super.channelRead(ctx, msg);
         }
-
-        return msg;
     }
 
     protected abstract Position handlePosition(Position position);

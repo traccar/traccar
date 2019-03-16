@@ -15,15 +15,14 @@
  */
 package org.traccar.helper;
 
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
-
 public final class DateUtil {
-
-    private static final DateTimeFormatter DATE_FORMAT = ISODateTimeFormat.dateTimeParser();
 
     private DateUtil() {
     }
@@ -61,6 +60,19 @@ public final class DateUtil {
     }
 
     public static Date parseDate(String value) {
-        return DATE_FORMAT.parseDateTime(value).toDate();
+        return Date.from(Instant.from(DateTimeFormatter.ISO_ZONED_DATE_TIME.parse(value)));
     }
+
+    public static String formatDate(Date date) {
+        return formatDate(date, true);
+    }
+
+    public static String formatDate(Date date, boolean zoned) {
+        if (zoned) {
+            return DateTimeFormatter.ISO_OFFSET_DATE_TIME.withZone(ZoneId.systemDefault()).format(date.toInstant());
+        } else {
+            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
+        }
+    }
+
 }

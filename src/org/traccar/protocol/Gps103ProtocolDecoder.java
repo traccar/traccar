@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,22 +15,33 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.Context;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
+import org.traccar.helper.DataConverter;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Gps103ProtocolDecoder(Gps103Protocol protocol) {
+    private int photoPackets = 0;
+    private ByteBuf photo;
+
+    public Gps103ProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
@@ -38,10 +49,19 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             .text("imei:")
             .number("(d+),")                     // imei
             .expression("([^,]+),")              // alarm
+            .groupBegin()
             .number("(dd)/?(dd)/?(dd) ?")        // local date (yymmdd)
             .number("(dd):?(dd)(?:dd)?,")        // local time (hhmmss)
+            .or()
+            .number("d*,")
+            .groupEnd()
             .expression("([^,]+)?,")             // rfid
-            .expression("[FL],")                 // full / low
+            .groupBegin()
+            .text("L,,,")
+            .number("(x+),,")                    // lac
+            .number("(x+),,,")                   // cid
+            .or()
+            .text("F,")
             .groupBegin()
             .number("(dd)(dd)(dd).d+")           // time utc (hhmmss)
             .or()
@@ -55,30 +75,18 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             .expression("([EW]),").optional()
             .number("(d+)(dd.d+),")              // longitude (dddmm.mmmm)
             .expression("([EW])?,").optional()
-            .number("(d+.?d*)?,?")               // speed
-            .number("(d+.?d*)?,?")               // course
-            .number("(d+.?d*)?,?")               // altitude
-            .expression("([^,;]+)?,?")
-            .expression("([^,;]+)?,?")
-            .expression("([^,;]+)?,?")
-            .expression("([^,;]+)?,?")
-            .expression("([^,;]+)?,?")
+            .number("(d+.?d*)?").optional()      // speed
+            .number(",(d+.?d*)?").optional()     // course
+            .number(",(d+.?d*)?").optional()     // altitude
+            .number(",([01])?").optional()       // ignition
+            .number(",([01])?").optional()       // door
+            .groupBegin()
+            .number(",(?:(d+.d+)%)?")            // fuel 1
+            .number(",(?:(d+.d+)%|d+)?")         // fuel 2
+            .groupEnd("?")
+            .number(",([-+]?d+)?").optional()    // temperature
+            .groupEnd()
             .any()
-            .compile();
-
-    private static final Pattern PATTERN_NETWORK = new PatternBuilder()
-            .text("imei:")
-            .number("(d+),")                     // imei
-            .expression("[^,]+,")                // alarm
-            .number("d*,,")
-            .text("L,,,")
-            .number("(x+),,")                    // lac
-            .number("(x+),,,")                   // cid
-            .any()
-            .compile();
-
-    private static final Pattern PATTERN_HANDSHAKE = new PatternBuilder()
-            .number("##,imei:(d+),A")
             .compile();
 
     private static final Pattern PATTERN_OBD = new PatternBuilder()
@@ -87,7 +95,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             .expression("OBD,")                  // type
             .number("(dd)(dd)(dd)")              // date (yymmdd)
             .number("(dd)(dd)(dd),")             // time (hhmmss)
-            .number("(d+),")                     // odometer
+            .number("(d+)?,")                    // odometer
             .number("(d+.d+)?,")                 // fuel instant
             .number("(d+.d+)?,")                 // fuel average
             .number("(d+)?,")                    // hours
@@ -101,11 +109,35 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
+    private static final Pattern PATTERN_ALT = new PatternBuilder()
+            .text("imei:")
+            .number("(d+),")                     // imei
+            .expression("[^,]+,")
+            .expression("(?:-+|(.+)),")          // event
+            .expression("(?:-+|(.+)),")          // sensor id
+            .expression("(?:-+|(.+)),")          // sensor voltage
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
+            .number("(dd)(dd)(dd),")             // date (ddmmyy)
+            .number("(d+),")                     // rssi
+            .number("(d),")                      // gps status
+            .number("(-?d+.d+),")                // latitude
+            .number("(-?d+.d+),")                // longitude
+            .number("(d+),")                     // speed
+            .number("(d+),")                     // course
+            .number("(-?d+),")                   // altitude
+            .number("(d+.d+),")                  // hdop
+            .number("(d+),")                     // satellites
+            .number("([01]),")                   // ignition
+            .number("([01]),")                   // charge
+            .expression("(?:-+|(.+))")           // error
+            .any()
+            .compile();
+
     private String decodeAlarm(String value) {
         if (value.startsWith("T:")) {
             return Position.ALARM_TEMPERATURE;
         } else if (value.startsWith("oil")) {
-            return Position.ALARM_OIL_LEAK;
+            return Position.ALARM_FUEL_LEAK;
         }
         switch (value) {
             case "tracker":
@@ -143,86 +175,9 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    @Override
-    protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+    private Position decodeRegular(Channel channel, SocketAddress remoteAddress, String sentence) {
 
-        String sentence = (String) msg;
-
-        // Send response #1
-        if (sentence.contains("##")) {
-            if (channel != null) {
-                channel.write("LOAD", remoteAddress);
-                Parser handshakeParser = new Parser(PATTERN_HANDSHAKE, sentence);
-                if (handshakeParser.matches()) {
-                    getDeviceSession(channel, remoteAddress, handshakeParser.next());
-                }
-            }
-            return null;
-        }
-
-        // Send response #2
-        if (!sentence.isEmpty() && Character.isDigit(sentence.charAt(0))) {
-            if (channel != null) {
-                channel.write("ON", remoteAddress);
-            }
-            int start = sentence.indexOf("imei:");
-            if (start >= 0) {
-                sentence = sentence.substring(start);
-            } else {
-                return null;
-            }
-        }
-
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
-
-        Parser parser = new Parser(PATTERN_NETWORK, sentence);
-        if (parser.matches()) {
-
-            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
-            if (deviceSession == null) {
-                return null;
-            }
-            position.setDeviceId(deviceSession.getDeviceId());
-
-            getLastLocation(position, null);
-
-            position.setNetwork(new Network(
-                    CellTower.fromLacCid(parser.nextHexInt(0), parser.nextHexInt(0))));
-
-            return position;
-
-        }
-
-        parser = new Parser(PATTERN_OBD, sentence);
-        if (parser.matches()) {
-
-            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
-            if (deviceSession == null) {
-                return null;
-            }
-            position.setDeviceId(deviceSession.getDeviceId());
-
-            getLastLocation(position, parser.nextDateTime());
-
-            position.set(Position.KEY_ODOMETER, parser.nextInt(0));
-            parser.nextDouble(0); // instant fuel consumption
-            position.set(Position.KEY_FUEL_CONSUMPTION, parser.nextDouble(0));
-            position.set(Position.KEY_HOURS, parser.nextInt());
-            position.set(Position.KEY_OBD_SPEED, parser.nextInt(0));
-            position.set(Position.KEY_ENGINE_LOAD, parser.next());
-            position.set(Position.KEY_COOLANT_TEMP, parser.nextInt());
-            position.set(Position.KEY_THROTTLE, parser.next());
-            position.set(Position.KEY_RPM, parser.nextInt(0));
-            position.set(Position.KEY_BATTERY, parser.nextDouble(0));
-            position.set(Position.KEY_DTCS, parser.next().replace(',', ' ').trim());
-
-            return position;
-
-        }
-
-        parser = new Parser(PATTERN, sentence);
+        Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
             return null;
         }
@@ -232,22 +187,27 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         if (deviceSession == null) {
             return null;
         }
+
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         String alarm = parser.next();
         position.set(Position.KEY_ALARM, decodeAlarm(alarm));
         if (alarm.equals("help me")) {
             if (channel != null) {
-                channel.write("**,imei:" + imei + ",E;", remoteAddress);
+                channel.writeAndFlush(new NetworkMessage("**,imei:" + imei + ",E;", remoteAddress));
             }
+        } else if (alarm.startsWith("vt")) {
+            photoPackets = Integer.parseInt(alarm.substring(2));
+            photo = Unpooled.buffer();
         } else if (alarm.equals("acc on")) {
             position.set(Position.KEY_IGNITION, true);
         } else if (alarm.equals("acc off")) {
             position.set(Position.KEY_IGNITION, false);
         } else if (alarm.startsWith("T:")) {
-            position.set(Position.PREFIX_TEMP + 1, alarm.substring(2));
+            position.set(Position.PREFIX_TEMP + 1, Double.parseDouble(alarm.substring(2)));
         } else if (alarm.startsWith("oil ")) {
-            position.set("oil", alarm.substring(4));
+            position.set(Position.KEY_FUEL_LEVEL, Double.parseDouble(alarm.substring(4)));
         } else if (!position.getAttributes().containsKey(Position.KEY_ALARM) && !alarm.equals("tracker")) {
             position.set(Position.KEY_EVENT, alarm);
         }
@@ -263,36 +223,200 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_DRIVER_UNIQUE_ID, rfid);
         }
 
-        String utcHours = parser.next();
-        String utcMinutes = parser.next();
+        if (parser.hasNext(2)) {
 
-        dateBuilder.setTime(localHours, localMinutes, parser.nextInt(0));
+            getLastLocation(position, null);
 
-        // Timezone calculation
-        if (utcHours != null && utcMinutes != null) {
-            int deltaMinutes = (localHours - Integer.parseInt(utcHours)) * 60;
-            deltaMinutes += localMinutes - Integer.parseInt(utcMinutes);
-            if (deltaMinutes <= -12 * 60) {
-                deltaMinutes += 24 * 60;
-            } else if (deltaMinutes > 12 * 60) {
-                deltaMinutes -= 24 * 60;
+            position.setNetwork(new Network(CellTower.fromLacCid(parser.nextHexInt(0), parser.nextHexInt(0))));
+
+        } else {
+
+            String utcHours = parser.next();
+            String utcMinutes = parser.next();
+
+            dateBuilder.setTime(localHours, localMinutes, parser.nextInt(0));
+
+            // Timezone calculation
+            if (utcHours != null && utcMinutes != null) {
+                int deltaMinutes = (localHours - Integer.parseInt(utcHours)) * 60;
+                deltaMinutes += localMinutes - Integer.parseInt(utcMinutes);
+                if (deltaMinutes <= -12 * 60) {
+                    deltaMinutes += 24 * 60;
+                } else if (deltaMinutes > 12 * 60) {
+                    deltaMinutes -= 24 * 60;
+                }
+                dateBuilder.addMinute(-deltaMinutes);
             }
-            dateBuilder.addMinute(-deltaMinutes);
-        }
-        position.setTime(dateBuilder.getDate());
+            position.setTime(dateBuilder.getDate());
 
-        position.setValid(parser.next().equals("A"));
-        position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN_HEM));
-        position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN_HEM));
-        position.setSpeed(parser.nextDouble(0));
-        position.setCourse(parser.nextDouble(0));
-        position.setAltitude(parser.nextDouble(0));
+            position.setValid(parser.next().equals("A"));
+            position.setFixTime(position.getDeviceTime());
+            position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN_HEM));
+            position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN_HEM));
+            position.setSpeed(parser.nextDouble(0));
+            position.setCourse(parser.nextDouble(0));
+            position.setAltitude(parser.nextDouble(0));
 
-        for (int i = 1; i <= 5; i++) {
-            position.set(Position.PREFIX_IO + i, parser.next());
+            if (parser.hasNext()) {
+                position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
+            }
+            if (parser.hasNext()) {
+                position.set(Position.KEY_DOOR, parser.nextInt() == 1);
+            }
+            position.set("fuel1", parser.nextDouble());
+            position.set("fuel2", parser.nextDouble());
+            position.set(Position.PREFIX_TEMP + 1, parser.nextInt());
+
         }
 
         return position;
+    }
+
+    private Position decodeObd(Channel channel, SocketAddress remoteAddress, String sentence) {
+
+        Parser parser = new Parser(PATTERN_OBD, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, parser.nextDateTime());
+
+        position.set(Position.KEY_ODOMETER, parser.nextInt(0));
+        parser.nextDouble(0); // instant fuel consumption
+        position.set(Position.KEY_FUEL_CONSUMPTION, parser.nextDouble(0));
+        if (parser.hasNext()) {
+            position.set(Position.KEY_HOURS, UnitsConverter.msFromHours(parser.nextInt()));
+        }
+        position.set(Position.KEY_OBD_SPEED, parser.nextInt(0));
+        position.set(Position.KEY_ENGINE_LOAD, parser.next());
+        position.set(Position.KEY_COOLANT_TEMP, parser.nextInt());
+        position.set(Position.KEY_THROTTLE, parser.next());
+        position.set(Position.KEY_RPM, parser.nextInt(0));
+        position.set(Position.KEY_BATTERY, parser.nextDouble(0));
+        position.set(Position.KEY_DTCS, parser.next().replace(',', ' ').trim());
+
+        return position;
+    }
+
+
+    private Position decodeAlternative(Channel channel, SocketAddress remoteAddress, String sentence) {
+
+        Parser parser = new Parser(PATTERN_ALT, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        position.set(Position.KEY_EVENT, parser.next());
+        position.set("sensorId", parser.next());
+        position.set("sensorVoltage", parser.nextDouble());
+
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY));
+
+        position.set(Position.KEY_RSSI, parser.nextInt());
+
+        position.setValid(parser.nextInt() > 0);
+        position.setLatitude(parser.nextDouble());
+        position.setLongitude(parser.nextDouble());
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt()));
+        position.setCourse(parser.nextInt());
+        position.setAltitude(parser.nextInt());
+
+        position.set(Position.KEY_HDOP, parser.nextDouble());
+        position.set(Position.KEY_SATELLITES, parser.nextInt());
+        position.set(Position.KEY_IGNITION, parser.nextInt() > 0);
+        position.set(Position.KEY_CHARGE, parser.nextInt() > 0);
+        position.set("error", parser.next());
+
+        return position;
+    }
+
+    private Position decodePhoto(Channel channel, SocketAddress remoteAddress, String sentence) {
+
+        String imei = sentence.substring(5, 5 + 15);
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
+        if (deviceSession == null) {
+            return null;
+        }
+
+        ByteBuf buf = Unpooled.wrappedBuffer(DataConverter.parseHex(
+                sentence.substring(24, sentence.endsWith(";") ? sentence.length() - 1 : sentence.length())));
+        int index = buf.readUnsignedShortLE();
+        photo.writeBytes(buf, buf.readerIndex() + 2, buf.readableBytes() - 4);
+
+        if (index + 1 >= photoPackets) {
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            try {
+                position.set(Position.KEY_IMAGE, Context.getMediaManager().writeFile(imei, photo, "jpg"));
+            } finally {
+                photoPackets = 0;
+                photo.release();
+                photo = null;
+            }
+
+            return position;
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    protected Object decode(
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+
+        String sentence = (String) msg;
+
+        if (sentence.contains("imei:") && sentence.length() <= 30) {
+            if (channel != null) {
+                channel.writeAndFlush(new NetworkMessage("LOAD", remoteAddress));
+                Matcher matcher = Pattern.compile("imei:(\\d+),").matcher(sentence);
+                if (matcher.find()) {
+                    getDeviceSession(channel, remoteAddress, matcher.group(1));
+                }
+            }
+            return null;
+        }
+
+        if (!sentence.isEmpty() && Character.isDigit(sentence.charAt(0))) {
+            if (channel != null) {
+                channel.writeAndFlush(new NetworkMessage("ON", remoteAddress));
+            }
+            int start = sentence.indexOf("imei:");
+            if (start >= 0) {
+                sentence = sentence.substring(start);
+            } else {
+                return null;
+            }
+        }
+
+        if (sentence.substring(21, 21 + 2).equals("vr")) {
+            return decodePhoto(channel, remoteAddress, sentence);
+        } else if (sentence.substring(21, 21 + 3).contains("OBD")) {
+            return decodeObd(channel, remoteAddress, sentence);
+        } else if (sentence.endsWith("*")) {
+            return decodeAlternative(channel, remoteAddress, sentence);
+        } else {
+            return decodeRegular(channel, remoteAddress, sentence);
+        }
     }
 
 }

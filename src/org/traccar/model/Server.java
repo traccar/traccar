@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,12 @@
 package org.traccar.model;
 
 import org.traccar.database.QueryIgnore;
-import org.traccar.helper.Log;
 
 public class Server extends ExtendedModel {
 
     @QueryIgnore
     public String getVersion() {
-        return Log.getAppVersion();
+        return getClass().getPackage().getImplementationVersion();
     }
 
     public void setVersion(String version) {
@@ -156,5 +155,15 @@ public class Server extends ExtendedModel {
 
     public void setLimitCommands(boolean limitCommands) {
         this.limitCommands = limitCommands;
+    }
+
+    private String poiLayer;
+
+    public String getPoiLayer() {
+        return poiLayer;
+    }
+
+    public void setPoiLayer(String poiLayer) {
+        this.poiLayer = poiLayer;
     }
 }

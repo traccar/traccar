@@ -1,0 +1,13 @@
+[Unit]
+Description=traccar
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/traccar
+ExecStart=/opt/traccar/jre/bin/java -jar tracker-server.jar conf/traccar.xml
+SyslogIdentifier=traccar
+SuccessExitStatus=143
+
+[Install]
+WantedBy=multi-user.target

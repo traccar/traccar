@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,16 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.Checksum;
-import org.traccar.helper.Log;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
@@ -33,7 +35,9 @@ import java.util.Date;
 
 public class AplicomProtocolDecoder extends BaseProtocolDecoder {
 
-    public AplicomProtocolDecoder(AplicomProtocol protocol) {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AplicomProtocolDecoder.class);
+
+    public AplicomProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
@@ -82,7 +86,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
 
     private static final int EVENT_DATA = 119;
 
-    private void decodeEventData(Position position, ChannelBuffer buf, int event) {
+    private void decodeEventData(Position position, ByteBuf buf, int event) {
         switch (event) {
             case 2:
             case 40:
@@ -102,6 +106,10 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedInt();
                 buf.readUnsignedByte();
                 break;
+            case 119:
+                position.set("eventData", ByteBufUtil.hexDump(
+                        buf, buf.readerIndex(), Math.min(buf.readableBytes(), 1024)));
+                break;
             case 121:
             case 142:
                 buf.readLong();
@@ -117,7 +125,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private void decodeCanData(ChannelBuffer buf, Position position) {
+    private void decodeCanData(ByteBuf buf, Position position) {
 
         buf.readUnsignedMedium(); // packet identifier
         position.set(Position.KEY_VERSION_FW, buf.readUnsignedByte());
@@ -128,76 +136,76 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
 
         buf.skipBytes(8);
 
-        ArrayList<ChannelBuffer> values = new ArrayList<>(count);
+        ArrayList<ByteBuf> values = new ArrayList<>(count);
 
         for (int i = 0; i < count; i++) {
-            values.add(buf.readBytes(8));
+            values.add(buf.readSlice(8));
         }
 
         for (int i = 0; i < count; i++) {
-            ChannelBuffer value = values.get(i);
+            ByteBuf value = values.get(i);
             switch (buf.readInt()) {
                 case 0x20D:
-                    position.set(Position.KEY_RPM, ChannelBuffers.swapShort(value.readShort()));
-                    position.set("dieselTemperature", ChannelBuffers.swapShort(value.readShort()) * 0.1);
-                    position.set("batteryVoltage", ChannelBuffers.swapShort(value.readShort()) * 0.01);
-                    position.set("supplyAirTempDep1", ChannelBuffers.swapShort(value.readShort()) * 0.1);
+                    position.set(Position.KEY_RPM, value.readShortLE());
+                    position.set("dieselTemperature", value.readShortLE() * 0.1);
+                    position.set("batteryVoltage", value.readShortLE() * 0.01);
+                    position.set("supplyAirTempDep1", value.readShortLE() * 0.1);
                     break;
                 case 0x30D:
-                    position.set("activeAlarm", ChannelBuffers.hexDump(value));
+                    position.set("activeAlarm", ByteBufUtil.hexDump(value));
                     break;
                 case 0x40C:
-                    position.set("airTempDep1", ChannelBuffers.swapShort(value.readShort()) * 0.1);
-                    position.set("airTempDep2", ChannelBuffers.swapShort(value.readShort()) * 0.1);
+                    position.set("airTempDep1", value.readShortLE() * 0.1);
+                    position.set("airTempDep2", value.readShortLE() * 0.1);
                     break;
                 case 0x40D:
-                    position.set("coldUnitState", ChannelBuffers.hexDump(value));
+                    position.set("coldUnitState", ByteBufUtil.hexDump(value));
                     break;
                 case 0x50C:
-                    position.set("defrostTempDep1", ChannelBuffers.swapShort(value.readShort()) * 0.1);
-                    position.set("defrostTempDep2", ChannelBuffers.swapShort(value.readShort()) * 0.1);
+                    position.set("defrostTempDep1", value.readShortLE() * 0.1);
+                    position.set("defrostTempDep2", value.readShortLE() * 0.1);
                     break;
                 case 0x50D:
-                    position.set("condenserPressure", ChannelBuffers.swapShort(value.readShort()) * 0.1);
-                    position.set("suctionPressure", ChannelBuffers.swapShort(value.readShort()) * 0.1);
+                    position.set("condenserPressure", value.readShortLE() * 0.1);
+                    position.set("suctionPressure", value.readShortLE() * 0.1);
                     break;
                 case 0x58C:
                     value.readByte();
                     value.readShort(); // index
                     switch (value.readByte()) {
                         case 0x01:
-                            position.set("setpointZone1", ChannelBuffers.swapInt(value.readInt()) * 0.1);
+                            position.set("setpointZone1", value.readIntLE() * 0.1);
                             break;
                         case 0x02:
-                            position.set("setpointZone2", ChannelBuffers.swapInt(value.readInt()) * 0.1);
+                            position.set("setpointZone2", value.readIntLE() * 0.1);
                             break;
                         case 0x05:
-                            position.set("unitType", ChannelBuffers.swapInt(value.readInt()));
+                            position.set("unitType", value.readIntLE());
                             break;
                         case 0x13:
-                            position.set("dieselHours", ChannelBuffers.swapInt(value.readInt()) / 60 / 60);
+                            position.set("dieselHours", value.readIntLE() / 60 / 60);
                             break;
                         case 0x14:
-                            position.set("electricHours", ChannelBuffers.swapInt(value.readInt()) / 60 / 60);
+                            position.set("electricHours", value.readIntLE() / 60 / 60);
                             break;
                         case 0x17:
-                            position.set("serviceIndicator", ChannelBuffers.swapInt(value.readInt()));
+                            position.set("serviceIndicator", value.readIntLE());
                             break;
                         case 0x18:
-                            position.set("softwareVersion", ChannelBuffers.swapInt(value.readInt()) * 0.01);
+                            position.set("softwareVersion", value.readIntLE() * 0.01);
                             break;
                         default:
                             break;
                     }
                     break;
                 default:
-                    Log.warning(new UnsupportedOperationException());
+                    LOGGER.warn("Aplicom CAN decoding error", new UnsupportedOperationException());
                     break;
             }
         }
     }
 
-    private void decodeD(Position position, ChannelBuffer buf, int selector, int event) {
+    private void decodeD(Position position, ByteBuf buf, int selector, int event) {
 
         if ((selector & 0x0008) != 0) {
             position.setValid((buf.readUnsignedByte() & 0x40) != 0);
@@ -206,11 +214,14 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if ((selector & 0x0004) != 0) {
-            buf.skipBytes(4); // snapshot time
+            position.setDeviceTime(new Date(buf.readUnsignedInt() * 1000));
         }
 
         if ((selector & 0x0008) != 0) {
-            position.setTime(new Date(buf.readUnsignedInt() * 1000));
+            position.setFixTime(new Date(buf.readUnsignedInt() * 1000));
+            if (position.getDeviceTime() == null) {
+                position.setDeviceTime(position.getFixTime());
+            }
             position.setLatitude(buf.readInt() / 1000000.0);
             position.setLongitude(buf.readInt() / 1000000.0);
             position.set(Position.KEY_SATELLITES_VISIBLE, buf.readUnsignedByte());
@@ -292,12 +303,12 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (Context.getConfig().getBoolean(getProtocolName() + ".can")
-                && buf.readable() && (selector & 0x1000) != 0 && event == EVENT_DATA) {
+                && buf.isReadable() && (selector & 0x1000) != 0 && event == EVENT_DATA) {
             decodeCanData(buf, position);
         }
     }
 
-    private void decodeE(Position position, ChannelBuffer buf, int selector) {
+    private void decodeE(Position position, ByteBuf buf, int selector) {
 
         if ((selector & 0x0008) != 0) {
             position.set("tachographEvent", buf.readUnsignedShort());
@@ -349,13 +360,13 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if ((selector & 0x0800) != 0) {
-            position.set(Position.KEY_VIN, buf.readBytes(18).toString(StandardCharsets.US_ASCII).trim());
+            position.set(Position.KEY_VIN, buf.readSlice(18).toString(StandardCharsets.US_ASCII).trim());
         }
 
         if ((selector & 0x2000) != 0) {
             buf.readUnsignedByte(); // card 1 type
             buf.readUnsignedByte(); // card 1 country code
-            String card = buf.readBytes(20).toString(StandardCharsets.US_ASCII).trim();
+            String card = buf.readSlice(20).toString(StandardCharsets.US_ASCII).trim();
             if (!card.isEmpty()) {
                 position.set("card1", card);
             }
@@ -364,7 +375,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         if ((selector & 0x4000) != 0) {
             buf.readUnsignedByte(); // card 2 type
             buf.readUnsignedByte(); // card 2 country code
-            String card = buf.readBytes(20).toString(StandardCharsets.US_ASCII).trim();
+            String card = buf.readSlice(20).toString(StandardCharsets.US_ASCII).trim();
             if (!card.isEmpty()) {
                 position.set("card2", card);
             }
@@ -373,13 +384,13 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         if ((selector & 0x10000) != 0) {
             int count = buf.readUnsignedByte();
             for (int i = 1; i <= count; i++) {
-                position.set("driver" + i, buf.readBytes(22).toString(StandardCharsets.US_ASCII).trim());
+                position.set("driver" + i, buf.readSlice(22).toString(StandardCharsets.US_ASCII).trim());
                 position.set("driverTime" + i, buf.readUnsignedInt());
             }
         }
     }
 
-    private void decodeH(Position position, ChannelBuffer buf, int selector) {
+    private void decodeH(Position position, ByteBuf buf, int selector) {
 
         if ((selector & 0x0004) != 0) {
             getLastLocation(position, new Date(buf.readUnsignedInt() * 1000));
@@ -457,7 +468,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private void decodeEB(Position position, ChannelBuffer buf) {
+    private void decodeEB(Position position, ByteBuf buf) {
 
         if (buf.readByte() != (byte) 'E' || buf.readByte() != (byte) 'B') {
             return;
@@ -477,7 +488,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
 
             switch (type) {
                 case 0x01:
-                    position.set("brakeFlags", ChannelBuffers.hexDump(buf.readBytes(length)));
+                    position.set("brakeFlags", ByteBufUtil.hexDump(buf.readSlice(length)));
                     break;
                 case 0x02:
                     position.set("wheelSpeed", buf.readUnsignedShort() / 256.0);
@@ -486,7 +497,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
                     position.set("vehicleSpeed", buf.readUnsignedShort() / 256.0);
                     break;
                 case 0x03:
-                    position.set("axleLoadSum", buf.readUnsignedShort() * 2);
+                    position.set(Position.KEY_AXLE_WEIGHT, buf.readUnsignedShort() * 2);
                     break;
                 case 0x04:
                     position.set("tyrePressure", buf.readUnsignedByte() * 10);
@@ -507,10 +518,10 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
                     position.set("vdcActiveCounter", buf.readUnsignedShort());
                     break;
                 case 0x0B:
-                    position.set("brakeMinMaxData", ChannelBuffers.hexDump(buf.readBytes(length)));
+                    position.set("brakeMinMaxData", ByteBufUtil.hexDump(buf.readSlice(length)));
                     break;
                 case 0x0C:
-                    position.set("missingPgn", ChannelBuffers.hexDump(buf.readBytes(length)));
+                    position.set("missingPgn", ByteBufUtil.hexDump(buf.readSlice(length)));
                     break;
                 case 0x0D:
                     buf.readUnsignedByte();
@@ -526,13 +537,15 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private void decodeF(Position position, ChannelBuffer buf, int selector) {
+    private void decodeF(Position position, ByteBuf buf, int selector) {
 
-        getLastLocation(position, null);
+        Date deviceTime = null;
 
         if ((selector & 0x0004) != 0) {
-            buf.skipBytes(4); // snapshot time
+            deviceTime = new Date(buf.readUnsignedInt() * 1000);
         }
+
+        getLastLocation(position, deviceTime);
 
         buf.readUnsignedByte(); // data validity
 
@@ -549,7 +562,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if ((selector & 0x0020) != 0) {
-            position.set(Position.KEY_HOURS, buf.readUnsignedInt());
+            position.set(Position.KEY_HOURS, UnitsConverter.msFromHours(buf.readUnsignedInt()));
             position.set("serviceDistance", buf.readInt());
             position.set("driverActivity", buf.readUnsignedByte());
             position.set(Position.KEY_THROTTLE, buf.readUnsignedByte());
@@ -557,7 +570,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if ((selector & 0x0040) != 0) {
-            position.set("totalFuelUsed", buf.readUnsignedInt());
+            position.set(Position.KEY_FUEL_USED, buf.readUnsignedInt());
         }
 
         if ((selector & 0x0080) != 0) {
@@ -579,12 +592,64 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             position.set("overspeedCount", buf.readUnsignedByte());
         }
 
+        if ((selector & 0x0800) != 0) {
+            position.set(Position.KEY_HOURS, buf.readUnsignedInt() * 0.05);
+            position.set(Position.KEY_RPM, buf.readUnsignedShort() * 0.125);
+            position.set(Position.KEY_OBD_SPEED, buf.readUnsignedShort() / 256.0);
+            position.set(Position.KEY_FUEL_USED, buf.readUnsignedInt() * 0.5);
+            position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte() * 0.4);
+        }
+
+        if ((selector & 0x1000) != 0) {
+            position.set("ambientTemperature", buf.readUnsignedShort() * 0.03125 - 273);
+            buf.readUnsignedShort(); // fuel rate
+            position.set("fuelEconomy", buf.readUnsignedShort() / 512.0);
+            position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedInt() * 0.001);
+            buf.readUnsignedByte(); // pto drive engagement
+        }
+
+        if ((selector & 0x2000) != 0) {
+            buf.skipBytes(buf.readUnsignedByte()); // driver identification
+        }
+
+        if ((selector & 0x4000) != 0) {
+            position.set("torque", buf.readUnsignedByte());
+            position.set("brakePressure1", buf.readUnsignedByte() * 8);
+            position.set("brakePressure2", buf.readUnsignedByte() * 8);
+            position.set("grossWeight", buf.readUnsignedShort() * 10);
+            position.set("exhaustFluid", buf.readUnsignedByte() * 0.4);
+            buf.readUnsignedByte(); // retarder torque mode
+            position.set("retarderTorque", buf.readUnsignedByte());
+            position.set("retarderSelection", buf.readUnsignedByte() * 0.4);
+            buf.skipBytes(8); // tell tale status block 1
+            buf.skipBytes(8); // tell tale status block 2
+            buf.skipBytes(8); // tell tale status block 3
+            buf.skipBytes(8); // tell tale status block 4
+        }
+
+        if ((selector & 0x8000) != 0) {
+            position.set("parkingBrakeStatus", buf.readUnsignedByte());
+            position.set("doorStatus", buf.readUnsignedByte());
+            buf.skipBytes(8); // status per door
+            position.set("alternatorStatus", buf.readUnsignedByte());
+            position.set("selectedGear", buf.readUnsignedByte());
+            position.set("currentGear", buf.readUnsignedByte());
+            buf.skipBytes(4 * 2); // air suspension pressure
+        }
+
+        if ((selector & 0x0400) != 0) {
+            int count = buf.readUnsignedByte();
+            for (int i = 0; i < count; i++) {
+                position.set("axle" + i, buf.readUnsignedShort());
+            }
+        }
+
     }
 
     @Override
     protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         char protocol = (char) buf.readByte();
         int version = buf.readUnsignedByte();
@@ -608,8 +673,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             selector = buf.readUnsignedMedium();
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
         if (deviceSession == null) {
             return null;

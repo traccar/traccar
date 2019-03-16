@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,24 +15,25 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.frame.FrameDecoder;
+import org.traccar.BaseFrameDecoder;
+
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Gl200FrameDecoder extends FrameDecoder {
+public class Gl200FrameDecoder extends BaseFrameDecoder {
 
     private static final int MINIMUM_LENGTH = 11;
 
     private static final Set<String> BINARY_HEADERS = new HashSet<>(
             Arrays.asList("+RSP", "+BSP", "+EVT", "+BVT", "+INF", "+BNF", "+HBD", "+CRD", "+BRD"));
 
-    public static boolean isBinary(ChannelBuffer buf) {
+    public static boolean isBinary(ByteBuf buf) {
         String header = buf.toString(buf.readerIndex(), 4, StandardCharsets.US_ASCII);
         if (header.equals("+ACK")) {
             return buf.getByte(buf.readerIndex() + header.length()) != (byte) ':';
@@ -43,7 +44,7 @@ public class Gl200FrameDecoder extends FrameDecoder {
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
+            ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
         if (buf.readableBytes() < MINIMUM_LENGTH) {
             return null;
@@ -73,7 +74,7 @@ public class Gl200FrameDecoder extends FrameDecoder {
             }
 
             if (buf.readableBytes() >= length) {
-                return buf.readBytes(length);
+                return buf.readRetainedSlice(length);
             }
 
         } else {
@@ -83,7 +84,7 @@ public class Gl200FrameDecoder extends FrameDecoder {
                 endIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) 0);
             }
             if (endIndex > 0) {
-                ChannelBuffer frame = buf.readBytes(endIndex - buf.readerIndex());
+                ByteBuf frame = buf.readRetainedSlice(endIndex - buf.readerIndex());
                 buf.readByte(); // delimiter
                 return frame;
             }

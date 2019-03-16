@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,22 +15,18 @@
  */
 package org.traccar.notification;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
-import java.util.Arrays;
-import java.util.List;
-
 import org.traccar.Context;
-import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Geofence;
+import org.traccar.model.Maintenance;
 import org.traccar.model.Position;
 
-import java.nio.charset.StandardCharsets;
+import javax.ws.rs.client.AsyncInvoker;
+import javax.ws.rs.client.Invocation;
 import java.util.HashMap;
 import java.util.Map;
-import com.ning.http.client.FluentCaseInsensitiveStringsMap;
+import java.util.Set;
 
 public abstract class EventForwarder {
 
@@ -46,66 +42,50 @@ public abstract class EventForwarder {
     private static final String KEY_EVENT = "event";
     private static final String KEY_GEOFENCE = "geofence";
     private static final String KEY_DEVICE = "device";
+    private static final String KEY_MAINTENANCE = "maintenance";
+    private static final String KEY_USERS = "users";
 
-    public final void forwardEvent(Event event, Position position) {
+    public final void forwardEvent(Event event, Position position, Set<Long> users) {
 
-        BoundRequestBuilder requestBuilder = Context.getAsyncHttpClient().preparePost(url);
-        requestBuilder.setBodyEncoding(StandardCharsets.UTF_8.name());
-
-        requestBuilder.addHeader("Content-Type", getContentType());
+        Invocation.Builder requestBuilder = Context.getClient().target(url).request();
 
         if (header != null && !header.isEmpty()) {
-            FluentCaseInsensitiveStringsMap params = new FluentCaseInsensitiveStringsMap();
-            params.putAll(splitIntoKeyValues(header, ":"));
-            requestBuilder.setHeaders(params);
-        }
-
-        setContent(event, position, requestBuilder);
-        requestBuilder.execute();
-    }
-
-    protected Map<String, List<String>> splitIntoKeyValues(String params, String separator) {
-
-        String[] splitedLine;
-        Map<String, List<String>> paramsMap = new HashMap<>();
-        String[] paramsLines = params.split("\\r?\\n");
-
-        for (String paramLine: paramsLines) {
-            splitedLine = paramLine.split(separator, 2);
-            if (splitedLine.length == 2) {
-                paramsMap.put(splitedLine[0].trim(), Arrays.asList(splitedLine[1].trim()));
+            for (String line: header.split("\\r?\\n")) {
+                String[] values = line.split(":", 2);
+                requestBuilder.header(values[0].trim(), values[1].trim());
             }
         }
-        return paramsMap;
+
+        executeRequest(event, position, users, requestBuilder.async());
     }
 
-    protected String prepareJsonPayload(Event event, Position position) {
+    protected Map<String, Object> preparePayload(Event event, Position position, Set<Long> users) {
         Map<String, Object> data = new HashMap<>();
         data.put(KEY_EVENT, event);
         if (position != null) {
             data.put(KEY_POSITION, position);
         }
-        if (event.getDeviceId() != 0) {
-            Device device = Context.getIdentityManager().getById(event.getDeviceId());
-            if (device != null) {
-                data.put(KEY_DEVICE, device);
-            }
+        Device device = Context.getIdentityManager().getById(event.getDeviceId());
+        if (device != null) {
+            data.put(KEY_DEVICE, device);
         }
         if (event.getGeofenceId() != 0) {
-            Geofence geofence = (Geofence) Context.getGeofenceManager().getById(event.getGeofenceId());
+            Geofence geofence = Context.getGeofenceManager().getById(event.getGeofenceId());
             if (geofence != null) {
                 data.put(KEY_GEOFENCE, geofence);
             }
         }
-        try {
-            return Context.getObjectMapper().writeValueAsString(data);
-        } catch (JsonProcessingException e) {
-            Log.warning(e);
-            return null;
+        if (event.getMaintenanceId() != 0) {
+            Maintenance maintenance = Context.getMaintenancesManager().getById(event.getMaintenanceId());
+            if (maintenance != null) {
+                data.put(KEY_MAINTENANCE, maintenance);
+            }
         }
+        data.put(KEY_USERS, Context.getUsersManager().getItems(users));
+        return data;
     }
 
-    protected abstract String getContentType();
-    protected abstract void setContent(Event event, Position position, BoundRequestBuilder requestBuilder);
+    protected abstract void executeRequest(
+            Event event, Position position, Set<Long> users, AsyncInvoker invoker);
 
 }

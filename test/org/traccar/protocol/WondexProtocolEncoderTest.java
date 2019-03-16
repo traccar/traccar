@@ -1,9 +1,10 @@
 package org.traccar.protocol;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Command;
+
+import static org.junit.Assert.assertEquals;
 
 public class WondexProtocolEncoderTest extends ProtocolTest {
     @Test
@@ -16,7 +17,7 @@ public class WondexProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_POSITION_SINGLE);
         command.set(Command.KEY_DEVICE_PASSWORD, "0000");
 
-        Assert.assertEquals("$WP+GETLOCATION=0000", encoder.encodeCommand(command));
+        assertEquals("$WP+GETLOCATION=0000", encoder.encodeCommand(command));
 
     }
 

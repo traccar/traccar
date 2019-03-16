@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -30,7 +31,7 @@ public class VtfmsProtocolDecoder extends BaseProtocolDecoder {
 
     private static final String[] DIRECTIONS = new String[] {"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
 
-    public VtfmsProtocolDecoder(VtfmsProtocol protocol) {
+    public VtfmsProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
@@ -59,7 +60,7 @@ public class VtfmsProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d+),")                  // power voltage
             .number("[^,]*,")                    // reserved
             .number("(d+)?,")                    // fuel level
-            .number("(d+.d+),")                  // adc 1
+            .number("(d+.d+)?,")                 // adc 1
             .number("[^,]*,")                    // reserved
             .number("(d+.d+)?,")                 // adc 2
             .expression("([01]),")               // di 1
@@ -92,6 +93,11 @@ public class VtfmsProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private double convertToDegrees(double value) {
+        double degrees = Math.floor(value / 100);
+        return degrees + (value - degrees * 100) / 60;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -106,8 +112,7 @@ public class VtfmsProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.set(Position.KEY_ALARM, decodeAlarm(parser.nextInt()));
@@ -116,12 +121,18 @@ public class VtfmsProtocolDecoder extends BaseProtocolDecoder {
 
         position.setValid(parser.next().equals("A"));
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY));
-        position.setLatitude(parser.nextDouble(0));
-        position.setLongitude(parser.nextDouble(0));
 
-        if (parser.hasNext()) {
-            position.setCourse(parser.nextDouble(0));
+        double latitude = parser.nextDouble();
+        double longitude = parser.nextDouble();
+        if (Math.abs(latitude) > 90 || Math.abs(longitude) > 180) {
+            position.setLatitude(convertToDegrees(latitude));
+            position.setLongitude(convertToDegrees(longitude));
+        } else {
+            position.setLatitude(latitude);
+            position.setLongitude(longitude);
         }
+
+        position.setCourse(parser.nextDouble(0));
         if (parser.hasNext()) {
             String direction = parser.next();
             for (int i = 0; i < DIRECTIONS.length; i++) {
@@ -132,9 +143,9 @@ public class VtfmsProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
 
-        position.set(Position.KEY_HOURS, parser.nextInt());
+        position.set(Position.KEY_HOURS, UnitsConverter.msFromHours(parser.nextInt()));
         position.set("idleHours", parser.nextInt());
         position.set(Position.KEY_ODOMETER, parser.nextInt() * 100);
         position.set(Position.KEY_CHARGE, parser.next().equals("1"));

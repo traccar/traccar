@@ -8,7 +8,7 @@ public class Gps056ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        Gps056ProtocolDecoder decoder = new Gps056ProtocolDecoder(new Gps056Protocol());
+        Gps056ProtocolDecoder decoder = new Gps056ProtocolDecoder(null);
 
         verifyNull(decoder, buffer(
                 "$$25LOGN_118624620337829462.1#"));

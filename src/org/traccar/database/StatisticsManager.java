@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,17 @@
  */
 package org.traccar.database;
 
-import com.ning.http.client.Request;
-import com.ning.http.client.RequestBuilder;
-import org.joda.time.format.ISODateTimeFormat;
-import org.traccar.Context;
-import org.traccar.helper.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
+import org.traccar.helper.DateUtil;
 import org.traccar.model.Statistics;
 
+import javax.inject.Inject;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Form;
 import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
@@ -31,7 +35,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class StatisticsManager {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(StatisticsManager.class);
+
     private static final int SPLIT_MODE = Calendar.DAY_OF_MONTH;
+
+    private final Config config;
+    private final DataManager dataManager;
+    private final Client client;
 
     private AtomicInteger lastUpdate = new AtomicInteger(Calendar.getInstance().get(SPLIT_MODE));
 
@@ -45,6 +55,13 @@ public class StatisticsManager {
     private int smsSent;
     private int geocoderRequests;
     private int geolocationRequests;
+
+    @Inject
+    public StatisticsManager(Config config, DataManager dataManager, Client client) {
+        this.config = config;
+        this.dataManager = dataManager;
+        this.client = client;
+    }
 
     private void checkSplit() {
         int currentUpdate = Calendar.getInstance().get(SPLIT_MODE);
@@ -62,30 +79,29 @@ public class StatisticsManager {
             statistics.setGeolocationRequests(geolocationRequests);
 
             try {
-                Context.getDataManager().addObject(statistics);
+                dataManager.addObject(statistics);
             } catch (SQLException e) {
-                Log.warning(e);
+                LOGGER.warn("Error saving statistics", e);
             }
 
-            String url = Context.getConfig().getString("server.statistics");
+            String url = config.getString(Keys.SERVER_STATISTICS);
             if (url != null) {
-                String time = ISODateTimeFormat.dateTime().print(statistics.getCaptureTime().getTime());
-                Request request = new RequestBuilder("POST")
-                        .setUrl(url)
-                        .addHeader("Content-Type", "application/x-www-form-urlencoded")
-                        .addFormParam("version", Log.getAppVersion())
-                        .addFormParam("captureTime", time)
-                        .addFormParam("activeUsers", String.valueOf(statistics.getActiveUsers()))
-                        .addFormParam("activeDevices", String.valueOf(statistics.getActiveDevices()))
-                        .addFormParam("requests", String.valueOf(statistics.getRequests()))
-                        .addFormParam("messagesReceived", String.valueOf(statistics.getMessagesReceived()))
-                        .addFormParam("messagesStored", String.valueOf(statistics.getMessagesStored()))
-                        .addFormParam("mailSent", String.valueOf(statistics.getMailSent()))
-                        .addFormParam("smsSent", String.valueOf(statistics.getSmsSent()))
-                        .addFormParam("geocoderRequests", String.valueOf(statistics.getGeocoderRequests()))
-                        .addFormParam("geolocationRequests", String.valueOf(statistics.getGeolocationRequests()))
-                        .build();
-                Context.getAsyncHttpClient().prepareRequest(request).execute();
+                String time = DateUtil.formatDate(statistics.getCaptureTime());
+
+                Form form = new Form();
+                form.param("version", getClass().getPackage().getImplementationVersion());
+                form.param("captureTime", time);
+                form.param("activeUsers", String.valueOf(statistics.getActiveUsers()));
+                form.param("activeDevices", String.valueOf(statistics.getActiveDevices()));
+                form.param("requests", String.valueOf(statistics.getRequests()));
+                form.param("messagesReceived", String.valueOf(statistics.getMessagesReceived()));
+                form.param("messagesStored", String.valueOf(statistics.getMessagesStored()));
+                form.param("mailSent", String.valueOf(statistics.getMailSent()));
+                form.param("smsSent", String.valueOf(statistics.getSmsSent()));
+                form.param("geocoderRequests", String.valueOf(statistics.getGeocoderRequests()));
+                form.param("geolocationRequests", String.valueOf(statistics.getGeolocationRequests()));
+
+                client.target(url).request().async().post(Entity.form(form));
             }
 
             users.clear();

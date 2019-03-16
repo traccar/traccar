@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,17 +25,20 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.traccar.Config;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.traccar.config.Config;
 import org.traccar.Context;
-import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceState;
-import org.traccar.model.DeviceTotalDistance;
+import org.traccar.model.DeviceAccumulators;
 import org.traccar.model.Group;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
 
 public class DeviceManager extends BaseObjectManager<Device> implements IdentityManager, ManagableObjects {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DeviceManager.class);
 
     public static final long DEFAULT_REFRESH_DELAY = 300;
 
@@ -65,7 +68,40 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         refreshLastPositions();
     }
 
-    private void updateDeviceCache(boolean force) throws SQLException {
+    @Override
+    public long addUnknownDevice(String uniqueId) {
+        Device device = new Device();
+        device.setName(uniqueId);
+        device.setUniqueId(uniqueId);
+
+        String defaultCategory = Context.getConfig().getString("database.registerUnknown.defaultCategory");
+        if (defaultCategory != null && !defaultCategory.isEmpty()) {
+            device.setCategory(defaultCategory);
+        }
+
+        long defaultGroupId = Context.getConfig().getLong("database.registerUnknown.defaultGroupId");
+        if (defaultGroupId != 0) {
+            device.setGroupId(defaultGroupId);
+        }
+
+        try {
+            addItem(device);
+
+            LOGGER.info("Automatically registered device " + uniqueId);
+
+            if (defaultGroupId != 0) {
+                Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
+                Context.getPermissionsManager().refreshAllExtendedPermissions();
+            }
+
+            return device.getId();
+        } catch (SQLException e) {
+            LOGGER.warn("Automatic device registration error", e);
+            return 0;
+        }
+    }
+
+    public void updateDeviceCache(boolean force) throws SQLException {
         long lastUpdate = devicesLastUpdate.get();
         if ((force || System.currentTimeMillis() - lastUpdate > dataRefreshDelay)
                 && devicesLastUpdate.compareAndSet(lastUpdate, System.currentTimeMillis())) {
@@ -93,7 +129,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
             try {
                 updateDeviceCache(true);
             } catch (SQLException e) {
-                Log.warning(e);
+                LOGGER.warn("Update device cache error", e);
             }
             result = super.getAllItems();
         }
@@ -104,13 +140,33 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         return getItems(getAllItems());
     }
 
+    public Set<Long> getAllUserItems(long userId) {
+        return Context.getPermissionsManager().getDevicePermissions(userId);
+    }
+
     @Override
     public Set<Long> getUserItems(long userId) {
         if (Context.getPermissionsManager() != null) {
-            return Context.getPermissionsManager().getDevicePermissions(userId);
+            Set<Long> result = new HashSet<>();
+            for (long deviceId : Context.getPermissionsManager().getDevicePermissions(userId)) {
+                Device device = getById(deviceId);
+                if (device != null && !device.getDisabled()) {
+                    result.add(deviceId);
+                }
+            }
+            return result;
         } else {
             return new HashSet<>();
         }
+    }
+
+    public Set<Long> getAllManagedItems(long userId) {
+        Set<Long> result = new HashSet<>();
+        result.addAll(getAllUserItems(userId));
+        for (long managedUserId : Context.getUsersManager().getUserItems(userId)) {
+            result.addAll(getAllUserItems(managedUserId));
+        }
+        return result;
     }
 
     @Override
@@ -160,6 +216,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         cachedDevice.setCategory(device.getCategory());
         cachedDevice.setContact(device.getContact());
         cachedDevice.setModel(device.getModel());
+        cachedDevice.setDisabled(device.getDisabled());
         cachedDevice.setAttributes(device.getAttributes());
         if (!device.getUniqueId().equals(cachedDevice.getUniqueId())) {
             devicesByUniqueId.remove(cachedDevice.getUniqueId());
@@ -168,7 +225,10 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         }
         if (device.getPhone() != null && !device.getPhone().isEmpty()
                 && !device.getPhone().equals(cachedDevice.getPhone())) {
-            devicesByPhone.remove(cachedDevice.getPhone());
+            String phone = cachedDevice.getPhone();
+            if (phone != null && !phone.isEmpty()) {
+                devicesByPhone.remove(phone);
+            }
             cachedDevice.setPhone(device.getPhone());
             putPhone(cachedDevice);
         }
@@ -204,7 +264,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
                     positions.put(position.getDeviceId(), position);
                 }
             } catch (SQLException error) {
-                Log.warning(error);
+                LOGGER.warn("Load latest positions error", error);
             }
         }
     }
@@ -243,7 +303,8 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         List<Position> result = new LinkedList<>();
 
         if (Context.getPermissionsManager() != null) {
-            for (long deviceId : getUserItems(userId)) {
+            for (long deviceId : Context.getPermissionsManager().getUserAdmin(userId)
+                    ? getAllUserItems(userId) : getUserItems(userId)) {
                 if (positions.containsKey(deviceId)) {
                     result.add(positions.get(deviceId));
                 }
@@ -253,6 +314,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         return result;
     }
 
+    @Override
     public boolean lookupAttributeBoolean(
             long deviceId, String attributeName, boolean defaultValue, boolean lookupConfig) {
         Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
@@ -262,12 +324,14 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         return defaultValue;
     }
 
+    @Override
     public String lookupAttributeString(
             long deviceId, String attributeName, String defaultValue, boolean lookupConfig) {
         Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
         return result != null ? (String) result : defaultValue;
     }
 
+    @Override
     public int lookupAttributeInteger(long deviceId, String attributeName, int defaultValue, boolean lookupConfig) {
         Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
         if (result != null) {
@@ -276,6 +340,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         return defaultValue;
     }
 
+    @Override
     public long lookupAttributeLong(
             long deviceId, String attributeName, long defaultValue, boolean lookupConfig) {
         Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
@@ -326,11 +391,16 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         return result;
     }
 
-    public void resetTotalDistance(DeviceTotalDistance deviceTotalDistance) throws SQLException {
-        Position last = positions.get(deviceTotalDistance.getDeviceId());
+    public void resetDeviceAccumulators(DeviceAccumulators deviceAccumulators) throws SQLException {
+        Position last = positions.get(deviceAccumulators.getDeviceId());
         if (last != null) {
-            last.getAttributes().put(Position.KEY_TOTAL_DISTANCE, deviceTotalDistance.getTotalDistance());
-            getDataManager().addPosition(last);
+            if (deviceAccumulators.getTotalDistance() != null) {
+                last.getAttributes().put(Position.KEY_TOTAL_DISTANCE, deviceAccumulators.getTotalDistance());
+            }
+            if (deviceAccumulators.getHours() != null) {
+                last.getAttributes().put(Position.KEY_HOURS, deviceAccumulators.getHours());
+            }
+            getDataManager().addObject(last);
             updateLatestPosition(last);
         } else {
             throw new IllegalArgumentException();

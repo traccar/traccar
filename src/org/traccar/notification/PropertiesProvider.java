@@ -15,7 +15,7 @@
  */
 package org.traccar.notification;
 
-import org.traccar.Config;
+import org.traccar.config.Config;
 import org.traccar.model.ExtendedModel;
 
 public class PropertiesProvider {
@@ -57,6 +57,23 @@ public class PropertiesProvider {
                 return result instanceof String ? Integer.parseInt((String) result) : (Integer) result;
             } else {
                 return defaultValue;
+            }
+        }
+    }
+
+    public Boolean getBoolean(String key) {
+        if (config != null) {
+            if (config.hasKey(key)) {
+                return config.getBoolean(key);
+            } else {
+                return null;
+            }
+        } else {
+            Object result = extendedModel.getAttributes().get(key);
+            if (result != null) {
+                return result instanceof String ? Boolean.valueOf((String) result) : (Boolean) result;
+            } else {
+                return null;
             }
         }
     }

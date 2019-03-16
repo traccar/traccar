@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,16 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
+import org.traccar.helper.DataConverter;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
-import javax.xml.bind.DatatypeConverter;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -34,7 +35,7 @@ import java.util.regex.Pattern;
 
 public class Xt2400ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Xt2400ProtocolDecoder(Xt2400Protocol protocol) {
+    public Xt2400ProtocolDecoder(Protocol protocol) {
         super(protocol);
 
         String config = Context.getConfig().getString(getProtocolName() + ".config");
@@ -95,7 +96,7 @@ public class Xt2400ProtocolDecoder extends BaseProtocolDecoder {
         Pattern pattern = Pattern.compile(":wycfg pcr\\[\\d+\\] ([0-9a-fA-F]{2})[0-9a-fA-F]{2}([0-9a-fA-F]+)");
         Matcher matcher = pattern.matcher(configString);
         while (matcher.find()) {
-            formats.put(Short.parseShort(matcher.group(1), 16), DatatypeConverter.parseHexBinary(matcher.group(2)));
+            formats.put(Short.parseShort(matcher.group(1), 16), DataConverter.parseHex(matcher.group(2)));
         }
     }
 
@@ -103,7 +104,7 @@ public class Xt2400ProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         byte[] format = null;
         if (formats.size() > 1) {
@@ -116,11 +117,10 @@ public class Xt2400ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
 
         for (byte tag : format) {
-            switch ((int) tag) {
+            switch (tag) {
                 case 0x03:
                     DeviceSession deviceSession = getDeviceSession(
                             channel, remoteAddress, String.valueOf(buf.readUnsignedInt()));
@@ -175,10 +175,10 @@ public class Xt2400ProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_OBD_SPEED, UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
                     break;
                 case 0x65:
-                    position.set(Position.KEY_VIN, buf.readBytes(17).toString(StandardCharsets.US_ASCII));
+                    position.set(Position.KEY_VIN, buf.readSlice(17).toString(StandardCharsets.US_ASCII));
                     break;
                 case 0x73:
-                    position.set(Position.KEY_VERSION_FW, buf.readBytes(16).toString(StandardCharsets.US_ASCII).trim());
+                    position.set(Position.KEY_VERSION_FW, buf.readSlice(16).toString(StandardCharsets.US_ASCII).trim());
                     break;
                 default:
                     buf.skipBytes(getTagLength(tag));

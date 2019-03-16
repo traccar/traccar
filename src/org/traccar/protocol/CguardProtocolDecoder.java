@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -28,7 +29,7 @@ import java.util.regex.Pattern;
 
 public class CguardProtocolDecoder extends BaseProtocolDecoder {
 
-    public CguardProtocolDecoder(CguardProtocol protocol) {
+    public CguardProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
@@ -58,8 +59,7 @@ public class CguardProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.setTime(parser.nextDateTime());
@@ -84,8 +84,7 @@ public class CguardProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         getLastLocation(position, parser.nextDateTime());
@@ -102,7 +101,11 @@ public class CguardProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_SATELLITES, Integer.parseInt(value));
                     break;
                 case "BAT1":
-                    position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(value));
+                    if (value.contains(".")) {
+                        position.set(Position.KEY_BATTERY, Double.parseDouble(value));
+                    } else {
+                        position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(value));
+                    }
                     break;
                 case "PWR1":
                     position.set(Position.KEY_POWER, Double.parseDouble(value));

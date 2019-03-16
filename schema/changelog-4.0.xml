@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+  logicalFilePath="changelog-4.0">
+
+  <changeSet author="author" id="changelog-4.0-pre">
+
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="tc_servers" />
+      </not>
+      <not>
+        <columnExists tableName="notifications" columnName="notificators" />
+      </not>
+    </preConditions>
+
+    <addColumn tableName="notifications">
+      <column name="notificators" type="VARCHAR(128)" />
+    </addColumn>
+
+  </changeSet>
+
+  <changeSet author="author" id="changelog-4.0-common">
+
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="tc_servers" />
+      </not>
+      <not>
+        <dbms type="postgresql" />
+      </not>
+      <columnExists tableName="notifications" columnName="web" />
+      <columnExists tableName="notifications" columnName="mail" />
+      <columnExists tableName="notifications" columnName="sms" />
+    </preConditions>
+
+    <update tableName="notifications">
+      <column name="notificators" value="web,mail,sms" />
+      <where>web = 1 AND mail = 1 AND sms = 1</where>
+    </update>
+
+    <update tableName="notifications">
+      <column name="notificators" value="web,mail" />
+      <where>web = 1 AND mail = 1 AND sms = 0</where>
+    </update>
+
+    <update tableName="notifications">
+      <column name="notificators" value="web" />
+      <where>web = 1 AND mail = 0 AND sms = 0</where>
+    </update>
+
+    <update tableName="notifications">
+      <column name="notificators" value="web,sms" />
+      <where>web = 1 AND mail = 0 AND sms = 1</where>
+    </update>
+
+    <update tableName="notifications">
+      <column name="notificators" value="mail,sms" />
+      <where>web = 0 AND mail = 1 AND sms = 1</where>
+    </update>
+
+    <update tableName="notifications">
+      <column name="notificators" value="mail" />
+      <where>web = 0 AND mail = 1 AND sms = 0</where>
+    </update>
+
+    <update tableName="notifications">
+      <column name="notificators" value="sms" />
+      <where>web = 0 AND mail = 0 AND sms = 1</where>
+    </update>
+
+  </changeSet>
+
+  <changeSet author="author" id="changelog-4.0-pg">
+
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="tc_servers" />
+      </not>
+      <dbms type="postgresql" />
+      <columnExists tableName="tc_notifications" columnName="web" />
+      <columnExists tableName="tc_notifications" columnName="mail" />
+      <columnExists tableName="tc_notifications" columnName="sms" />
+    </preConditions>
+
+    <update tableName="notifications">
+      <column name="notificators" value="web,mail,sms" />
+      <where>web = TRUE AND mail = TRUE AND sms = TRUE</where>
+    </update>
+
+    <update tableName="notifications">
+      <column name="notificators" value="web,mail" />
+      <where>web = TRUE AND mail = TRUE AND sms = FALSE</where>
+    </update>
+
+    <update tableName="notifications">
+      <column name="notificators" value="web" />
+      <where>web = TRUE AND mail = FALSE AND sms = FALSE</where>
+    </update>
+
+    <update tableName="notifications">
+      <column name="notificators" value="web,sms" />
+      <where>web = TRUE AND mail = FALSE AND sms = TRUE</where>
+    </update>
+
+    <update tableName="notifications">
+      <column name="notificators" value="mail,sms" />
+      <where>web = FALSE AND mail = TRUE AND sms = TRUE</where>
+    </update>
+
+    <update tableName="notifications">
+      <column name="notificators" value="mail" />
+      <where>web = FALSE AND mail = TRUE AND sms = FALSE</where>
+    </update>
+
+    <update tableName="notifications">
+      <column name="notificators" value="sms" />
+      <where>web = FALSE AND mail = FALSE AND sms = TRUE</where>
+    </update>
+
+  </changeSet>
+
+  <changeSet author="author" id="changelog-4.0">
+
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="tc_servers" />
+      </not>
+    </preConditions>
+
+    <dropDefaultValue tableName="notifications" columnName="web" />
+    <dropColumn tableName="notifications" columnName="web" />
+
+    <dropDefaultValue tableName="notifications" columnName="mail" />
+    <dropColumn tableName="notifications" columnName="mail" />
+
+    <dropDefaultValue tableName="notifications" columnName="sms" />
+    <dropColumn tableName="notifications" columnName="sms" />
+
+  </changeSet>
+
+  <changeSet author="author" id="changelog-4.0-renaming">
+
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="tc_servers" />
+      </not>
+    </preConditions>
+
+    <renameTable oldTableName="attributes" newTableName="tc_attributes" />
+    <renameTable oldTableName="calendars" newTableName="tc_calendars" />
+    <renameTable oldTableName="commands" newTableName="tc_commands" />
+    <renameTable oldTableName="device_attribute" newTableName="tc_device_attribute" />
+    <renameTable oldTableName="device_command" newTableName="tc_device_command" />
+    <renameTable oldTableName="device_driver" newTableName="tc_device_driver" />
+    <renameTable oldTableName="device_geofence" newTableName="tc_device_geofence" />
+    <renameTable oldTableName="device_maintenance" newTableName="tc_device_maintenance" />
+    <renameTable oldTableName="device_notification" newTableName="tc_device_notification" />
+    <renameTable oldTableName="devices" newTableName="tc_devices" />
+    <renameTable oldTableName="drivers" newTableName="tc_drivers" />
+    <renameTable oldTableName="events" newTableName="tc_events" />
+    <renameTable oldTableName="geofences" newTableName="tc_geofences" />
+    <renameTable oldTableName="group_attribute" newTableName="tc_group_attribute" />
+    <renameTable oldTableName="group_command" newTableName="tc_group_command" />
+    <renameTable oldTableName="group_driver" newTableName="tc_group_driver" />
+    <renameTable oldTableName="group_geofence" newTableName="tc_group_geofence" />
+    <renameTable oldTableName="group_maintenance" newTableName="tc_group_maintenance" />
+    <renameTable oldTableName="group_notification" newTableName="tc_group_notification" />
+    <renameTable oldTableName="groups" newTableName="tc_groups" />
+    <renameTable oldTableName="maintenances" newTableName="tc_maintenances" />
+    <renameTable oldTableName="notifications" newTableName="tc_notifications" />
+    <renameTable oldTableName="positions" newTableName="tc_positions" />
+    <renameTable oldTableName="servers" newTableName="tc_servers" />
+    <renameTable oldTableName="statistics" newTableName="tc_statistics" />
+    <renameTable oldTableName="user_attribute" newTableName="tc_user_attribute" />
+    <renameTable oldTableName="user_calendar" newTableName="tc_user_calendar" />
+    <renameTable oldTableName="user_command" newTableName="tc_user_command" />
+    <renameTable oldTableName="user_device" newTableName="tc_user_device" />
+    <renameTable oldTableName="user_driver" newTableName="tc_user_driver" />
+    <renameTable oldTableName="user_geofence" newTableName="tc_user_geofence" />
+    <renameTable oldTableName="user_group" newTableName="tc_user_group" />
+    <renameTable oldTableName="user_maintenance" newTableName="tc_user_maintenance" />
+    <renameTable oldTableName="user_notification" newTableName="tc_user_notification" />
+    <renameTable oldTableName="user_user" newTableName="tc_user_user" />
+    <renameTable oldTableName="users" newTableName="tc_users" />
+
+  </changeSet>
+
+</databaseChangeLog>

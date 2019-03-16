@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,12 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.frame.FrameDecoder;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import org.traccar.BaseFrameDecoder;
 
-public class H02FrameDecoder extends FrameDecoder {
+public class H02FrameDecoder extends BaseFrameDecoder {
 
     private static final int MESSAGE_SHORT = 32;
     private static final int MESSAGE_LONG = 45;
@@ -33,7 +33,7 @@ public class H02FrameDecoder extends FrameDecoder {
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
+            ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
         char marker = (char) buf.getByte(buf.readerIndex());
 
@@ -50,8 +50,8 @@ public class H02FrameDecoder extends FrameDecoder {
                 // Return text message
                 int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '#');
                 if (index != -1) {
-                    ChannelBuffer result = buf.readBytes(index + 1 - buf.readerIndex());
-                    while (buf.readable()
+                    ByteBuf result = buf.readRetainedSlice(index + 1 - buf.readerIndex());
+                    while (buf.isReadable()
                             && (buf.getByte(buf.readerIndex()) == '\r' || buf.getByte(buf.readerIndex()) == '\n')) {
                         buf.readByte(); // skip new line
                     }
@@ -71,7 +71,7 @@ public class H02FrameDecoder extends FrameDecoder {
                 }
 
                 if (buf.readableBytes() >= messageLength) {
-                    return buf.readBytes(messageLength);
+                    return buf.readRetainedSlice(messageLength);
                 }
 
                 break;
@@ -79,7 +79,7 @@ public class H02FrameDecoder extends FrameDecoder {
             case 'X':
 
                 if (buf.readableBytes() >= MESSAGE_SHORT) {
-                    return buf.readBytes(MESSAGE_SHORT);
+                    return buf.readRetainedSlice(MESSAGE_SHORT);
                 }
 
                 break;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,23 +15,25 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.socket.DatagramChannel;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.nio.channels.DatagramChannel;
 import java.util.Date;
 import java.util.regex.Pattern;
 
 public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
-    public T55ProtocolDecoder(T55Protocol protocol) {
+    public T55ProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
@@ -53,7 +55,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             .number(",(d+)")                     // imei
             .expression(",([01])")               // ignition
             .number(",(d+)")                     // fuel
-            .number(",(d+)").optional(5)         // battery
+            .number(",(d+)").optional(7)         // battery
             .number("((?:,d+)+)?")               // parameters
             .any()
             .compile();
@@ -99,11 +101,10 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
     private Position decodeGprmc(
             DeviceSession deviceSession, String sentence, SocketAddress remoteAddress, Channel channel) {
 
-        if (deviceSession != null && channel != null && !(channel instanceof DatagramChannel)) {
-            if (Context.getIdentityManager().lookupAttributeBoolean(
-                    deviceSession.getDeviceId(), getProtocolName() + ".ack", false, true)) {
-                channel.write("OK1\r\n");
-            }
+        if (deviceSession != null && channel != null && !(channel instanceof DatagramChannel)
+                && Context.getIdentityManager().lookupAttributeBoolean(
+                        deviceSession.getDeviceId(), getProtocolName() + ".ack", false, true)) {
+            channel.writeAndFlush(new NetworkMessage("OK1\r\n", remoteAddress));
         }
 
         Parser parser = new Parser(PATTERN_GPRMC, sentence);
@@ -111,8 +112,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
 
         if (deviceSession != null) {
             position.setDeviceId(deviceSession.getDeviceId());
@@ -166,8 +166,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         DateBuilder dateBuilder = new DateBuilder()
@@ -189,8 +188,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.setTime(new Date());
@@ -210,8 +208,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.setTime(parser.nextDateTime());
@@ -252,12 +249,16 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
         if (sentence.startsWith("$PGID")) {
             getDeviceSession(channel, remoteAddress, sentence.substring(6, sentence.length() - 3));
+        } else if (sentence.startsWith("$DEVID")) {
+            getDeviceSession(channel, remoteAddress, sentence.substring(7, sentence.lastIndexOf('*')));
         } else if (sentence.startsWith("$PCPTI")) {
             getDeviceSession(channel, remoteAddress, sentence.substring(7, sentence.indexOf(",", 7)));
         } else if (sentence.startsWith("IMEI")) {
-            getDeviceSession(channel, remoteAddress, sentence.substring(5, sentence.length()));
+            getDeviceSession(channel, remoteAddress, sentence.substring(5));
+        } else if (sentence.startsWith("$IMEI")) {
+            getDeviceSession(channel, remoteAddress, sentence.substring(6));
         } else if (sentence.startsWith("$GPFID")) {
-            deviceSession = getDeviceSession(channel, remoteAddress, sentence.substring(7, sentence.length()));
+            deviceSession = getDeviceSession(channel, remoteAddress, sentence.substring(7));
             if (deviceSession != null && position != null) {
                 Position position = this.position;
                 position.setDeviceId(deviceSession.getDeviceId());

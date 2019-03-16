@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+  logicalFilePath="changelog-3.16">
+
+  <changeSet author="author" id="changelog-3.16">
+
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="tc_servers" />
+      </not>
+    </preConditions>
+
+    <addColumn tableName="devices">
+      <column name="disabled" type="BOOLEAN" defaultValueBoolean="false" />
+    </addColumn>
+
+    <addColumn tableName="users">
+        <column name="poilayer" type="VARCHAR(512)" />
+    </addColumn>
+
+    <addColumn tableName="servers">
+        <column name="poilayer" type="VARCHAR(512)" />
+    </addColumn>
+
+    <addColumn tableName="notifications">
+      <column name="calendarid" type="INT" />
+    </addColumn>
+
+    <addForeignKeyConstraint baseColumnNames="calendarid" baseTableName="notifications" constraintName="fk_notification_calendar_calendarid" onDelete="SET NULL" onUpdate="RESTRICT" referencedColumnNames="id" referencedTableName="calendars" />
+
+  </changeSet>
+
+</databaseChangeLog>

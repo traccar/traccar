@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,32 +15,33 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.frame.FrameDecoder;
+import org.traccar.BaseFrameDecoder;
 
-public class TelicFrameDecoder extends FrameDecoder {
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+
+public class TelicFrameDecoder extends BaseFrameDecoder {
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
+            ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
         if (buf.readableBytes() < 4) {
             return null;
         }
 
-        long length = buf.getUnsignedInt(buf.readerIndex());
+        long length = buf.getUnsignedIntLE(buf.readerIndex());
 
         if (length < 1024) {
             if (buf.readableBytes() >= length + 4) {
-                buf.readUnsignedInt();
-                return buf.readBytes((int) length);
+                buf.readUnsignedIntLE();
+                return buf.readRetainedSlice((int) length);
             }
         } else {
             int endIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) 0);
             if (endIndex >= 0) {
-                ChannelBuffer frame = buf.readBytes(endIndex - buf.readerIndex());
+                ByteBuf frame = buf.readRetainedSlice(endIndex - buf.readerIndex());
                 buf.readByte();
                 if (frame.readableBytes() > 0) {
                     return frame;

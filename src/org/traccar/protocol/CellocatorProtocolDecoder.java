@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,22 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.nio.ByteOrder;
 
 public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
 
-    public CellocatorProtocolDecoder(CellocatorProtocol protocol) {
+    public CellocatorProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
@@ -44,27 +45,27 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
     private byte commandCount;
 
     private void sendReply(Channel channel, SocketAddress remoteAddress, long deviceId, byte packetNumber) {
-        ChannelBuffer reply = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, 28);
-        reply.writeByte('M');
-        reply.writeByte('C');
-        reply.writeByte('G');
-        reply.writeByte('P');
-        reply.writeByte(MSG_SERVER_ACKNOWLEDGE);
-        reply.writeInt((int) deviceId);
-        reply.writeByte(commandCount++);
-        reply.writeInt(0); // authentication code
-        reply.writeByte(0);
-        reply.writeByte(packetNumber);
-        reply.writeZero(11);
-
-        byte checksum = 0;
-        for (int i = 4; i < 27; i++) {
-            checksum += reply.getByte(i);
-        }
-        reply.writeByte(checksum);
-
         if (channel != null) {
-            channel.write(reply, remoteAddress);
+            ByteBuf reply = Unpooled.buffer(28);
+            reply.writeByte('M');
+            reply.writeByte('C');
+            reply.writeByte('G');
+            reply.writeByte('P');
+            reply.writeByte(MSG_SERVER_ACKNOWLEDGE);
+            reply.writeIntLE((int) deviceId);
+            reply.writeByte(commandCount++);
+            reply.writeIntLE(0); // authentication code
+            reply.writeByte(0);
+            reply.writeByte(packetNumber);
+            reply.writeZero(11);
+
+            byte checksum = 0;
+            for (int i = 4; i < 27; i++) {
+                checksum += reply.getByte(i);
+            }
+            reply.writeByte(checksum);
+
+            channel.writeAndFlush(new NetworkMessage(reply, remoteAddress));
         }
     }
 
@@ -85,14 +86,16 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
+
+        boolean alternative = buf.getByte(buf.readerIndex() + 3) != 'P';
 
         buf.skipBytes(4); // system code
         int type = buf.readUnsignedByte();
-        long deviceUniqueId = buf.readUnsignedInt();
+        long deviceUniqueId = buf.readUnsignedIntLE();
 
         if (type != MSG_CLIENT_SERIAL) {
-            buf.readUnsignedShort(); // communication control
+            buf.readUnsignedShortLE(); // communication control
         }
         byte packetNumber = buf.readByte();
 
@@ -100,8 +103,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
 
         if (type == MSG_CLIENT_STATUS) {
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
 
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, String.valueOf(deviceUniqueId));
             if (deviceSession == null) {
@@ -111,44 +113,59 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Position.KEY_VERSION_HW, buf.readUnsignedByte());
             position.set(Position.KEY_VERSION_FW, buf.readUnsignedByte());
-            position.set("protocolVersion", buf.readUnsignedByte());
+            buf.readUnsignedByte(); // protocol version
 
-            position.set(Position.KEY_STATUS, buf.getUnsignedByte(buf.readerIndex()) & 0x0f);
+            position.set(Position.KEY_STATUS, buf.readUnsignedByte() & 0x0f);
 
-            int operator = (buf.readUnsignedByte() & 0xf0) << 4;
-            operator += buf.readUnsignedByte();
-
+            buf.readUnsignedByte(); // operator / configuration flags
             buf.readUnsignedByte(); // reason data
             position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
 
             position.set("mode", buf.readUnsignedByte());
-            position.set(Position.PREFIX_IO + 1, buf.readUnsignedInt());
+            position.set(Position.KEY_INPUT, buf.readUnsignedIntLE());
 
-            operator <<= 8;
-            operator += buf.readUnsignedByte();
-            position.set(Position.KEY_OPERATOR, operator);
+            if (alternative) {
+                buf.readUnsignedByte(); // input
+                position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShortLE());
+                position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShortLE());
+            } else {
+                buf.readUnsignedByte(); // operator
+                position.set(Position.PREFIX_ADC + 1, buf.readUnsignedIntLE());
+            }
 
-            position.set(Position.PREFIX_ADC + 1, buf.readUnsignedInt());
-            position.set(Position.KEY_ODOMETER, buf.readUnsignedMedium());
+            position.set(Position.KEY_ODOMETER, buf.readUnsignedMediumLE());
+
             buf.skipBytes(6); // multi-purpose data
-
-            position.set(Position.KEY_GPS, buf.readUnsignedShort());
-            position.set("locationStatus", buf.readUnsignedByte());
-            position.set("mode1", buf.readUnsignedByte());
-            position.set("mode2", buf.readUnsignedByte());
+            buf.readUnsignedShortLE(); // fix time
+            buf.readUnsignedByte(); // location status
+            buf.readUnsignedByte(); // mode 1
+            buf.readUnsignedByte(); // mode 2
 
             position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
 
             position.setValid(true);
-            position.setLongitude(buf.readInt() / Math.PI * 180 / 100000000);
-            position.setLatitude(buf.readInt() / Math.PI * 180 / 100000000.0);
-            position.setAltitude(buf.readInt() * 0.01);
-            position.setSpeed(UnitsConverter.knotsFromMps(buf.readInt() * 0.01));
-            position.setCourse(buf.readUnsignedShort() / Math.PI * 180.0 / 1000.0);
+
+            if (alternative) {
+                position.setLongitude(buf.readIntLE() / 10000000.0);
+                position.setLatitude(buf.readIntLE() / 10000000.0);
+            } else {
+                position.setLongitude(buf.readIntLE() / Math.PI * 180 / 100000000);
+                position.setLatitude(buf.readIntLE() / Math.PI * 180 / 100000000);
+            }
+
+            position.setAltitude(buf.readIntLE() * 0.01);
+
+            if (alternative) {
+                position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedIntLE()));
+                position.setCourse(buf.readUnsignedShortLE() / 1000.0);
+            } else {
+                position.setSpeed(UnitsConverter.knotsFromMps(buf.readUnsignedIntLE() * 0.01));
+                position.setCourse(buf.readUnsignedShortLE() / Math.PI * 180.0 / 1000.0);
+            }
 
             DateBuilder dateBuilder = new DateBuilder()
                     .setTimeReverse(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
-                    .setDateReverse(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedShort());
+                    .setDateReverse(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedShortLE());
             position.setTime(dateBuilder.getDate());
 
             return position;

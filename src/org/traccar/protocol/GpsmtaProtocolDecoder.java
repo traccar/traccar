@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,11 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
@@ -28,15 +30,15 @@ import java.util.regex.Pattern;
 
 public class GpsmtaProtocolDecoder extends BaseProtocolDecoder {
 
-    public GpsmtaProtocolDecoder(GpsmtaProtocol protocol) {
+    public GpsmtaProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
             .expression("([^ ]+) ")              // uid
             .number("(d+) ")                     // time (unix time)
-            .number("(d+.d+) ")                  // latitude
-            .number("(d+.d+) ")                  // longitude
+            .number("(-?d+.d+) ")                // latitude
+            .number("(-?d+.d+) ")                // longitude
             .number("(d+) ")                     // speed
             .number("(d+) ")                     // course
             .number("(d+) ")                     // accuracy
@@ -44,7 +46,7 @@ public class GpsmtaProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+) ")                     // flags
             .number("(d+) ")                     // battery
             .number("(d+) ")                     // temperature
-            .number("(d)")                       // changing status
+            .number("(d)")                       // charging status
             .any()
             .compile();
 
@@ -57,8 +59,7 @@ public class GpsmtaProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
@@ -69,20 +70,20 @@ public class GpsmtaProtocolDecoder extends BaseProtocolDecoder {
         String time = parser.next();
         position.setTime(new Date(Long.parseLong(time) * 1000));
 
-        position.setLatitude(parser.nextDouble(0));
-        position.setLongitude(parser.nextDouble(0));
-        position.setSpeed(parser.nextInt(0));
-        position.setCourse(parser.nextInt(0));
-        position.setAccuracy(parser.nextInt(0));
-        position.setAltitude(parser.nextInt(0));
+        position.setLatitude(parser.nextDouble());
+        position.setLongitude(parser.nextDouble());
+        position.setSpeed(parser.nextInt());
+        position.setCourse(parser.nextInt());
+        position.setAccuracy(parser.nextInt());
+        position.setAltitude(parser.nextInt());
 
-        position.set(Position.KEY_STATUS, parser.nextInt(0));
-        position.set(Position.KEY_BATTERY, parser.nextInt(0));
-        position.set(Position.PREFIX_TEMP + 1, parser.nextInt(0));
-        position.set(Position.KEY_CHARGE, parser.nextInt(0) == 1);
+        position.set(Position.KEY_STATUS, parser.nextInt());
+        position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
+        position.set(Position.PREFIX_TEMP + 1, parser.nextInt());
+        position.set(Position.KEY_CHARGE, parser.nextInt() == 1);
 
         if (channel != null) {
-            channel.write(time, remoteAddress);
+            channel.writeAndFlush(new NetworkMessage(time, remoteAddress));
         }
 
         return position;

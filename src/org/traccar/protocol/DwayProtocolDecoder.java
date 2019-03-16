@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,11 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -28,7 +30,7 @@ import java.util.regex.Pattern;
 
 public class DwayProtocolDecoder extends BaseProtocolDecoder {
 
-    public DwayProtocolDecoder(DwayProtocol protocol) {
+    public DwayProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
@@ -61,7 +63,7 @@ public class DwayProtocolDecoder extends BaseProtocolDecoder {
         String sentence = (String) msg;
         if (sentence.equals("AA55,HB")) {
             if (channel != null) {
-                channel.write("55AA,HB,OK\r\n");
+                channel.writeAndFlush(new NetworkMessage("55AA,HB,OK\r\n", remoteAddress));
             }
             return null;
         }
@@ -76,8 +78,7 @@ public class DwayProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.setValid(true);

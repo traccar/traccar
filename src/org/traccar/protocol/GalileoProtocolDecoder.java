@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,19 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.Context;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
@@ -35,9 +39,11 @@ import java.util.Set;
 
 public class GalileoProtocolDecoder extends BaseProtocolDecoder {
 
-    public GalileoProtocolDecoder(GalileoProtocol protocol) {
+    public GalileoProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
+
+    private ByteBuf photo;
 
     private static final Map<Integer, Integer> TAG_LENGTH_MAP = new HashMap<>();
 
@@ -90,16 +96,40 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         return length;
     }
 
-    private void sendReply(Channel channel, int checksum) {
-        ChannelBuffer reply = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, 3);
-        reply.writeByte(0x02);
-        reply.writeShort((short) checksum);
+    private void sendReply(Channel channel, int header, int checksum) {
         if (channel != null) {
-            channel.write(reply);
+            ByteBuf reply = Unpooled.buffer(3);
+            reply.writeByte(header);
+            reply.writeShortLE((short) checksum);
+            channel.writeAndFlush(new NetworkMessage(reply, channel.remoteAddress()));
         }
     }
 
-    private void decodeTag(Position position, ChannelBuffer buf, int tag) {
+    private void decodeTag(Position position, ByteBuf buf, int tag) {
+        if (tag >= 0x50 && tag <= 0x57) {
+            position.set(Position.PREFIX_ADC + (tag - 0x50), buf.readUnsignedShortLE());
+        } else if (tag >= 0x60 && tag <= 0x62) {
+            position.set("fuel" + (tag - 0x60), buf.readUnsignedShortLE());
+        } else if (tag >= 0xa0 && tag <= 0xaf) {
+            position.set("can8BitR" + (tag - 0xa0 + 15), buf.readUnsignedByte());
+        } else if (tag >= 0xb0 && tag <= 0xb9) {
+            position.set("can16BitR" + (tag - 0xb0 + 5), buf.readUnsignedShortLE());
+        } else if (tag >= 0xc4 && tag <= 0xd2) {
+            position.set("can8BitR" + (tag - 0xc4), buf.readUnsignedByte());
+        } else if (tag >= 0xd6 && tag <= 0xda) {
+            position.set("can16BitR" + (tag - 0xd6), buf.readUnsignedShortLE());
+        } else if (tag >= 0xdb && tag <= 0xdf) {
+            position.set("can32BitR" + (tag - 0xdb), buf.readUnsignedIntLE());
+        } else if (tag >= 0xe2 && tag <= 0xe9) {
+            position.set("userData" + (tag - 0xe2), buf.readUnsignedIntLE());
+        } else if (tag >= 0xf0 && tag <= 0xf9) {
+            position.set("can32BitR" + (tag - 0xf0 + 5), buf.readUnsignedIntLE());
+        } else {
+            decodeTagOther(position, buf, tag);
+        }
+    }
+
+    private void decodeTagOther(Position position, ByteBuf buf, int tag) {
         switch (tag) {
             case 0x01:
                 position.set(Position.KEY_VERSION_HW, buf.readUnsignedByte());
@@ -108,125 +138,84 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_VERSION_FW, buf.readUnsignedByte());
                 break;
             case 0x04:
-                position.set("deviceId", buf.readUnsignedShort());
+                position.set("deviceId", buf.readUnsignedShortLE());
                 break;
             case 0x10:
-                position.set(Position.KEY_INDEX, buf.readUnsignedShort());
+                position.set(Position.KEY_INDEX, buf.readUnsignedShortLE());
                 break;
             case 0x20:
-                position.setTime(new Date(buf.readUnsignedInt() * 1000));
+                position.setTime(new Date(buf.readUnsignedIntLE() * 1000));
                 break;
             case 0x33:
-                position.setSpeed(buf.readUnsignedShort() * 0.0539957);
-                position.setCourse(buf.readUnsignedShort() * 0.1);
+                position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShortLE() * 0.1));
+                position.setCourse(buf.readUnsignedShortLE() * 0.1);
                 break;
             case 0x34:
-                position.setAltitude(buf.readShort());
+                position.setAltitude(buf.readShortLE());
+                break;
+            case 0x35:
+                position.set(Position.KEY_HDOP, buf.readUnsignedByte() * 0.1);
                 break;
             case 0x40:
-                position.set(Position.KEY_STATUS, buf.readUnsignedShort());
+                position.set(Position.KEY_STATUS, buf.readUnsignedShortLE());
                 break;
             case 0x41:
-                position.set(Position.KEY_POWER, buf.readUnsignedShort());
+                position.set(Position.KEY_POWER, buf.readUnsignedShortLE() / 1000.0);
                 break;
             case 0x42:
-                position.set(Position.KEY_BATTERY, buf.readUnsignedShort());
+                position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() / 1000.0);
                 break;
             case 0x43:
                 position.set(Position.KEY_DEVICE_TEMP, buf.readByte());
                 break;
             case 0x44:
-                position.set(Position.KEY_ACCELERATION, buf.readUnsignedInt());
+                position.set(Position.KEY_ACCELERATION, buf.readUnsignedIntLE());
                 break;
             case 0x45:
-                position.set(Position.KEY_OUTPUT, buf.readUnsignedShort());
+                position.set(Position.KEY_OUTPUT, buf.readUnsignedShortLE());
                 break;
             case 0x46:
-                position.set(Position.KEY_INPUT, buf.readUnsignedShort());
+                position.set(Position.KEY_INPUT, buf.readUnsignedShortLE());
                 break;
-            case 0x50:
-            case 0x51:
-            case 0x52:
-            case 0x53:
-            case 0x54:
-            case 0x55:
-            case 0x56:
-            case 0x57:
-                position.set(Position.PREFIX_ADC + (tag - 0x50), buf.readUnsignedShort());
+            case 0x48:
+                position.set("statusExtended", buf.readUnsignedShortLE());
                 break;
             case 0x58:
-                position.set("rs2320", buf.readUnsignedShort());
+                position.set("rs2320", buf.readUnsignedShortLE());
                 break;
             case 0x59:
-                position.set("rs2321", buf.readUnsignedShort());
+                position.set("rs2321", buf.readUnsignedShortLE());
+                break;
+            case 0x90:
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(buf.readUnsignedIntLE()));
                 break;
             case 0xc0:
-                position.set("fuelTotal", buf.readUnsignedInt() * 0.5);
+                position.set("fuelTotal", buf.readUnsignedIntLE() * 0.5);
                 break;
             case 0xc1:
                 position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte() * 0.4);
                 position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedByte() - 40);
-                position.set(Position.KEY_RPM, buf.readUnsignedShort() * 0.125);
+                position.set(Position.KEY_RPM, buf.readUnsignedShortLE() * 0.125);
                 break;
             case 0xc2:
-                position.set("canB0", buf.readUnsignedInt());
+                position.set("canB0", buf.readUnsignedIntLE());
                 break;
             case 0xc3:
-                position.set("canB1", buf.readUnsignedInt());
-                break;
-            case 0xc4:
-            case 0xc5:
-            case 0xc6:
-            case 0xc7:
-            case 0xc8:
-            case 0xc9:
-            case 0xca:
-            case 0xcb:
-            case 0xcc:
-            case 0xcd:
-            case 0xce:
-            case 0xcf:
-            case 0xd0:
-            case 0xd1:
-            case 0xd2:
-                position.set("can8Bit" + (tag - 0xc4), buf.readUnsignedByte());
-                break;
-            case 0xd6:
-            case 0xd7:
-            case 0xd8:
-            case 0xd9:
-            case 0xda:
-                position.set("can16Bit" + (tag - 0xd6), buf.readUnsignedShort());
-                break;
-            case 0xdb:
-            case 0xdc:
-            case 0xdd:
-            case 0xde:
-            case 0xdf:
-                position.set("can32Bit" + (tag - 0xdb), buf.readUnsignedInt());
+                position.set("canB1", buf.readUnsignedIntLE());
                 break;
             case 0xd4:
-                position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+                position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
                 break;
             case 0xe0:
-                position.set(Position.KEY_INDEX, buf.readUnsignedInt());
+                position.set(Position.KEY_INDEX, buf.readUnsignedIntLE());
                 break;
             case 0xe1:
                 position.set(Position.KEY_RESULT,
-                        buf.readBytes(buf.readUnsignedByte()).toString(StandardCharsets.US_ASCII));
-                break;
-            case 0xe2:
-            case 0xe3:
-            case 0xe4:
-            case 0xe5:
-            case 0xe6:
-            case 0xe7:
-            case 0xe8:
-            case 0xe9:
-                position.set("userData" + (tag - 0xe2), buf.readUnsignedInt());
+                        buf.readSlice(buf.readUnsignedByte()).toString(StandardCharsets.US_ASCII));
                 break;
             case 0xea:
-                position.set("userDataArray", ChannelBuffers.hexDump(buf.readBytes(buf.readUnsignedByte())));
+                position.set("userDataArray", ByteBufUtil.hexDump(buf.readSlice(buf.readUnsignedByte())));
+                position.set("userDataArray", ByteBufUtil.hexDump(buf.readSlice(buf.readUnsignedByte())));
                 break;
             default:
                 buf.skipBytes(getTagLength(tag));
@@ -238,21 +227,32 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
-        buf.readUnsignedByte(); // header
-        int length = (buf.readUnsignedShort() & 0x7fff) + 3;
+        int header = buf.readUnsignedByte();
+        if (header == 0x01) {
+            return decodePositions(channel, remoteAddress, buf);
+        } else if (header == 0x07) {
+            return decodePhoto(channel, remoteAddress, buf);
+        }
+
+        return null;
+    }
+
+    private Object decodePositions(
+            Channel channel, SocketAddress remoteAddress, ByteBuf buf) throws Exception {
+
+        int length = (buf.readUnsignedShortLE() & 0x7fff) + 3;
 
         List<Position> positions = new LinkedList<>();
         Set<Integer> tags = new HashSet<>();
         boolean hasLocation = false;
 
         DeviceSession deviceSession = null;
-        Position position = new Position();
+        Position position = new Position(getProtocolName());
 
         while (buf.readerIndex() < length) {
 
-            // Check if new message started
             int tag = buf.readUnsignedByte();
             if (tags.contains(tag)) {
                 if (hasLocation && position.getFixTime() != null) {
@@ -260,29 +260,22 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
                 }
                 tags.clear();
                 hasLocation = false;
-                position = new Position();
+                position = new Position(getProtocolName()); // new position starts
             }
             tags.add(tag);
 
             if (tag == 0x03) {
                 deviceSession = getDeviceSession(
-                        channel, remoteAddress, buf.readBytes(15).toString(StandardCharsets.US_ASCII));
+                        channel, remoteAddress, buf.readSlice(15).toString(StandardCharsets.US_ASCII));
             } else if (tag == 0x30) {
                 hasLocation = true;
                 position.setValid((buf.readUnsignedByte() & 0xf0) == 0x00);
-                position.setLatitude(buf.readInt() / 1000000.0);
-                position.setLongitude(buf.readInt() / 1000000.0);
+                position.setLatitude(buf.readIntLE() / 1000000.0);
+                position.setLongitude(buf.readIntLE() / 1000000.0);
             } else {
                 decodeTag(position, buf, tag);
             }
 
-        }
-
-        if (hasLocation && position.getFixTime() != null) {
-            positions.add(position);
-        } else if (position.getAttributes().containsKey(Position.KEY_RESULT)) {
-            getLastLocation(position, null);
-            positions.add(position);
         }
 
         if (deviceSession == null) {
@@ -292,14 +285,58 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        sendReply(channel, buf.readUnsignedShort());
+        if (hasLocation && position.getFixTime() != null) {
+            positions.add(position);
+        } else if (position.getAttributes().containsKey(Position.KEY_RESULT)) {
+            position.setDeviceId(deviceSession.getDeviceId());
+            getLastLocation(position, null);
+            positions.add(position);
+        }
+
+        sendReply(channel, 0x02, buf.readUnsignedShortLE());
 
         for (Position p : positions) {
-            p.setProtocol(getProtocolName());
             p.setDeviceId(deviceSession.getDeviceId());
         }
 
         return positions.isEmpty() ? null : positions;
+    }
+
+    private Object decodePhoto(
+            Channel channel, SocketAddress remoteAddress, ByteBuf buf) throws Exception {
+
+        int length = buf.readUnsignedShortLE();
+
+        Position position = null;
+
+        if (length > 1) {
+
+            if (photo == null) {
+                photo = Unpooled.buffer();
+            }
+
+            buf.readUnsignedByte(); // part number
+            photo.writeBytes(buf, length - 1);
+
+        } else {
+
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+            String uniqueId = Context.getIdentityManager().getById(deviceSession.getDeviceId()).getUniqueId();
+
+            position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            position.set(Position.KEY_IMAGE, Context.getMediaManager().writeFile(uniqueId, photo, "jpg"));
+            photo.release();
+            photo = null;
+
+        }
+
+        sendReply(channel, 0x07, buf.readUnsignedShortLE());
+
+        return position;
     }
 
 }

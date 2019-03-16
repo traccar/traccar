@@ -15,19 +15,19 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.frame.FrameDecoder;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import org.traccar.BaseFrameDecoder;
 
-public class AplicomFrameDecoder extends FrameDecoder {
+public class AplicomFrameDecoder extends BaseFrameDecoder {
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
+            ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
         // Skip Alive message
-        while (buf.readable() && Character.isDigit(buf.getByte(buf.readerIndex()))) {
+        while (buf.isReadable() && Character.isDigit(buf.getByte(buf.readerIndex()))) {
             buf.readByte();
         }
 
@@ -53,7 +53,7 @@ public class AplicomFrameDecoder extends FrameDecoder {
 
         // Return buffer
         if (buf.readableBytes() >= length) {
-            return buf.readBytes(length);
+            return buf.readRetainedSlice(length);
         }
 
         return null;

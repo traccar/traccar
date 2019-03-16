@@ -1,6 +1,6 @@
 /*
  * Copyright 2015 Vijay Kumar (vijaykumar@zilogic.com)
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,31 +16,20 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.bootstrap.ServerBootstrap;
-import org.jboss.netty.channel.ChannelPipeline;
 import org.traccar.BaseProtocol;
+import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
-
-import java.nio.ByteOrder;
-import java.util.List;
 
 public class BlackKiteProtocol extends BaseProtocol {
 
     public BlackKiteProtocol() {
-        super("blackkite");
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        TrackerServer server = new TrackerServer(new ServerBootstrap(), getName()) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                pipeline.addLast("frameDecoder", new GalileoFrameDecoder());
-                pipeline.addLast("objectDecoder", new BlackKiteProtocolDecoder(BlackKiteProtocol.this));
+            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+                pipeline.addLast(new GalileoFrameDecoder());
+                pipeline.addLast(new BlackKiteProtocolDecoder(BlackKiteProtocol.this));
             }
-        };
-        server.setEndianness(ByteOrder.LITTLE_ENDIAN);
-        serverList.add(server);
+        });
     }
 
 }

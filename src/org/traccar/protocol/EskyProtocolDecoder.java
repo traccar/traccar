@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -28,25 +29,27 @@ import java.util.regex.Pattern;
 
 public class EskyProtocolDecoder extends BaseProtocolDecoder {
 
-    public EskyProtocolDecoder(EskyProtocol protocol) {
+    public EskyProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .text("EO;")                         // header
+            .expression("..;")                   // header
             .number("d+;")                       // index
             .number("(d+);")                     // imei
             .text("R;")                          // data type
-            .number("(d+)").text("+")            // satellites
+            .number("(d+)[+;]")                  // satellites
             .number("(dd)(dd)(dd)")              // date
-            .number("(dd)(dd)(dd)").text("+")    // time
-            .number("(-?d+.d+)").text("+")       // latitude
-            .number("(-?d+.d+)").text("+")       // longitude
-            .number("(d+.d+)").text("+")         // speed
-            .number("(d+)").text("+")            // course
-            .text("0x").number("(d+)").text("+") // input
-            .number("(d+)").text("+")            // message type
-            .number("(d+)").text("+")            // odometer
+            .number("(dd)(dd)(dd)[+;]")          // time
+            .number("(-?d+.d+)[+;]")             // latitude
+            .number("(-?d+.d+)[+;]")             // longitude
+            .number("(d+.d+)[+;]")               // speed
+            .number("(d+)[+;]")                  // course
+            .groupBegin()
+            .text("0x").number("(d+)[+;]")       // input
+            .number("(d+)[+;]")                  // message type
+            .number("(d+)[+;]")                  // odometer
+            .groupEnd("?")
             .number("(d+)")                      // voltage
             .any()
             .compile();
@@ -65,8 +68,7 @@ public class EskyProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.set(Position.KEY_SATELLITES, parser.nextInt());
@@ -78,10 +80,13 @@ public class EskyProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(UnitsConverter.knotsFromMps(parser.nextDouble()));
         position.setCourse(parser.nextDouble());
 
-        position.set(Position.KEY_INPUT, parser.nextHexInt());
-        position.set(Position.KEY_EVENT, parser.nextInt());
-        position.set(Position.KEY_ODOMETER, parser.nextInt());
-        position.set(Position.KEY_POWER, parser.nextInt());
+        if (parser.hasNext(3)) {
+            position.set(Position.KEY_INPUT, parser.nextHexInt());
+            position.set(Position.KEY_EVENT, parser.nextInt());
+            position.set(Position.KEY_ODOMETER, parser.nextInt());
+        }
+
+        position.set(Position.KEY_BATTERY, parser.nextInt() * 0.001);
 
         return position;
     }

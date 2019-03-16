@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,11 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -28,12 +30,11 @@ import java.util.regex.Pattern;
 
 public class SanavProtocolDecoder extends BaseProtocolDecoder {
 
-    public SanavProtocolDecoder(SanavProtocol protocol) {
+    public SanavProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .any()
             .expression("imei[:=]")
             .number("(d+)")                      // imei
             .expression("&?rmc[:=]")
@@ -47,6 +48,13 @@ public class SanavProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d+),")                  // speed
             .number("(d+.d+)?,")                 // course
             .number("(dd)(dd)(dd),")             // date (ddmmyy)
+            .groupBegin()
+            .expression("[^*]*")
+            .text("*")
+            .number("xx,")
+            .expression("[^,]+,")                // status
+            .number("(d+),")                     // io
+            .groupEnd("?")
             .any()
             .compile();
 
@@ -59,26 +67,39 @@ public class SanavProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
-
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
             return null;
         }
+
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         DateBuilder dateBuilder = new DateBuilder()
-                .setTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
 
         position.setValid(parser.next().equals("A"));
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
-        position.setSpeed(parser.nextDouble(0));
+        position.setSpeed(parser.nextDouble());
         position.setCourse(parser.nextDouble(0));
 
-        dateBuilder.setDateReverse(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
+        dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
         position.setTime(dateBuilder.getDate());
+
+        if (parser.hasNext()) {
+            int io = parser.nextHexInt();
+            for (int i = 0; i < 5; i++) {
+                position.set(Position.PREFIX_IN + (i + 1), BitUtil.check(io, i));
+            }
+            position.set(Position.KEY_IGNITION, BitUtil.check(io, 5));
+            position.set(Position.PREFIX_OUT + 1, BitUtil.check(io, 6));
+            position.set(Position.PREFIX_OUT + 2, BitUtil.check(io, 7));
+            position.set(Position.KEY_CHARGE, BitUtil.check(io, 8));
+            if (!BitUtil.check(io, 9)) {
+                position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+            }
+        }
 
         return position;
     }

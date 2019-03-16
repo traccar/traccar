@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +15,19 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.frame.FrameDecoder;
+import org.traccar.BaseFrameDecoder;
 
-public class TeltonikaFrameDecoder extends FrameDecoder {
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+
+public class TeltonikaFrameDecoder extends BaseFrameDecoder {
 
     private static final int MESSAGE_MINIMUM_LENGTH = 12;
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx,
-            Channel channel,
-            ChannelBuffer buf) throws Exception {
+            ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
         // Check minimum length
         if (buf.readableBytes() < MESSAGE_MINIMUM_LENGTH) {
@@ -39,12 +38,12 @@ public class TeltonikaFrameDecoder extends FrameDecoder {
         int length = buf.getUnsignedShort(buf.readerIndex());
         if (length > 0) {
             if (buf.readableBytes() >= (length + 2)) {
-                return buf.readBytes(length + 2);
+                return buf.readRetainedSlice(length + 2);
             }
         } else {
             int dataLength = buf.getInt(buf.readerIndex() + 4);
             if (buf.readableBytes() >= (dataLength + 12)) {
-                return buf.readBytes(dataLength + 12);
+                return buf.readRetainedSlice(dataLength + 12);
             }
         }
 

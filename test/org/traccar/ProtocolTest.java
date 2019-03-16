@@ -1,17 +1,18 @@
 package org.traccar;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
-import org.jboss.netty.handler.codec.http.HttpMethod;
-import org.jboss.netty.handler.codec.http.HttpVersion;
-import org.junit.Assert;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.http.DefaultFullHttpRequest;
+import io.netty.handler.codec.http.DefaultHttpHeaders;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.HttpVersion;
+import org.traccar.helper.DataConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Command;
 import org.traccar.model.Position;
 
-import javax.xml.bind.DatatypeConverter;
-import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -21,17 +22,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 public class ProtocolTest extends BaseTest {
 
     protected Position position(String time, boolean valid, double lat, double lon) throws ParseException {
 
         Position position = new Position();
 
-        if (time != null) {
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-            position.setTime(dateFormat.parse(time));
-        }
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        position.setTime(dateFormat.parse(time));
         position.setValid(valid);
         position.setLatitude(lat);
         position.setLongitude(lon);
@@ -47,51 +52,67 @@ public class ProtocolTest extends BaseTest {
         return builder.toString();
     }
 
-    protected ChannelBuffer binary(String... data) {
-        return binary(ByteOrder.BIG_ENDIAN, data);
+    protected ByteBuf concatenateBuffers(ByteBuf... buffers) {
+        ByteBuf result = Unpooled.buffer();
+        for (ByteBuf buf : buffers) {
+            result.writeBytes(buf);
+        }
+        return result;
     }
 
-    protected ChannelBuffer binary(ByteOrder endianness, String... data) {
-        return ChannelBuffers.wrappedBuffer(
-                endianness, DatatypeConverter.parseHexBinary(concatenateStrings(data)));
+    protected ByteBuf binary(String... data) {
+        return Unpooled.wrappedBuffer(DataConverter.parseHex(concatenateStrings(data)));
     }
 
     protected String text(String... data) {
         return concatenateStrings(data);
     }
 
-    protected ChannelBuffer buffer(String... data) {
-        return ChannelBuffers.copiedBuffer(concatenateStrings(data), StandardCharsets.ISO_8859_1);
+    protected ByteBuf buffer(String... data) {
+        return Unpooled.copiedBuffer(concatenateStrings(data), StandardCharsets.ISO_8859_1);
     }
 
-    protected DefaultHttpRequest request(String url) {
+    protected DefaultFullHttpRequest request(String url) {
         return request(HttpMethod.GET, url);
     }
 
-    protected DefaultHttpRequest request(HttpMethod method, String url) {
-        return new DefaultHttpRequest(HttpVersion.HTTP_1_1, method, url);
+    protected DefaultFullHttpRequest request(HttpMethod method, String url) {
+        return new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, url);
     }
 
-    protected DefaultHttpRequest request(HttpMethod method, String url, ChannelBuffer data) {
-        DefaultHttpRequest request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, method, url);
-        request.setContent(data);
-        return request;
+    protected DefaultFullHttpRequest request(HttpMethod method, String url, ByteBuf data) {
+        return new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, url, data);
+    }
+
+    protected DefaultFullHttpRequest request(HttpMethod method, String url, HttpHeaders headers) {
+        return new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, url, Unpooled.buffer(), headers, new DefaultHttpHeaders());
     }
 
     protected void verifyNotNull(BaseProtocolDecoder decoder, Object object) throws Exception {
-        Assert.assertNotNull(decoder.decode(null, null, object));
+        assertNotNull(decoder.decode(null, null, object));
     }
 
-    protected void verifyNull(Object object) throws Exception {
-        Assert.assertNull(object);
+    protected void verifyNull(Object object) {
+        assertNull(object);
     }
 
     protected void verifyNull(BaseProtocolDecoder decoder, Object object) throws Exception {
-        Assert.assertNull(decoder.decode(null, null, object));
+        assertNull(decoder.decode(null, null, object));
     }
 
     protected void verifyAttribute(BaseProtocolDecoder decoder, Object object, String key, Object expected) throws Exception {
-        Assert.assertEquals(expected, ((Position) decoder.decode(null, null, object)).getAttributes().get(key));
+        Position position = (Position) decoder.decode(null, null, object);
+        switch (key) {
+            case "speed":
+                assertEquals(expected, position.getSpeed());
+                break;
+            case "course":
+                assertEquals(expected, position.getCourse());
+                break;
+            default:
+                assertEquals(expected, position.getAttributes().get(key));
+                break;
+        }
     }
 
     protected void verifyAttributes(BaseProtocolDecoder decoder, Object object) throws Exception {
@@ -120,9 +141,9 @@ public class ProtocolTest extends BaseTest {
 
     private void verifyDecodedList(Object decodedObject, boolean checkLocation, Position expected) {
 
-        Assert.assertNotNull("list is null", decodedObject);
-        Assert.assertTrue("not a list", decodedObject instanceof List);
-        Assert.assertFalse("list is empty", ((List) decodedObject).isEmpty());
+        assertNotNull("list is null", decodedObject);
+        assertTrue("not a list", decodedObject instanceof List);
+        assertFalse("list is empty", ((List) decodedObject).isEmpty());
 
         for (Object item : (List) decodedObject) {
             verifyDecodedPosition(item, checkLocation, false, expected);
@@ -132,8 +153,8 @@ public class ProtocolTest extends BaseTest {
 
     private void verifyDecodedPosition(Object decodedObject, boolean checkLocation, boolean checkAttributes, Position expected) {
 
-        Assert.assertNotNull("position is null", decodedObject);
-        Assert.assertTrue("not a position", decodedObject instanceof Position);
+        assertNotNull("position is null", decodedObject);
+        assertTrue("not a position", decodedObject instanceof Position);
 
         Position position = (Position) decodedObject;
 
@@ -144,125 +165,130 @@ public class ProtocolTest extends BaseTest {
                 if (expected.getFixTime() != null) {
                     DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
                     dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-                    Assert.assertEquals("time", dateFormat.format(expected.getFixTime()), dateFormat.format(position.getFixTime()));
+                    assertEquals("time", dateFormat.format(expected.getFixTime()), dateFormat.format(position.getFixTime()));
                 }
-                Assert.assertEquals("valid", expected.getValid(), position.getValid());
-                Assert.assertEquals("latitude", expected.getLatitude(), position.getLatitude(), 0.00001);
-                Assert.assertEquals("longitude", expected.getLongitude(), position.getLongitude(), 0.00001);
+                assertEquals("valid", expected.getValid(), position.getValid());
+                assertEquals("latitude", expected.getLatitude(), position.getLatitude(), 0.00001);
+                assertEquals("longitude", expected.getLongitude(), position.getLongitude(), 0.00001);
 
             } else {
 
-                Assert.assertNotNull(position.getFixTime());
-                Assert.assertTrue("year > 1999", position.getFixTime().after(new Date(915148800000L)));
-                Assert.assertTrue("time < +25 hours",
+                assertNotNull(position.getServerTime());
+                assertNotNull(position.getFixTime());
+                assertTrue("year > 1999", position.getFixTime().after(new Date(915148800000L)));
+                assertTrue("time < +25 hours",
                         position.getFixTime().getTime() < System.currentTimeMillis() + 25 * 3600000);
 
-                Assert.assertTrue("latitude >= -90", position.getLatitude() >= -90);
-                Assert.assertTrue("latitude <= 90", position.getLatitude() <= 90);
+                assertTrue("latitude >= -90", position.getLatitude() >= -90);
+                assertTrue("latitude <= 90", position.getLatitude() <= 90);
 
-                Assert.assertTrue("longitude >= -180", position.getLongitude() >= -180);
-                Assert.assertTrue("longitude <= 180", position.getLongitude() <= 180);
+                assertTrue("longitude >= -180", position.getLongitude() >= -180);
+                assertTrue("longitude <= 180", position.getLongitude() <= 180);
 
             }
 
-            Assert.assertTrue("altitude >= -12262", position.getAltitude() >= -12262);
-            Assert.assertTrue("altitude <= 18000", position.getAltitude() <= 18000);
+            assertTrue("altitude >= -12262", position.getAltitude() >= -12262);
+            assertTrue("altitude <= 18000", position.getAltitude() <= 18000);
 
-            Assert.assertTrue("speed >= 0", position.getSpeed() >= 0);
-            Assert.assertTrue("speed <= 869", position.getSpeed() <= 869);
+            assertTrue("speed >= 0", position.getSpeed() >= 0);
+            assertTrue("speed <= 869", position.getSpeed() <= 869);
 
-            Assert.assertTrue("course >= 0", position.getCourse() >= 0);
-            Assert.assertTrue("course <= 360", position.getCourse() <= 360);
+            assertTrue("course >= 0", position.getCourse() >= 0);
+            assertTrue("course <= 360", position.getCourse() <= 360);
 
-            Assert.assertNotNull("protocol is null", position.getProtocol());
+            assertNotNull("protocol is null", position.getProtocol());
 
         }
 
         Map<String, Object> attributes = position.getAttributes();
 
         if (checkAttributes) {
-            Assert.assertFalse("no attributes", attributes.isEmpty());
+            assertFalse("no attributes", attributes.isEmpty());
         }
 
         if (attributes.containsKey(Position.KEY_INDEX)) {
-            Assert.assertTrue(attributes.get(Position.KEY_INDEX) instanceof Number);
+            assertTrue(attributes.get(Position.KEY_INDEX) instanceof Number);
         }
 
         if (attributes.containsKey(Position.KEY_HDOP)) {
-            Assert.assertTrue(attributes.get(Position.KEY_HDOP) instanceof Number);
+            assertTrue(attributes.get(Position.KEY_HDOP) instanceof Number);
         }
 
         if (attributes.containsKey(Position.KEY_VDOP)) {
-            Assert.assertTrue(attributes.get(Position.KEY_VDOP) instanceof Number);
+            assertTrue(attributes.get(Position.KEY_VDOP) instanceof Number);
         }
 
         if (attributes.containsKey(Position.KEY_PDOP)) {
-            Assert.assertTrue(attributes.get(Position.KEY_PDOP) instanceof Number);
+            assertTrue(attributes.get(Position.KEY_PDOP) instanceof Number);
         }
 
         if (attributes.containsKey(Position.KEY_SATELLITES)) {
-            Assert.assertTrue(attributes.get(Position.KEY_SATELLITES) instanceof Number);
+            assertTrue(attributes.get(Position.KEY_SATELLITES) instanceof Number);
         }
 
         if (attributes.containsKey(Position.KEY_SATELLITES_VISIBLE)) {
-            Assert.assertTrue(attributes.get(Position.KEY_SATELLITES_VISIBLE) instanceof Number);
+            assertTrue(attributes.get(Position.KEY_SATELLITES_VISIBLE) instanceof Number);
         }
 
         if (attributes.containsKey(Position.KEY_RSSI)) {
-            Assert.assertTrue(attributes.get(Position.KEY_RSSI) instanceof Number);
+            assertTrue(attributes.get(Position.KEY_RSSI) instanceof Number);
         }
 
         if (attributes.containsKey(Position.KEY_ODOMETER)) {
-            Assert.assertTrue(attributes.get(Position.KEY_ODOMETER) instanceof Number);
+            assertTrue(attributes.get(Position.KEY_ODOMETER) instanceof Number);
         }
 
         if (attributes.containsKey(Position.KEY_RPM)) {
-            Assert.assertTrue(attributes.get(Position.KEY_RPM) instanceof Number);
+            assertTrue(attributes.get(Position.KEY_RPM) instanceof Number);
         }
 
         if (attributes.containsKey(Position.KEY_FUEL_LEVEL)) {
-            Assert.assertTrue(attributes.get(Position.KEY_FUEL_LEVEL) instanceof Number);
+            assertTrue(attributes.get(Position.KEY_FUEL_LEVEL) instanceof Number);
         }
 
         if (attributes.containsKey(Position.KEY_POWER)) {
-            Assert.assertTrue(attributes.get(Position.KEY_POWER) instanceof Number);
+            assertTrue(attributes.get(Position.KEY_POWER) instanceof Number);
         }
 
         if (attributes.containsKey(Position.KEY_BATTERY)) {
-            Assert.assertTrue(attributes.get(Position.KEY_BATTERY) instanceof Number);
+            assertTrue(attributes.get(Position.KEY_BATTERY) instanceof Number);
         }
 
         if (attributes.containsKey(Position.KEY_BATTERY_LEVEL)) {
             int batteryLevel = ((Number) attributes.get(Position.KEY_BATTERY_LEVEL)).intValue();
-            Assert.assertTrue(batteryLevel <= 100 && batteryLevel >= 0);
+            assertTrue(batteryLevel <= 100 && batteryLevel >= 0);
         }
 
         if (attributes.containsKey(Position.KEY_CHARGE)) {
-            Assert.assertTrue(attributes.get(Position.KEY_CHARGE) instanceof Boolean);
+            assertTrue(attributes.get(Position.KEY_CHARGE) instanceof Boolean);
         }
 
         if (attributes.containsKey(Position.KEY_IGNITION)) {
-            Assert.assertTrue(attributes.get(Position.KEY_IGNITION) instanceof Boolean);
+            assertTrue(attributes.get(Position.KEY_IGNITION) instanceof Boolean);
         }
 
         if (attributes.containsKey(Position.KEY_MOTION)) {
-            Assert.assertTrue(attributes.get(Position.KEY_MOTION) instanceof Boolean);
+            assertTrue(attributes.get(Position.KEY_MOTION) instanceof Boolean);
         }
 
         if (attributes.containsKey(Position.KEY_ARCHIVE)) {
-            Assert.assertTrue(attributes.get(Position.KEY_ARCHIVE) instanceof Boolean);
+            assertTrue(attributes.get(Position.KEY_ARCHIVE) instanceof Boolean);
         }
 
         if (attributes.containsKey(Position.KEY_DRIVER_UNIQUE_ID)) {
-            Assert.assertTrue(attributes.get(Position.KEY_DRIVER_UNIQUE_ID) instanceof String);
+            assertTrue(attributes.get(Position.KEY_DRIVER_UNIQUE_ID) instanceof String);
         }
 
         if (attributes.containsKey(Position.KEY_STEPS)) {
-            Assert.assertTrue(attributes.get(Position.KEY_STEPS) instanceof Number);
+            assertTrue(attributes.get(Position.KEY_STEPS) instanceof Number);
         }
 
         if (attributes.containsKey(Position.KEY_ROAMING)) {
-            Assert.assertTrue(attributes.get(Position.KEY_ROAMING) instanceof Boolean);
+            assertTrue(attributes.get(Position.KEY_ROAMING) instanceof Boolean);
+        }
+
+        if (attributes.containsKey(Position.KEY_HOURS)) {
+            assertTrue(attributes.get(Position.KEY_HOURS) instanceof Number);
         }
 
         if (position.getNetwork() != null && position.getNetwork().getCellTowers() != null) {
@@ -277,24 +303,22 @@ public class ProtocolTest extends BaseTest {
     }
 
     private void checkInteger(Object value, int min, int max) {
-        Assert.assertNotNull("value is null", value);
-        Assert.assertTrue("not int or long", value instanceof Integer || value instanceof Long);
+        assertNotNull("value is null", value);
+        assertTrue("not int or long", value instanceof Integer || value instanceof Long);
         long number = ((Number) value).longValue();
-        Assert.assertTrue("value too low", number >= min);
-        Assert.assertTrue("value too high", number <= max);
+        assertTrue("value too low", number >= min);
+        assertTrue("value too high", number <= max);
     }
 
     protected void verifyCommand(
-            BaseProtocolEncoder encoder, Command command, ChannelBuffer expected) throws Exception {
+            BaseProtocolEncoder encoder, Command command, ByteBuf expected) {
         verifyFrame(expected, encoder.encodeCommand(command));
     }
 
-    protected void verifyFrame(ChannelBuffer expected, Object object) {
-
-        Assert.assertNotNull("buffer is null", object);
-        Assert.assertTrue("not a buffer", object instanceof ChannelBuffer);
-        Assert.assertEquals(ChannelBuffers.hexDump(expected), ChannelBuffers.hexDump((ChannelBuffer) object));
-
+    protected void verifyFrame(ByteBuf expected, Object object) {
+        assertNotNull("buffer is null", object);
+        assertTrue("not a buffer", object instanceof ByteBuf);
+        assertEquals(ByteBufUtil.hexDump(expected), ByteBufUtil.hexDump((ByteBuf) object));
     }
 
 }

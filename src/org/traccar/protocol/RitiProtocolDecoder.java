@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Anton Tananaev (anton@traccar.org)
+ * Copyright 2014 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,11 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -30,7 +31,7 @@ import java.util.regex.Pattern;
 
 public class RitiProtocolDecoder extends BaseProtocolDecoder {
 
-    public RitiProtocolDecoder(RitiProtocol protocol) {
+    public RitiProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
@@ -52,12 +53,11 @@ public class RitiProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         buf.skipBytes(2); // header
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, String.valueOf(buf.readUnsignedShort()));
         if (deviceSession == null) {
@@ -67,14 +67,14 @@ public class RitiProtocolDecoder extends BaseProtocolDecoder {
 
         position.set("mode", buf.readUnsignedByte());
         position.set(Position.KEY_COMMAND, buf.readUnsignedByte());
-        position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.001);
+        position.set(Position.KEY_POWER, buf.readUnsignedShortLE() * 0.001);
 
         buf.skipBytes(5);  // status
-        buf.readUnsignedShort();  // idleCount
-        buf.readUnsignedShort();  // idleTime in seconds
+        buf.readUnsignedShortLE();  // idleCount
+        buf.readUnsignedShortLE();  // idleTime in seconds
 
-        position.set(Position.KEY_DISTANCE, buf.readUnsignedInt());
-        position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedInt());
+        position.set(Position.KEY_DISTANCE, buf.readUnsignedIntLE());
+        position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedIntLE());
 
         // Parse GPRMC
         int end = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '*');

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,12 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.BcdUtil;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
@@ -32,7 +33,7 @@ import java.util.Date;
 
 public class Vt200ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Vt200ProtocolDecoder(Vt200Protocol protocol) {
+    public Vt200ProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
@@ -42,7 +43,7 @@ public class Vt200ProtocolDecoder extends BaseProtocolDecoder {
         return degrees + minutes * 0.0001 / 60;
     }
 
-    protected Date decodeDate(ChannelBuffer buf) {
+    protected Date decodeDate(ByteBuf buf) {
         DateBuilder dateBuilder = new DateBuilder()
                 .setDateReverse(BcdUtil.readInteger(buf, 2), BcdUtil.readInteger(buf, 2), BcdUtil.readInteger(buf, 2))
                 .setTime(BcdUtil.readInteger(buf, 2), BcdUtil.readInteger(buf, 2), BcdUtil.readInteger(buf, 2));
@@ -53,11 +54,11 @@ public class Vt200ProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         buf.skipBytes(1); // header
 
-        String id = ChannelBuffers.hexDump(buf.readBytes(6));
+        String id = ByteBufUtil.hexDump(buf.readSlice(6));
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
         if (deviceSession == null) {
             return null;
@@ -68,8 +69,7 @@ public class Vt200ProtocolDecoder extends BaseProtocolDecoder {
 
         if (type == 0x2086 || type == 0x2084 || type == 0x2082) {
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             buf.readUnsignedByte(); // data type
@@ -85,7 +85,7 @@ public class Vt200ProtocolDecoder extends BaseProtocolDecoder {
             if (!BitUtil.check(flags, 1)) {
                 position.setLatitude(-position.getLatitude());
             }
-            if (!BitUtil.check(flags, 1)) {
+            if (!BitUtil.check(flags, 2)) {
                 position.setLongitude(-position.getLongitude());
             }
 
@@ -103,8 +103,7 @@ public class Vt200ProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == 0x3088) {
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             getLastLocation(position, null);

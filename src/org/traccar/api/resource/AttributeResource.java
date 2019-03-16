@@ -1,6 +1,6 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
- * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
+ * Copyright 2017 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,11 @@ package org.traccar.api.resource;
 import java.sql.SQLException;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -30,7 +33,7 @@ import org.traccar.Context;
 import org.traccar.api.ExtendedObjectResource;
 import org.traccar.model.Attribute;
 import org.traccar.model.Position;
-import org.traccar.processing.ComputedAttributesHandler;
+import org.traccar.handler.ComputedAttributesHandler;
 
 @Path("attributes/computed")
 @Produces(MediaType.APPLICATION_JSON)
@@ -43,18 +46,23 @@ public class AttributeResource extends ExtendedObjectResource<Attribute> {
 
     @POST
     @Path("test")
-    public Response test(@QueryParam("deviceId") long deviceId, Attribute entity) throws SQLException {
-        Context.getPermissionsManager().checkReadonly(getUserId());
+    public Response test(@QueryParam("deviceId") long deviceId, Attribute entity) {
+        Context.getPermissionsManager().checkAdmin(getUserId());
         Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
         Position last = Context.getIdentityManager().getLastPosition(deviceId);
         if (last != null) {
-            Object result = new ComputedAttributesHandler().computeAttribute(entity, last);
+            Object result = new ComputedAttributesHandler(
+                    Context.getConfig(),
+                    Context.getIdentityManager(),
+                    Context.getAttributesManager()).computeAttribute(entity, last);
             if (result != null) {
                 switch (entity.getType()) {
                     case "number":
-                        return Response.ok((Number) result).build();
+                        Number numberValue = (Number) result;
+                        return Response.ok(numberValue).build();
                     case "boolean":
-                        return Response.ok((Boolean) result).build();
+                        Boolean booleanValue = (Boolean) result;
+                        return Response.ok(booleanValue).build();
                     default:
                         return Response.ok(result.toString()).build();
                 }
@@ -64,6 +72,26 @@ public class AttributeResource extends ExtendedObjectResource<Attribute> {
         } else {
             throw new IllegalArgumentException("Device has no last position");
         }
+    }
+
+    @POST
+    public Response add(Attribute entity) throws SQLException {
+        Context.getPermissionsManager().checkAdmin(getUserId());
+        return super.add(entity);
+    }
+
+    @Path("{id}")
+    @PUT
+    public Response update(Attribute entity) throws SQLException {
+        Context.getPermissionsManager().checkAdmin(getUserId());
+        return super.update(entity);
+    }
+
+    @Path("{id}")
+    @DELETE
+    public Response remove(@PathParam("id") long id) throws SQLException {
+        Context.getPermissionsManager().checkAdmin(getUserId());
+        return super.remove(id);
     }
 
 }

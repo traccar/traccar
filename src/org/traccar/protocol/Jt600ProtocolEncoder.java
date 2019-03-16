@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@ package org.traccar.protocol;
 import java.util.TimeZone;
 
 import org.traccar.StringProtocolEncoder;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 public class Jt600ProtocolEncoder extends StringProtocolEncoder {
+
     @Override
     protected Object encodeCommand(Command command) {
 
@@ -36,10 +36,8 @@ public class Jt600ProtocolEncoder extends StringProtocolEncoder {
             case Command.TYPE_REBOOT_DEVICE:
                 return "(S17)";
             default:
-                Log.warning(new UnsupportedOperationException(command.getType()));
-                break;
+                return null;
         }
-
-        return null;
     }
+
 }

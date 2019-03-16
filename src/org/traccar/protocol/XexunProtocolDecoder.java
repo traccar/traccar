@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -30,7 +31,7 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
 
     private final boolean full;
 
-    public XexunProtocolDecoder(XexunProtocol protocol, boolean full) {
+    public XexunProtocolDecoder(Protocol protocol, boolean full) {
         super(protocol);
         this.full = full;
     }
@@ -106,8 +107,7 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
 
         if (full) {
             position.set("serial", parser.next());

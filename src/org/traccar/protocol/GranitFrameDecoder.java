@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,29 +15,29 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.frame.FrameDecoder;
-import org.traccar.helper.StringFinder;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import org.traccar.BaseFrameDecoder;
+import org.traccar.helper.BufferUtil;
 
-public class GranitFrameDecoder extends FrameDecoder {
+public class GranitFrameDecoder extends BaseFrameDecoder {
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
+            ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
-        int indexEnd = buf.indexOf(buf.readerIndex(), buf.writerIndex(), new StringFinder("\r\n"));
+        int indexEnd = BufferUtil.indexOf("\r\n", buf);
         if (indexEnd != -1) {
-            int indexTilde = buf.indexOf(buf.readerIndex(), buf.writerIndex(), new StringFinder("~"));
+            int indexTilde = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '~');
             if (indexTilde != -1 && indexTilde < indexEnd) {
-                int length = buf.getUnsignedShort(indexTilde + 1);
-                indexEnd = buf.indexOf(indexTilde + 2 + length, buf.writerIndex(), new StringFinder("\r\n"));
+                int length = buf.getUnsignedShortLE(indexTilde + 1);
+                indexEnd = BufferUtil.indexOf("\r\n", buf, indexTilde + 2 + length, buf.writerIndex());
                 if (indexEnd == -1) {
                     return null;
                 }
             }
-            ChannelBuffer frame = buf.readBytes(indexEnd - buf.readerIndex());
+            ByteBuf frame = buf.readRetainedSlice(indexEnd - buf.readerIndex());
             buf.skipBytes(2);
             return frame;
         }

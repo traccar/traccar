@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,13 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -31,7 +33,7 @@ import java.util.regex.Pattern;
 
 public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Tk102ProtocolDecoder(Tk102Protocol protocol) {
+    public Tk102ProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
@@ -59,16 +61,17 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
             .text(")")
             .compile();
 
-    private void sendResponse(Channel channel, int type, ChannelBuffer dataSequence, ChannelBuffer content) {
+    private void sendResponse(Channel channel, int type, ByteBuf dataSequence, ByteBuf content) {
         if (channel != null) {
-            ChannelBuffer response = ChannelBuffers.dynamicBuffer();
+            ByteBuf response = Unpooled.buffer();
             response.writeByte('[');
             response.writeByte(type);
             response.writeBytes(dataSequence);
             response.writeByte(content.readableBytes());
             response.writeBytes(content);
+            content.release();
             response.writeByte(']');
-            channel.write(response);
+            channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
     }
 
@@ -76,16 +79,16 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         buf.skipBytes(1); // header
         int type = buf.readUnsignedByte();
-        ChannelBuffer dataSequence = buf.readBytes(10);
+        ByteBuf dataSequence = buf.readSlice(10);
         int length = buf.readUnsignedByte();
 
         if (type == MSG_LOGIN_REQUEST || type == MSG_LOGIN_REQUEST_2) {
 
-            ChannelBuffer data = buf.readBytes(length);
+            ByteBuf data = buf.readSlice(length);
 
             String id;
             if (type == MSG_LOGIN_REQUEST) {
@@ -95,7 +98,7 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (getDeviceSession(channel, remoteAddress, id) != null) {
-                ChannelBuffer response = ChannelBuffers.dynamicBuffer();
+                ByteBuf response = Unpooled.buffer();
                 response.writeByte(MODE_GPRS);
                 response.writeBytes(data);
                 sendResponse(channel, MSG_LOGIN_RESPONSE, dataSequence, response);
@@ -103,7 +106,7 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == MSG_HEARTBEAT_REQUEST) {
 
-            sendResponse(channel, MSG_HEARTBEAT_RESPONSE, dataSequence, buf.readBytes(length));
+            sendResponse(channel, MSG_HEARTBEAT_RESPONSE, dataSequence, buf.readRetainedSlice(length));
 
         } else {
 
@@ -112,13 +115,12 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
                 return null;
             }
 
-            Parser parser = new Parser(PATTERN, buf.readBytes(length).toString(StandardCharsets.US_ASCII));
+            Parser parser = new Parser(PATTERN, buf.readSlice(length).toString(StandardCharsets.US_ASCII));
             if (!parser.matches()) {
                 return null;
             }
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             DateBuilder dateBuilder = new DateBuilder()

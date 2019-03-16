@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,29 +15,29 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
+import org.traccar.helper.DataConverter;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import javax.json.Json;
 import javax.json.JsonObject;
-import javax.xml.bind.DatatypeConverter;
 import java.io.StringReader;
 import java.net.SocketAddress;
 import java.net.URLDecoder;
-import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
 
-    public SigfoxProtocolDecoder(SigfoxProtocol protocol) {
+    public SigfoxProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
@@ -45,9 +45,9 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        HttpRequest request = (HttpRequest) msg;
+        FullHttpRequest request = (FullHttpRequest) msg;
         JsonObject json = Json.createReader(new StringReader(URLDecoder.decode(
-                request.getContent().toString(StandardCharsets.UTF_8).split("=")[0], "UTF-8"))).readObject();
+                request.content().toString(StandardCharsets.UTF_8).split("=")[0], "UTF-8"))).readObject();
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, json.getString("device"));
         if (deviceSession == null) {
@@ -55,30 +55,31 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.setTime(new Date(json.getInt("time") * 1000L));
 
-        ChannelBuffer buf = ChannelBuffers.wrappedBuffer(
-                ByteOrder.LITTLE_ENDIAN, DatatypeConverter.parseHexBinary(json.getString("data")));
+        ByteBuf buf = Unpooled.wrappedBuffer(DataConverter.parseHex(json.getString("data")));
+        try {
+            int type = buf.readUnsignedByte() >> 4;
+            if (type == 0) {
 
-        int type = buf.readUnsignedByte() >> 4;
-        if (type == 0) {
+                position.setValid(true);
+                position.setLatitude(buf.readIntLE() * 0.0000001);
+                position.setLongitude(buf.readIntLE() * 0.0000001);
+                position.setCourse(buf.readUnsignedByte() * 2);
+                position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
 
-            position.setValid(true);
-            position.setLatitude(buf.readInt() * 0.0000001);
-            position.setLongitude(buf.readInt() * 0.0000001);
-            position.setCourse(buf.readUnsignedByte() * 2);
-            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
+                position.set(Position.KEY_BATTERY, buf.readUnsignedByte() * 0.025);
 
-            position.set(Position.KEY_BATTERY, buf.readUnsignedByte() * 0.025);
+            } else {
 
-        } else {
+                getLastLocation(position, position.getDeviceTime());
 
-            getLastLocation(position, position.getDeviceTime());
-
+            }
+        } finally {
+            buf.release();
         }
 
         position.set(Position.KEY_RSSI, json.getJsonNumber("rssi").doubleValue());

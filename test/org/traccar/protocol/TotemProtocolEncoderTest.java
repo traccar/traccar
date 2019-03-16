@@ -1,9 +1,10 @@
 package org.traccar.protocol;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Command;
+
+import static org.junit.Assert.assertEquals;
 
 public class TotemProtocolEncoderTest extends ProtocolTest {
 
@@ -17,7 +18,7 @@ public class TotemProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_ENGINE_STOP);
         command.set(Command.KEY_DEVICE_PASSWORD, "000000");
         
-        Assert.assertEquals("*000000,025,C,1#", encoder.encodeCommand(command));
+        assertEquals("*000000,025,C,1#", encoder.encodeCommand(command));
 
     }
 

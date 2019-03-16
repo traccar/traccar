@@ -8,7 +8,7 @@ public class UlbotechProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        UlbotechProtocolDecoder decoder = new UlbotechProtocolDecoder(new UlbotechProtocol());
+        UlbotechProtocolDecoder decoder = new UlbotechProtocolDecoder(null);
 
         verifyNull(decoder, buffer(
                 "*TS01,353323081464660#"));

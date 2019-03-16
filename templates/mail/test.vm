@@ -1,7 +1,0 @@
-#set($subject = "Traccar test message")
-<!DOCTYPE html>
-<html>
-<body>
-Test message
-</body>
-</html> 

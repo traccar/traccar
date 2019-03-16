@@ -16,7 +16,6 @@
 package org.traccar.protocol;
 
 import org.traccar.StringProtocolEncoder;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 public class Gl200ProtocolEncoder extends StringProtocolEncoder {
@@ -40,11 +39,8 @@ public class Gl200ProtocolEncoder extends StringProtocolEncoder {
             case Command.TYPE_REBOOT_DEVICE:
                 return formatCommand(command, "AT+GTRTO={%s},3,,,,,,FFFF$", Command.KEY_DEVICE_PASSWORD);
             default:
-                Log.warning(new UnsupportedOperationException(command.getType()));
-                break;
+                return null;
         }
-
-        return null;
     }
 
 }

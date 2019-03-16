@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -29,7 +30,7 @@ import java.util.regex.Pattern;
 
 public class AlematicsProtocolDecoder extends BaseProtocolDecoder {
 
-    public AlematicsProtocolDecoder(AlematicsProtocol protocol) {
+    public AlematicsProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
@@ -60,6 +61,8 @@ public class AlematicsProtocolDecoder extends BaseProtocolDecoder {
             .or()
             .number("(d+),")                     // extra mask
             .expression("(.*)")                  // extra data
+            .or()
+            .any()
             .groupEnd()
             .compile();
 
@@ -113,8 +116,7 @@ public class AlematicsProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
 
         position.set(Position.KEY_TYPE, parser.nextInt());
         position.set(Position.KEY_INDEX, parser.nextInt());
@@ -145,7 +147,7 @@ public class AlematicsProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext()) {
             position.set("text", parser.next());
-        } else {
+        } else if (parser.hasNext()) {
             decodeExtras(position, parser);
         }
 

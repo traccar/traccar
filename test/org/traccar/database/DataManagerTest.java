@@ -1,6 +1,5 @@
 package org.traccar.database;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.traccar.model.Attribute;
 import org.traccar.model.Device;
@@ -11,66 +10,70 @@ import org.traccar.model.ManagedUser;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 public class DataManagerTest {
 
     @Test
     public void constructObjectQuery() {
-        Assert.assertEquals("SELECT * FROM users",
+        assertEquals("SELECT * FROM tc_users",
                 DataManager.constructObjectQuery(DataManager.ACTION_SELECT_ALL, User.class, false));
-        Assert.assertEquals("DELETE FROM groups WHERE id = :id",
+        assertEquals("DELETE FROM tc_groups WHERE id = :id",
                 DataManager.constructObjectQuery(DataManager.ACTION_DELETE, Group.class, false));
-        Assert.assertEquals("SELECT * FROM positions WHERE id = :id",
+        assertEquals("SELECT * FROM tc_positions WHERE id = :id",
                 DataManager.constructObjectQuery(DataManager.ACTION_SELECT, Position.class, false));
 
         String insertDevice = DataManager.constructObjectQuery(DataManager.ACTION_INSERT, Device.class, false);
-        Assert.assertFalse(insertDevice.contains("class"));
-        Assert.assertFalse(insertDevice.contains("id"));
-        Assert.assertFalse(insertDevice.contains("status"));
-        Assert.assertFalse(insertDevice.contains("geofenceIds"));
+        assertFalse(insertDevice.contains("class"));
+        assertFalse(insertDevice.contains("id"));
+        assertFalse(insertDevice.contains("status"));
+        assertFalse(insertDevice.contains("geofenceIds"));
 
         String updateDeviceStatus = DataManager.constructObjectQuery("update", Device.class, true);
-        Assert.assertTrue(updateDeviceStatus.contains("lastUpdate"));
+        assertTrue(updateDeviceStatus.contains("lastUpdate"));
 
         String updateUser = DataManager.constructObjectQuery(DataManager.ACTION_UPDATE, User.class, false);
-        Assert.assertFalse(updateUser.contains("class"));
-        Assert.assertFalse(updateUser.contains("password"));
-        Assert.assertFalse(updateUser.contains("salt"));
+        assertFalse(updateUser.contains("class"));
+        assertFalse(updateUser.contains("password"));
+        assertFalse(updateUser.contains("salt"));
 
         String updateUserPassword = DataManager.constructObjectQuery(DataManager.ACTION_UPDATE, User.class, true);
-        Assert.assertFalse(updateUserPassword.contains("name"));
-        Assert.assertTrue(updateUserPassword.contains("hashedPassword"));
-        Assert.assertTrue(updateUserPassword.contains("salt"));
+        assertFalse(updateUserPassword.contains("name"));
+        assertTrue(updateUserPassword.contains("hashedPassword"));
+        assertTrue(updateUserPassword.contains("salt"));
 
         String insertPosition = DataManager.constructObjectQuery(DataManager.ACTION_INSERT, Position.class, false);
-        Assert.assertFalse(insertPosition.contains("type"));
-        Assert.assertFalse(insertPosition.contains("outdated"));
+        assertFalse(insertPosition.contains("type"));
+        assertFalse(insertPosition.contains("outdated"));
 
     }
 
     @Test
     public void constructPermissionsQuery() {
-        Assert.assertEquals("SELECT userId, deviceId FROM user_device",
+        assertEquals("SELECT userId, deviceId FROM tc_user_device",
                 DataManager.constructPermissionQuery(DataManager.ACTION_SELECT_ALL, User.class, Device.class));
 
-        Assert.assertEquals("SELECT userId, managedUserId FROM user_user",
+        assertEquals("SELECT userId, managedUserId FROM tc_user_user",
                 DataManager.constructPermissionQuery(DataManager.ACTION_SELECT_ALL, User.class, ManagedUser.class));
 
-        Assert.assertEquals("SELECT deviceId, driverId FROM device_driver",
+        assertEquals("SELECT deviceId, driverId FROM tc_device_driver",
                 DataManager.constructPermissionQuery(DataManager.ACTION_SELECT_ALL, Device.class, Driver.class));
 
-        Assert.assertEquals("SELECT groupId, geofenceId FROM group_geofence",
+        assertEquals("SELECT groupId, geofenceId FROM tc_group_geofence",
                 DataManager.constructPermissionQuery(DataManager.ACTION_SELECT_ALL, Group.class, Geofence.class));
 
-        Assert.assertEquals("INSERT INTO user_device (userId, deviceId) VALUES (:userId, :deviceId)",
+        assertEquals("INSERT INTO tc_user_device (userId, deviceId) VALUES (:userId, :deviceId)",
                 DataManager.constructPermissionQuery(DataManager.ACTION_INSERT, User.class, Device.class));
 
-        Assert.assertEquals("DELETE FROM user_user WHERE userId = :userId AND managedUserId = :managedUserId",
+        assertEquals("DELETE FROM tc_user_user WHERE userId = :userId AND managedUserId = :managedUserId",
                 DataManager.constructPermissionQuery(DataManager.ACTION_DELETE, User.class, ManagedUser.class));
 
-        Assert.assertEquals("INSERT INTO device_geofence (deviceId, geofenceId) VALUES (:deviceId, :geofenceId)",
+        assertEquals("INSERT INTO tc_device_geofence (deviceId, geofenceId) VALUES (:deviceId, :geofenceId)",
                 DataManager.constructPermissionQuery(DataManager.ACTION_INSERT, Device.class, Geofence.class));
 
-        Assert.assertEquals("DELETE FROM group_attribute WHERE groupId = :groupId AND attributeId = :attributeId",
+        assertEquals("DELETE FROM tc_group_attribute WHERE groupId = :groupId AND attributeId = :attributeId",
                 DataManager.constructPermissionQuery(DataManager.ACTION_DELETE, Group.class, Attribute.class));
 
     }

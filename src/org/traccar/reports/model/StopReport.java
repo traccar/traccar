@@ -53,37 +53,21 @@ public class StopReport extends BaseReport  {
     private Date startTime;
 
     public Date getStartTime() {
-        if (startTime != null) {
-            return new Date(startTime.getTime());
-        } else {
-            return null;
-        }
+        return startTime;
     }
 
     public void setStartTime(Date startTime) {
-        if (startTime != null) {
-            this.startTime = new Date(startTime.getTime());
-        } else {
-            this.startTime = null;
-        }
+        this.startTime = startTime;
     }
 
     private Date endTime;
 
     public Date getEndTime() {
-        if (endTime != null) {
-            return new Date(endTime.getTime());
-        } else {
-            return null;
-        }
+        return endTime;
     }
 
     public void setEndTime(Date endTime) {
-        if (endTime != null) {
-            this.endTime = new Date(endTime.getTime());
-        } else {
-            this.endTime = null;
-        }
+        this.endTime = endTime;
     }
 
     private String address;

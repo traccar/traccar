@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,38 +15,37 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.frame.FrameDecoder;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import org.traccar.BaseFrameDecoder;
+import org.traccar.NetworkMessage;
 
-import java.nio.ByteOrder;
-
-public class At2000FrameDecoder extends FrameDecoder {
+public class At2000FrameDecoder extends BaseFrameDecoder {
 
     private static final int BLOCK_LENGTH = 16;
     private static final int ACK_LENGTH = 496;
 
     private boolean firstPacket = true;
 
-    private ChannelBuffer currentBuffer;
+    private ByteBuf currentBuffer;
     private int acknowledgedBytes;
 
     private void sendResponse(Channel channel) {
         if (channel != null) {
-            ChannelBuffer response = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, 2 * BLOCK_LENGTH);
+            ByteBuf response = Unpooled.buffer(2 * BLOCK_LENGTH);
             response.writeByte(At2000ProtocolDecoder.MSG_ACKNOWLEDGEMENT);
-            response.writeMedium(ChannelBuffers.swapMedium(1));
+            response.writeMedium(1);
             response.writeByte(0x00); // success
             response.writerIndex(2 * BLOCK_LENGTH);
-            channel.write(response);
+            channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
     }
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
+            ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
         if (buf.readableBytes() < 5) {
             return null;
@@ -55,9 +54,9 @@ public class At2000FrameDecoder extends FrameDecoder {
         int length;
         if (firstPacket) {
             firstPacket = false;
-            length = buf.getUnsignedMedium(buf.readerIndex() + 2);
+            length = buf.getUnsignedMediumLE(buf.readerIndex() + 2);
         } else {
-            length = buf.getUnsignedMedium(buf.readerIndex() + 1);
+            length = buf.getUnsignedMediumLE(buf.readerIndex() + 1);
         }
 
         length += BLOCK_LENGTH;
@@ -73,7 +72,7 @@ public class At2000FrameDecoder extends FrameDecoder {
         }
 
         if (buf.readableBytes() >= length) {
-            return buf.readBytes(length);
+            return buf.readRetainedSlice(length);
         }
 
         return null;

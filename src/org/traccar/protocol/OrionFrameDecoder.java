@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Anton Tananaev (anton@traccar.org)
+ * Copyright 2014 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,16 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.frame.FrameDecoder;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import org.traccar.BaseFrameDecoder;
 
-public class OrionFrameDecoder extends FrameDecoder {
+public class OrionFrameDecoder extends BaseFrameDecoder {
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx,
-            Channel channel,
-            ChannelBuffer buf) throws Exception {
+            ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
         int length = 6;
 
@@ -51,14 +49,14 @@ public class OrionFrameDecoder extends FrameDecoder {
                 }
 
                 if (buf.readableBytes() >= length) {
-                    return buf.readBytes(length);
+                    return buf.readRetainedSlice(length);
                 }
 
             } else if (type == OrionProtocolDecoder.MSG_SYSLOG && buf.readableBytes() >= length + 12) {
 
-                length += buf.getUnsignedShort(buf.readerIndex() + 8);
+                length += buf.getUnsignedShortLE(buf.readerIndex() + 8);
                 if (buf.readableBytes() >= length) {
-                    return buf.readBytes(length);
+                    return buf.readRetainedSlice(length);
                 }
 
             }

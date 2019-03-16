@@ -8,7 +8,7 @@ public class IntellitracProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        IntellitracProtocolDecoder decoder = new IntellitracProtocolDecoder(new IntellitracProtocol());
+        IntellitracProtocolDecoder decoder = new IntellitracProtocolDecoder(null);
 
         verifyNull(decoder, text(
                 "$OK:TRACKING"));

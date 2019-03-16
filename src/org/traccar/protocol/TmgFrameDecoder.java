@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,37 +15,37 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBufferIndexFinder;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.frame.FrameDecoder;
+import org.traccar.BaseFrameDecoder;
 
-public class TmgFrameDecoder extends FrameDecoder {
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+
+public class TmgFrameDecoder extends BaseFrameDecoder {
 
     private boolean isLetter(byte c) {
         return c >= 'a' && c <= 'z';
     }
 
-    @Override
-    protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
-
-        int beginIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), new ChannelBufferIndexFinder() {
-            @Override
-            public boolean find(ChannelBuffer buffer, int guessedIndex) {
-                if (buffer.getByte(guessedIndex) != (byte) '$' || buffer.writerIndex() - guessedIndex < 5) {
-                    return false;
-                }
-                if (buffer.getByte(guessedIndex + 4) == ','
+    private int findHeader(ByteBuf buffer) {
+        int guessedIndex = buffer.indexOf(buffer.readerIndex(), buffer.writerIndex(), (byte) '$');
+        while (guessedIndex != -1 && buffer.writerIndex() - guessedIndex >= 5) {
+            if (buffer.getByte(guessedIndex + 4) == ','
                         && isLetter(buffer.getByte(guessedIndex + 1))
                         && isLetter(buffer.getByte(guessedIndex + 2))
                         && isLetter(buffer.getByte(guessedIndex + 3))) {
-                    return true;
-                }
-                return false;
+                return guessedIndex;
             }
-        });
+            guessedIndex = buffer.indexOf(guessedIndex, buffer.writerIndex(), (byte) '$');
+        }
+        return -1;
+    }
+
+    @Override
+    protected Object decode(
+            ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
+
+        int beginIndex = findHeader(buf);
 
         if (beginIndex >= 0) {
 
@@ -54,7 +54,7 @@ public class TmgFrameDecoder extends FrameDecoder {
             int endIndex = buf.indexOf(beginIndex, buf.writerIndex(), (byte) '\n');
 
             if (endIndex >= 0) {
-                ChannelBuffer frame = buf.readBytes(endIndex - beginIndex);
+                ByteBuf frame = buf.readRetainedSlice(endIndex - beginIndex);
                 buf.readByte(); // delimiter
                 return frame;
             }

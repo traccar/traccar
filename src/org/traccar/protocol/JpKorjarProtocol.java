@@ -1,5 +1,6 @@
 /*
  * Copyright 2016 Nyash (nyashh@gmail.com)
+ * Copyright 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,29 +16,20 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.bootstrap.ServerBootstrap;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.string.StringDecoder;
 import org.traccar.BaseProtocol;
+import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
-
-import java.util.List;
 
 public class JpKorjarProtocol extends BaseProtocol {
 
     public JpKorjarProtocol() {
-        super("jpkorjar");
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(new ServerBootstrap(), this.getName()) {
+        addServer(new TrackerServer(false, this.getName()) {
             @Override
-            protected void addSpecificHandlers(ChannelPipeline pipeline) {
-
-                pipeline.addLast("frameDecoder", new JpKorjarFrameDecoder());
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectDecoder", new JpKorjarProtocolDecoder(JpKorjarProtocol.this));
+            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+                pipeline.addLast(new JpKorjarFrameDecoder());
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new JpKorjarProtocolDecoder(JpKorjarProtocol.this));
             }
         });
     }

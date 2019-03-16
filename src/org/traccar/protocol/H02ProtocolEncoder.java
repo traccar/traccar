@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Gabor Somogyi (gabor.g.somogyi@gmail.com)
- *           2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,20 @@
  */
 package org.traccar.protocol;
 
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
+import org.traccar.Context;
 import org.traccar.StringProtocolEncoder;
-import org.traccar.helper.Log;
 import org.traccar.model.Command;
+
+import java.util.Date;
 
 public class H02ProtocolEncoder extends StringProtocolEncoder {
 
     private static final String MARKER = "HQ";
 
-    private Object formatCommand(DateTime time, String uniqueId, String type, String... params) {
+    private Object formatCommand(Date time, String uniqueId, String type, String... params) {
 
-        StringBuilder result = new StringBuilder(String.format("*%s,%s,%s,%02d%02d%02d",
-                MARKER, uniqueId, type, time.getHourOfDay(), time.getMinuteOfHour(), time.getSecondOfMinute()));
+        StringBuilder result = new StringBuilder(
+                String.format("*%s,%s,%s,%4$tH%4$tM%4$tS", MARKER, uniqueId, type, time));
 
         for (String param : params) {
             result.append(",").append(param);
@@ -40,7 +40,7 @@ public class H02ProtocolEncoder extends StringProtocolEncoder {
         return result.toString();
     }
 
-    protected Object encodeCommand(Command command, DateTime time) {
+    protected Object encodeCommand(Command command, Date time) {
         String uniqueId = getUniqueId(command.getDeviceId());
 
         switch (command.getType()) {
@@ -49,24 +49,25 @@ public class H02ProtocolEncoder extends StringProtocolEncoder {
             case Command.TYPE_ALARM_DISARM:
                 return formatCommand(time, uniqueId, "SCF", "1", "1");
             case Command.TYPE_ENGINE_STOP:
-                return formatCommand(
-                        time, uniqueId, "S20", "1", "3", "10", "3", "5", "5", "3", "5", "3", "5", "3", "5");
+                return formatCommand(time, uniqueId, "S20", "1", "1");
             case Command.TYPE_ENGINE_RESUME:
-                return formatCommand(time, uniqueId, "S20", "0", "0");
+                return formatCommand(time, uniqueId, "S20", "1", "0");
             case Command.TYPE_POSITION_PERIODIC:
-                return formatCommand(
-                        time, uniqueId, "S71", "22", command.getAttributes().get(Command.KEY_FREQUENCY).toString());
+                String frequency = command.getAttributes().get(Command.KEY_FREQUENCY).toString();
+                if (Context.getIdentityManager().lookupAttributeBoolean(
+                        command.getDeviceId(), "h02.alternative", false, true)) {
+                    return formatCommand(time, uniqueId, "D1", frequency);
+                } else {
+                    return formatCommand(time, uniqueId, "S71", "22", frequency);
+                }
             default:
-                Log.warning(new UnsupportedOperationException(command.getType()));
-                break;
+                return null;
         }
-
-        return null;
     }
 
     @Override
     protected Object encodeCommand(Command command) {
-        return encodeCommand(command, new DateTime(DateTimeZone.UTC));
+        return encodeCommand(command, new Date());
     }
 
 }

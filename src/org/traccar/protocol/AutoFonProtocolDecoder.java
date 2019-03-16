@@ -16,11 +16,14 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.model.CellTower;
@@ -34,7 +37,7 @@ import java.util.List;
 
 public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
 
-    public AutoFonProtocolDecoder(AutoFonProtocol protocol) {
+    public AutoFonProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
@@ -60,10 +63,9 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private Position decodePosition(DeviceSession deviceSession, ChannelBuffer buf, boolean history) {
+    private Position decodePosition(DeviceSession deviceSession, ByteBuf buf, boolean history) {
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         if (!history) {
@@ -119,7 +121,7 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         int type = buf.readUnsignedByte();
 
@@ -130,14 +132,14 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedByte(); // software version
             }
 
-            String imei = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
+            String imei = ByteBufUtil.hexDump(buf.readSlice(8)).substring(1);
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
 
             if (deviceSession != null && channel != null) {
-                ChannelBuffer response = ChannelBuffers.dynamicBuffer();
+                ByteBuf response = Unpooled.buffer();
                 response.writeBytes("resp_crc=".getBytes(StandardCharsets.US_ASCII));
                 response.writeByte(buf.getByte(buf.writerIndex() - 1));
-                channel.write(response);
+                channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
             }
 
             return null;
@@ -167,8 +169,7 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == MSG_45_LOCATION) {
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             short status = buf.readUnsignedByte();

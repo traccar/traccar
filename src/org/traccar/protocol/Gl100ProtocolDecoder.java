@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,11 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
@@ -27,7 +29,7 @@ import java.util.regex.Pattern;
 
 public class Gl100ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Gl100ProtocolDecoder(Gl100Protocol protocol) {
+    public Gl100ProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
@@ -64,7 +66,7 @@ public class Gl100ProtocolDecoder extends BaseProtocolDecoder {
             String response = "+RESP:GTHBD,GPRS ACTIVE,";
             response += sentence.substring(9, sentence.lastIndexOf(','));
             response += '\0';
-            channel.write(response); // heartbeat response
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress)); // heartbeat response
         }
 
         Parser parser = new Parser(PATTERN, sentence);
@@ -72,8 +74,7 @@ public class Gl100ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {

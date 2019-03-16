@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2014 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,12 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -28,7 +31,7 @@ import java.util.regex.Pattern;
 
 public class BoxProtocolDecoder extends BaseProtocolDecoder {
 
-    public BoxProtocolDecoder(BoxProtocol protocol) {
+    public BoxProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
@@ -62,7 +65,7 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
         } else if (sentence.startsWith("E,")) {
 
             if (channel != null) {
-                channel.write("A," + sentence.substring(2) + "\r");
+                channel.writeAndFlush(new NetworkMessage("A," + sentence.substring(2) + "\r", remoteAddress));
             }
 
         } else if (sentence.startsWith("L,")) {
@@ -77,22 +80,21 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
                 return null;
             }
 
-            Position position = new Position();
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
-            position.setProtocol(getProtocolName());
 
             position.setTime(parser.nextDateTime());
 
-            position.setLatitude(parser.nextDouble(0));
-            position.setLongitude(parser.nextDouble(0));
-            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
-            position.setCourse(parser.nextDouble(0));
+            position.setLatitude(parser.nextDouble());
+            position.setLongitude(parser.nextDouble());
+            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+            position.setCourse(parser.nextDouble());
 
-            position.set(Position.KEY_ODOMETER_TRIP, parser.nextDouble(0) * 1000);
+            position.set(Position.KEY_ODOMETER_TRIP, parser.nextDouble() * 1000);
             position.set(Position.KEY_EVENT, parser.next());
 
-            int status = parser.nextInt(0);
-            position.setValid((status & 0x04) == 0);
+            int status = parser.nextInt();
+            position.setValid(!BitUtil.check(status, 2));
             position.set(Position.KEY_STATUS, status);
 
             return position;

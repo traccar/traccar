@@ -16,10 +16,11 @@
  */
 package org.traccar.protocol;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Command;
+
+import static org.junit.Assert.assertEquals;
 
 public class AdmProtocolEncoderTest extends ProtocolTest {
 
@@ -31,13 +32,13 @@ public class AdmProtocolEncoderTest extends ProtocolTest {
         Command command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_GET_DEVICE_STATUS);
-        Assert.assertEquals("STATUS\r\n", encoder.encodeCommand(command));
+        assertEquals("STATUS\r\n", encoder.encodeCommand(command));
 
         command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_CUSTOM);
         command.set(Command.KEY_DATA, "INPUT 0");
-        Assert.assertEquals("INPUT 0\r\n", encoder.encodeCommand(command));
+        assertEquals("INPUT 0\r\n", encoder.encodeCommand(command));
     }
 
 }

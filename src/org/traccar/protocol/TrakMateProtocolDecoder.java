@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,25 +15,21 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
 import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 public class TrakMateProtocolDecoder extends BaseProtocolDecoder {
 
-    private final TimeZone timeZone = TimeZone.getTimeZone("UTC");
-
-    public TrakMateProtocolDecoder(TrakMateProtocol protocol) {
+    public TrakMateProtocolDecoder(Protocol protocol) {
         super(protocol);
-        timeZone.setRawOffset(Context.getConfig().getInteger(getProtocolName() + ".timezone") * 1000);
     }
 
     private static final Pattern PATTERN_SRT = new PatternBuilder()
@@ -49,7 +45,8 @@ public class TrakMateProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private static final Pattern PATTERN_PER = new PatternBuilder()
-            .text("^TMPER|")
+            .text("^TM")
+            .expression("...|")                  // type
             .expression("([^ ]+)|")              // uid
             .number("(d+)|")                     // seq
             .number("(d+.d+)|")                  // latitude
@@ -58,17 +55,23 @@ public class TrakMateProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd)(dd)(dd)|")             // date (ddmmyy)
             .number("(d+.d+)|")                  // speed
             .number("(d+.d+)|")                  // heading
-            .number("(d+)|")                     // ignition
+            .number("(d+)|").optional()          // satellites
+            .number("([01])|")                   // ignition
+            .groupBegin()
             .number("(d+)|")                     // dop1
             .number("(d+)|")                     // dop2
             .number("(d+.d+)|")                  // analog
             .number("(d+.d+)|")                  // internal battery
+            .or()
+            .number("-?d+ -?d+ -?d+|")           // accelerometer
+            .number("([01])|")                   // movement
+            .groupEnd()
             .number("(d+.d+)|")                  // vehicle battery
             .number("(d+.d+)|")                  // gps odometer
-            .number("(d+.d+)|")                  // pulse odometer
-            .number("(d+)|")                     // main power status
-            .number("(d+)|")                     // gps data validity
-            .number("(d+)|")                     // live or cache
+            .number("(d+.d+)|").optional()       // pulse odometer
+            .number("([01])|")                   // main power status
+            .number("([01])|")                   // gps data validity
+            .number("([01])|")                   // live or cache
             .any()
             .compile();
 
@@ -112,12 +115,11 @@ public class TrakMateProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.setLatitude(parser.nextDouble(0));
-        position.setLongitude(parser.nextDouble(0));
+        position.setLatitude(parser.nextDouble());
+        position.setLongitude(parser.nextDouble());
 
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY));
 
@@ -139,21 +141,20 @@ public class TrakMateProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         parser.next(); // seq
-        position.set(Position.KEY_ALARM, decodeAlarm(parser.nextInt(0)));
+        position.set(Position.KEY_ALARM, decodeAlarm(parser.nextInt()));
         parser.next(); // alert status or data
 
-        position.setLatitude(parser.nextDouble(0));
-        position.setLongitude(parser.nextDouble(0));
+        position.setLatitude(parser.nextDouble());
+        position.setLongitude(parser.nextDouble());
 
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY));
 
-        position.setSpeed(parser.nextDouble(0));
-        position.setCourse(parser.nextDouble(0));
+        position.setSpeed(parser.nextDouble());
+        position.setCourse(parser.nextDouble());
 
         return position;
     }
@@ -170,33 +171,41 @@ public class TrakMateProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         parser.next(); // seq
 
-        position.setLatitude(parser.nextDouble(0));
-        position.setLongitude(parser.nextDouble(0));
+        position.setLatitude(parser.nextDouble());
+        position.setLongitude(parser.nextDouble());
 
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY));
 
-        position.setSpeed(parser.nextDouble(0));
-        position.setCourse(parser.nextDouble(0));
+        position.setSpeed(parser.nextDouble());
+        position.setCourse(parser.nextDouble());
 
-        position.set(Position.KEY_IGNITION, parser.nextInt(0) == 1);
-        position.set("dop1", parser.next());
-        position.set("dop2", parser.next());
-        position.set(Position.KEY_INPUT, parser.next());
-        position.set(Position.KEY_BATTERY, parser.nextDouble(0));
+        position.set(Position.KEY_SATELLITES, parser.nextInt());
+        position.set(Position.KEY_IGNITION, parser.nextInt() > 0);
+
+        if (parser.hasNext(4)) {
+            position.set("dop1", parser.nextInt());
+            position.set("dop2", parser.nextInt());
+            position.set(Position.PREFIX_ADC + 1, parser.nextDouble());
+            position.set(Position.KEY_BATTERY, parser.nextDouble());
+        }
+
+        if (parser.hasNext()) {
+            position.set(Position.KEY_MOTION, parser.nextInt(0) > 0);
+        }
+
         position.set(Position.KEY_POWER, parser.nextDouble());
-        position.set(Position.KEY_ODOMETER, parser.nextDouble(0));
-        position.set("pulseOdometer", parser.next());
-        position.set(Position.KEY_STATUS, parser.nextInt(0));
+        position.set(Position.KEY_ODOMETER, parser.nextDouble());
+        position.set("pulseOdometer", parser.nextDouble());
+        position.set(Position.KEY_STATUS, parser.nextInt());
 
-        position.setValid(parser.nextInt(0) != 0);
+        position.setValid(parser.nextInt() > 0);
 
-        position.set(Position.KEY_ARCHIVE, parser.nextInt(0) == 1);
+        position.set(Position.KEY_ARCHIVE, parser.nextInt() > 0);
 
         return position;
     }
@@ -216,10 +225,8 @@ public class TrakMateProtocolDecoder extends BaseProtocolDecoder {
                 return decodeAlt(channel, remoteAddress, sentence);
             case "SRT":
                 return decodeSrt(channel, remoteAddress, sentence);
-            case "PER":
-                return decodePer(channel, remoteAddress, sentence);
             default:
-                return null;
+                return decodePer(channel, remoteAddress, sentence);
         }
     }
 

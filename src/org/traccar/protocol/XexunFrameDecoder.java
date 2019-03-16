@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,31 +15,32 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.frame.FrameDecoder;
-import org.traccar.helper.StringFinder;
+import org.traccar.BaseFrameDecoder;
+import org.traccar.helper.BufferUtil;
 
-public class XexunFrameDecoder extends FrameDecoder {
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+
+public class XexunFrameDecoder extends BaseFrameDecoder {
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
+            ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
         if (buf.readableBytes() < 80) {
             return null;
         }
 
-        int beginIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), new StringFinder("GPRMC"));
+        int beginIndex = BufferUtil.indexOf("GPRMC", buf);
         if (beginIndex == -1) {
-            beginIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), new StringFinder("GNRMC"));
+            beginIndex = BufferUtil.indexOf("GNRMC", buf);
             if (beginIndex == -1) {
                 return null;
             }
         }
 
-        int identifierIndex = buf.indexOf(beginIndex, buf.writerIndex(), new StringFinder("imei:"));
+        int identifierIndex = BufferUtil.indexOf("imei:", buf, beginIndex, buf.writerIndex());
         if (identifierIndex == -1) {
             return null;
         }
@@ -51,7 +52,7 @@ public class XexunFrameDecoder extends FrameDecoder {
 
         buf.skipBytes(beginIndex - buf.readerIndex());
 
-        return buf.readBytes(endIndex - beginIndex + 1);
+        return buf.readRetainedSlice(endIndex - beginIndex + 1);
     }
 
 }

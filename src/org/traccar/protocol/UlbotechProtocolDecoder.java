@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,14 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
@@ -39,11 +41,8 @@ import java.util.regex.Pattern;
 
 public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
 
-    private final long timeZone;
-
-    public UlbotechProtocolDecoder(UlbotechProtocol protocol) {
+    public UlbotechProtocolDecoder(Protocol protocol) {
         super(protocol);
-        timeZone = Context.getConfig().getInteger(getProtocolName() + ".timezone", 0);
     }
 
     private static final short DATA_GPS = 0x01;
@@ -62,18 +61,18 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
     private static final short DATA_RFID = 0x0E;
     private static final short DATA_EVENT = 0x10;
 
-    private void decodeObd(Position position, ChannelBuffer buf, int length) {
+    private void decodeObd(Position position, ByteBuf buf, int length) {
 
         int end = buf.readerIndex() + length;
 
         while (buf.readerIndex() < end) {
             int parameterLength = buf.getUnsignedByte(buf.readerIndex()) >> 4;
             int mode = buf.readUnsignedByte() & 0x0F;
-            position.add(ObdDecoder.decode(mode, ChannelBuffers.hexDump(buf.readBytes(parameterLength - 1))));
+            position.add(ObdDecoder.decode(mode, ByteBufUtil.hexDump(buf.readSlice(parameterLength - 1))));
         }
     }
 
-    private void decodeJ1708(Position position, ChannelBuffer buf, int length) {
+    private void decodeJ1708(Position position, ByteBuf buf, int length) {
 
         int end = buf.readerIndex() + length;
 
@@ -85,14 +84,14 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
             if (type == 3) {
                 id += 256;
             }
-            String value = ChannelBuffers.hexDump(buf.readBytes(len - 1));
+            String value = ByteBufUtil.hexDump(buf.readSlice(len - 1));
             if (type == 2 || type == 3) {
                 position.set("pid" + id, value);
             }
         }
     }
 
-    private void decodeDriverBehavior(Position position, ChannelBuffer buf) {
+    private void decodeDriverBehavior(Position position, ByteBuf buf) {
 
         int value = buf.readUnsignedByte();
 
@@ -141,7 +140,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
-    private void decodeAdc(Position position, ChannelBuffer buf, int length) {
+    private void decodeAdc(Position position, ByteBuf buf, int length) {
         for (int i = 0; i < length / 2; i++) {
             int value = buf.readUnsignedShort();
             int id = BitUtil.from(value, 12);
@@ -188,8 +187,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         DateBuilder dateBuilder = new DateBuilder()
@@ -203,26 +201,29 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private Object decodeBinary(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
+    private Object decodeBinary(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
 
         buf.readUnsignedByte(); // header
         buf.readUnsignedByte(); // version
         buf.readUnsignedByte(); // type
 
-        String imei = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
+        String imei = ByteBufUtil.hexDump(buf.readSlice(8)).substring(1);
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
         if (deviceSession == null) {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        if (deviceSession.getTimeZone() == null) {
+            deviceSession.setTimeZone(getTimeZone(deviceSession.getDeviceId()));
+        }
+
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         long seconds = buf.readUnsignedInt() & 0x7fffffffL;
         seconds += 946684800L; // 2000-01-01 00:00
-        seconds -= timeZone;
+        seconds -= deviceSession.getTimeZone().getRawOffset() / 1000;
         Date time = new Date(seconds * 1000);
 
         boolean hasLocation = false;
@@ -296,7 +297,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
                     break;
 
                 case DATA_CANBUS:
-                    position.set("can", ChannelBuffers.hexDump(buf.readBytes(length)));
+                    position.set("can", ByteBufUtil.hexDump(buf.readSlice(length)));
                     break;
 
                 case DATA_J1708:
@@ -304,12 +305,12 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
                     break;
 
                 case DATA_VIN:
-                    position.set(Position.KEY_VIN, buf.readBytes(length).toString(StandardCharsets.US_ASCII));
+                    position.set(Position.KEY_VIN, buf.readSlice(length).toString(StandardCharsets.US_ASCII));
                     break;
 
                 case DATA_RFID:
                     position.set(Position.KEY_DRIVER_UNIQUE_ID,
-                            buf.readBytes(length - 1).toString(StandardCharsets.US_ASCII));
+                            buf.readSlice(length - 1).toString(StandardCharsets.US_ASCII));
                     position.set("authorized", buf.readUnsignedByte() != 0);
                     break;
 
@@ -339,28 +340,28 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         if (buf.getUnsignedByte(buf.readerIndex()) == 0xF8) {
 
             if (channel != null) {
-                ChannelBuffer response = ChannelBuffers.dynamicBuffer();
+                ByteBuf response = Unpooled.buffer();
                 response.writeByte(0xF8);
                 response.writeByte(DATA_GPS);
                 response.writeByte(0xFE);
                 response.writeShort(buf.getShort(response.writerIndex() - 1 - 2));
-                response.writeShort(Checksum.crc16(Checksum.CRC16_XMODEM, response.toByteBuffer(1, 4)));
+                response.writeShort(Checksum.crc16(Checksum.CRC16_XMODEM, response.nioBuffer(1, 4)));
                 response.writeByte(0xF8);
-                channel.write(response);
+                channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
             }
 
             return decodeBinary(channel, remoteAddress, buf);
         } else {
 
             if (channel != null) {
-                channel.write(ChannelBuffers.copiedBuffer(String.format("*TS01,ACK:%04X#",
-                        Checksum.crc16(Checksum.CRC16_XMODEM, buf.toByteBuffer(1, buf.writerIndex() - 2))),
-                        StandardCharsets.US_ASCII));
+                channel.writeAndFlush(new NetworkMessage(Unpooled.copiedBuffer(String.format("*TS01,ACK:%04X#",
+                        Checksum.crc16(Checksum.CRC16_XMODEM, buf.nioBuffer(1, buf.writerIndex() - 2))),
+                        StandardCharsets.US_ASCII), remoteAddress));
             }
 
             return decodeText(channel, remoteAddress, buf.toString(StandardCharsets.US_ASCII));

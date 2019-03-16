@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -28,6 +28,9 @@ import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
 import org.traccar.model.WifiAccessPoint;
+
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -44,7 +47,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private boolean ignoreFixTime;
 
-    public Gl200TextProtocolDecoder(Gl200Protocol protocol) {
+    public Gl200TextProtocolDecoder(Protocol protocol) {
         super(protocol);
 
         ignoreFixTime = Context.getConfig().getBoolean(getProtocolName() + ".ignoreFixTime");
@@ -173,21 +176,20 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private static final Pattern PATTERN_FRI = new PatternBuilder()
-            .text("+").expression("(?:RESP|BUFF):GTFRI,")
+            .text("+").expression("(?:RESP|BUFF):GT...,")
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
             .number("(d{15}|x{14}),")            // imei
             .expression("(?:([0-9A-Z]{17}),)?")  // vin
             .expression("[^,]*,")                // device name
             .number("(d+)?,")                    // power
-            .number("d{1,2},")                   // report type
-            .number("d{1,2},")                   // count
+            .number("d{1,2},").optional()        // report type
+            .number("d{1,2},").optional()        // count
+            .number(",").optional()              // reserved
+            .number("(d+),").optional()          // battery
             .expression("((?:")
             .expression(PATTERN_LOCATION.pattern())
             .expression(")+)")
             .groupBegin()
-            .number("(d{1,7}.d)?,").optional()   // odometer
-            .number("(d{1,3})?,")                // battery
-            .or()
             .number("(d{1,7}.d)?,")              // odometer
             .number("(d{5}:dd:dd)?,")            // hour meter
             .number("(x+)?,")                    // adc 1
@@ -197,7 +199,11 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)?,")                    // rpm
             .number("(?:d+.?d*|Inf|NaN)?,")      // fuel consumption
             .number("(d+)?,")                    // fuel level
+            .or()
+            .number("(d{1,7}.d)?,").optional()   // odometer
+            .number("(d{1,3})?,")                // battery
             .groupEnd()
+            .any()
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
             .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
             .text(",")
@@ -210,7 +216,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
             .number("(d{15}|x{14}),")            // imei
             .expression("[^,]*,")                // device name
-            .number("x{8},")                     // mask
+            .number("(x{8}),")                   // mask
             .number("(d+)?,")                    // power
             .number("d{1,2},")                   // report type
             .number("d{1,2},")                   // count
@@ -240,6 +246,21 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .expression(PATTERN_LOCATION.pattern())
             .number("(d{5}:dd:dd)?,")            // hour meter
             .number("(d{1,7}.d)?,")              // odometer
+            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
+            .text(",")
+            .number("(xxxx)")                    // count number
+            .text("$").optional()
+            .compile();
+
+    private static final Pattern PATTERN_LSW = new PatternBuilder()
+            .text("+RESP:").expression("GT[LT]SW,")
+            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
+            .number("(d{15}|x{14}),")            // imei
+            .expression("[^,]*,")                // device name
+            .number("[01],")                     // type
+            .number("([01]),")                   // state
+            .expression(PATTERN_LOCATION.pattern())
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
             .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
             .text(",")
@@ -293,13 +314,25 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .text("$").optional()
             .compile();
 
+    private static final Pattern PATTERN_PNA = new PatternBuilder()
+            .text("+RESP:GT").expression("P[NF]A,")
+            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
+            .number("(d{15}|x{14}),")            // imei
+            .expression("[^,]*,")                // device name
+            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
+            .text(",")
+            .number("(xxxx)")                    // count number
+            .text("$").optional()
+            .compile();
+
     private static final Pattern PATTERN = new PatternBuilder()
             .text("+").expression("(?:RESP|BUFF):GT...,")
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
             .number("(d{15}|x{14}),")            // imei
             .expression("[^,]*,")                // device name
             .number("d*,")
-            .number("(d{1,2}),")                 // report type
+            .number("(x{1,2}),")                 // report type
             .number("d{1,2},")                   // count
             .expression(PATTERN_LOCATION.pattern())
             .groupBegin()
@@ -353,11 +386,11 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             if (type.equals("HBD")) {
                 if (channel != null) {
                     parser.skip(6);
-                    channel.write("+SACK:GTHBD," + protocolVersion + "," + parser.next() + "$", remoteAddress);
+                    channel.writeAndFlush(new NetworkMessage(
+                            "+SACK:GTHBD," + protocolVersion + "," + parser.next() + "$", remoteAddress));
                 }
             } else {
-                Position position = new Position();
-                position.setProtocol(getProtocolName());
+                Position position = new Position(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());
                 getLastLocation(position, parser.nextDateTime());
                 position.setValid(false);
@@ -372,8 +405,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (parser.matches()) {
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
             if (deviceSession != null) {
-                Position position = new Position();
-                position.setProtocol(getProtocolName());
+                Position position = new Position(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());
                 return position;
             }
@@ -389,6 +421,16 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                 position.setDeviceTime(parser.nextDateTime());
             }
         }
+    }
+
+    private Long parseHours(String hoursString) {
+        if (hoursString != null) {
+            String[] hours = hoursString.split(":");
+            return (long) (Integer.parseInt(hours[0]) * 3600
+                    + (hours.length > 1 ? Integer.parseInt(hours[1]) * 60 : 0)
+                    + (hours.length > 2 ? Integer.parseInt(hours[2]) : 0)) * 1000;
+        }
+        return null;
     }
 
     private Object decodeInf(Channel channel, SocketAddress remoteAddress, String sentence) {
@@ -431,8 +473,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         parser.next(); // odometer or external power
 
-        position.set(Position.KEY_BATTERY, parser.nextDouble(0));
-        position.set(Position.KEY_CHARGE, parser.nextInt(0) == 1);
+        position.set(Position.KEY_BATTERY, parser.nextDouble());
+        position.set(Position.KEY_CHARGE, parser.nextInt() == 1);
 
         position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
 
@@ -446,7 +488,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         getLastLocation(position, parser.nextDateTime());
 
-        position.set(Position.KEY_INDEX, parser.nextHexInt(0));
+        position.set(Position.KEY_INDEX, parser.nextHexInt());
 
         return position;
     }
@@ -459,17 +501,21 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
 
         position.set("deviceType", parser.next());
-        position.set(Position.KEY_VERSION_FW, parser.nextHexInt(0));
-        position.set(Position.KEY_VERSION_HW, parser.nextHexInt(0));
+        position.set(Position.KEY_VERSION_FW, parser.nextHexInt());
+        position.set(Position.KEY_VERSION_HW, parser.nextHexInt());
 
         getLastLocation(position, parser.nextDateTime());
 
         return position;
     }
 
+    private void skipLocation(Parser parser) {
+        parser.skip(19);
+    }
+
     private void decodeLocation(Position position, Parser parser) {
-        int hdop = parser.nextInt(0);
-        position.setValid(hdop > 0);
+        Integer hdop = parser.nextInt();
+        position.setValid(hdop == null || hdop > 0);
         position.set(Position.KEY_HDOP, hdop);
 
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
@@ -478,25 +524,27 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext(8)) {
             position.setValid(true);
-            position.setLongitude(parser.nextDouble(0));
-            position.setLatitude(parser.nextDouble(0));
+            position.setLongitude(parser.nextDouble());
+            position.setLatitude(parser.nextDouble());
             position.setTime(parser.nextDateTime());
         } else {
             getLastLocation(position, null);
         }
 
         if (parser.hasNext(6)) {
-            int mcc = parser.nextInt(0);
-            int mnc = parser.nextInt(0);
+            int mcc = parser.nextInt();
+            int mnc = parser.nextInt();
             if (parser.hasNext(2)) {
-                position.setNetwork(new Network(CellTower.from(mcc, mnc, parser.nextInt(0), parser.nextInt(0))));
+                position.setNetwork(new Network(CellTower.from(mcc, mnc, parser.nextInt(), parser.nextInt())));
             }
             if (parser.hasNext(2)) {
-                position.setNetwork(new Network(CellTower.from(mcc, mnc, parser.nextHexInt(0), parser.nextHexInt(0))));
+                position.setNetwork(new Network(CellTower.from(mcc, mnc, parser.nextHexInt(), parser.nextHexInt())));
             }
         }
 
-        position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1000);
+        if (parser.hasNext()) {
+            position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
+        }
     }
 
     private Object decodeObd(Channel channel, SocketAddress remoteAddress, String sentence) {
@@ -511,16 +559,22 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.PREFIX_TEMP + 1, parser.nextInt());
         position.set(Position.KEY_FUEL_CONSUMPTION, parser.next());
         position.set("dtcsClearedDistance", parser.nextInt());
-        position.set("odbConnect", parser.nextInt(0) == 1);
+        if (parser.hasNext()) {
+            position.set("odbConnect", parser.nextInt() == 1);
+        }
         position.set("dtcsNumber", parser.nextInt());
         position.set("dtcsCodes", parser.next());
         position.set(Position.KEY_THROTTLE, parser.nextInt());
         position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
-        position.set(Position.KEY_OBD_ODOMETER, parser.nextInt(0) * 1000);
+        if (parser.hasNext()) {
+            position.set(Position.KEY_OBD_ODOMETER, parser.nextInt() * 1000);
+        }
 
         decodeLocation(position, parser);
 
-        position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1000);
+        if (parser.hasNext()) {
+            position.set(Position.KEY_OBD_ODOMETER, (int) (parser.nextDouble() * 1000));
+        }
 
         decodeDeviceTime(position, parser);
 
@@ -528,8 +582,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private Object decodeCan(Channel channel, SocketAddress remoteAddress, String sentence) throws ParseException {
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        Position position = new Position(getProtocolName());
 
         int index = 0;
         String[] values = sentence.split(",");
@@ -544,6 +597,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         index += 1; // report type
         index += 1; // canbus state
         long reportMask = Long.parseLong(values[index++], 16);
+        long reportMaskExt = 0;
 
         if (BitUtil.check(reportMask, 0)) {
             position.set(Position.KEY_VIN, values[index++]);
@@ -552,75 +606,148 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_IGNITION, Integer.parseInt(values[index++]) > 0);
         }
         if (BitUtil.check(reportMask, 2)) {
-            index += 1; // total distance
+            position.set(Position.KEY_OBD_ODOMETER, values[index++]);
         }
-        if (BitUtil.check(reportMask, 3)) {
-            position.set("totalFuelConsumption", Double.parseDouble(values[index++]));
+        if (BitUtil.check(reportMask, 3) && !values[index++].isEmpty()) {
+            position.set(Position.KEY_FUEL_USED, Double.parseDouble(values[index - 1]));
         }
-        if (BitUtil.check(reportMask, 5)) {
-            position.set(Position.KEY_RPM, Integer.parseInt(values[index++]));
+        if (BitUtil.check(reportMask, 5) && !values[index++].isEmpty()) {
+            position.set(Position.KEY_RPM, Integer.parseInt(values[index - 1]));
         }
-        if (BitUtil.check(reportMask, 4)) {
-            position.set(Position.KEY_OBD_SPEED, UnitsConverter.knotsFromKph(Integer.parseInt(values[index++])));
+        if (BitUtil.check(reportMask, 4) && !values[index++].isEmpty()) {
+            position.set(Position.KEY_OBD_SPEED, UnitsConverter.knotsFromKph(Integer.parseInt(values[index - 1])));
         }
-        if (BitUtil.check(reportMask, 6)) {
-            position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(values[index++]));
+        if (BitUtil.check(reportMask, 6) && !values[index++].isEmpty()) {
+            position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(values[index - 1]));
         }
-        if (BitUtil.check(reportMask, 7)) {
-            index += 1; // fuel consumption
+        if (BitUtil.check(reportMask, 7) && !values[index++].isEmpty()) {
+            position.set(Position.KEY_FUEL_CONSUMPTION, Double.parseDouble(values[index - 1].substring(1)));
         }
-        if (BitUtil.check(reportMask, 8)) {
-            index += 1; // fuel level
+        if (BitUtil.check(reportMask, 8) && !values[index++].isEmpty()) {
+            position.set(Position.KEY_FUEL_LEVEL, Double.parseDouble(values[index - 1].substring(1)));
         }
-        if (BitUtil.check(reportMask, 9)) {
-            index += 1; // range
+        if (BitUtil.check(reportMask, 9) && !values[index++].isEmpty()) {
+            position.set("range", Long.parseLong(values[index - 1]) * 100);
         }
-        if (BitUtil.check(reportMask, 10)) {
-            if (!values[index++].isEmpty()) {
-                position.set(Position.KEY_THROTTLE, Integer.parseInt(values[index - 1]));
-            }
+        if (BitUtil.check(reportMask, 10) && !values[index++].isEmpty()) {
+            position.set(Position.KEY_THROTTLE, Integer.parseInt(values[index - 1]));
         }
-        if (BitUtil.check(reportMask, 11)) {
-            position.set(Position.KEY_HOURS, Double.parseDouble(values[index++]));
+        if (BitUtil.check(reportMask, 11) && !values[index++].isEmpty()) {
+            position.set(Position.KEY_HOURS, UnitsConverter.msFromHours(Double.parseDouble(values[index - 1])));
         }
         if (BitUtil.check(reportMask, 12)) {
-            index += 1; // driving time
+            position.set("drivingHours", Double.parseDouble(values[index++]));
         }
         if (BitUtil.check(reportMask, 13)) {
-            index += 1; // idle time
+            position.set("idleHours", Double.parseDouble(values[index++]));
         }
-        if (BitUtil.check(reportMask, 14)) {
-            index += 1; // idle fuel
+        if (BitUtil.check(reportMask, 14) && !values[index++].isEmpty()) {
+            position.set("idleFuelConsumption", Double.parseDouble(values[index - 1]));
         }
-        if (BitUtil.check(reportMask, 15)) {
-            index += 1; // axle weight
+        if (BitUtil.check(reportMask, 15) && !values[index++].isEmpty()) {
+            position.set(Position.KEY_AXLE_WEIGHT, Integer.parseInt(values[index - 1]));
         }
-        if (BitUtil.check(reportMask, 16)) {
-            index += 1; // tachograph info
+        if (BitUtil.check(reportMask, 16) && !values[index++].isEmpty()) {
+            position.set("tachographInfo", Integer.parseInt(values[index - 1]));
         }
-        if (BitUtil.check(reportMask, 17)) {
-            index += 1; // indicators
+        if (BitUtil.check(reportMask, 17) && !values[index++].isEmpty()) {
+            position.set("indicators", Integer.parseInt(values[index - 1]));
         }
-        if (BitUtil.check(reportMask, 18)) {
-            index += 1; // lights
+        if (BitUtil.check(reportMask, 18) && !values[index++].isEmpty()) {
+            position.set("lights", Integer.parseInt(values[index - 1]));
         }
-        if (BitUtil.check(reportMask, 19)) {
-            index += 1; // doors
+        if (BitUtil.check(reportMask, 19) && !values[index++].isEmpty()) {
+            position.set("doors", Integer.parseInt(values[index - 1]));
         }
-        if (BitUtil.check(reportMask, 20)) {
-            index += 1; // total vehicle overspeed time
+        if (BitUtil.check(reportMask, 20) && !values[index++].isEmpty()) {
+            position.set("vehicleOverspeed", Double.parseDouble(values[index - 1]));
         }
-        if (BitUtil.check(reportMask, 21)) {
-            index += 1; // total engine overspeed time
+        if (BitUtil.check(reportMask, 21) && !values[index++].isEmpty()) {
+            position.set("engineOverspeed", Double.parseDouble(values[index - 1]));
         }
         if (BitUtil.check(reportMask, 29)) {
-            index += 1; // expansion
+            reportMaskExt = Long.parseLong(values[index++], 16);
+        }
+        if (BitUtil.check(reportMaskExt, 0) && !values[index++].isEmpty()) {
+            position.set("adBlueLevel", Integer.parseInt(values[index - 1]));
+        }
+        if (BitUtil.check(reportMaskExt, 1) && !values[index++].isEmpty()) {
+            position.set("axleWeight1", Integer.parseInt(values[index - 1]));
+        }
+        if (BitUtil.check(reportMaskExt, 2) && !values[index++].isEmpty()) {
+            position.set("axleWeight3", Integer.parseInt(values[index - 1]));
+        }
+        if (BitUtil.check(reportMaskExt, 3) && !values[index++].isEmpty()) {
+            position.set("axleWeight4", Integer.parseInt(values[index - 1]));
+        }
+        if (BitUtil.check(reportMaskExt, 4)) {
+            index += 1; // tachograph overspeed
+        }
+        if (BitUtil.check(reportMaskExt, 5)) {
+            index += 1; // tachograph motion
+        }
+        if (BitUtil.check(reportMaskExt, 6)) {
+            index += 1; // tachograph direction
+        }
+        if (BitUtil.check(reportMaskExt, 7) && !values[index++].isEmpty()) {
+            position.set(Position.PREFIX_ADC + 1, Integer.parseInt(values[index - 1]) * 0.001);
+        }
+        if (BitUtil.check(reportMaskExt, 8)) {
+            index += 1; // pedal breaking factor
+        }
+        if (BitUtil.check(reportMaskExt, 9)) {
+            index += 1; // engine breaking factor
+        }
+        if (BitUtil.check(reportMaskExt, 10)) {
+            index += 1; // total accelerator kick-downs
+        }
+        if (BitUtil.check(reportMaskExt, 11)) {
+            index += 1; // total effective engine speed
+        }
+        if (BitUtil.check(reportMaskExt, 12)) {
+            index += 1; // total cruise control time
+        }
+        if (BitUtil.check(reportMaskExt, 13)) {
+            index += 1; // total accelerator kick-down time
+        }
+        if (BitUtil.check(reportMaskExt, 14)) {
+            index += 1; // total brake application
+        }
+        if (BitUtil.check(reportMaskExt, 15) && !values[index++].isEmpty()) {
+            position.set("driver1Card", values[index - 1]);
+        }
+        if (BitUtil.check(reportMaskExt, 16) && !values[index++].isEmpty()) {
+            position.set("driver2Card", values[index - 1]);
+        }
+        if (BitUtil.check(reportMaskExt, 17) && !values[index++].isEmpty()) {
+            position.set("driver1Name", values[index - 1]);
+        }
+        if (BitUtil.check(reportMaskExt, 18) && !values[index++].isEmpty()) {
+            position.set("driver2Name", values[index - 1]);
+        }
+        if (BitUtil.check(reportMaskExt, 19) && !values[index++].isEmpty()) {
+            position.set("registration", values[index - 1]);
+        }
+        if (BitUtil.check(reportMaskExt, 20)) {
+            index += 1; // expansion information
+        }
+        if (BitUtil.check(reportMaskExt, 21)) {
+            index += 1; // rapid brakings
+        }
+        if (BitUtil.check(reportMaskExt, 22)) {
+            index += 1; // rapid accelerations
+        }
+        if (BitUtil.check(reportMaskExt, 23)) {
+            index += 1; // engine torque
         }
 
         DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         if (BitUtil.check(reportMask, 30)) {
+            while (values[index].isEmpty()) {
+                index += 1;
+            }
             position.setValid(Integer.parseInt(values[index++]) > 0);
             if (!values[index].isEmpty()) {
                 position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(values[index++])));
@@ -639,9 +766,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         if (BitUtil.check(reportMask, 31)) {
             index += 4; // cell
+            index += 1; // reserved
         }
-
-        index += 1; // reserved
 
         if (ignoreFixTime) {
             position.setTime(dateFormat.parse(values[index]));
@@ -654,14 +780,14 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private void decodeStatus(Position position, Parser parser) {
         if (parser.hasNext(3)) {
-            int ignition = parser.nextHexInt(0);
+            int ignition = parser.nextHexInt();
             if (BitUtil.check(ignition, 4)) {
                 position.set(Position.KEY_IGNITION, false);
             } else if (BitUtil.check(ignition, 5)) {
                 position.set(Position.KEY_IGNITION, true);
             }
-            position.set(Position.KEY_INPUT, parser.nextHexInt(0));
-            position.set(Position.KEY_OUTPUT, parser.nextHexInt(0));
+            position.set(Position.KEY_INPUT, parser.nextHexInt());
+            position.set(Position.KEY_OUTPUT, parser.nextHexInt());
         }
     }
 
@@ -679,12 +805,12 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         LinkedList<Position> positions = new LinkedList<>();
 
         String vin = parser.next();
-        int power = parser.nextInt(0);
+        Integer power = parser.nextInt();
+        Integer battery = parser.nextInt();
 
         Parser itemParser = new Parser(PATTERN_LOCATION, parser.next());
         while (itemParser.find()) {
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             position.set(Position.KEY_VIN, vin);
@@ -696,18 +822,19 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = positions.getLast();
 
-        decodeLocation(position, parser);
+        skipLocation(parser);
 
-        // power value only on some devices
-        if (power > 10) {
-            position.set(Position.KEY_POWER, power);
+        if (power != null && power > 10) {
+            position.set(Position.KEY_POWER, power * 0.001); // only on some devices
+        }
+        if (battery != null) {
+            position.set(Position.KEY_BATTERY_LEVEL, battery);
         }
 
-        position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1000);
-        position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
-
-        position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1000);
-        position.set(Position.KEY_HOURS, parser.next());
+        if (parser.hasNext()) {
+            position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
+        }
+        position.set(Position.KEY_HOURS, parseHours(parser.next()));
         position.set(Position.PREFIX_ADC + 1, parser.next());
         position.set(Position.PREFIX_ADC + 2, parser.next());
         position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
@@ -716,6 +843,11 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_RPM, parser.nextInt());
         position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
+
+        if (parser.hasNext()) {
+            position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
+        }
+        position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
 
         decodeDeviceTime(position, parser);
         if (ignoreFixTime) {
@@ -737,14 +869,15 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
+        long mask = parser.nextHexLong();
+
         LinkedList<Position> positions = new LinkedList<>();
 
-        int power = parser.nextInt(0);
+        Integer power = parser.nextInt();
 
         Parser itemParser = new Parser(PATTERN_LOCATION, parser.next());
         while (itemParser.find()) {
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             decodeLocation(position, itemParser);
@@ -754,11 +887,13 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = positions.getLast();
 
-        decodeLocation(position, parser);
+        skipLocation(parser);
 
-        position.set(Position.KEY_POWER, power);
-        position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1000);
-        position.set(Position.KEY_HOURS, parser.next());
+        if (power != null) {
+            position.set(Position.KEY_POWER, power * 0.001);
+        }
+        position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
+        position.set(Position.KEY_HOURS, parseHours(parser.next()));
         position.set(Position.PREFIX_ADC + 1, parser.next());
         position.set(Position.PREFIX_ADC + 2, parser.next());
         position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
@@ -767,14 +902,37 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         int index = 0;
         String[] data = parser.next().split(",");
-        if (data.length > 1) {
-            int deviceType = Integer.parseInt(data[index++]);
-            if (deviceType == 2) {
-                int deviceCount = Integer.parseInt(data[index++]);
-                for (int i = 1; i <= deviceCount; i++) {
-                    index++; // id
-                    index++; // type
-                    position.set(Position.PREFIX_TEMP + i, (short) Integer.parseInt(data[index++], 16) * 0.0625);
+
+        index += 1; // device type
+
+        if (BitUtil.check(mask, 0)) {
+            index += 1; // digital fuel sensor data
+        }
+
+        if (BitUtil.check(mask, 1)) {
+            int deviceCount = Integer.parseInt(data[index++]);
+            for (int i = 1; i <= deviceCount; i++) {
+                index += 1; // id
+                index += 1; // type
+                if (!data[index++].isEmpty()) {
+                    position.set(Position.PREFIX_TEMP + i, (short) Integer.parseInt(data[index - 1], 16) * 0.0625);
+                }
+            }
+        }
+
+        if (BitUtil.check(mask, 2)) {
+            index += 1; // can data
+        }
+
+        if (BitUtil.check(mask, 3) || BitUtil.check(mask, 4)) {
+            int deviceCount = Integer.parseInt(data[index++]);
+            for (int i = 1; i <= deviceCount; i++) {
+                index += 1; // type
+                if (BitUtil.check(mask, 3)) {
+                    position.set(Position.KEY_FUEL_LEVEL, Double.parseDouble(data[index++]));
+                }
+                if (BitUtil.check(mask, 4)) {
+                    index += 1; // volume
                 }
             }
         }
@@ -797,8 +955,25 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         decodeLocation(position, parser);
 
-        position.set(Position.KEY_HOURS, parser.next());
-        position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1000);
+        position.set(Position.KEY_IGNITION, sentence.contains("IGN"));
+        position.set(Position.KEY_HOURS, parseHours(parser.next()));
+        position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
+
+        decodeDeviceTime(position, parser);
+
+        return position;
+    }
+
+    private Object decodeLsw(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN_LSW, sentence);
+        Position position = initPosition(parser, channel, remoteAddress);
+        if (position == null) {
+            return null;
+        }
+
+        position.set(Position.PREFIX_IN + (sentence.contains("LSW") ? 1 : 2), parser.nextInt() == 1);
+
+        decodeLocation(position, parser);
 
         decodeDeviceTime(position, parser);
 
@@ -816,7 +991,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         decodeLocation(position, parser);
 
-        position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1000);
+        position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
 
         decodeDeviceTime(position, parser);
 
@@ -834,7 +1009,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         Network network = new Network();
 
-        parser.nextInt(0); // count
+        parser.nextInt(); // count
         Matcher matcher = Pattern.compile("([0-9a-fA-F]{12}),(-?\\d+),,,,").matcher(parser.next());
         while (matcher.find()) {
             String mac = matcher.group(1).replaceAll("(..)", "$1:");
@@ -844,7 +1019,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         position.setNetwork(network);
 
-        position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt(0));
+        position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
 
         return position;
     }
@@ -875,6 +1050,20 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private Object decodePna(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN_PNA, sentence);
+        Position position = initPosition(parser, channel, remoteAddress);
+        if (position == null) {
+            return null;
+        }
+
+        getLastLocation(position, null);
+
+        position.set(Position.KEY_ALARM, sentence.contains("PNA") ? Position.ALARM_POWER_ON : Position.ALARM_POWER_OFF);
+
+        return position;
+    }
+
     private Object decodeOther(Channel channel, SocketAddress remoteAddress, String sentence, String type) {
         Parser parser = new Parser(PATTERN, sentence);
         Position position = initPosition(parser, channel, remoteAddress);
@@ -882,24 +1071,32 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        int reportType = parser.nextInt(0);
+        int reportType = parser.nextHexInt();
         if (type.equals("NMR")) {
             position.set(Position.KEY_MOTION, reportType == 1);
         } else if (type.equals("SOS")) {
             position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+        } else if (type.equals("DIS")) {
+            position.set(Position.PREFIX_IN + reportType / 0x10, reportType % 0x10 == 1);
+        } else if (type.equals("IGL")) {
+            position.set(Position.KEY_IGNITION, reportType % 0x10 == 1);
         }
 
         decodeLocation(position, parser);
 
-        position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1000);
-        position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt(0));
+        if (parser.hasNext()) {
+            position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
+        }
+        position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
 
-        position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1000);
+        if (parser.hasNext()) {
+            position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
+        }
 
         decodeDeviceTime(position, parser);
 
         if (Context.getConfig().getBoolean(getProtocolName() + ".ack") && channel != null) {
-            channel.write("+SACK:" + parser.next() + "$", remoteAddress);
+            channel.writeAndFlush(new NetworkMessage("+SACK:" + parser.next() + "$", remoteAddress));
         }
 
         return position;
@@ -912,17 +1109,19 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        int hdop = parser.nextInt(0);
-        position.setValid(hdop > 0);
-        position.set(Position.KEY_HDOP, hdop);
+        if (parser.hasNext()) {
+            int hdop = parser.nextInt();
+            position.setValid(hdop > 0);
+            position.set(Position.KEY_HDOP, hdop);
+        }
 
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
         position.setCourse(parser.nextDouble(0));
         position.setAltitude(parser.nextDouble(0));
 
         if (parser.hasNext(2)) {
-            position.setLongitude(parser.nextDouble(0));
-            position.setLatitude(parser.nextDouble(0));
+            position.setLongitude(parser.nextDouble());
+            position.setLatitude(parser.nextDouble());
         } else {
             getLastLocation(position, null);
         }
@@ -933,12 +1132,18 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext(4)) {
             position.setNetwork(new Network(CellTower.from(
-                    parser.nextInt(0), parser.nextInt(0), parser.nextHexInt(0), parser.nextHexInt(0))));
+                    parser.nextInt(), parser.nextInt(), parser.nextHexInt(), parser.nextHexInt())));
         }
 
         decodeDeviceTime(position, parser);
 
         switch (type) {
+            case "TOW":
+                position.set(Position.KEY_ALARM, Position.ALARM_TOW);
+                break;
+            case "IDL":
+                position.set(Position.KEY_ALARM, Position.ALARM_IDLE);
+                break;
             case "PNA":
                 position.set(Position.KEY_ALARM, Position.ALARM_POWER_ON);
                 break;
@@ -946,9 +1151,11 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_ALARM, Position.ALARM_POWER_OFF);
                 break;
             case "EPN":
+            case "MPN":
                 position.set(Position.KEY_ALARM, Position.ALARM_POWER_RESTORED);
                 break;
             case "EPF":
+            case "MPF":
                 position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
                 break;
             case "BPL":
@@ -979,7 +1186,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        String sentence = ((ChannelBuffer) msg).toString(StandardCharsets.US_ASCII);
+        String sentence = ((ByteBuf) msg).toString(StandardCharsets.US_ASCII);
 
         int typeIndex = sentence.indexOf(":GT");
         if (typeIndex < 0) {
@@ -1002,6 +1209,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                     result = decodeCan(channel, remoteAddress, sentence);
                     break;
                 case "FRI":
+                case "GEO":
+                case "STR":
                     result = decodeFri(channel, remoteAddress, sentence);
                     break;
                 case "ERI":
@@ -1010,6 +1219,10 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                 case "IGN":
                 case "IGF":
                     result = decodeIgn(channel, remoteAddress, sentence);
+                    break;
+                case "LSW":
+                case "TSW":
+                    result = decodeLsw(channel, remoteAddress, sentence);
                     break;
                 case "IDA":
                     result = decodeIda(channel, remoteAddress, sentence);
@@ -1022,6 +1235,10 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case "VER":
                     result = decodeVer(channel, remoteAddress, sentence);
+                    break;
+                case "PNA":
+                case "PFA":
+                    result = decodePna(channel, remoteAddress, sentence);
                     break;
                 default:
                     result = decodeOther(channel, remoteAddress, sentence, type);

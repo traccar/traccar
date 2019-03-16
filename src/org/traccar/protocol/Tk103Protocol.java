@@ -1,6 +1,6 @@
 /*
  * Copyright 2017 Christoph Krey (c@ckrey.de)
- * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,52 +16,52 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
-import org.jboss.netty.bootstrap.ServerBootstrap;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.handler.codec.string.StringDecoder;
-import org.jboss.netty.handler.codec.string.StringEncoder;
+import io.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
-import org.traccar.CharacterDelimiterFrameDecoder;
+import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.model.Command;
-
-import java.util.List;
 
 public class Tk103Protocol extends BaseProtocol {
 
     public Tk103Protocol() {
-        super("tk103");
         setSupportedDataCommands(
+                Command.TYPE_CUSTOM,
+                Command.TYPE_GET_DEVICE_STATUS,
+                Command.TYPE_IDENTIFICATION,
+                Command.TYPE_MODE_DEEP_SLEEP,
+                Command.TYPE_MODE_POWER_SAVING,
+                Command.TYPE_ALARM_SOS,
+                Command.TYPE_SET_CONNECTION,
+                Command.TYPE_SOS_NUMBER,
                 Command.TYPE_POSITION_SINGLE,
                 Command.TYPE_POSITION_PERIODIC,
                 Command.TYPE_POSITION_STOP,
                 Command.TYPE_GET_VERSION,
+                Command.TYPE_POWER_OFF,
                 Command.TYPE_REBOOT_DEVICE,
                 Command.TYPE_SET_ODOMETER,
                 Command.TYPE_ENGINE_STOP,
-                Command.TYPE_ENGINE_RESUME);
-    }
-
-    @Override
-    public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(new ServerBootstrap(), getName()) {
+                Command.TYPE_ENGINE_RESUME,
+                Command.TYPE_OUTPUT_CONTROL);
+        addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, ')'));
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("objectEncoder", new Tk103ProtocolEncoder());
-                pipeline.addLast("objectDecoder", new Tk103ProtocolDecoder(Tk103Protocol.this));
+            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+                pipeline.addLast(new Tk103FrameDecoder());
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new Tk103ProtocolEncoder());
+                pipeline.addLast(new Tk103ProtocolDecoder(Tk103Protocol.this));
             }
         });
-        serverList.add(new TrackerServer(new ConnectionlessBootstrap(), getName()) {
+        addServer(new TrackerServer(true, getName()) {
             @Override
-            protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("objectEncoder", new Tk103ProtocolEncoder());
-                pipeline.addLast("objectDecoder", new Tk103ProtocolDecoder(Tk103Protocol.this));
+            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new Tk103ProtocolEncoder());
+                pipeline.addLast(new Tk103ProtocolDecoder(Tk103Protocol.this));
             }
         });
     }

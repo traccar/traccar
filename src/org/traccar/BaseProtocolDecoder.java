@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,15 @@
  */
 package org.traccar;
 
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.socket.DatagramChannel;
-import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
-import org.traccar.helper.Log;
+import io.netty.channel.Channel;
+import io.netty.channel.socket.DatagramChannel;
+import io.netty.handler.codec.http.HttpRequestDecoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.traccar.config.Config;
+import org.traccar.database.ConnectionManager;
+import org.traccar.database.IdentityManager;
+import org.traccar.database.StatisticsManager;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
@@ -29,50 +34,40 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.sql.SQLException;
+import java.util.TimeZone;
 
 public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(BaseProtocolDecoder.class);
+
+    private static final String PROTOCOL_UNKNOWN = "unknown";
+
+    private final Config config = Context.getConfig();
+    private final IdentityManager identityManager = Context.getIdentityManager();
+    private final ConnectionManager connectionManager = Context.getConnectionManager();
+    private final StatisticsManager statisticsManager;
     private final Protocol protocol;
 
-    public long addUnknownDevice(String uniqueId) {
-        Device device = new Device();
-        device.setName(uniqueId);
-        device.setUniqueId(uniqueId);
-
-        String defaultCategory = Context.getConfig().getString("database.registerUnknown.defaultCategory");
-        if (defaultCategory != null && !defaultCategory.isEmpty()) {
-            device.setCategory(defaultCategory);
-        }
-
-        long defaultGroupId = Context.getConfig().getLong("database.registerUnknown.defaultGroupId");
-        if (defaultGroupId != 0) {
-            device.setGroupId(defaultGroupId);
-        }
-
-        try {
-            Context.getDeviceManager().addItem(device);
-
-            Log.info("Automatically registered device " + uniqueId);
-
-            if (defaultGroupId != 0) {
-                Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
-                Context.getPermissionsManager().refreshAllExtendedPermissions();
-            }
-
-            return device.getId();
-        } catch (SQLException e) {
-            Log.warning(e);
-            return 0;
-        }
+    public BaseProtocolDecoder(Protocol protocol) {
+        this.protocol = protocol;
+        statisticsManager = Main.getInjector() != null ? Main.getInjector().getInstance(StatisticsManager.class) : null;
     }
 
     public String getProtocolName() {
-        return protocol.getName();
+        return protocol != null ? protocol.getName() : PROTOCOL_UNKNOWN;
+    }
+
+    public String getServer(Channel channel, char delimiter) {
+        String server = config.getString(getProtocolName() + ".server");
+        if (server == null && channel != null) {
+            InetSocketAddress address = (InetSocketAddress) channel.localAddress();
+            server = address.getAddress().getHostAddress() + ":" + address.getPort();
+        }
+        return server != null ? server.replace(':', delimiter) : null;
     }
 
     protected double convertSpeed(double value, String defaultUnits) {
-        switch (Context.getConfig().getString(getProtocolName() + ".speed", defaultUnits)) {
+        switch (config.getString(getProtocolName() + ".speed", defaultUnits)) {
             case "kmh":
                 return UnitsConverter.knotsFromKph(value);
             case "mps":
@@ -85,16 +80,36 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
         }
     }
 
+    protected TimeZone getTimeZone(long deviceId) {
+        return getTimeZone(deviceId, "UTC");
+    }
+
+    protected TimeZone getTimeZone(long deviceId, String defaultTimeZone) {
+        TimeZone result = TimeZone.getTimeZone(defaultTimeZone);
+        String timeZoneName = identityManager.lookupAttributeString(deviceId, "decoder.timezone", null, true);
+        if (timeZoneName != null) {
+            result = TimeZone.getTimeZone(timeZoneName);
+        } else {
+            int timeZoneOffset = config.getInteger(getProtocolName() + ".timezone", 0);
+            if (timeZoneOffset != 0) {
+                result.setRawOffset(timeZoneOffset * 1000);
+                LOGGER.warn("Config parameter " + getProtocolName() + ".timezone is deprecated");
+            }
+        }
+        return result;
+    }
+
     private DeviceSession channelDeviceSession; // connection-based protocols
     private Map<SocketAddress, DeviceSession> addressDeviceSessions = new HashMap<>(); // connectionless protocols
 
     private long findDeviceId(SocketAddress remoteAddress, String... uniqueIds) {
-        long deviceId = 0;
         if (uniqueIds.length > 0) {
+            long deviceId = 0;
+            Device device = null;
             try {
                 for (String uniqueId : uniqueIds) {
                     if (uniqueId != null) {
-                        Device device = Context.getIdentityManager().getByUniqueId(uniqueId);
+                        device = identityManager.getByUniqueId(uniqueId);
                         if (device != null) {
                             deviceId = device.getId();
                             break;
@@ -102,33 +117,38 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
                     }
                 }
             } catch (Exception e) {
-                Log.warning(e);
+                LOGGER.warn("Find device error", e);
             }
+            if (deviceId == 0 && config.getBoolean("database.registerUnknown")) {
+                return identityManager.addUnknownDevice(uniqueIds[0]);
+            }
+            if (device != null && !device.getDisabled() || config.getBoolean("database.storeDisabled")) {
+                return deviceId;
+            }
+            StringBuilder message = new StringBuilder();
             if (deviceId == 0) {
-                if (Context.getConfig().getBoolean("database.registerUnknown")) {
-                    return addUnknownDevice(uniqueIds[0]);
-                }
-
-                StringBuilder message = new StringBuilder("Unknown device -");
-                for (String uniqueId : uniqueIds) {
-                    message.append(" ").append(uniqueId);
-                }
-                if (remoteAddress != null) {
-                    message.append(" (").append(((InetSocketAddress) remoteAddress).getHostString()).append(")");
-                }
-                Log.warning(message.toString());
+                message.append("Unknown device -");
+            } else {
+                message.append("Disabled device -");
             }
+            for (String uniqueId : uniqueIds) {
+                message.append(" ").append(uniqueId);
+            }
+            if (remoteAddress != null) {
+                message.append(" (").append(((InetSocketAddress) remoteAddress).getHostString()).append(")");
+            }
+            LOGGER.warn(message.toString());
         }
-        return deviceId;
+        return 0;
     }
 
     public DeviceSession getDeviceSession(Channel channel, SocketAddress remoteAddress, String... uniqueIds) {
-        if (channel != null && channel.getPipeline().get(HttpRequestDecoder.class) != null
-                || Context.getConfig().getBoolean("decoder.ignoreSessionCache")) {
+        if (channel != null && BasePipelineFactory.getHandler(channel.pipeline(), HttpRequestDecoder.class) != null
+                || config.getBoolean("decoder.ignoreSessionCache")) {
             long deviceId = findDeviceId(remoteAddress, uniqueIds);
             if (deviceId != 0) {
-                if (Context.getConnectionManager() != null) {
-                    Context.getConnectionManager().addActiveDevice(deviceId, protocol, channel, remoteAddress);
+                if (connectionManager != null) {
+                    connectionManager.addActiveDevice(deviceId, protocol, channel, remoteAddress);
                 }
                 return new DeviceSession(deviceId);
             } else {
@@ -143,8 +163,8 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
             } else if (deviceId != 0) {
                 deviceSession = new DeviceSession(deviceId);
                 addressDeviceSessions.put(remoteAddress, deviceSession);
-                if (Context.getConnectionManager() != null) {
-                    Context.getConnectionManager().addActiveDevice(deviceId, protocol, channel, remoteAddress);
+                if (connectionManager != null) {
+                    connectionManager.addActiveDevice(deviceId, protocol, channel, remoteAddress);
                 }
                 return deviceSession;
             } else {
@@ -155,8 +175,8 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
                 long deviceId = findDeviceId(remoteAddress, uniqueIds);
                 if (deviceId != 0) {
                     channelDeviceSession = new DeviceSession(deviceId);
-                    if (Context.getConnectionManager() != null) {
-                        Context.getConnectionManager().addActiveDevice(deviceId, protocol, channel, remoteAddress);
+                    if (connectionManager != null) {
+                        connectionManager.addActiveDevice(deviceId, protocol, channel, remoteAddress);
                     }
                 }
             }
@@ -164,15 +184,11 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
         }
     }
 
-    public BaseProtocolDecoder(Protocol protocol) {
-        this.protocol = protocol;
-    }
-
     public void getLastLocation(Position position, Date deviceTime) {
         if (position.getDeviceId() != 0) {
             position.setOutdated(true);
 
-            Position last = Context.getIdentityManager().getLastPosition(position.getDeviceId());
+            Position last = identityManager.getLastPosition(position.getDeviceId());
             if (last != null) {
                 position.setFixTime(last.getFixTime());
                 position.setValid(last.getValid());
@@ -197,8 +213,8 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     @Override
     protected void onMessageEvent(
             Channel channel, SocketAddress remoteAddress, Object originalMessage, Object decodedMessage) {
-        if (Context.getStatisticsManager() != null) {
-            Context.getStatisticsManager().registerMessageReceived();
+        if (statisticsManager != null) {
+            statisticsManager.registerMessageReceived();
         }
         Position position = null;
         if (decodedMessage != null) {
@@ -212,12 +228,12 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
             }
         }
         if (position != null) {
-            Context.getConnectionManager().updateDevice(
+            connectionManager.updateDevice(
                     position.getDeviceId(), Device.STATUS_ONLINE, new Date());
         } else {
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
             if (deviceSession != null) {
-                Context.getConnectionManager().updateDevice(
+                connectionManager.updateDevice(
                         deviceSession.getDeviceId(), Device.STATUS_ONLINE, new Date());
             }
         }
@@ -226,9 +242,8 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     @Override
     protected Object handleEmptyMessage(Channel channel, SocketAddress remoteAddress, Object msg) {
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
-        if (Context.getConfig().getBoolean("database.saveEmpty") && deviceSession != null) {
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
+        if (config.getBoolean("database.saveEmpty") && deviceSession != null) {
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
             getLastLocation(position, null);
             return position;
