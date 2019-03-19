@@ -85,7 +85,7 @@ public class Xt2400ProtocolDecoder extends BaseProtocolDecoder {
     private static int getTagLength(int tag) {
         Integer length = TAG_LENGTH_MAP.get(tag);
         if (length == null) {
-            throw new IllegalArgumentException("Unknown tag: " + tag);
+          return 1;
         }
         return length;
     }

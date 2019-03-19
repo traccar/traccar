@@ -21,5 +21,12 @@
     <entry key='database.password'></entry>
 
     <entry key='atrack.custom'>true</entry>
+    <entry key='xirgo.newformat'>true</entry>
+    <entry key='xt2400.config'>:wycfg pcr[2] 0216010304191a1b1c1d1e1f20212223245813122e171405
+    :wycfg pcr[1] 01100103044106070809570a13122e171405
+    :wycfg pcr[0] 0016010304060708095793940a5813122e7d1714324a5a05
+    </entry>
+    <entry key='xirgo.timeout'>120</entry>
+    <entry key='xt2400.timeout'>120</entry>
 
 </properties>
