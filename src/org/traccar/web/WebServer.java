@@ -15,6 +15,7 @@
  */
 package org.traccar.web;
 
+import io.netty.handler.codec.http.HttpHeaderNames;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.proxy.AsyncProxyServlet;
@@ -109,6 +110,33 @@ public class WebServer {
                         String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
                         throws IOException, ServletException {
                     if (target.equals("/") && request.getMethod().equals(HttpMethod.POST.asString())) {
+                        if (!response.containsHeader(HttpHeaderNames.ACCESS_CONTROL_ALLOW_HEADERS.toString())) {
+                            response.setHeader(HttpHeaderNames.ACCESS_CONTROL_ALLOW_HEADERS.toString(),
+                                    CorsResponseFilter.HEADERS_ALL);
+                        }
+
+                        if (!response.containsHeader(HttpHeaderNames.ACCESS_CONTROL_ALLOW_CREDENTIALS.toString())) {
+                            response.setHeader(HttpHeaderNames.ACCESS_CONTROL_ALLOW_CREDENTIALS.toString(),
+                                    Boolean.toString(true));
+                        }
+
+                        if (!response.containsHeader(HttpHeaderNames.ACCESS_CONTROL_ALLOW_METHODS.toString())) {
+                            response.setHeader(HttpHeaderNames.ACCESS_CONTROL_ALLOW_METHODS.toString(),
+                                    CorsResponseFilter.METHODS_ALL);
+                        }
+
+                        if (!response.containsHeader(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN.toString())) {
+                            String origin = request.getHeader(HttpHeaderNames.ORIGIN.toString());
+                            String allowed = org.traccar.Context.getConfig().getString("web.origin");
+
+                            if (origin == null) {
+                                response.setHeader(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN.toString(),
+                                        CorsResponseFilter.ORIGIN_ALL);
+                            } else if (allowed == null || allowed.equals(CorsResponseFilter.ORIGIN_ALL)
+                                    || allowed.contains(origin)) {
+                                response.setHeader(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN.toString(), origin);
+                            }
+                        }
                         super.doScope(target, baseRequest, request, response);
                     }
                 }
