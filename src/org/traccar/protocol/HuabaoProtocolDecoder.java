@@ -44,7 +44,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_GENERAL_RESPONSE = 0x8001;
     public static final int MSG_TERMINAL_REGISTER = 0x0100;
     public static final int MSG_TERMINAL_REGISTER_RESPONSE = 0x8100;
-    public static final int MSG_TERMINAL_CONTROL = 8105;
+    public static final int MSG_TERMINAL_CONTROL = 0x8105;
     public static final int MSG_TERMINAL_AUTH = 0x0102;
     public static final int MSG_LOCATION_REPORT = 0x0200;
     public static final int MSG_LOCATION_BATCH = 0x0704;
