@@ -63,6 +63,22 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.?d*),")                 // speed
             .number("(d+.?d*),")                 // course
             .number("(d+),")                     // satellites
+            .groupBegin()
+            .number("(d+.?d*),")                 // altitude
+            .number("d+.?d*,")                   // pdop
+            .number("d+.?d*,")                   // hdop
+            .expression("[^,]*,")
+            .number("([01]),")                   // ignition
+            .number("([01]),")                   // charging
+            .number("(d+.?d*),")                 // power
+            .number("(d+.?d*),")                 // battery
+            .number("[01],")                     // emergency
+            .expression("[CO]?,")                // tamper
+            .number("(?:x+,){5}")                // main cell
+            .number("(?:-?x+,){12}")             // other cells
+            .number("([01]{4}),")                // inputs
+            .number("([01]{2}),")                // outputs
+            .groupEnd("?")
             .or()
             .number("(-?d+.d+),")                // altitude
             .number("(d+.d+),")                  // speed
@@ -107,6 +123,16 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
             position.setCourse(parser.nextDouble());
             position.set(Position.KEY_SATELLITES, parser.nextInt());
+        }
+
+        if (parser.hasNext(7)) {
+            position.setAltitude(parser.nextDouble());
+            position.set(Position.KEY_IGNITION, parser.nextInt() > 0);
+            position.set(Position.KEY_CHARGE, parser.nextInt() > 0);
+            position.set(Position.KEY_POWER, parser.nextDouble());
+            position.set(Position.KEY_BATTERY, parser.nextDouble());
+            position.set(Position.KEY_INPUT, parser.nextBinInt());
+            position.set(Position.KEY_OUTPUT, parser.nextBinInt());
         }
 
         if (parser.hasNext(2)) {
