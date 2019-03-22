@@ -107,7 +107,8 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedShort(); // acc off interval
             buf.readUnsignedByte(); // angle compensation
             buf.readUnsignedShort(); // distance compensation
-            buf.readUnsignedShort(); // speed alarm
+
+            position.set(Position.KEY_RSSI, BitUtil.to(buf.readUnsignedShort(), 7));
 
             int status = buf.readUnsignedByte();
             position.set(Position.KEY_SATELLITES, BitUtil.to(status, 5));
