@@ -45,13 +45,13 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_ALARM = 0x04;
     public static final int MSG_COMMAND = 0x81;
 
-    private void sendResponse(Channel channel, short header, int type, ByteBuf imei) {
+    private void sendResponse(Channel channel, short header, int type, int index, ByteBuf imei) {
         if (channel != null) {
             ByteBuf response = Unpooled.buffer(15);
             response.writeShort(header);
             response.writeByte(type);
             response.writeShort(response.capacity()); // length
-            response.writeShort(0x0001); // index
+            response.writeShort(index);
             response.writeBytes(imei);
             channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
@@ -94,9 +94,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        if (type == MSG_LOGIN || type == MSG_ALARM || type == MSG_HEARTBEAT) {
-            sendResponse(channel, header, type, imei);
-        }
+        sendResponse(channel, header, type, index, imei);
 
         if (type == MSG_GPS || type == MSG_ALARM) {
 
