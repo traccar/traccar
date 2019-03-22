@@ -205,9 +205,9 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case "D":
                     String[] date = values[i].split("/");
-                    dateBuilder.setYear(Integer.parseInt(date[0]));
-                    dateBuilder.setMonth(Integer.parseInt(date[1]));
-                    dateBuilder.setDay(Integer.parseInt(date[2]));
+                    dateBuilder.setMonth(Integer.parseInt(date[0]));
+                    dateBuilder.setDay(Integer.parseInt(date[1]));
+                    dateBuilder.setYear(Integer.parseInt(date[2]));
                     break;
                 case "T":
                     String[] time = values[i].split(":");
