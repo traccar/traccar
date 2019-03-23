@@ -19,9 +19,6 @@ package org.traccar.handler.events;
 import java.util.Collections;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.netty.channel.ChannelHandler;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
