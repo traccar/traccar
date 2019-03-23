@@ -52,7 +52,8 @@ public class ServerManager {
                 Enumeration<JarEntry> jarEntries = jf.entries();
                 while (jarEntries.hasMoreElements()) {
                     String entryName = jarEntries.nextElement().getName();
-                    if (entryName.startsWith(packagePath) && entryName.length() > packagePath.length() + 5) {
+                    if (entryName.startsWith(packagePath)
+                            && entryName.endsWith(".class")) {
                         names.add(entryName.substring(packagePath.length() + 1, entryName.lastIndexOf('.')));
                     }
                 }
@@ -63,7 +64,9 @@ public class ServerManager {
             if (files != null) {
                 for (File actual: files) {
                     String entryName = actual.getName();
-                    names.add(entryName.substring(0, entryName.lastIndexOf('.')));
+                    if (entryName.endsWith(".class")) {
+                        names.add(entryName.substring(0, entryName.lastIndexOf('.')));
+                    }
                 }
             }
         }
