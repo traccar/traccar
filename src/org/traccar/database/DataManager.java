@@ -39,7 +39,7 @@ import liquibase.resource.ResourceAccessor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.Config;
+import org.traccar.config.Config;
 import org.traccar.Context;
 import org.traccar.helper.DateUtil;
 import org.traccar.model.Attribute;

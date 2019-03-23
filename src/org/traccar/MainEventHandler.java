@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,29 +23,36 @@ import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.database.StatisticsManager;
 import org.traccar.helper.DateUtil;
 import org.traccar.model.Position;
 
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class MainEventHandler extends ChannelInboundHandlerAdapter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GeocoderHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MainEventHandler.class);
+
+    private static final String DEFAULT_LOGGER_ATTRIBUTES = "time,position,speed,course,accuracy,result";
 
     private final Set<String> connectionlessProtocols = new HashSet<>();
+    private final Set<String> logAttributes = new LinkedHashSet<>();
 
     public MainEventHandler() {
         String connectionlessProtocolList = Context.getConfig().getString("status.ignoreOffline");
         if (connectionlessProtocolList != null) {
             connectionlessProtocols.addAll(Arrays.asList(connectionlessProtocolList.split(",")));
         }
+        logAttributes.addAll(Arrays.asList(
+                Context.getConfig().getString("logger.attributes", DEFAULT_LOGGER_ATTRIBUTES).split(",")));
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) {
         if (msg instanceof Position) {
 
             Position position = (Position) msg;
@@ -57,27 +64,52 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
 
             String uniqueId = Context.getIdentityManager().getById(position.getDeviceId()).getUniqueId();
 
-            // Log position
-            StringBuilder s = new StringBuilder();
-            s.append(formatChannel(ctx.channel())).append(" ");
-            s.append("id: ").append(uniqueId);
-            s.append(", time: ").append(DateUtil.formatDate(position.getFixTime(), false));
-            s.append(", lat: ").append(String.format("%.5f", position.getLatitude()));
-            s.append(", lon: ").append(String.format("%.5f", position.getLongitude()));
-            if (position.getSpeed() > 0) {
-                s.append(", speed: ").append(String.format("%.1f", position.getSpeed()));
+            StringBuilder builder = new StringBuilder();
+            builder.append(formatChannel(ctx.channel())).append(" ");
+            builder.append("id: ").append(uniqueId);
+            for (String attribute : logAttributes) {
+                switch (attribute) {
+                    case "time":
+                        builder.append(", time: ").append(DateUtil.formatDate(position.getFixTime(), false));
+                        break;
+                    case "position":
+                        builder.append(", lat: ").append(String.format("%.5f", position.getLatitude()));
+                        builder.append(", lon: ").append(String.format("%.5f", position.getLongitude()));
+                        break;
+                    case "speed":
+                        if (position.getSpeed() > 0) {
+                            builder.append(", speed: ").append(String.format("%.1f", position.getSpeed()));
+                        }
+                        break;
+                    case "course":
+                        builder.append(", course: ").append(String.format("%.1f", position.getCourse()));
+                        break;
+                    case "accuracy":
+                        if (position.getAccuracy() > 0) {
+                            builder.append(", accuracy: ").append(String.format("%.1f", position.getAccuracy()));
+                        }
+                        break;
+                    case "outdated":
+                        if (position.getOutdated()) {
+                            builder.append(", outdated");
+                        }
+                        break;
+                    case "invalid":
+                        if (!position.getValid()) {
+                            builder.append(", invalid");
+                        }
+                        break;
+                    default:
+                        Object value = position.getAttributes().get(attribute);
+                        if (value != null) {
+                            builder.append(", ").append(attribute).append(": ").append(value);
+                        }
+                        break;
+                }
             }
-            s.append(", course: ").append(String.format("%.1f", position.getCourse()));
-            if (position.getAccuracy() > 0) {
-                s.append(", accuracy: ").append(String.format("%.1f", position.getAccuracy()));
-            }
-            Object cmdResult = position.getAttributes().get(Position.KEY_RESULT);
-            if (cmdResult != null) {
-                s.append(", result: ").append(cmdResult);
-            }
-            LOGGER.info(s.toString());
+            LOGGER.info(builder.toString());
 
-            Context.getStatisticsManager().registerMessageStored(position.getDeviceId());
+            Main.getInjector().getInstance(StatisticsManager.class).registerMessageStored(position.getDeviceId());
         }
     }
 
@@ -86,14 +118,14 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+    public void channelActive(ChannelHandlerContext ctx) {
         if (!(ctx.channel() instanceof DatagramChannel)) {
             LOGGER.info(formatChannel(ctx.channel()) + " connected");
         }
     }
 
     @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+    public void channelInactive(ChannelHandlerContext ctx) {
         LOGGER.info(formatChannel(ctx.channel()) + " disconnected");
         closeChannel(ctx.channel());
 
@@ -104,13 +136,16 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        while (cause.getCause() != null && cause.getCause() != cause) {
+            cause = cause.getCause();
+        }
         LOGGER.warn(formatChannel(ctx.channel()) + " error", cause);
         closeChannel(ctx.channel());
     }
 
     @Override
-    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
         if (evt instanceof IdleStateEvent) {
             LOGGER.info(formatChannel(ctx.channel()) + " timed out");
             closeChannel(ctx.channel());

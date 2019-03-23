@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 package org.traccar.notification;
 
-import org.apache.commons.collections4.MultiValuedMap;
-import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.traccar.Context;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
@@ -52,23 +50,13 @@ public abstract class EventForwarder {
         Invocation.Builder requestBuilder = Context.getClient().target(url).request();
 
         if (header != null && !header.isEmpty()) {
-            for (Map.Entry<String, String> entry : splitKeyValues(header, ":").entries()) {
-                requestBuilder = requestBuilder.header(entry.getKey(), entry.getValue());
+            for (String line: header.split("\\r?\\n")) {
+                String[] values = line.split(":", 2);
+                requestBuilder.header(values[0].trim(), values[1].trim());
             }
         }
 
         executeRequest(event, position, users, requestBuilder.async());
-    }
-
-    protected MultiValuedMap<String, String> splitKeyValues(String params, String separator) {
-        MultiValuedMap<String, String> data = new ArrayListValuedHashMap<>();
-        for (String line: params.split("\\r?\\n")) {
-            String[] values = line.split(separator, 2);
-            if (values.length == 2) {
-                data.put(values[0].trim(), values[1].trim());
-            }
-        }
-        return data;
     }
 
     protected Map<String, Object> preparePayload(Event event, Position position, Set<Long> users) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -34,22 +35,23 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .text("$,")
-            .expression("[^,]+,")                // event
+            .expression("[^$]*")
+            .text("$")
+            .expression(",?[^,]+,")              // event
             .groupBegin()
             .expression("[^,]+,")                // vendor
             .expression("[^,]+,")                // firmware version
-            .groupEnd("?")
             .expression("[^,]+,")                // type
-            .groupBegin()
             .number("d+,")
             .expression("[LH],")                 // history
-            .groupEnd("?")
+            .or()
+            .expression("[^,]+,")                // type
+            .groupEnd()
             .number("(d{15}),")                  // imei
             .groupBegin()
-            .expression("(?:NM|SP),")            // status
+            .expression("(..),")                 // status
             .or()
-            .expression("[^,]+,")                // vehicle registration
+            .expression("[^,]*,")                // vehicle registration
             .number("([01]),")                   // valid
             .groupEnd()
             .number("(dd),?(dd),?(dddd),")       // date (ddmmyyyy)
@@ -58,9 +60,25 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d+),([NS]),")           // latitude
             .number("(d+.d+),([EW]),")           // longitude
             .groupBegin()
-            .number("(d+.d+),")                  // speed
-            .number("(d+.d+),")                  // course
+            .number("(d+.?d*),")                 // speed
+            .number("(d+.?d*),")                 // course
             .number("(d+),")                     // satellites
+            .groupBegin()
+            .number("(d+.?d*),")                 // altitude
+            .number("d+.?d*,")                   // pdop
+            .number("d+.?d*,")                   // hdop
+            .expression("[^,]*,")
+            .number("([01]),")                   // ignition
+            .number("([01]),")                   // charging
+            .number("(d+.?d*),")                 // power
+            .number("(d+.?d*),")                 // battery
+            .number("[01],")                     // emergency
+            .expression("[CO]?,")                // tamper
+            .number("(?:x+,){5}")                // main cell
+            .number("(?:-?x+,){12}")             // other cells
+            .number("([01]{4}),")                // inputs
+            .number("([01]{2}),")                // outputs
+            .groupEnd("?")
             .or()
             .number("(-?d+.d+),")                // altitude
             .number("(d+.d+),")                  // speed
@@ -68,11 +86,37 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
+    private String decodeAlarm(String status) {
+        switch (status) {
+            case "WD":
+            case "EA":
+                return Position.ALARM_SOS;
+            case "BL":
+                return Position.ALARM_LOW_BATTERY;
+            case "HB":
+                return Position.ALARM_BRAKING;
+            case "HA":
+                return Position.ALARM_ACCELERATION;
+            case "RT":
+                return Position.ALARM_CORNERING;
+            case "OS":
+                return Position.ALARM_OVERSPEED;
+            default:
+                return null;
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        Parser parser = new Parser(PATTERN, (String) msg);
+        String sentence = (String) msg;
+
+        if (channel != null && sentence.startsWith("$,01,")) {
+            channel.writeAndFlush(new NetworkMessage("$,1,*", remoteAddress));
+        }
+
+        Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
             return null;
         }
@@ -84,6 +128,10 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
+
+        if (parser.hasNext()) {
+            position.set(Position.KEY_ALARM, decodeAlarm(parser.next()));
+        }
 
         if (parser.hasNext()) {
             position.setValid(parser.nextInt() == 1);
@@ -101,8 +149,18 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_SATELLITES, parser.nextInt());
         }
 
-        if (parser.hasNext()) {
-            position.setAltitude(parser.nextDouble(0));
+        if (parser.hasNext(7)) {
+            position.setAltitude(parser.nextDouble());
+            position.set(Position.KEY_IGNITION, parser.nextInt() > 0);
+            position.set(Position.KEY_CHARGE, parser.nextInt() > 0);
+            position.set(Position.KEY_POWER, parser.nextDouble());
+            position.set(Position.KEY_BATTERY, parser.nextDouble());
+            position.set(Position.KEY_INPUT, parser.nextBinInt());
+            position.set(Position.KEY_OUTPUT, parser.nextBinInt());
+        }
+
+        if (parser.hasNext(2)) {
+            position.setAltitude(parser.nextDouble());
             position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
         }
 

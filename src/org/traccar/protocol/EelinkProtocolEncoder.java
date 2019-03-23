@@ -69,6 +69,7 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
         }
 
         result.writeBytes(buf);
+        buf.release();
 
         return result;
     }

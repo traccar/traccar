@@ -21,6 +21,7 @@
     <entry key='logger.enable'>true</entry>
     <entry key='logger.level'>info</entry>
     <entry key='logger.file'>./logs/tracker-server.log</entry>
+    <entry key='logger.rotate'>true</entry>
 
     <entry key='filter.enable'>true</entry>
     <entry key='filter.future'>86400</entry>
@@ -257,5 +258,8 @@
     <entry key='its.port'>5179</entry>
     <entry key='xrb28.port'>5180</entry>
     <entry key='c2stek.port'>5181</entry>
+    <entry key='nyitech.port'>5182</entry>
+    <entry key='neos.port'>5183</entry>
+    <entry key='satsol.port'>5184</entry>
 
 </properties>

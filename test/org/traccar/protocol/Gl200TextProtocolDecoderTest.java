@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class Gl200TextProtocolDecoderTest extends ProtocolTest {
 
@@ -9,6 +10,20 @@ public class Gl200TextProtocolDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         Gl200TextProtocolDecoder decoder = new Gl200TextProtocolDecoder(null);
+
+        verifyAttribute(decoder, buffer(
+                "+RESP:GTPFA,F50201,866425030235982,GL300M,20190208124849,0BD4$"),
+                Position.KEY_ALARM, Position.ALARM_POWER_OFF);
+
+        verifyAttribute(decoder, buffer(
+                "+RESP:GTPNA,F50201,866425030235982,GL300M,20190208124909,0BD5$"),
+                Position.KEY_ALARM, Position.ALARM_POWER_ON);
+
+        verifyAttributes(decoder, buffer(
+                "+BUFF:GTSTC,410301,864802030022424,,,0,,,,,,,0228,0002,4EE8,1BFF489,00,20181207134332,EC90$"));
+
+        verifyPositions(decoder, buffer(
+                "+RESP:GTFRI,1A0900,860599000306845,G3-313,0,0,4,1,2.1,0,426.7,8.611466,47.681639,20181214134603,0228,0001,077F,4812,25.2,1,5.7,34,437.3,8.611600,47.681846,20181214134619,0228,0001,077F,4812,25.2,1,4.4,62,438.2,8.611893,47.681983,20181214134633,0228,0001,077F,4812,25.2,1,4.8,78,436.6,8.612236,47.682040,20181214134648,0228,0001,077F,4812,25.2,83,20181214134702,0654$"));
 
         verifyPosition(decoder, buffer(
                 "+RESP:GTCAN,270703,867162025056839,gv300w,0,1,E07FFFFF,,2,H9307659,368713.50,1291,90,91,,P82.40,,61,10.10,6.76,3.34,524.08,,,0000,,00,,,007FFFFF,,,,,,,,,,,,,,,,,,,,,0000,2,0,,,0,88.6,104,117.6,-116.886007,32.543697,20181031202959,0334,0020,5234,7FCC3D0,00,20181031203002,9F50$"));

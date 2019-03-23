@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class EelinkProtocolDecoderTest extends ProtocolTest {
 
@@ -12,6 +13,17 @@ public class EelinkProtocolDecoderTest extends ProtocolTest {
 
         verifyNull(decoder, binary(
                 "454C0027E753035254407167747167670100180002035254407167747100200205020500010432000086BD"));
+
+        verifyAttributes(decoder, binary(
+                "676707006502df5c89fde800bc3fa8030302005555045b555555057a5555550b225555550c105c55550d115555550e7e5555550f4555555510017b5555112b5555551f01ed5555208005b0012100005555407ad000004237f5555589000000498a0000aef78b00000000"));
+
+        verifyAttribute(decoder, binary(
+                "676712003400e45c5b0ade02012e03702d87064546aa24066a1086018a0000002dc1a0ffffffff0afd074d000000000000000000000000fce0"),
+                Position.PREFIX_TEMP + 2, -50.0);
+
+        verifyAttribute(decoder, binary(
+                "6767120043000e5c37387c0304e4e1b4f8194fa800160013009408012e03702d8706453c6e5b066f115f05710000001b067f8d248d240313020500000000000000000000000001cc"),
+                Position.PREFIX_TEMP + 2, 28.75);
 
         verifyPosition(decoder, binary(
                 "676714002414B05AD43A7D03026B92B10C395499FFD7000000000701CC00002495000014203604067B"));
@@ -91,7 +103,7 @@ public class EelinkProtocolDecoderTest extends ProtocolTest {
         verifyAttributes(decoder, binary(
                 "6767030004001A0001"));
 
-        verifyNull(decoder, binary(
+        verifyAttributes(decoder, binary(
                 "6767070088001050E2281400FFFFFFFF02334455660333445566043344556605AA00000007334455660A334455660B334455660C4E2000000DAA0000000E334455660F3344556610AAAA000011334455661C334455661F334455662133445566423344556646334455664D334455665C334455665E33445566880000000089000000008A000000008B00000000"));
 
         verifyPosition(decoder, binary(

@@ -30,7 +30,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.traccar.Context;
+import org.traccar.Main;
 import org.traccar.api.resource.SessionResource;
+import org.traccar.database.StatisticsManager;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
 
@@ -51,7 +53,7 @@ public class MediaFilter implements Filter {
                 userId = (Long) session.getAttribute(SessionResource.USER_ID_KEY);
                 if (userId != null) {
                     Context.getPermissionsManager().checkUserEnabled(userId);
-                    Context.getStatisticsManager().registerRequest(userId);
+                    Main.getInjector().getInstance(StatisticsManager.class).registerRequest(userId);
                 }
             }
             if (userId == null) {

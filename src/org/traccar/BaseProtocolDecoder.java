@@ -20,6 +20,7 @@ import io.netty.channel.socket.DatagramChannel;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.config.Config;
 import org.traccar.database.ConnectionManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.database.StatisticsManager;
@@ -44,24 +45,25 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     private final Config config = Context.getConfig();
     private final IdentityManager identityManager = Context.getIdentityManager();
     private final ConnectionManager connectionManager = Context.getConnectionManager();
-    private final StatisticsManager statisticsManager = Context.getStatisticsManager();
+    private final StatisticsManager statisticsManager;
     private final Protocol protocol;
 
     public BaseProtocolDecoder(Protocol protocol) {
         this.protocol = protocol;
+        statisticsManager = Main.getInjector() != null ? Main.getInjector().getInstance(StatisticsManager.class) : null;
     }
 
     public String getProtocolName() {
         return protocol != null ? protocol.getName() : PROTOCOL_UNKNOWN;
     }
 
-    public String getServer(Channel channel) {
+    public String getServer(Channel channel, char delimiter) {
         String server = config.getString(getProtocolName() + ".server");
         if (server == null && channel != null) {
             InetSocketAddress address = (InetSocketAddress) channel.localAddress();
             server = address.getAddress().getHostAddress() + ":" + address.getPort();
         }
-        return server;
+        return server != null ? server.replace(':', delimiter) : null;
     }
 
     protected double convertSpeed(double value, String defaultUnits) {

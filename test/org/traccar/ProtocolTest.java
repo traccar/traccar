@@ -52,6 +52,14 @@ public class ProtocolTest extends BaseTest {
         return builder.toString();
     }
 
+    protected ByteBuf concatenateBuffers(ByteBuf... buffers) {
+        ByteBuf result = Unpooled.buffer();
+        for (ByteBuf buf : buffers) {
+            result.writeBytes(buf);
+        }
+        return result;
+    }
+
     protected ByteBuf binary(String... data) {
         return Unpooled.wrappedBuffer(DataConverter.parseHex(concatenateStrings(data)));
     }
@@ -84,7 +92,7 @@ public class ProtocolTest extends BaseTest {
         assertNotNull(decoder.decode(null, null, object));
     }
 
-    protected void verifyNull(Object object) throws Exception {
+    protected void verifyNull(Object object) {
         assertNull(object);
     }
 
@@ -93,7 +101,18 @@ public class ProtocolTest extends BaseTest {
     }
 
     protected void verifyAttribute(BaseProtocolDecoder decoder, Object object, String key, Object expected) throws Exception {
-        assertEquals(expected, ((Position) decoder.decode(null, null, object)).getAttributes().get(key));
+        Position position = (Position) decoder.decode(null, null, object);
+        switch (key) {
+            case "speed":
+                assertEquals(expected, position.getSpeed());
+                break;
+            case "course":
+                assertEquals(expected, position.getCourse());
+                break;
+            default:
+                assertEquals(expected, position.getAttributes().get(key));
+                break;
+        }
     }
 
     protected void verifyAttributes(BaseProtocolDecoder decoder, Object object) throws Exception {
@@ -154,6 +173,7 @@ public class ProtocolTest extends BaseTest {
 
             } else {
 
+                assertNotNull(position.getServerTime());
                 assertNotNull(position.getFixTime());
                 assertTrue("year > 1999", position.getFixTime().after(new Date(915148800000L)));
                 assertTrue("time < +25 hours",
@@ -291,7 +311,7 @@ public class ProtocolTest extends BaseTest {
     }
 
     protected void verifyCommand(
-            BaseProtocolEncoder encoder, Command command, ByteBuf expected) throws Exception {
+            BaseProtocolEncoder encoder, Command command, ByteBuf expected) {
         verifyFrame(expected, encoder.encodeCommand(command));
     }
 

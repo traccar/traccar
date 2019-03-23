@@ -17,6 +17,8 @@
 package org.traccar.notificators;
 
 import org.traccar.Context;
+import org.traccar.Main;
+import org.traccar.database.StatisticsManager;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
@@ -41,7 +43,7 @@ public final class NotificatorSms extends Notificator {
     public void sendAsync(long userId, Event event, Position position) {
         final User user = Context.getPermissionsManager().getUser(userId);
         if (user.getPhone() != null) {
-            Context.getStatisticsManager().registerSms();
+            Main.getInjector().getInstance(StatisticsManager.class).registerSms();
             smsManager.sendMessageAsync(user.getPhone(),
                     NotificationFormatter.formatShortMessage(userId, event, position), false);
         }
@@ -51,7 +53,7 @@ public final class NotificatorSms extends Notificator {
     public void sendSync(long userId, Event event, Position position) throws MessageException, InterruptedException {
         final User user = Context.getPermissionsManager().getUser(userId);
         if (user.getPhone() != null) {
-            Context.getStatisticsManager().registerSms();
+            Main.getInjector().getInstance(StatisticsManager.class).registerSms();
             smsManager.sendMessageSync(user.getPhone(),
                     NotificationFormatter.formatShortMessage(userId, event, position), false);
         }

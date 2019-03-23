@@ -17,6 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.socket.DatagramChannel;
 import org.traccar.BaseProtocolDecoder;
@@ -61,13 +62,6 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_OBD_CODE = 0x19;
     public static final int MSG_CAMERA_INFO = 0x1E;
     public static final int MSG_CAMERA_DATA = 0x1F;
-
-    private void sendResponse(Channel channel, SocketAddress remoteAddress, String uniqueId, int type, int index) {
-        if (channel != null) {
-            channel.writeAndFlush(new NetworkMessage(EelinkProtocolEncoder.encodeContent(
-                    channel instanceof DatagramChannel, uniqueId, type, index, null), remoteAddress));
-        }
-    }
 
     private String decodeAlarm(Short value) {
         switch (value) {
@@ -273,6 +267,10 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 position.set("co2", buf.readUnsignedInt());
             }
 
+            if (buf.readableBytes() >= 2) {
+                position.set(Position.PREFIX_TEMP + 2, buf.readShort() / 16.0);
+            }
+
         }
 
         return position;
@@ -329,6 +327,34 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private Position decodeObd(DeviceSession deviceSession, ByteBuf buf, int index) {
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, new Date(buf.readUnsignedInt() * 1000));
+
+        while (buf.readableBytes() > 0) {
+            int pid = buf.readUnsignedByte();
+            int value = buf.readInt();
+            switch (pid) {
+                case 0x89:
+                    position.set(Position.KEY_FUEL_CONSUMPTION, value);
+                    break;
+                case 0x8a:
+                    position.set(Position.KEY_ODOMETER, value * 1000L);
+                    break;
+                case 0x8b:
+                    position.set(Position.KEY_FUEL_LEVEL, value / 10);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        return position;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -352,7 +378,18 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         int index = buf.readUnsignedShort();
 
         if (type != MSG_GPS && type != MSG_DATA) {
-            sendResponse(channel, remoteAddress, uniqueId, type, index);
+            ByteBuf content = Unpooled.buffer();
+            if (type == MSG_LOGIN) {
+                content.writeInt((int) (System.currentTimeMillis() / 1000));
+                content.writeByte(1); // protocol version
+                content.writeByte(0); // action mask
+            }
+            ByteBuf response = EelinkProtocolEncoder.encodeContent(
+                    channel instanceof DatagramChannel, uniqueId, type, index, content);
+            content.release();
+            if (channel != null) {
+                channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+            }
         }
 
         if (type == MSG_LOGIN) {
@@ -385,6 +422,10 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 decodeStatus(position, buf.readUnsignedShort());
 
                 return position;
+
+            } else if (type == MSG_OBD) {
+
+                return decodeObd(deviceSession, buf, index);
 
             } else if (type == MSG_DOWNLINK) {
 

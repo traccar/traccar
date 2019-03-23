@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.Config;
+import org.traccar.config.Config;
 import org.traccar.Context;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceState;
@@ -315,6 +315,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         return result;
     }
 
+    @Override
     public boolean lookupAttributeBoolean(
             long deviceId, String attributeName, boolean defaultValue, boolean lookupConfig) {
         Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
@@ -324,12 +325,14 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         return defaultValue;
     }
 
+    @Override
     public String lookupAttributeString(
             long deviceId, String attributeName, String defaultValue, boolean lookupConfig) {
         Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
         return result != null ? (String) result : defaultValue;
     }
 
+    @Override
     public int lookupAttributeInteger(long deviceId, String attributeName, int defaultValue, boolean lookupConfig) {
         Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
         if (result != null) {
@@ -338,6 +341,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         return defaultValue;
     }
 
+    @Override
     public long lookupAttributeLong(
             long deviceId, String attributeName, long defaultValue, boolean lookupConfig) {
         Object result = lookupAttribute(deviceId, attributeName, lookupConfig);

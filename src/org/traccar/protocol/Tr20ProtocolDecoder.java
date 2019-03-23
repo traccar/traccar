@@ -52,7 +52,7 @@ public class Tr20ProtocolDecoder extends BaseProtocolDecoder {
             .number("(ddd)(dd.d+),")             // longitude
             .number("(d+),")                     // speed
             .number("(d+),")                     // course
-            .number("(?:NA|[FC](-?d+)),")        // temperature
+            .number("(?:NA|[FC]?(-?d+)),")       // temperature
             .number("(x{8}),")                   // status
             .number("(d+)")                      // event
             .any()

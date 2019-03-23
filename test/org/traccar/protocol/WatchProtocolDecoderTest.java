@@ -1,7 +1,12 @@
 package org.traccar.protocol;
 
+import io.netty.buffer.ByteBuf;
 import org.junit.Test;
+import org.traccar.Context;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
+
+import static org.junit.Assert.assertEquals;
 
 public class WatchProtocolDecoderTest extends ProtocolTest {
 
@@ -101,6 +106,22 @@ public class WatchProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, buffer(
                 "[ZJ*014111001350304*0038*008a*UD,070318,021027,V,00.000000,N,000.000000,E,0,0,0,0,100,18,1000,50,00000000,4,255,460,0,9346,5223,42,9346,5214,20,9784,4083,11,9346,5221,5]"));
+
+    }
+
+    @Test
+    public void testDecodeVoiceMessage() throws Exception {
+
+        WatchProtocolDecoder decoder = new WatchProtocolDecoder(null);
+
+        verifyNull(decoder.decode(null, null, buffer("[CS*1234567890*0004*TK,1]")));
+
+        ByteBuf data = binary("7d5b5d2c2aff");
+
+        Object decodedObject = decoder.decode(null, null, concatenateBuffers(buffer("[CS*1234567890*000e*TK,#!AMR"), data.resetReaderIndex(), buffer("]")));
+        assertEquals("1234567890/mock.amr", ((Position) decodedObject).getAttributes().get("audio"));
+
+        verifyFrame(concatenateBuffers(buffer("#!AMR"), data.resetReaderIndex()), ((MockMediaManager) Context.getMediaManager()).readFile("1234567890/mock.amr"));
 
     }
 

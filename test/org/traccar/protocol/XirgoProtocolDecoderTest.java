@@ -6,6 +6,18 @@ import org.traccar.ProtocolTest;
 public class XirgoProtocolDecoderTest extends ProtocolTest {
 
     @Test
+    public void testDecodeCustom() throws Exception {
+
+        XirgoProtocolDecoder decoder = new XirgoProtocolDecoder(null);
+
+        decoder.setForm("UID,EV,D,T,LT,LN,AL,GSPT,SV,HP,BV,CQ,MI,GS,SI,IG,OT");
+
+        verifyPosition(decoder, text(
+                "$$184800793,4002,03/15/2019,21:30:21,46.848582,-114.022237,9733,0.0,18,1.1,13.605,20,0,3,89011703278246523602,2,0##"));
+
+    }
+
+    @Test
     public void testDecodeNew() throws Exception {
 
         XirgoProtocolDecoder decoder = new XirgoProtocolDecoder(null);
