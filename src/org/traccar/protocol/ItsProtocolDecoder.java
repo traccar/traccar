@@ -49,7 +49,7 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             .groupEnd()
             .number("(d{15}),")                  // imei
             .groupBegin()
-            .expression("(?:NM|SP),")            // status
+            .expression("(..),")                 // status
             .or()
             .expression("[^,]*,")                // vehicle registration
             .number("([01]),")                   // valid
@@ -86,6 +86,26 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
+    private String decodeAlarm(String status) {
+        switch (status) {
+            case "WD":
+            case "EA":
+                return Position.ALARM_SOS;
+            case "BL":
+                return Position.ALARM_LOW_BATTERY;
+            case "HB":
+                return Position.ALARM_BRAKING;
+            case "HA":
+                return Position.ALARM_ACCELERATION;
+            case "RT":
+                return Position.ALARM_CORNERING;
+            case "OS":
+                return Position.ALARM_OVERSPEED;
+            default:
+                return null;
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -108,6 +128,10 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
+
+        if (parser.hasNext()) {
+            position.set(Position.KEY_ALARM, decodeAlarm(parser.next()));
+        }
 
         if (parser.hasNext()) {
             position.setValid(parser.nextInt() == 1);
