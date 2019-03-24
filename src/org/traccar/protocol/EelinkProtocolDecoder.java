@@ -327,6 +327,34 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private Position decodeObd(DeviceSession deviceSession, ByteBuf buf, int index) {
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, new Date(buf.readUnsignedInt() * 1000));
+
+        while (buf.readableBytes() > 0) {
+            int pid = buf.readUnsignedByte();
+            int value = buf.readInt();
+            switch (pid) {
+                case 0x89:
+                    position.set(Position.KEY_FUEL_CONSUMPTION, value);
+                    break;
+                case 0x8a:
+                    position.set(Position.KEY_ODOMETER, value * 1000L);
+                    break;
+                case 0x8b:
+                    position.set(Position.KEY_FUEL_LEVEL, value / 10);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        return position;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -394,6 +422,10 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 decodeStatus(position, buf.readUnsignedShort());
 
                 return position;
+
+            } else if (type == MSG_OBD) {
+
+                return decodeObd(deviceSession, buf, index);
 
             } else if (type == MSG_DOWNLINK) {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -677,11 +677,31 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 decodeStatus(position, buf);
             }
 
-            if (type == MSG_GPS_LBS_1 && buf.readableBytes() >= 4 + 6) {
+            if (type == MSG_GPS_LBS_1 && buf.readableBytes() == 2 + 6) {
+                int mask = buf.readUnsignedShort();
+                position.set(Position.KEY_IGNITION, BitUtil.check(mask, 8 + 7));
+                position.set(Position.PREFIX_IN + 2, BitUtil.check(mask, 8 + 6));
+                if (BitUtil.check(mask, 8 + 4)) {
+                    int value = BitUtil.to(mask, 8 + 1);
+                    if (BitUtil.check(mask, 8 + 1)) {
+                        value = -value;
+                    }
+                    position.set(Position.PREFIX_TEMP + 1, value);
+                } else {
+                    int value = BitUtil.to(mask, 8 + 2);
+                    if (BitUtil.check(mask, 8 + 5)) {
+                        position.set(Position.PREFIX_ADC + 1, value);
+                    } else {
+                        position.set(Position.PREFIX_ADC + 1, value * 0.1);
+                    }
+                }
+            }
+
+            if (type == MSG_GPS_LBS_1 && buf.readableBytes() == 4 + 6) {
                 position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
             }
 
-            if (type == MSG_GPS_LBS_2 && buf.readableBytes() >= 3 + 6) {
+            if (type == MSG_GPS_LBS_2 && buf.readableBytes() == 3 + 6) {
                 position.set(Position.KEY_IGNITION, buf.readUnsignedByte() > 0);
                 position.set(Position.KEY_EVENT, buf.readUnsignedByte()); // reason
                 position.set(Position.KEY_ARCHIVE, buf.readUnsignedByte() > 0);

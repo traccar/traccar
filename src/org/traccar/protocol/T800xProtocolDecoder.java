@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,13 +45,13 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_ALARM = 0x04;
     public static final int MSG_COMMAND = 0x81;
 
-    private void sendResponse(Channel channel, short header, int type, ByteBuf imei) {
+    private void sendResponse(Channel channel, short header, int type, int index, ByteBuf imei) {
         if (channel != null) {
             ByteBuf response = Unpooled.buffer(15);
             response.writeShort(header);
             response.writeByte(type);
             response.writeShort(response.capacity()); // length
-            response.writeShort(0x0001); // index
+            response.writeShort(index);
             response.writeBytes(imei);
             channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
@@ -94,9 +94,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        if (type == MSG_LOGIN || type == MSG_ALARM || type == MSG_HEARTBEAT) {
-            sendResponse(channel, header, type, imei);
-        }
+        sendResponse(channel, header, type, index, imei);
 
         if (type == MSG_GPS || type == MSG_ALARM) {
 
@@ -109,9 +107,11 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedShort(); // acc off interval
             buf.readUnsignedByte(); // angle compensation
             buf.readUnsignedShort(); // distance compensation
-            buf.readUnsignedShort(); // speed alarm
+
+            position.set(Position.KEY_RSSI, BitUtil.to(buf.readUnsignedShort(), 7));
 
             int status = buf.readUnsignedByte();
+            position.set(Position.KEY_SATELLITES, BitUtil.to(status, 5));
 
             buf.readUnsignedByte(); // gsensor manager status
             buf.readUnsignedByte(); // other flags
