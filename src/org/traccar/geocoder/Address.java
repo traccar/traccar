@@ -11,6 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
+ *
  * limitations under the License.
  */
 package org.traccar.geocoder;
@@ -75,6 +76,16 @@ public class Address {
 
     public void setSuburb(String suburb) {
         this.suburb = suburb;
+    }
+
+    private String political;
+
+    public String getPolitical() {
+        return political;
+    }
+
+    public void setPolitical(String political) {
+        this.political = political;
     }
 
     private String street;

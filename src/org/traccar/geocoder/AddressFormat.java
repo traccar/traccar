@@ -28,6 +28,7 @@ import java.text.ParsePosition;
  * %d - district
  * %t - settlement (town)
  * %u - suburb
+ * %n - political (neighborhood)
  * %r - street (road)
  * %h - house
  * %f - formatted address
@@ -38,7 +39,7 @@ public class AddressFormat extends Format {
     private final String format;
 
     public AddressFormat() {
-        this("%h %r, %t, %s, %c");
+        this("%h %r, %n, %t, %s, %c");
     }
 
     public AddressFormat(String format) {
@@ -65,6 +66,7 @@ public class AddressFormat extends Format {
         result = replace(result, "%d", address.getDistrict());
         result = replace(result, "%t", address.getSettlement());
         result = replace(result, "%u", address.getSuburb());
+        result = replace(result, "%n", address.getPolitical());
         result = replace(result, "%r", address.getStreet());
         result = replace(result, "%h", address.getHouse());
         result = replace(result, "%f", address.getFormattedAddress());

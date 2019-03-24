@@ -63,6 +63,9 @@ public class GoogleGeocoder extends JsonGeocoder {
                         case "route":
                             address.setStreet(value);
                             break typesLoop;
+                        case "political":
+                            address.setPolitical(value);
+                            break typesLoop;
                         case "locality":
                             address.setSettlement(value);
                             break typesLoop;
