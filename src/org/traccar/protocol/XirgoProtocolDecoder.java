@@ -215,11 +215,24 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
                     dateBuilder.setMinute(Integer.parseInt(time[1]));
                     dateBuilder.setSecond(Integer.parseInt(time[2]));
                     break;
+                case "DT":
+                    String[] mainstring = values[i].split( ";",2);
+                    String[] date1 = mainstring[0].split("/");
+                    dateBuilder.setMonth(Integer.parseInt(date1[0]));
+                    dateBuilder.setDay(Integer.parseInt(date1[1]));
+                    dateBuilder.setYear(Integer.parseInt(date1[2]));
+                    String[] time1 = mainstring[1].split(":");
+                    dateBuilder.setHour(Integer.parseInt(time1[0]));
+                    dateBuilder.setMinute(Integer.parseInt(time1[1]));
+                    dateBuilder.setSecond(Integer.parseInt(time1[2]));
+                    break;
+
+
                 case "LT":
-                    position.setLatitude(Double.parseDouble(values[i]));
+                    position.setLatitude((Double.parseDouble(values[i]) * 0.000001));
                     break;
                 case "LN":
-                    position.setLongitude(Double.parseDouble(values[i]));
+                    position.setLongitude((Double.parseDouble(values[i])* 0.000001));
                     break;
                 case "AL":
                     position.setAltitude(Integer.parseInt(values[i]));
