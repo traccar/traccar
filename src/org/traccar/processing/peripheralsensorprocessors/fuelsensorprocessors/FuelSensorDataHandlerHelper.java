@@ -7,6 +7,7 @@ import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
+import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -196,5 +197,13 @@ public class FuelSensorDataHandlerHelper {
                           + " averages list size: " + fuelLevelReadings.size());
 
         return avg;
+    }
+
+    public static void updatePosition(final Position outlierPosition) {
+        try {
+            Context.getDataManager().updateObject(outlierPosition);
+        } catch (SQLException e) {
+            Log.debug("Exception while updating outlier position with id: " + outlierPosition.getId());
+        }
     }
 }

@@ -425,7 +425,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         // We could use an external queue and update these positions from there, without affecting processing here.
         // Also, we do not want to lose any data coming in, so we'll only mark the position as an outlier rather
         // than deleting it.
-        updatePosition(outlierCheckPosition);
+        FuelSensorDataHandlerHelper.updatePosition(outlierCheckPosition);
 
         if (outlierPresent) {
             // Remove the outlier from our in memory list and move on.
@@ -447,7 +447,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         positionUnderEvaluation.set(Position.KEY_FUEL_LEVEL, currentFuelLevelAverage);
 
         // Update the position in the db so the recalculated average is reflected there.
-        updatePosition(positionUnderEvaluation);
+        FuelSensorDataHandlerHelper.updatePosition(positionUnderEvaluation);
 
         if (possibleDataLoss && nonOutlierInLastWindowByDevice.containsKey(deviceId)) {
             Optional<FuelActivity> fuelActivity =
@@ -518,14 +518,6 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             }
 
             Context.getFcmPushNotificationManager().updateFuelActivity(fuelActivity);
-        }
-    }
-
-    private static void updatePosition(final Position outlierPosition) {
-        try {
-            Context.getDataManager().updateObject(outlierPosition);
-        } catch (SQLException e) {
-            Log.debug("Exception while updating outlier position with id: " + outlierPosition.getId());
         }
     }
 
