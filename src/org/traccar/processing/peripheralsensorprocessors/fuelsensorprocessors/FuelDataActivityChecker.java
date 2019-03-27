@@ -82,6 +82,7 @@ public class FuelDataActivityChecker {
                 // before adding to the window list.
                 List<Position> window = new ArrayList<>();
                 window.addAll(readingsForDevice);
+                fuelEventMetadata.setActivityWindow(window);
 
 
                 Log.debug("[FUEL_ACTIVITY_START] rawFuelValues that crossed threshold for deviceId: " + deviceId
@@ -250,8 +251,8 @@ public class FuelDataActivityChecker {
         List<Position> activityWindow = fuelEventMetadata.getActivityWindow();
 
         // Clone readingsForDevice, so we don't alter that list unintentionally coz it's passed in as an arg.
-        List<Position> copyOfReadingsForDevice = new ArrayList<>(readingsForDevice.size());
-        Collections.copy(copyOfReadingsForDevice, readingsForDevice);
+        List<Position> copyOfReadingsForDevice = new ArrayList<>(readingsForDevice);
+
         copyOfReadingsForDevice.removeAll(activityWindow);
         activityWindow.addAll(copyOfReadingsForDevice);
     }
@@ -285,10 +286,10 @@ public class FuelDataActivityChecker {
         // Note: these can be the only 2 cases, since this method is not called during data loss checks.
         if ( activityType == FuelActivityType.FUEL_FILL) {
             minFuelValue = startPositon.getDouble(Position.KEY_CALIBRATED_FUEL_LEVEL) - fuelLevelChangeThreshold;
-            maxFuelValue = endPosition.getDouble(Position.KEY_CALIBRATED_FUEL_LEVEL) - fuelLevelChangeThreshold;
+            maxFuelValue = endPosition.getDouble(Position.KEY_CALIBRATED_FUEL_LEVEL) + fuelLevelChangeThreshold;
         } else if (activityType == FuelActivityType.FUEL_DRAIN) {
             minFuelValue = endPosition.getDouble(Position.KEY_CALIBRATED_FUEL_LEVEL) - fuelLevelChangeThreshold;
-            maxFuelValue = startPositon.getDouble(Position.KEY_CALIBRATED_FUEL_LEVEL) - fuelLevelChangeThreshold;
+            maxFuelValue = startPositon.getDouble(Position.KEY_CALIBRATED_FUEL_LEVEL) + fuelLevelChangeThreshold;
         }
 
         for (Position position : fuelEventMetadata.getActivityWindow()) {
