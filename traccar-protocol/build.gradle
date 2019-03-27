@@ -1,0 +1,7 @@
+dependencies {
+    compile project(':traccar-core')
+    implementation rootProject.ext.dependencyNettyAll
+    implementation rootProject.ext.dependencySlf4j
+    implementation rootProject.ext.dependencyJavaxJson
+    testImplementation rootProject.ext.dependencyJunit
+}

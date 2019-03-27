@@ -11,12 +11,12 @@ dependencies {
     implementation 'org.postgresql:postgresql:42.2.5'
     implementation 'com.microsoft.sqlserver:mssql-jdbc:7.2.0.jre8'
     implementation 'com.zaxxer:HikariCP:3.3.0'
-    implementation 'io.netty:netty-all:4.1.33.Final'
-    implementation 'org.slf4j:slf4j-jdk14:1.7.25'
+    implementation rootProject.ext.dependencyNettyAll
+    implementation rootProject.ext.dependencySlf4j
     implementation 'com.google.inject:guice:4.2.2'
     implementation 'com.google.inject.extensions:guice-assistedinject:4.2.2'
     implementation 'org.owasp.encoder:encoder:1.2.2'
-    implementation 'org.glassfish:javax.json:1.1.4'
+    implementation rootProject.ext.dependencyJavaxJson
     implementation "org.eclipse.jetty:jetty-server:$jettyVersion"
     implementation "org.eclipse.jetty:jetty-servlet:$jettyVersion"
     implementation "org.eclipse.jetty:jetty-webapp:$jettyVersion"
@@ -43,5 +43,5 @@ dependencies {
     implementation 'com.sun.xml.bind:jaxb-core:2.3.0.1'
     implementation 'com.sun.xml.bind:jaxb-impl:2.3.2'
     implementation 'javax.activation:activation:1.1.1'
-    testImplementation 'junit:junit:4.12'
+    testImplementation rootProject.ext.dependencyJunit
 }

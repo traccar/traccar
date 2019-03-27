@@ -15,7 +15,6 @@
  */
 package org.traccar.protocol;
 
-import com.fasterxml.jackson.databind.util.ByteBufferBackedInputStream;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -36,7 +35,9 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+import java.io.InputStream;
 import java.net.SocketAddress;
+import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -45,6 +46,31 @@ public class SpotProtocolDecoder extends BaseHttpProtocolDecoder {
     private DocumentBuilder documentBuilder;
     private XPath xPath;
     private XPathExpression messageExpression;
+
+    public static class ByteBufferBackedInputStream extends InputStream {
+
+        private ByteBuffer buffer;
+
+        public ByteBufferBackedInputStream(ByteBuffer buffer) {
+            this.buffer = buffer;
+        }
+
+        public int read() {
+            if (!buffer.hasRemaining()) {
+                return -1;
+            }
+            return buffer.get() & 0xFF;
+        }
+
+        public int read(byte[] bytes, int offset, int length) {
+            if (!buffer.hasRemaining()) {
+                return -1;
+            }
+            length = Math.min(length, buffer.remaining());
+            buffer.get(bytes, offset, length);
+            return length;
+        }
+    }
 
     public SpotProtocolDecoder(Protocol protocol) {
         super(protocol);
