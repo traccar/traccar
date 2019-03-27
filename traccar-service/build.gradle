@@ -1,0 +1,23 @@
+plugins {
+    id 'application'
+}
+
+application.mainClassName = 'org.traccar.Main'
+distZip.enabled = false
+distTar.enabled = false
+startScripts.enabled = false
+
+build.dependsOn installDist
+
+dependencies {
+    compile project(':traccar-core')
+}
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'org.traccar.Main',
+                'Implementation-Version': '4.3',
+                'Class-Path': configurations.runtimeClasspath.files.collect { it.name }.join(' '))
+    }
+}

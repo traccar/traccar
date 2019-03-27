@@ -1,11 +1,6 @@
-target
-nbactions.xml
-.classpath
-.project
-.settings
 .idea
 *.iml
 .DS_Store
-.checkstyle
 .gradle
 build
+out

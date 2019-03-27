@@ -1,1 +1,2 @@
-rootProject.name = 'tracker-server'
+include 'traccar-core'
+include 'traccar-service'
