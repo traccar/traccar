@@ -11,6 +11,8 @@ build.dependsOn installDist
 
 dependencies {
     compile project(':traccar-core')
+    compile project(':traccar-http')
+    compile project(':traccar-protocol')
 }
 
 jar {
