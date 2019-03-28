@@ -77,7 +77,7 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
             .number("d+,")                       // length
             .number("(d+),")                     // imei
             .any()
-            .number("(d+),")                     // length
+            .number(",(d+),")                    // length
             .expression("([^*]+)")               // photo id
             .text("*")
             .number("xx")
@@ -87,7 +87,7 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
             .text("$$")
             .number("d+,")                       // length
             .number("(d+),")                     // imei
-            .expression("([^*]+)")               // photo id
+            .expression("([^*]+),")              // photo id
             .number("(d+),")                     // offset
             .number("(d+),")                     // size
             .number("(x+)")                      // data
