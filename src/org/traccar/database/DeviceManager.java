@@ -34,6 +34,7 @@ import org.traccar.model.DeviceTotalDistance;
 import org.traccar.model.Group;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
+import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.DeviceConsumptionInfo;
 
 public class DeviceManager extends BaseObjectManager<Device> implements IdentityManager, ManagableObjects {
 
@@ -50,6 +51,8 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
     private final Map<Long, Position> positions = new ConcurrentHashMap<>();
 
     private final Map<Long, DeviceState> deviceStates = new ConcurrentHashMap<>();
+
+    private final Map<Long, DeviceConsumptionInfo> deviceConsumptionMap = new ConcurrentHashMap<>();
 
     public DeviceManager(DataManager dataManager) {
         super(dataManager, Device.class);
@@ -197,6 +200,22 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
             cachedDevice.setPhone(device.getPhone());
             putPhone(cachedDevice);
         }
+
+        // We're not checking if the map contains info on the device or not, so we have the latest updated attributes.
+        DeviceConsumptionInfo deviceConsumptionInfo = new DeviceConsumptionInfo(device);
+        deviceConsumptionMap.put(device.getId(), deviceConsumptionInfo);
+
+    }
+
+    public DeviceConsumptionInfo getDeviceConsumptionInfo(long deviceId) {
+        refreshItems();
+
+        if (deviceConsumptionMap.containsKey(deviceId)) {
+            return deviceConsumptionMap.get(deviceId);
+        }
+
+        // Return with defaults;
+        return new DeviceConsumptionInfo();
     }
 
     @Override

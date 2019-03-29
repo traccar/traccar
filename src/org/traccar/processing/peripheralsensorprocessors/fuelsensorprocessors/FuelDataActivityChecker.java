@@ -6,7 +6,6 @@ import org.traccar.model.Position;
 import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.FuelActivity.FuelActivityType;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -14,14 +13,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class FuelDataActivityChecker {
-
-    private static final Double fuelLevelChangeThreshold;
-
-    static {
-        fuelLevelChangeThreshold =
-                Context.getConfig()
-                       .getDouble("processing.peripheralSensorData.fuelLevelChangeThresholdLiters");
-    }
 
     public static FuelActivity checkForActivity(List<Position> readingsForDevice,
                                                 Map<String, FuelEventMetadata> deviceFuelEventMetadata,
@@ -43,6 +34,10 @@ public class FuelDataActivityChecker {
         double diffInMeans = Math.abs(leftMean - rightMean);
 
         long deviceId = readingsForDevice.get(0).getDeviceId();
+
+        DeviceConsumptionInfo consumptionInfo = Context.getDeviceManager().getDeviceConsumptionInfo(deviceId);
+        double fuelLevelChangeThreshold = consumptionInfo.getFuelActivityThreshold();
+
         String lookupKey = deviceId + "_" + sensorId;
         Log.debug("[FUEL_ACTIVITY] deviceId: " + deviceId + "diffInMeans: " + diffInMeans
                           + " fuelLevelChangeThreshold: " + fuelLevelChangeThreshold
@@ -145,19 +140,18 @@ public class FuelDataActivityChecker {
             Log.debug("[FUEL_ACTIVITY_END] errorCheckFuelChange: " + errorCheckFuelChange);
 
             Optional<Long> maxCapacity = Context.getPeripheralSensorManager().getFuelTankMaxCapacity(deviceId, sensorId);
-            boolean isDataLoss = FuelDataLossChecker.isFuelEventDueToDataLoss(fuelEventMetadata, maxCapacity);
+            boolean isFuelConsumptionAsExpected = FuelDataLossChecker.isFuelConsumptionAsExpected(fuelEventMetadata, maxCapacity);
 
-            if (!isDataLoss && fuelChangeVolume < 0.0) {
+            // If fuel consumption is not as expected, means we have some activity going on.
+            if (!isFuelConsumptionAsExpected && fuelChangeVolume < 0.0) {
                 fuelActivity.setActivityType(FuelActivity.FuelActivityType.FUEL_DRAIN);
                 setActivityParameters(fuelActivity, fuelEventMetadata, fuelChangeVolume);
-                checkForMissedOutlier(fuelEventMetadata, fuelActivity);
-                // TODO: So now that we've checked and marked positions outliers in the event, what next?
+                checkForMissedOutlier(fuelEventMetadata, fuelActivity, fuelLevelChangeThreshold);
                 deviceFuelEventMetadata.remove(lookupKey);
-            } else if (fuelChangeVolume > 0.0) {
+            } else if (!isFuelConsumptionAsExpected && fuelChangeVolume > 0.0) {
                 fuelActivity.setActivityType(FuelActivity.FuelActivityType.FUEL_FILL);
                 setActivityParameters(fuelActivity, fuelEventMetadata, fuelChangeVolume);
-                checkForMissedOutlier(fuelEventMetadata, fuelActivity);
-                // TODO: So now that we've checked and marked positions outliers in the event, what next?
+                checkForMissedOutlier(fuelEventMetadata, fuelActivity, fuelLevelChangeThreshold);
                 deviceFuelEventMetadata.remove(lookupKey);
             } else {
                 // The start may have been detected as a false positive. In any case, remove after we determine the kind
@@ -175,19 +169,20 @@ public class FuelDataActivityChecker {
                                                                     final Position lastPosition,
                                                                     final Optional<Long> maxTankMaxVolume) {
 
-        final boolean requiredFieldsPresent = FuelDataLossChecker.checkRequiredFieldsPresent(lastPosition, position);
+        DeviceConsumptionInfo consumptionInfo = Context.getDeviceManager().getDeviceConsumptionInfo(position.getDeviceId());
+        final boolean requiredFieldsPresent = FuelDataLossChecker.checkRequiredFieldsPresent(lastPosition, position, consumptionInfo);
         if (!requiredFieldsPresent) {
             // Not enough info to process data loss.
             return Optional.empty();
         }
 
         ExpectedFuelConsumption expectedFuelConsumption =
-                FuelDataLossChecker.getExpectedFuelConsumptionValues(lastPosition, position, maxTankMaxVolume);
+                FuelDataLossChecker.getExpectedFuelConsumptionValues(lastPosition, position, maxTankMaxVolume, consumptionInfo);
 
         double calculatedFuelChangeVolume = position.getDouble(Position.KEY_CALIBRATED_FUEL_LEVEL)
                 - lastPosition.getDouble(Position.KEY_CALIBRATED_FUEL_LEVEL);
 
-        if (Math.abs(calculatedFuelChangeVolume) > expectedFuelConsumption.allowedDeviation) {
+        if (expectedFuelConsumption != null && Math.abs(calculatedFuelChangeVolume) > expectedFuelConsumption.allowedDeviation) {
             if (calculatedFuelChangeVolume < 0.0) {
                 boolean isConsumptionExpected =
                         FuelDataLossChecker.isFuelConsumptionAsExpected(calculatedFuelChangeVolume,
@@ -275,7 +270,8 @@ public class FuelDataActivityChecker {
     }
 
     private static void checkForMissedOutlier(final FuelEventMetadata fuelEventMetadata,
-                                              final FuelActivity fuelActivity) {
+                                              final FuelActivity fuelActivity,
+                                              double fuelLevelChangeThreshold) {
 
         double minFuelValue = 0.0, maxFuelValue = 0.0;
 

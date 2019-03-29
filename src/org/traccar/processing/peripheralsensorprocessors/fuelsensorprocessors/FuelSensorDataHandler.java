@@ -449,6 +449,8 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         // Update the position in the db so the recalculated average is reflected there.
         FuelSensorDataHandlerHelper.updatePosition(positionUnderEvaluation);
 
+        //-- End Outliers
+
         if (possibleDataLoss && nonOutlierInLastWindowByDevice.containsKey(deviceId)) {
             Optional<FuelActivity> fuelActivity =
                     FuelDataActivityChecker.checkForActivityIfDataLoss(outlierCheckPosition,
@@ -460,27 +462,28 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             }
             possibleDataLossByDevice.remove(deviceId);
             nonOutlierInLastWindowByDevice.remove(deviceId);
-        }
+        } else {
+            // There was no data loss, so check for regular events.
+            possibleDataLossByDevice.remove(deviceId);
+            nonOutlierInLastWindowByDevice.remove(deviceId);
 
+            List<Position> relevantPositionsListForAlerts =
+                    FuelSensorDataHandlerHelper.getRelevantPositionsSubList(
+                            positionsForDeviceSensor,
+                            positionUnderEvaluation,
+                            maxValuesForAlerts,
+                            true,
+                            currentEventLookBackSeconds);
 
-        //-- End Outliers
+            if (!this.loadingOldDataFromDB && relevantPositionsListForAlerts.size() >= maxValuesForAlerts) {
+                // We'll use the smoothed values to check for activity.
+                FuelActivity fuelActivity =
+                        FuelDataActivityChecker.checkForActivity(relevantPositionsListForAlerts,
+                                                                 deviceFuelEventMetadata,
+                                                                 sensorId);
 
-        List<Position> relevantPositionsListForAlerts =
-                FuelSensorDataHandlerHelper.getRelevantPositionsSubList(
-                        positionsForDeviceSensor,
-                        positionUnderEvaluation,
-                        maxValuesForAlerts,
-                        true,
-                        currentEventLookBackSeconds);
-
-        if (!this.loadingOldDataFromDB && relevantPositionsListForAlerts.size() >= maxValuesForAlerts) {
-            // We'll use the smoothed values to check for activity.
-            FuelActivity fuelActivity =
-                    FuelDataActivityChecker.checkForActivity(relevantPositionsListForAlerts,
-                                                             deviceFuelEventMetadata,
-                                                             sensorId);
-
-            sendNotificationIfNecessary(deviceId, fuelActivity);
+                sendNotificationIfNecessary(deviceId, fuelActivity);
+            }
         }
 
         removeFirstPositionIfNecessary(positionsForDeviceSensor, deviceId);

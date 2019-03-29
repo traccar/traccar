@@ -11,53 +11,40 @@ import java.util.Optional;
 
 public class FuelDataLossChecker {
 
-    private static double MINIMUM_AVERAGE_MILEAGE;
-    private static double MAXIMUM_AVERAGE_MILEAGE;
-    private static double CURRENT_AVERAGE_MILEAGE;
+    private static final long DEFAULT_MAX_CAPACITY = 100L;
+    private static final long MILLIS_IN_HOUR = 36_00_000L;
 
-    static {
-        MINIMUM_AVERAGE_MILEAGE = Context.getConfig().getDouble("processing.minimumAverageMileage");
-        MAXIMUM_AVERAGE_MILEAGE = Context.getConfig().getDouble("processing.maximumAverageMileage");
-        CURRENT_AVERAGE_MILEAGE = Context.getConfig().getDouble("processing.currentAverageMileage");
-    }
+    public static boolean isFuelConsumptionAsExpected(final FuelEventMetadata fuelEventMetadata,
+                                                      Optional<Long> maxCapacity) {
 
-    public static boolean isFuelEventDueToDataLoss(final FuelEventMetadata fuelEventMetadata,
-                                                   final Optional<Long> maxCapacity) {
+        double calculatedFuelChangeVolume = fuelEventMetadata.getEndLevel() - fuelEventMetadata.getStartLevel();
+        Position startPosition = fuelEventMetadata.getActivityStartPosition();
+        Position endPosition = fuelEventMetadata.getActivityEndPosition();
 
 
-        double fuelChangeVolume = fuelEventMetadata.getEndLevel() - fuelEventMetadata.getStartLevel();
-        return isDataLoss(fuelEventMetadata.getActivityStartPosition(),
-                          fuelEventMetadata.getActivityEndPosition(),
-                          fuelChangeVolume,
-                          maxCapacity);
-    }
+        long deviceId = startPosition.getDeviceId();
+        DeviceConsumptionInfo consumptionInfo = Context.getDeviceManager().getDeviceConsumptionInfo(deviceId);
+        boolean requiredFieldsPresent = checkRequiredFieldsPresent(startPosition, endPosition, consumptionInfo);
 
-    public static boolean isDataLoss(Position startPosition,
-                                     Position endPosition,
-                                     double calculatedFuelChangeVolume,
-                                     Optional<Long> maxCapacity) {
-
-        boolean requiredFieldsPresent = checkRequiredFieldsPresent(startPosition, endPosition);
         if (!requiredFieldsPresent) {
             // Not enough info to process data loss.
             return false;
         }
 
         ExpectedFuelConsumption expectedFuelConsumption =
-                getExpectedFuelConsumptionValues(startPosition, endPosition, maxCapacity);
+                getExpectedFuelConsumptionValues(startPosition, endPosition, maxCapacity, consumptionInfo);
 
-        boolean dataLoss =
-                isFuelConsumptionAsExpected(calculatedFuelChangeVolume,
-                                            expectedFuelConsumption);
+        boolean consumptionAsExpected = expectedFuelConsumption != null
+                && isFuelConsumptionAsExpected(calculatedFuelChangeVolume, expectedFuelConsumption);
 
-        if (dataLoss) {
+        if (consumptionAsExpected) {
             Log.debug(String.format("Data Loss: Distance covered %f, Exp fuel consumed: %f, actual fuel consumed: %f",
-                                    expectedFuelConsumption.maximumDistanceTravelled,
+                                    expectedFuelConsumption.getMaximumDistanceTravelled(),
                                     expectedFuelConsumption.expectedCurrentFuelConsumed,
                                     calculatedFuelChangeVolume));
         }
 
-        return dataLoss;
+        return consumptionAsExpected;
     }
 
     public static boolean isFuelConsumptionAsExpected(final double calculatedFuelChangeVolume,
@@ -68,16 +55,67 @@ public class FuelDataLossChecker {
                && Math.abs(calculatedFuelChangeVolume) <= expectedFuelConsumption.expectedMaxFuelConsumed;
     }
 
-    public static boolean checkRequiredFieldsPresent(Position startPosition, Position endPosition) {
-        return startPosition.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)
-                && startPosition.getAttributes().containsKey(Position.KEY_ODOMETER)
-                && endPosition.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)
-                && endPosition.getAttributes().containsKey(Position.KEY_ODOMETER);
+    public static boolean checkRequiredFieldsPresent(Position startPosition,
+                                                     Position endPosition,
+                                                     DeviceConsumptionInfo consumptionInfo) {
+
+        String consumptionType = consumptionInfo.getDeviceConsumptionType().toLowerCase();
+        switch (consumptionType) {
+            case "hourly":
+                return startPosition.getAttributes().containsKey(Position.KEY_CALIBRATED_FUEL_LEVEL)
+                        && endPosition.getAttributes().containsKey(Position.KEY_CALIBRATED_FUEL_LEVEL);
+
+            case "odometer":
+                return startPosition.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)
+                        && startPosition.getAttributes().containsKey(Position.KEY_ODOMETER)
+                        && endPosition.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)
+                        && endPosition.getAttributes().containsKey(Position.KEY_ODOMETER);
+
+            case "empty":
+            case "noconsumption":
+                return true;
+
+            default:
+                Log.debug("Found strange fuel consumption category vehicle");
+                return false;
+        }
     }
 
     public static ExpectedFuelConsumption getExpectedFuelConsumptionValues(Position startPosition,
                                                                            Position endPosition,
-                                                                           Optional<Long> maxCapacity) {
+                                                                           Optional<Long> maxCapacity,
+                                                                           DeviceConsumptionInfo consumptionInfo) {
+
+        double allowedDeviation = maxCapacity.orElse(DEFAULT_MAX_CAPACITY) * 0.01;
+
+        switch (consumptionInfo.getDeviceConsumptionType().toLowerCase()) {
+
+            case "hourly":
+                return getExpectedHourlyFuelConsumptionValues(startPosition, endPosition, allowedDeviation, consumptionInfo);
+
+            case "odometer":
+                return getExpectedDistanceFuelConsumptionValues(startPosition, endPosition, allowedDeviation, consumptionInfo);
+
+            // All other categories, including "noconsumption" and default "empty" means that there is no expected fuel
+            // consumption, and any activity should be treated as is, with or without data loss.
+            // The default case here should never be hit, even if we've not set the string in the db. It is included
+            // for sanity sake. The null that it returns will be treated as "unexpected consumption", and the event will
+            // be treated as is.
+
+            case "empty":
+            case "noconsumption":
+                return new ExpectedFuelConsumption(0, 0, 0, 0);
+            default:
+                Log.debug("Found strange fuel consumption category vehicle");
+                return null;
+
+        }
+    }
+
+    private static ExpectedFuelConsumption getExpectedDistanceFuelConsumptionValues(Position startPosition,
+                                                                                    Position endPosition,
+                                                                                    double allowedDeviation,
+                                                                                    DeviceConsumptionInfo consumptionInfo) {
 
         double startTotalGPSDistanceInMeters = (double) startPosition.getAttributes().get(Position.KEY_TOTAL_DISTANCE);
         double endTotalGPSDistanceInMeters = (double) endPosition.getAttributes().get(Position.KEY_TOTAL_DISTANCE);
@@ -101,20 +139,40 @@ public class FuelDataLossChecker {
 
         // max distance in KM
         double maximumDistanceTravelled = Math.max(differenceTotalDistanceInMeters, differenceOdometerInMeters) / 1000;
-        double expectedMaxFuelConsumed = maximumDistanceTravelled / MINIMUM_AVERAGE_MILEAGE;
-        double expectedMinFuelConsumed = maximumDistanceTravelled / MAXIMUM_AVERAGE_MILEAGE;
-        double expectedCurrentFuelConsumed = maximumDistanceTravelled / CURRENT_AVERAGE_MILEAGE;
+        double expectedMinFuelConsumed = maximumDistanceTravelled / consumptionInfo.getMaxDeviceConsumptionRate();
+        double expectedMaxFuelConsumed = maximumDistanceTravelled / consumptionInfo.getMinDeviceConsumptionRate();
+        double expectedCurrentFuelConsumed = maximumDistanceTravelled / consumptionInfo.getAssumedDeviceConsumptionRate();
 
-        double allowedDeviation = 1.0; // Default, if maxCapacity is absent.
 
-        if (maxCapacity.isPresent()) {
-            allowedDeviation = maxCapacity.get() * 0.01;
-        }
+        ExpectedFuelConsumption expectedFuelConsumption = new ExpectedFuelConsumption(expectedMinFuelConsumed,
+                                                                                      expectedMaxFuelConsumed,
+                                                                                      expectedCurrentFuelConsumed,
+                                                                                      allowedDeviation);
 
-        return new ExpectedFuelConsumption(expectedMinFuelConsumed,
-                                           expectedMaxFuelConsumed,
-                                           expectedCurrentFuelConsumed,
-                                           allowedDeviation,
-                                           maximumDistanceTravelled);
+        expectedFuelConsumption.setMaximumDistanceTravelled(maximumDistanceTravelled);
+        return expectedFuelConsumption;
+    }
+
+
+    private static ExpectedFuelConsumption getExpectedHourlyFuelConsumptionValues(Position startPosition,
+                                                                                  Position endPosition,
+                                                                                  double allowedDeviation,
+                                                                                  DeviceConsumptionInfo consumptionInfo) {
+
+        long maxRunningTime = endPosition.getLong(Position.KEY_TOTAL_IGN_ON_MILLIS) - startPosition.getLong(Position.KEY_TOTAL_IGN_ON_MILLIS);
+
+        double maxRunTimeHours = maxRunningTime / MILLIS_IN_HOUR;
+
+        double expectedMinFuelConsumed = consumptionInfo.getMinDeviceConsumptionRate() * maxRunTimeHours;
+        double expectedMaxFuelConsumed = consumptionInfo.getMaxDeviceConsumptionRate() * maxRunTimeHours;
+        double expectedCurrentFuelConsumed = consumptionInfo.getAssumedDeviceConsumptionRate() * maxRunTimeHours;
+
+        ExpectedFuelConsumption expectedFuelConsumption = new ExpectedFuelConsumption(expectedMinFuelConsumed,
+                                                                                      expectedMaxFuelConsumed,
+                                                                                      expectedCurrentFuelConsumed,
+                                                                                      allowedDeviation);
+
+        expectedFuelConsumption.setMaxRunningTimeMillis(maxRunningTime);
+        return expectedFuelConsumption;
     }
 }
