@@ -48,6 +48,8 @@ import java.io.IOException;
 import java.io.Writer;
 import java.net.InetSocketAddress;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
 
 public class WebServer {
 
@@ -145,6 +147,7 @@ public class WebServer {
             servletHolder.setInitParameter("pathInfoOnly", "true");
             servletHandler.addServlet(servletHolder, "/api/media/*");
             servletHandler.addFilter(MediaFilter.class, "/api/media/*", EnumSet.allOf(DispatcherType.class));
+            addMimeTypes(servletHandler);
         }
 
         ResourceConfig resourceConfig = new ResourceConfig();
@@ -152,6 +155,16 @@ public class WebServer {
         resourceConfig.registerClasses(SecurityRequestFilter.class, CorsResponseFilter.class);
         resourceConfig.packages(ServerResource.class.getPackage().getName());
         servletHandler.addServlet(new ServletHolder(new ServletContainer(resourceConfig)), "/api/*");
+    }
+
+    private static final Map<String, String> MIME_TYPES = new HashMap<String, String>() {{
+        put("amr", "audio/amr");
+    }};
+
+    private void addMimeTypes(ServletContextHandler servletHandler) {
+        Map<String, String> mimeTypes = servletHandler.getMimeTypes().getMimeMap();
+        mimeTypes.putAll(MIME_TYPES);
+        servletHandler.getMimeTypes().setMimeMap(mimeTypes);
     }
 
     public void start() {
