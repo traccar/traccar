@@ -3,6 +3,7 @@ package org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors;
 import org.traccar.model.Position;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by saurako on 5/6/18.
@@ -16,6 +17,7 @@ public class FuelEventMetadata {
     private Date endTime;
     private Position activityStartPosition;
     private Position activityEndPosition;
+    private List<Position> activityWindow;
 
     public double getStartLevel() {
         return startLevel;
@@ -79,6 +81,14 @@ public class FuelEventMetadata {
 
     public void setActivityEndPosition(final Position activityEndPosition) {
         this.activityEndPosition = activityEndPosition;
+    }
+
+    public List<Position> getActivityWindow() {
+        return activityWindow;
+    }
+
+    public void setActivityWindow(final List<Position> activityWindow) {
+        this.activityWindow = activityWindow;
     }
 
     @Override
