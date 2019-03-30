@@ -283,6 +283,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             case 4:
                 position.set(Position.KEY_ALARM, Position.ALARM_SOS);
                 break;
+            case 7:
+                position.set(Position.KEY_ALARM, Position.ALARM_REMOVING);
+                break;
             default:
                 break;
         }

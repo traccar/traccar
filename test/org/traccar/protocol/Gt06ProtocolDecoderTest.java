@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class Gt06ProtocolDecoderTest extends ProtocolTest {
 
@@ -18,6 +19,10 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, binary(
                 "787821121303120b2524c70138e363085b549003d43301940057d200cd52c000006aa1ca0d0a"));
+
+        verifyAttribute(decoder, binary(
+                "7878251613020C12141AC5027951430C2A16F60014000900000000001A00007C550300020002F1E70D0A"),
+                Position.KEY_ALARM, Position.ALARM_REMOVING);
 
         verifyNotNull(decoder, binary(
                 "7878006919012105090303028f01007549e05a00bc9c5c5a007a8d1a5a0d0a"));
