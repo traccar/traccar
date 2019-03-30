@@ -1,6 +1,6 @@
 subprojects {
-    apply plugin: 'java'
-    apply plugin: 'checkstyle'
+    apply plugin: "java"
+    apply plugin: "checkstyle"
 
     repositories {
         mavenCentral()
@@ -11,13 +11,13 @@ subprojects {
         checkstyleTest.enabled = false
     }
 
-    sourceCompatibility = '1.8'
-    compileJava.options.encoding = 'UTF-8'
+    sourceCompatibility = "1.8"
+    compileJava.options.encoding = "UTF-8"
 }
 
 project.ext {
-    dependencyJunit = 'junit:junit:4.12'
-    dependencyNettyAll = 'io.netty:netty-all:4.1.33.Final'
-    dependencySlf4j = 'org.slf4j:slf4j-jdk14:1.7.25'
-    dependencyJavaxJson = 'org.glassfish:javax.json:1.1.4'
+    dependencyJunit = "junit:junit:4.12"
+    dependencyNettyAll = "io.netty:netty-all:4.1.33.Final"
+    dependencySlf4j = "org.slf4j:slf4j-jdk14:1.7.25"
+    dependencyJavaxJson = "org.glassfish:javax.json:1.1.4"
 }

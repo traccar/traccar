@@ -1,8 +1,8 @@
 plugins {
-    id 'application'
+    id "application"
 }
 
-application.mainClassName = 'org.traccar.Main'
+application.mainClassName = "org.traccar.Main"
 distZip.enabled = false
 distTar.enabled = false
 startScripts.enabled = false
@@ -10,16 +10,16 @@ startScripts.enabled = false
 build.dependsOn installDist
 
 dependencies {
-    compile project(':traccar-core')
-    compile project(':traccar-http')
-    compile project(':traccar-protocol')
+    compile project(":traccar-core")
+    compile project(":traccar-http")
+    compile project(":traccar-protocol")
 }
 
 jar {
     manifest {
         attributes(
-                'Main-Class': 'org.traccar.Main',
-                'Implementation-Version': '4.3',
-                'Class-Path': configurations.runtimeClasspath.files.collect { it.name }.join(' '))
+                "Main-Class": "org.traccar.Main",
+                "Implementation-Version": "4.3",
+                "Class-Path": configurations.runtimeClasspath.files.collect { it.name }.join(" "))
     }
 }

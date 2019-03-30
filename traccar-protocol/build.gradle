@@ -1,5 +1,5 @@
 dependencies {
-    compile project(':traccar-core')
+    compile project(":traccar-core")
     implementation rootProject.ext.dependencyNettyAll
     implementation rootProject.ext.dependencySlf4j
     implementation rootProject.ext.dependencyJavaxJson
