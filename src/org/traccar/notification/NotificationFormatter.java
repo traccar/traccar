@@ -19,8 +19,11 @@ package org.traccar.notification;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.exception.ResourceNotFoundException;
@@ -38,6 +41,9 @@ import org.traccar.reports.ReportUtils;
 public final class NotificationFormatter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificationFormatter.class);
+
+    public static final String KEY_DATA_EVENT = "event";
+    public static final String KEY_DATA_POSITION = "position";
 
     private NotificationFormatter() {
     }
@@ -115,4 +121,18 @@ public final class NotificationFormatter {
         return writer.toString();
     }
 
+    public static Map<String, String> buildData(long userId, Event event, Position position) {
+        Map<String, String> data = new HashMap<>();
+        try {
+            if (event != null) {
+                data.put(KEY_DATA_EVENT, Context.getObjectMapper().writeValueAsString(event));
+            }
+            if (position != null) {
+                data.put(KEY_DATA_POSITION, Context.getObjectMapper().writeValueAsString(position));
+            }
+        } catch (JsonProcessingException e) {
+            LOGGER.warn("Notification JSON formatting error", e);
+        }
+        return data;
+    }
 }
