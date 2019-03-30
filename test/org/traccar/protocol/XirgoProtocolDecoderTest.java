@@ -10,6 +10,14 @@ public class XirgoProtocolDecoderTest extends ProtocolTest {
 
         XirgoProtocolDecoder decoder = new XirgoProtocolDecoder(null);
 
+        decoder.setForm("UID,EV,D,T,LT,LN,AL,GSPT,HD,SV,HP,BV,CQ,GS,SI,IG,OT");
+
+        verifyPosition(decoder, text(
+                "$$183900034,4002,03/30/2019,02:15:22,46.848577,-114.022213,978,0.0,172.3,16,1.2,13.291,20,3,2,2,1##"));
+
+        verifyPosition(decoder, text(
+                "$$184800793,4002,03/30/2019,02:10:13,46.848600,-114.022256,9723,0.0,1645,17,1.2,13.283,18,3,89011703278246523594,2,0##"));
+
         decoder.setForm("UID,EV,D,T,LT,LN,AL,GSPT,SV,HP,BV,CQ,MI,GS,SI,IG,OT");
 
         verifyPosition(decoder, text(

@@ -228,7 +228,11 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
                     position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(values[i])));
                     break;
                 case "HD":
-                    position.setCourse(Integer.parseInt(values[i]) * 0.1);
+                    if (values[i].contains(".")) {
+                        position.setCourse(Double.parseDouble(values[i]));
+                    } else {
+                        position.setCourse(Integer.parseInt(values[i]) * 0.1);
+                    }
                     break;
                 case "SV":
                     position.set(Position.KEY_SATELLITES, Integer.parseInt(values[i]));
