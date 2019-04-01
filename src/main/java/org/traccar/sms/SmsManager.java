@@ -24,6 +24,6 @@ public interface SmsManager {
             String destAddress, String message, boolean command) throws InterruptedException, MessageException;
 
     void sendMessageAsync(
-            final String destAddress, final String message, final boolean command);
+            String destAddress, String message, boolean command);
 
 }

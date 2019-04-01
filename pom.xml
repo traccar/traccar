@@ -224,23 +224,13 @@
     <build>
         <finalName>tracker-server</finalName>
         <outputDirectory>target/classes</outputDirectory>
-        <sourceDirectory>src</sourceDirectory>
-        <testSourceDirectory>test</testSourceDirectory>
-        <resources>
-            <resource>
-                <directory>src</directory>
-                <excludes>
-                    <exclude>**/*.java</exclude>
-                </excludes>
-            </resource>
-        </resources>
 
         <plugins>
             <plugin>
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <version>3.0.0</version>
                 <configuration>
-                    <configLocation>checkstyle.xml</configLocation>
+                    <configLocation>gradle/checkstyle.xml</configLocation>
                 </configuration>
                 <executions>
                     <execution>
@@ -374,7 +364,7 @@
                 <artifactId>findbugs-maven-plugin</artifactId>
                 <version>3.0.5</version>
                 <configuration>
-                    <excludeFilterFile>findbugs.xml</excludeFilterFile>
+                    <excludeFilterFile>gradle/findbugs.xml</excludeFilterFile>
                 </configuration>
             </plugin>
             <plugin>
