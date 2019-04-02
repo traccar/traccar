@@ -45,7 +45,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_ALARM = 0x04;
     public static final int MSG_COMMAND = 0x81;
 
-    private void sendResponse(Channel channel, short header, int type, int index, ByteBuf imei) {
+    private void sendResponse(Channel channel, short header, int type, int index, ByteBuf imei, int alarm) {
         if (channel != null) {
             ByteBuf response = Unpooled.buffer(15);
             response.writeShort(header);
@@ -53,11 +53,14 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             response.writeShort(response.capacity()); // length
             response.writeShort(index);
             response.writeBytes(imei);
+            if (alarm > 0) {
+                response.writeByte(alarm);
+            }
             channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
     }
 
-    private String decodeAlarm(short value) {
+    private String decodeAlarm(int value) {
         switch (value) {
             case 1:
                 return Position.ALARM_POWER_CUT;
@@ -98,14 +101,13 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedShort(); // length
         int index = buf.readUnsignedShort();
         ByteBuf imei = buf.readSlice(8);
+        int alarm = 0;
 
         DeviceSession deviceSession = getDeviceSession(
                 channel, remoteAddress, ByteBufUtil.hexDump(imei).substring(1));
         if (deviceSession == null) {
             return null;
         }
-
-        sendResponse(channel, header, type, index, imei);
 
         if (type == MSG_GPS || type == MSG_ALARM) {
 
@@ -137,7 +139,8 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
             position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort());
 
-            position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
+            alarm = buf.readUnsignedByte();
+            position.set(Position.KEY_ALARM, decodeAlarm(alarm));
 
             buf.readUnsignedByte(); // reserved
 
@@ -189,9 +192,13 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_POWER, BcdUtil.readInteger(buf, 4) * 0.01);
             }
 
+            sendResponse(channel, header, type, index, imei, alarm);
+
             return position;
 
         }
+
+        sendResponse(channel, header, type, index, imei, alarm);
 
         return null;
     }
