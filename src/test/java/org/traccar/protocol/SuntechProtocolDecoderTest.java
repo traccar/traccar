@@ -27,6 +27,20 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
     }
 
     @Test
+    public void testDecodeRpm() throws Exception {
+
+        SuntechProtocolDecoder decoder = new SuntechProtocolDecoder(null);
+
+        decoder.setHbm(true);
+        decoder.setIncludeRpm(true);
+
+        verifyAttribute(decoder, text(
+                "ST300STT;907131077;04;706;20190227;23:59:34;cc719;-12.963490;-038.499587;000.067;000.00;7;1;57095;12.50;000000;1;0337;000207;0.0;1;0;012E717F010000;1"),
+                Position.KEY_RPM, 0);
+
+    }
+
+    @Test
     public void testDecodeHours() throws Exception {
 
         SuntechProtocolDecoder decoder = new SuntechProtocolDecoder(null);

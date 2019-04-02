@@ -37,6 +37,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
     private int protocolType;
     private boolean hbm;
     private boolean includeAdc;
+    private boolean includeRpm;
     private boolean includeTemp;
 
     public SuntechProtocolDecoder(Protocol protocol) {
@@ -68,6 +69,15 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
     public boolean isIncludeAdc(long deviceId) {
         return Context.getIdentityManager().lookupAttributeBoolean(
                 deviceId, getProtocolName() + ".includeAdc", includeAdc, true);
+    }
+
+    public void setIncludeRpm(boolean includeRpm) {
+        this.includeRpm = includeRpm;
+    }
+
+    public boolean isIncludeRpm(long deviceId) {
+        return Context.getIdentityManager().lookupAttributeBoolean(
+                deviceId, getProtocolName() + ".includeRpm", includeRpm, true);
     }
 
     public void setIncludeTemp(boolean includeTemp) {
@@ -336,6 +346,10 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.PREFIX_ADC + i, Double.parseDouble(values[index - 1]));
                     }
                 }
+            }
+
+            if (isIncludeRpm(deviceSession.getDeviceId()) && index < values.length) {
+                position.set(Position.KEY_RPM, Integer.parseInt(values[index++]));
             }
 
             if (values.length - index >= 2) {
