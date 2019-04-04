@@ -47,7 +47,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
     private void sendResponse(Channel channel, short header, int type, int index, ByteBuf imei, int alarm) {
         if (channel != null) {
-            ByteBuf response = Unpooled.buffer(15);
+            ByteBuf response = Unpooled.buffer(alarm > 0 ? 16 : 15);
             response.writeShort(header);
             response.writeByte(type);
             response.writeShort(response.capacity()); // length
