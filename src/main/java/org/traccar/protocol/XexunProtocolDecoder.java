@@ -77,6 +77,7 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_IGNITION, false);
                     break;
                 case "help me!":
+                case "help me":
                     position.set(Position.KEY_ALARM, Position.ALARM_SOS);
                     break;
                 case "low battery":
