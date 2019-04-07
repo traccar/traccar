@@ -261,5 +261,6 @@
     <entry key='nyitech.port'>5182</entry>
     <entry key='neos.port'>5183</entry>
     <entry key='satsol.port'>5184</entry>
+    <entry key='globalstar.port'>5185</entry>
 
 </properties>
