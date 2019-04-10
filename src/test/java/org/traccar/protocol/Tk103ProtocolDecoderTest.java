@@ -12,6 +12,9 @@ public class Tk103ProtocolDecoderTest extends ProtocolTest {
         Tk103ProtocolDecoder decoder = new Tk103ProtocolDecoder(null);
 
         verifyPosition(decoder, text(
+                "(BALLESTEROS3BR00190408A4113.5700N00140.3100E000.0162431000.0001000000L00000000)"));
+
+        verifyPosition(decoder, text(
                 "(094625928000BR00190213A1156.0431S07705.6145W000.000023521.40000000007L00000314T113)"));
 
         verifyPosition(decoder, text(
@@ -32,7 +35,7 @@ public class Tk103ProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "(864768011069660,ZC17,250517,A,3211.7118N,03452.8086E,0.68,115525,208.19,64.50,9)"));
 
-        verifyNull(decoder, text(
+        verifyPosition(decoder, text(
                 "(357593060760397BP02,G,2,170304A6015.7466N01101.8460E001.609445591.048,7)"));
 
         verifyPosition(decoder, text(

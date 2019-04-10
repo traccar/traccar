@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,11 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN = new PatternBuilder()
             .text("(").optional()
-            .number("(d+)(,)?")                  // device id
+            .groupBegin()
+            .expression("(.{12})")               // device id
+            .or()
+            .expression("(.+),")                 // device id
+            .groupEnd()
             .expression("(.{4}),?")              // command
             .number("(d*)")
             .number("(dd)(dd)(dd),?")            // date (mmddyy if comma-delimited, otherwise yyddmm)
@@ -371,15 +375,23 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        String id = null;
+        boolean alternative = false;
+        if (parser.hasNext()) {
+            id = parser.next();
+        }
+        if (parser.hasNext()) {
+            id = parser.next();
+            alternative = true;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
         if (deviceSession == null) {
             return null;
         }
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
-
-        boolean alternative = parser.next() != null;
 
         decodeType(position, parser.next(), parser.next());
 
