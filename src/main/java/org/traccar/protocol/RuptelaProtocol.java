@@ -26,6 +26,7 @@ public class RuptelaProtocol extends BaseProtocol {
     public RuptelaProtocol() {
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM,
+                Command.TYPE_REQUEST_PHOTO,
                 Command.TYPE_CONFIGURATION,
                 Command.TYPE_GET_VERSION,
                 Command.TYPE_FIRMWARE_UPDATE,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,12 @@ public class RuptelaProtocolEncoder extends BaseProtocolEncoder {
             case Command.TYPE_CUSTOM:
                 content.writeBytes(command.getString(Command.KEY_DATA).getBytes(StandardCharsets.US_ASCII));
                 return encodeContent(RuptelaProtocolDecoder.MSG_SMS_VIA_GPRS, content);
+            case Command.TYPE_REQUEST_PHOTO:
+                content.writeByte(1); // sub-command
+                content.writeByte(0); // source
+                content.writeInt(0); // start timestamp
+                content.writeInt(Integer.MAX_VALUE); // end timestamp
+                return encodeContent(RuptelaProtocolDecoder.MSG_FILES, content);
             case Command.TYPE_CONFIGURATION:
                 content.writeBytes((command.getString(Command.KEY_DATA) + "\r\n").getBytes(StandardCharsets.US_ASCII));
                 return encodeContent(RuptelaProtocolDecoder.MSG_DEVICE_CONFIGURATION, content);

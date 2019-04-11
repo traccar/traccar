@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_SMS_VIA_GPRS = 8;
     public static final int MSG_DTCS = 9;
     public static final int MSG_SET_IO = 17;
+    public static final int MSG_FILES = 37;
     public static final int MSG_EXTENDED_RECORDS = 68;
 
     private Position decodeCommandResponse(DeviceSession deviceSession, int type, ByteBuf buf) {
