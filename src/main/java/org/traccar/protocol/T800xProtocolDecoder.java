@@ -163,6 +163,9 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
         int io = buf.readUnsignedShort();
         position.set(Position.KEY_IGNITION, BitUtil.check(io, 14));
         position.set("ac", BitUtil.check(io, 13));
+        for (int i = 0; i <= 2; i++) {
+            position.set(Position.PREFIX_OUT + (i + 1), BitUtil.check(io, 7 + i));
+        }
 
         position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
         position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort());
