@@ -33,8 +33,8 @@ public class T800xProtocolEncoder extends BaseProtocolEncoder {
 
         ByteBuf buf = Unpooled.buffer();
 
-        buf.writeByte('#');
-        buf.writeByte('#');
+        buf.writeByte('%');
+        buf.writeByte('%');
         buf.writeByte(T800xProtocolDecoder.MSG_COMMAND);
         buf.writeShort(7 + 8 + 1 + content.length());
         buf.writeShort(1); // serial number

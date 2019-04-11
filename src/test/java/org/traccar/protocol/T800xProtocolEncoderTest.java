@@ -16,7 +16,7 @@ public class T800xProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_CUSTOM);
         command.set(Command.KEY_DATA, "RELAY,0000,On#");
 
-        verifyCommand(encoder, command, binary("232381001e000101234567890123450152454c41592c303030302c4f6e23"));
+        verifyCommand(encoder, command, binary("252581001e000101234567890123450152454c41592c303030302c4f6e23"));
 
     }
 
