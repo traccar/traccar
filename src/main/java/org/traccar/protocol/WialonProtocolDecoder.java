@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,9 +59,10 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             .groupEnd("?")
             .compile();
 
-    private void sendResponse(Channel channel, SocketAddress remoteAddress, String prefix, Integer number) {
+    private void sendResponse(Channel channel, SocketAddress remoteAddress, String type, Integer number) {
         if (channel != null) {
-            StringBuilder response = new StringBuilder(prefix);
+            StringBuilder response = new StringBuilder("#A");
+            response.append(type.substring(1));
             if (number != null) {
                 response.append(number);
             }
@@ -134,60 +135,69 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         String sentence = (String) msg;
+        String type = sentence.substring(0, sentence.indexOf('#', 1) + 1);
 
-        if (sentence.startsWith("#L#")) {
+        switch (type) {
 
-            String[] values = sentence.substring(3).split(";");
+            case "#L#":
+                String[] values = sentence.substring(3).split(";");
 
-            String imei = values[0].indexOf('.') >= 0 ? values[1] : values[0];
-            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
-            if (deviceSession != null) {
-                sendResponse(channel, remoteAddress, "#AL#", 1);
-            }
-
-        } else if (sentence.startsWith("#P#")) {
-
-            sendResponse(channel, remoteAddress, "#AP#", null); // heartbeat
-
-        } else if (sentence.startsWith("#SD#") || sentence.startsWith("#D#")) {
-
-            Position position = decodePosition(
-                    channel, remoteAddress, sentence.substring(sentence.indexOf('#', 1) + 1));
-
-            if (position != null) {
-                sendResponse(channel, remoteAddress, "#AD#", 1);
-                return position;
-            }
-
-        } else if (sentence.startsWith("#B#")) {
-
-            String[] messages = sentence.substring(sentence.indexOf('#', 1) + 1).split("\\|");
-            List<Position> positions = new LinkedList<>();
-
-            for (String message : messages) {
-                Position position = decodePosition(channel, remoteAddress, message);
-                if (position != null) {
-                    position.set(Position.KEY_ARCHIVE, true);
-                    positions.add(position);
+                String imei = values[0].indexOf('.') >= 0 ? values[1] : values[0];
+                DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
+                if (deviceSession != null) {
+                    sendResponse(channel, remoteAddress, type, 1);
                 }
-            }
+                break;
 
-            sendResponse(channel, remoteAddress, "#AB#", messages.length);
-            if (!positions.isEmpty()) {
-                return positions;
-            }
+            case "#P#":
+                sendResponse(channel, remoteAddress, type, null); // heartbeat
+                break;
 
-        } else if (sentence.startsWith("#M#")) {
-            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
-            if (deviceSession != null) {
-                Position position = new Position(getProtocolName());
-                position.setDeviceId(deviceSession.getDeviceId());
-                getLastLocation(position, new Date());
-                position.setValid(false);
-                position.set(Position.KEY_RESULT, sentence.substring(sentence.indexOf('#', 1) + 1));
-                sendResponse(channel, remoteAddress, "#AM#", 1);
-                return position;
-            }
+            case "#D#":
+            case "#SD#":
+                Position position = decodePosition(
+                        channel, remoteAddress, sentence.substring(sentence.indexOf('#', 1) + 1));
+
+                if (position != null) {
+                    sendResponse(channel, remoteAddress, type, 1);
+                    return position;
+                }
+                break;
+
+            case "#B#":
+                String[] messages = sentence.substring(sentence.indexOf('#', 1) + 1).split("\\|");
+                List<Position> positions = new LinkedList<>();
+
+                for (String message : messages) {
+                    position = decodePosition(channel, remoteAddress, message);
+                    if (position != null) {
+                        position.set(Position.KEY_ARCHIVE, true);
+                        positions.add(position);
+                    }
+                }
+
+                sendResponse(channel, remoteAddress, type, messages.length);
+                if (!positions.isEmpty()) {
+                    return positions;
+                }
+                break;
+
+            case "#M#":
+                deviceSession = getDeviceSession(channel, remoteAddress);
+                if (deviceSession != null) {
+                    position = new Position(getProtocolName());
+                    position.setDeviceId(deviceSession.getDeviceId());
+                    getLastLocation(position, new Date());
+                    position.setValid(false);
+                    position.set(Position.KEY_RESULT, sentence.substring(sentence.indexOf('#', 1) + 1));
+                    sendResponse(channel, remoteAddress, type, 1);
+                    return position;
+                }
+                break;
+
+            default:
+                break;
+
         }
 
         return null;
