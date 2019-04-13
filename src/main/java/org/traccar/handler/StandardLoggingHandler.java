@@ -31,6 +31,12 @@ public class StandardLoggingHandler extends ChannelDuplexHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StandardLoggingHandler.class);
 
+    private final String protocol;
+
+    public StandardLoggingHandler(String protocol) {
+        this.protocol = protocol;
+    }
+
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         log(ctx, false, msg);
@@ -58,7 +64,7 @@ public class StandardLoggingHandler extends ChannelDuplexHandler {
         StringBuilder message = new StringBuilder();
 
         message.append("[").append(ctx.channel().id().asShortText()).append(": ");
-        message.append(((InetSocketAddress) ctx.channel().localAddress()).getPort());
+        message.append(protocol);
         if (downstream) {
             message.append(" > ");
         } else {

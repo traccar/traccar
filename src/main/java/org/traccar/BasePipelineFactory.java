@@ -56,11 +56,13 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
     private static final Logger LOGGER = LoggerFactory.getLogger(BasePipelineFactory.class);
 
     private final TrackerServer server;
+    private final String protocol;
     private boolean eventsEnabled;
     private int timeout;
 
     public BasePipelineFactory(TrackerServer server, String protocol) {
         this.server = server;
+        this.protocol = protocol;
         eventsEnabled = Context.getConfig().getBoolean(Keys.EVENT_ENABLE);
         timeout = Context.getConfig().getInteger(Keys.PROTOCOL_TIMEOUT.withPrefix(protocol));
         if (timeout == 0) {
@@ -103,7 +105,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
         }
         pipeline.addLast(new OpenChannelHandler(server));
         pipeline.addLast(new NetworkMessageHandler());
-        pipeline.addLast(new StandardLoggingHandler());
+        pipeline.addLast(new StandardLoggingHandler(protocol));
 
         addProtocolHandlers(handler -> {
             if (!(handler instanceof BaseProtocolDecoder || handler instanceof BaseProtocolEncoder)) {
