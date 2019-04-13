@@ -97,9 +97,9 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
 
     private void requestPhoto(Channel channel, SocketAddress socketAddress, String imei, String file) {
         if (channel != null) {
-            String content = "D06," + file + "," + photo.writerIndex() + "," + Math.min(1024, photo.writableBytes());
-            int length = 1 + imei.length() + 1 + content.length() + 5;
-            String response = String.format("@@%02d,%s,%s*", length, imei, content);
+            String content = "1,D06," + file + "," + photo.writerIndex() + "," + Math.min(1024, photo.writableBytes());
+            int length = 1 + imei.length() + 1 + content.length();
+            String response = String.format("##%02d,%s,%s*", length, imei, content);
             response += Checksum.sum(response) + "\r\n";
             channel.writeAndFlush(new NetworkMessage(response, socketAddress));
         }
