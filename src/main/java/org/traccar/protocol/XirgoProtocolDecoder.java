@@ -16,9 +16,11 @@
 package org.traccar.protocol;
 
 import io.netty.channel.Channel;
+import io.netty.channel.socket.nio.NioDatagramChannel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
@@ -27,6 +29,7 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class XirgoProtocolDecoder extends BaseProtocolDecoder {
@@ -174,6 +177,15 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         String sentence = (String) msg;
+
+        if (channel instanceof NioDatagramChannel) {
+            Matcher matcher = Pattern.compile("\\$\\$\\d+,(\\d+),.*,(\\d+)##").matcher(sentence);
+            if (matcher.matches()) {
+                String response = "!UDP_ACK," + matcher.group(1) + "," + matcher.group(2);
+                channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+            }
+        }
+
         if (form != null) {
             return decodeCustom(channel, remoteAddress, sentence);
         } else {
@@ -188,10 +200,14 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
         String[] keys = form.split(",");
         String[] values = sentence.replace("$$", "").replace("##", "").split(",");
 
+        if (values.length < keys.length) {
+            return null;
+        }
+
         Position position = new Position(getProtocolName());
         DateBuilder dateBuilder = new DateBuilder();
 
-        for (int i = 0; i < Math.min(keys.length, values.length); i++) {
+        for (int i = 0; i < keys.length; i++) {
             switch (keys[i]) {
                 case "UID":
                 case "IM":
