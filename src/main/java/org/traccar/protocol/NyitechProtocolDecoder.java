@@ -22,6 +22,7 @@ import org.traccar.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
+import org.traccar.helper.ObdDecoder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
@@ -102,20 +103,66 @@ public class NyitechProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         if (type == MSG_COMPREHENSIVE_LIVE || type == MSG_COMPREHENSIVE_HISTORY) {
+
             buf.skipBytes(6); // time
-            buf.skipBytes(3); // data
+            boolean includeLocation = buf.readUnsignedByte() > 0;
+            boolean includeObd = buf.readUnsignedByte() > 0;
+            buf.readUnsignedByte(); // include sensor
+
+            if (includeLocation) {
+                decodeLocation(position, buf);
+            } else {
+                getLastLocation(position, null);
+            }
+
+            if (includeObd) {
+                int count = buf.readUnsignedByte();
+                for (int i = 0; i < count; i++) {
+                    int pid = buf.readUnsignedShortLE();
+                    int length = buf.readUnsignedByte();
+                    switch (length) {
+                        case 1:
+                            position.add(ObdDecoder.decodeData(pid, buf.readByte(), true));
+                            break;
+                        case 2:
+                            position.add(ObdDecoder.decodeData(pid, buf.readShortLE(), true));
+                            break;
+                        case 4:
+                            position.add(ObdDecoder.decodeData(pid, buf.readIntLE(), true));
+                            break;
+                        default:
+                            buf.skipBytes(length);
+                            break;
+                    }
+                }
+            }
+
+            position.set(Position.KEY_FUEL_USED, buf.readUnsignedInt() * 0.01);
+            position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedInt());
+
+
         } else if (type == MSG_ALARM) {
+
             buf.readUnsignedShortLE(); // random number
             buf.readUnsignedByte(); // tag
             position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
             buf.readUnsignedShortLE(); // threshold
             buf.readUnsignedShortLE(); // value
             buf.skipBytes(6); // time
-        } else if (type == MSG_FIXED) {
-            buf.skipBytes(6); // time
-        }
 
-        decodeLocation(position, buf);
+            decodeLocation(position, buf);
+
+        } else if (type == MSG_FIXED) {
+
+            buf.skipBytes(6); // time
+
+            decodeLocation(position, buf);
+
+        } else {
+
+            decodeLocation(position, buf);
+
+        }
 
         return position;
     }
