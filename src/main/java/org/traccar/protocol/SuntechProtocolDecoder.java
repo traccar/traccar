@@ -254,7 +254,8 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
         String type = values[index++].substring(5);
 
-        if (!type.equals("STT") && !type.equals("EMG") && !type.equals("EVT") && !type.equals("ALT")) {
+        if (!type.equals("STT") && !type.equals("EMG") && !type.equals("EVT")
+                && !type.equals("ALT") && !type.equals("UEX")) {
             return null;
         }
 
@@ -321,6 +322,17 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                 break;
             case "ALT":
                 position.set(Position.KEY_ALARM, decodeAlert(Integer.parseInt(values[index++])));
+                break;
+            case "UEX":
+                int remaining = Integer.parseInt(values[index++]);
+                while (remaining > 0) {
+                    String value = values[index++];
+                    String[] pair = value.split("=");
+                    if (pair.length >= 2) {
+                        position.set(pair[0].toLowerCase(), pair[1].trim());
+                    }
+                    remaining -= value.length() + 1;
+                }
                 break;
             default:
                 break;
