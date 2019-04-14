@@ -45,7 +45,7 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             .number("d+,")
             .expression("[LH],")                 // history
             .or()
-            .expression("[^,]+,")                // type
+            .expression("([^,]+),")              // type
             .groupEnd()
             .number("(d{15}),")                  // imei
             .groupBegin()
@@ -121,6 +121,8 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
+        String type = parser.next();
+
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
             return null;
@@ -128,6 +130,10 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
+
+        if (type != null && type.equals("EMR")) {
+            position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+        }
 
         if (parser.hasNext()) {
             position.set(Position.KEY_ALARM, decodeAlarm(parser.next()));

@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class ItsProtocolDecoderTest extends ProtocolTest {
 
@@ -9,6 +10,10 @@ public class ItsProtocolDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         ItsProtocolDecoder decoder = new ItsProtocolDecoder(null);
+
+        verifyAttribute(decoder, text(
+                "$EPB,EMR,869867036066035,NM,03042019,192008,V,000.00000000,N,000.00000000,E,0000000000.0,0000.0,00.000,G,,0,404,22,ECFB,36EF*226F7BD1"),
+                Position.KEY_ALARM, Position.ALARM_SOS);
 
         verifyPosition(decoder, text(
                 "$,CP,ATL,1.4D3_AIS140_1.0,EA,10,H,868728037717441,,1,31032019,140054,28.533699,N,77.269020,E,0.0,188.00,14,76.0,1.3,0.0,Idea,0,1,12.7,3.9,1,O,22,404,11,69,979c,fc1,69,18,fbf,69,15,e36e,69,14,ba2f,3ff,13,0111,00,249404,"));
