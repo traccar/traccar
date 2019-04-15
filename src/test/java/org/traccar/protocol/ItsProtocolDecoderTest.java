@@ -12,6 +12,13 @@ public class ItsProtocolDecoderTest extends ProtocolTest {
         ItsProtocolDecoder decoder = new ItsProtocolDecoder(null);
 
         verifyAttribute(decoder, text(
+                "$TEL123,Teltonika,03.18.16,NR,1,L,352093085223096,KA09X6945,1,24122018,055749,12.303873,N,76.690697,E,0.0,349.00,10,795.0,0.50,0.40,Airtel,0,1,14.6,4.1,0,,28,404,45,625A,116E,29,28DF,03A3,28,9A5C,0923,26,116F,625A,25,2A51,03A3,0010,00,000042,0.1,0.1,0,()*7B"),
+                Position.PREFIX_ADC + 2, 0.1);
+
+        verifyPosition(decoder, text(
+                "$Header,iTriangle,1_37T02B0164MAIS,BR,6,L,861693034634154,KA01I2000,1,09112017,160702,12.976593,N,77.549782,E,25.1,344,15,911.0,1.04,0.68,Airtel,1,1,11.8,3.8,1,C,24,404,45,61b4,9ad9,31,9adb,61b4,35,ffff,0000,33,ffff,0000,31,ffff,0000,0001,00,000014,0.0,0.1,4,()*1E"));
+
+        verifyAttribute(decoder, text(
                 "$EPB,EMR,869867036066035,NM,03042019,192008,V,000.00000000,N,000.00000000,E,0000000000.0,0000.0,00.000,G,,0,404,22,ECFB,36EF*226F7BD1"),
                 Position.KEY_ALARM, Position.ALARM_SOS);
 

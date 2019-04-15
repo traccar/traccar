@@ -41,8 +41,8 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             .groupBegin()
             .expression("[^,]+,")                // vendor
             .expression("[^,]+,")                // firmware version
-            .expression("[^,]+,")                // type
-            .number("d+,")
+            .expression("(..),")                 // status
+            .number("(d+),")                     // event
             .expression("[LH],")                 // history
             .or()
             .expression("([^,]+),")              // type
@@ -78,6 +78,11 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             .number("(?:-?x+,){12}")             // other cells
             .number("([01]{4}),")                // inputs
             .number("([01]{2}),")                // outputs
+            .groupBegin()
+            .number("d+,")                       // index
+            .number("(d+.d+),")                  // adc1
+            .number("(d+.d+),")                  // adc2
+            .groupEnd("?")
             .groupEnd("?")
             .or()
             .number("(-?d+.d+),")                // altitude
@@ -101,6 +106,8 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_CORNERING;
             case "OS":
                 return Position.ALARM_OVERSPEED;
+            case "TA":
+                return Position.ALARM_TAMPERING;
             default:
                 return null;
         }
@@ -121,6 +128,8 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
+        String status = parser.next();
+        Integer event = parser.nextInt();
         String type = parser.next();
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
@@ -135,8 +144,15 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_ALARM, Position.ALARM_SOS);
         }
 
+        if (event != null) {
+            position.set(Position.KEY_EVENT, event);
+        }
+
         if (parser.hasNext()) {
-            position.set(Position.KEY_ALARM, decodeAlarm(parser.next()));
+            status = parser.next();
+        }
+        if (status != null) {
+            position.set(Position.KEY_ALARM, decodeAlarm(status));
         }
 
         if (parser.hasNext()) {
@@ -163,6 +179,11 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_BATTERY, parser.nextDouble());
             position.set(Position.KEY_INPUT, parser.nextBinInt());
             position.set(Position.KEY_OUTPUT, parser.nextBinInt());
+        }
+
+        if (parser.hasNext(2)) {
+            position.set(Position.PREFIX_ADC + 1, parser.nextDouble());
+            position.set(Position.PREFIX_ADC + 2, parser.nextDouble());
         }
 
         if (parser.hasNext(2)) {
