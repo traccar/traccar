@@ -262,5 +262,6 @@
     <entry key='neos.port'>5183</entry>
     <entry key='satsol.port'>5184</entry>
     <entry key='globalstar.port'>5185</entry>
+    <entry key='sanul.port'>5186</entry>
 
 </properties>
