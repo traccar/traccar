@@ -41,7 +41,7 @@ public class SanulProtocolDecoder extends BaseProtocolDecoder {
         if (channel != null) {
             ByteBuf response = Unpooled.buffer();
             response.writeByte(0xaa); // header
-            response.writeShortLE(0); // reserved
+            response.writeShortLE(0x85da); // reserved
             response.writeShortLE(15); // length
             response.writeByte(1); // edition
             response.writeShortLE(MSG_RESPONSE);
@@ -49,7 +49,7 @@ public class SanulProtocolDecoder extends BaseProtocolDecoder {
             response.writeIntLE(0); // command id
             response.writeByte(0); // status
             response.writeByte(0); // result length
-            response.writeIntLE(0); // result data ?
+            response.writeIntLE(0x20000); // result data ?
             channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
     }

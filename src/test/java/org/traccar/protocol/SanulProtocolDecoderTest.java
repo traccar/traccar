@@ -12,7 +12,6 @@ public class SanulProtocolDecoderTest extends ProtocolTest {
 
         verifyNull(decoder, binary(
                 "aa007020000100000000000033353333353830313831353431313700000000000000000000"));
-        //       aa00000f00010500000000000000000000000000
 
     }
 
