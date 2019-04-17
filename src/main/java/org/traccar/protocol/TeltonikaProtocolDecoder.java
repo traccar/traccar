@@ -145,8 +145,22 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         } else {
 
             position.set(Position.KEY_TYPE, type);
-            position.set(Position.KEY_RESULT, buf.readSlice(buf.readInt()).toString(StandardCharsets.US_ASCII));
 
+            int length = buf.readInt();
+            boolean readable = true;
+            for (int i = 0; i < length; i++) {
+                byte b = buf.getByte(buf.readerIndex() + i);
+                if (b < 32 && b != '\r' && b != '\n') {
+                    readable = false;
+                    break;
+                }
+            }
+
+            if (readable) {
+                position.set(Position.KEY_RESULT, buf.readSlice(length).toString(StandardCharsets.US_ASCII));
+            } else {
+                position.set(Position.KEY_RESULT, ByteBufUtil.hexDump(buf.readSlice(length)));
+            }
         }
     }
 
