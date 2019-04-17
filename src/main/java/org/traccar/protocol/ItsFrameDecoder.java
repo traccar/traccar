@@ -30,7 +30,7 @@ public class ItsFrameDecoder extends BaseFrameDecoder {
             ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
         ByteBuf frame;
-        int delimiterIndex = BufferUtil.indexOf("\r\n", buf);;
+        int delimiterIndex = BufferUtil.indexOf("\r\n", buf);
         if (delimiterIndex > MINIMUM_LENGTH) {
             frame = buf.readRetainedSlice(delimiterIndex - buf.readerIndex());
             buf.skipBytes(2);
