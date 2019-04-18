@@ -47,7 +47,10 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.?d*),")                 // distance
             .number("(d+),")                     // event
             .number("(d+)")                      // status
-            .any()
+            .groupBegin()
+            .text(";")
+            .expression("(.+)")
+            .groupEnd("?")
             .compile();
 
     @Override
@@ -98,6 +101,14 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_MOTION, BitUtil.check(status, 1));
             position.setValid(!BitUtil.check(status, 2));
             position.set(Position.KEY_STATUS, status);
+
+            if (parser.hasNext()) {
+                String[] data = parser.next().split(";");
+                for (String item : data) {
+                    int valueIndex = item.indexOf(',');
+                    position.set(item.substring(0, valueIndex).toLowerCase(), item.substring(valueIndex + 1));
+                }
+            }
 
             return position;
         }
