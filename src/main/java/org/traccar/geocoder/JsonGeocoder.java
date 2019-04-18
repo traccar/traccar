@@ -19,10 +19,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
 
+import javax.json.Json;
 import javax.json.JsonObject;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.InvocationCallback;
+import java.io.StringReader;
 import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -90,6 +92,7 @@ public abstract class JsonGeocoder implements Geocoder {
 
         Invocation.Builder request = Context.getClient().target(String.format(url, latitude, longitude)).request();
 
+
         if (callback != null) {
             request.async().get(new InvocationCallback<JsonObject>() {
                 @Override
@@ -104,7 +107,13 @@ public abstract class JsonGeocoder implements Geocoder {
             });
         } else {
             try {
-                return handleResponse(latitude, longitude, request.get(JsonObject.class), null);
+
+
+                String replyString = request.get().readEntity(String.class);
+                JsonObject testObj = Json.createReader(new StringReader(replyString)).readObject();
+
+                return handleResponse(latitude, longitude, testObj, null);
+//                return handleResponse(latitude, longitude, request.get(JsonObject.class), null);
             } catch (ClientErrorException e) {
                 LOGGER.warn("Geocoder network error", e);
             }
