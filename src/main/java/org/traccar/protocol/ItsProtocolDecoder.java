@@ -23,6 +23,8 @@ import org.traccar.Protocol;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -43,7 +45,7 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             .expression("[^,]+,")                // firmware version
             .expression("(..),")                 // status
             .number("(d+),")                     // event
-            .expression("[LH],")                 // history
+            .expression("([LH]),")               // history
             .or()
             .expression("([^,]+),")              // type
             .groupEnd()
@@ -72,10 +74,10 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             .number("([01]),")                   // charging
             .number("(d+.?d*),")                 // power
             .number("(d+.?d*),")                 // battery
-            .number("[01],")                     // emergency
+            .number("([01]),")                   // emergency
             .expression("[CO]?,")                // tamper
-            .number("(?:x+,){5}")                // main cell
-            .number("(?:-?x+,){12}")             // other cells
+            .number("((?:x+,){5}")               // main cell
+            .number("(?:-?x+,){12})")            // other cells
             .number("([01]{4}),")                // inputs
             .number("([01]{2}),")                // outputs
             .groupBegin()
@@ -130,6 +132,7 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
 
         String status = parser.next();
         Integer event = parser.nextInt();
+        boolean history = "H".equals(parser.next());
         String type = parser.next();
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
@@ -146,6 +149,9 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
 
         if (event != null) {
             position.set(Position.KEY_EVENT, event);
+        }
+        if (history) {
+            position.set(Position.KEY_ARCHIVE, true);
         }
 
         if (parser.hasNext()) {
@@ -171,12 +177,30 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_SATELLITES, parser.nextInt());
         }
 
-        if (parser.hasNext(7)) {
+        if (parser.hasNext(8)) {
             position.setAltitude(parser.nextDouble());
             position.set(Position.KEY_IGNITION, parser.nextInt() > 0);
             position.set(Position.KEY_CHARGE, parser.nextInt() > 0);
             position.set(Position.KEY_POWER, parser.nextDouble());
             position.set(Position.KEY_BATTERY, parser.nextDouble());
+
+            position.set("emergency", parser.nextInt() > 0);
+
+            String[] cells = parser.next().split(",");
+            int mcc = Integer.parseInt(cells[1]);
+            int mnc = Integer.parseInt(cells[2]);
+            int lac = Integer.parseInt(cells[3], 16);
+            int cid = Integer.parseInt(cells[4], 16);
+            Network network = new Network(CellTower.from(mcc, mnc, lac, cid, Integer.parseInt(cells[0])));
+            for (int i = 0; i < 4; i++) {
+                lac = Integer.parseInt(cells[5 + 3 * i + 1], 16);
+                cid = Integer.parseInt(cells[5 + 3 * i + 2], 16);
+                if (lac > 0 && cid > 0) {
+                    network.addCellTower(CellTower.from(mcc, mnc, lac, cid));
+                }
+            }
+            position.setNetwork(network);
+
             position.set(Position.KEY_INPUT, parser.nextBinInt());
             position.set(Position.KEY_OUTPUT, parser.nextBinInt());
         }
