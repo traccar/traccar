@@ -29,7 +29,21 @@ import org.traccar.database.GeofenceManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.database.MaintenancesManager;
 import org.traccar.database.StatisticsManager;
-import org.traccar.geocoder.*;
+import org.traccar.geocoder.AddressFormat;
+import org.traccar.geocoder.BanGeocoder;
+import org.traccar.geocoder.BingMapsGeocoder;
+import org.traccar.geocoder.FactualGeocoder;
+import org.traccar.geocoder.GeoPortailGeocoder;
+import org.traccar.geocoder.GeocodeFarmGeocoder;
+import org.traccar.geocoder.GeocodeXyzGeocoder;
+import org.traccar.geocoder.Geocoder;
+import org.traccar.geocoder.GisgraphyGeocoder;
+import org.traccar.geocoder.GoogleGeocoder;
+import org.traccar.geocoder.HereGeocoder;
+import org.traccar.geocoder.MapQuestGeocoder;
+import org.traccar.geocoder.MapmyIndiaGeocoder;
+import org.traccar.geocoder.NominatimGeocoder;
+import org.traccar.geocoder.OpenCageGeocoder;
 import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.geolocation.GoogleGeolocationProvider;
 import org.traccar.geolocation.MozillaGeolocationProvider;
@@ -159,8 +173,8 @@ public class MainModule extends AbstractModule {
                     return new HereGeocoder(id, key, language, cacheSize, addressFormat);
                 case "mapmyindia":
                     return new MapmyIndiaGeocoder(url, key, cacheSize, addressFormat);
-                case "geoPortail":
-                    return new GeoPortailGeocoder(url,cacheSize,addressFormat);
+                case "geoportail":
+                    return new GeoPortailGeocoder(url, cacheSize, addressFormat);
                 default:
                     return new GoogleGeocoder(key, language, cacheSize, addressFormat);
             }
