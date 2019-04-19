@@ -648,16 +648,16 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_AXLE_WEIGHT, Integer.parseInt(values[index - 1]));
         }
         if (BitUtil.check(reportMask, 16) && !values[index++].isEmpty()) {
-            position.set("tachographInfo", Integer.parseInt(values[index - 1]));
+            position.set("tachographInfo", Integer.parseInt(values[index - 1], 16));
         }
         if (BitUtil.check(reportMask, 17) && !values[index++].isEmpty()) {
-            position.set("indicators", Integer.parseInt(values[index - 1]));
+            position.set("indicators", Integer.parseInt(values[index - 1], 16));
         }
         if (BitUtil.check(reportMask, 18) && !values[index++].isEmpty()) {
-            position.set("lights", Integer.parseInt(values[index - 1]));
+            position.set("lights", Integer.parseInt(values[index - 1], 16));
         }
         if (BitUtil.check(reportMask, 19) && !values[index++].isEmpty()) {
-            position.set("doors", Integer.parseInt(values[index - 1]));
+            position.set("doors", Integer.parseInt(values[index - 1], 16));
         }
         if (BitUtil.check(reportMask, 20) && !values[index++].isEmpty()) {
             position.set("vehicleOverspeed", Double.parseDouble(values[index - 1]));
