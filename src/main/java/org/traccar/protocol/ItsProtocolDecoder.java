@@ -110,6 +110,10 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_OVERSPEED;
             case "TA":
                 return Position.ALARM_TAMPERING;
+            case "BD":
+                return Position.ALARM_POWER_CUT;
+            case "BR":
+                return Position.ALARM_POWER_RESTORED;
             default:
                 return null;
         }
@@ -158,7 +162,13 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             status = parser.next();
         }
         if (status != null) {
-            position.set(Position.KEY_ALARM, decodeAlarm(status));
+            if (status.equals("IN")) {
+                position.set(Position.KEY_IGNITION, true);
+            } else if (status.equals("IF")) {
+                position.set(Position.KEY_IGNITION, false);
+            } else {
+                position.set(Position.KEY_ALARM, decodeAlarm(status));
+            }
         }
 
         if (parser.hasNext()) {
