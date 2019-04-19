@@ -3,15 +3,11 @@ package org.traccar.geocoder;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 
-/**
- * Created by goebel on 4/17/19.
- */
 public class GeoPortailGeocoder extends JsonGeocoder {
 
     public GeoPortailGeocoder(String url, int cacheSize, AddressFormat addressFormat) {
         super("https://api.geoportail.lu/geocoder/reverseGeocode?lat=%f&lon=%f", cacheSize, new AddressFormat("%h %r, %p, %t, %s, %c"));
     }
-
 
     @Override
     public Address parseAddress(JsonObject json) {
@@ -46,8 +42,5 @@ public class GeoPortailGeocoder extends JsonGeocoder {
 
         return null;
     }
-
-
-
 
 }
