@@ -184,6 +184,19 @@ public final class Keys {
             "filter.skipAttributes.enable", Boolean.class);
 
     /**
+     * Override device time. Possible values are 'deviceTime' and 'serverTime'
+     */
+    public static final ConfigKey TIME_OVERRIDE = new ConfigKey(
+            "time.override", String.class);
+
+    /**
+     * List of protocols for overriding time. If not specified override is applied globally. List consist of protocol
+     * names that can be separated by comma or single space character.
+     */
+    public static final ConfigKey TIME_PROTOCOLS = new ConfigKey(
+            "time.protocols", String.class);
+
+    /**
      * Replaces coordinates with last known if change is less than a 'coordinates.error' meters. Helps to avoid
      * coordinates jumps during parking period.
      */

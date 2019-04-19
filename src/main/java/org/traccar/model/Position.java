@@ -157,7 +157,7 @@ public class Position extends Message {
         this.protocol = protocol;
     }
 
-    private Date serverTime;
+    private Date serverTime = new Date();
 
     public Date getServerTime() {
         return serverTime;

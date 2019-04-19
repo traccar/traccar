@@ -59,6 +59,7 @@ import org.traccar.handler.GeolocationHandler;
 import org.traccar.handler.HemisphereHandler;
 import org.traccar.handler.MotionHandler;
 import org.traccar.handler.RemoteAddressHandler;
+import org.traccar.handler.TimeHandler;
 import org.traccar.handler.events.AlertEventHandler;
 import org.traccar.handler.events.CommandResultEventHandler;
 import org.traccar.handler.events.DriverEventHandler;
@@ -294,6 +295,15 @@ public class MainModule extends AbstractModule {
             Config config, IdentityManager identityManager, AttributesManager attributesManager) {
         if (config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_ENABLE)) {
             return new ComputedAttributesHandler(config, identityManager, attributesManager);
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public static TimeHandler provideTimeHandler(Config config) {
+        if (config.hasKey(Keys.TIME_OVERRIDE)) {
+            return new TimeHandler(config);
         }
         return null;
     }
