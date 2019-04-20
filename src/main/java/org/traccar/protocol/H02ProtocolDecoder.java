@@ -88,19 +88,16 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private Integer decodeBattery(int value) {
-        switch (value) {
-            case 6:
-                return 100;
-            case 5:
-                return 80;
-            case 4:
-                return 60;
-            case 3:
-                return 20;
-            case 2:
-                return 10;
-            default:
-                return null;
+        if (value <= 3) {
+            return (value - 1) * 10;
+        } else if (value <= 6) {
+            return (value - 1) * 20;
+        } else if (value <= 100) {
+            return value;
+        } else if (value >= 0xF1 && value <= 0xF6) {
+            return value - 0xF0;
+        } else {
+            return null;
         }
     }
 
