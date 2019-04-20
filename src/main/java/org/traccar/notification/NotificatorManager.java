@@ -31,6 +31,7 @@ import org.traccar.notificators.NotificatorNull;
 import org.traccar.notificators.Notificator;
 import org.traccar.notificators.NotificatorSms;
 import org.traccar.notificators.NotificatorWeb;
+import org.traccar.notificators.NotificatorTelegram;
 
 public final class NotificatorManager {
 
@@ -56,6 +57,9 @@ public final class NotificatorManager {
                     break;
                 case "firebase":
                     defaultNotificator = NotificatorFirebase.class.getCanonicalName();
+                    break;
+                case "telegram":
+                    defaultNotificator = NotificatorTelegram.class.getCanonicalName();
                     break;
                 default:
                     break;
