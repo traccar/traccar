@@ -88,7 +88,9 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private Integer decodeBattery(int value) {
-        if (value <= 3) {
+        if (value == 0) {
+            return null;
+        } else if (value <= 3) {
             return (value - 1) * 10;
         } else if (value <= 6) {
             return (value - 1) * 20;
