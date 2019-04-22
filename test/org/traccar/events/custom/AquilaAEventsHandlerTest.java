@@ -1,4 +1,4 @@
-package org.traccar.events.aquila;
+package org.traccar.events.custom;
 
 import org.junit.Test;
 import org.traccar.model.Event;

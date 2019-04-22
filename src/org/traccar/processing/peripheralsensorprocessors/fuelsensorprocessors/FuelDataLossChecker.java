@@ -3,6 +3,7 @@ package org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors;
 import org.traccar.Context;
 import org.traccar.helper.DistanceCalculator;
 import org.traccar.helper.Log;
+import org.traccar.model.PeripheralSensor;
 import org.traccar.model.Position;
 
 import java.math.BigDecimal;
@@ -15,7 +16,8 @@ public class FuelDataLossChecker {
     private static final long MILLIS_IN_HOUR = 36_00_000L;
 
     public static boolean isFuelConsumptionAsExpected(final FuelEventMetadata fuelEventMetadata,
-                                                      Optional<Long> maxCapacity) {
+                                                      Optional<Long> maxCapacity,
+                                                      PeripheralSensor fuelSensor) {
 
         double calculatedFuelChangeVolume = fuelEventMetadata.getEndLevel() - fuelEventMetadata.getStartLevel();
         Position startPosition = fuelEventMetadata.getActivityStartPosition();
@@ -24,7 +26,7 @@ public class FuelDataLossChecker {
 
         long deviceId = startPosition.getDeviceId();
         DeviceConsumptionInfo consumptionInfo = Context.getDeviceManager().getDeviceConsumptionInfo(deviceId);
-        boolean requiredFieldsPresent = checkRequiredFieldsPresent(startPosition, endPosition, consumptionInfo);
+        boolean requiredFieldsPresent = checkRequiredFieldsPresent(startPosition, endPosition, consumptionInfo, fuelSensor);
 
         if (!requiredFieldsPresent) {
             // Not enough info to process data loss.
@@ -57,13 +59,15 @@ public class FuelDataLossChecker {
 
     public static boolean checkRequiredFieldsPresent(Position startPosition,
                                                      Position endPosition,
-                                                     DeviceConsumptionInfo consumptionInfo) {
+                                                     DeviceConsumptionInfo consumptionInfo,
+                                                     PeripheralSensor fuelSensor) {
 
         String consumptionType = consumptionInfo.getDeviceConsumptionType().toLowerCase();
+        String calibFuelField = fuelSensor.getCalibFuelFieldName();
         switch (consumptionType) {
             case "hourly":
-                return startPosition.getAttributes().containsKey(Position.KEY_CALIBRATED_FUEL_LEVEL)
-                        && endPosition.getAttributes().containsKey(Position.KEY_CALIBRATED_FUEL_LEVEL);
+                return startPosition.getAttributes().containsKey(calibFuelField)
+                        && endPosition.getAttributes().containsKey(calibFuelField);
 
             case "odometer":
                 return startPosition.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)

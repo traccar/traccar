@@ -1,5 +1,6 @@
 package org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.traccar.BaseDataHandler;
 import org.traccar.Context;
 import org.traccar.helper.Log;
@@ -10,15 +11,13 @@ import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.fu
 import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.fueldataparsers.omnicomm.DigitalLLSFuelDataParser;
 import org.traccar.transforms.model.SensorPointsMap;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class FuelDataCalibrationHandler extends BaseDataHandler {
-
-    private final static Map<String, TreeMap<Long, SensorPointsMap>> deviceToSensorCalibrationPointsMap =
-            new ConcurrentHashMap<>();
 
     private final static Map<String, FuelDataParser> FUEL_SENOR_TYPE_PARSER_MAP = new ConcurrentHashMap<>();
 
@@ -30,29 +29,45 @@ public class FuelDataCalibrationHandler extends BaseDataHandler {
     @Override
     protected Position handlePosition(Position position) {
 
-        if (position.getAttributes().containsKey(Position.KEY_CALIBRATED_FUEL_LEVEL)) {
-            return position;
-        }
-
         long deviceId = position.getDeviceId();
-        Optional<PeripheralSensor> sensorOnDevice = Context.getPeripheralSensorManager().getSensorByDeviceId(deviceId);
+        Optional<List<PeripheralSensor>> sensorsOnDevice = Context.getPeripheralSensorManager().getSensorByDeviceId(deviceId);
 
-        if (!sensorOnDevice.isPresent()) {
-            Log.debug(String.format("No sensor found on deviceId: %d. Refreshing sensors map.", deviceId));
+        if (!sensorsOnDevice.isPresent()) {
+            Log.debug(String.format("No sensors found on deviceId: %d. Refreshing sensors map.", deviceId));
             Context.getPeripheralSensorManager().refreshPeripheralSensorsMap();
             return position;
         }
 
-        String fuelSensorType = sensorOnDevice.get().getTypeName().split("_")[1].toLowerCase();
+        List<PeripheralSensor> fuelSensorsList = sensorsOnDevice.get();
+        if (fuelSensorsList.isEmpty()) {
+            Log.debug(String.format("Sensors list empty for deviceId: %d. Refreshing sensors map.", deviceId));
+            Context.getPeripheralSensorManager().refreshPeripheralSensorsMap();
+            return position;
+        }
 
+        for (PeripheralSensor fuelSensor : fuelSensorsList) {
+            String calibFuelField = fuelSensor.getCalibFuelFieldName();
+            if (position.getAttributes().containsKey(calibFuelField)) {
+                continue;
+            }
+            handleCalibrationData(position, deviceId, fuelSensor);
+        }
+
+        return position;
+    }
+
+    private void handleCalibrationData(Position position, long deviceId, PeripheralSensor fuelSensor) {
+
+        String fuelSensorType = fuelSensor.getTypeName().split("_")[1].toLowerCase();
         FuelDataParser parser = FUEL_SENOR_TYPE_PARSER_MAP.get(fuelSensorType);
-        Optional<Long> fuelLevelPoints = parser.getFuelLevelPointsFromPayload(position);
+        Optional<Long> fuelLevelPoints =
+                parser.getFuelLevelPointsFromPayload(position, fuelSensor.getSensorFuelDataField(position));
 
-        long sensorId = sensorOnDevice.get().getPeripheralSensorId();
+        long sensorId = fuelSensor.getPeripheralSensorId();
 
         if (!fuelLevelPoints.isPresent()) {
             Log.debug(String.format("No fuel data found on payload for %d and sensor %d", deviceId, sensorId));
-            return position;
+            return;
         }
 
         Optional<Double> maybeCalibratedData =
@@ -62,11 +77,10 @@ public class FuelDataCalibrationHandler extends BaseDataHandler {
             Log.debug(String.format("Calibrated fuel level could not be determined for device %d and sensor %d",
                                     deviceId, sensorId));
 
-            return position;
+            return;
         }
 
-        position.set(Position.KEY_CALIBRATED_FUEL_LEVEL, maybeCalibratedData.get());
-        return position;
+        position.set(fuelSensor.getCalibFuelFieldName(), maybeCalibratedData.get());
     }
 
     private Optional<Double> getCalibratedFuelLevel(Long deviceId, Long sensorId, Long sensorFuelLevelPoints) {

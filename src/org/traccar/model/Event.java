@@ -24,6 +24,11 @@ public class Event extends Message {
         setPositionId(positionId);
     }
 
+    public Event(String type, long deviceId, long positionId, Date deviceTime) {
+        this(type, deviceId, positionId);
+        setDeviceTime(deviceTime);
+    }
+
     public Event(String type, long deviceId) {
         setType(type);
         setDeviceId(deviceId);
@@ -77,6 +82,8 @@ public class Event extends Message {
 
     private Date serverTime;
 
+    private Date deviceTime;
+
     public Date getServerTime() {
         return serverTime;
     }
@@ -115,4 +122,11 @@ public class Event extends Message {
         this.maintenanceId = maintenanceId;
     }
 
+    public Date getDeviceTime() {
+        return deviceTime;
+    }
+
+    public void setDeviceTime(Date deviceTime) {
+        this.deviceTime = deviceTime;
+    }
 }

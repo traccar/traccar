@@ -8,13 +8,14 @@ import java.util.Optional;
 
 public class DigitalLLSFuelDataParser implements FuelDataParser {
 
+    // NOTE: with this type of sensorData field, we can only handle one sensor on this type of device.
     private static final int INVALID_FUEL_FREQUENCY = 0xFFF;
     private static final String SENSOR_DATA = "sensorData";
     private static final String FREQUENCY_PREFIX = "F=";
     private static final String FUEL_PART_PREFIX = "N=";
 
     @Override
-    public Optional<Long> getFuelLevelPointsFromPayload(Position position) {
+    public Optional<Long> getFuelLevelPointsFromPayload(Position position, String fuelDataField) {
 
         String sensorDataString = (String) position.getAttributes().get(SENSOR_DATA);
 

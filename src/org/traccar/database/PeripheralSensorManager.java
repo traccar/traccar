@@ -74,7 +74,7 @@ public class PeripheralSensorManager extends ExtendedObjectManager<PeripheralSen
         return Optional.empty();
     }
 
-    public Optional<PeripheralSensor> getSensorByDeviceId(long deviceId) {
+    public Optional<List<PeripheralSensor>> getSensorByDeviceId(long deviceId) {
         // Note: Handles only one sensor per  gps device for now.
 
         Optional<List<PeripheralSensor>> sensorOnDevice = getLinkedPeripheralSensors(deviceId);
@@ -83,7 +83,7 @@ public class PeripheralSensorManager extends ExtendedObjectManager<PeripheralSen
             return Optional.empty();
         }
 
-        return sensorOnDevice.get().stream().findFirst();
+        return sensorOnDevice;
     }
 
     public Optional<TreeMap<Long, SensorPointsMap>> getSensorCalibrationPointsMap(long deviceId, long peripheralSensorId) {

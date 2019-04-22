@@ -38,7 +38,8 @@ import org.traccar.events.MaintenanceEventHandler;
 import org.traccar.events.MotionEventHandler;
 import org.traccar.events.OverspeedEventHandler;
 import org.traccar.events.AlertEventHandler;
-import org.traccar.events.aquila.AquilaAEventsHandler;
+import org.traccar.events.custom.AquilaAEventsHandler;
+import org.traccar.events.custom.CommonGPSEventsHandler;
 import org.traccar.helper.Log;
 import org.traccar.processing.ComputedAttributesHandler;
 import org.traccar.processing.CopyAttributesHandler;
@@ -74,6 +75,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
     private IgnitionEventHandler ignitionEventHandler;
     private MaintenanceEventHandler maintenanceEventHandler;
     private DriverEventHandler driverEventHandler;
+    private CommonGPSEventsHandler commonGPSEventsHandler;
     private AquilaAEventsHandler aquilaAEventsHandler;
 
     private static final class OpenChannelHandler extends SimpleChannelHandler {
@@ -191,6 +193,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             ignitionEventHandler = new IgnitionEventHandler();
             maintenanceEventHandler = new MaintenanceEventHandler();
             driverEventHandler = new DriverEventHandler();
+            commonGPSEventsHandler = new CommonGPSEventsHandler();
             aquilaAEventsHandler = new AquilaAEventsHandler();
         }
     }
@@ -304,6 +307,10 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
         if (driverEventHandler != null) {
             pipeline.addLast("DriverEventHandler", driverEventHandler);
+        }
+
+        if (commonGPSEventsHandler != null) {
+            pipeline.addLast("CommonGPSEventsHandler", commonGPSEventsHandler);
         }
 
         if (aquilaAEventsHandler != null) {
