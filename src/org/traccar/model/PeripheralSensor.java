@@ -18,7 +18,7 @@ public class PeripheralSensor extends ExtendedModel {
     private static Map<String, String> gpsProtocolToFuelFieldMap = new ConcurrentHashMap<>();
 
     static {
-        gpsProtocolToFuelFieldMap.put("custom", Context.getConfig().getString("aquila.fuel_analog"));
+        gpsProtocolToFuelFieldMap.put("aquila", Context.getConfig().getString("aquila.fuel_analog"));
         gpsProtocolToFuelFieldMap.put("teltonika", Context.getConfig().getString("teltonika.fuel_analog"));
     }
 
