@@ -142,7 +142,12 @@ public class FuelDataActivityChecker {
             Log.debug("[FUEL_ACTIVITY_END] errorCheckFuelChange: " + errorCheckFuelChange);
 
             Optional<Long> maxCapacity = Context.getPeripheralSensorManager().getFuelTankMaxCapacity(deviceId, fuelSensor.getPeripheralSensorId());
-            boolean isFuelConsumptionAsExpected = FuelDataLossChecker.isFuelConsumptionAsExpected(fuelEventMetadata, maxCapacity, fuelSensor);
+            boolean isFuelConsumptionAsExpected =
+                    FuelConsumptionChecker.isFuelConsumptionAsExpected(fuelEventMetadata.getActivityStartPosition(),
+                                                                       fuelEventMetadata.getActivityEndPosition(),
+                                                                       fuelChangeVolume,
+                                                                       maxCapacity,
+                                                                       fuelSensor);
 
             // If fuel consumption is not as expected, means we have some activity going on.
             if (!isFuelConsumptionAsExpected && fuelChangeVolume < 0.0) {
@@ -176,7 +181,7 @@ public class FuelDataActivityChecker {
         DeviceConsumptionInfo consumptionInfo = Context.getDeviceManager().getDeviceConsumptionInfo(position.getDeviceId());
 
         final boolean requiredFieldsPresent =
-                FuelDataLossChecker.checkRequiredFieldsPresent(lastPosition, position, consumptionInfo, fuelSensor);
+                FuelConsumptionChecker.checkRequiredFieldsPresent(lastPosition, position, consumptionInfo, fuelSensor);
 
         if (!requiredFieldsPresent) {
             // Not enough info to process data loss.
@@ -186,7 +191,7 @@ public class FuelDataActivityChecker {
         String calibFuelDataField = fuelSensor.getCalibFuelFieldName();
 
         ExpectedFuelConsumption expectedFuelConsumption =
-                FuelDataLossChecker.getExpectedFuelConsumptionValues(lastPosition, position, maxTankMaxVolume, consumptionInfo);
+                FuelConsumptionChecker.getExpectedFuelConsumptionValues(lastPosition, position, maxTankMaxVolume, consumptionInfo);
 
         double calculatedFuelChangeVolume = position.getDouble(calibFuelDataField)
                 - lastPosition.getDouble(calibFuelDataField);
@@ -194,8 +199,8 @@ public class FuelDataActivityChecker {
         if (expectedFuelConsumption != null && Math.abs(calculatedFuelChangeVolume) > expectedFuelConsumption.allowedDeviation) {
             if (calculatedFuelChangeVolume < 0.0) {
                 boolean isConsumptionExpected =
-                        FuelDataLossChecker.isFuelConsumptionAsExpected(calculatedFuelChangeVolume,
-                                                                        expectedFuelConsumption);
+                        FuelConsumptionChecker.isFuelConsumptionAsExpected(calculatedFuelChangeVolume,
+                                                                           expectedFuelConsumption);
 
                 if (isConsumptionExpected) {
                     Log.info(String.format(

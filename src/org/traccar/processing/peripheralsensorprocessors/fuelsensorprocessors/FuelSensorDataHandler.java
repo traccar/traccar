@@ -461,9 +461,8 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                                                                        nonOutlierInLastWindowByDevice.get(deviceId),
                                                                        fuelTankMaxVolume, fuelSensor);
 
-            if(fuelActivity.isPresent()) {
-                sendNotificationIfNecessary(deviceId, fuelActivity.get(), fuelSensor.getPeripheralSensorId(), fuelTankMaxVolume);
-            }
+            fuelActivity.ifPresent(activity -> sendNotificationIfNecessary(deviceId, activity, fuelSensor, fuelTankMaxVolume));
+
             possibleDataLossByDevice.remove(deviceId);
             nonOutlierInLastWindowByDevice.remove(deviceId);
         } else {
@@ -486,29 +485,37 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                                                                  deviceFuelEventMetadata,
                                                                  fuelSensor);
 
-                sendNotificationIfNecessary(deviceId, fuelActivity, fuelSensor.getPeripheralSensorId());
+                sendNotificationIfNecessary(deviceId, fuelActivity, fuelSensor, fuelTankMaxVolume);
             }
         }
 
         removeFirstPositionIfNecessary(positionsForDeviceSensor, deviceId);
     }
 
-    private void sendNotificationIfNecessary(final long deviceId, final FuelActivity fuelActivity, long peripheralSensorId, Optional<Long> fuelTankMaxVolume) {
+    private void sendNotificationIfNecessary(final long deviceId,
+                                             final FuelActivity fuelActivity,
+                                             PeripheralSensor fuelSensor,
+                                             Optional<Long> fuelTankMaxVolume) {
+
         boolean isDrain = fuelActivity.getActivityType() == FuelActivityType.FUEL_DRAIN
                 || fuelActivity.getActivityType() == FuelActivityType.PROBABLE_FUEL_DRAIN;
 
-        double minAllowedVolumeChange = fuelTankMaxVolume.orElse(500L) * 0.01;
-        long tankMax = fuelTankMaxVolume.isPresent()? fuelTankMaxVolume.get() : -1L;
+        if (isDrain) {
+            boolean isConsumptionExpected =
+                    FuelConsumptionChecker.isFuelConsumptionAsExpected(fuelActivity.getActivityStartPosition(),
+                                                                       fuelActivity.getActivityEndPosition(),
+                                                                       fuelActivity.getChangeVolume(),
+                                                                       fuelTankMaxVolume,
+                                                                       fuelSensor);
+            if (!isConsumptionExpected) {
+                Log.debug("Detected drain not within expected consumption");
+                sendNotificationIfNecessary(deviceId, fuelActivity, fuelSensor.getPeripheralSensorId());
+            } else {
+                Log.debug("Detected drain that was within expected consumption, not sending notification.");
+            }
 
-        Log.debug(String.format("activityType: %s, minAllowedVolChange: %f, maxFuelTankCapacity: %d",
-                                fuelActivity.getActivityType().toString(),
-                                minAllowedVolumeChange,
-                                tankMax));
-
-        if (isDrain && Math.abs(fuelActivity.getChangeVolume()) > minAllowedVolumeChange) {
-            sendNotificationIfNecessary(deviceId, fuelActivity, peripheralSensorId);
-        } else if (!isDrain) {
-            sendNotificationIfNecessary(deviceId, fuelActivity, peripheralSensorId);
+        } else {
+            sendNotificationIfNecessary(deviceId, fuelActivity, fuelSensor.getPeripheralSensorId());
         }
     }
 
