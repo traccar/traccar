@@ -45,10 +45,12 @@ public class IgnitionEventHandler extends BaseEventHandler {
 
                 if (ignition && !oldIgnition) {
                     result = Collections.singletonMap(
-                            new Event(Event.TYPE_IGNITION_ON, position.getDeviceId(), position.getId()), position);
+                            new Event(Event.TYPE_IGNITION_ON, position.getDeviceId(), position.getId(),
+                                      position.getDeviceTime()), position);
                 } else if (!ignition && oldIgnition) {
                     result = Collections.singletonMap(
-                            new Event(Event.TYPE_IGNITION_OFF, position.getDeviceId(), position.getId()), position);
+                            new Event(Event.TYPE_IGNITION_OFF, position.getDeviceId(), position.getId(),
+                                      position.getDeviceTime()), position);
                 }
             }
         }

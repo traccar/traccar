@@ -12,15 +12,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class AnalogLLSFuelDataParser implements FuelDataParser {
 
-    private static Map<String, String> gpsProtocolToFuelFieldMap = new ConcurrentHashMap<>();
-
-    static {
-        gpsProtocolToFuelFieldMap.put("aquila", Context.getConfig().getString("aquila.fuel_analog"));
-        gpsProtocolToFuelFieldMap.put("teltonika", Context.getConfig().getString("teltonika.fuel_analog"));
-    }
-
     @Override
-    public Optional<Long> getFuelLevelPointsFromPayload(Position position) {
+    public Optional<Long> getFuelLevelPointsFromPayload(Position position, String fuelDataFieldName) {
 
         String gpsDeviceProtocol = position.getProtocol();
         if (StringUtils.isBlank(gpsDeviceProtocol)) {
@@ -28,8 +21,6 @@ public class AnalogLLSFuelDataParser implements FuelDataParser {
                     "Invalid protocol on payload for deviceId: %s", position.getDeviceId()));
             return Optional.empty();
         }
-
-        String fuelDataFieldName = gpsProtocolToFuelFieldMap.getOrDefault(gpsDeviceProtocol, null);
 
         if (StringUtils.isBlank(fuelDataFieldName) || !position.getAttributes().containsKey(fuelDataFieldName)) {
             Log.debug(String.format(

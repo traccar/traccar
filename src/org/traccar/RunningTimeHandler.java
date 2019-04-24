@@ -11,7 +11,14 @@ import static org.traccar.model.Position.KEY_IGNITION;
 import static org.traccar.model.Position.KEY_IGN_ON_MILLIS;
 import static org.traccar.model.Position.KEY_TOTAL_IGN_ON_MILLIS;
 
-public class RunningTimeHandler extends BaseDataHandler{
+public class RunningTimeHandler extends BaseDataHandler {
+
+    private static long DATA_LOSS_FOR_IGNITION_MILLIS;
+
+    static {
+        DATA_LOSS_FOR_IGNITION_MILLIS =
+                Context.getConfig().getLong("processing.peripheralSensorData.ignitionDataLossThresholdSeconds") * 1000L;
+    }
 
     @Override
     protected Position handlePosition(Position position) {
@@ -42,7 +49,12 @@ public class RunningTimeHandler extends BaseDataHandler{
             return position;
         }
 
-        // We have a last position
+        // We have a last position, check if data was lost in between since can't say if ignition was on or not then.
+        if (position.getDeviceTime().getTime() - lastPosition.getDeviceTime().getTime() >= DATA_LOSS_FOR_IGNITION_MILLIS) {
+            initializeHourMeter(position);
+            return position;
+        }
+
         if (!position.getAttributes().containsKey(KEY_IGNITION) &&
                 !lastPosition.getAttributes().containsKey(KEY_IGN_ON_MILLIS)) {
             initializeHourMeter(position);

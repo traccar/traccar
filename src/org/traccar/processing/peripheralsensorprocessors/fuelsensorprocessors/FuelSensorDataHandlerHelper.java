@@ -5,6 +5,7 @@ import com.google.common.collect.SortedMultiset;
 import com.google.common.collect.TreeMultiset;
 import org.traccar.Context;
 import org.traccar.helper.Log;
+import org.traccar.model.PeripheralSensor;
 import org.traccar.model.Position;
 
 import java.sql.SQLException;
@@ -94,15 +95,16 @@ public class FuelSensorDataHandlerHelper {
 
     public static boolean isOutlierPresentInSublist(List<Position> rawFuelOutlierSublist,
                                                     int indexOfPositionEvaluated,
-                                                    Optional<Long> fuelTankMaxCapacity) {
+                                                    Optional<Long> fuelTankMaxCapacity, PeripheralSensor fuelSensor) {
 
         // Make a copy so we don't affect the original incoming list esp in the sort below,
         // since the order of the incoming list needs to be preserved to remove / mark the right
         // Position as an outlier.
+        String calibFueldField = fuelSensor.getCalibFuelFieldName();
         List<Position> copyOfRawValues = new ArrayList<>();
         for (Position p : rawFuelOutlierSublist) {
             Position tempPosition = new Position();
-            tempPosition.set(Position.KEY_CALIBRATED_FUEL_LEVEL, (double) p.getAttributes().get(Position.KEY_CALIBRATED_FUEL_LEVEL));
+            tempPosition.set(calibFueldField, (double) p.getAttributes().get(calibFueldField));
             copyOfRawValues.add(tempPosition);
         }
 
@@ -111,7 +113,7 @@ public class FuelSensorDataHandlerHelper {
         double sumOfValues =
                 copyOfRawValues.stream()
                                      .mapToDouble(p -> (double) p.getAttributes()
-                                                                 .get(Position.KEY_CALIBRATED_FUEL_LEVEL))
+                                                                 .get(calibFueldField))
                                      .sum();
 
         double mean = sumOfValues / (double) listSize;
@@ -122,7 +124,7 @@ public class FuelSensorDataHandlerHelper {
                                      .mapToDouble(p -> {
                                          double differenceOfMean =
                                                  (double) p.getAttributes()
-                                                           .get(Position.KEY_CALIBRATED_FUEL_LEVEL) - mean;
+                                                           .get(calibFueldField) - mean;
                                          return differenceOfMean * differenceOfMean;
                                      }).sum();
 
@@ -131,16 +133,16 @@ public class FuelSensorDataHandlerHelper {
         double rawFuelOfPositionEvaluated =
                 (double) copyOfRawValues.get(indexOfPositionEvaluated)
                                               .getAttributes()
-                                              .get(Position.KEY_CALIBRATED_FUEL_LEVEL);
+                                              .get(calibFueldField);
 
         copyOfRawValues.sort(Comparator.comparing(p -> (double) p.getAttributes()
-                                                                       .get(Position.KEY_CALIBRATED_FUEL_LEVEL)));
+                                                                       .get(calibFueldField)));
 
         int midPointOfList = (listSize - 1) / 2;
 
         double medianRawFuelValue = (double) copyOfRawValues.get(midPointOfList)
                                                                   .getAttributes()
-                                                                  .get(Position.KEY_CALIBRATED_FUEL_LEVEL);
+                                                                  .get(calibFueldField);
 
         double standardDeviation = Math.sqrt(sumOfSquaredDifferenceOfMean / (double) listSize);
 
@@ -171,7 +173,7 @@ public class FuelSensorDataHandlerHelper {
         return isOutlier;
     }
 
-    public static Double getAverageFuelValue(List<Position> fuelLevelReadings) {
+    public static Double getAverageFuelValue(List<Position> fuelLevelReadings, PeripheralSensor fuelSensor) {
 
         // Omit values that are 0s, to avoid skewing the average. This is mostly useful in handling 0s from the
         // analog sensor, which are noise.
@@ -179,7 +181,7 @@ public class FuelSensorDataHandlerHelper {
         double size = 0.0;
 
         for (Position position : fuelLevelReadings) {
-            double level = (Double) position.getAttributes().get(Position.KEY_CALIBRATED_FUEL_LEVEL);
+            double level = (Double) position.getAttributes().get(fuelSensor.getCalibFuelFieldName());
             if (level > 0.0 && !Double.isNaN(level)) {
                 total += level;
                 size += 1.0;

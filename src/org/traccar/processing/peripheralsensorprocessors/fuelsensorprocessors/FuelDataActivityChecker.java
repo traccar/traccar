@@ -2,11 +2,11 @@ package org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors;
 
 import org.traccar.Context;
 import org.traccar.helper.Log;
+import org.traccar.model.PeripheralSensor;
 import org.traccar.model.Position;
 import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.FuelActivity.FuelActivityType;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -15,27 +15,20 @@ import java.util.stream.Collectors;
 
 public class FuelDataActivityChecker {
 
-    private static final Double fuelLevelChangeThreshold;
-
-    static {
-        fuelLevelChangeThreshold =
-                Context.getConfig()
-                       .getDouble("processing.peripheralSensorData.fuelLevelChangeThresholdLiters");
-    }
-
     public static FuelActivity checkForActivity(List<Position> readingsForDevice,
                                                 Map<String, FuelEventMetadata> deviceFuelEventMetadata,
-                                                Long sensorId) {
+                                                PeripheralSensor fuelSensor) {
 
         FuelActivity fuelActivity = new FuelActivity();
+        String calibFuelDataField = fuelSensor.getCalibFuelFieldName();
 
         final int readingsSize = readingsForDevice.size();
         final int midPoint = (readingsSize - 1) / 2;
         double leftSum = 0, rightSum = 0;
 
         for (int i = 0; i <= midPoint; i++) {
-            leftSum += (double) readingsForDevice.get(i).getAttributes().get(Position.KEY_CALIBRATED_FUEL_LEVEL);
-            rightSum += (double) readingsForDevice.get(i + midPoint).getAttributes().get(Position.KEY_CALIBRATED_FUEL_LEVEL);
+            leftSum += (double) readingsForDevice.get(i).getAttributes().get(calibFuelDataField);
+            rightSum += (double) readingsForDevice.get(i + midPoint).getAttributes().get(calibFuelDataField);
         }
 
         double leftMean = leftSum / (midPoint + 1);
@@ -43,7 +36,11 @@ public class FuelDataActivityChecker {
         double diffInMeans = Math.abs(leftMean - rightMean);
 
         long deviceId = readingsForDevice.get(0).getDeviceId();
-        String lookupKey = deviceId + "_" + sensorId;
+
+        DeviceConsumptionInfo consumptionInfo = Context.getDeviceManager().getDeviceConsumptionInfo(deviceId);
+        double fuelLevelChangeThreshold = consumptionInfo.getFuelActivityThreshold();
+
+        String lookupKey = deviceId + "_" + fuelSensor.getPeripheralSensorId();
         Log.debug("[FUEL_ACTIVITY] deviceId: " + deviceId + "diffInMeans: " + diffInMeans
                           + " fuelLevelChangeThreshold: " + fuelLevelChangeThreshold
                           + " diffInMeans > fuelLevelChangeThreshold: " + (diffInMeans > fuelLevelChangeThreshold));
@@ -55,12 +52,12 @@ public class FuelDataActivityChecker {
                 deviceFuelEventMetadata.put(lookupKey, new FuelEventMetadata());
 
                 FuelEventMetadata fuelEventMetadata = deviceFuelEventMetadata.get(lookupKey);
-                double leftMedian = getMedianValue(readingsForDevice, 0, midPoint);
+                double leftMedian = getMedianValue(readingsForDevice, 0, midPoint, fuelSensor);
                 fuelEventMetadata.setStartLevel(leftMedian);
 
                 fuelEventMetadata.setErrorCheckStart((double) readingsForDevice.get(0)
                                                                                .getAttributes()
-                                                                               .get(Position.KEY_CALIBRATED_FUEL_LEVEL));
+                                                                               .get(calibFuelDataField));
 
                 fuelEventMetadata.setStartTime(midPointPosition.getDeviceTime());
                 fuelEventMetadata.setActivityStartPosition(midPointPosition);
@@ -72,7 +69,7 @@ public class FuelDataActivityChecker {
                 StringBuilder timestamps = new StringBuilder();
                 readingsForDevice.forEach(p -> {
                     rawFuelValuesInReadings.append((double) p.getAttributes()
-                                                             .get(Position.KEY_CALIBRATED_FUEL_LEVEL) + ", ");
+                                                             .get(calibFuelDataField) + ", ");
                     timestamps.append(p.getDeviceTime());
                 });
 
@@ -90,7 +87,7 @@ public class FuelDataActivityChecker {
                 Log.debug("[FUEL_ACTIVITY_START] corresponding timestamps: " + timestamps);
                 Log.debug("[FUEL_ACTIVITY_START] Midpoint: "
                                   + midPointPosition.getAttributes()
-                                                    .get(Position.KEY_CALIBRATED_FUEL_LEVEL));
+                                                    .get(calibFuelDataField));
 
                 Log.debug("[FUEL_ACTIVITY_START] Left median: " + leftMedian);
                 Log.debug("[FUEL_ACTIVITY_START] metadata: " + fuelEventMetadata);
@@ -107,12 +104,12 @@ public class FuelDataActivityChecker {
             Position midPointPosition = readingsForDevice.get(midPoint);
             FuelEventMetadata fuelEventMetadata = deviceFuelEventMetadata.get(lookupKey);
 
-            double rightMedian = getMedianValue(readingsForDevice, midPoint, readingsSize);
+            double rightMedian = getMedianValue(readingsForDevice, midPoint, readingsSize, fuelSensor);
             fuelEventMetadata.setEndLevel(rightMedian);
 
             fuelEventMetadata.setErrorCheckEnd((double) readingsForDevice.get(readingsForDevice.size() - 1)
                                                                          .getAttributes()
-                                                                         .get(Position.KEY_CALIBRATED_FUEL_LEVEL));
+                                                                         .get(calibFuelDataField));
 
             fuelEventMetadata.setEndTime(midPointPosition.getDeviceTime());
             fuelEventMetadata.setActivityEndPosition(midPointPosition);
@@ -131,33 +128,37 @@ public class FuelDataActivityChecker {
             StringBuilder timestamps = new StringBuilder();
             readingsForDevice.forEach(p -> {
                 rawFuelValuesInReadings.append((double) p.getAttributes()
-                                                         .get(Position.KEY_CALIBRATED_FUEL_LEVEL) + ", ");
+                                                         .get(calibFuelDataField) + ", ");
                 timestamps.append(p.getDeviceTime());
             });
             Log.debug("[FUEL_ACTIVITY_END] rawFuelValues that crossed threshold for deviceId: " + deviceId
                               + " - " + rawFuelValuesInReadings);
             Log.debug("[FUEL_ACTIVITY_END] corresponding timestamps: " + timestamps);
             Log.debug("[FUEL_ACTIVITY_END] Midpoint: " + midPointPosition.getAttributes()
-                                                                         .get(Position.KEY_CALIBRATED_FUEL_LEVEL));
-            Log.debug("[FUEL_ACTIVITY_START] Right median: " + rightMedian);
+                                                                         .get(calibFuelDataField));
+            Log.debug("[FUEL_ACTIVITY_END] Right median: " + rightMedian);
             Log.debug("[FUEL_ACTIVITY_END] metadata: " + fuelEventMetadata);
             Log.debug("[FUEL_ACTIVITY_END] fuelChangeVolume: " + fuelChangeVolume);
             Log.debug("[FUEL_ACTIVITY_END] errorCheckFuelChange: " + errorCheckFuelChange);
 
-            Optional<Long> maxCapacity = Context.getPeripheralSensorManager().getFuelTankMaxCapacity(deviceId, sensorId);
-            boolean isDataLoss = FuelDataLossChecker.isFuelEventDueToDataLoss(fuelEventMetadata, maxCapacity);
+            Optional<Long> maxCapacity = Context.getPeripheralSensorManager().getFuelTankMaxCapacity(deviceId, fuelSensor.getPeripheralSensorId());
+            boolean isFuelConsumptionAsExpected =
+                    FuelConsumptionChecker.isFuelConsumptionAsExpected(fuelEventMetadata.getActivityStartPosition(),
+                                                                       fuelEventMetadata.getActivityEndPosition(),
+                                                                       fuelChangeVolume,
+                                                                       maxCapacity,
+                                                                       fuelSensor);
 
-            if (!isDataLoss && fuelChangeVolume < 0.0) {
+            // If fuel consumption is not as expected, means we have some activity going on.
+            if (!isFuelConsumptionAsExpected && fuelChangeVolume < 0.0) {
                 fuelActivity.setActivityType(FuelActivity.FuelActivityType.FUEL_DRAIN);
                 setActivityParameters(fuelActivity, fuelEventMetadata, fuelChangeVolume);
-                checkForMissedOutlier(fuelEventMetadata, fuelActivity);
-                // TODO: So now that we've checked and marked positions outliers in the event, what next?
+                checkForMissedOutlier(fuelEventMetadata, fuelActivity, fuelLevelChangeThreshold, fuelSensor);
                 deviceFuelEventMetadata.remove(lookupKey);
-            } else if (fuelChangeVolume > 0.0) {
+            } else if (!isFuelConsumptionAsExpected && fuelChangeVolume > 0.0) {
                 fuelActivity.setActivityType(FuelActivity.FuelActivityType.FUEL_FILL);
                 setActivityParameters(fuelActivity, fuelEventMetadata, fuelChangeVolume);
-                checkForMissedOutlier(fuelEventMetadata, fuelActivity);
-                // TODO: So now that we've checked and marked positions outliers in the event, what next?
+                checkForMissedOutlier(fuelEventMetadata, fuelActivity, fuelLevelChangeThreshold, fuelSensor);
                 deviceFuelEventMetadata.remove(lookupKey);
             } else {
                 // The start may have been detected as a false positive. In any case, remove after we determine the kind
@@ -173,25 +174,33 @@ public class FuelDataActivityChecker {
 
     public static Optional<FuelActivity> checkForActivityIfDataLoss(final Position position,
                                                                     final Position lastPosition,
-                                                                    final Optional<Long> maxTankMaxVolume) {
+                                                                    final Optional<Long> maxTankMaxVolume,
+                                                                    PeripheralSensor fuelSensor) {
 
-        final boolean requiredFieldsPresent = FuelDataLossChecker.checkRequiredFieldsPresent(lastPosition, position);
+        // TODO: Should this be per device or per sensor?
+        DeviceConsumptionInfo consumptionInfo = Context.getDeviceManager().getDeviceConsumptionInfo(position.getDeviceId());
+
+        final boolean requiredFieldsPresent =
+                FuelConsumptionChecker.checkRequiredFieldsPresent(lastPosition, position, consumptionInfo, fuelSensor);
+
         if (!requiredFieldsPresent) {
             // Not enough info to process data loss.
             return Optional.empty();
         }
 
+        String calibFuelDataField = fuelSensor.getCalibFuelFieldName();
+
         ExpectedFuelConsumption expectedFuelConsumption =
-                FuelDataLossChecker.getExpectedFuelConsumptionValues(lastPosition, position, maxTankMaxVolume);
+                FuelConsumptionChecker.getExpectedFuelConsumptionValues(lastPosition, position, maxTankMaxVolume, consumptionInfo);
 
-        double calculatedFuelChangeVolume = position.getDouble(Position.KEY_CALIBRATED_FUEL_LEVEL)
-                - lastPosition.getDouble(Position.KEY_CALIBRATED_FUEL_LEVEL);
+        double calculatedFuelChangeVolume = position.getDouble(calibFuelDataField)
+                - lastPosition.getDouble(calibFuelDataField);
 
-        if (Math.abs(calculatedFuelChangeVolume) > expectedFuelConsumption.allowedDeviation) {
+        if (expectedFuelConsumption != null && Math.abs(calculatedFuelChangeVolume) > expectedFuelConsumption.allowedDeviation) {
             if (calculatedFuelChangeVolume < 0.0) {
                 boolean isConsumptionExpected =
-                        FuelDataLossChecker.isFuelConsumptionAsExpected(calculatedFuelChangeVolume,
-                                                                        expectedFuelConsumption);
+                        FuelConsumptionChecker.isFuelConsumptionAsExpected(calculatedFuelChangeVolume,
+                                                                           expectedFuelConsumption);
 
                 if (isConsumptionExpected) {
                     Log.info(String.format(
@@ -259,12 +268,14 @@ public class FuelDataActivityChecker {
 
     private static double getMedianValue(final List<Position> readingsForDevice,
                                          final int start,
-                                         final int end) {
+                                         final int end,
+                                         PeripheralSensor fuelSensor) {
 
+        String calibFuelField = fuelSensor.getCalibFuelFieldName();
         final List<Double> readings = readingsForDevice.subList(start, end)
                                                        .stream()
                                                        .map(p -> (double) p.getAttributes()
-                                                                           .get(Position.KEY_CALIBRATED_FUEL_LEVEL))
+                                                                           .get(calibFuelField))
                                                        .collect(Collectors.toList());
 
         // Sort them in the ascending order
@@ -275,28 +286,31 @@ public class FuelDataActivityChecker {
     }
 
     private static void checkForMissedOutlier(final FuelEventMetadata fuelEventMetadata,
-                                              final FuelActivity fuelActivity) {
+                                              final FuelActivity fuelActivity,
+                                              double fuelLevelChangeThreshold,
+                                              PeripheralSensor fuelSensor) {
 
         double minFuelValue = 0.0, maxFuelValue = 0.0;
 
         FuelActivityType activityType = fuelActivity.getActivityType();
         Position startPositon = fuelActivity.getActivityStartPosition();
         Position endPosition = fuelActivity.getActivityEndPosition();
+        String calibFuelField = fuelSensor.getCalibFuelFieldName();
 
         // Note: these can be the only 2 cases, since this method is not called during data loss checks.
         if ( activityType == FuelActivityType.FUEL_FILL) {
-            minFuelValue = startPositon.getDouble(Position.KEY_CALIBRATED_FUEL_LEVEL) - fuelLevelChangeThreshold;
-            maxFuelValue = endPosition.getDouble(Position.KEY_CALIBRATED_FUEL_LEVEL) + fuelLevelChangeThreshold;
+            minFuelValue = startPositon.getDouble(calibFuelField) - fuelLevelChangeThreshold;
+            maxFuelValue = endPosition.getDouble(calibFuelField) + fuelLevelChangeThreshold;
         } else if (activityType == FuelActivityType.FUEL_DRAIN) {
-            minFuelValue = endPosition.getDouble(Position.KEY_CALIBRATED_FUEL_LEVEL) - fuelLevelChangeThreshold;
-            maxFuelValue = startPositon.getDouble(Position.KEY_CALIBRATED_FUEL_LEVEL) + fuelLevelChangeThreshold;
+            minFuelValue = endPosition.getDouble(calibFuelField) - fuelLevelChangeThreshold;
+            maxFuelValue = startPositon.getDouble(calibFuelField) + fuelLevelChangeThreshold;
         }
 
         for (Position position : fuelEventMetadata.getActivityWindow()) {
-            boolean isOutlier = position.getDouble(Position.KEY_CALIBRATED_FUEL_LEVEL) < minFuelValue
-                                || position.getDouble(Position.KEY_CALIBRATED_FUEL_LEVEL) > maxFuelValue;
+            boolean isOutlier = position.getDouble(calibFuelField) < minFuelValue
+                                || position.getDouble(calibFuelField) > maxFuelValue;
 
-            position.set(Position.KEY_FUEL_IS_OUTLIER, isOutlier);
+            position.set(fuelSensor.getFuelOutlierFieldName(), isOutlier);
 
             // These are amazingly expensive DB write calls. 2nd occurence of this type of writes.
             // Need to make a better async way to do this.

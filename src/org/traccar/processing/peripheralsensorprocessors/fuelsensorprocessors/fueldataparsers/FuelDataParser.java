@@ -6,5 +6,5 @@ import java.util.Optional;
 
 public interface FuelDataParser {
 
-    Optional<Long> getFuelLevelPointsFromPayload(Position position);
+    Optional<Long> getFuelLevelPointsFromPayload(Position position, String fuelDataField);
 }

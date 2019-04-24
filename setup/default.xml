@@ -67,7 +67,7 @@
     </entry>
 
     <entry key='database.selectPeripheralSensors'>
-        SELECT p.id AS peripheralSensorId, d.id AS deviceId, dt.typename as typeName, p.calibrationdata as calibrationData
+        SELECT p.id AS peripheralSensorId, d.id AS deviceId, dt.typename as typeName, p.calibrationdata as calibrationData, p.attributes as attributes
         FROM peripheralsensors AS p
         JOIN peripheralsensortypes AS dt ON p.sensortypeid = dt.id
         JOIN device_peripheralsensors AS dp ON p.id = dp.peripheralsensorid

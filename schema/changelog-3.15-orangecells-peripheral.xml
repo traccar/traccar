@@ -51,8 +51,17 @@
                                  referencedColumnNames="id" />
         <addForeignKeyConstraint baseTableName="device_peripheralsensors" baseColumnNames="peripheralsensorid" constraintName="fk_device_peripheralsensors_peripheralsensorid" referencedTableName="peripheralsensors"
                                  referencedColumnNames="id" />
+    </changeSet>
 
+    <changeSet id="fuel_sensor_data_fields" author="saurako">
+        <addColumn tableName="peripheralsensors">
+            <column name="attributes" type="VARCHAR(4096)" />
+        </addColumn>
+    </changeSet>
 
-
+    <changeSet id="device_time_events_table" author="saurako">
+        <addColumn tableName="events">
+            <column name="devicetime" type="TIMESTAMP" />
+        </addColumn>
     </changeSet>
 </databaseChangeLog>

@@ -118,10 +118,18 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_RSSI, readValue(buf, length, false));
                 break;
             case 66:
-                position.set(Position.KEY_POWER, readValue(buf, length, false) * 0.001);
+                double power = readValue(buf, length, false) * 0.001;
+                position.set(Position.KEY_POWER, power);
+                if (power < 1.0) {
+                    position.set(Position.KEY_EXTERNAL_BATTERY_DISCONNECT, true);
+                }
                 break;
             case 67:
-                position.set(Position.KEY_BATTERY, readValue(buf, length, false) * 0.001);
+                double battery = readValue(buf, length, false) * 0.001;
+                position.set(Position.KEY_BATTERY, battery);
+                if (battery < 2.0) {
+                    position.set(Position.KEY_INTERNAL_BATTERY_LOW, true);
+                }
                 break;
             case 72:
                 position.set(Position.PREFIX_TEMP + 1, readValue(buf, length, true) * 0.1);
@@ -163,6 +171,8 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             case 182:
                 position.set(Position.KEY_HDOP, readValue(buf, length, false) * 0.1);
                 break;
+            case 216:
+                position.set(Position.KEY_ODOMETER, readValue(buf, length, false));
             case 236:
                 if (readValue(buf, length, false) == 1) {
                     position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);

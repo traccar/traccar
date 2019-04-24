@@ -1,4 +1,4 @@
-package org.traccar.events.aquila;
+package org.traccar.events.custom;
 
 import org.traccar.BaseEventHandler;
 import org.traccar.Context;
@@ -10,35 +10,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Created by saurako on 5/24/18.
- */
-public class AquilaAEventsHandler extends BaseEventHandler {
+public class CommonGPSEventsHandler extends BaseEventHandler {
 
     private static int batteryEventsAlertThreshold;
+    private Map<Long, List<Event>> deviceIdToExtBatteryDisconnectMap = new ConcurrentHashMap<>();
+    private Map<Long, List<Event>> deviceIdToIntBatteryLowMap = new ConcurrentHashMap<>();
 
     static {
         batteryEventsAlertThreshold = Context.getConfig().getInteger("processing.peripheralSensorData.batteryEventsThreshold");
     }
 
-    private Map<String, String> positionInfoToEventTypeMap = new ConcurrentHashMap<>();
-
-    private Map<Long, List<Event>> deviceIdToExtBatteryDisconnectMap = new ConcurrentHashMap<>();
-    private Map<Long, List<Event>> deviceIdToIntBatteryLowMap = new ConcurrentHashMap<>();
-
-    public AquilaAEventsHandler() {
-        positionInfoToEventTypeMap.put(Position.KEY_CASE_OPEN, Event.TYPE_CASE_OPEN);
-        positionInfoToEventTypeMap.put(Position.KEY_HARD_ACCELERATION, Event.TYPE_HARD_ACCELERATION);
-        positionInfoToEventTypeMap.put(Position.KEY_HARD_BRAKING, Event.TYPE_HARD_BRAKING);
-        positionInfoToEventTypeMap.put(Position.KEY_OVERSPEED_START, Event.TYPE_OVERSPEED_START);
-        positionInfoToEventTypeMap.put(Position.KEY_OVERSPEED_END, Event.TYPE_OVERSPEED_END);
+    @Override
+    protected Map<Event, Position> analyzePosition(Position position) {
+        return processPosition(position);
     }
 
-    @Override
-    protected Map<Event, Position> analyzePosition(final Position position) {
+    protected Map<Event, Position> processPosition(Position position) {
         Map<Event, Position> result = new ConcurrentHashMap<>();
         Map<String, Object> attributes = position.getAttributes();
-
         handleBatteryEvent(position,
                            Position.KEY_EXTERNAL_BATTERY_DISCONNECT,
                            deviceIdToExtBatteryDisconnectMap,
@@ -50,31 +39,22 @@ public class AquilaAEventsHandler extends BaseEventHandler {
                            deviceIdToIntBatteryLowMap,
                            result,
                            attributes);
-
-        for (String eventString : positionInfoToEventTypeMap.keySet()) {
-             if (attributes.containsKey(eventString) && (boolean) attributes.get(eventString)) {
-                String eventType = positionInfoToEventTypeMap.get(eventString);
-                Event event = createEvent(position, eventType);
-                result.put(event, position);
-            }
-        }
-
         return result;
     }
 
     private void handleBatteryEvent(final Position position,
-                                           final String eventType,
-                                           final Map<Long, List<Event>> eventsMap,
-                                           final Map<Event, Position> result,
-                                           final Map<String, Object> attributes) {
+                                    final String eventType,
+                                    final Map<Long, List<Event>> eventsMap,
+                                    final Map<Event, Position> result,
+                                    final Map<String, Object> attributes) {
 
         long deviceId = position.getDeviceId();
 
         boolean isExpectedBatteryEvent = attributes.containsKey(eventType)
-                                         && (boolean) attributes.get(eventType);
+                && (boolean) attributes.get(eventType);
 
-        boolean charge =  attributes.containsKey(Position.KEY_CHARGE)
-                          && (boolean) attributes.get(Position.KEY_CHARGE);
+        boolean charge = attributes.containsKey(Position.KEY_CHARGE)
+                && (boolean) attributes.get(Position.KEY_CHARGE);
 
         if (isExpectedBatteryEvent) {
             registerEventIfNecessary(position, eventType, eventsMap, result, deviceId);
@@ -82,7 +62,7 @@ public class AquilaAEventsHandler extends BaseEventHandler {
         }
 
         if (eventsMap.containsKey(deviceId)
-            && !eventsMap.get(deviceId).isEmpty()) {
+                && !eventsMap.get(deviceId).isEmpty()) {
 
             if (charge) {
                 registerEventIfNecessary(position, eventType, eventsMap, result, deviceId);
@@ -94,11 +74,11 @@ public class AquilaAEventsHandler extends BaseEventHandler {
 
     }
 
-    private static void registerEventIfNecessary(final Position position,
-                                                 final String eventType,
-                                                 final Map<Long, List<Event>> eventsMap,
-                                                 final Map<Event, Position> result,
-                                                 final long deviceId) {
+    private void registerEventIfNecessary(final Position position,
+                                          final String eventType,
+                                          final Map<Long, List<Event>> eventsMap,
+                                          final Map<Event, Position> result,
+                                          final long deviceId) {
 
         Event batteryEvent = createEvent(position, eventType);
 
@@ -138,8 +118,8 @@ public class AquilaAEventsHandler extends BaseEventHandler {
         }
     }
 
-    private static Event createEvent(final Position position, final String eventType) {
-        final Event event = new Event(eventType, position.getDeviceId(), position.getId());
+    protected Event createEvent(final Position position, final String eventType) {
+        final Event event = new Event(eventType, position.getDeviceId(), position.getId(), position.getDeviceTime());
         event.set("startTime", position.getDeviceTime().getTime());
 
         // Setting the start and end lat long to keep it consistent with the fuel events.

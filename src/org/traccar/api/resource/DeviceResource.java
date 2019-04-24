@@ -22,6 +22,7 @@ import org.traccar.helper.LogAction;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceTotalDistance;
 
+import javax.annotation.security.PermitAll;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -97,4 +98,11 @@ public class DeviceResource extends BaseObjectResource<Device> {
         return Response.noContent().build();
     }
 
+    @PermitAll
+    @Path("/refresh")
+    @GET
+    public Response refreshDevices() throws SQLException {
+        Context.getDeviceManager().updateDeviceCache(true);
+        return Response.noContent().build();
+    }
 }
