@@ -89,40 +89,4 @@ public class PeripheralSensor extends ExtendedModel {
         return fuelDataField == null? defaultName : fuelDataField + "_is_outlier";
 
     }
-
-//    public Map<String, Map<String, String>> getFuelFields() {
-//
-//        String sensorDataField =
-//                this.getString(FuelDataConstants.SENSOR_FUEL_DATA_FIELD);
-//
-//        String calibFuelDataField =
-//                this.getString(FuelDataConstants.CALIB_FUEL_ON_POSITION_NAME);
-//
-//        String fuelDataField =
-//                this.getString(FuelDataConstants.SMOOTHED_FUEL_ON_POSITION_NAME);
-//
-//        // The default values will depend on the protocol too.
-//        // TODO: Find a better way to do this.
-//        if (sensorDataField == null) {
-//            switch(this.getTypeName()) {
-//                case "analog": sensorDataField = "adc1";
-//                        break;
-//                case "digital": sensorDataField = "digital";
-//                        break;
-//                default:
-//                    sensorDataField = "adc1";
-//
-//            }
-//        }
-//
-//        if (calibFuelDataField == null) {
-//            calibFuelDataField = Position.KEY_CALIBRATED_FUEL_LEVEL;
-//        }
-//
-//        if (fuelDataField == null) {
-//            fuelDataField = Position.KEY_FUEL_LEVEL;
-//        }
-//
-//        return ImmutableMap.of(sensorDataField, Pair.of(calibFuelDataField, fuelDataField));
-//    }
 }
