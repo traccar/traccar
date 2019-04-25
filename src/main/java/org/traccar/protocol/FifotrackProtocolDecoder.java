@@ -23,7 +23,6 @@ import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.Checksum;
-import org.traccar.helper.DataConverter;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -32,6 +31,7 @@ import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
 public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
@@ -87,12 +87,11 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
             .text("$$")
             .number("d+,")                       // length
             .number("(d+),")                     // imei
-            .expression("([^*]+),")              // photo id
+            .number("x+,")                       // index
+            .expression("[^,]+,")                // type
+            .expression("([^,]+),")              // photo id
             .number("(d+),")                     // offset
             .number("(d+),")                     // size
-            .number("(x+)")                      // data
-            .text("*")
-            .number("xx")
             .compile();
 
     private void requestPhoto(Channel channel, SocketAddress socketAddress, String imei, String file) {
@@ -165,11 +164,14 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        String sentence = (String) msg;
-        int typeIndex = sentence.indexOf(',', sentence.indexOf(',', sentence.indexOf(',') + 1) + 1) + 1;
-        String type = sentence.substring(typeIndex, typeIndex + 3);
+        ByteBuf buf = (ByteBuf) msg;
+        int typeIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ',') + 1;
+        typeIndex = buf.indexOf(typeIndex, buf.writerIndex(), (byte) ',') + 1;
+        typeIndex = buf.indexOf(typeIndex, buf.writerIndex(), (byte) ',') + 1;
+        String type = buf.toString(typeIndex, 3, StandardCharsets.US_ASCII);
 
         if (type.equals("D05")) {
+            String sentence = buf.toString(StandardCharsets.US_ASCII);
             Parser parser = new Parser(PATTERN_PHOTO, sentence);
             if (parser.matches()) {
                 String imei = parser.next();
@@ -179,16 +181,22 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
                 requestPhoto(channel, remoteAddress, imei, photoId);
             }
         } else if (type.equals("D06")) {
+            int dataIndex = buf.indexOf(typeIndex + 4, buf.writerIndex(), (byte) ',') + 1;
+            dataIndex = buf.indexOf(dataIndex, buf.writerIndex(), (byte) ',') + 1;
+            dataIndex = buf.indexOf(dataIndex, buf.writerIndex(), (byte) ',') + 1;
+            String sentence = buf.toString(buf.readerIndex(), dataIndex, StandardCharsets.US_ASCII);
             Parser parser = new Parser(PATTERN_PHOTO_DATA, sentence);
             if (parser.matches()) {
                 String imei = parser.next();
                 String photoId = parser.next();
                 parser.nextInt(); // offset
                 parser.nextInt(); // size
-                photo.writeBytes(DataConverter.parseHex(parser.next()));
+                buf.readerIndex(dataIndex);
+                photo.writeBytes(buf.readBytes(buf.readableBytes() - 3)); // ignore checksum
                 requestPhoto(channel, remoteAddress, imei, photoId);
             }
         } else {
+            String sentence = buf.toString(StandardCharsets.US_ASCII);
             return decodeLocation(channel, remoteAddress, sentence);
         }
 

@@ -16,7 +16,6 @@
 package org.traccar.protocol;
 
 import io.netty.handler.codec.LineBasedFrameDecoder;
-import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
@@ -30,7 +29,6 @@ public class FifotrackProtocol extends BaseProtocol {
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new LineBasedFrameDecoder(1024));
                 pipeline.addLast(new StringEncoder());
-                pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new FifotrackProtocolDecoder(FifotrackProtocol.this));
             }
         });
