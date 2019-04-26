@@ -156,7 +156,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                 && deviceLastKnownOdometerPositionLookup.containsKey(deviceId)) {
 
             Position lastPosition = deviceLastKnownOdometerPositionLookup.get(deviceId);
-            position.set(Position.KEY_ODOMETER, (int) lastPosition.getAttributes().get(Position.KEY_ODOMETER));
+            position.set(Position.KEY_ODOMETER, ((Number) lastPosition.getAttributes().get(Position.KEY_ODOMETER)).longValue());
         }
 
         if ((position.getAttributes().containsKey(calibFuelDataField) &&
@@ -199,10 +199,10 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         Map<String, Object> currentAttributes = position.getAttributes();
 
         if (lastKnownPosition.getDeviceTime().getTime() > position.getDeviceTime().getTime()
-            || ((int) lastKnownAttributes.get(Position.KEY_ODOMETER) >
-                    (int) currentAttributes.get(Position.KEY_ODOMETER))
-            || ((double) lastKnownAttributes.get(Position.KEY_TOTAL_DISTANCE) >
-                    (double) currentAttributes.get(Position.KEY_TOTAL_DISTANCE))) {
+            || (((Number) lastKnownAttributes.get(Position.KEY_ODOMETER)).longValue() >
+                ((Number) currentAttributes.get(Position.KEY_ODOMETER)).longValue())
+            || (((Number) lastKnownAttributes.get(Position.KEY_TOTAL_DISTANCE)).longValue() >
+                ((Number) currentAttributes.get(Position.KEY_TOTAL_DISTANCE)).longValue())) {
 
             return;
         }
