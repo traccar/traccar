@@ -171,8 +171,10 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             case 182:
                 position.set(Position.KEY_HDOP, readValue(buf, length, false) * 0.1);
                 break;
+            case 16:
             case 216:
                 position.set(Position.KEY_ODOMETER, readValue(buf, length, false));
+                break;
             case 236:
                 if (readValue(buf, length, false) == 1) {
                     position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
