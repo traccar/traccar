@@ -84,8 +84,9 @@ public class DistanceHandler extends BaseDataHandler {
                 && last.getAttributes().containsKey(Position.KEY_ODOMETER)
                 && position.getAttributes().containsKey(Position.KEY_ODOMETER)) {
 
-                double differenceInOdometer = (double) (Integer) position.getAttributes().get(Position.KEY_ODOMETER)
-                                              - (double) (Integer)last.getAttributes().get(Position.KEY_ODOMETER);
+                double differenceInOdometer = ((Number) position.getAttributes().get(Position.KEY_ODOMETER)).doubleValue()
+                                              -  ((Number)last.getAttributes().get(Position.KEY_ODOMETER)).doubleValue();
+
                 if(differenceInOdometer > distance) {
                     distance = differenceInOdometer;
                 }

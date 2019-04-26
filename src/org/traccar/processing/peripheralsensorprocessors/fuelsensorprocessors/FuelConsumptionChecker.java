@@ -117,8 +117,8 @@ public class FuelConsumptionChecker {
         double startTotalGPSDistanceInMeters = (double) startPosition.getAttributes().get(Position.KEY_TOTAL_DISTANCE);
         double endTotalGPSDistanceInMeters = (double) endPosition.getAttributes().get(Position.KEY_TOTAL_DISTANCE);
 
-        int startOdometerInMeters = (int) startPosition.getAttributes().get(Position.KEY_ODOMETER);
-        int endOdometerInMeters = (int) endPosition.getAttributes().get(Position.KEY_ODOMETER);
+        Number startOdometerInMeters = (Number) startPosition.getAttributes().get(Position.KEY_ODOMETER);
+        Number endOdometerInMeters = (Number) endPosition.getAttributes().get(Position.KEY_ODOMETER);
 
         double differenceTotalDistanceInMeters;
         if (endTotalGPSDistanceInMeters > 0 && startTotalGPSDistanceInMeters > 0) {
@@ -132,7 +132,7 @@ public class FuelConsumptionChecker {
                                                         .setScale(2, RoundingMode.HALF_EVEN).doubleValue();
         }
 
-        double differenceOdometerInMeters = endOdometerInMeters - startOdometerInMeters;
+        double differenceOdometerInMeters = endOdometerInMeters.longValue() - startOdometerInMeters.longValue();
 
         // max distance in KM
         double maximumDistanceTravelled = Math.max(differenceTotalDistanceInMeters, differenceOdometerInMeters) / 1000;
