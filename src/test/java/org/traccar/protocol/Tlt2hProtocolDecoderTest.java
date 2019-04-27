@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class Tlt2hProtocolDecoderTest extends ProtocolTest {
 
@@ -9,6 +10,11 @@ public class Tlt2hProtocolDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         Tlt2hProtocolDecoder decoder = new Tlt2hProtocolDecoder(null);
+
+        verifyAttribute(decoder, text(
+                "#869260042149724#MP90_4G#0000#AUTOLOW#1\r\n" +
+                "#02201be0000$GPRMC,001645.00,A,5333.2920,N,11334.3857,W,0.03,,250419,,,A*5E\r\n"),
+                Position.KEY_IGNITION, false);
 
         verifyPositions(decoder, text(
                 "#867962040161955#MT600#0000#0#0#137#41#0#AUTO#1\r\n" +

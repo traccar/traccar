@@ -17,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -101,7 +102,13 @@ public class ProtocolTest extends BaseTest {
     }
 
     protected void verifyAttribute(BaseProtocolDecoder decoder, Object object, String key, Object expected) throws Exception {
-        Position position = (Position) decoder.decode(null, null, object);
+        Object decodedObject = decoder.decode(null, null, object);
+        Position position;
+        if (decodedObject instanceof Collection) {
+            position = (Position) ((Collection) decodedObject).iterator().next();
+        } else {
+            position = (Position) decodedObject;
+        }
         switch (key) {
             case "speed":
                 assertEquals(expected, position.getSpeed());
