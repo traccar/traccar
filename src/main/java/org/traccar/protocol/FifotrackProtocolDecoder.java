@@ -19,6 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -181,6 +182,9 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
                 requestPhoto(channel, remoteAddress, imei, photoId);
             }
         } else if (type.equals("D06")) {
+            if (photo == null) {
+                return null;
+            }
             int dataIndex = buf.indexOf(typeIndex + 4, buf.writerIndex(), (byte) ',') + 1;
             dataIndex = buf.indexOf(dataIndex, buf.writerIndex(), (byte) ',') + 1;
             dataIndex = buf.indexOf(dataIndex, buf.writerIndex(), (byte) ',') + 1;
@@ -193,7 +197,17 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
                 parser.nextInt(); // size
                 buf.readerIndex(dataIndex);
                 photo.writeBytes(buf.readBytes(buf.readableBytes() - 3)); // ignore checksum
-                requestPhoto(channel, remoteAddress, imei, photoId);
+                if (photo.isWritable()) {
+                    requestPhoto(channel, remoteAddress, imei, photoId);
+                } else {
+                    Position position = new Position(getProtocolName());
+                    position.setDeviceId(getDeviceSession(channel, remoteAddress, imei).getDeviceId());
+                    getLastLocation(position, null);
+                    position.set(Position.KEY_IMAGE, Context.getMediaManager().writeFile(imei, photo, "jpg"));
+                    photo.release();
+                    photo = null;
+                    return position;
+                }
             }
         } else {
             String sentence = buf.toString(StandardCharsets.US_ASCII);
