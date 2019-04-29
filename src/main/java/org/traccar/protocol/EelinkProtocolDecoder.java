@@ -327,7 +327,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private Position decodeObd(DeviceSession deviceSession, ByteBuf buf, int index) {
+    private Position decodeObd(DeviceSession deviceSession, ByteBuf buf) {
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
@@ -425,7 +425,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
             } else if (type == MSG_OBD) {
 
-                return decodeObd(deviceSession, buf, index);
+                return decodeObd(deviceSession, buf);
 
             } else if (type == MSG_DOWNLINK) {
 
