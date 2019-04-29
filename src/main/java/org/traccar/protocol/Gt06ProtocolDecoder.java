@@ -15,7 +15,6 @@
  */
 package org.traccar.protocol;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
@@ -40,190 +39,14 @@ import org.traccar.model.WifiAccessPoint;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
-
-    static class ComplexBMS {
-        private Long time;
-        private Short relativeSoc;
-        private Integer remainingCap;
-        private Short absoluteSoc;
-        private Integer fullCap;
-        private Short soh;
-        private Integer innerTemp;
-        private Integer realCurrent;
-        private Integer voltage;
-        private Integer cycleIndex;
-        private List<Integer> batterysVol;
-        private Integer currChargingInterval;
-        private Integer maxChargingInterval;
-        private String barcode;
-        private String version;
-        private String manufacturer;
-        private Integer batteryStatus;
-        private Integer controllerStatus;
-        private Integer controllerFaultCode;
-
-        public Long getTime() {
-            return time;
-        }
-
-        public void setTime(Long time) {
-            this.time = time;
-        }
-
-        public Short getRelativeSoc() {
-            return relativeSoc;
-        }
-
-        public void setRelativeSoc(Short relativeSoc) {
-            this.relativeSoc = relativeSoc;
-        }
-
-        public Integer getRemainingCap() {
-            return remainingCap;
-        }
-
-        public void setRemainingCap(Integer remainingCap) {
-            this.remainingCap = remainingCap;
-        }
-
-        public Short getAbsoluteSoc() {
-            return absoluteSoc;
-        }
-
-        public void setAbsoluteSoc(Short absoluteSoc) {
-            this.absoluteSoc = absoluteSoc;
-        }
-
-        public Integer getFullCap() {
-            return fullCap;
-        }
-
-        public void setFullCap(Integer fullCap) {
-            this.fullCap = fullCap;
-        }
-
-        public Short getSoh() {
-            return soh;
-        }
-
-        public void setSoh(Short soh) {
-            this.soh = soh;
-        }
-
-        public Integer getInnerTemp() {
-            return innerTemp;
-        }
-
-        public void setInnerTemp(Integer innerTemp) {
-            this.innerTemp = innerTemp;
-        }
-
-        public Integer getRealCurrent() {
-            return realCurrent;
-        }
-
-        public void setRealCurrent(Integer realCurrent) {
-            this.realCurrent = realCurrent;
-        }
-
-        public Integer getVoltage() {
-            return voltage;
-        }
-
-        public void setVoltage(Integer voltage) {
-            this.voltage = voltage;
-        }
-
-        public Integer getCycleIndex() {
-            return cycleIndex;
-        }
-
-        public void setCycleIndex(Integer cycleIndex) {
-            this.cycleIndex = cycleIndex;
-        }
-
-        public List<Integer> getBatterysVol() {
-            return batterysVol;
-        }
-
-        public void setBatterysVol(List<Integer> batterysVol) {
-            this.batterysVol = batterysVol;
-        }
-
-        public Integer getCurrChargingInterval() {
-            return currChargingInterval;
-        }
-
-        public void setCurrChargingInterval(Integer currChargingInterval) {
-            this.currChargingInterval = currChargingInterval;
-        }
-
-        public Integer getMaxChargingInterval() {
-            return maxChargingInterval;
-        }
-
-        public void setMaxChargingInterval(Integer maxChargingInterval) {
-            this.maxChargingInterval = maxChargingInterval;
-        }
-
-        public String getBarcode() {
-            return barcode;
-        }
-
-        public void setBarcode(String barcode) {
-            this.barcode = barcode;
-        }
-
-        public String getVersion() {
-            return version;
-        }
-
-        public void setVersion(String version) {
-            this.version = version;
-        }
-
-        public String getManufacturer() {
-            return manufacturer;
-        }
-
-        public void setManufacturer(String manufacturer) {
-            this.manufacturer = manufacturer;
-        }
-
-        public Integer getBatteryStatus() {
-            return batteryStatus;
-        }
-
-        public void setBatteryStatus(Integer batteryStatus) {
-            this.batteryStatus = batteryStatus;
-        }
-
-        public Integer getControllerStatus() {
-            return controllerStatus;
-        }
-
-        public void setControllerStatus(Integer controllerStatus) {
-            this.controllerStatus = controllerStatus;
-        }
-
-        public Integer getControllerFaultCode() {
-            return controllerFaultCode;
-        }
-
-        public void setControllerFaultCode(Integer controllerFaultCode) {
-            this.controllerFaultCode = controllerFaultCode;
-        }
-    }
 
     private final Map<Integer, ByteBuf> photos = new HashMap<>();
 
@@ -274,8 +97,10 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_OBD = 0x8C;
     public static final int MSG_DTC = 0x65;
     public static final int MSG_PID = 0x66;
-    public static final int MSG_BMS_DATA = 0x40;
-    public static final int MSG_MEDIA_DATA = 0x41;
+    public static final int MSG_BMS = 0x20;
+    public static final int MSG_MULTIMEDIA = 0x21;
+    public static final int MSG_BMS_2 = 0x40;
+    public static final int MSG_MULTIMEDIA_2 = 0x41;
 
     private static boolean isSupported(int type) {
         return hasGps(type) || hasLbs(type) || hasStatus(type);
@@ -367,7 +192,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             response.writeShort(Checksum.crc16(Checksum.CRC16_X25,
                     response.nioBuffer(2, response.writerIndex() - 2)));
             response.writeByte('\r');
-            response.writeByte('\n'); // ending
+            response.writeByte('\n');
             channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
     }
@@ -791,8 +616,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private Object decodeBasicOther(Channel channel, ByteBuf buf,
-                                    DeviceSession deviceSession, int type, int dataLength) throws Exception {
+    private Object decodeBasicOther(
+            Channel channel, ByteBuf buf, DeviceSession deviceSession, int type, int dataLength) {
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
@@ -845,44 +670,38 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                         buf.readSlice(commandLength - 1).toString(StandardCharsets.US_ASCII));
             }
 
-        } else if (type == MSG_BMS_DATA) {
-            getLastLocation(position, new Date());
+        } else if (type == MSG_BMS || type == MSG_BMS_2) {
 
-            ComplexBMS bms = new ComplexBMS();
+            buf.skipBytes(8); // serial number
 
-            buf.skipBytes(8); // skip sn
-            bms.setTime(buf.readUnsignedInt() * 1000);
-            bms.setRelativeSoc(buf.readUnsignedByte());
-            bms.setRemainingCap(buf.readUnsignedShort());
-            bms.setAbsoluteSoc(buf.readUnsignedByte());
-            bms.setFullCap(buf.readUnsignedShort());
-            bms.setSoh(buf.readUnsignedByte());
-            bms.setInnerTemp(buf.readUnsignedShort());
-            bms.setRealCurrent(buf.readUnsignedShort());
-            bms.setVoltage(buf.readUnsignedShort());
-            bms.setCycleIndex(buf.readUnsignedShort());
-            List<Integer> batterysVol = new LinkedList<>();
-            for (int i = 0; i < 14; i++) {
-                batterysVol.add(buf.readUnsignedShort());
+            getLastLocation(position, new Date(buf.readUnsignedInt() * 1000));
+
+            position.set("relativeCapacity", buf.readUnsignedByte());
+            position.set("remainingCapacity", buf.readUnsignedShort());
+            position.set("absoluteCapacity", buf.readUnsignedByte());
+            position.set("fullCapacity", buf.readUnsignedShort());
+            position.set("batteryHealth", buf.readUnsignedByte());
+            position.set("batteryTemp", buf.readUnsignedShort() * 0.1 - 273.1);
+            position.set("current", buf.readUnsignedShort());
+            position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
+            position.set("cycleIndex", buf.readUnsignedShort());
+            for (int i = 1; i <= 14; i++) {
+                position.set("batteryCell" + i, buf.readUnsignedShort() * 0.001);
             }
-            bms.setBatterysVol(batterysVol);
-            bms.setCurrChargingInterval(buf.readUnsignedShort());
-            bms.setMaxChargingInterval(buf.readUnsignedShort());
-            bms.setBarcode(buf.readCharSequence(16, StandardCharsets.US_ASCII).toString().trim());
-            bms.setVersion(Integer.toString(buf.readUnsignedShort()));
-            bms.setManufacturer(buf.readCharSequence(16, StandardCharsets.US_ASCII).toString().trim());
-            bms.setBatteryStatus(buf.readInt());
+            position.set("currentChargeInterval", buf.readUnsignedShort());
+            position.set("maxChargeInterval", buf.readUnsignedShort());
+            position.set("barcode", buf.readCharSequence(16, StandardCharsets.US_ASCII).toString().trim());
+            position.set("batteryVersion", buf.readUnsignedShort());
+            position.set("manufacturer", buf.readCharSequence(16, StandardCharsets.US_ASCII).toString().trim());
+            position.set("batteryStatus", buf.readUnsignedInt());
 
-            bms.setControllerStatus(buf.readInt());
-            bms.setControllerFaultCode(buf.readInt());
-
-            ObjectMapper objectMapper = new ObjectMapper();
-            String bmsStr = objectMapper.writeValueAsString(bms);
-            position.set(Position.KEY_BMS_INFO, bmsStr);
+            position.set("controllerStatus", buf.readUnsignedInt());
+            position.set("controllerFault", buf.readUnsignedInt());
 
             sendResponse(channel, false, type, buf.getShort(buf.writerIndex() - 6), null);
 
             return position;
+
         } else if (isSupported(type)) {
 
             if (hasGps(type)) {
@@ -968,7 +787,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        int dataLength = buf.readUnsignedShort(); // length
+        buf.readUnsignedShort(); // length
         int type = buf.readUnsignedByte();
 
         if (type == MSG_STRING_INFO) {
@@ -1124,64 +943,64 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             return position;
 
         } else {
-            return decodeExtendedOther(channel, buf, deviceSession, type, dataLength);
+
+            return decodeExtendedOther(channel, buf, deviceSession, type);
+
         }
 
         return null;
     }
 
-    private Object decodeExtendedOther(Channel channel, ByteBuf buf,
-                                    DeviceSession deviceSession, int type, int dataLength) {
+    private Object decodeExtendedOther(Channel channel, ByteBuf buf, DeviceSession deviceSession, int type) {
 
-        Position position = new Position(getProtocolName());
-        position.setDeviceId(deviceSession.getDeviceId());
+        Position position = null;
 
-        if (type == MSG_MEDIA_DATA) {
+        if (type == MSG_MULTIMEDIA || type == MSG_MULTIMEDIA_2) {
 
-            buf.skipBytes(8); // skip sn
-
-            long dt = buf.readUnsignedInt() * 1000;
-
-            buf.skipBytes(4 + 4 + 2 + 1 + 1 + 2); // skip gps
-
-            buf.skipBytes(2 + 2 + 2 + 2); // skip cell
+            buf.skipBytes(8); // serial number
+            long timestamp = buf.readUnsignedInt() * 1000;
+            buf.skipBytes(4 + 4 + 2 + 1 + 1 + 2); // gps
+            buf.skipBytes(2 + 2 + 2 + 2); // cell
 
             int mediaId = buf.readInt();
-            int mediaLen = buf.readInt();
+            int mediaLength = buf.readInt();
             int mediaType = buf.readUnsignedByte();
             int mediaFormat = buf.readUnsignedByte();
-            int eventType = buf.readUnsignedByte();
-            int mediaPkgIndex = buf.readUnsignedShort();
-            int mediaPkgLen = buf.readableBytes() - (2 + 2 + 2);
-            if (mediaType != 0 || mediaFormat != 0) {
-                sendResponse(channel, true, type, buf.getShort(buf.writerIndex() - 6), null);
-                return null;
-            }
-            ByteBuf photo;
-            if (mediaPkgIndex == 0) {
-                photo = Unpooled.buffer(mediaLen);
-                if (photos.containsKey(mediaId)) {
-                    photos.remove(mediaId).release();
-                }
-                photos.put(mediaId, photo);
-            } else {
-                photo = photos.get(mediaId);
-            }
-            if (null != photo) {
-                buf.readBytes(photo, mediaPkgLen);
-                if (photo.writableBytes() <= 0) {
-                    Device device = Context.getDeviceManager().getById(deviceSession.getDeviceId());
-                    getLastLocation(position, new Date(dt));
-                    position.set(Position.KEY_IMAGE, Context.getMediaManager().writeFile(device.getUniqueId(),
-                            photo, "jpg"));
-                    photos.remove(mediaId).release();
 
-                    sendResponse(channel, true, type, buf.getShort(buf.writerIndex() - 6), null);
+            if (mediaType == 0 && mediaFormat == 0) {
 
-                    return position;
+                buf.readUnsignedByte(); // event
+
+                ByteBuf photo;
+                if (buf.readUnsignedShort() == 0) {
+                    photo = Unpooled.buffer(mediaLength);
+                    if (photos.containsKey(mediaId)) {
+                        photos.remove(mediaId).release();
+                    }
+                    photos.put(mediaId, photo);
+                } else {
+                    photo = photos.get(mediaId);
                 }
+
+                if (photo != null) {
+                    buf.readBytes(photo, buf.readableBytes() - 3 * 2);
+                    if (!photo.isWritable()) {
+                        position = new Position(getProtocolName());
+                        position.setDeviceId(deviceSession.getDeviceId());
+                        getLastLocation(position, new Date(timestamp));
+                        Device device = Context.getDeviceManager().getById(deviceSession.getDeviceId());
+                        position.set(Position.KEY_IMAGE,
+                                Context.getMediaManager().writeFile(device.getUniqueId(), photo, "jpg"));
+                        photos.remove(mediaId).release();
+                    }
+                }
+
             }
+
             sendResponse(channel, true, type, buf.getShort(buf.writerIndex() - 6), null);
+
+            return position;
+
         }
 
         return null;
