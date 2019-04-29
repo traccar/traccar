@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "version": "4.3",
+        "version": "4.4",
         "title": "traccar"
     },
     "host": "demo.traccar.org",
