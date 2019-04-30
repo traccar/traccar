@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,14 +26,8 @@ public class ResourceErrorHandler implements ExceptionMapper<Exception> {
     @Override
     public Response toResponse(Exception e) {
         if (e instanceof WebApplicationException) {
-            WebApplicationException exception = (WebApplicationException) e;
-            String message;
-            if (exception.getCause() != null) {
-                message = Log.exceptionStack(exception.getCause());
-            } else {
-                message = Log.exceptionStack(exception);
-            }
-            return Response.fromResponse(exception.getResponse()).entity(message).build();
+            WebApplicationException webException = (WebApplicationException) e;
+            return Response.fromResponse(webException.getResponse()).entity(Log.exceptionStack(webException)).build();
         } else {
             return Response.status(Response.Status.BAD_REQUEST).entity(Log.exceptionStack(e)).build();
         }
