@@ -211,9 +211,10 @@ public final class Log {
     }
 
     public static String exceptionStack(Throwable exception) {
-        Throwable cause;
-        while (null != (cause = exception.getCause())  && (exception != cause) ) {
+        Throwable cause = exception.getCause();
+        while (cause != null && exception != cause) {
             exception = cause;
+            cause = cause.getCause();
         }
 
         StringBuilder s = new StringBuilder();
