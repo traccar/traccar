@@ -69,7 +69,7 @@ public class TekProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedByte(); // rssi
         buf.readUnsignedByte(); // battery / status
 
-        String imei = ByteBufUtil.hexDump(buf.readBytes(8)).substring(1);
+        String imei = ByteBufUtil.hexDump(buf.readSlice(8)).substring(1);
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
         if (deviceSession == null) {
             return null;

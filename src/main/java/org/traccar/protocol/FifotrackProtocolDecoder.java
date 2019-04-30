@@ -196,7 +196,7 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
                 parser.nextInt(); // offset
                 parser.nextInt(); // size
                 buf.readerIndex(dataIndex);
-                photo.writeBytes(buf.readBytes(buf.readableBytes() - 3)); // ignore checksum
+                buf.readBytes(photo, buf.readableBytes() - 3); // ignore checksum
                 if (photo.isWritable()) {
                     requestPhoto(channel, remoteAddress, imei, photoId);
                 } else {

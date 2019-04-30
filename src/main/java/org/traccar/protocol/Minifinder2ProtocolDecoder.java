@@ -84,7 +84,7 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                 switch (key) {
                     case 0x01:
                         DeviceSession deviceSession = getDeviceSession(
-                                channel, remoteAddress, buf.readBytes(15).toString(StandardCharsets.US_ASCII));
+                                channel, remoteAddress, buf.readCharSequence(15, StandardCharsets.US_ASCII).toString());
                         if (deviceSession == null) {
                             return null;
                         }

@@ -103,7 +103,7 @@ public class AutoTrackProtocolDecoder extends BaseProtocolDecoder {
 
         switch (type) {
             case MSG_LOGIN_REQUEST:
-                String imei = ByteBufUtil.hexDump(buf.readBytes(8));
+                String imei = ByteBufUtil.hexDump(buf.readSlice(8));
                 DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
                 if (deviceSession == null) {
                     return null;
