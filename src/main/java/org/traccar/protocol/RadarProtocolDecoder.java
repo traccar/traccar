@@ -172,6 +172,12 @@ public class RadarProtocolDecoder extends BaseProtocolDecoder {
                 if (mask.get(50)) {
                     buf.readShort(); // tilt
                 }
+                if (mask.get(51)) {
+                    buf.readUnsignedInt(); // partial hours
+                }
+                if (mask.get(52)) {
+                    buf.readUnsignedInt(); // accumulated hours
+                }
 
                 if (position.getDeviceTime() != null && position.getFixTime() != null) {
                     positions.add(position);
