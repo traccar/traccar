@@ -31,9 +31,9 @@ import org.traccar.model.WifiAccessPoint;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 
-public class PebbellProtocolDecoder extends BaseProtocolDecoder {
+public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
 
-    public PebbellProtocolDecoder(Protocol protocol) {
+    public Minifinder2ProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

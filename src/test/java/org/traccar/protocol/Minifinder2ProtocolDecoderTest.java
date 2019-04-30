@@ -3,12 +3,12 @@ package org.traccar.protocol;
 import org.junit.Test;
 import org.traccar.ProtocolTest;
 
-public class PebbellProtocolDecoderTest extends ProtocolTest {
+public class Minifinder2ProtocolDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        PebbellProtocolDecoder decoder = new PebbellProtocolDecoder(null);
+        Minifinder2ProtocolDecoder decoder = new Minifinder2ProtocolDecoder(null);
 
         verifyAttributes(decoder, binary(
                 "ab1845005d39370301100133353836383830303030303338303209245b92b55c84004b610502001000002221ca00050b4a005cc30f4a0056c80f4a003ba90e4a0055c8074a005dc3034a0057c8"));

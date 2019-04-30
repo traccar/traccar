@@ -263,7 +263,7 @@
     <entry key='satsol.port'>5184</entry>
     <entry key='globalstar.port'>5185</entry>
     <entry key='sanul.port'>5186</entry>
-    <entry key='pebbell.port'>5187</entry>
+    <entry key='minifinder2.port'>5187</entry>
     <entry key='radar.port'>5188</entry>
 
 </properties>

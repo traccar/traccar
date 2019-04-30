@@ -22,14 +22,14 @@ import org.traccar.TrackerServer;
 
 import java.nio.ByteOrder;
 
-public class PebbellProtocol extends BaseProtocol {
+public class Minifinder2Protocol extends BaseProtocol {
 
-    public PebbellProtocol() {
+    public Minifinder2Protocol() {
         addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 1024, 2, 2, 4, 0, true));
-                pipeline.addLast(new PebbellProtocolDecoder(PebbellProtocol.this));
+                pipeline.addLast(new Minifinder2ProtocolDecoder(Minifinder2Protocol.this));
             }
         });
     }
