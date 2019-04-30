@@ -18,7 +18,7 @@ public class GlobalstarProtocolDecoderTest extends ProtocolTest {
                 "<esn>0-2654816</esn>",
                 "<unixTime>1550440592</unixTime>",
                 "<gps>N</gps>",
-                "<payload length=\"9\" source=\"pc\" encoding=\"hex\">0x00337BA319B7280A00</payload>",
+                "<payload length=\"9\" source=\"pc\" encoding=\"hex\">0x00337BA619B7250A00</payload>",
                 "</stuMessage>",
                 "</stuMessages>")));
 

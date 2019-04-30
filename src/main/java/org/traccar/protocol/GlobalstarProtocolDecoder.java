@@ -99,7 +99,7 @@ public class GlobalstarProtocolDecoder extends BaseHttpProtocolDecoder {
                     position.setLatitude(position.getLatitude() - 180);
                 }
 
-                position.setLongitude(buf.readUnsignedMedium() * 90.0 / (1 << 23));
+                position.setLongitude(buf.readUnsignedMedium() * 180.0 / (1 << 23));
                 if (position.getLongitude() > 180) {
                     position.setLongitude(position.getLongitude() - 360);
                 }
