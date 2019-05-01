@@ -46,7 +46,7 @@ public class NotificatorTelegram extends Notificator {
         url = String.format(
                 "https://api.telegram.org/bot%s/sendMessage",
                 Context.getConfig().getString("notificator.telegram.key"));
-        chatId = Context.getConfig().getString("notificator.Telegram.chatid");
+        chatId = Context.getConfig().getString("notificator.telegram.chatId");
     }
 
     @Override
