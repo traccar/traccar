@@ -168,11 +168,22 @@
                     {
                         "name": "deviceId",
                         "in": "query",
+                        "description" : "Internal device identifier. Only works if device has already reported some locations",
+                        "required" : false,
                         "type": "integer"
+                    },
+                    {
+                        "name": "protocol",
+                        "in": "query",
+                        "description" : "Protocol name. Can be used instead of device id",
+                        "required" : false,
+                        "type": "string"
                     },
                     {
                         "name": "textChannel",
                         "in": "query",
+                        "description" : "When `true` return SMS commands. If not specified or `false` return data commands",
+                        "required" : false,
                         "type": "boolean"
                     }
                 ],

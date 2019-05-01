@@ -20,6 +20,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -106,17 +107,21 @@ public class CommandsManager  extends ExtendedObjectManager<Command> {
     }
 
     public Collection<Typed> getCommandTypes(long deviceId, boolean textChannel) {
-        List<Typed> result = new ArrayList<>();
         Position lastPosition = Context.getIdentityManager().getLastPosition(deviceId);
         if (lastPosition != null) {
-            BaseProtocol protocol = Context.getServerManager().getProtocol(lastPosition.getProtocol());
-            Collection<String> commands;
-            commands = textChannel ? protocol.getSupportedTextCommands() : protocol.getSupportedDataCommands();
-            for (String commandKey : commands) {
-                result.add(new Typed(commandKey));
-            }
+            return getCommandTypes(lastPosition.getProtocol(), textChannel);
         } else {
-            result.add(new Typed(Command.TYPE_CUSTOM));
+            return Collections.singletonList(new Typed(Command.TYPE_CUSTOM));
+        }
+    }
+
+    public Collection<Typed> getCommandTypes(String protocolName, boolean textChannel) {
+        List<Typed> result = new ArrayList<>();
+        BaseProtocol protocol = Context.getServerManager().getProtocol(protocolName);
+        Collection<String> commands;
+        commands = textChannel ? protocol.getSupportedTextCommands() : protocol.getSupportedDataCommands();
+        for (String commandKey : commands) {
+            result.add(new Typed(commandKey));
         }
         return result;
     }

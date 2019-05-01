@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 Gabor Somogyi (gabor.g.somogyi@gmail.com)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
@@ -23,7 +23,6 @@ import org.traccar.database.CommandsManager;
 import org.traccar.model.Command;
 import org.traccar.model.Typed;
 
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -48,7 +47,7 @@ public class CommandResource extends ExtendedObjectResource<Command> {
 
     @GET
     @Path("send")
-    public Collection<Command> get(@QueryParam("deviceId") long deviceId) throws SQLException {
+    public Collection<Command> get(@QueryParam("deviceId") long deviceId) {
         Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
         CommandsManager commandsManager = Context.getCommandsManager();
         Set<Long> result = new HashSet<>(commandsManager.getUserItems(getUserId()));
@@ -77,11 +76,15 @@ public class CommandResource extends ExtendedObjectResource<Command> {
 
     @GET
     @Path("types")
-    public Collection<Typed> get(@QueryParam("deviceId") long deviceId,
+    public Collection<Typed> get(
+            @QueryParam("deviceId") long deviceId,
+            @QueryParam("protocol") String protocol,
             @QueryParam("textChannel") boolean textChannel) {
         if (deviceId != 0) {
             Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
             return Context.getCommandsManager().getCommandTypes(deviceId, textChannel);
+        } else if (protocol != null) {
+            return Context.getCommandsManager().getCommandTypes(protocol, textChannel);
         } else {
             return Context.getCommandsManager().getAllCommandTypes();
         }
