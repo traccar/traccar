@@ -265,5 +265,6 @@
     <entry key='sanul.port'>5186</entry>
     <entry key='minifinder2.port'>5187</entry>
     <entry key='radar.port'>5188</entry>
+    <entry key='techtlt.port'>5189</entry>
 
 </properties>
