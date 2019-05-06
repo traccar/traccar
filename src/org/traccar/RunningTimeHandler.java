@@ -51,7 +51,7 @@ public class RunningTimeHandler extends BaseDataHandler {
 
         // We have a last position, check if data was lost in between since can't say if ignition was on or not then.
         if (position.getDeviceTime().getTime() - lastPosition.getDeviceTime().getTime() >= DATA_LOSS_FOR_IGNITION_MILLIS) {
-            initializeHourMeter(position);
+            initializeHourMeter(position, lastPosition);
             return position;
         }
 
