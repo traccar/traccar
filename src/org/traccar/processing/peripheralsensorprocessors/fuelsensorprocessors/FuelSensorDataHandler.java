@@ -100,7 +100,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             }
 
             for (PeripheralSensor sensorOnDevice : sensorsOnDeviceList) {
-                String lookUpKey = String.format("%d_%d", deviceId, sensorOnDevice.getPeripheralSensorId());
+                String lookUpKey = getLookupKey(deviceId, sensorOnDevice.getPeripheralSensorId());
                 if (!previousPositions.containsKey(lookUpKey)) {
                     TreeMultiset<Position> positions =
                             TreeMultiset.create(Comparator.comparing(p -> p.getDeviceTime().getTime()));
@@ -145,7 +145,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         } finally {
             long endProcessing = new Date().getTime();
             long processingTime = endProcessing - startProcessing;
-            Log.debug(String.format("Total processing time for deviceId: %d = %d",
+            Log.debug(String.format("Total processing time (ms) for deviceId: %d = %d",
                     position.getDeviceId(), processingTime));
 
             return position;
@@ -224,7 +224,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                                          PeripheralSensor fuelSensor) {
 
         long deviceId = position.getDeviceId();
-        String lookupKey = String.format("%d_%d", deviceId, fuelSensor.getPeripheralSensorId());
+        String lookupKey = getLookupKey(deviceId, fuelSensor.getPeripheralSensorId());
 
         if (!previousPositions.containsKey(lookupKey)) {
             Log.debug("lookupKey not found in previousPositions: " + lookupKey);
@@ -373,7 +373,9 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
         long deviceId = position.getDeviceId();
         long sensorId = fuelSensor.getPeripheralSensorId();
-        String lookupKey = String.format("%d_%d", deviceId, sensorId);
+        String lookupKey = getLookupKey(deviceId, sensorId);
+
+        Log.debug(String.format("Processing data for lookup key: %s", lookupKey));
 
         TreeMultiset<Position> positionsForDeviceSensor = previousPositions.get(lookupKey);
         String fuelDataField = fuelSensor.getFuelDataFieldName();
