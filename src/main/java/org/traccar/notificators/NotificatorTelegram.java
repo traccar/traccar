@@ -51,13 +51,15 @@ public class NotificatorTelegram extends Notificator {
 
     @Override
     public void sendSync(long userId, Event event, Position position) {
-	final User user = Context.getPermissionsManager().getUser(userId);
+
+        final User user = Context.getPermissionsManager().getUser(userId);
         Message message = new Message();
-	    
-	if (user.getAttributes().containsKey("notificationTelegramChatId"))
-    		chatId = user.getString("notificationTelegramChatId");
-        else
-        	chatId = Context.getConfig().getString("notificator.telegram.chatId");   
+
+        if (user.getAttributes().containsKey("notificationTelegramChatId")) {
+            chatId = user.getString("notificationTelegramChatId");
+        } else {
+            chatId = Context.getConfig().getString("notificator.telegram.chatId");
+        }   
 	    
         message.chatId = chatId;
         message.text = NotificationFormatter.formatShortMessage(userId, event, position);
