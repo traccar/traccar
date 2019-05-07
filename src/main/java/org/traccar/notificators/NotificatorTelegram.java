@@ -50,7 +50,7 @@ public class NotificatorTelegram extends Notificator {
                 Context.getConfig().getString("notificator.telegram.key"));
         if (user.getAttributes().containsKey("notificationTelegramChatId"))
 		chatId = user.getString("notificationTelegramChatId");
-	elseif (group.getAttributes().containsKey("notificationTelegramChatId"))
+	else if (group.getAttributes().containsKey("notificationTelegramChatId"))
 		chatId = group.getString("notificationTelegramChatId");
 	else
         	chatId = Context.getConfig().getString("notificator.telegram.chatId");
