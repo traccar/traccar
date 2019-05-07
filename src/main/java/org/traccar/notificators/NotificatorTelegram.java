@@ -59,8 +59,8 @@ public class NotificatorTelegram extends Notificator {
             chatId = user.getString("notificationTelegramChatId");
         } else {
             chatId = Context.getConfig().getString("notificator.telegram.chatId");
-        }   
-	    
+        }
+
         message.chatId = chatId;
         message.text = NotificationFormatter.formatShortMessage(userId, event, position);
 
