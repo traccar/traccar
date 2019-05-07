@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
 import org.traccar.model.User;
-import org.traccar.model.Group;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.notification.NotificationFormatter;
@@ -48,18 +47,18 @@ public class NotificatorTelegram extends Notificator {
         url = String.format(
                 "https://api.telegram.org/bot%s/sendMessage",
                 Context.getConfig().getString("notificator.telegram.key"));
-        if (user.getAttributes().containsKey("notificationTelegramChatId"))
-		chatId = user.getString("notificationTelegramChatId");
-	else if (group.getAttributes().containsKey("notificationTelegramChatId"))
-		chatId = group.getString("notificationTelegramChatId");
-	else
-        	chatId = Context.getConfig().getString("notificator.telegram.chatId");
     }
 
     @Override
     public void sendSync(long userId, Event event, Position position) {
-
+	final User user = Context.getPermissionsManager().getUser(userId);
         Message message = new Message();
+	    
+	if (user.getAttributes().containsKey("notificationTelegramChatId"))
+    		chatId = user.getString("notificationTelegramChatId");
+        else
+        	chatId = Context.getConfig().getString("notificator.telegram.chatId");   
+	    
         message.chatId = chatId;
         message.text = NotificationFormatter.formatShortMessage(userId, event, position);
 
