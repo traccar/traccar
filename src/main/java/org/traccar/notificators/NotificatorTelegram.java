@@ -19,6 +19,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
+import org.traccar.model.User;
+import org.traccar.model.Group;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.notification.NotificationFormatter;
@@ -47,11 +49,11 @@ public class NotificatorTelegram extends Notificator {
                 "https://api.telegram.org/bot%s/sendMessage",
                 Context.getConfig().getString("notificator.telegram.key"));
         if (user.getAttributes().containsKey("notificationTelegramChatId"))
-			chatId = user.getString("notificationTelegramChatId");
-		elseif (group.getAttributes().containsKey("notificationTelegramChatId"))
-			chatId = group.getString("notificationTelegramChatId");
-		else
-            chatId = Context.getConfig().getString("notificator.telegram.chatId");
+		chatId = user.getString("notificationTelegramChatId");
+	elseif (group.getAttributes().containsKey("notificationTelegramChatId"))
+		chatId = group.getString("notificationTelegramChatId");
+	else
+        	chatId = Context.getConfig().getString("notificator.telegram.chatId");
     }
 
     @Override
