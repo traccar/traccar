@@ -27,10 +27,12 @@ public class FuelSensorDataHandlerHelper {
     public static List<Position> getRelevantPositionsSubList(TreeMultiset<Position> positionsForSensor,
                                                              Position position,
                                                              int minListSize,
+                                                             String sensorOutlierFieldName,
                                                              int currentEventLookBackSeconds) {
         return getRelevantPositionsSubList(positionsForSensor,
                                            position,
                                            minListSize,
+                                           sensorOutlierFieldName,
                                            false,
                                            currentEventLookBackSeconds);
     }
@@ -38,12 +40,13 @@ public class FuelSensorDataHandlerHelper {
     public static List<Position> getRelevantPositionsSubList(TreeMultiset<Position> positionsForSensor,
                                                               Position position,
                                                               int minListSize,
+                                                              String sensorOutlierFieldName,
                                                               boolean excludeOutliers,
                                                               int currentEventLookBackSeconds) {
 
         if (positionsForSensor.size() <= minListSize) {
             return positionsForSensor.stream()
-                                     .filter(p -> !excludeOutliers || positionIsMarkedOutlier(p))
+                                     .filter(p -> !excludeOutliers || positionIsMarkedOutlier(p, sensorOutlierFieldName))
                                      .collect(Collectors.toList());
         }
 
@@ -59,13 +62,13 @@ public class FuelSensorDataHandlerHelper {
             Log.debug("[RELEVANT_SUBLIST] sublist is lesser than "
                               + minListSize + " returning " + positionsSubset.size());
             return positionsSubset.stream()
-                                  .filter(p -> !excludeOutliers || positionIsMarkedOutlier(p))
+                                  .filter(p -> !excludeOutliers || positionIsMarkedOutlier(p, sensorOutlierFieldName))
                                   .collect(Collectors.toList());
         }
 
         List<Position> filteredSublistToReturn =
                 positionsSubset.stream()
-                               .filter(p -> !excludeOutliers || positionIsMarkedOutlier(p))
+                               .filter(p -> !excludeOutliers || positionIsMarkedOutlier(p, sensorOutlierFieldName))
                                .collect(Collectors.toList());
 
         int listMaxIndex = filteredSublistToReturn.size();
@@ -81,9 +84,9 @@ public class FuelSensorDataHandlerHelper {
         return sublistToReturn;
     }
 
-    private static boolean positionIsMarkedOutlier(final Position position) {
-        return position.getAttributes().containsKey(Position.KEY_FUEL_IS_OUTLIER)
-                && !(boolean) position.getAttributes().get(Position.KEY_FUEL_IS_OUTLIER);
+    private static boolean positionIsMarkedOutlier(final Position position, final String sensorOutlierFieldName) {
+        return position.getAttributes().containsKey(sensorOutlierFieldName)
+                && !(boolean) position.getAttributes().get(sensorOutlierFieldName);
     }
 
     public static Date getAdjustedDate(Date fromDate, int type, int amount) {

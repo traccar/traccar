@@ -385,6 +385,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                         positionsForDeviceSensor,
                         position,
                         minValuesForMovingAvg - 1,
+                        fuelSensor.getFuelOutlierFieldName(),
                         currentEventLookBackSeconds);
 
         Log.debug(String.format("Size of list before getting averages: %d, deviceId: %d, sensorId: %d",
@@ -407,8 +408,10 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
         // Detect and remove outliers
         List<Position> relevantPositionsListForOutliers =
-                FuelSensorDataHandlerHelper.getRelevantPositionsSubList(
-                        positionsForDeviceSensor, position, minValuesForOutlierDetection, currentEventLookBackSeconds);
+                FuelSensorDataHandlerHelper.getRelevantPositionsSubList(positionsForDeviceSensor,
+                                                                        position, minValuesForOutlierDetection,
+                                                                        fuelSensor.getFuelOutlierFieldName(),
+                                                                        currentEventLookBackSeconds);
 
 
 
@@ -464,6 +467,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                 FuelSensorDataHandlerHelper.getRelevantPositionsSubList(positionsForDeviceSensor,
                                                                         positionUnderEvaluation,
                                                                         minValuesForMovingAvg,
+                                                                        fuelSensor.getFuelOutlierFieldName(),
                                                                         true,
                                                                         currentEventLookBackSeconds);
 
@@ -495,6 +499,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                             positionsForDeviceSensor,
                             positionUnderEvaluation,
                             maxValuesForAlerts,
+                            fuelSensor.getFuelOutlierFieldName(),
                             true,
                             currentEventLookBackSeconds);
 
