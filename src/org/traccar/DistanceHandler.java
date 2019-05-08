@@ -16,6 +16,7 @@
  */
 package org.traccar;
 
+import org.eclipse.jetty.util.StringUtil;
 import org.traccar.helper.DistanceCalculator;
 import org.traccar.model.Position;
 
@@ -26,6 +27,8 @@ public class DistanceHandler extends BaseDataHandler {
 
     private static final long MILLIS_IN_SECOND = 1000L;
     private static final long MAX_DATA_LOSS_DURATION_SECONDS = 1800L;
+    private static final String STATIONARY_TYPE = "stationary";
+    private static final String TYPE_ATTR_NAME = "type";
 
     private final boolean filter;
     private final int coordinatesMinError;
@@ -47,13 +50,22 @@ public class DistanceHandler extends BaseDataHandler {
     @Override
     protected Position handlePosition(Position position) {
 
+        long deviceId = position.getDeviceId();
+        String deviceType = Context.getDeviceManager().getById(deviceId).getString(TYPE_ATTR_NAME);
+
+        if (StringUtil.isNotBlank(deviceType) && deviceType.equals(STATIONARY_TYPE)) {
+            position.set(Position.KEY_DISTANCE, 0.0);
+            position.set(Position.KEY_TOTAL_DISTANCE, 0.0);
+            return position;
+        }
+
         double distance = 0.0;
         if (position.getAttributes().containsKey(Position.KEY_DISTANCE)) {
             distance = position.getDouble(Position.KEY_DISTANCE);
         }
         double totalDistance = 0.0;
 
-        Position last = getLastPosition(position.getDeviceId());
+        Position last = getLastPosition(deviceId);
 
         if (last != null && position.getDeviceTime().compareTo((last.getDeviceTime())) >= 0) {
             totalDistance = last.getDouble(Position.KEY_TOTAL_DISTANCE);
