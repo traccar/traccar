@@ -262,16 +262,18 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
 
         if (isLatestPosition(position)) {
 
-            getDataManager().updateLatestPosition(position);
+            if (position.getValid()) { // Set the latest valid position only
+                getDataManager().updateLatestPosition(position);
 
-            Device device = getById(position.getDeviceId());
-            if (position.getValid() && device != null) { // Set the latest valid position only
-                device.setPositionId(position.getId());
+                Device device = getById(position.getDeviceId());
+                if (position.getValid() && device != null) {
+                    device.setPositionId(position.getId());
+                }
             }
 
             positions.put(position.getDeviceId(), position);
 
-            if (Context.getConnectionManager() != null && position.getValid()) {
+            if (Context.getConnectionManager() != null) {
                 Context.getConnectionManager().updatePosition(position);
             }
         }
