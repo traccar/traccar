@@ -51,12 +51,15 @@ public class DistanceHandler extends BaseDataHandler {
     protected Position handlePosition(Position position) {
 
         long deviceId = position.getDeviceId();
-        String deviceType = Context.getDeviceManager().getById(deviceId).getString(TYPE_ATTR_NAME);
 
-        if (StringUtil.isNotBlank(deviceType) && deviceType.equals(STATIONARY_TYPE)) {
-            position.set(Position.KEY_DISTANCE, 0.0);
-            position.set(Position.KEY_TOTAL_DISTANCE, 0.0);
-            return position;
+        if (Context.getDeviceManager() != null) { // To satisfy the DistanceHandlerTest
+            String deviceType = Context.getDeviceManager().getById(deviceId).getString(TYPE_ATTR_NAME);
+
+            if (StringUtil.isNotBlank(deviceType) && deviceType.equals(STATIONARY_TYPE)) {
+                position.set(Position.KEY_DISTANCE, 0.0);
+                position.set(Position.KEY_TOTAL_DISTANCE, 0.0);
+                return position;
+            }
         }
 
         double distance = 0.0;

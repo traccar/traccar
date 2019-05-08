@@ -265,7 +265,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
             getDataManager().updateLatestPosition(position);
 
             Device device = getById(position.getDeviceId());
-            if (device != null) {
+            if (position.getValid() && device != null) { // Set the latest valid position only
                 device.setPositionId(position.getId());
             }
 
