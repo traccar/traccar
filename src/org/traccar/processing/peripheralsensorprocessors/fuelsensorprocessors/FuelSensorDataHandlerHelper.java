@@ -152,6 +152,10 @@ public class FuelSensorDataHandlerHelper {
         if (fuelTankMaxCapacity.isPresent()) {
             double allowedDeviation = fuelTankMaxCapacity.get() * 0.01;
 
+            if (allowedDeviation > 5.0) {
+                allowedDeviation = 5.0;
+            }
+
             if ((allowedDeviation / MULTIPLIER) > standardDeviation) {
                 standardDeviation = allowedDeviation / MULTIPLIER;
             }
