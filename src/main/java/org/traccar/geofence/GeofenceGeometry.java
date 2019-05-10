@@ -21,6 +21,8 @@ public abstract class GeofenceGeometry {
 
     public abstract boolean containsPoint(double latitude, double longitude);
 
+    public abstract boolean crossesGeofence(double latitude1, double longitude1, double latitude2, double longitude2);
+
     public abstract String toWkt();
 
     public abstract void fromWkt(String wkt) throws ParseException;

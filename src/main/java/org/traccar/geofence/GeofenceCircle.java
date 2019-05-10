@@ -49,6 +49,12 @@ public class GeofenceCircle extends GeofenceGeometry {
     }
 
     @Override
+    public boolean crossesGeofence(double latitude1, double longitude1, double latitude2, double longitude2) {
+        return DistanceCalculator.lineCrossesCircle(
+                latitude1, longitude1, latitude2, longitude2, centerLatitude, centerLongitude, radius);
+    }
+
+    @Override
     public String toWkt() {
         String wkt = "";
         wkt = "CIRCLE (";

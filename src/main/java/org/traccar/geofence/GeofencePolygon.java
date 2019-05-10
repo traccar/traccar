@@ -18,6 +18,8 @@ package org.traccar.geofence;
 import java.text.ParseException;
 import java.util.ArrayList;
 
+import org.traccar.helper.DistanceCalculator;
+
 public class GeofencePolygon extends GeofenceGeometry {
 
     public GeofencePolygon() {
@@ -105,6 +107,29 @@ public class GeofencePolygon extends GeofenceGeometry {
             }
         }
         return oddNodes;
+    }
+
+    @Override
+    public boolean crossesGeofence(double latitude1, double longitude1, double latitude2, double longitude2) {
+        int crosses = 0;
+
+        for (int i = 1; i <= coordinates.size(); i++) {
+            if (i == coordinates.size()) {
+                if (DistanceCalculator.lineCrossesLine(
+                        latitude1, longitude1, latitude2, longitude2,
+                        coordinates.get(i - 1).getLat(), coordinates.get(i - 1).getLon(),
+                        coordinates.get(0).getLat(), coordinates.get(0).getLon())) {
+                    crosses++;
+                }
+            } else if (DistanceCalculator.lineCrossesLine(
+                    latitude1, longitude1, latitude2, longitude2,
+                    coordinates.get(i - 1).getLat(), coordinates.get(i - 1).getLon(),
+                    coordinates.get(i).getLat(), coordinates.get(i).getLon())) {
+                crosses++;
+            }
+        }
+
+        return crosses > 0 && crosses % 2 == 0;
     }
 
     @Override
