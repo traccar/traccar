@@ -359,6 +359,15 @@ public class DataManager {
                 .executeQuery(Position.class);
     }
 
+    public Position getPreviousPosition(Position position) throws SQLException {
+        return QueryBuilder.create(dataSource,  getQuery("database.selectPreviousPosition"))
+                .setLong("deviceId", position.getDeviceId())
+                .setLong("positionId", position.getId())
+                .executeQuery(Position.class)
+                .iterator()
+                .next();
+    }
+
     public void clearHistory() throws SQLException {
         long historyDays = config.getInteger("database.historyDays");
         if (historyDays != 0) {

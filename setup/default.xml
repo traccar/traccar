@@ -56,6 +56,12 @@
         SELECT tc_positions.* FROM tc_positions INNER JOIN tc_devices ON tc_positions.id = tc_devices.positionid;
     </entry>
 
+    <entry key='database.selectPreviousPosition'>
+        SELECT * FROM tc_positions WHERE deviceID = :deviceId AND id &lt; :positionId
+        ORDER BY id DESC
+        LIMIT 1
+    </entry>
+
     <entry key='database.updateLatestPosition'>
         UPDATE tc_devices SET positionId = :id WHERE id = :deviceId
     </entry>
