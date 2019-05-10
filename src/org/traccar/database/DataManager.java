@@ -42,6 +42,7 @@ import liquibase.exception.LiquibaseException;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 
+import org.eclipse.jetty.util.StringUtil;
 import org.traccar.Config;
 import org.traccar.Context;
 import org.traccar.helper.Log;
@@ -357,11 +358,20 @@ public class DataManager {
         return queryBuilder.executeQuery(Position.class);
     }
 
-    public Collection<Position> getPositionsForSummary(long deviceId, Date from, Date to) throws SQLException {
+    public Collection<Position> getPositionsForSummary(long deviceId, Date from, Date to, String deviceType) throws SQLException {
+
+        String defaultFilter = "%\"totalDistance\":0.0%";
+        if (StringUtil.isNotBlank(deviceType) && deviceType.equals("stationary")) {
+            defaultFilter = "%\"totalIgnOnMillis\":0.0%";
+        }
+
         QueryBuilder queryBuilder = QueryBuilder.create(dataSource, getQuery("database.selectPositionsForSummary"))
                                                 .setLong("deviceId", deviceId)
                                                 .setDate("from", from)
-                                                .setDate("to", to);
+                                                .setDate("to", to)
+                                                .setString("unitsFilter", defaultFilter);
+
+
         return queryBuilder.executeQuery(Position.class);
     }
 

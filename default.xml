@@ -213,7 +213,7 @@
             SELECT MIN(id) AS mini, MAX(id) AS maxi
             FROM positions
             WHERE deviceId = :deviceId
-            AND attributes NOT LIKE '%"totalDistance":0.0%'
+            AND attributes NOT LIKE :unitsFilter
             AND fixTime BETWEEN :from AND :to
             ORDER BY fixtime
         ) AS m
