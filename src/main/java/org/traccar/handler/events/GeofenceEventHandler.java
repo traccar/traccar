@@ -54,6 +54,7 @@ public class GeofenceEventHandler extends BaseEventHandler {
         }
 
         List<Long> currentGeofences = geofenceManager.getCurrentDeviceGeofences(position);
+        List<Long> crossedGeofences = geofenceManager.getCurrentDeviceCrossedGeofences(position);
         List<Long> oldGeofences = new ArrayList<>();
         if (device.getGeofenceIds() != null) {
             oldGeofences.addAll(device.getGeofenceIds());
@@ -64,23 +65,24 @@ public class GeofenceEventHandler extends BaseEventHandler {
 
         device.setGeofenceIds(currentGeofences);
 
+        List<List<Long>> allGeofences = new ArrayList<>();
+        allGeofences.add(oldGeofences);
+        allGeofences.add(newGeofences);
+        allGeofences.add(crossedGeofences);
+
+        String[] eventTypes = new String[] {
+                Event.TYPE_GEOFENCE_EXIT, Event.TYPE_GEOFENCE_ENTER, Event.TYPE_GEOFENCE_CROSSED};
+
         Map<Event, Position> events = new HashMap<>();
-        for (long geofenceId : oldGeofences) {
-            long calendarId = geofenceManager.getById(geofenceId).getCalendarId();
-            Calendar calendar = calendarId != 0 ? calendarManager.getById(calendarId) : null;
-            if (calendar == null || calendar.checkMoment(position.getFixTime())) {
-                Event event = new Event(Event.TYPE_GEOFENCE_EXIT, position.getDeviceId(), position.getId());
-                event.setGeofenceId(geofenceId);
-                events.put(event, position);
-            }
-        }
-        for (long geofenceId : newGeofences) {
-            long calendarId = geofenceManager.getById(geofenceId).getCalendarId();
-            Calendar calendar = calendarId != 0 ? calendarManager.getById(calendarId) : null;
-            if (calendar == null || calendar.checkMoment(position.getFixTime())) {
-                Event event = new Event(Event.TYPE_GEOFENCE_ENTER, position.getDeviceId(), position.getId());
-                event.setGeofenceId(geofenceId);
-                events.put(event, position);
+        for (int i = 0; i < allGeofences.size(); i++) {
+            for (long geofenceId : allGeofences.get(i)) {
+                long calendarId = geofenceManager.getById(geofenceId).getCalendarId();
+                Calendar calendar = calendarId != 0 ? calendarManager.getById(calendarId) : null;
+                if (calendar == null || calendar.checkMoment(position.getFixTime())) {
+                    Event event = new Event(eventTypes[i], position.getDeviceId(), position.getId());
+                    event.setGeofenceId(geofenceId);
+                    events.put(event, position);
+                }
             }
         }
         return events;
