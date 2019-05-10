@@ -65,13 +65,4 @@ public final class DistanceCalculator {
             return (0 < lambda && lambda < 1) && (0 < gamma && gamma < 1);
         }
     }
-
-    public static boolean lineCrossesCircle(
-            double lat1, double lon1, double lat2, double lon2, double circleLat, double circleLon, double circleRad) {
-        return (Math.abs((lat2 - lat1) * circleLon + circleLat * (lon1 - lon2)
-                + (lat1 - lat2) * lon1
-                + (lon1 - lon2) * lat1) / Math.sqrt(Math.pow((lat2 - lat1), 2)
-                + Math.pow((lon1 - lon2), 2)) <= circleRad);
-    }
-
 }
