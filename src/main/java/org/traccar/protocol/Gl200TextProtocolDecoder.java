@@ -1080,6 +1080,22 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.PREFIX_IN + reportType / 0x10, reportType % 0x10 == 1);
         } else if (type.equals("IGL")) {
             position.set(Position.KEY_IGNITION, reportType % 0x10 == 1);
+        } else if (type.equals("HBM")) {
+            switch (reportType % 0x10) {
+                case 0:
+                case 3:
+                    position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+                    break;
+                case 1:
+                case 4:
+                    position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+                    break;
+                case 2:
+                    position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
+                    break;
+                default:
+                    break;
+            }
         }
 
         decodeLocation(position, parser);
