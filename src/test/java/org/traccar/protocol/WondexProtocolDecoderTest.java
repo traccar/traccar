@@ -11,6 +11,9 @@ public class WondexProtocolDecoderTest extends ProtocolTest {
         WondexProtocolDecoder decoder = new WondexProtocolDecoder(null);
 
         verifyPosition(decoder, buffer(
+                "2005010051,19990925063830,26.106181,44.440225,0,0,0,7,2,0.0,0,,,0"));
+
+        verifyPosition(decoder, buffer(
                 "2000000108,20151030145404,76.948633,43.354700,0,140,15,100,1,1325,125.4,10.5,0.0"),
                 position("2015-10-30 14:54:04.000", true, 43.35470, 76.94863));
 
