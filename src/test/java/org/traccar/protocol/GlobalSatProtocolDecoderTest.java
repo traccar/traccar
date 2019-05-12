@@ -13,6 +13,11 @@ public class GlobalSatProtocolDecoderTest extends ProtocolTest {
         verifyNull(decoder, text(
                 "GSh,131826789036289,3,M,ea04*3d"));
 
+        decoder.setFormat0("TSPRXAB27GHKLMmnaictuvw*U!");
+
+        verifyPosition(decoder, text(
+                "GSb,GTR-388,358173053992353,0000,5,8080,3,270419,113326,E01020.6223,N6323.1937,129,0.01,154,10,0.8,12380mV,3128mV,0,0,11,242,02,10EB,120FC1B*5a!"));
+
         decoder.setFormat0("SORPZAB27GHKLMN*U!");
 
         verifyPosition(decoder, text(
