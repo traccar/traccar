@@ -69,7 +69,6 @@ public class PositionResource extends BaseResource {
         }
     }
 
-    @PermitAll
     @GET
     @Path("lastValidPosition")
     public Collection<Position> getLatestValidPositionForDevice(@QueryParam("deviceId") long deviceId)
