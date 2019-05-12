@@ -266,5 +266,6 @@
     <entry key='minifinder2.port'>5187</entry>
     <entry key='radar.port'>5188</entry>
     <entry key='techtlt.port'>5189</entry>
+    <entry key='starcom.port'>5190</entry>
 
 </properties>
