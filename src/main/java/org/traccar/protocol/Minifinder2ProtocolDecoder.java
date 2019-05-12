@@ -17,11 +17,14 @@ package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.Checksum;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
@@ -38,6 +41,7 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public static final int MSG_DATA = 0x01;
+    public static final int MSG_RESPONSE = 0x7F;
 
     private String decodeAlarm(int code) {
         if (BitUtil.check(code, 0)) {
@@ -68,7 +72,26 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
         ByteBuf buf = (ByteBuf) msg;
 
         buf.readUnsignedByte(); // header
-        buf.readUnsignedByte(); // properties
+
+        if (BitUtil.check(buf.readUnsignedByte(), 4) && channel != null) {
+
+            ByteBuf content = Unpooled.buffer();
+            content.writeByte(MSG_RESPONSE);
+            content.writeByte(1); // key length
+            content.writeByte(0); // success
+
+            ByteBuf response = Unpooled.buffer();
+            response.writeByte(0xAB); // header
+            response.writeByte(0); // properties
+            response.writeShortLE(3);
+            response.writeShortLE(Checksum.crc16(Checksum.CRC16_XMODEM, content.nioBuffer()));
+            response.writeShortLE(0); // index
+            response.writeBytes(content);
+            content.release();
+
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+        }
+
         buf.readUnsignedShortLE(); // length
         buf.readUnsignedShortLE(); // checksum
         buf.readUnsignedShortLE(); // index
