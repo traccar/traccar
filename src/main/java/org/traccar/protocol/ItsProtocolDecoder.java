@@ -54,11 +54,11 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             .expression("(..),")                 // status
             .or()
             .expression("[^,]*,")                // vehicle registration
-            .number("([01]),")                   // valid
+            .number("([01]),").optional()        // valid
             .groupEnd()
             .number("(dd),?(dd),?(dddd),")       // date (ddmmyyyy)
             .number("(dd),?(dd),?(dd),")         // time (hhmmss)
-            .expression("([AV]),").optional()    // valid
+            .expression("([01AV]),").optional()  // valid
             .number("(d+.d+),([NS]),")           // latitude
             .number("(d+.d+),([EW]),")           // longitude
             .groupBegin()
@@ -176,7 +176,7 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
         if (parser.hasNext()) {
-            position.setValid(parser.next().equals("A"));
+            position.setValid(parser.next().matches("[1A]"));
         }
         position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
         position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));

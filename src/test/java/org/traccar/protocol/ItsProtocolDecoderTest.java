@@ -11,6 +11,9 @@ public class ItsProtocolDecoderTest extends ProtocolTest {
 
         ItsProtocolDecoder decoder = new ItsProtocolDecoder(null);
 
+        verifyPosition(decoder, text(
+                "$RLP,N.A,2.0.2,NR,01,L,869867030181814,N.A,28022019,180155,1,28.688226,N,076.993570,E,0.0,80.26,17,201.0,0.89,0.60,VODAFONE I,0,1,25.0,4.20,0,C,14,404,11,415,F34A,51f7,415,13,840b,415,8,a3f7,0c2,5,ef77,415,5,0001,00,17888,47,*"));
+
         verifyAttribute(decoder, text(
                 "$TEL123,Teltonika,03.18.16,NR,1,L,352093085223096,KA09X6945,1,24122018,055749,12.303873,N,76.690697,E,0.0,349.00,10,795.0,0.50,0.40,Airtel,0,1,14.6,4.1,0,,28,404,45,625A,116E,29,28DF,03A3,28,9A5C,0923,26,116F,625A,25,2A51,03A3,0010,00,000042,0.1,0.1,0,()*7B"),
                 Position.PREFIX_ADC + 2, 0.1);
