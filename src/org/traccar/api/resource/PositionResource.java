@@ -22,6 +22,7 @@ import org.traccar.model.Position;
 import org.traccar.web.CsvBuilder;
 import org.traccar.web.GpxBuilder;
 
+import javax.annotation.security.PermitAll;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -66,6 +67,14 @@ public class PositionResource extends BaseResource {
             return Context.getDataManager().getPositions(
                     deviceId, DateUtil.parseDate(from), DateUtil.parseDate(to));
         }
+    }
+
+    @GET
+    @Path("lastValidPosition")
+    public Collection<Position> getLatestValidPositionForDevice(@QueryParam("deviceId") long deviceId)
+            throws SQLException {
+
+        return Context.getDataManager().getLastValidPosition(deviceId);
     }
 
     @GET

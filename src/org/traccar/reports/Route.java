@@ -127,12 +127,14 @@ public final class Route {
 
     public static Collection<Position> getSummaryObjects(long userId, Collection<Long> deviceIds,
                                                          Collection<Long> groupIds,
-                                                         Date from, Date to) throws SQLException {
+                                                         Date from,
+                                                         Date to) throws SQLException {
         ReportUtils.checkPeriodLimit(from, to);
         ArrayList<Position> result = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            result.addAll(Context.getDataManager().getPositionsForSummary(deviceId, from, to));
+            String deviceType = Context.getDeviceManager().getById(deviceId).getString("type");
+            result.addAll(Context.getDataManager().getPositionsForSummary(deviceId, from, to, deviceType));
         }
         return result;
     }

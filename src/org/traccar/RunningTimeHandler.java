@@ -1,11 +1,15 @@
 package org.traccar;
 
+import com.google.common.collect.ImmutableSet;
+import org.eclipse.jetty.util.StringUtil;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
+import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.DeviceConsumptionInfo;
 
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Set;
 
 import static org.traccar.model.Position.KEY_IGNITION;
 import static org.traccar.model.Position.KEY_IGN_ON_MILLIS;
@@ -20,11 +24,24 @@ public class RunningTimeHandler extends BaseDataHandler {
                 Context.getConfig().getLong("processing.peripheralSensorData.ignitionDataLossThresholdSeconds") * 1000L;
     }
 
+    private Set<String> consumptionTypesWithoutIgnition = ImmutableSet.of("enginelesshourly", "noconsumption");
+
     @Override
     protected Position handlePosition(Position position) {
-        Device device = Context.getIdentityManager().getById(position.getDeviceId());
+
+        long deviceId = position.getDeviceId();
+        Device device = Context.getIdentityManager().getById(deviceId);
 
         if (device == null) {
+            return position;
+        }
+
+        DeviceConsumptionInfo consumptionInfo = Context.getDeviceManager().getDeviceConsumptionInfo(deviceId);
+        String consumptionType = consumptionInfo.getDeviceConsumptionType().toLowerCase();
+
+        if (StringUtil.isNotBlank(consumptionType) && consumptionTypesWithoutIgnition.contains(consumptionType)) {
+            position.set(KEY_IGN_ON_MILLIS, 0L);
+            position.set(KEY_TOTAL_IGN_ON_MILLIS, 0);
             return position;
         }
 
@@ -51,7 +68,7 @@ public class RunningTimeHandler extends BaseDataHandler {
 
         // We have a last position, check if data was lost in between since can't say if ignition was on or not then.
         if (position.getDeviceTime().getTime() - lastPosition.getDeviceTime().getTime() >= DATA_LOSS_FOR_IGNITION_MILLIS) {
-            initializeHourMeter(position);
+            initializeHourMeter(position, lastPosition);
             return position;
         }
 

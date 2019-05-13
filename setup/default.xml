@@ -82,6 +82,15 @@
         LIMIT 1
     </entry>
 
+    <entry key="database.getLastValidPosition">
+        SELECT *
+        FROM positions AS p
+        where deviceid = :deviceId
+        and valid = 1
+        order by devicetime desc
+        limit 1
+    </entry>
+
     <entry key='database.selectPositionsForSummary'>
         SELECT a.*
         FROM positions AS a,
@@ -89,7 +98,7 @@
             SELECT MIN(id) AS mini, MAX(id) AS maxi
             FROM positions
             WHERE deviceId = :deviceId
-            AND attributes NOT LIKE '%"totalDistance":0.0%'
+            AND attributes NOT LIKE :unitsFilter
             AND fixTime BETWEEN :from AND :to
             ORDER BY fixtime
         ) AS m

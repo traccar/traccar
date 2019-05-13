@@ -261,7 +261,6 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
     public void updateLatestPosition(Position position) throws SQLException {
 
         if (isLatestPosition(position)) {
-
             getDataManager().updateLatestPosition(position);
 
             Device device = getById(position.getDeviceId());
@@ -271,7 +270,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
 
             positions.put(position.getDeviceId(), position);
 
-            if (Context.getConnectionManager() != null && position.getValid()) {
+            if (Context.getConnectionManager() != null) {
                 Context.getConnectionManager().updatePosition(position);
             }
         }

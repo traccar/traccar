@@ -233,7 +233,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
                 }
             }
         }
-        if (position != null && position.getValid()) {
+        if (position != null) {
             Context.getConnectionManager().updateDevice(
                     position.getDeviceId(), Device.STATUS_ONLINE, new Date());
         }
