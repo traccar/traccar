@@ -39,6 +39,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
     static final int MSG_CLIENT_SERIAL_LOG = 7;
     static final int MSG_CLIENT_SERIAL = 8;
     static final int MSG_CLIENT_MODULAR = 9;
+    static final int MSG_CLIENT_MODULAR_EXT = 11;
 
     public static final int MSG_SERVER_ACKNOWLEDGE = 4;
 
@@ -82,6 +83,126 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private Position decodeStatus(ByteBuf buf, DeviceSession deviceSession, boolean alternative) {
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        position.set(Position.KEY_VERSION_HW, buf.readUnsignedByte());
+        position.set(Position.KEY_VERSION_FW, buf.readUnsignedByte());
+        buf.readUnsignedByte(); // protocol version
+
+        position.set(Position.KEY_STATUS, buf.readUnsignedByte() & 0x0f);
+
+        buf.readUnsignedByte(); // operator / configuration flags
+        buf.readUnsignedByte(); // reason data
+        position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
+
+        position.set("mode", buf.readUnsignedByte());
+        position.set(Position.KEY_INPUT, buf.readUnsignedIntLE());
+
+        if (alternative) {
+            buf.readUnsignedByte(); // input
+            position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShortLE());
+            position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShortLE());
+        } else {
+            buf.readUnsignedByte(); // operator
+            position.set(Position.PREFIX_ADC + 1, buf.readUnsignedIntLE());
+        }
+
+        position.set(Position.KEY_ODOMETER, buf.readUnsignedMediumLE());
+
+        buf.skipBytes(6); // multi-purpose data
+        buf.readUnsignedShortLE(); // fix time
+        buf.readUnsignedByte(); // location status
+        buf.readUnsignedByte(); // mode 1
+        buf.readUnsignedByte(); // mode 2
+
+        position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+
+        position.setValid(true);
+
+        if (alternative) {
+            position.setLongitude(buf.readIntLE() / 10000000.0);
+            position.setLatitude(buf.readIntLE() / 10000000.0);
+        } else {
+            position.setLongitude(buf.readIntLE() / Math.PI * 180 / 100000000);
+            position.setLatitude(buf.readIntLE() / Math.PI * 180 / 100000000);
+        }
+
+        position.setAltitude(buf.readIntLE() * 0.01);
+
+        if (alternative) {
+            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedIntLE()));
+            position.setCourse(buf.readUnsignedShortLE() / 1000.0);
+        } else {
+            position.setSpeed(UnitsConverter.knotsFromMps(buf.readUnsignedIntLE() * 0.01));
+            position.setCourse(buf.readUnsignedShortLE() / Math.PI * 180.0 / 1000.0);
+        }
+
+        DateBuilder dateBuilder = new DateBuilder()
+                .setTimeReverse(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
+                .setDateReverse(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedShortLE());
+        position.setTime(dateBuilder.getDate());
+
+        return position;
+    }
+
+    private Position decodeModular(ByteBuf buf, DeviceSession deviceSession) {
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        buf.readUnsignedByte(); // packet control
+        buf.readUnsignedShortLE(); // length
+        buf.readUnsignedShortLE(); // reserved
+        buf.readUnsignedShortLE(); // reserved
+
+        while (buf.readableBytes() > 3) {
+
+            int moduleType = buf.readUnsignedByte();
+            int endIndex = buf.readUnsignedShortLE() + buf.readerIndex();
+
+            switch (moduleType) {
+                case 2:
+                    buf.readUnsignedShortLE(); // operator id
+                    buf.readUnsignedIntLE(); // pl signature
+                    int count = buf.readUnsignedByte();
+                    for (int i = 0; i < count; i++) {
+                        int id = buf.readUnsignedShortLE();
+                        buf.readUnsignedByte(); // variable length
+                        position.set(Position.PREFIX_IO + id, buf.readUnsignedIntLE());
+                    }
+                    break;
+                case 6:
+                    buf.readUnsignedByte(); // hdop
+                    buf.readUnsignedByte(); // mode 1
+                    buf.readUnsignedByte(); // mode 2
+                    buf.readUnsignedByte(); // satellites
+                    position.setLongitude(buf.readIntLE() / Math.PI * 180 / 100000000);
+                    position.setLatitude(buf.readIntLE() / Math.PI * 180 / 100000000);
+                    position.setAltitude(buf.readIntLE() * 0.01);
+                    position.setSpeed(UnitsConverter.knotsFromMps(buf.readUnsignedByte() * 0.01));
+                    position.setCourse(buf.readUnsignedShortLE() / Math.PI * 180.0 / 1000.0);
+                    break;
+                case 7:
+                    buf.readUnsignedByte(); // valid
+                    DateBuilder dateBuilder = new DateBuilder()
+                            .setTimeReverse(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
+                            .setDateReverse(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
+                    position.setTime(dateBuilder.getDate());
+                    break;
+                default:
+                    break;
+            }
+
+            buf.readerIndex(endIndex);
+
+        }
+
+        return position;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -92,7 +213,12 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
 
         buf.skipBytes(4); // system code
         int type = buf.readUnsignedByte();
+
         long deviceUniqueId = buf.readUnsignedIntLE();
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, String.valueOf(deviceUniqueId));
+        if (deviceSession == null) {
+            return null;
+        }
 
         if (type != MSG_CLIENT_SERIAL) {
             buf.readUnsignedShortLE(); // communication control
@@ -102,73 +228,9 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
         sendReply(channel, remoteAddress, deviceUniqueId, packetNumber);
 
         if (type == MSG_CLIENT_STATUS) {
-
-            Position position = new Position(getProtocolName());
-
-            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, String.valueOf(deviceUniqueId));
-            if (deviceSession == null) {
-                return null;
-            }
-            position.setDeviceId(deviceSession.getDeviceId());
-
-            position.set(Position.KEY_VERSION_HW, buf.readUnsignedByte());
-            position.set(Position.KEY_VERSION_FW, buf.readUnsignedByte());
-            buf.readUnsignedByte(); // protocol version
-
-            position.set(Position.KEY_STATUS, buf.readUnsignedByte() & 0x0f);
-
-            buf.readUnsignedByte(); // operator / configuration flags
-            buf.readUnsignedByte(); // reason data
-            position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
-
-            position.set("mode", buf.readUnsignedByte());
-            position.set(Position.KEY_INPUT, buf.readUnsignedIntLE());
-
-            if (alternative) {
-                buf.readUnsignedByte(); // input
-                position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShortLE());
-                position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShortLE());
-            } else {
-                buf.readUnsignedByte(); // operator
-                position.set(Position.PREFIX_ADC + 1, buf.readUnsignedIntLE());
-            }
-
-            position.set(Position.KEY_ODOMETER, buf.readUnsignedMediumLE());
-
-            buf.skipBytes(6); // multi-purpose data
-            buf.readUnsignedShortLE(); // fix time
-            buf.readUnsignedByte(); // location status
-            buf.readUnsignedByte(); // mode 1
-            buf.readUnsignedByte(); // mode 2
-
-            position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
-
-            position.setValid(true);
-
-            if (alternative) {
-                position.setLongitude(buf.readIntLE() / 10000000.0);
-                position.setLatitude(buf.readIntLE() / 10000000.0);
-            } else {
-                position.setLongitude(buf.readIntLE() / Math.PI * 180 / 100000000);
-                position.setLatitude(buf.readIntLE() / Math.PI * 180 / 100000000);
-            }
-
-            position.setAltitude(buf.readIntLE() * 0.01);
-
-            if (alternative) {
-                position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedIntLE()));
-                position.setCourse(buf.readUnsignedShortLE() / 1000.0);
-            } else {
-                position.setSpeed(UnitsConverter.knotsFromMps(buf.readUnsignedIntLE() * 0.01));
-                position.setCourse(buf.readUnsignedShortLE() / Math.PI * 180.0 / 1000.0);
-            }
-
-            DateBuilder dateBuilder = new DateBuilder()
-                    .setTimeReverse(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
-                    .setDateReverse(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedShortLE());
-            position.setTime(dateBuilder.getDate());
-
-            return position;
+            return decodeStatus(buf, deviceSession, alternative);
+        } else if (type == MSG_CLIENT_MODULAR_EXT) {
+            return decodeModular(buf, deviceSession);
         }
 
         return null;
