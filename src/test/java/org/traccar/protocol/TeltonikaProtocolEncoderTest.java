@@ -14,9 +14,12 @@ public class TeltonikaProtocolEncoderTest extends ProtocolTest {
         Command command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_CUSTOM);
-        command.set(Command.KEY_DATA, "setdigout 11");
 
+        command.set(Command.KEY_DATA, "setdigout 11");
         verifyCommand(encoder, command, binary("00000000000000160C01050000000E7365746469676F75742031310D0A010000E258"));
+
+        command.set(Command.KEY_DATA, "03030000000185E8");
+        verifyCommand(encoder, command, binary("00000000000000120c01050000000a03030000000185e80d0a010000cf19"));
 
     }
 
