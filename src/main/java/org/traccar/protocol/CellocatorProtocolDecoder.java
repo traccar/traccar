@@ -45,7 +45,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
 
     private byte commandCount;
 
-    private void sendReply(Channel channel, SocketAddress remoteAddress, long deviceId, byte packetNumber) {
+    private void sendResponse(Channel channel, SocketAddress remoteAddress, long deviceId, byte packetNumber) {
         if (channel != null) {
             ByteBuf reply = Unpooled.buffer(28);
             reply.writeByte('M');
@@ -225,7 +225,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
         }
         byte packetNumber = buf.readByte();
 
-        sendReply(channel, remoteAddress, deviceUniqueId, packetNumber);
+        sendResponse(channel, remoteAddress, deviceUniqueId, packetNumber);
 
         if (type == MSG_CLIENT_STATUS) {
             return decodeStatus(buf, deviceSession, alternative);

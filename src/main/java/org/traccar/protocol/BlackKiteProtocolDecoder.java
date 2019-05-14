@@ -56,7 +56,7 @@ public class BlackKiteProtocolDecoder extends BaseProtocolDecoder {
     private static final int TAG_XT2 = 0x61;
     private static final int TAG_XT3 = 0x62;
 
-    private void sendReply(Channel channel, int checksum) {
+    private void sendResponse(Channel channel, int checksum) {
         if (channel != null) {
             ByteBuf reply = Unpooled.buffer(3);
             reply.writeByte(0x02);
@@ -179,7 +179,7 @@ public class BlackKiteProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        sendReply(channel, buf.readUnsignedShortLE());
+        sendResponse(channel, buf.readUnsignedShortLE());
 
         for (Position p : positions) {
             p.setDeviceId(deviceSession.getDeviceId());

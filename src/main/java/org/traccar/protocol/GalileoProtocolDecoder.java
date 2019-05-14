@@ -96,7 +96,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         return length;
     }
 
-    private void sendReply(Channel channel, int header, int checksum) {
+    private void sendResponse(Channel channel, int header, int checksum) {
         if (channel != null) {
             ByteBuf reply = Unpooled.buffer(3);
             reply.writeByte(header);
@@ -293,7 +293,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
             positions.add(position);
         }
 
-        sendReply(channel, 0x02, buf.readUnsignedShortLE());
+        sendResponse(channel, 0x02, buf.readUnsignedShortLE());
 
         for (Position p : positions) {
             p.setDeviceId(deviceSession.getDeviceId());
@@ -334,7 +334,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
 
         }
 
-        sendReply(channel, 0x07, buf.readUnsignedShortLE());
+        sendResponse(channel, 0x07, buf.readUnsignedShortLE());
 
         return position;
     }
