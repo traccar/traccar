@@ -75,8 +75,6 @@ public class PeripheralSensorManager extends ExtendedObjectManager<PeripheralSen
     }
 
     public Optional<List<PeripheralSensor>> getSensorByDeviceId(long deviceId) {
-        // Note: Handles only one sensor per  gps device for now.
-
         Optional<List<PeripheralSensor>> sensorOnDevice = getLinkedPeripheralSensors(deviceId);
 
         if (!sensorOnDevice.isPresent()) {
