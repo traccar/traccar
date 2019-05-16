@@ -129,6 +129,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             long processingTime = endProcessing - startProcessing;
             logIfNotLoading(String.format("Total processing time (ms) for deviceId: %d = %d",
                     position.getDeviceId(), processingTime));
+            logIfNotLoading(System.lineSeparator());
 
             return position;
         }
@@ -350,12 +351,11 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                     handlePosition(position);
                 }
             }
-
-            previousPositions.forEach((s, t) -> Log.info(String.format("Loaded %d positions for lookupKey %s", t.size(), s)));
         } catch (SQLException e) {
             e.printStackTrace();
         }
         this.loadingOldDataFromDB = false;
+        previousPositions.forEach((s, t) -> Log.info(String.format("Loaded %d positions for lookupKey %s", t.size(), s)));
     }
 
     private void handleSensorData(Position position,
@@ -371,7 +371,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         String fuelDataField = fuelSensor.getFuelDataFieldName();
 
         DeviceConsumptionInfo consumptionInfo = Context.getDeviceManager().getDeviceConsumptionInfo(deviceId);
-        int averagesLookbackSeconds = (fuelSensor.getMovingAvgWindowSize() + 1) * consumptionInfo.getTransmissionFrequency();
+        int averagesLookbackSeconds = (fuelSensor.getMovingAvgWindowSize() + 2) * consumptionInfo.getTransmissionFrequency();
 
         List<Position> relevantPositionsListForAverages =
                 FuelSensorDataHandlerHelper.getRelevantPositionsSubList(
@@ -381,7 +381,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                         fuelSensor.getFuelOutlierFieldName(),
                         averagesLookbackSeconds);
 
-        logIfNotLoading(String.format("Size of list before getting averages: %d, deviceId: %d, sensorId: %d",
+        logIfNotLoading(String.format("[Averages] Size of list before getting averages: %d, deviceId: %d, sensorId: %d",
                                 relevantPositionsListForAverages.size(), deviceId, fuelSensor.getPeripheralSensorId()));
 
         relevantPositionsListForAverages.add(position);
@@ -400,7 +400,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         }
 
         // Detect and remove outliers
-        int outlierLookbackSeconds = (fuelSensor.getOutlierWindowSize() + 1) * consumptionInfo.getTransmissionFrequency();
+        int outlierLookbackSeconds = (fuelSensor.getOutlierWindowSize() + 2) * consumptionInfo.getTransmissionFrequency();
         List<Position> relevantPositionsListForOutliers =
                 FuelSensorDataHandlerHelper.getRelevantPositionsSubList(positionsForDeviceSensor,
                                                                         position,
@@ -426,7 +426,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         if (relevantPositionsListForOutliers.size() < fuelSensor.getOutlierWindowSize()) {
             // positions in this case will have isFuelOutlier left blank (neither true nor false) i.e.
             // not evaluated.
-            logIfNotLoading("List too small for outlier detection. Outlier window size: " + fuelSensor.getOutlierWindowSize());
+            logIfNotLoading("[Outliers] List too small for outlier detection. Outlier window size: " + fuelSensor.getOutlierWindowSize());
             return;
         }
 
@@ -489,7 +489,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             possibleDataLossByDevice.remove(deviceId);
             nonOutlierInLastWindowByDevice.remove(deviceId);
 
-            int alertsLookback = (fuelSensor.getEventsWindowSize() + 1) * consumptionInfo.getTransmissionFrequency();
+            int alertsLookback = (fuelSensor.getEventsWindowSize() + 2) * consumptionInfo.getTransmissionFrequency();
             List<Position> relevantPositionsListForAlerts =
                     FuelSensorDataHandlerHelper.getRelevantPositionsSubList(
                             positionsForDeviceSensor,
@@ -529,10 +529,10 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                                                                        fuelTankMaxVolume,
                                                                        fuelSensor);
             if (!isConsumptionExpected) {
-                logIfNotLoading("Detected drain not within expected consumption");
+                logIfNotLoading("[Events] Detected drain not within expected consumption");
                 sendNotificationIfNecessary(deviceId, fuelActivity, fuelSensor.getPeripheralSensorId());
             } else {
-                logIfNotLoading("Detected drain that was within expected consumption, not sending notification.");
+                logIfNotLoading("[Events] Detected drain that was within expected consumption, not sending notification.");
             }
 
         } else {
@@ -569,7 +569,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             try {
                 getDataManager().addObject(event);
             } catch (SQLException error) {
-                Log.warning("Error while saving fuel event to DB", error);
+                Log.warning("[Events] Error while saving fuel event to DB", error);
             }
 
             // Adding the sensor ID to the FCM notification does not make sense, since the end user does not care
