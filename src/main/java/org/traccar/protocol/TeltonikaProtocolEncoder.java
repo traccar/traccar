@@ -32,14 +32,12 @@ public class TeltonikaProtocolEncoder extends BaseProtocolEncoder {
         ByteBuf buf = Unpooled.buffer();
 
         buf.writeInt(0);
-        buf.writeInt(content.length + 10);
+        buf.writeInt(content.length + 8);
         buf.writeByte(TeltonikaProtocolDecoder.CODEC_12);
         buf.writeByte(1); // quantity
         buf.writeByte(5); // type
-        buf.writeInt(content.length + 2);
+        buf.writeInt(content.length);
         buf.writeBytes(content);
-        buf.writeByte('\r');
-        buf.writeByte('\n');
         buf.writeByte(1); // quantity
         buf.writeInt(Checksum.crc16(Checksum.CRC16_IBM, buf.nioBuffer(8, buf.writerIndex() - 8)));
 
@@ -54,7 +52,7 @@ public class TeltonikaProtocolEncoder extends BaseProtocolEncoder {
             if (data.matches("(\\p{XDigit}{2})+")) {
                 return encodeContent(DataConverter.parseHex(data));
             } else {
-                return encodeContent(data.getBytes(StandardCharsets.US_ASCII));
+                return encodeContent((data + "\r\n").getBytes(StandardCharsets.US_ASCII));
             }
         } else {
             return null;

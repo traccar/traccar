@@ -19,7 +19,7 @@ public class TeltonikaProtocolEncoderTest extends ProtocolTest {
         verifyCommand(encoder, command, binary("00000000000000160C01050000000E7365746469676F75742031310D0A010000E258"));
 
         command.set(Command.KEY_DATA, "03030000000185E8");
-        verifyCommand(encoder, command, binary("00000000000000120c01050000000a03030000000185e80d0a010000cf19"));
+        verifyCommand(encoder, command, binary("00000000000000100c01050000000803030000000185e8010000da8b"));
 
     }
 
