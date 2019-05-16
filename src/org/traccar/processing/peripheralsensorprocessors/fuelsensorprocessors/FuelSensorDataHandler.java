@@ -99,7 +99,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                     if (position.getDeviceTime().compareTo((lastPacketProcessed.get().getDeviceTime())) <= 0) {
                         Log.debug(String.format("Backdated packets detected for device: %d. Skipping fuel processing for them",
                                 deviceId));
-                        return position;
+                        continue;
                     }
 
                     if (position.getDeviceTime().getTime() - lastPacketProcessed.get().getDeviceTime().getTime() > dataLossThresholdSeconds) {
@@ -115,11 +115,10 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                         positionsForDeviceSensor.add(position);
                     }
                     removeFirstPositionIfNecessary(positionsForDeviceSensor, lookUpKey);
-                    return position;
+                    continue;
                 }
 
                 processSensorData(position, sensorOnDevice);
-
             }
 
         } catch (Exception e) {
