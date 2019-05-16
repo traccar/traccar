@@ -33,7 +33,7 @@ public class FuelDataActivityChecker {
 
         double leftMean = leftSum / (midPoint + 1);
         double rightMean = rightSum / (midPoint + 1);
-        double diffInMeans = Math.abs(leftMean - rightMean);
+        double diffInMeans = leftMean - rightMean;
 
         long deviceId = readingsForDevice.get(0).getDeviceId();
 
@@ -41,11 +41,19 @@ public class FuelDataActivityChecker {
         double fuelLevelChangeThreshold = consumptionInfo.getFuelActivityThreshold();
 
         String lookupKey = deviceId + "_" + fuelSensor.getPeripheralSensorId();
-        Log.debug("[FUEL_ACTIVITY] lookupKey: " + lookupKey + "diffInMeans: " + diffInMeans
-                          + " fuelLevelChangeThreshold: " + fuelLevelChangeThreshold
-                          + " diffInMeans > fuelLevelChangeThreshold: " + (diffInMeans > fuelLevelChangeThreshold));
+        double fillThreshold = fuelSensor.getFillThreshold().isPresent()? fuelSensor.getFillThreshold().get() : fuelLevelChangeThreshold;
+        double drainThreshold = fuelSensor.getDrainThreshold().isPresent()? fuelSensor.getDrainThreshold().get() : fuelLevelChangeThreshold;
 
-        if (diffInMeans > fuelLevelChangeThreshold) {
+        Log.debug("[FUEL_ACTIVITY] lookupKey: " + lookupKey + "diffInMeans: " + diffInMeans
+                          + " fillThreshold: " + fillThreshold
+                          + " drainThreshold: " + drainThreshold
+                          + " diffInMeans > fillThreshold: " + (Math.abs(diffInMeans) > fillThreshold)
+                          + " diffInMeans > drainThreshold: " + (Math.abs(diffInMeans) > drainThreshold));
+
+
+
+        if ((diffInMeans > 0 && Math.abs(diffInMeans) > fillThreshold)
+                || (diffInMeans < 0 && Math.abs(diffInMeans) > drainThreshold)) {
 
             if (!deviceFuelEventMetadata.containsKey(lookupKey)) {
                 Position midPointPosition = readingsForDevice.get(midPoint);
@@ -99,7 +107,9 @@ public class FuelDataActivityChecker {
             }
         }
 
-        if (diffInMeans < fuelLevelChangeThreshold && deviceFuelEventMetadata.containsKey(lookupKey)) {
+        if (((diffInMeans > 0 && Math.abs(diffInMeans) < fillThreshold)
+                || (diffInMeans < 0 && Math.abs(diffInMeans) < drainThreshold))
+            && deviceFuelEventMetadata.containsKey(lookupKey)) {
 
             Position midPointPosition = readingsForDevice.get(midPoint);
             FuelEventMetadata fuelEventMetadata = deviceFuelEventMetadata.get(lookupKey);

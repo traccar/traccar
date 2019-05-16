@@ -12,16 +12,21 @@ public class DeviceConsumptionInfo {
     private static final String MAX_AVG_CONSUMPTION_RATE_ATTR = "maxAvgConsumptionRate";
     private static final String ASSUMED_AVG_CONSUMPTION_RATE_ATTR = "assumedAvgConsumptionRate";
     private static final String FUEL_ACTIVITY_THRESHOLD_ATTR = "fuelActivityThreshold";
+    private static final String TRANSMISSION_FREQUENCY_ATTR = "transmissionFreq";
 
     private static final double DEFAULT_FUEL_ACTIVITY_THRESHOLD;
     private static final double MIN_AVG_CONSUMPTION_RATE;
     private static final double MAX_AVG_CONSUMPTION_RATE;
     private static final double ASSUMED_AVG_CONSUMPTION_RATE;
+    private static final int DEFAULT_TRANSMISSION_FREQUENCY;
 
 
     static {
         DEFAULT_FUEL_ACTIVITY_THRESHOLD =
                 Context.getConfig().getDouble("processing.peripheralSensorData.fuelLevelChangeThresholdLiters");
+
+        DEFAULT_TRANSMISSION_FREQUENCY = Context.getConfig()
+                         .getInteger("processing.peripheralSensorData.messageFrequency");
 
         MIN_AVG_CONSUMPTION_RATE = Context.getConfig().getDouble("processing.minimumAverageMileage");
         MAX_AVG_CONSUMPTION_RATE = Context.getConfig().getDouble("processing.maximumAverageMileage");
@@ -33,6 +38,7 @@ public class DeviceConsumptionInfo {
     private double maxDeviceConsumptionRate;
     private double assumedDeviceConsumptionRate;
     private double fuelActivityThreshold;
+    private int transmissionFrequency;
 
     public DeviceConsumptionInfo() {
         deviceConsumptionType = DEFAULT_CONSUMPTION_TYPE;
@@ -40,6 +46,7 @@ public class DeviceConsumptionInfo {
         maxDeviceConsumptionRate = MAX_AVG_CONSUMPTION_RATE;
         assumedDeviceConsumptionRate = ASSUMED_AVG_CONSUMPTION_RATE;
         fuelActivityThreshold = DEFAULT_FUEL_ACTIVITY_THRESHOLD;
+        transmissionFrequency = DEFAULT_TRANSMISSION_FREQUENCY;
     }
 
     public DeviceConsumptionInfo(Device device) {
@@ -65,6 +72,9 @@ public class DeviceConsumptionInfo {
             fuelActivityThreshold = device.getDouble(FUEL_ACTIVITY_THRESHOLD_ATTR);
         }
 
+        if (device.getAttributes().containsKey(TRANSMISSION_FREQUENCY_ATTR)) {
+            transmissionFrequency = device.getInteger(TRANSMISSION_FREQUENCY_ATTR);
+        }
     }
 
     public String getDeviceConsumptionType() {
@@ -85,5 +95,9 @@ public class DeviceConsumptionInfo {
 
     public double getFuelActivityThreshold() {
         return fuelActivityThreshold;
+    }
+
+    public int getTransmissionFrequency() {
+        return transmissionFrequency;
     }
 }
