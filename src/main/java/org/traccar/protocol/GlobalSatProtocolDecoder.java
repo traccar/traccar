@@ -21,10 +21,13 @@ import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -48,6 +51,35 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
 
     public void setFormat1(String format) {
         format1 = format;
+    }
+
+    private Double decodeVoltage(String value) {
+        if (value.endsWith("mV")) {
+            return Integer.parseInt(value.substring(0, value.length() - 2)) / 1000.0;
+        } else if (value.endsWith("V")) {
+            return Double.parseDouble(value.substring(0, value.length() - 1));
+        } else {
+            return null;
+        }
+    }
+
+    private String decodeAlarm(int value) {
+        if (BitUtil.check(value, 0)) {
+            return Position.ALARM_SOS;
+        }
+        if (BitUtil.check(value, 3) || BitUtil.check(value, 4)) {
+            return Position.ALARM_GEOFENCE;
+        }
+        if (BitUtil.check(value, 5)) {
+            return Position.ALARM_OVERSPEED;
+        }
+        if (BitUtil.check(value, 6)) {
+            return Position.ALARM_POWER_CUT;
+        }
+        if (BitUtil.check(value, 7)) {
+            return Position.ALARM_LOW_POWER;
+        }
+        return null;
     }
 
     private Position decodeOriginal(Channel channel, SocketAddress remoteAddress, String sentence) {
@@ -80,9 +112,11 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position(getProtocolName());
 
+        CellTower cellTower = new CellTower();
+
         for (int formatIndex = 0, valueIndex = 1; formatIndex < format.length()
                 && valueIndex < values.length; formatIndex++) {
-            String value = values[valueIndex];
+            String value = values[valueIndex].replace("\"", "");
 
             switch (format.charAt(formatIndex)) {
                 case 'S':
@@ -165,13 +199,48 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
                 case 'K':
                     position.setCourse(Double.parseDouble(value));
                     break;
-                case 'N':
-                    if (value.endsWith("mV")) {
-                        position.set(Position.KEY_BATTERY,
-                                Integer.parseInt(value.substring(0, value.length() - 2)) / 1000.0);
-                    } else {
-                        position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(value));
+                case 'L':
+                    position.set(Position.KEY_SATELLITES, Integer.parseInt(value));
+                    break;
+                case 'P':
+                    if (value.length() == 4) {
+                        position.set(Position.KEY_ALARM, decodeAlarm(Integer.parseInt(value, 16)));
                     }
+                    break;
+                case 'Z':
+                    if (!value.isEmpty()) {
+                        position.set("geofence", value);
+                    }
+                    break;
+                case 'Y':
+                    int io = Integer.parseInt(value, 16);
+                    position.set(Position.PREFIX_IN + 1, BitUtil.check(io, 1));
+                    position.set(Position.KEY_MOTION, BitUtil.check(io, 7));
+                    position.set(Position.PREFIX_OUT + 1, BitUtil.check(io, 9));
+                    position.set(Position.KEY_IGNITION, BitUtil.check(io, 13));
+                    position.set(Position.KEY_CHARGE, BitUtil.check(io, 15));
+                    break;
+                case 'c':
+                    cellTower.setSignalStrength(Integer.parseInt(value));
+                    break;
+                case 'm':
+                    position.set(Position.KEY_POWER, decodeVoltage(value));
+                    break;
+                case 'n':
+                case 'N':
+                    position.set(Position.KEY_BATTERY, decodeVoltage(value));
+                    break;
+                case 't':
+                    cellTower.setMobileCountryCode(Integer.parseInt(value));
+                    break;
+                case 'u':
+                    cellTower.setMobileNetworkCode(Integer.parseInt(value));
+                    break;
+                case 'v':
+                    cellTower.setLocationAreaCode(Integer.parseInt(value, 16));
+                    break;
+                case 'w':
+                    cellTower.setCellId(Long.parseLong(value, 16));
                     break;
                 default:
                     // Unsupported
@@ -180,6 +249,11 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
 
             valueIndex += 1;
         }
+
+        if (cellTower.getCellId() != null) {
+            position.setNetwork(new Network(cellTower));
+        }
+
         return position;
     }
 
