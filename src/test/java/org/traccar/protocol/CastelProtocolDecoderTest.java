@@ -11,6 +11,12 @@ public class CastelProtocolDecoderTest extends ProtocolTest {
         CastelProtocolDecoder decoder = new CastelProtocolDecoder(null);
 
         verifyAttributes(decoder, binary(
+                "404043000432313357503230313830303138323400000000004005f064d95c8365d95c9f2f0100c50200004006000000000000040003440068000000000100f3660d0a"));
+
+        verifyNull(decoder, binary(
+                "40409c020432313357503230313830303138323400000000004003f064d95c3b66d95c9f2f0100000d0000400600000000000004000345006800000000e80364f0ff3c00f4fff3ff3d00f4fff1ff3d00f4fff7ff3e00f4fffcff3f00f5fffcff3f00f5fffdff3f00f5fffdff3f00f5fffcff3f00f5fffeff3f00f3fffeff3e00f3fffdff3f00f5fffbff3f00f4fffbff3f00f5fffbff4000f5fffdff3e00f4fffdff4000f6fffeff4100f6ffffff3f00f5ffffff3f00f4ffffff3f00f5fffeff4000f5fffeff3f00f4fffcff3e00f5fff6ff3e00f5fff6ff3e00f5fff6ff3f00f6fff4ff3e00f5fff1ff3e00f5fff5ff3e00f5fff6ff3e00f6fff6ff3e00f3ffeeff3c00f1fff2ff3a00e9fff4ff3b00e9fff7ff3d00e5fff7ff3d00e4fff7ff3a00e1ff00003d00e9ff01003f00f4ff03004000f6ff02003f00f8ff00003f00f7ff00003f00fcfffeff4000f8fffeff4100f7ffffff4100f8fffeff3f00f5fffdff4000f6fffdff3b00f6fffdff4000f6fffdff3f00f4fffbff4400f5fffdff4500f3fffcff3d00f7fffcff3f00f5fffbff3f00fafffcff4100f5fffbff3c00f7fffaff3f00f8fffcff3e00f5fffbff3c00f4fffaff3f00f7fffbff4200f8fffcff3c00fefff9ff4000f4fff8ff3d00f3fffaff3d00f7fffbff3f00f7fffbff3c00f8fffaff3f00f6fffaff4100f5ff"));
+
+        verifyAttributes(decoder, binary(
                 "40403a00043231335750323031373030363135360000000000a00200000100000101201100344a474446364545374a4230373632363056ff0d0a"));
 
         verifyAttributes(decoder, binary(
