@@ -292,6 +292,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
             int version, ByteBuf id, short type, DeviceSession deviceSession) {
 
         Position position;
+        int count;
 
         switch (type) {
 
@@ -330,7 +331,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
                 long status = buf.readUnsignedIntLE();
                 buf.skipBytes(8);
 
-                int count = buf.readUnsignedByte();
+                count = buf.readUnsignedByte();
 
                 List<Position> positions = new LinkedList<>();
 
@@ -377,6 +378,34 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
 
                 buf.readUnsignedShortLE(); // sample rate
                 decodeObd(position, buf, true);
+
+                return position;
+
+            case MSG_SC_G_SENSOR:
+                position = createPosition(deviceSession);
+
+                decodeStat(position, buf);
+
+                buf.readUnsignedShortLE(); // sample rate
+
+                count = buf.readUnsignedByte();
+
+                StringBuilder data = new StringBuilder("[");
+                for (int i = 0; i < count; i++) {
+                    if (i > 0) {
+                        data.append(",");
+                    }
+                    data.append("[");
+                    data.append(buf.readShortLE() * 0.015625);
+                    data.append(",");
+                    data.append(buf.readShortLE() * 0.015625);
+                    data.append(",");
+                    data.append(buf.readShortLE() * 0.015625);
+                    data.append("]");
+                }
+                data.append("]");
+
+                position.set(Position.KEY_G_SENSOR, data.toString());
 
                 return position;
 
