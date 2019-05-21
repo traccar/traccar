@@ -35,4 +35,4 @@ exec "$@"
 ################################
 ##Main Excecution ##############
 ################################
-exec java -Xms2048m -Xmx28024m -Djava.net.preferIPv4Stack=true -jar /opt/traccar/tracker-server.jar /opt/traccar/conf/traccar.xml
+exec java -Xms512m -Xmx28024m -Djava.net.preferIPv4Stack=true -jar /opt/traccar/tracker-server.jar /opt/traccar/conf/traccar.xml

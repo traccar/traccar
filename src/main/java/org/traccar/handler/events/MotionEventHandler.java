@@ -22,6 +22,7 @@ import java.util.Map;
 import io.netty.channel.ChannelHandler;
 import org.traccar.database.DeviceManager;
 import org.traccar.database.IdentityManager;
+import org.traccar.Context;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceState;
 import org.traccar.model.Event;
