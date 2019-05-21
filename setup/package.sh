@@ -60,22 +60,22 @@ check_requirement "Unzip" "which unzip" "Missing unzip binary"
 check_requirement "Ext JS" "ls $EXTJS_PATH" "ExtJS not found in $EXTJS_PATH (https://www.sencha.com/legal/GPL/)"
 check_requirement "Sencha Cmd" "which sencha" "Missing Sencha Cmd package (https://www.sencha.com/products/extjs/cmd-download/)"
 if [ $PLATFORM != "other" ]; then
-  check_requirement "Jlink" "which jlink" "Missing jlink binary (openjdk-10-jdk-headless)"
+  check_requirement "Jlink" "which jlink" "Missing jlink binary"
 fi
 if [ $PLATFORM = "all" -o $PLATFORM = "windows-64" ]; then
   check_requirement "Inno Extractor" "which innoextract" "Missing innoextract binary"
   check_requirement "Inno Setup" "ls innosetup-*.exe" "Missing Inno Setup (http://www.jrsoftware.org/isdl.php)"
-  check_requirement "Windows 64 Java" "ls java-*.windows.x86_64.zip" "Missing Windows 64 Java (https://github.com/ojdkbuild/ojdkbuild)"
+  check_requirement "Windows 64 Java" "ls java-*.windows.ojdkbuild.x86_64.zip" "Missing Windows 64 Java (https://github.com/ojdkbuild/ojdkbuild)"
   check_requirement "Wine" "which wine" "Missing wine binary"
 fi
 if [ $PLATFORM = "all" -o $PLATFORM = "linux-64" -o $PLATFORM = "linux-arm" ]; then
   check_requirement "Makeself" "which makeself" "Missing makeself binary"
 fi
 if [ $PLATFORM = "all" -o $PLATFORM = "linux-64" ]; then
-  check_requirement "Linux 64 Java" "ls jdk-*-linux-x64.zip" "Missing Linux 64 Java (https://github.com/ojdkbuild/contrib_jdk10u-ci/releases)"
+  check_requirement "Linux 64 Java" "ls jdk-*-linux-x64.zip" "Missing Linux 64 Java (https://github.com/ojdkbuild/contrib_jdk11u-ci/releases)"
 fi
 if [ $PLATFORM = "all" -o $PLATFORM = "linux-arm" ]; then
-  check_requirement "Linux ARM Java" "ls jdk-*-linux-armhf.zip" "Missing Linux ARM Java (https://github.com/ojdkbuild/contrib_jdk10u-aarch32-ci/releases)"
+  check_requirement "Linux ARM Java" "ls jdk-*-linux-armhf.zip" "Missing Linux ARM Java (https://github.com/ojdkbuild/contrib_jdk11u-aarch32-ci/releases)"
 fi
 if [ $PREREQ = false ]; then
   info "Missing build requirements, aborting..."
@@ -128,9 +128,9 @@ package_other () {
 
 package_windows () {
   info "Building Windows 64 installer"
-  unzip -q -o java-*.windows.x86_64.zip
-  jlink --module-path java-*.windows.x86_64/jmods --add-modules java.se.ee,jdk.charsets --output out/jre
-  rm -rf java-*.windows.x86_64
+  unzip -q -o java-*.windows.ojdkbuild.x86_64.zip
+  jlink --module-path java-*.windows.ojdkbuild.x86_64/jmods --add-modules java.se,jdk.charsets --output out/jre
+  rm -rf java-*.windows.ojdkbuild.x86_64
   wine app/ISCC.exe traccar.iss >/dev/null
   rm -rf out/jre
   zip -q -j traccar-windows-64-$VERSION.zip Output/traccar-setup.exe README.txt
@@ -143,7 +143,7 @@ package_linux () {
   cp traccar.service out
 
   unzip -q -o jdk-*-linux-$1.zip
-  jlink --module-path jdk-*-linux-$1/jmods --add-modules java.se.ee,jdk.charsets --output out/jre
+  jlink --module-path jdk-*-linux-$1/jmods --add-modules java.se,jdk.charsets --output out/jre
   rm -rf jdk-*-linux-$1
   makeself --quiet --notemp out traccar.run "traccar" ./setup.sh
   rm -rf out/jre
