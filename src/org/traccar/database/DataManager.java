@@ -22,13 +22,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.naming.InitialContext;
@@ -364,11 +358,16 @@ public class DataManager {
         return queryBuilder.executeQuery(Position.class);
     }
 
-    public Collection<Position> getPositionsForSummary(long deviceId, Date from, Date to, String deviceType) throws SQLException {
+    public Collection<Position> getPositionsForSummary(long deviceId, Date from, Date to) throws SQLException {
+
+        String deviceType = Context.getDeviceManager().getById(deviceId).getString("type");
+        String deviceConsumptionType = Context.getDeviceManager().getDeviceConsumptionInfo(deviceId).getDeviceConsumptionType();
 
         String defaultFilter = "%\"totalDistance\":0.0%";
         if (StringUtil.isNotBlank(deviceType) && deviceType.equals("stationary")) {
             defaultFilter = "%\"totalIgnOnMillis\":0.0%";
+        } else if (deviceConsumptionType.equals("enginelesshourly")) {
+            defaultFilter = "";
         }
 
         QueryBuilder queryBuilder = QueryBuilder.create(dataSource, getQuery("database.selectPositionsForSummary"))
@@ -389,13 +388,24 @@ public class DataManager {
 
         Collection<Position> queryResult = queryBuilder.executeQuery(Position.class);
 
+        Optional<List<PeripheralSensor>> sensorsOnDevice =
+                Context.getPeripheralSensorManager().getSensorByDeviceId(deviceId);
+
+        Set<String> fuelFieldNames = new HashSet<>(Arrays.asList("fuel"));
+
+        if (sensorsOnDevice.isPresent()) {
+            Set<String> fuelFields = sensorsOnDevice.get().stream().map(p -> p.getFuelDataFieldName()).collect(Collectors.toSet());
+            fuelFieldNames.addAll(fuelFields);
+        }
+
+
         // Remove all unwanted properties on attributes, so the return payload is smaller.
         for (Position p : queryResult) {
             Map<String, Object> attributes = p.getAttributes();
             Set<String> keys = attributes.keySet();
             List<String> keysList = keys.stream().collect(Collectors.toList());
             for (String key : keysList) {
-                if (!key.equals("fuel")) {
+                if (!fuelFieldNames.contains(key)) {
                     attributes.remove(key);
                 }
             }
