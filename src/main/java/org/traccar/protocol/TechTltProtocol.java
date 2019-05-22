@@ -29,7 +29,7 @@ public class TechTltProtocol extends BaseProtocol {
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
-                pipeline.addLast(new Ardi01ProtocolDecoder(TechTltProtocol.this));
+                pipeline.addLast(new TechTltProtocolDecoder(TechTltProtocol.this));
             }
         });
     }
