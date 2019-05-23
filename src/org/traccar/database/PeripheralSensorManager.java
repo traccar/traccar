@@ -1,6 +1,7 @@
 package org.traccar.database;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.PeripheralSensor;
@@ -17,6 +18,8 @@ public class PeripheralSensorManager extends ExtendedObjectManager<PeripheralSen
 
     private final Map<Long, List<PeripheralSensor>> deviceToPeripheralSensorMap =
             new ConcurrentHashMap();
+
+    private final List<Long> sortedSensorIds = Lists.newArrayList();
 
     private final Map<String, FuelSensorCalibration> deviceSensorToCalibrationDataMap =
             new ConcurrentHashMap<>();
@@ -40,6 +43,7 @@ public class PeripheralSensorManager extends ExtendedObjectManager<PeripheralSen
                         linkedPeripheralSensors = new ArrayList();
                     }
                     linkedPeripheralSensors.add(p);
+                    sortedSensorIds.add(p.getPeripheralSensorId());
                     deviceToPeripheralSensorMap.put(p.getDeviceId(), linkedPeripheralSensors);
 
                     ObjectMapper calibrationDataMapper = new ObjectMapper();
@@ -50,6 +54,7 @@ public class PeripheralSensorManager extends ExtendedObjectManager<PeripheralSen
                                                                                  p.getPeripheralSensorId()),
                                                          fuelSensorCalibration);
                 }
+                sortedSensorIds.sort(Long::compareTo);
             } catch (SQLException | IOException e) {
                 e.printStackTrace();
             }
@@ -62,6 +67,10 @@ public class PeripheralSensorManager extends ExtendedObjectManager<PeripheralSen
         }
 
         return Optional.empty();
+    }
+
+    public List<Long> getSortedSensorIds() {
+        return sortedSensorIds;
     }
 
     public Optional<FuelSensorCalibration> getDeviceSensorCalibrationData(long deviceId, long peripheralSensorId) {

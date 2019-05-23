@@ -371,7 +371,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         String fuelDataField = fuelSensor.getFuelDataFieldName();
 
         DeviceConsumptionInfo consumptionInfo = Context.getDeviceManager().getDeviceConsumptionInfo(deviceId);
-        int averagesLookbackSeconds = (fuelSensor.getMovingAvgWindowSize() + 2) * consumptionInfo.getTransmissionFrequency();
+        int averagesLookbackSeconds = (fuelSensor.getMovingAvgWindowSize() + 10) * consumptionInfo.getTransmissionFrequency();
 
         List<Position> relevantPositionsListForAverages =
                 FuelSensorDataHandlerHelper.getRelevantPositionsSubList(
@@ -400,7 +400,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         }
 
         // Detect and remove outliers
-        int outlierLookbackSeconds = (fuelSensor.getOutlierWindowSize() + 2) * consumptionInfo.getTransmissionFrequency();
+        int outlierLookbackSeconds = (fuelSensor.getOutlierWindowSize() + 10) * consumptionInfo.getTransmissionFrequency();
         List<Position> relevantPositionsListForOutliers =
                 FuelSensorDataHandlerHelper.getRelevantPositionsSubList(positionsForDeviceSensor,
                                                                         position,
@@ -489,7 +489,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             possibleDataLossByDevice.remove(deviceId);
             nonOutlierInLastWindowByDevice.remove(deviceId);
 
-            int alertsLookback = (fuelSensor.getEventsWindowSize() + 2) * consumptionInfo.getTransmissionFrequency();
+            int alertsLookback = (fuelSensor.getEventsWindowSize() + 10) * consumptionInfo.getTransmissionFrequency();
             List<Position> relevantPositionsListForAlerts =
                     FuelSensorDataHandlerHelper.getRelevantPositionsSubList(
                             positionsForDeviceSensor,
@@ -575,7 +575,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             // Adding the sensor ID to the FCM notification does not make sense, since the end user does not care
             // about these IDs. In the future, if we think it is necessary, we'll add names to sensors so it is
             // clear which "tank" this notification came from.
-            Context.getFcmPushNotificationManager().updateFuelActivity(fuelActivity);
+            Context.getFcmPushNotificationManager().updateFuelActivity(fuelActivity, peripheralSensorId);
         }
     }
 

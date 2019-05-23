@@ -44,7 +44,7 @@ public class FuelSensorDataHandlerHelper {
                                                               boolean excludeOutliers,
                                                               int currentEventLookBackSeconds) {
 
-        if (positionsForSensor.size() <= minListSize) {
+        if (positionsForSensor.size() < minListSize) {
             return positionsForSensor.stream()
                                      .filter(p -> !excludeOutliers || positionIsMarkedOutlier(p, sensorOutlierFieldName))
                                      .collect(Collectors.toList());
@@ -58,7 +58,7 @@ public class FuelSensorDataHandlerHelper {
         SortedMultiset<Position> positionsSubset =
                 positionsForSensor.subMultiset(fromPosition, BoundType.OPEN, position, BoundType.CLOSED);
 
-        if (positionsSubset.size() <= minListSize) {
+        if (positionsSubset.size() < minListSize) {
             Log.debug("[RELEVANT_SUBLIST] sublist is lesser than "
                               + minListSize + " returning " + positionsSubset.size());
             return positionsSubset.stream()
@@ -73,7 +73,7 @@ public class FuelSensorDataHandlerHelper {
 
         int listMaxIndex = filteredSublistToReturn.size();
 
-        if (filteredSublistToReturn.size() <= minListSize) {
+        if (filteredSublistToReturn.size() < minListSize) {
             return filteredSublistToReturn;
         }
 
@@ -98,7 +98,8 @@ public class FuelSensorDataHandlerHelper {
 
     public static boolean isOutlierPresentInSublist(List<Position> rawFuelOutlierSublist,
                                                     int indexOfPositionEvaluated,
-                                                    Optional<Long> fuelTankMaxCapacity, PeripheralSensor fuelSensor) {
+                                                    Optional<Long> fuelTankMaxCapacity,
+                                                    PeripheralSensor fuelSensor) {
 
         // Make a copy so we don't affect the original incoming list esp in the sort below,
         // since the order of the incoming list needs to be preserved to remove / mark the right
@@ -108,6 +109,7 @@ public class FuelSensorDataHandlerHelper {
         for (Position p : rawFuelOutlierSublist) {
             Position tempPosition = new Position();
             tempPosition.set(calibFueldField, (double) p.getAttributes().get(calibFueldField));
+            tempPosition.setDeviceTime(p.getDeviceTime());
             copyOfRawValues.add(tempPosition);
         }
 
@@ -171,6 +173,7 @@ public class FuelSensorDataHandlerHelper {
         Log.debug("[OUTLIER_STAT] sumOfValues: " + sumOfValues
                   + " mean: " + mean
                   + " sumOfSquaredDifferenceOfMean: " + sumOfSquaredDifferenceOfMean
+                  + " deviceTime of position evaluated: " + (copyOfRawValues.get(indexOfPositionEvaluated).getDeviceTime())
                   + " rawFuelOfPositionEvaluated: " + rawFuelOfPositionEvaluated
                   + " standardDeviation: " + standardDeviation
                   + " lowerBoundOnRawFuelValue: " + lowerBoundOnRawFuelValue
