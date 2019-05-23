@@ -171,7 +171,7 @@ public class FuelDataActivityChecker {
                 setActivityParameters(fuelActivity, fuelEventMetadata, fuelChangeVolume);
                 checkForMissedOutlier(fuelEventMetadata, fuelActivity, fuelLevelChangeThreshold, fuelSensor);
                 deviceFuelEventMetadata.remove(activityLookupKey);
-            } else if (!isFuelConsumptionAsExpected && fuelChangeVolume > 0.0) {
+            } else if (fuelChangeVolume > 0.0) {
                 fuelActivity.setActivityType(FuelActivity.FuelActivityType.FUEL_FILL);
                 setActivityParameters(fuelActivity, fuelEventMetadata, fuelChangeVolume);
                 checkForMissedOutlier(fuelEventMetadata, fuelActivity, fuelLevelChangeThreshold, fuelSensor);
@@ -277,7 +277,7 @@ public class FuelDataActivityChecker {
                     FuelActivity activity =
                             new FuelActivity(FuelActivity.FuelActivityType.PROBABLE_FUEL_DRAIN,
                                              possibleFuelDrain, lastPosition, position);
-                    return Optional.of(activity);
+                    return checkNoise(activity, expectedFuelConsumption);
                 } else {
                     double possibleFuelFill =
                             expectedFuelConsumption.expectedCurrentFuelConsumed -
@@ -285,7 +285,7 @@ public class FuelDataActivityChecker {
                     FuelActivity activity =
                             new FuelActivity(FuelActivity.FuelActivityType.PROBABLE_FUEL_FILL,
                                              possibleFuelFill, lastPosition, position);
-                    return Optional.of(activity);
+                    return checkNoise(activity, expectedFuelConsumption);
                 }
             } else {
                 double expectedFuelFill =
@@ -293,11 +293,17 @@ public class FuelDataActivityChecker {
                 FuelActivity activity =
                         new FuelActivity(FuelActivity.FuelActivityType.EXPECTED_FUEL_FILL,
                                          expectedFuelFill, lastPosition, position);
-                return Optional.of(activity);
+                return checkNoise(activity, expectedFuelConsumption);
             }
         }
 
         return Optional.empty();
+    }
+
+    private static Optional<FuelActivity> checkNoise(FuelActivity activity,
+                                                     ExpectedFuelConsumption expectedFuelConsumption) {
+
+        return Math.abs(activity.getChangeVolume()) > expectedFuelConsumption.allowedDeviation ? Optional.of(activity) : Optional.empty();
     }
 
     private static void setActivityParameters(final FuelActivity fuelActivity,
