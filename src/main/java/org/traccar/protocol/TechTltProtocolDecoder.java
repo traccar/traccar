@@ -35,6 +35,15 @@ public class TechTltProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
+    private static final Pattern PATTERN_STATUS = new PatternBuilder()
+            .number("(d+),")                     // id
+            .text("INFOGPRS,")
+            .number("V Bat=(d+.d),")             // battery
+            .number("TEMP=(d+),")                // temperature
+            .expression("[^,]*,")
+            .number("(d+)")                      // rssi
+            .compile();
+
     private static final Pattern PATTERN_POSITION = new PatternBuilder()
             .number("(d+)")                      // id
             .text("*POS=Y,")
@@ -52,11 +61,33 @@ public class TechTltProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)")                      // cid
             .compile();
 
-    @Override
-    protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+    private Position decodeStatus(Channel channel, SocketAddress remoteAddress, String sentence) {
 
-        Parser parser = new Parser(PATTERN_POSITION, (String) msg);
+        Parser parser = new Parser(PATTERN_STATUS, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, null);
+
+        position.set(Position.KEY_BATTERY, parser.nextDouble());
+        position.set(Position.KEY_DEVICE_TEMP, parser.nextInt());
+        position.set(Position.KEY_RSSI, parser.nextInt());
+
+        return position;
+    }
+
+    private Position decodeLocation(Channel channel, SocketAddress remoteAddress, String sentence) {
+
+        Parser parser = new Parser(PATTERN_POSITION, sentence);
         if (!parser.matches()) {
             return null;
         }
@@ -82,6 +113,20 @@ public class TechTltProtocolDecoder extends BaseProtocolDecoder {
         position.setNetwork(new Network(CellTower.fromLacCid(parser.nextInt(), parser.nextInt())));
 
         return position;
+    }
+
+    @Override
+    protected Object decode(
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+
+        String sentence = (String) msg;
+        if (sentence.contains("INFO")) {
+            return decodeStatus(channel, remoteAddress, sentence);
+        } else if (sentence.contains("POS")) {
+            return decodeLocation(channel, remoteAddress, sentence);
+        } else {
+            return null;
+        }
     }
 
 }
