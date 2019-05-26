@@ -326,12 +326,28 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             case "UEX":
                 int remaining = Integer.parseInt(values[index++]);
                 while (remaining > 0) {
-                    String value = values[index++];
-                    String[] pair = value.split("=");
+                    String attribute = values[index++];
+                    String[] pair = attribute.split("=");
                     if (pair.length >= 2) {
-                        position.set(pair[0].toLowerCase(), pair[1].trim());
+                        String value = pair[1].trim();
+                        if (value.contains(".")) {
+                            value = value.substring(0, value.indexOf('.'));
+                        }
+                        switch (pair[0].charAt(0)) {
+                            case 't':
+                                position.set(Position.PREFIX_TEMP + pair[0].charAt(2), Integer.parseInt(value, 16));
+                                break;
+                            case 'N':
+                                position.set("fuel" + pair[0].charAt(2), Integer.parseInt(value, 16));
+                                break;
+                            case 'Q':
+                                position.set("drivingQuality", Integer.parseInt(value, 16));
+                                break;
+                            default:
+                                break;
+                        }
                     }
-                    remaining -= value.length() + 1;
+                    remaining -= attribute.length() + 1;
                 }
                 break;
             default:
