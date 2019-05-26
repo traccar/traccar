@@ -21,6 +21,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.Protocol;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import javax.json.Json;
@@ -102,7 +103,7 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
                 position.setLongitude(((JsonNumber) value).doubleValue());
                 return true;
             case "position.speed":
-                position.setSpeed(((JsonNumber) value).doubleValue());
+                position.setSpeed(UnitsConverter.knotsFromKph(((JsonNumber) value).doubleValue()));
                 return true;
             case "position.direction":
                 position.setCourse(((JsonNumber) value).doubleValue());
