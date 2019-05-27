@@ -26,9 +26,11 @@ import org.traccar.model.Position;
 import org.traccar.model.WifiAccessPoint;
 
 import java.net.SocketAddress;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 public class MictrackProtocolDecoder extends BaseProtocolDecoder {
 
@@ -37,7 +39,9 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private Date decodeTime(String data) throws ParseException {
-        return new SimpleDateFormat("yyMMddHHmmss").parse(data);
+        DateFormat dateFormat = new SimpleDateFormat("yyMMddHHmmss");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return dateFormat.parse(data);
     }
 
     private void decodeLocation(Position position, String data) throws ParseException {

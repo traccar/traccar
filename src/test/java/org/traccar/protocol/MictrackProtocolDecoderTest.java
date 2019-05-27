@@ -12,7 +12,7 @@ public class MictrackProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, text(
                 "MT;6;866425031361423;R0;10+190109091803+22.63827+114.02922+2.14+69+2+3744+113"),
-                position("2019-01-09 17:18:03.000", true, 22.63827, 114.02922));
+                position("2019-01-09 09:18:03.000", true, 22.63827, 114.02922));
 
         verifyAttributes(decoder, text(
                 "MT;6;866425031377981;R1;190108024848+6a:db:54:5a:79:6d,-91,00:9a:cd:a2:e6:21,-94+3+3831+0"));
