@@ -267,5 +267,6 @@
     <entry key='radar.port'>5188</entry>
     <entry key='techtlt.port'>5189</entry>
     <entry key='starcom.port'>5190</entry>
+    <entry key='mictrack.port'>5191</entry>
 
 </properties>
