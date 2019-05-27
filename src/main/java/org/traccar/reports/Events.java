@@ -27,6 +27,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import org.jxls.util.JxlsHelper;
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.traccar.Context;
 import org.traccar.model.Device;
@@ -127,7 +128,9 @@ public final class Events {
             jxlsContext.putVar("maintenanceNames", maintenanceNames);
             jxlsContext.putVar("from", from);
             jxlsContext.putVar("to", to);
-            ReportUtils.processTemplateWithSheets(inputStream, outputStream, jxlsContext);
+            //ReportUtils.processTemplateWithSheets(inputStream, outputStream, jxlsContext);
+            JxlsHelper.getInstance().setUseFastFormulaProcessor(false)
+                    .processTemplate(inputStream, outputStream, jxlsContext);
         }
     }
 }
