@@ -83,6 +83,7 @@ public class Position extends Message {
     public static final String KEY_DOOR = "door";
     public static final String KEY_AXLE_WEIGHT = "axleWeight";
     public static final String KEY_G_SENSOR = "gSensor";
+    public static final String KEY_ICCID = "iccid";
 
     public static final String KEY_DTCS = "dtcs";
     public static final String KEY_OBD_SPEED = "obdSpeed"; // knots

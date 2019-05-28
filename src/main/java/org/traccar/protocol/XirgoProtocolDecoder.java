@@ -266,7 +266,7 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
                     position.setValid(Integer.parseInt(values[i]) == 3);
                     break;
                 case "SI":
-                    position.set("iccid", values[i]);
+                    position.set(Position.KEY_ICCID, values[i]);
                     break;
                 case "IG":
                     int ignition = Integer.parseInt(values[i]);

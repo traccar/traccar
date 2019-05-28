@@ -99,4 +99,17 @@ public class AtrackProtocolDecoderTest extends ProtocolTest {
 
     }
 
+    @Test
+    public void testDecodeCustom() throws Exception {
+
+        AtrackProtocolDecoder decoder = new AtrackProtocolDecoder(null);
+
+        decoder.setCustom(true);
+        decoder.setForm("%AT%BV%CD%CE%CM%CN%DT%GN%GQ%GS%GV%LC%ME%MV%RL%SA%SM%CS%HT%VN%PD%IA%MP%EL%ET%FC%FL%RP%ML%MF%TR%EH%CR%DL%EG%HA%HB%HC%IP%MT%PF");
+
+        verifyPositions(decoder, buffer(
+                "@P,DCCE,422,5818,357766091026083,1557904779,1557904780,1557904780,-121899644,37406291,129,2,21,10,0,0,0,0,,2000,2000,,13,40,8942310017000752067,21096194,295050910083206,310260,0,FF00001F0393FF01001E0395FF01001E0394FF01001F0393FF02001D0393FF00001F0394FF0100200394FF01001F0393FF02001F0395FF0100200394,20,10,002C005C03B4,14953,357766091026083,125,38,11,0,1,Device:Fail,JN8AZ1MU1BW066090,0,0,0,0,0,99,0,0,0,0,0,264,5,0,0,0,0,0,0,0,0\r\n"));
+
+    }
+
 }

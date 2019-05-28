@@ -84,6 +84,10 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         this.custom = custom;
     }
 
+    public void setForm(String form) {
+        this.form = form;
+    }
+
     private static void sendResponse(Channel channel, SocketAddress remoteAddress, long rawId, int index) {
         if (channel != null) {
             ByteBuf response = Unpooled.buffer(12);
@@ -166,6 +170,12 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case "AV1":
                     position.set(Position.PREFIX_ADC + 1, Integer.parseInt(values[i]));
+                    break;
+                case "CD":
+                    position.set(Position.KEY_ICCID, values[i]);
+                    break;
+                case "EH":
+                    position.set(Position.KEY_HOURS, UnitsConverter.msFromHours(Integer.parseInt(values[i])));
                     break;
                 default:
                     break;
@@ -274,7 +284,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                     buf.readUnsignedByte(); // pending code status
                     break;
                 case "CD":
-                    readString(buf); // sim cid
+                    position.set(Position.KEY_ICCID, readString(buf));
                     break;
                 case "CM":
                     buf.readLong(); // imsi
