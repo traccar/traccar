@@ -54,7 +54,17 @@ public class FuelDataActivityChecker {
         Optional<String> possibleActivityStartTypeStartType = determinePossibleActivityStartType(diffInMeans, fillThreshold, drainThreshold);
 
         if (possibleActivityStartTypeStartType.isPresent()) {
-            String activityLookupKey = getActivityLookupKey(deviceSensorLookupKey, possibleActivityStartTypeStartType.get());
+            String startType = possibleActivityStartTypeStartType.get();
+
+            String oppositeEventType = startType.equals(FuelActivityType.FUEL_FILL.name())? FuelActivityType.FUEL_DRAIN.name() :
+                                       FuelActivityType.FUEL_FILL.name();
+
+            String activityLookupKey = getActivityLookupKey(deviceSensorLookupKey, startType);
+            String oppositeActivityLookupKey = getActivityLookupKey(deviceSensorLookupKey, oppositeEventType);
+
+            if (!deviceFuelEventMetadata.containsKey(oppositeActivityLookupKey)) {
+
+            }
 
             if (!deviceFuelEventMetadata.containsKey(activityLookupKey)) {
                 Position midPointPosition = readingsForDevice.get(midPoint);
@@ -215,12 +225,12 @@ public class FuelDataActivityChecker {
         String drainLookupKey = getActivityLookupKey(deviceSensorLookupKey, FuelActivityType.FUEL_DRAIN.name());
         String fillLookupKey = getActivityLookupKey(deviceSensorLookupKey, FuelActivityType.FUEL_FILL.name());
 
-        if (diffInMeans > 0 && Math.abs(diffInMeans) < drainThreshold
+        if (Math.abs(diffInMeans) < drainThreshold
                 && deviceFuelEventMetadata.containsKey(drainLookupKey)) {
             return Optional.of(FuelActivityType.FUEL_DRAIN.name());
         }
 
-        if (diffInMeans < 0 && Math.abs(diffInMeans) < fillThreshold
+        if (Math.abs(diffInMeans) < fillThreshold
                 && deviceFuelEventMetadata.containsKey(fillLookupKey)) {
             return Optional.of(FuelActivityType.FUEL_FILL.name());
         }

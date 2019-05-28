@@ -19,8 +19,6 @@ public class PeripheralSensorManager extends ExtendedObjectManager<PeripheralSen
     private final Map<Long, List<PeripheralSensor>> deviceToPeripheralSensorMap =
             new ConcurrentHashMap();
 
-    private final List<Long> sortedSensorIds = Lists.newArrayList();
-
     private final Map<String, FuelSensorCalibration> deviceSensorToCalibrationDataMap =
             new ConcurrentHashMap<>();
 
@@ -43,7 +41,6 @@ public class PeripheralSensorManager extends ExtendedObjectManager<PeripheralSen
                         linkedPeripheralSensors = new ArrayList();
                     }
                     linkedPeripheralSensors.add(p);
-                    sortedSensorIds.add(p.getPeripheralSensorId());
                     deviceToPeripheralSensorMap.put(p.getDeviceId(), linkedPeripheralSensors);
 
                     ObjectMapper calibrationDataMapper = new ObjectMapper();
@@ -54,7 +51,6 @@ public class PeripheralSensorManager extends ExtendedObjectManager<PeripheralSen
                                                                                  p.getPeripheralSensorId()),
                                                          fuelSensorCalibration);
                 }
-                sortedSensorIds.sort(Long::compareTo);
             } catch (SQLException | IOException e) {
                 e.printStackTrace();
             }
@@ -69,8 +65,17 @@ public class PeripheralSensorManager extends ExtendedObjectManager<PeripheralSen
         return Optional.empty();
     }
 
-    public List<Long> getSortedSensorIds() {
-        return sortedSensorIds;
+    public Optional<List<Long>> getSortedSensorIds(long deviceId) {
+        Optional<List<PeripheralSensor>> sensorsOnDevice = getLinkedPeripheralSensors(deviceId);
+        if (sensorsOnDevice.isPresent()) {
+            List<Long> sensorIds = Lists.newArrayList();
+            for (PeripheralSensor sensor : sensorsOnDevice.get()) {
+                sensorIds.add(sensor.getPeripheralSensorId());
+            }
+            sensorIds.sort(Long::compareTo);
+            return Optional.of(sensorIds);
+        }
+        return Optional.empty();
     }
 
     public Optional<FuelSensorCalibration> getDeviceSensorCalibrationData(long deviceId, long peripheralSensorId) {

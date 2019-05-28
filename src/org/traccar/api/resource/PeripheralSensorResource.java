@@ -24,7 +24,6 @@ public class PeripheralSensorResource extends BaseObjectResource<PeripheralSenso
         super(PeripheralSensor.class);
     }
 
-    @PermitAll
     @GET
     public Collection<PeripheralSensor> get(@QueryParam("deviceId") Long deviceId) {
         Optional<List<PeripheralSensor>> sensors = Context.getPeripheralSensorManager().getSensorByDeviceId(deviceId);
