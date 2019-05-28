@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,12 +29,14 @@ public class TeltonikaFrameDecoder extends BaseFrameDecoder {
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
-        // Check minimum length
+        while (buf.isReadable() && buf.getByte(buf.readerIndex()) == (byte) 0xff) {
+            buf.skipBytes(1);
+        }
+
         if (buf.readableBytes() < MESSAGE_MINIMUM_LENGTH) {
             return null;
         }
 
-        // Read packet
         int length = buf.getUnsignedShort(buf.readerIndex());
         if (length > 0) {
             if (buf.readableBytes() >= (length + 2)) {
