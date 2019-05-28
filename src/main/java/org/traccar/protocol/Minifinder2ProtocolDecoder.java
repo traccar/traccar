@@ -72,8 +72,13 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
         ByteBuf buf = (ByteBuf) msg;
 
         buf.readUnsignedByte(); // header
+        int flags = buf.readUnsignedByte();
+        buf.readUnsignedShortLE(); // length
+        buf.readUnsignedShortLE(); // checksum
+        int index = buf.readUnsignedShortLE();
+        int type = buf.readUnsignedByte();
 
-        if (BitUtil.check(buf.readUnsignedByte(), 4) && channel != null) {
+        if (BitUtil.check(flags, 4) && channel != null) {
 
             ByteBuf content = Unpooled.buffer();
             content.writeByte(MSG_RESPONSE);
@@ -82,20 +87,15 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
 
             ByteBuf response = Unpooled.buffer();
             response.writeByte(0xAB); // header
-            response.writeByte(0); // properties
-            response.writeShortLE(3);
+            response.writeByte(0x28); // properties
+            response.writeShortLE(content.readableBytes());
             response.writeShortLE(Checksum.crc16(Checksum.CRC16_XMODEM, content.nioBuffer()));
-            response.writeShortLE(0); // index
+            response.writeShortLE(index);
             response.writeBytes(content);
             content.release();
 
             channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
-
-        buf.readUnsignedShortLE(); // length
-        buf.readUnsignedShortLE(); // checksum
-        buf.readUnsignedShortLE(); // index
-        int type = buf.readUnsignedByte();
 
         if (type == MSG_DATA) {
 
