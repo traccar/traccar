@@ -66,8 +66,8 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
         int length = values.length % 5 == 0 ? 5 : 4;
         for (int i = 0; i < values.length / length; i++) {
             int mnc = Integer.parseInt(values[i * length]);
-            int lac = Integer.parseInt(values[i * length + 1]);
-            int cid = Integer.parseInt(values[i * length + 2]);
+            int cid = Integer.parseInt(values[i * length + 1]);
+            int lac = Integer.parseInt(values[i * length + 2]);
             int mcc = Integer.parseInt(values[i * length + 3]);
             network.addCellTower(CellTower.from(mcc, mnc, lac, cid));
         }
