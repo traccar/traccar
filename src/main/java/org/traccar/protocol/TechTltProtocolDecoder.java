@@ -119,7 +119,7 @@ public class TechTltProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        String sentence = (String) msg;
+        String sentence = ((String) msg).trim();
         if (sentence.contains("INFO")) {
             return decodeStatus(channel, remoteAddress, sentence);
         } else if (sentence.contains("POS")) {
