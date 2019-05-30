@@ -12,6 +12,9 @@ public class T800xProtocolDecoderTest extends ProtocolTest {
         T800xProtocolDecoder decoder = new T800xProtocolDecoder(null);
 
         verifyNull(decoder, binary(
+                "2727010017000108806168988888881016010207110111"));
+
+        verifyNull(decoder, binary(
                 "252501001504050880061689888888111111250350"));
 
         verifyAttribute(decoder, binary(

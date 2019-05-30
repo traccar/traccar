@@ -44,6 +44,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_GPS = 0x02;
     public static final int MSG_HEARTBEAT = 0x03;
     public static final int MSG_ALARM = 0x04;
+    public static final int MSG_NETWORK = 0x05;
     public static final int MSG_COMMAND = 0x81;
 
     private void sendResponse(Channel channel, short header, int type, int index, ByteBuf imei, int alarm) {
@@ -144,44 +145,56 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_INDEX, index);
 
-        buf.readUnsignedShort(); // acc on interval
-        buf.readUnsignedShort(); // acc off interval
-        buf.readUnsignedByte(); // angle compensation
-        buf.readUnsignedShort(); // distance compensation
+        if (header != 0x2727) {
 
-        position.set(Position.KEY_RSSI, BitUtil.to(buf.readUnsignedShort(), 7));
+            buf.readUnsignedShort(); // acc on interval
+            buf.readUnsignedShort(); // acc off interval
+            buf.readUnsignedByte(); // angle compensation
+            buf.readUnsignedShort(); // distance compensation
+
+            position.set(Position.KEY_RSSI, BitUtil.to(buf.readUnsignedShort(), 7));
+
+        }
 
         int status = buf.readUnsignedByte();
         position.set(Position.KEY_SATELLITES, BitUtil.to(status, 5));
 
-        buf.readUnsignedByte(); // gsensor manager status
-        buf.readUnsignedByte(); // other flags
-        buf.readUnsignedByte(); // heartbeat
-        buf.readUnsignedByte(); // relay status
-        buf.readUnsignedShort(); // drag alarm setting
+        if (header != 0x2727) {
 
-        int io = buf.readUnsignedShort();
-        position.set(Position.KEY_IGNITION, BitUtil.check(io, 14));
-        position.set("ac", BitUtil.check(io, 13));
-        for (int i = 0; i <= 2; i++) {
-            position.set(Position.PREFIX_OUT + (i + 1), BitUtil.check(io, 7 + i));
+            buf.readUnsignedByte(); // gsensor manager status
+            buf.readUnsignedByte(); // other flags
+            buf.readUnsignedByte(); // heartbeat
+            buf.readUnsignedByte(); // relay status
+            buf.readUnsignedShort(); // drag alarm setting
+
+            int io = buf.readUnsignedShort();
+            position.set(Position.KEY_IGNITION, BitUtil.check(io, 14));
+            position.set("ac", BitUtil.check(io, 13));
+            for (int i = 0; i <= 2; i++) {
+                position.set(Position.PREFIX_OUT + (i + 1), BitUtil.check(io, 7 + i));
+            }
+
+            position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
+            position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort());
+
         }
-
-        position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
-        position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort());
 
         int alarm = buf.readUnsignedByte();
         position.set(Position.KEY_ALARM, decodeAlarm(alarm));
 
-        buf.readUnsignedByte(); // reserved
+        if (header != 0x2727) {
 
-        position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+            buf.readUnsignedByte(); // reserved
 
-        int battery = BcdUtil.readInteger(buf, 2);
-        if (battery == 0) {
-            battery = 100;
+            position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+
+            int battery = BcdUtil.readInteger(buf, 2);
+            if (battery == 0) {
+                battery = 100;
+            }
+            position.set(Position.KEY_BATTERY, battery);
+
         }
-        position.set(Position.KEY_BATTERY, battery);
 
         DateBuilder dateBuilder = new DateBuilder()
                 .setYear(BcdUtil.readInteger(buf, 2))
@@ -219,7 +232,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
         }
 
-        if (buf.readableBytes() >= 2) {
+        if (header != 0x2727 && buf.readableBytes() >= 2) {
             position.set(Position.KEY_POWER, BcdUtil.readInteger(buf, 4) * 0.01);
         }
 
