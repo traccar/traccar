@@ -12,7 +12,7 @@ import java.util.Optional;
 
 public class FuelConsumptionChecker {
 
-    private static final long DEFAULT_MAX_CAPACITY = 100L;
+    private static final long DEFAULT_MAX_CAPACITY = 500L;
     private static final long MILLIS_IN_HOUR = 36_00_000L;
 
     public static boolean isFuelConsumptionAsExpected(Position startPosition,
@@ -29,6 +29,9 @@ public class FuelConsumptionChecker {
             // Not enough info to process data loss.
             return false;
         }
+
+        String maxCapacityString = maxCapacity.map(Object::toString).orElse("n/a");
+        Log.debug(String.format("[ConsumptionChecker] MaxCapacity of sensorId %d on deviceId %d is %s ", fuelSensor.getPeripheralSensorId(), deviceId, maxCapacityString));
 
         ExpectedFuelConsumption expectedFuelConsumption =
                 getExpectedFuelConsumptionValues(startPosition, endPosition, maxCapacity, consumptionInfo);

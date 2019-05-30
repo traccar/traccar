@@ -6,7 +6,7 @@ import org.traccar.model.Device;
 
 public class DeviceConsumptionInfo {
     private static final String CONSUMPTION_TYPE_ATTR = "consumption";
-    private static final String DEFAULT_CONSUMPTION_TYPE = "empty";
+    private static final String DEFAULT_CONSUMPTION_TYPE = "odometer";
 
     private static final String MIN_AVG_CONSUMPTION_RATE_ATTR = "minAvgConsumptionRate";
     private static final String MAX_AVG_CONSUMPTION_RATE_ATTR = "maxAvgConsumptionRate";

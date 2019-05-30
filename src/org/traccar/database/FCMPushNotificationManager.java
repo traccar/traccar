@@ -131,7 +131,7 @@ public class FCMPushNotificationManager extends ExtendedObjectManager<FCMPushNot
         Optional<List<Long>> sortedSensorIds = Context.getPeripheralSensorManager().getSortedSensorIds(deviceId);
         StringBuilder tankIndexBuilder = new StringBuilder("detected on");
         if (sortedSensorIds.isPresent() && sortedSensorIds.get().size() > 1 && sortedSensorIds.get().contains(peripheralSensorId)) {
-            tankIndexBuilder.append(String.format(" tank %d of", sortedSensorIds.get().indexOf(peripheralSensorId)));
+            tankIndexBuilder.append(String.format(" tank %d of", (sortedSensorIds.get().indexOf(peripheralSensorId) + 1)));
         }
 
         String title = String.format("[%s] %s %s", eventType, tankIndexBuilder, device.getRegistrationNumber());

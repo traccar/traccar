@@ -72,7 +72,7 @@ public class PeripheralSensorManager extends ExtendedObjectManager<PeripheralSen
             for (PeripheralSensor sensor : sensorsOnDevice.get()) {
                 sensorIds.add(sensor.getPeripheralSensorId());
             }
-            sensorIds.sort(Long::compareTo);
+            sensorIds.sort(Comparator.naturalOrder());
             return Optional.of(sensorIds);
         }
         return Optional.empty();

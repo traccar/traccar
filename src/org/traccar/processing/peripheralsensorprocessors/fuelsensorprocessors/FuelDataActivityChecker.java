@@ -256,6 +256,9 @@ public class FuelDataActivityChecker {
 
         String calibFuelDataField = fuelSensor.getCalibFuelFieldName();
 
+        String maxCapacityString = maxTankMaxVolume.map(Object::toString).orElse("n/a");
+        Log.debug(String.format("[ActivityChecker] MaxCapacity of sensorId %d on deviceId %d is %s ", fuelSensor.getPeripheralSensorId(), position.getDeviceId(), maxCapacityString));
+
         ExpectedFuelConsumption expectedFuelConsumption =
                 FuelConsumptionChecker.getExpectedFuelConsumptionValues(lastPosition, position, maxTankMaxVolume, consumptionInfo);
 
