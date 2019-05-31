@@ -232,8 +232,21 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
         }
 
-        if (header != 0x2727 && buf.readableBytes() >= 2) {
+        if (header == 0x2727) {
+
+            buf.skipBytes(5); // acceleration
+            position.set(Position.KEY_BATTERY_LEVEL, BcdUtil.readInteger(buf, 2));
+            position.set(Position.KEY_DEVICE_TEMP, (int) buf.readByte());
+            buf.readUnsignedByte(); // front light sensor voltage
+            position.set(Position.KEY_BATTERY, BcdUtil.readInteger(buf, 2) * 0.1);
+            buf.readUnsignedByte(); // solar panel voltage
+            position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+            position.set(Position.KEY_STATUS, buf.readUnsignedShort());
+
+        } else if (buf.readableBytes() >= 2) {
+
             position.set(Position.KEY_POWER, BcdUtil.readInteger(buf, 4) * 0.01);
+
         }
 
         sendResponse(channel, header, type, index, imei, alarm);
