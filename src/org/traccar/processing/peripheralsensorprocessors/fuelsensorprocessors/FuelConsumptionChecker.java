@@ -105,7 +105,7 @@ public class FuelConsumptionChecker {
 
             case "empty":
             case "noconsumption":
-                return new ExpectedFuelConsumption(0, 0, 0, 0);
+                return new ExpectedFuelConsumption(0, 0, 0, allowedDeviation);
             default:
                 Log.debug("Found strange fuel consumption category vehicle");
                 return null;
