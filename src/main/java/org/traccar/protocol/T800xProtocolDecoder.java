@@ -33,6 +33,7 @@ import org.traccar.model.Position;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 
 public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
@@ -92,6 +93,17 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private Date readDate(ByteBuf buf) {
+        return new DateBuilder()
+                .setYear(BcdUtil.readInteger(buf, 2))
+                .setMonth(BcdUtil.readInteger(buf, 2))
+                .setDay(BcdUtil.readInteger(buf, 2))
+                .setHour(BcdUtil.readInteger(buf, 2))
+                .setMinute(BcdUtil.readInteger(buf, 2))
+                .setSecond(BcdUtil.readInteger(buf, 2))
+                .getDate();
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -110,9 +122,32 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
+        if (type != MSG_GPS && type != MSG_ALARM) {
+            sendResponse(channel, header, type, index, imei, 0);
+        }
+
         if (type == MSG_GPS || type == MSG_ALARM) {
 
             return decodePosition(channel, deviceSession, buf, header, type, index, imei);
+
+        } else if (type == MSG_NETWORK) {
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, readDate(buf));
+
+            position.set(Position.KEY_OPERATOR, buf.readCharSequence(
+                    buf.readUnsignedByte(), StandardCharsets.UTF_16LE).toString());
+            position.set("networkTechnology", buf.readCharSequence(
+                    buf.readUnsignedByte(), StandardCharsets.US_ASCII).toString());
+            position.set("networkBand", buf.readCharSequence(
+                    buf.readUnsignedByte(), StandardCharsets.US_ASCII).toString());
+            buf.readCharSequence(buf.readUnsignedByte(), StandardCharsets.US_ASCII); // imsi
+            position.set(Position.KEY_ICCID, buf.readCharSequence(
+                    buf.readUnsignedByte(), StandardCharsets.US_ASCII).toString());
+
+            return position;
 
         } else if (type == MSG_COMMAND) {
 
@@ -125,13 +160,9 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Position.KEY_RESULT, buf.toString(StandardCharsets.UTF_16LE));
 
-            sendResponse(channel, header, type, index, imei, 0);
-
             return position;
 
         }
-
-        sendResponse(channel, header, type, index, imei, 0);
 
         return null;
     }
@@ -196,18 +227,10 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
         }
 
-        DateBuilder dateBuilder = new DateBuilder()
-                .setYear(BcdUtil.readInteger(buf, 2))
-                .setMonth(BcdUtil.readInteger(buf, 2))
-                .setDay(BcdUtil.readInteger(buf, 2))
-                .setHour(BcdUtil.readInteger(buf, 2))
-                .setMinute(BcdUtil.readInteger(buf, 2))
-                .setSecond(BcdUtil.readInteger(buf, 2));
-
         if (BitUtil.check(status, 6)) {
 
             position.setValid(!BitUtil.check(status, 7));
-            position.setTime(dateBuilder.getDate());
+            position.setTime(readDate(buf));
             position.setAltitude(buf.readFloatLE());
             position.setLongitude(buf.readFloatLE());
             position.setLatitude(buf.readFloatLE());
@@ -216,7 +239,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
         } else {
 
-            getLastLocation(position, dateBuilder.getDate());
+            getLastLocation(position, readDate(buf));
 
             int mcc = buf.readUnsignedShortLE();
             int mnc = buf.readUnsignedShortLE();
@@ -237,9 +260,9 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             buf.skipBytes(5); // acceleration
             position.set(Position.KEY_BATTERY_LEVEL, BcdUtil.readInteger(buf, 2));
             position.set(Position.KEY_DEVICE_TEMP, (int) buf.readByte());
-            buf.readUnsignedByte(); // front light sensor voltage
+            position.set("lightSensor", BcdUtil.readInteger(buf, 2) * 0.1);
             position.set(Position.KEY_BATTERY, BcdUtil.readInteger(buf, 2) * 0.1);
-            buf.readUnsignedByte(); // solar panel voltage
+            position.set("solarPanel", BcdUtil.readInteger(buf, 2) * 0.1);
             position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
             position.set(Position.KEY_STATUS, buf.readUnsignedShort());
 
