@@ -83,7 +83,8 @@ public class FuelConsumptionChecker {
                                                                            Optional<Long> maxCapacity,
                                                                            DeviceConsumptionInfo consumptionInfo) {
 
-        double allowedDeviation = maxCapacity.orElse(DEFAULT_MAX_CAPACITY) * 0.01;
+        double allowedDeviation = (maxCapacity.map(tankMaxCapacity -> Math.min(tankMaxCapacity, DEFAULT_MAX_CAPACITY))
+                                              .orElse(DEFAULT_MAX_CAPACITY)) * 0.01;
 
         switch (consumptionInfo.getDeviceConsumptionType().toLowerCase()) {
 
