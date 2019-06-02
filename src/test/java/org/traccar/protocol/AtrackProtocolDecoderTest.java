@@ -105,6 +105,12 @@ public class AtrackProtocolDecoderTest extends ProtocolTest {
         AtrackProtocolDecoder decoder = new AtrackProtocolDecoder(null);
 
         decoder.setCustom(true);
+
+        decoder.setForm("%AT%BV%MV%SA%VN%PD%IA%MP%EL%ET%FC%FL%RP%ML%MF%TR%EH%DL%EG%HA%HB%HC%IP%MT");
+
+        verifyPositions(decoder, buffer(
+                "@P,7E02,186,0,357766091026083,1558908265,1558908266,1558908266,-121900220,37407524,175,2,6,6,1,39,0,0,,2000,2000, ,3,40,142,12,JN8AZ1MU1BW066090,0,30,0,58,90,22,72,1187,0,1232,9,409,0,1,0,0,0,0,1\r\n"));
+
         decoder.setForm("%AT%BV%CD%CE%CM%CN%DT%GN%GQ%GS%GV%LC%ME%MV%RL%SA%SM%CS%HT%VN%PD%IA%MP%EL%ET%FC%FL%RP%ML%MF%TR%EH%CR%DL%EG%HA%HB%HC%IP%MT%PF");
 
         verifyPositions(decoder, buffer(

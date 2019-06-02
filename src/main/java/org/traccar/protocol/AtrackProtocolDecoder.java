@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,7 +160,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_THROTTLE, Integer.parseInt(values[i]));
                     break;
                 case "ET":
-                    position.set(Position.PREFIX_TEMP + 1, Integer.parseInt(values[i]));
+                    position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(values[i]));
                     break;
                 case "FL":
                     position.set(Position.KEY_FUEL_LEVEL, Integer.parseInt(values[i]));
@@ -175,7 +175,31 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_ICCID, values[i]);
                     break;
                 case "EH":
-                    position.set(Position.KEY_HOURS, UnitsConverter.msFromHours(Integer.parseInt(values[i])));
+                    position.set(Position.KEY_HOURS, UnitsConverter.msFromHours(Integer.parseInt(values[i]) * 0.1));
+                    break;
+                case "IA":
+                    position.set("intakeTemp", Integer.parseInt(values[i]));
+                    break;
+                case "EL":
+                    position.set(Position.KEY_ENGINE_LOAD, Integer.parseInt(values[i]));
+                    break;
+                case "HA":
+                    if (Integer.parseInt(values[i]) > 0) {
+                        position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+                    }
+                    break;
+                case "HB":
+                    if (Integer.parseInt(values[i]) > 0) {
+                        position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+                    }
+                    break;
+                case "HC":
+                    if (Integer.parseInt(values[i]) > 0) {
+                        position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
+                    }
+                    break;
+                case "MT":
+                    position.set(Position.KEY_MOTION, Integer.parseInt(values[i]) > 0);
                     break;
                 default:
                     break;
