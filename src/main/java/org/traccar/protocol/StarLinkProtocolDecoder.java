@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,21 +34,7 @@ import java.util.regex.Pattern;
 
 public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
 
-    private String[] dataTags;
-    private DateFormat dateFormat;
-
-    public StarLinkProtocolDecoder(Protocol protocol) {
-        super(protocol);
-
-        String format = Context.getConfig().getString(
-                getProtocolName() + ".format", "#EDT#,#EID#,#PDT#,#LAT#,#LONG#,#SPD#,#HEAD#,#ODO#,"
-                + "#IN1#,#IN2#,#IN3#,#IN4#,#OUT1#,#OUT2#,#OUT3#,#OUT4#,#LAC#,#CID#,#VIN#,#VBAT#,#DEST#,#IGN#,#ENG#");
-        dataTags = format.split(",");
-
-        dateFormat = new SimpleDateFormat(
-                Context.getConfig().getString(getProtocolName() + ".dateFormat", "yyMMddHHmmss"));
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
+    public static final int MSG_EVENT_REPORT = 6;
 
     private static final Pattern PATTERN = new PatternBuilder()
             .expression(".")                     // protocol head
@@ -61,7 +47,27 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
             .number("xx")                        // checksum
             .compile();
 
-    public static final int MSG_EVENT_REPORT = 6;
+    private String[] dataTags;
+    private DateFormat dateFormat;
+
+    public StarLinkProtocolDecoder(Protocol protocol) {
+        super(protocol);
+
+        setFormat(Context.getConfig().getString(
+                getProtocolName() + ".format", "#EDT#,#EID#,#PDT#,#LAT#,#LONG#,#SPD#,#HEAD#,#ODO#,"
+                + "#IN1#,#IN2#,#IN3#,#IN4#,#OUT1#,#OUT2#,#OUT3#,#OUT4#,#LAC#,#CID#,#VIN#,#VBAT#,#DEST#,#IGN#,#ENG#"));
+
+        setDateFormat(Context.getConfig().getString(getProtocolName() + ".dateFormat", "yyMMddHHmmss"));
+    }
+
+    public void setFormat(String format) {
+        dataTags = format.split(",");
+    }
+
+    public void setDateFormat(String dateFormat) {
+        this.dateFormat = new SimpleDateFormat(dateFormat);
+        this.dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
 
     private double parseCoordinate(String value) {
         int minutesIndex = value.indexOf('.') - 2;
@@ -151,31 +157,19 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
                     position.setCourse(Integer.parseInt(data[i]));
                     break;
                 case "#ODO#":
-                    position.set(Position.KEY_ODOMETER, Long.parseLong(data[i]) * 1000);
+                    position.set(Position.KEY_ODOMETER, (long) (Double.parseDouble(data[i]) * 1000));
                     break;
                 case "#IN1#":
-                    position.set(Position.PREFIX_IN + 1, Integer.parseInt(data[i]));
-                    break;
                 case "#IN2#":
-                    position.set(Position.PREFIX_IN + 2, Integer.parseInt(data[i]));
-                    break;
                 case "#IN3#":
-                    position.set(Position.PREFIX_IN + 3, Integer.parseInt(data[i]));
-                    break;
                 case "#IN4#":
-                    position.set(Position.PREFIX_IN + 4, Integer.parseInt(data[i]));
+                    position.set(Position.PREFIX_IN + dataTags[i].charAt(3), Integer.parseInt(data[i]));
                     break;
                 case "#OUT1#":
-                    position.set(Position.PREFIX_OUT + 1, Integer.parseInt(data[i]));
-                    break;
                 case "#OUT2#":
-                    position.set(Position.PREFIX_OUT + 2, Integer.parseInt(data[i]));
-                    break;
                 case "#OUT3#":
-                    position.set(Position.PREFIX_OUT + 3, Integer.parseInt(data[i]));
-                    break;
                 case "#OUT4#":
-                    position.set(Position.PREFIX_OUT + 4, Integer.parseInt(data[i]));
+                    position.set(Position.PREFIX_OUT + dataTags[i].charAt(3), Integer.parseInt(data[i]));
                     break;
                 case "#LAC#":
                     if (!data[i].isEmpty()) {

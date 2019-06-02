@@ -49,6 +49,11 @@ public class StarLinkProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "$SLU006968,06,375154,170117052613,04,170117052612,+3203.2079,+03448.1369,000.0,300,085725,1,1,0,0,0,0,0,0,10422,36201,14.287,04.084,,1,0*5B"));
 
+        decoder.setFormat("#EDT#,#EID#,#PDT#,#LAT#,#LONG#,#SPD#,#HEAD#,#ODO#,#LAC#,#CID#,#VIN#,#VBAT#");
+
+        verifyPosition(decoder, text(
+                "$SLU352353083185436,06,85,190527214903,01,190527214903,+0614.1883,-07535.5033,000.0,000,000082.505,5070,50473,0,12.148,03.507,,100,0.02,35.0,1,1513,60,1,99*30"));
+
     }
 
 }
