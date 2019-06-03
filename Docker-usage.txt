@@ -1,0 +1,28 @@
+
+
+sudo docker run -d \
+--restart=always \
+--name=traccar \
+-e SETUP_TITLE="GPS TRACK" \
+-e ATTRIB_NAME="GPS TRACK" \
+-e ATTRIB_LINK="https://#" \
+-e PLAY_LINK="#" \
+-e FRONT_LOGO_HEIGHT=52 \
+-e FRONT_LOGO_WIDTH=92 \
+-e BACK_LOGO_HEIGHT=27 \
+-e BACK_LOGO_WIDTH=52 \
+-e SETUP_COLOR="808080" \
+-e GEOCODE_LINK="https://nominatim.link" \
+--ulimit nofile=999999:999999 \
+--ulimit nproc=999999:999999 \
+--privileged \
+--net=host \
+-p 8082:8082 \
+-p 5000-5180:5000-5200 \
+-p 5000-5180:5000-5200/udp \
+-v /etc/timezone:/etc/timezone:ro \
+-v /etc/localtime:/etc/localtime:ro \
+-v /opt/traccar/logs:/opt/traccar/logs:rw \
+-v /opt/traccar/media:/opt/traccar/media:rw \
+-v /opt/traccar/conf/traccar.xml:/opt/traccar/conf/traccar.xml:ro \
+gpproton/traccar
