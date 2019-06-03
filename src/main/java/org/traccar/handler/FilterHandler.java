@@ -37,6 +37,8 @@ public class FilterHandler extends BaseDataHandler {
     private boolean filterApproximate;
     private int filterAccuracy;
     private boolean filterStatic;
+    private boolean filterAllStatic;
+    private long filterCourse;
     private int filterDistance;
     private int filterMaxSpeed;
     private long filterMinPeriod;
@@ -51,6 +53,8 @@ public class FilterHandler extends BaseDataHandler {
         filterAccuracy = config.getInteger(Keys.FILTER_ACCURACY);
         filterApproximate = config.getBoolean(Keys.FILTER_APPROXIMATE);
         filterStatic = config.getBoolean(Keys.FILTER_STATIC);
+        filterAllStatic = config.getBoolean(Keys.FILTER_ALL_STATIC);
+        filterCourse = config.getLong(Keys.FILTER_COURSE);
         filterDistance = config.getInteger(Keys.FILTER_DISTANCE);
         filterMaxSpeed = config.getInteger(Keys.FILTER_MAX_SPEED);
         filterMinPeriod = config.getInteger(Keys.FILTER_MIN_PERIOD) * 1000;
@@ -92,8 +96,25 @@ public class FilterHandler extends BaseDataHandler {
         return filterApproximate && position.getBoolean(Position.KEY_APPROXIMATE);
     }
 
-    private boolean filterStatic(Position position) {
-        return filterStatic && position.getSpeed() == 0.0;
+    private boolean filterStatic(Position position, Position last) {
+        if (last != null && !filterAllStatic) {
+            return filterStatic && (position.getSpeed() == 0.0 && last.getSpeed() == 0.0);
+        } else if (filterAllStatic) {
+            return filterStatic && position.getSpeed() == 0.0;
+        }
+        return false;
+    }
+
+    private boolean filterCourse(Position position, Position last) {
+        if (filterCourse != 0 && last != null && !position.getBoolean(last.KEY_MOTION)) {
+            double course = position.getCourse() - last.getCourse();
+            if (course < 0) {
+                return (-1 * course) < filterCourse;
+            } else {
+                return course < filterCourse;
+            }
+        }
+        return false;
     }
 
     private boolean filterDistance(Position position, Position last) {
@@ -167,10 +188,15 @@ public class FilterHandler extends BaseDataHandler {
         if (filterApproximate(position)) {
             filterType.append("Approximate ");
         }
-        if (filterStatic(position) && !skipLimit(position, last) && !skipAttributes(position)) {
+        if (filterStatic(position, last) && !skipLimit(position, last) && !skipAttributes(position)) {
             filterType.append("Static ");
         }
-        if (filterDistance(position, last) && !skipLimit(position, last) && !skipAttributes(position)) {
+        if (filterCourse(position, last) && !skipLimit(position, last)
+                && !filterStatic(position, last) && !skipAttributes(position)) {
+            filterType.append("Course ");
+        }
+        if (filterDistance(position, last) && !skipLimit(position, last)
+                && !filterStatic(position, last) && !skipAttributes(position)) {
             filterType.append("Distance ");
         }
         if (filterMaxSpeed(position, last)) {

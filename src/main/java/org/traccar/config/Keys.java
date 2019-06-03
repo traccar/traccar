@@ -151,6 +151,18 @@ public final class Keys {
             "filter.static", Boolean.class);
 
     /**
+     * Filter positions with exactly zero speed values.
+     */
+    public static final ConfigKey FILTER_ALL_STATIC = new ConfigKey(
+            "filter.allStatic", Boolean.class);
+
+    /**
+     * Filter records with course value lesser than the value specified in meters.
+     */
+    public static final ConfigKey FILTER_COURSE = new ConfigKey(
+            "filter.course", Long.class);
+
+    /**
      * Filter records by distance. The values is specified in meters. If the new position is less far than this value
      * from the last one it gets filtered out.
      */

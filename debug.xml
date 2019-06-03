@@ -43,6 +43,7 @@
 
     <entry key='status.updateDeviceState'>true</entry>
     <entry key='event.overspeed.notRepeat'>true</entry>
+    <entry key='event.ignoreDuplicateAlerts'>true</entry>
 
     <entry key ='report.trip.greedyParking'>true</entry>
     <entry key='report.trip.useIgnition'>false</entry>
@@ -59,7 +60,10 @@
     <entry key='filter.invalid'>true</entry>
     <!--<##Affects Static filter don't enable
     <entry key='filter.skipLimit'>45</entry>
-    <entry key='filter.static'>true</entry>-->
+    -->
+    <entry key='filter.static'>true</entry>
+    <entry key='filter.allStatic'>false</entry>
+    <entry key='filter.course'>12</entry>
     <entry key='filter.distance'>50</entry>
     <entry key='filter.duplicate'>false</entry>
     <entry key='filter.skipAttributes'>fuel,driverUniqueId,ignition,alarm</entry>
