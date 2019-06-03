@@ -31,7 +31,7 @@ public class MictrackProtocol extends BaseProtocol {
                 pipeline.addLast(new LineBasedFrameDecoder(1024));
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
-                pipeline.addLast(new Ardi01ProtocolDecoder(MictrackProtocol.this));
+                pipeline.addLast(new MictrackProtocolDecoder(MictrackProtocol.this));
             }
         });
     }
