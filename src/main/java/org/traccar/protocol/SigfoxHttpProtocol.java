@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,16 +22,16 @@ import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 
-public class SigfoxProtocol extends BaseProtocol {
+public class SigfoxHttpProtocol extends BaseProtocol {
 
-    public SigfoxProtocol() {
+    public SigfoxHttpProtocol() {
         addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new HttpResponseEncoder());
                 pipeline.addLast(new HttpRequestDecoder());
                 pipeline.addLast(new HttpObjectAggregator(65535));
-                pipeline.addLast(new SigfoxProtocolDecoder(SigfoxProtocol.this));
+                pipeline.addLast(new SigfoxHttpProtocolDecoder(SigfoxHttpProtocol.this));
             }
         });
     }
