@@ -34,6 +34,14 @@ public class MictrackProtocol extends BaseProtocol {
                 pipeline.addLast(new MictrackProtocolDecoder(MictrackProtocol.this));
             }
         });
+        addServer(new TrackerServer(true, getName()) {
+            @Override
+            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new MictrackProtocolDecoder(MictrackProtocol.this));
+            }
+        });
     }
 
 }
