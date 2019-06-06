@@ -9,22 +9,15 @@ import org.joda.time.format.DateTimeFormatter;
 import org.traccar.Context;
 import org.traccar.fcm.PushNotifications;
 import org.traccar.helper.Log;
-import org.traccar.model.Device;
-import org.traccar.model.Event;
-import org.traccar.model.FCMPushNotification;
-import org.traccar.model.Position;
+import org.traccar.model.*;
 import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.FuelActivity;
 import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.FuelActivity.FuelActivityType;
 
 import java.sql.SQLException;
 
 import java.text.DecimalFormat;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class FCMPushNotificationManager extends ExtendedObjectManager<FCMPushNotification> {
@@ -119,7 +112,7 @@ public class FCMPushNotificationManager extends ExtendedObjectManager<FCMPushNot
         PushNotifications.getInstance().sendEventNotification(tokens, title, body, ttl);
     }
 
-    public void updateFuelActivity(FuelActivity fuelActivity) {
+    public void updateFuelActivity(FuelActivity fuelActivity, long peripheralSensorId) {
 
         FuelActivityType eventType = fuelActivity.getActivityType();
         if (eventType == FuelActivityType.NONE) {
@@ -134,7 +127,14 @@ public class FCMPushNotificationManager extends ExtendedObjectManager<FCMPushNot
         }
 
         Device device = Context.getDeviceManager().getById(deviceId);
-        String title = String.format("[%s] detected on %s", eventType, device.getRegistrationNumber());
+
+        Optional<List<Long>> sortedSensorIds = Context.getPeripheralSensorManager().getSortedSensorIds(deviceId);
+        StringBuilder tankIndexBuilder = new StringBuilder("detected on");
+        if (sortedSensorIds.isPresent() && sortedSensorIds.get().size() > 1 && sortedSensorIds.get().contains(peripheralSensorId)) {
+            tankIndexBuilder.append(String.format(" tank %d of", (sortedSensorIds.get().indexOf(peripheralSensorId) + 1)));
+        }
+
+        String title = String.format("[%s] %s %s", eventType, tankIndexBuilder, device.getRegistrationNumber());
 
         DecimalFormat formatFuelLevel = new DecimalFormat(".#");
 

@@ -1,6 +1,7 @@
 package org.traccar.database;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.PeripheralSensor;
@@ -64,6 +65,19 @@ public class PeripheralSensorManager extends ExtendedObjectManager<PeripheralSen
         return Optional.empty();
     }
 
+    public Optional<List<Long>> getSortedSensorIds(long deviceId) {
+        Optional<List<PeripheralSensor>> sensorsOnDevice = getLinkedPeripheralSensors(deviceId);
+        if (sensorsOnDevice.isPresent()) {
+            List<Long> sensorIds = Lists.newArrayList();
+            for (PeripheralSensor sensor : sensorsOnDevice.get()) {
+                sensorIds.add(sensor.getPeripheralSensorId());
+            }
+            sensorIds.sort(Comparator.naturalOrder());
+            return Optional.of(sensorIds);
+        }
+        return Optional.empty();
+    }
+
     public Optional<FuelSensorCalibration> getDeviceSensorCalibrationData(long deviceId, long peripheralSensorId) {
         String lookupKey = buildDeviceSensorMapKey(deviceId, peripheralSensorId);
 
@@ -75,8 +89,6 @@ public class PeripheralSensorManager extends ExtendedObjectManager<PeripheralSen
     }
 
     public Optional<List<PeripheralSensor>> getSensorByDeviceId(long deviceId) {
-        // Note: Handles only one sensor per  gps device for now.
-
         Optional<List<PeripheralSensor>> sensorOnDevice = getLinkedPeripheralSensors(deviceId);
 
         if (!sensorOnDevice.isPresent()) {

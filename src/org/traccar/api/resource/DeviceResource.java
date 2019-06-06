@@ -103,6 +103,6 @@ public class DeviceResource extends BaseObjectResource<Device> {
     @GET
     public Response refreshDevices() throws SQLException {
         Context.getDeviceManager().updateDeviceCache(true);
-        return Response.noContent().build();
+        return Response.ok().build();
     }
 }

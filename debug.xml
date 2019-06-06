@@ -29,7 +29,7 @@
 
     <!-- Peripheral sensor processing entries-->
     <entry key='processing.peripheralSensorData.enable'>true</entry>
-    <entry key='processing.peripheralSensorData.messageFrequency'>30</entry>
+    <entry key='processing.peripheralSensorData.messageFrequency'>60</entry>
     <entry key='processing.peripheralSensorData.hoursOfDataToLoad'>24</entry>
     <entry key='processing.peripheralSensorData.minHoursOfDataInMemory'>24</entry>
     <entry key='processing.peripheralSensorData.storedEventLookAroundSeconds'>300</entry>

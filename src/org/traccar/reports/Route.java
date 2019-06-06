@@ -133,8 +133,8 @@ public final class Route {
         ArrayList<Position> result = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            String deviceType = Context.getDeviceManager().getById(deviceId).getString("type");
-            result.addAll(Context.getDataManager().getPositionsForSummary(deviceId, from, to, deviceType));
+
+            result.addAll(Context.getDataManager().getPositionsForSummary(deviceId, from, to));
         }
         return result;
     }

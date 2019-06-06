@@ -12,7 +12,7 @@ import java.util.Optional;
 
 public class FuelConsumptionChecker {
 
-    private static final long DEFAULT_MAX_CAPACITY = 100L;
+    private static final long DEFAULT_MAX_CAPACITY = 500L;
     private static final long MILLIS_IN_HOUR = 36_00_000L;
 
     public static boolean isFuelConsumptionAsExpected(Position startPosition,
@@ -29,6 +29,9 @@ public class FuelConsumptionChecker {
             // Not enough info to process data loss.
             return false;
         }
+
+        String maxCapacityString = maxCapacity.map(Object::toString).orElse("n/a");
+        Log.debug(String.format("[ConsumptionChecker] MaxCapacity of sensorId %d on deviceId %d is %s ", fuelSensor.getPeripheralSensorId(), deviceId, maxCapacityString));
 
         ExpectedFuelConsumption expectedFuelConsumption =
                 getExpectedFuelConsumptionValues(startPosition, endPosition, maxCapacity, consumptionInfo);
@@ -80,7 +83,8 @@ public class FuelConsumptionChecker {
                                                                            Optional<Long> maxCapacity,
                                                                            DeviceConsumptionInfo consumptionInfo) {
 
-        double allowedDeviation = maxCapacity.orElse(DEFAULT_MAX_CAPACITY) * 0.01;
+        double allowedDeviation = (maxCapacity.map(tankMaxCapacity -> Math.min(tankMaxCapacity, DEFAULT_MAX_CAPACITY))
+                                              .orElse(DEFAULT_MAX_CAPACITY)) * 0.01;
 
         switch (consumptionInfo.getDeviceConsumptionType().toLowerCase()) {
 
@@ -101,7 +105,7 @@ public class FuelConsumptionChecker {
 
             case "empty":
             case "noconsumption":
-                return new ExpectedFuelConsumption(0, 0, 0, 0);
+                return new ExpectedFuelConsumption(0, 0, 0, allowedDeviation);
             default:
                 Log.debug("Found strange fuel consumption category vehicle");
                 return null;
