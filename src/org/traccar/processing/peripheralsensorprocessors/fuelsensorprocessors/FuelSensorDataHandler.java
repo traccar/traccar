@@ -29,6 +29,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
     private final Map<String, TreeMultiset<Position>> previousPositions = new ConcurrentHashMap<>();
     private final Map<String, FuelEventMetadata> deviceFuelEventMetadata = new ConcurrentHashMap<>();
     private final Map<Long, Position> deviceLastKnownOdometerPositionLookup = new ConcurrentHashMap<>();
+    private final Map<String, Position> previousAlertWindowStart = new ConcurrentHashMap<>();
     private boolean loadingOldDataFromDB = false;
 
     static {
@@ -510,6 +511,10 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             nonOutlierInLastWindowByDevice.remove(deviceId);
 
             int alertsLookback = (fuelSensor.getEventsWindowSize() + 10) * consumptionInfo.getTransmissionFrequency();
+
+            long previousAlertWindowStartTime = previousAlertWindowStart.containsKey(lookupKey)?
+                    previousAlertWindowStart.get(lookupKey).getDeviceTime().getTime() : 0L;
+
             List<Position> relevantPositionsListForAlerts =
                     FuelSensorDataHandlerHelper.getRelevantPositionsSubList(
                             positionsForDeviceSensor,
@@ -517,10 +522,11 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                             fuelSensor.getEventsWindowSize(),
                             fuelSensor.getFuelOutlierFieldName(),
                             true,
-                            alertsLookback);
+                            alertsLookback,
+                            previousAlertWindowStartTime);
 
             if (!this.loadingOldDataFromDB && relevantPositionsListForAlerts.size() >= fuelSensor.getEventsWindowSize()) {
-                // We'll use the smoothed values to check for activity.
+                previousAlertWindowStart.put(lookupKey, relevantPositionsListForAlerts.get(0));
                 FuelActivity fuelActivity =
                         FuelDataActivityChecker.checkForActivity(relevantPositionsListForAlerts,
                                                                  deviceFuelEventMetadata,
