@@ -71,7 +71,7 @@ public class FuelDataActivityChecker {
                 deviceFuelEventMetadata.put(activityLookupKey, new FuelEventMetadata());
 
                 FuelEventMetadata fuelEventMetadata = deviceFuelEventMetadata.get(activityLookupKey);
-                double leftMedian = getMedianValue(readingsForDevice, 0, midPoint, fuelSensor);
+                double leftMedian = getMedianValue(readingsForDevice, 0, midPoint + 1, fuelSensor);
                 fuelEventMetadata.setStartLevel(leftMedian);
 
                 fuelEventMetadata.setErrorCheckStart((double) readingsForDevice.get(0)
