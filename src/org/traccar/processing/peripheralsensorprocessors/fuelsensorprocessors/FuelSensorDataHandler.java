@@ -559,6 +559,8 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                 sendNotificationIfNecessary(deviceId, fuelActivity, fuelSensor.getPeripheralSensorId());
             } else {
                 logDebugIfNotLoading(String.format("[Events] Detected drain that was within expected consumption, not sending notification %d", deviceId), deviceId);
+                fuelActivity.setActivityType(FuelActivityType.DRAIN_WITHIN_CONSUMPTION);
+                saveEventToDB(deviceId, fuelActivity, fuelSensor.getPeripheralSensorId());
             }
 
         } else {
@@ -578,30 +580,34 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                       + ", " + fuelActivity.getActivityEndPosition().getLongitude(), deviceId);
 
             // Add event to events table
-            String eventType = fuelActivity.getActivityType().toString();
 
-            Event event = new Event(eventType, deviceId,
-                                    fuelActivity.getActivityStartPosition().getId(), fuelActivity.getActivityStartTime());
-            event.set("sensorId", peripheralSensorId);
-            event.set("startTime", fuelActivity.getActivityStartTime().getTime());
-            event.set("endTime", fuelActivity.getActivityEndTime().getTime());
-            event.set("volume", fuelActivity.getChangeVolume());
-            event.set("endPositionId", fuelActivity.getActivityEndPosition().getId());
-            event.set("startLat", fuelActivity.getActivityStartPosition().getLatitude());
-            event.set("startLong", fuelActivity.getActivityStartPosition().getLongitude());
-            event.set("endLat", fuelActivity.getActivityEndPosition().getLatitude());
-            event.set("endLong", fuelActivity.getActivityEndPosition().getLongitude());
-
-            try {
-                getDataManager().addObject(event);
-            } catch (SQLException error) {
-                Log.warning("[Events] Error while saving fuel event to DB", error);
-            }
+            saveEventToDB(deviceId, fuelActivity, peripheralSensorId);
 
             // Adding the sensor ID to the FCM notification does not make sense, since the end user does not care
             // about these IDs. In the future, if we think it is necessary, we'll add names to sensors so it is
             // clear which "tank" this notification came from.
             Context.getFcmPushNotificationManager().updateFuelActivity(fuelActivity, peripheralSensorId);
+        }
+    }
+
+    private void saveEventToDB(long deviceId, FuelActivity fuelActivity, long peripheralSensorId) {
+        String eventType = fuelActivity.getActivityType().toString();
+        Event event = new Event(eventType, deviceId,
+                                fuelActivity.getActivityStartPosition().getId(), fuelActivity.getActivityStartTime());
+        event.set("sensorId", peripheralSensorId);
+        event.set("startTime", fuelActivity.getActivityStartTime().getTime());
+        event.set("endTime", fuelActivity.getActivityEndTime().getTime());
+        event.set("volume", fuelActivity.getChangeVolume());
+        event.set("endPositionId", fuelActivity.getActivityEndPosition().getId());
+        event.set("startLat", fuelActivity.getActivityStartPosition().getLatitude());
+        event.set("startLong", fuelActivity.getActivityStartPosition().getLongitude());
+        event.set("endLat", fuelActivity.getActivityEndPosition().getLatitude());
+        event.set("endLong", fuelActivity.getActivityEndPosition().getLongitude());
+
+        try {
+            getDataManager().addObject(event);
+        } catch (SQLException error) {
+            Log.warning("[Events] Error while saving fuel event to DB", error);
         }
     }
 

@@ -195,7 +195,7 @@ public class FuelSensorDataHandlerHelper {
 
         boolean isOutlier = rawFuelOfPositionEvaluated < lowerBoundOnRawFuelValue
                 || rawFuelOfPositionEvaluated > upperBoundOnRawFuelValue;
-        
+
         long deviceId = rawFuelOutlierSublist.get(0).getDeviceId();
         logDebugIfDeviceId("[OUTLIER_STAT] sumOfValues: " + sumOfValues
                   + " mean: " + mean
