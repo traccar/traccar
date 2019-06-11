@@ -11,6 +11,9 @@ public class CalAmpProtocolDecoderTest extends ProtocolTest {
         CalAmpProtocolDecoder decoder = new CalAmpProtocolDecoder(null);
 
         verifyPosition(decoder, binary(
+                "8308352648068863398f01070102039c5cfc4dcd5cfc4dcd19913f5dcce1291e000033fa0000005801110800019aff9d6f0e13003e0b02000000000000000000"));
+
+        verifyPosition(decoder, binary(
                 "83051633033459010101028afd59ae7c1459ae7c140b06bbce2c01520e0000d916000001b900450900005affa50f091f00260d040000000f24000001b90000000000003714"));
 
         verifyPosition(decoder, binary(
