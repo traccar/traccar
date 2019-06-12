@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2014 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,8 +42,8 @@ public class TelicProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd)(dd)(dd)")              // date (ddmmyy)
             .number("(dd)(dd)(dd),")             // time (hhmmss)
             .groupBegin()
-            .number("(ddd)(dd)(dddd),")          // longitude
-            .number("(dd)(dd)(dddd),")           // latitude
+            .number("(-?d{9}),")                 // longitude
+            .number("(-?d{8}),")                 // latitude
             .or()
             .number("(-?d+),")                   // longitude
             .number("(-?d+),")                   // latitude
@@ -88,17 +88,16 @@ public class TelicProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position(getProtocolName());
-
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
             return null;
         }
+
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        int event = parser.nextInt(0);
+        int event = parser.nextInt();
         position.set(Position.KEY_EVENT, event);
-
         position.set(Position.KEY_ALARM, decodeAlarm(event));
 
         if (event == 11) {
@@ -109,25 +108,22 @@ public class TelicProtocolDecoder extends BaseProtocolDecoder {
 
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
 
-        if (parser.hasNext(6)) {
-            position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN));
-            position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN));
+        if (parser.hasNext(2)) {
+            position.setLongitude(parser.nextDouble() / 1000000);
+            position.setLatitude(parser.nextDouble() / 1000000);
         }
 
         if (parser.hasNext(2)) {
-            position.setLongitude(parser.nextDouble(0) / 10000);
-            position.setLatitude(parser.nextDouble(0) / 10000);
+            position.setLongitude(parser.nextDouble() / 10000);
+            position.setLatitude(parser.nextDouble() / 10000);
         }
 
-        position.setValid(parser.nextInt(0) != 1);
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
-        position.setCourse(parser.nextDouble(0));
+        position.setValid(parser.nextInt() != 1);
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+        position.setCourse(parser.nextDouble());
 
-        if (parser.hasNext()) {
-            position.set(Position.KEY_SATELLITES, parser.nextInt(0));
-        }
-
-        position.set(Position.KEY_BATTERY, parser.nextInt(0));
+        position.set(Position.KEY_SATELLITES, parser.nextInt());
+        position.set(Position.KEY_BATTERY, parser.nextInt());
 
         return position;
     }
