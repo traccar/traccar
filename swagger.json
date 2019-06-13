@@ -1,10 +1,10 @@
 {
     "swagger": "2.0",
     "info": {
-        "version": "4.5",
-        "title": "traccar"
+        "version": "1.3",
+        "title": "gpstrackng"
     },
-    "host": "demo.traccar.org",
+    "host": "gpstrack.com.ng",
     "basePath": "/api",
     "schemes": [
         "http"
