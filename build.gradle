@@ -46,7 +46,9 @@ dependencies {
     implementation "org.glassfish.jersey.inject:jersey-hk2:$jerseyVersion"
     implementation "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:$jacksonVersion"
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr353:$jacksonVersion"
-    implementation "org.liquibase:liquibase-core:3.6.3"
+    implementation "org.liquibase:liquibase-core:3.6.3", {
+        exclude group: "ch.qos.logback", module: "logback-classic"
+    }
     implementation "com.sun.mail:javax.mail:1.6.2"
     implementation "org.jxls:jxls:2.4.7"
     implementation "org.jxls:jxls-poi:1.0.16"
