@@ -208,14 +208,12 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
     }
 
     public DeviceConsumptionInfo getDeviceConsumptionInfo(long deviceId) {
-        refreshItems();
 
-        if (deviceConsumptionMap.containsKey(deviceId)) {
-            return deviceConsumptionMap.get(deviceId);
+        if (!deviceConsumptionMap.containsKey(deviceId)) {
+            refreshItems();
         }
 
-        // Return with defaults;
-        return new DeviceConsumptionInfo();
+        return deviceConsumptionMap.getOrDefault(deviceId, new DeviceConsumptionInfo());
     }
 
     @Override
