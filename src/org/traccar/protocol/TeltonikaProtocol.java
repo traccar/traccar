@@ -19,6 +19,7 @@ import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.traccar.BaseProtocol;
+import org.traccar.Context;
 import org.traccar.TrackerServer;
 import org.traccar.model.Command;
 
@@ -42,13 +43,16 @@ public class TeltonikaProtocol extends BaseProtocol {
                 pipeline.addLast("objectDecoder", new TeltonikaProtocolDecoder(TeltonikaProtocol.this, false));
             }
         });
-        serverList.add(new TrackerServer(new ConnectionlessBootstrap(), getName()) {
-            @Override
-            protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                pipeline.addLast("objectEncoder", new TeltonikaProtocolEncoder());
-                pipeline.addLast("objectDecoder", new TeltonikaProtocolDecoder(TeltonikaProtocol.this, true));
-            }
-        });
+
+        if (Context.getConfig().getBoolean("server.enableTeltonikaConnectionLess")) {
+            serverList.add(new TrackerServer(new ConnectionlessBootstrap(), getName()) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("objectEncoder", new TeltonikaProtocolEncoder());
+                    pipeline.addLast("objectDecoder", new TeltonikaProtocolDecoder(TeltonikaProtocol.this, true));
+                }
+            });
+        }
     }
 
 }

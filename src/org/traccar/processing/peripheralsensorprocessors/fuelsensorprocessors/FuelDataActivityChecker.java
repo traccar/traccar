@@ -272,7 +272,7 @@ public class FuelDataActivityChecker {
                                                                            expectedFuelConsumption);
 
                 if (isConsumptionExpected) {
-                    Log.info(String.format(
+                    Log.debug(String.format(
                             "Determined data loss, but cannot identify fuel event since fuel consumption " +
                                     " is within expected range: %s", expectedFuelConsumption));
 

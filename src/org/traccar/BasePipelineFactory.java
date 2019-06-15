@@ -142,58 +142,58 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
                 Context.getConfig().getInteger("coordinates.minError"),
                 Context.getConfig().getInteger("coordinates.maxError"));
 
-        if (Context.getConfig().getBoolean("processing.remoteAddress.enable")) {
-            remoteAddressHandler = new RemoteAddressHandler();
-        }
+//        if (Context.getConfig().getBoolean("processing.remoteAddress.enable")) {
+//            remoteAddressHandler = new RemoteAddressHandler();
+//        }
 
         if (Context.getConfig().getBoolean("filter.enable")) {
             filterHandler = new FilterHandler();
         }
 
-        if (Context.getGeocoder() != null && !Context.getConfig().getBoolean("geocoder.ignorePositions")) {
-            geocoderHandler = new GeocoderHandler(
-                    Context.getGeocoder(),
-                    Context.getConfig().getBoolean("geocoder.processInvalidPositions"));
-        }
-
-        if (Context.getGeolocationProvider() != null) {
-            geolocationHandler = new GeolocationHandler(
-                    Context.getGeolocationProvider(),
-                    Context.getConfig().getBoolean("geolocation.processInvalidPositions"));
-        }
+//        if (Context.getGeocoder() != null && !Context.getConfig().getBoolean("geocoder.ignorePositions")) {
+//            geocoderHandler = new GeocoderHandler(
+//                    Context.getGeocoder(),
+//                    Context.getConfig().getBoolean("geocoder.processInvalidPositions"));
+//        }
+//
+//        if (Context.getGeolocationProvider() != null) {
+//            geolocationHandler = new GeolocationHandler(
+//                    Context.getGeolocationProvider(),
+//                    Context.getConfig().getBoolean("geolocation.processInvalidPositions"));
+//        }
 
         motionHandler = new MotionHandler(Context.getTripsConfig().getSpeedThreshold());
 
-        if (Context.getConfig().hasKey("location.latitudeHemisphere")
-                || Context.getConfig().hasKey("location.longitudeHemisphere")) {
-            hemisphereHandler = new HemisphereHandler();
-        }
-
-        if (Context.getConfig().getBoolean("processing.copyAttributes.enable")) {
-            copyAttributesHandler = new CopyAttributesHandler();
-        }
-
-        if (Context.getConfig().getBoolean("processing.computedAttributes.enable")) {
-            computedAttributesHandler = new ComputedAttributesHandler();
-        }
+//        if (Context.getConfig().hasKey("location.latitudeHemisphere")
+//                || Context.getConfig().hasKey("location.longitudeHemisphere")) {
+//            hemisphereHandler = new HemisphereHandler();
+//        }
+//
+//        if (Context.getConfig().getBoolean("processing.copyAttributes.enable")) {
+//            copyAttributesHandler = new CopyAttributesHandler();
+//        }
+//
+//        if (Context.getConfig().getBoolean("processing.computedAttributes.enable")) {
+//            computedAttributesHandler = new ComputedAttributesHandler();
+//        }
 
         if (Context.getConfig().getBoolean("processing.peripheralSensorData.enable")) {
             runningTimeHandler = new RunningTimeHandler();
             fuelDataCalibrationHandler = new FuelDataCalibrationHandler();
-            fuelSensorDataHandler = new FuelSensorDataHandler();
+            fuelSensorDataHandler = new FuelSensorDataHandler(protocol);
         }
 
         if (Context.getConfig().getBoolean("event.enable")) {
-            commandResultEventHandler = new CommandResultEventHandler();
-            overspeedEventHandler = Context.getOverspeedEventHandler();
-            fuelDropEventHandler = new FuelDropEventHandler();
+//            commandResultEventHandler = new CommandResultEventHandler();
+//            overspeedEventHandler = Context.getOverspeedEventHandler();
+//            fuelDropEventHandler = new FuelDropEventHandler();
             motionEventHandler = Context.getMotionEventHandler();
-            geofenceEventHandler = new GeofenceEventHandler();
-            alertEventHandler = new AlertEventHandler();
+//            geofenceEventHandler = new GeofenceEventHandler();
+//            alertEventHandler = new AlertEventHandler();
             ignitionEventHandler = new IgnitionEventHandler();
-            maintenanceEventHandler = new MaintenanceEventHandler();
-            driverEventHandler = new DriverEventHandler();
-            commonGPSEventsHandler = new CommonGPSEventsHandler();
+//            maintenanceEventHandler = new MaintenanceEventHandler();
+//            driverEventHandler = new DriverEventHandler();
+//            commonGPSEventsHandler = new CommonGPSEventsHandler();
             aquilaAEventsHandler = new AquilaAEventsHandler();
         }
     }

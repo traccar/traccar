@@ -459,6 +459,12 @@ public class DataManager {
                 .executeQuery(Position.class);
     }
 
+    public Collection<Position> getLatestPositionsForProtocol(String protocol) throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.selectLatestPositionsForProtocol"))
+                           .setString("protocol", protocol)
+                           .executeQuery(Position.class);
+    }
+
     public void clearHistory() throws SQLException {
         long historyDays = config.getInteger("database.historyDays");
         if (historyDays != 0) {
