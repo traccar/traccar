@@ -6,7 +6,13 @@ import org.traccar.model.Device;
 
 public class DeviceConsumptionInfo {
     private static final String CONSUMPTION_TYPE_ATTR = "consumption";
-    private static final String DEFAULT_CONSUMPTION_TYPE = "odometer";
+
+    public static final String ODOMETER_CONSUMPTION_TYPE = "odometer";
+    public static final String HOURLY_CONSUMPTION_TYPE = "hourly";
+    public static final String ENGINELESS_HOURLY_CONSUMPTION_TYPE = "enginelesshourly";
+    public static final String NO_CONSUMPTION_CONSUMPTION_TYPE = "noconsumption";
+    public static final String EMPTY_CONSUMPTION_TYPE = "empty";
+    private static final String DEFAULT_CONSUMPTION_TYPE = ODOMETER_CONSUMPTION_TYPE;
 
     private static final String MIN_AVG_CONSUMPTION_RATE_ATTR = "minAvgConsumptionRate";
     private static final String MAX_AVG_CONSUMPTION_RATE_ATTR = "maxAvgConsumptionRate";
