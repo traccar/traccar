@@ -28,7 +28,7 @@ public class FuelDataCalibrationHandler extends BaseDataHandler {
 
     @Override
     protected Position handlePosition(Position position) {
-
+        Log.info(String.format("[FuelDataCalibrationHandler] Calibrating position for %d", position.getDeviceId()));
         long deviceId = position.getDeviceId();
         Optional<List<PeripheralSensor>> sensorsOnDevice = Context.getPeripheralSensorManager().getSensorByDeviceId(deviceId);
 
@@ -52,7 +52,7 @@ public class FuelDataCalibrationHandler extends BaseDataHandler {
             }
             handleCalibrationData(position, deviceId, fuelSensor);
         }
-
+        Log.info(String.format("[FuelDataCalibrationHandler] Done calibrating position for %d", position.getDeviceId()));
         return position;
     }
 

@@ -32,8 +32,6 @@ public class RunningTimeHandler extends BaseDataHandler {
     @Override
     protected Position handlePosition(Position position) {
 
-        Log.info(String.format("Calculating run time for: %d", position.getDeviceId()));
-
         long deviceId = position.getDeviceId();
         Device device = Context.getIdentityManager().getById(deviceId);
 
@@ -116,7 +114,7 @@ public class RunningTimeHandler extends BaseDataHandler {
                 }
             }
         }
-        Log.info(String.format("Done calculating run time for: %d", position.getDeviceId()));
+
         return position;
     }
 
