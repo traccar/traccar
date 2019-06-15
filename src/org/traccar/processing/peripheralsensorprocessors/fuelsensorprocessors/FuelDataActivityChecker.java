@@ -26,9 +26,11 @@ public class FuelDataActivityChecker {
         final int midPoint = (readingsSize - 1) / 2;
         double leftSum = 0, rightSum = 0;
 
+        boolean ignitionOnInAnyRHWindow = false;
         for (int i = 0; i <= midPoint; i++) {
             leftSum += (double) readingsForDevice.get(i).getAttributes().get(calibFuelDataField);
             rightSum += (double) readingsForDevice.get(i + midPoint).getAttributes().get(calibFuelDataField);
+            ignitionOnInAnyRHWindow |= readingsForDevice.get(i + midPoint).getBoolean(Position.KEY_IGNITION);
         }
 
         double leftMean = leftSum / (midPoint + 1);
@@ -51,10 +53,23 @@ public class FuelDataActivityChecker {
                           + " diffInMeans > drainThreshold: " + (Math.abs(diffInMeans) > drainThreshold), deviceId);
 
 
+        boolean isEnginelessHourly = consumptionInfo.getDeviceConsumptionType().toLowerCase().equals(DeviceConsumptionInfo.ENGINELESS_HOURLY_CONSUMPTION_TYPE);
         Optional<String> possibleActivityStartTypeStartType = determinePossibleActivityStartType(diffInMeans, fillThreshold, drainThreshold);
 
         if (possibleActivityStartTypeStartType.isPresent()) {
             String startType = possibleActivityStartTypeStartType.get();
+
+            // For enginelesshourly devices, we want to register drains when fuel flows out of the tank - which is it's
+            // normal consumption mechanism.
+            // We connect the ignition to the pump that drains fuel from the tank, and check if the ignition
+            // was on when we detected the start of the event, and off when the event end is detected.
+            if (isEnginelessHourly
+                    && startType.equals(FuelActivityType.FUEL_DRAIN.name())
+                    && !ignitionOnInAnyRHWindow) {
+
+                fuelActivity.setActivityType(FuelActivityType.NONE);
+                return fuelActivity;
+            }
 
             String oppositeEventType = startType.equals(FuelActivityType.FUEL_FILL.name())? FuelActivityType.FUEL_DRAIN.name() :
                                        FuelActivityType.FUEL_FILL.name();
@@ -125,7 +140,19 @@ public class FuelDataActivityChecker {
 
         if (possibleActivityEndType.isPresent()) {
 
-            String activityLookupKey = getActivityLookupKey(deviceSensorLookupKey, possibleActivityEndType.get());
+            String endType = possibleActivityEndType.get();
+            boolean ignitionOnRHWindowLast = readingsForDevice.get(readingsSize - 1).getBoolean(Position.KEY_IGNITION);
+
+            if (isEnginelessHourly
+                    && endType.equals(FuelActivityType.FUEL_DRAIN.name())
+                    && ignitionOnRHWindowLast) {
+
+                // Ignition is still on, we're probably not done with the "drain" for the "enginelesshourly" types.
+                fuelActivity.setActivityType(FuelActivityType.NONE);
+                return fuelActivity;
+            }
+
+            String activityLookupKey = getActivityLookupKey(deviceSensorLookupKey, endType);
 
             Position midPointPosition = readingsForDevice.get(midPoint);
             FuelEventMetadata fuelEventMetadata = deviceFuelEventMetadata.get(activityLookupKey);

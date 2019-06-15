@@ -283,7 +283,6 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             return Optional.empty();
         }
 
-
         return Optional.of(readingsFromDevice.lastEntry().getElement());
     }
 
