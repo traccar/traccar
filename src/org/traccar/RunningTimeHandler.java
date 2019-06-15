@@ -9,7 +9,9 @@ import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.De
 
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.traccar.model.Position.KEY_IGNITION;
 import static org.traccar.model.Position.KEY_IGN_ON_MILLIS;
@@ -25,9 +27,12 @@ public class RunningTimeHandler extends BaseDataHandler {
     }
 
     private Set<String> consumptionTypesWithoutIgnition = ImmutableSet.of("enginelesshourly", "noconsumption");
+    private Map<Long, Position> latestPositionByDeviceId = new ConcurrentHashMap();
 
     @Override
     protected Position handlePosition(Position position) {
+
+        Log.info(String.format("Calculating run time for: %d", position.getDeviceId()));
 
         long deviceId = position.getDeviceId();
         Device device = Context.getIdentityManager().getById(deviceId);
@@ -48,17 +53,8 @@ public class RunningTimeHandler extends BaseDataHandler {
         Position lastPosition = Context.getIdentityManager().getLastPosition(position.getDeviceId());
 
         if (!Context.getIdentityManager().isLatestPosition(position)) {
-            try {
-                Collection<Position> lastPositionsBefore = Context.getDataManager().getLastPositionBefore(position);
-                if (lastPositionsBefore.size() > 0) {
-                    lastPosition = lastPositionsBefore.stream().findFirst().get();
-                }
-            } catch (SQLException e) {
-                Log.debug(String.format("Exception while getting last position before deviceId: %d, deviceTime: %d",
-                                        position.getDeviceId(), position.getDeviceTime().getTime()));
-                e.printStackTrace();
-                lastPosition = null;
-            }
+            initializeHourMeter(position);
+            return position;
         }
 
         if (lastPosition == null) {
@@ -120,6 +116,7 @@ public class RunningTimeHandler extends BaseDataHandler {
                 }
             }
         }
+        Log.info(String.format("Done calculating run time for: %d", position.getDeviceId()));
         return position;
     }
 
@@ -155,5 +152,22 @@ public class RunningTimeHandler extends BaseDataHandler {
 
         position.set(KEY_IGN_ON_MILLIS, lastPosition.getLong(KEY_IGN_ON_MILLIS));
         position.set(KEY_TOTAL_IGN_ON_MILLIS, lastPosition.getLong(KEY_TOTAL_IGN_ON_MILLIS));
+    }
+
+    private void getLatestPositionBefore(Position lastPosition, Position position) {
+        // NOTE: This is a no-op method only to preserve the calls we were making to retrieve the lastPositionBefore
+        // These _may_ have been causing extra db strain, so we're not doing this for now. Ideally this could happen
+        // async, since we use the totalIgnition time in the reports.
+        try {
+            Collection<Position> lastPositionsBefore = Context.getDataManager().getLastPositionBefore(position);
+            if (lastPositionsBefore.size() > 0) {
+                lastPosition = lastPositionsBefore.stream().findFirst().get();
+            }
+        } catch (SQLException e) {
+            Log.debug(String.format("Exception while getting last position before deviceId: %d, deviceTime: %d",
+                                    position.getDeviceId(), position.getDeviceTime().getTime()));
+            e.printStackTrace();
+            lastPosition = null;
+        }
     }
 }
