@@ -107,6 +107,14 @@
         ORDER BY a.id
     </entry>
 
+    <entry key="database.getDevicePositionProtocol">
+        SELECT protocol
+        FROM positions
+        WHERE deviceId = :deviceId
+        ORDER BY id DESC
+        LIMIT 1
+    </entry>
+
     <entry key='database.selectFCMPushNotificationsByUserId'>
         SELECT deviceId, eventTypeId, enabled FROM fcmpushnotifications WHERE userId = :userId
     </entry>
@@ -124,7 +132,18 @@
     </entry>
 
     <entry key='database.selectLatestPositions'>
-        SELECT positions.* FROM positions INNER JOIN devices ON positions.id = devices.positionid;
+        SELECT p.*
+        FROM positions p
+        INNER JOIN devices d ON p.id = d.positionid
+        ORDER BY p.devicetime;
+    </entry>
+
+    <entry key='database.selectLatestPositionsForProtocol'>
+        SELECT p.*
+        FROM positions p
+        INNER JOIN devices d ON p.id = d.positionid
+        WHERE p.protocol = :protocol
+        ORDER BY p.devicetime;
     </entry>
 
     <entry key='database.updateLatestPosition'>
