@@ -361,7 +361,6 @@ public class DataManager {
 
     public Position getPreviousPosition(Position position) throws SQLException {
         return QueryBuilder.create(dataSource,  getQuery("database.selectPreviousPosition"))
-                .setLong("deviceId", position.getDeviceId())
                 .setLong("positionId", position.getId())
                 .executeQuery(Position.class)
                 .iterator()
