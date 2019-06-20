@@ -69,7 +69,7 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
             .number("(x+),")                     // cid
             .number("([x|]+)")                   // adc
             .expression(",([^,]+)")              // rfid
-            .expression(",([^*]+)").optional(2)  // sensors
+            .expression(",([^*]*)").optional(2)  // sensors
             .any()
             .compile();
 
@@ -149,7 +149,9 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.PREFIX_ADC + (i + 1), Integer.parseInt(adc[i], 16));
         }
 
-        position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
+        if (parser.hasNext()) {
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(parser.nextHexInt()));
+        }
 
         if (parser.hasNext()) {
             String[] sensors = parser.next().split("\\|");

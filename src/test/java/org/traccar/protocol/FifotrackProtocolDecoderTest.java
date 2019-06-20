@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class FifotrackProtocolDecoderTest extends ProtocolTest {
 
@@ -9,6 +10,10 @@ public class FifotrackProtocolDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         FifotrackProtocolDecoder decoder = new FifotrackProtocolDecoder(null);
+
+        verifyAttribute(decoder, buffer(
+                "$$125,869467049296388,548,A01,38,190619025856,A,22.333905,113.590261,0,12,60,16666,0,0000,00,0,460|0|2694|13F8,1A2|4C1|0|0,B4A067,*7A"),
+                Position.KEY_DRIVER_UNIQUE_ID, "11837543");
 
         verifyNull(decoder, buffer(
                 "$$79,868345037864709,382,D05,190220085833,22.643210,114.018176,1,1,1,13152,23FFD339*25"));
