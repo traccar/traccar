@@ -31,7 +31,8 @@ public class FuelConsumptionChecker {
         }
 
         String maxCapacityString = maxCapacity.map(Object::toString).orElse("n/a");
-        Log.debug(String.format("[ConsumptionChecker] MaxCapacity of sensorId %d on deviceId %d is %s ", fuelSensor.getPeripheralSensorId(), deviceId, maxCapacityString));
+        FuelSensorDataHandlerHelper.logDebugIfDeviceId(String.format("[ConsumptionChecker] MaxCapacity of sensorId %d on deviceId %d is %s ",
+                                                                     fuelSensor.getPeripheralSensorId(), deviceId, maxCapacityString), deviceId);
 
         ExpectedFuelConsumption expectedFuelConsumption =
                 getExpectedFuelConsumptionValues(startPosition, endPosition, maxCapacity, consumptionInfo);
@@ -40,10 +41,10 @@ public class FuelConsumptionChecker {
                 && isFuelConsumptionAsExpected(changeVolume, expectedFuelConsumption);
 
         if (consumptionAsExpected) {
-            Log.debug(String.format("Data Loss: Distance covered %f, Exp fuel consumed: %f, actual fuel consumed: %f",
+            FuelSensorDataHandlerHelper.logDebugIfDeviceId(String.format("Data Loss: Distance covered %f, Exp fuel consumed: %f, actual fuel consumed: %f",
                                     expectedFuelConsumption.getMaximumDistanceTravelled(),
                                     expectedFuelConsumption.expectedCurrentFuelConsumed,
-                                    changeVolume));
+                                    changeVolume), deviceId);
         }
 
         return consumptionAsExpected;
@@ -73,7 +74,8 @@ public class FuelConsumptionChecker {
                 return true;
 
             default:
-                Log.debug("Found strange fuel consumption category vehicle");
+                FuelSensorDataHandlerHelper.logDebugIfDeviceId("Found strange fuel consumption category vehicle",
+                                                               startPosition.getDeviceId());
                 return false;
         }
     }
@@ -107,7 +109,7 @@ public class FuelConsumptionChecker {
             case "noconsumption":
                 return new ExpectedFuelConsumption(0, 0, 0, allowedDeviation);
             default:
-                Log.debug("Found strange fuel consumption category vehicle");
+                FuelSensorDataHandlerHelper.logDebugIfDeviceId("Found strange fuel consumption category vehicle", startPosition.getDeviceId());
                 return null;
 
         }

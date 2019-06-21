@@ -58,33 +58,35 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
     @Override
     protected Position handlePosition(Position position) {
+        long deviceId = position.getDeviceId();
+
         long startProcessing = new Date().getTime();
-        logDebugIfNotLoading(String.format("[FuelSensorDataHandler] Received position for %d", position.getDeviceId()));
+        logDebugIfNotLoading(String.format("[FuelSensorDataHandler] Received position for %d", deviceId), deviceId);
         try {
 
             updateLatestKnownPosition(position);
 
-            long deviceId = position.getDeviceId();
+
 
             Optional<List<PeripheralSensor>> peripheralSensorOnDevice =
                     Context.getPeripheralSensorManager().getSensorByDeviceId(deviceId);
 
             if (!peripheralSensorOnDevice.isPresent()) {
-                logDebugIfNotLoading(String.format("No sensors found on deviceId: %d. Refreshing sensors map.", deviceId));
+                logDebugIfNotLoading(String.format("No sensors found on deviceId: %d. Refreshing sensors map.", deviceId), deviceId);
                 Context.getPeripheralSensorManager().refreshPeripheralSensorsMap();
                 return position;
             }
 
             List<PeripheralSensor> sensorsOnDeviceList = peripheralSensorOnDevice.get();
             if (sensorsOnDeviceList.isEmpty()) {
-                logDebugIfNotLoading(String.format("Sensors list empty for deviceId: %d. Refreshing sensors map.", deviceId));
+                logDebugIfNotLoading(String.format("Sensors list empty for deviceId: %d. Refreshing sensors map.", deviceId), deviceId);
                 Context.getPeripheralSensorManager().refreshPeripheralSensorsMap();
                 return position;
             }
 
             for (PeripheralSensor sensorOnDevice : sensorsOnDeviceList) {
                 long sensorID = sensorOnDevice.getPeripheralSensorId();
-                logDebugIfNotLoading(String.format("[FuelSensorDataHandler] Running sensor loop on %d %d", position.getDeviceId(), sensorID));
+                logDebugIfNotLoading(String.format("[FuelSensorDataHandler] Running sensor loop on %d %d", position.getDeviceId(), sensorID), deviceId);
                 String lookUpKey = getLookupKey(deviceId, sensorID);
                 if (!previousPositions.containsKey(lookUpKey)) {
                     TreeMultiset<Position> positions =
@@ -95,12 +97,12 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                 TreeMultiset<Position> positionsForDeviceSensor = previousPositions.get(lookUpKey);
 
                 //If this is a back dated packet, do nothing
-                Optional<Position> lastPacketProcessed = getLastKnownPositionForSensor(lookUpKey);
+                Optional<Position> lastPacketProcessed = getLastKnownPositionForSensor(lookUpKey, deviceId);
 
                 if (lastPacketProcessed.isPresent()) {
                     if (position.getDeviceTime().compareTo((lastPacketProcessed.get().getDeviceTime())) <= 0) {
                         logDebugIfNotLoading(String.format("Backdated packets detected for device: %d. Skipping fuel processing for them",
-                                                           deviceId));
+                                                           deviceId), deviceId);
                         continue;
                     }
 
@@ -124,7 +126,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             }
 
         } catch (Exception e) {
-            logDebugIfNotLoading(String.format("Exception in processing fuel info: %s", e.getMessage()));
+            logDebugIfNotLoading(String.format("Exception in processing fuel info: %s", e.getMessage()), deviceId);
             e.printStackTrace();
         } finally {
             long endProcessing = new Date().getTime();
@@ -142,6 +144,12 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         }
     }
 
+    private void logDebugIfNotLoading(String logMessage, long deviceId) {
+        if (!loadingOldDataFromDB) {
+            FuelSensorDataHandlerHelper.logDebugIfDeviceId(logMessage, deviceId);
+        }
+    }
+
     private void logInfoIfNotLoading(String logMessage) {
         if (!loadingOldDataFromDB) {
             Log.info(logMessage);
@@ -149,8 +157,8 @@ public class FuelSensorDataHandler extends BaseDataHandler {
     }
 
     private void processSensorData(Position position, PeripheralSensor fuelSensor) {
-        logDebugIfNotLoading(String.format("[FuelSensorDataHandler] processing sensor data %d %d", position.getDeviceId(), fuelSensor.getPeripheralSensorId()));
         long deviceId = position.getDeviceId();
+        logDebugIfNotLoading(String.format("[FuelSensorDataHandler] processing sensor data %d %d", position.getDeviceId(), fuelSensor.getPeripheralSensorId()), deviceId);
         String calibFuelDataField = fuelSensor.getCalibFuelFieldName();
 
         if (!position.getAttributes().containsKey(calibFuelDataField)) {
@@ -169,14 +177,12 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                 ((Number) position.getAttributes().get(calibFuelDataField)).longValue()  <= 0L) ||
                 (position.getAttributes().containsKey(Position.KEY_POWER) &&
                         ((Number) position.getAttributes().get(Position.KEY_POWER)).doubleValue()  <= 0.0)) {
-            logDebugIfNotLoading("Device power too low, updating with last known fuel level for deviceId"
-                              + position.getDeviceId());
+            logDebugIfNotLoading(String.format("Device power too low, updating with last known fuel level for deviceId %s", deviceId), deviceId);
             updateWithLastAvailable(position, ALL_FUEL_FIELDS, fuelSensor);
         }
 
         if (position.getBoolean(Position.KEY_CHARGE)) {
-            logDebugIfNotLoading("Device on internal charge. Ignoring reported fuel value and updating with last known fuel level for deviceId"
-                              + position.getDeviceId());
+            logDebugIfNotLoading(String.format("Device on internal charge. Ignoring reported fuel value and updating with last known fuel level for deviceId %d", deviceId), deviceId);
             updateWithLastAvailable(position, ALL_FUEL_FIELDS, fuelSensor);
             return;
         }
@@ -224,23 +230,23 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         String lookupKey = getLookupKey(deviceId, fuelSensor.getPeripheralSensorId());
 
         if (!previousPositions.containsKey(lookupKey)) {
-            logDebugIfNotLoading("lookupKey not found in previousPositions: " + lookupKey);
+            logDebugIfNotLoading(String.format("lookupKey not found in previousPositions: %s", lookupKey), deviceId);
             return;
         }
 
         TreeMultiset<Position> sensorReadingsFromDevice = previousPositions.get(lookupKey);
 
         if (sensorReadingsFromDevice.size() < 1) {
-            logDebugIfNotLoading("No previous readings found for lookupKey: " + lookupKey);
+            logDebugIfNotLoading(String.format("No previous readings found for lookupKey: %s", lookupKey), deviceId);
             return;
         }
 
         // This should ideally average the readings from all sensors, but for now we'll just pick the first sensor and
         // use the last available level.
 
-        Optional<Position> possibleLastKnownPosition = getLastKnownPositionForSensor(lookupKey);
+        Optional<Position> possibleLastKnownPosition = getLastKnownPositionForSensor(lookupKey, deviceId);
         if (!possibleLastKnownPosition.isPresent()) {
-            logDebugIfNotLoading("Last known position not found for lookupKey: " + lookupKey);
+            logDebugIfNotLoading(String.format("Last known position not found for lookupKey: %s", lookupKey), deviceId);
             return;
         }
 
@@ -248,7 +254,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         if (!attributeToUpdate.equals(ALL_FUEL_FIELDS)
                 && !lastKnownPosition.getAttributes().containsKey(attributeToUpdate)) {
             logDebugIfNotLoading(String.format("Last known position for deviceId %d doesn't have property %s set.",
-                                               position.getDeviceId(), attributeToUpdate));
+                                               position.getDeviceId(), attributeToUpdate), deviceId);
             return;
         }
 
@@ -262,17 +268,17 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         }
     }
 
-    private Optional<Position> getLastKnownPositionForSensor(String sensorPositionsLookupKey) {
+    private Optional<Position> getLastKnownPositionForSensor(String sensorPositionsLookupKey, long deviceId) {
 
         if (!previousPositions.containsKey(sensorPositionsLookupKey)) {
-            logDebugIfNotLoading("sensorPositionsLookupKey not found in previousPositions" + sensorPositionsLookupKey);
+            logDebugIfNotLoading(String.format("sensorPositionsLookupKey not found in previousPositions %s", sensorPositionsLookupKey), deviceId);
             return Optional.empty();
         }
 
         TreeMultiset<Position> readingsFromDevice = previousPositions.get(sensorPositionsLookupKey);
 
         if (readingsFromDevice.isEmpty()) {
-            logDebugIfNotLoading("No previous readings found for sensorPositionsLookupKey: " + sensorPositionsLookupKey);
+            logDebugIfNotLoading(String.format("No previous readings found for sensorPositionsLookupKey: %s", sensorPositionsLookupKey), deviceId);
             return Optional.empty();
         }
 
@@ -285,14 +291,14 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
         String lookupKey = getLookupKey(deviceId, fuelSensor.getPeripheralSensorId());
         if (!previousPositions.containsKey(lookupKey)) {
-            logDebugIfNotLoading("deviceId not found in lookupKey" + lookupKey);
+            logDebugIfNotLoading(String.format("deviceId not found in lookupKey %s", lookupKey), deviceId);
             return Optional.empty();
         }
 
         TreeMultiset<Position> sensorReadingsFromDevice = previousPositions.get(lookupKey);
 
         if (sensorReadingsFromDevice.isEmpty()) {
-            logDebugIfNotLoading("No readings for sensors found for lookupKey: " + lookupKey);
+            logDebugIfNotLoading(String.format("No readings for sensors found for lookupKey: %s", lookupKey), deviceId);
             return Optional.empty();
         }
 
@@ -373,12 +379,13 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
     private void handleSensorData(Position position,
                                   PeripheralSensor fuelSensor) {
-        logDebugIfNotLoading(String.format("[FuelSensorDataHandler] handleSensorData sensor data %d %d", position.getDeviceId(), fuelSensor.getPeripheralSensorId()));
         long deviceId = position.getDeviceId();
+        logDebugIfNotLoading(String.format("[FuelSensorDataHandler] handleSensorData sensor data %d %d", deviceId, fuelSensor.getPeripheralSensorId()), deviceId);
+
         long sensorId = fuelSensor.getPeripheralSensorId();
         String lookupKey = getLookupKey(deviceId, sensorId);
 
-        logDebugIfNotLoading(String.format("Processing data for lookup key: %s", lookupKey));
+        logDebugIfNotLoading(String.format("Processing data for lookup key: %s", lookupKey), deviceId);
 
         TreeMultiset<Position> positionsForDeviceSensor = previousPositions.get(lookupKey);
         String fuelDataField = fuelSensor.getFuelDataFieldName();
@@ -395,7 +402,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                         averagesLookbackSeconds);
 
         logDebugIfNotLoading(String.format("[Averages] Size of list before getting averages: %d, deviceId: %d, sensorId: %d",
-                                           relevantPositionsListForAverages.size(), deviceId, fuelSensor.getPeripheralSensorId()));
+                                           relevantPositionsListForAverages.size(), deviceId, fuelSensor.getPeripheralSensorId()), deviceId);
 
         relevantPositionsListForAverages.add(position);
         double currentFuelLevelAverage =
@@ -439,7 +446,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         if (relevantPositionsListForOutliers.size() < fuelSensor.getOutlierWindowSize()) {
             // positions in this case will have isFuelOutlier left blank (neither true nor false) i.e.
             // not evaluated.
-            logDebugIfNotLoading("[Outliers] List too small for outlier detection. Outlier window size: " + fuelSensor.getOutlierWindowSize());
+            logDebugIfNotLoading(String.format("[Outliers] List too small for outlier detection. Outlier window size: %d", fuelSensor.getOutlierWindowSize()), deviceId);
             return;
         }
 
@@ -542,10 +549,10 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                                                                        fuelTankMaxVolume,
                                                                        fuelSensor);
             if (!isConsumptionExpected) {
-                logDebugIfNotLoading("[Events] Detected drain not within expected consumption");
+                logDebugIfNotLoading(String.format("[Events] Detected drain not within expected consumption %d", deviceId),deviceId);
                 sendNotificationIfNecessary(deviceId, fuelActivity, fuelSensor.getPeripheralSensorId());
             } else {
-                logDebugIfNotLoading("[Events] Detected drain that was within expected consumption, not sending notification.");
+                logDebugIfNotLoading(String.format("[Events] Detected drain that was within expected consumption, not sending notification %d", deviceId), deviceId);
             }
 
         } else {
@@ -562,7 +569,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                       + " start lat, long " + fuelActivity.getActivityStartPosition().getLatitude()
                       + ", " + fuelActivity.getActivityStartPosition().getLongitude()
                       + " end lat, long " + fuelActivity.getActivityEndPosition().getLatitude()
-                      + ", " + fuelActivity.getActivityEndPosition().getLongitude());
+                      + ", " + fuelActivity.getActivityEndPosition().getLongitude(), deviceId);
 
             // Add event to events table
             String eventType = fuelActivity.getActivityType().toString();

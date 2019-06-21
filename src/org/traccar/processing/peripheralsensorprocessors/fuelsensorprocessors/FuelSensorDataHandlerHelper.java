@@ -17,6 +17,12 @@ import java.util.stream.Collectors;
  */
 public class FuelSensorDataHandlerHelper {
 
+    private static int logForDeviceId;
+
+    static {
+        logForDeviceId = Context.getConfig().getInteger("processing.peripheralSensorData.logForDeviceId");
+    }
+
     private final static double MULTIPLIER;
 
     static {
@@ -58,9 +64,11 @@ public class FuelSensorDataHandlerHelper {
         SortedMultiset<Position> positionsSubset =
                 positionsForSensor.subMultiset(fromPosition, BoundType.OPEN, position, BoundType.CLOSED);
 
+        long deviceId = position.getDeviceId();
+
         if (positionsSubset.size() < minListSize) {
-            Log.debug("[RELEVANT_SUBLIST] sublist is lesser than "
-                              + minListSize + " returning " + positionsSubset.size());
+            logDebugIfDeviceId("[RELEVANT_SUBLIST] sublist is lesser than "
+                              + minListSize + " returning " + positionsSubset.size(), deviceId);
             return positionsSubset.stream()
                                   .filter(p -> !excludeOutliers || positionIsMarkedOutlier(p, sensorOutlierFieldName))
                                   .collect(Collectors.toList());
@@ -79,7 +87,7 @@ public class FuelSensorDataHandlerHelper {
 
         List<Position> sublistToReturn = filteredSublistToReturn.subList(listMaxIndex - minListSize, listMaxIndex);
 
-        Log.debug("[RELEVANT_SUBLIST] sublist size: " + sublistToReturn.size());
+        logDebugIfDeviceId("[RELEVANT_SUBLIST] sublist size: " + sublistToReturn.size(), deviceId);
 
         return sublistToReturn;
     }
@@ -170,7 +178,8 @@ public class FuelSensorDataHandlerHelper {
         boolean isOutlier = rawFuelOfPositionEvaluated < lowerBoundOnRawFuelValue
                             || rawFuelOfPositionEvaluated > upperBoundOnRawFuelValue;
 
-        Log.debug("[OUTLIER_STAT] sumOfValues: " + sumOfValues
+        long deviceId = rawFuelOutlierSublist.get(0).getDeviceId();
+        logDebugIfDeviceId("[OUTLIER_STAT] sumOfValues: " + sumOfValues
                   + " mean: " + mean
                   + " sumOfSquaredDifferenceOfMean: " + sumOfSquaredDifferenceOfMean
                   + " deviceTime of position evaluated: " + (copyOfRawValues.get(indexOfPositionEvaluated).getDeviceTime())
@@ -178,7 +187,7 @@ public class FuelSensorDataHandlerHelper {
                   + " standardDeviation: " + standardDeviation
                   + " lowerBoundOnRawFuelValue: " + lowerBoundOnRawFuelValue
                   + " upperBoundOnRawFuelValue: " + upperBoundOnRawFuelValue
-                  + " isOutlier: " + isOutlier);
+                  + " isOutlier: " + isOutlier, deviceId);
 
         return isOutlier;
     }
@@ -203,10 +212,11 @@ public class FuelSensorDataHandlerHelper {
         }
 
         double avg = total / size;
+        long deviceId = fuelLevelReadings.get(0).getDeviceId();
 
-        Log.debug("[FUEL_ACTIVITY_AVERAGES] deviceId: " + fuelLevelReadings.get(0).getDeviceId()
+        logDebugIfDeviceId("[FUEL_ACTIVITY_AVERAGES] deviceId: " + deviceId
                           + " average: " + avg
-                          + " averages list size: " + fuelLevelReadings.size());
+                          + " averages list size: " + fuelLevelReadings.size(), deviceId);
 
         return avg;
     }
@@ -215,7 +225,13 @@ public class FuelSensorDataHandlerHelper {
         try {
             Context.getDataManager().updateObject(outlierPosition);
         } catch (SQLException e) {
-            Log.debug("Exception while updating outlier position with id: " + outlierPosition.getId());
+            logDebugIfDeviceId("Exception while updating outlier position with id: " + outlierPosition.getId(), outlierPosition.getDeviceId());
+        }
+    }
+
+    public static void logDebugIfDeviceId(String logMessage, long deviceId) {
+        if (deviceId == logForDeviceId) {
+            Log.debug(logMessage);
         }
     }
 }
