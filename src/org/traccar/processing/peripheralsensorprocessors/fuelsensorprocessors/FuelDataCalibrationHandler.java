@@ -28,19 +28,18 @@ public class FuelDataCalibrationHandler extends BaseDataHandler {
 
     @Override
     protected Position handlePosition(Position position) {
-        Log.info(String.format("[FuelDataCalibrationHandler] Calibrating position for %d", position.getDeviceId()));
         long deviceId = position.getDeviceId();
         Optional<List<PeripheralSensor>> sensorsOnDevice = Context.getPeripheralSensorManager().getSensorByDeviceId(deviceId);
 
         if (!sensorsOnDevice.isPresent()) {
-            Log.debug(String.format("No sensors found on deviceId: %d. Refreshing sensors map.", deviceId));
+            FuelSensorDataHandlerHelper.logDebugIfDeviceId(String.format("No sensors found on deviceId: %d. Refreshing sensors map.", deviceId), deviceId);
             Context.getPeripheralSensorManager().refreshPeripheralSensorsMap();
             return position;
         }
 
         List<PeripheralSensor> fuelSensorsList = sensorsOnDevice.get();
         if (fuelSensorsList.isEmpty()) {
-            Log.debug(String.format("Sensors list empty for deviceId: %d. Refreshing sensors map.", deviceId));
+            FuelSensorDataHandlerHelper.logDebugIfDeviceId(String.format("Sensors list empty for deviceId: %d. Refreshing sensors map.", deviceId), deviceId);
             Context.getPeripheralSensorManager().refreshPeripheralSensorsMap();
             return position;
         }
@@ -52,7 +51,6 @@ public class FuelDataCalibrationHandler extends BaseDataHandler {
             }
             handleCalibrationData(position, deviceId, fuelSensor);
         }
-        Log.info(String.format("[FuelDataCalibrationHandler] Done calibrating position for %d", position.getDeviceId()));
         return position;
     }
 
@@ -66,7 +64,7 @@ public class FuelDataCalibrationHandler extends BaseDataHandler {
         long sensorId = fuelSensor.getPeripheralSensorId();
 
         if (!fuelLevelPoints.isPresent()) {
-            Log.debug(String.format("No fuel data found on payload for %d and sensor %d", deviceId, sensorId));
+            FuelSensorDataHandlerHelper.logDebugIfDeviceId(String.format("No fuel data found on payload for %d and sensor %d", deviceId, sensorId), deviceId);
             return;
         }
 
@@ -74,8 +72,8 @@ public class FuelDataCalibrationHandler extends BaseDataHandler {
                 getCalibratedFuelLevel(deviceId, sensorId, fuelLevelPoints.get());
 
         if (!maybeCalibratedData.isPresent()) {
-            Log.debug(String.format("Calibrated fuel level could not be determined for device %d and sensor %d",
-                                    deviceId, sensorId));
+            FuelSensorDataHandlerHelper.logDebugIfDeviceId(String.format("Calibrated fuel level could not be determined for device %d and sensor %d",
+                                    deviceId, sensorId), deviceId);
 
             return;
         }
@@ -128,9 +126,9 @@ public class FuelDataCalibrationHandler extends BaseDataHandler {
 
             return Optional.of(fuelLevel);
         } catch (Exception ex) {
-            Log.debug("Null nextFuelLevelInfo - deviceID: " + deviceId
+            FuelSensorDataHandlerHelper.logDebugIfDeviceId("Null nextFuelLevelInfo - deviceID: " + deviceId
                               + " sensorId: " + sensorId
-                              + " reported sensorFuelLevelPoints" + sensorFuelLevelPoints);
+                              + " reported sensorFuelLevelPoints" + sensorFuelLevelPoints, deviceId);
         }
 
         return Optional.empty();
