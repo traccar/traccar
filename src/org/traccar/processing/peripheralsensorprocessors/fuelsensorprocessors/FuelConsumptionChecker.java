@@ -23,6 +23,11 @@ public class FuelConsumptionChecker {
 
         long deviceId = startPosition.getDeviceId();
         DeviceConsumptionInfo consumptionInfo = Context.getDeviceManager().getDeviceConsumptionInfo(deviceId);
+
+        if (consumptionInfo.getDeviceConsumptionType().equals(DeviceConsumptionInfo.ENGINELESS_HOURLY_CONSUMPTION_TYPE)) {
+            return false;
+        }
+
         boolean requiredFieldsPresent = checkRequiredFieldsPresent(startPosition, endPosition, consumptionInfo, fuelSensor);
 
         if (!requiredFieldsPresent) {

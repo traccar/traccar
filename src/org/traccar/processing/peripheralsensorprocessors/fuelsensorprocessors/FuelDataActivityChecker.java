@@ -63,13 +63,15 @@ public class FuelDataActivityChecker {
             // normal consumption mechanism.
             // We connect the ignition to the pump that drains fuel from the tank, and check if the ignition
             // was on when we detected the start of the event, and off when the event end is detected.
-            if (isEnginelessHourly
-                    && startType.equals(FuelActivityType.FUEL_DRAIN.name())
-                    && !ignitionOnInAnyRHWindow) {
+            boolean isDrain = startType.equals(FuelActivityType.FUEL_DRAIN.name());
 
-                fuelActivity.setActivityType(FuelActivityType.NONE);
-                return fuelActivity;
+            if (isEnginelessHourly && isDrain && !ignitionOnInAnyRHWindow) {
+                FuelSensorDataHandlerHelper.logDebugIfDeviceId("Detected fuel drain start but ignition not on in any RH Window", deviceId);
+                return new FuelActivity();
             }
+
+            String logMessage = String.format("Fuel event started: %d %b %b", deviceId, isDrain, ignitionOnInAnyRHWindow);
+            FuelSensorDataHandlerHelper.logDebugIfDeviceId(logMessage, deviceId);
 
             String oppositeEventType = startType.equals(FuelActivityType.FUEL_FILL.name())? FuelActivityType.FUEL_DRAIN.name() :
                                        FuelActivityType.FUEL_FILL.name();
@@ -142,15 +144,17 @@ public class FuelDataActivityChecker {
 
             String endType = possibleActivityEndType.get();
             boolean ignitionOnRHWindowLast = readingsForDevice.get(readingsSize - 1).getBoolean(Position.KEY_IGNITION);
+            boolean isEndDrain = endType.equals(FuelActivityType.FUEL_DRAIN.name());
 
-            if (isEnginelessHourly
-                    && endType.equals(FuelActivityType.FUEL_DRAIN.name())
-                    && ignitionOnRHWindowLast) {
+            if (isEnginelessHourly && isEndDrain && ignitionOnRHWindowLast) {
 
                 // Ignition is still on, we're probably not done with the "drain" for the "enginelesshourly" types.
-                fuelActivity.setActivityType(FuelActivityType.NONE);
-                return fuelActivity;
+                FuelSensorDataHandlerHelper.logDebugIfDeviceId("Detected fuel drain end but ignition is still on last rh window", deviceId);
+                return new FuelActivity();
             }
+
+            String logMessage = String.format("Fuel event ended: %d %b %b", deviceId, isEndDrain, ignitionOnRHWindowLast);
+            FuelSensorDataHandlerHelper.logDebugIfDeviceId(logMessage, deviceId);
 
             String activityLookupKey = getActivityLookupKey(deviceSensorLookupKey, endType);
 
@@ -195,15 +199,9 @@ public class FuelDataActivityChecker {
             FuelSensorDataHandlerHelper.logDebugIfDeviceId("[FUEL_ACTIVITY_END] errorCheckFuelChange: " + errorCheckFuelChange, deviceId);
 
             Optional<Long> maxCapacity = Context.getPeripheralSensorManager().getFuelTankMaxCapacity(deviceId, fuelSensor.getPeripheralSensorId());
-            boolean isFuelConsumptionAsExpected =
-                    FuelConsumptionChecker.isFuelConsumptionAsExpected(fuelEventMetadata.getActivityStartPosition(),
-                                                                       fuelEventMetadata.getActivityEndPosition(),
-                                                                       fuelChangeVolume,
-                                                                       maxCapacity,
-                                                                       fuelSensor);
 
             // If fuel consumption is not as expected, means we have some activity going on.
-            if (!isFuelConsumptionAsExpected && fuelChangeVolume < 0.0) {
+            if (fuelChangeVolume < 0.0) {
                 fuelActivity.setActivityType(FuelActivity.FuelActivityType.FUEL_DRAIN);
                 setActivityParameters(fuelActivity, fuelEventMetadata, fuelChangeVolume);
                 checkForMissedOutlier(fuelEventMetadata, fuelActivity, fuelLevelChangeThreshold, fuelSensor);
