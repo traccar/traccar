@@ -21,4 +21,8 @@ public class FuelDataConstants {
     public final static String FILL_THRESHOLD_FIELD_NAME = "fill_threshold";
 
     public final static String DRAIN_THRESHOLD_FIELD_NAME = "drain_threshold";
+
+    public final static String IGN_ON_DRAIN_THRESHOLD_FIELD_NAME = "ign_on_drain_threshold";
+
+    public final static String IGN_OFF_DRAIN_THRESHOLD_FIELD_NAME = "ign_off_drain_threshold";
 }

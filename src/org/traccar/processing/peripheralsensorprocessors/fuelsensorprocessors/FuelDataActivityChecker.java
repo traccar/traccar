@@ -1,7 +1,6 @@
 package org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors;
 
 import org.traccar.Context;
-import org.traccar.helper.Log;
 import org.traccar.model.PeripheralSensor;
 import org.traccar.model.Position;
 import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.FuelActivity.FuelActivityType;
@@ -45,16 +44,28 @@ public class FuelDataActivityChecker {
         String deviceSensorLookupKey = deviceId + "_" + fuelSensor.getPeripheralSensorId();
         double fillThreshold = fuelSensor.getFillThreshold().isPresent()? fuelSensor.getFillThreshold().get() : fuelLevelChangeThreshold;
         double drainThreshold = fuelSensor.getDrainThreshold().isPresent()? fuelSensor.getDrainThreshold().get() : fuelLevelChangeThreshold;
+        double ignOnDrainThreshold = fuelSensor.getIgnOnDrainThreshold().isPresent()? fuelSensor.getIgnOnDrainThreshold().get() : drainThreshold;
+        double ignOffDrainThreshold = fuelSensor.getIgnOffDrainThreshold().isPresent()? fuelSensor.getIgnOffDrainThreshold().get() : drainThreshold;
+        double drainThresholdToUseForStart = ignitionOnInAnyRHWindow? ignOnDrainThreshold : ignOffDrainThreshold;
 
-        FuelSensorDataHandlerHelper.logDebugIfDeviceId("[FUEL_ACTIVITY] lookupKey: " + deviceSensorLookupKey + "diffInMeans: " + diffInMeans
-                          + " fillThreshold: " + fillThreshold
-                          + " drainThreshold: " + drainThreshold
-                          + " diffInMeans > fillThreshold: " + (Math.abs(diffInMeans) > fillThreshold)
-                          + " diffInMeans > drainThreshold: " + (Math.abs(diffInMeans) > drainThreshold), deviceId);
-
+        FuelSensorDataHandlerHelper.logDebugIfDeviceId(
+                "[FUEL_ACTIVITY] lookupKey: " + deviceSensorLookupKey
+                        + " diffInMeans: " + diffInMeans
+                        + " fillThreshold: " + fillThreshold
+                        + " ignitionOnInAnyRHWindow: " + ignitionOnInAnyRHWindow
+                        + " drainThreshold: " + drainThreshold
+                        + " ignOnDrainThreshold: " + ignOnDrainThreshold
+                        + " ignOffDrainThreshold: " + ignOffDrainThreshold
+                        + " drainThresholdToUseForStart: " + drainThresholdToUseForStart
+                        + " diffInMeans > fillThreshold: " + (Math.abs(diffInMeans) > fillThreshold)
+                        + " diffInMeans > drainThreshold: " + (Math.abs(diffInMeans) > drainThreshold), deviceId);
 
         boolean isEnginelessHourly = consumptionInfo.getDeviceConsumptionType().toLowerCase().equals(DeviceConsumptionInfo.ENGINELESS_HOURLY_CONSUMPTION_TYPE);
-        Optional<String> possibleActivityStartTypeStartType = determinePossibleActivityStartType(diffInMeans, fillThreshold, drainThreshold);
+
+
+        Optional<String> possibleActivityStartTypeStartType = determinePossibleActivityStartType(diffInMeans,
+                                                                                                 fillThreshold,
+                                                                                                 drainThresholdToUseForStart);
 
         if (possibleActivityStartTypeStartType.isPresent()) {
             String startType = possibleActivityStartTypeStartType.get();
@@ -134,16 +145,18 @@ public class FuelDataActivityChecker {
             }
         }
 
+        boolean ignitionOnRHWindowLast = readingsForDevice.get(readingsSize - 1).getBoolean(Position.KEY_IGNITION);
+        double drainThresholdToUseForEnd = ignitionOnRHWindowLast? ignOnDrainThreshold : ignOffDrainThreshold;
+
         Optional<String> possibleActivityEndType = determinePossibleActivityEndType(diffInMeans,
                                                                                     fillThreshold,
-                                                                                    drainThreshold,
+                                                                                    drainThresholdToUseForEnd,
                                                                                     deviceFuelEventMetadata,
                                                                                     deviceSensorLookupKey);
 
         if (possibleActivityEndType.isPresent()) {
 
             String endType = possibleActivityEndType.get();
-            boolean ignitionOnRHWindowLast = readingsForDevice.get(readingsSize - 1).getBoolean(Position.KEY_IGNITION);
             boolean isEndDrain = endType.equals(FuelActivityType.FUEL_DRAIN.name());
 
             if (isEnginelessHourly && isEndDrain && ignitionOnRHWindowLast) {
@@ -153,7 +166,7 @@ public class FuelDataActivityChecker {
                 return new FuelActivity();
             }
 
-            String logMessage = String.format("Fuel event ended: %d %b %b", deviceId, isEndDrain, ignitionOnRHWindowLast);
+            String logMessage = String.format("Fuel event ended: %d %b %b %d", deviceId, isEndDrain, ignitionOnRHWindowLast, drainThresholdToUseForEnd);
             FuelSensorDataHandlerHelper.logDebugIfDeviceId(logMessage, deviceId);
 
             String activityLookupKey = getActivityLookupKey(deviceSensorLookupKey, endType);
