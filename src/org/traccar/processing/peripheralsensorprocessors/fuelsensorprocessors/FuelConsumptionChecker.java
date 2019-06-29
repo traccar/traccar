@@ -162,7 +162,7 @@ public class FuelConsumptionChecker {
     }
 
 
-    private static ExpectedFuelConsumption getExpectedHourlyFuelConsumptionValues(Position startPosition,
+    public static ExpectedFuelConsumption getExpectedHourlyFuelConsumptionValues(Position startPosition,
                                                                                   Position endPosition,
                                                                                   double allowedDeviation,
                                                                                   DeviceConsumptionInfo consumptionInfo) {
