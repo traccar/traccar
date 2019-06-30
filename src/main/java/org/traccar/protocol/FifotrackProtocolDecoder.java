@@ -105,6 +105,24 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private String decodeAlarm(Integer alarm) {
+        if (alarm != null) {
+            switch (alarm) {
+                case 2:
+                    return Position.ALARM_SOS;
+                case 14:
+                    return Position.ALARM_LOW_POWER;
+                case 15:
+                    return Position.ALARM_POWER_CUT;
+                case 16:
+                    return Position.ALARM_POWER_RESTORED;
+                default:
+                    return null;
+            }
+        }
+        return null;
+    }
+
     private Object decodeLocation(
             Channel channel, SocketAddress remoteAddress, String sentence) {
 
@@ -121,28 +139,24 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.set(Position.KEY_ALARM, parser.next());
+        position.set(Position.KEY_ALARM, decodeAlarm(parser.nextInt()));
 
         position.setTime(parser.nextDateTime());
 
         position.setValid(parser.next().equals("A"));
-        position.setLatitude(parser.nextDouble(0));
-        position.setLongitude(parser.nextDouble(0));
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt(0)));
-        position.setCourse(parser.nextInt(0));
-        position.setAltitude(parser.nextInt(0));
+        position.setLatitude(parser.nextDouble());
+        position.setLongitude(parser.nextDouble());
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt()));
+        position.setCourse(parser.nextInt());
+        position.setAltitude(parser.nextInt());
 
-        position.set(Position.KEY_ODOMETER, parser.nextLong(0));
-        position.set(Position.KEY_STATUS, parser.nextHexInt(0));
-        if (parser.hasNext()) {
-            position.set(Position.KEY_INPUT, parser.nextHexInt(0));
-        }
-        if (parser.hasNext()) {
-            position.set(Position.KEY_OUTPUT, parser.nextHexInt(0));
-        }
+        position.set(Position.KEY_ODOMETER, parser.nextLong());
+        position.set(Position.KEY_STATUS, parser.nextHexInt());
+        position.set(Position.KEY_INPUT, parser.nextHexInt());
+        position.set(Position.KEY_OUTPUT, parser.nextHexInt());
 
         position.setNetwork(new Network(CellTower.from(
-                parser.nextInt(0), parser.nextInt(0), parser.nextHexInt(0), parser.nextHexInt(0))));
+                parser.nextInt(), parser.nextInt(), parser.nextHexInt(), parser.nextHexInt())));
 
         String[] adc = parser.next().split("\\|");
         for (int i = 0; i < adc.length; i++) {
