@@ -95,10 +95,11 @@ public class DistanceHandler extends BaseDataHandler {
             long durationBetweenPacketsSeconds =
                     (position.getDeviceTime().getTime() - last.getDeviceTime().getTime()) / MILLIS_IN_SECOND;
 
-            if (durationBetweenPacketsSeconds >= MAX_DATA_LOSS_DURATION_SECONDS
-                && last.getAttributes().containsKey(Position.KEY_ODOMETER)
-                && position.getAttributes().containsKey(Position.KEY_ODOMETER)) {
+            boolean isDataLoss = durationBetweenPacketsSeconds >= MAX_DATA_LOSS_DURATION_SECONDS
+                    && last.getAttributes().containsKey(Position.KEY_ODOMETER)
+                    && position.getAttributes().containsKey(Position.KEY_ODOMETER);
 
+            if (isDataLoss) {
                 double differenceInOdometer = ((Number) position.getAttributes().get(Position.KEY_ODOMETER)).doubleValue()
                                               -  ((Number)last.getAttributes().get(Position.KEY_ODOMETER)).doubleValue();
 
@@ -107,7 +108,7 @@ public class DistanceHandler extends BaseDataHandler {
                 }
             }
 
-            if (filter && last.getValid() && last.getLatitude() != 0 && last.getLongitude() != 0) {
+            if (!isDataLoss && filter && last.getValid() && last.getLatitude() != 0 && last.getLongitude() != 0) {
                 boolean satisfiesMin = coordinatesMinError == 0 || distance > coordinatesMinError;
                 boolean satisfiesMax = coordinatesMaxError == 0
                         || distance < coordinatesMaxError || position.getValid();
