@@ -1,6 +1,7 @@
 package org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors;
 
 import com.google.common.collect.Sets;
+import org.eclipse.jetty.util.StringUtil;
 import org.traccar.Context;
 import org.traccar.model.PeripheralSensor;
 import org.traccar.model.Position;
@@ -386,7 +387,8 @@ public class FuelDataActivityChecker {
                                               final String deviceType) {
 
         double finalVolume = fuelChangeVolume;
-        if (deviceType.equals(STATIONARY_TYPE)
+        if (StringUtil.isNotBlank(deviceType)
+                && deviceType.equals(STATIONARY_TYPE)
                 && adjustVolumeFor.contains(fuelActivity.getActivityType().name())) {
              finalVolume += getAdjustedVolume(consumptionInfo, fuelEventMetadata);
         }
