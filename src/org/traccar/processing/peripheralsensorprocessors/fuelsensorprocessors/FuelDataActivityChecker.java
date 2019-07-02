@@ -174,7 +174,7 @@ public class FuelDataActivityChecker {
                 return new FuelActivity();
             }
 
-            String logMessage = String.format("Fuel event ended: %d %b %b %d", deviceId, isEndDrain, ignitionOnRHWindowLast, drainThresholdToUseForEnd);
+            String logMessage = String.format("Fuel event ended: %d %b %b %f", deviceId, isEndDrain, ignitionOnRHWindowLast, drainThresholdToUseForEnd);
             FuelSensorDataHandlerHelper.logDebugIfDeviceId(logMessage, deviceId);
 
             String activityLookupKey = getActivityLookupKey(deviceSensorLookupKey, endType);

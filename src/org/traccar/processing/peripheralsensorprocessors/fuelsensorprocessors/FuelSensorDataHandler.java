@@ -127,7 +127,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             }
 
         } catch (Exception e) {
-            logDebugIfNotLoading(String.format("Exception in processing fuel info: %s", e.getMessage()), deviceId);
+            Log.info(String.format("Exception in processing fuel info: %s", e.getMessage(), deviceId));
             e.printStackTrace();
         } finally {
             long endProcessing = new Date().getTime();
