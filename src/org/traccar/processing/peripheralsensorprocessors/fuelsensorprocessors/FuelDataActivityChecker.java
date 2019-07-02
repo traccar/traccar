@@ -350,6 +350,8 @@ public class FuelDataActivityChecker {
                     FuelEventMetadata fuelEventMetadata = new FuelEventMetadata();
                     fuelEventMetadata.setActivityStartPosition(lastPosition);
                     fuelEventMetadata.setActivityEndPosition(position);
+                    fuelEventMetadata.setStartTime(lastPosition.getDeviceTime());
+                    fuelEventMetadata.setEndTime(position.getDeviceTime());
 
                     FuelActivity activity = new FuelActivity();
                     activity.setActivityType(FuelActivity.FuelActivityType.PROBABLE_FUEL_FILL);
@@ -363,6 +365,8 @@ public class FuelDataActivityChecker {
                 FuelEventMetadata fuelEventMetadata = new FuelEventMetadata();
                 fuelEventMetadata.setActivityStartPosition(lastPosition);
                 fuelEventMetadata.setActivityEndPosition(position);
+                fuelEventMetadata.setStartTime(lastPosition.getDeviceTime());
+                fuelEventMetadata.setEndTime(position.getDeviceTime());
 
                 FuelActivity activity = new FuelActivity();
                 activity.setActivityType(FuelActivity.FuelActivityType.EXPECTED_FUEL_FILL);
