@@ -1746,7 +1746,7 @@
                     "type": "integer"
                 },
                 "calendarId": {
-                    "description": "Geofence Id, can be second parameter only and only in combination with userId",
+                    "description": "Calendar Id, can be second parameter only and only in combination with userId",
                     "type": "integer"
                 },
                 "attributeId": {
