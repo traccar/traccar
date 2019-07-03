@@ -15,10 +15,10 @@ public class LaipacProtocolDecoderTest extends ProtocolTest {
 
         verifyNull(decoder, text(
                 "$AVSYS,99999999,V1.50,SN0000103,32768*15"));
-        
+
         verifyNull(decoder, text(
                 "$ECHK,99999999,0*35"));
-        
+
         verifyNull(decoder, text(
                 "$AVSYS,MSG00002,14406,7046811160,64*1A"));
 
@@ -85,10 +85,10 @@ public class LaipacProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, text(
                 "$AVRMC,MSG00002,125517,R,5053.0442,N,00557.8694,E,0.00,0.00,240614,H,4076,167,1,0,0,0D7AB913,020408*75"));
-        
+
         verifyPosition(decoder, text(
                 "$AVRMC,MSG00002,043104,p,5114.4664,N,00534.3308,E,0.00,0.00,280614,0,4115,495,1,0,0,0D48C3DC,020408*52"));
-        
+
         verifyPosition(decoder, text(
                 "$AVRMC,MSG00002,050601,P,5114.4751,N,00534.3175,E,0.00,0.00,280614,0,4115,495,1,0,0,0D48C3DC,020408*7D"));
 
@@ -120,6 +120,13 @@ public class LaipacProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "$AVRMC,358174067149865,143747,R,5050.1124,N,00420.0542,E,1.34,161.96,190318,a,3416,119,1,0,0*7D"));
 
+        //Zero LAC, CID, MCC, MNC
+        verifyPosition(decoder, text(
+                "$AVRMC,358174067149865,143747,P,5050.1124,N,00420.0542,E,1.34,161.96,190318,A,3416,119,1,0,0,0,0*5F"));
+
+        //New unknown parameters
+        verifyPosition(decoder, text(
+                "$AVRMC,358174067149865,143747,P,5050.1124,N,00420.0542,E,1.34,161.96,190318,A,3416,119,1,0,0,0,0,0,0*5F"));
     }
 
 }
