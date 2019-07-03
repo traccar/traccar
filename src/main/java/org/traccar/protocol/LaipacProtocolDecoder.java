@@ -30,11 +30,9 @@ import org.traccar.model.Device;
 import org.traccar.model.Command;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
-import org.traccar.database.ConnectionManager;
 
 import java.net.SocketAddress;
 import java.util.regex.Pattern;
-import java.util.Date;
 
 public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
@@ -72,9 +70,11 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
             .number(",(d)")                      // gps status
             .number(",(d+)")                     // adc1
             .number(",(d+)")                     // adc2
-            .number(",(x{1}|x{8})")              // lac+cid
-            .number(",(d{1}|d{6})")              // mcc+mnc
-            .optional(2)
+            .number(",(x{4}|x{1})")              // lac | lac+cid = 0
+            .number("(x{4})")                    // cid | nothing
+            .number(",(d{3}|d{1})")              // mcc | mcc+mnc = 0
+            .number("(d{3})")                    // mnc | nothing
+            .optional(4)
             .expression(",([^*]*)")              // anything remaining (be forward compatible)
             .optional(1)
             .text("*")
@@ -140,28 +140,64 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         return devicePassword;
     }
 
+    private String getEventResponse(String event, String devicePassword) {
+
+        String responseCode = null;
+
+        switch (event) {
+            case "3":
+                responseCode = "d";
+                break;
+            case "S":
+            case "T":
+                responseCode = "t";
+                break;
+            case "X":
+            case "4":
+                responseCode = "x";
+                break;
+            case "Y":
+                responseCode = "y";
+                break;
+            case "Z":
+                responseCode = "z";
+                break;
+            default:
+                break;
+        }
+
+        if (responseCode != null) {
+            String response = "$AVCFG," + devicePassword + "," + responseCode;
+            response += Checksum.nmea(response) + "\r\n";
+            return response;
+        }
+
+        return null;
+    }
+
+    private String getStatusResponse(String status, String event, String checksum) {
+
+        if (Character.isLowerCase(status.charAt(0))) {
+            String response = "$EAVACK," + event + "," + checksum;
+            response += Checksum.nmea(response) + "\r\n";
+            return response;
+        }
+
+        return null;
+    }
+
     private Object handleEchk(
-            String sentence, int checksum, Parser parser, Channel channel, SocketAddress remoteAddress) {
+            String sentence, Parser parser, Channel channel, SocketAddress remoteAddress) {
 
         if (channel != null) {
             channel.writeAndFlush(new NetworkMessage(sentence + "\r\n", remoteAddress));
-        }
-
-        DeviceSession deviceSession =
-            getDeviceSession(channel, remoteAddress, parser.next());
-        if (deviceSession != null) {
-            ConnectionManager cm = Context.getConnectionManager();
-            if (cm != null) {
-                cm.updateDevice(deviceSession.getDeviceId(),
-                    Device.STATUS_ONLINE, new Date());
-            }
         }
 
         return null;
     }
 
     protected Object handleAvrmc(
-            String sentence, int checksum, Parser parser, Channel channel, SocketAddress remoteAddress) {
+            String sentence, Parser parser, Channel channel, SocketAddress remoteAddress) {
 
         DeviceSession deviceSession =
             getDeviceSession(channel, remoteAddress, parser.next());
@@ -171,97 +207,55 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position(getProtocolName());
 
-        // Device ID
         position.setDeviceId(deviceSession.getDeviceId());
-
-        // Time
         DateBuilder dateBuilder = new DateBuilder()
                 .setTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
 
-        // Status [ V: Invalid | A: Valid | R: Not realtime | P: Parked ]
         String status = parser.next();
         String upperCaseStatus = status.toUpperCase();
-        position.setValid(upperCaseStatus.equals("A"));
+        position.setValid(upperCaseStatus.equals("A") || upperCaseStatus.equals("R") || upperCaseStatus.equals("P"));
         position.set(Position.KEY_STATUS, status);
 
-        // Position
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
-
-        // Speed
         position.setSpeed(parser.nextDouble(0));
-
-        // Course
         position.setCourse(parser.nextDouble(0));
 
-        // Date
         dateBuilder.setDateReverse(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
         position.setTime(dateBuilder.getDate());
 
-        // Alarm / Event
         String event = parser.next();
         position.set(Position.KEY_ALARM, decodeAlarm(event));
         position.set(Position.KEY_EVENT, decodeEvent(event, position));
-
-        // Battery
         position.set(Position.KEY_BATTERY, Double.parseDouble(parser.next().replaceAll("\\.", "")) * 0.001);
-
-        // Odometer
         position.set(Position.KEY_ODOMETER, parser.nextDouble());
-
-        // GPS status
         position.set(Position.KEY_GPS, parser.nextInt());
-
-        // ADC1 / ADC2
         position.set(Position.PREFIX_ADC + 1, parser.nextDouble() * 0.001);
         position.set(Position.PREFIX_ADC + 2, parser.nextDouble() * 0.001);
 
-        // LAC, CID, MCC, MNC
-        Integer laccid = parser.nextHexInt();
-        Integer mccmnc = parser.nextInt();
-        if (laccid != null && laccid != 0 && mccmnc != null && mccmnc != 0) {
-            Integer lac = (laccid >> 16) & 0xFFFF;
-            Integer cid = laccid & 0xFFFF;
-            Integer mcc = mccmnc / 10000;
-            Integer mnc = mccmnc % 100;
+        Integer lac = parser.nextHexInt();
+        Integer cid = parser.nextHexInt();
+        Integer mcc = parser.nextInt();
+        Integer mnc = parser.nextInt();
+        if (lac != null && cid != null && mcc != null && mnc != null) {
             position.setNetwork(new Network(CellTower.from(mcc, mnc, lac, cid)));
         }
 
-        // Skip remaining parameters
         String unused = parser.next();
 
-        // Checksum
-        String checksumStr = parser.next();
-        if (checksum != Integer.parseInt(checksumStr, 16)) {
-            return null;
-        }
+        String checksum = parser.next();
 
         if (channel != null) {
 
-            if (Character.isLowerCase(status.charAt(0))) {
-                String ack = "$EAVACK," + event + "," + checksumStr;
-                ack += Checksum.nmea(ack) + "\r\n";
-                channel.writeAndFlush(new NetworkMessage(ack, remoteAddress));
+            String statusResponse = getStatusResponse(status, event, checksum);
+            if (statusResponse != null) {
+                channel.writeAndFlush(new NetworkMessage(statusResponse, remoteAddress));
             }
 
-            String response = "";
             String devicePassword = getDevicePassword(deviceSession);
-
-            if (event.equals("3")) {
-                response = "$AVCFG," + devicePassword + ",d";
-            } else if (event.equals("S") || event.equals("T")) {
-                response = "$AVCFG," + devicePassword + ",t";
-            } else if (event.equals("X") || event.equals("4")) {
-                response = "$AVCFG," + devicePassword + ",x";
-            } else if (event.equals("Y")) {
-                response = "$AVCFG," + devicePassword + ",y";
-            } else if (event.equals("Z")) {
-                response = "$AVCFG," + devicePassword + ",z";
-            }
-
-            if (response.length() > 0) {
-                response += Checksum.nmea(response) + "\r\n";
-                channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+            String eventResponse = getEventResponse(event, devicePassword);
+            if (eventResponse != null) {
+                channel.writeAndFlush(new NetworkMessage(eventResponse, remoteAddress));
             }
         }
 
@@ -274,36 +268,14 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
         String sentence = (String) msg;
 
-        // Validate sentence length
-        int slen = sentence.length();
-        if (slen <= 5) {
-            return null;
-        }
-
-        // Validate sentence format
-        if (sentence.charAt(0) != '$') {
-            return null;
-        }
-        if (sentence.charAt(slen - 3) != '*') {
-            return null;
-        }
-
-        // Verify sentence checksum
-        int checksum = Integer.parseInt(sentence.substring(slen - 2), 16);
-        if (checksum != Checksum.xor(sentence.substring(1, slen - 3))) {
-            return null;
-        }
-
-        // Handle ECHK sentences
         Parser parser = new Parser(PATTERN_ECHK, sentence);
         if (parser.matches()) {
-            return handleEchk(sentence, checksum, parser, channel, remoteAddress);
+            return handleEchk(sentence, parser, channel, remoteAddress);
         }
 
-        // Handle AVRMC sentences
         parser = new Parser(PATTERN_AVRMC, sentence);
         if (parser.matches()) {
-            return handleAvrmc(sentence, checksum,  parser, channel, remoteAddress);
+            return handleAvrmc(sentence, parser, channel, remoteAddress);
         }
 
         return null;

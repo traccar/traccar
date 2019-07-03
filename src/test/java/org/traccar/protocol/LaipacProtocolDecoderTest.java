@@ -104,27 +104,27 @@ public class LaipacProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "$AVRMC,999999999999999,084514,r,5050.1314,N,00419.9719,E,0.68,306.39,120318,0,3882,84,1,0,0,3EE4A617,020610*4D"));
 
-        //Alarm button
+        // Alarm button
         verifyPosition(decoder, text(
                 "$AVRMC,358174067149865,142945,R,5050.1254,N,00420.0490,E,0.00,0.00,190318,3,3455,119,1,0,0,3EE4A617,020610*53"));
 
-        //G-Sensor
+        // G-Sensor
         verifyPosition(decoder, text(
                 "$AVRMC,358174067149865,143407,R,5050.1254,N,00420.0490,E,0.00,0.00,190318,8,3455,119,1,0,0,3EE4A617,020610*52"));
 
-        //Powered off
+        // Powered off
         verifyPosition(decoder, text(
                 "$AVRMC,358174067149865,143648,A,5050.1141,N,00420.0525,E,1.24,174.38,190318,H,3455,119,1,0,0,3EE4A617,020610*3E"));
 
-        //No network
+        // No network
         verifyPosition(decoder, text(
                 "$AVRMC,358174067149865,143747,R,5050.1124,N,00420.0542,E,1.34,161.96,190318,a,3416,119,1,0,0*7D"));
 
-        //Zero LAC, CID, MCC, MNC
+        // Zero LAC, CID, MCC, MNC
         verifyPosition(decoder, text(
                 "$AVRMC,358174067149865,143747,P,5050.1124,N,00420.0542,E,1.34,161.96,190318,A,3416,119,1,0,0,0,0*5F"));
 
-        //New unknown parameters
+        // New unknown parameters
         verifyPosition(decoder, text(
                 "$AVRMC,358174067149865,143747,P,5050.1124,N,00420.0542,E,1.34,161.96,190318,A,3416,119,1,0,0,0,0,0,0*5F"));
     }
