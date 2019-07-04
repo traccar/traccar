@@ -40,8 +40,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
     public LaipacProtocolDecoder(Protocol protocol) {
         super(protocol);
-        defaultDevicePassword = Context.getConfig().getString(
-            getProtocolName() + ".defaultPassword", "00000000");
+        defaultDevicePassword = "00000000";
     }
 
     private static final Pattern PATTERN_ECHK = new PatternBuilder()
