@@ -58,6 +58,9 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
 
         SuntechProtocolDecoder decoder = new SuntechProtocolDecoder(null);
 
+        verifyPosition(decoder, text(
+                "ALT;0520000295;3FFFFF;52;1.0.2;0;20190703;01:03:24;00004697;732;101;0002;59;+4.682583;-74.128142;0.00;0.00;6;1;00000000;00000000;9;1;;4.1;12.92;103188"));
+
         verifyAttribute(decoder, text(
                 "ST300UEX;109003241;08;1026;20190425;17:36:04;04402;+04.722553;-074.052583;000.020;000.00;10;1;0;12.04;010000;51;CabAVL\"CabMensaje,0,58.5,-1.0,,,FinMensaje\"FinAVL\r\n;B1;0000000000;4.1;1"),
                 "fuel1", 58.5);

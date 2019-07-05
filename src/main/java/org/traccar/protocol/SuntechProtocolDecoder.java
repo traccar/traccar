@@ -421,7 +421,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
         String type = values[index++];
 
-        if (!type.equals("STT")) {
+        if (!type.equals("STT") && !type.equals("ALT")) {
             return null;
         }
 
