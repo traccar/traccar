@@ -15,29 +15,19 @@
  */
 package org.traccar.protocol;
 
-import org.traccar.Protocol;
 import org.traccar.StringProtocolEncoder;
 import org.traccar.model.Command;
 import org.traccar.helper.Checksum;
 
 public class LaipacProtocolEncoder extends StringProtocolEncoder {
 
-    private final Protocol protocol;
-    private final String defaultDevicePassword;
-
-    public LaipacProtocolEncoder(Protocol protocol) {
-        this.protocol = protocol;
-        defaultDevicePassword = "00000000";
-    }
-
-    protected String getProtocolName() {
-        return protocol.getName();
+    public LaipacProtocolEncoder() {
     }
 
     @Override
     protected Object encodeCommand(Command command) {
 
-        initDevicePassword(command, defaultDevicePassword);
+        initDevicePassword(command, LaipacProtocolDecoder.DEFAULT_DEVICE_PASSWORD);
 
         String commandSentence = null;
 

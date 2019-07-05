@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,12 +36,11 @@ import java.util.regex.Pattern;
 
 public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
-    private final String defaultDevicePassword;
-
     public LaipacProtocolDecoder(Protocol protocol) {
         super(protocol);
-        defaultDevicePassword = "00000000";
     }
+
+    public static final String DEFAULT_DEVICE_PASSWORD = "00000000";
 
     private static final Pattern PATTERN_ECHK = new PatternBuilder()
             .text("$ECHK")
@@ -52,27 +51,27 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private static final Pattern PATTERN_AVRMC = new PatternBuilder()
-            .text("$AVRMC")
-            .expression(",([^,]+)")              // identifier
-            .number(",(dd)(dd)(dd)")             // time (hhmmss)
-            .expression(",([AVRPavrp])")         // validity
-            .number(",(dd)(dd.d+)")              // latitude
-            .expression(",([NS])")               // latitude hemisphere
-            .number(",(ddd)(dd.d+)")             // longitude
-            .number(",([EW])")                   // longitude hemisphere
-            .number(",(d+.d+)")                  // speed
-            .number(",(d+.d+)")                  // course
-            .number(",(dd)(dd)(dd)")             // date (ddmmyy)
-            .expression(",([0-9A-Za-z])")        // event code
-            .expression(",([\\d.]+)")            // battery voltage
-            .number(",(d+)")                     // current mileage
-            .number(",(d)")                      // gps status
-            .number(",(d+)")                     // adc1
-            .number(",(d+)")                     // adc2
-            .number(",(x{4}|x{1})")              // lac | lac+cid = 0
-            .number("(x{4})")                    // cid | nothing
-            .number(",(d{3}|d{1})")              // mcc | mcc+mnc = 0
-            .number("(d{3})")                    // mnc | nothing
+            .text("$AVRMC,")
+            .expression("([^,]+),")              // identifier
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
+            .expression("([AVRPavrp]),")         // validity
+            .number("(dd)(dd.d+),")              // latitude
+            .expression("([NS]),")               // latitude hemisphere
+            .number("(ddd)(dd.d+),")             // longitude
+            .number("([EW]),")                   // longitude hemisphere
+            .number("(d+.d+),")                  // speed
+            .number("(d+.d+),")                  // course
+            .number("(dd)(dd)(dd),")             // date (ddmmyy)
+            .expression("([0-9A-Za-z]),")        // event code
+            .expression("([\\d.]+),")            // battery voltage
+            .number("(d+),")                     // current mileage
+            .number("(d),")                      // gps status
+            .number("(d+),")                     // adc1
+            .number("(d+)")                      // adc2
+            .number(",(xxxx|x)")                 // lac | lac+cid = 0
+            .number("(xxxx),")                   // cid | nothing
+            .number("(ddd|d)")                   // mcc | mcc+mnc = 0
+            .number("(ddd)")                     // mnc | nothing
             .optional(4)
             .expression(",([^*]*)")              // anything remaining (be forward compatible)
             .optional(1)
@@ -126,7 +125,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
     private String getDevicePassword(DeviceSession deviceSession) {
 
-        String devicePassword = defaultDevicePassword;
+        String devicePassword = DEFAULT_DEVICE_PASSWORD;
 
         Device device = Context.getIdentityManager().getById(deviceSession.getDeviceId());
         if (device != null) {
@@ -139,7 +138,8 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         return devicePassword;
     }
 
-    private String getEventResponse(String event, String devicePassword) {
+    private void sendEventResponse(
+            String event, String devicePassword, Channel channel, SocketAddress remoteAddress) {
 
         String responseCode = null;
 
@@ -168,21 +168,20 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         if (responseCode != null) {
             String response = "$AVCFG," + devicePassword + "," + responseCode;
             response += Checksum.nmea(response) + "\r\n";
-            return response;
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
 
-        return null;
     }
 
-    private String getStatusResponse(String status, String event, String checksum) {
+    private void sendAcknowledge(
+            String status, String event, String checksum, Channel channel, SocketAddress remoteAddress) {
 
         if (Character.isLowerCase(status.charAt(0))) {
             String response = "$EAVACK," + event + "," + checksum;
             response += Checksum.nmea(response) + "\r\n";
-            return response;
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
 
-        return null;
     }
 
     private Object handleEchk(
@@ -246,16 +245,10 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
         if (channel != null) {
 
-            String statusResponse = getStatusResponse(status, event, checksum);
-            if (statusResponse != null) {
-                channel.writeAndFlush(new NetworkMessage(statusResponse, remoteAddress));
-            }
+            sendAcknowledge(status, event, checksum, channel, remoteAddress);
 
             String devicePassword = getDevicePassword(deviceSession);
-            String eventResponse = getEventResponse(event, devicePassword);
-            if (eventResponse != null) {
-                channel.writeAndFlush(new NetworkMessage(eventResponse, remoteAddress));
-            }
+            sendEventResponse(event, devicePassword, channel, remoteAddress);
         }
 
         return position;
