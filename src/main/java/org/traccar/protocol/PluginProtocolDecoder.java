@@ -34,8 +34,8 @@ public class PluginProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .expression("[^0-9]*")
-            .number("(d+),")                     // device id
+            .expression("[^0-9,]*,?")
+            .number("([^,]+),")                  // device id
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
             .number("(dd)(dd)(dd),")             // time (hhmmss)
             .number("(-?d+.d+),")                // longitude
