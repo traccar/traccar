@@ -23,6 +23,11 @@ public class FuelConsumptionChecker {
 
         long deviceId = startPosition.getDeviceId();
         DeviceConsumptionInfo consumptionInfo = Context.getDeviceManager().getDeviceConsumptionInfo(deviceId);
+
+        if (consumptionInfo.getDeviceConsumptionType().equals(DeviceConsumptionInfo.ENGINELESS_HOURLY_CONSUMPTION_TYPE)) {
+            return false;
+        }
+
         boolean requiredFieldsPresent = checkRequiredFieldsPresent(startPosition, endPosition, consumptionInfo, fuelSensor);
 
         if (!requiredFieldsPresent) {
@@ -58,19 +63,19 @@ public class FuelConsumptionChecker {
         String consumptionType = consumptionInfo.getDeviceConsumptionType().toLowerCase();
         String calibFuelField = fuelSensor.getCalibFuelFieldName();
         switch (consumptionType) {
-            case "hourly":
+            case DeviceConsumptionInfo.HOURLY_CONSUMPTION_TYPE:
                 return startPosition.getAttributes().containsKey(calibFuelField)
                         && endPosition.getAttributes().containsKey(calibFuelField);
 
-            case "odometer":
+            case DeviceConsumptionInfo.ODOMETER_CONSUMPTION_TYPE:
                 return startPosition.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)
                         && startPosition.getAttributes().containsKey(Position.KEY_ODOMETER)
                         && endPosition.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)
                         && endPosition.getAttributes().containsKey(Position.KEY_ODOMETER);
 
-            case "empty":
-            case "enginelesshourly":
-            case "noconsumption":
+            case DeviceConsumptionInfo.EMPTY_CONSUMPTION_TYPE:
+            case DeviceConsumptionInfo.ENGINELESS_HOURLY_CONSUMPTION_TYPE:
+            case DeviceConsumptionInfo.NO_CONSUMPTION_CONSUMPTION_TYPE:
                 return true;
 
             default:
@@ -90,13 +95,13 @@ public class FuelConsumptionChecker {
 
         switch (consumptionInfo.getDeviceConsumptionType().toLowerCase()) {
 
-            case "hourly":
+            case DeviceConsumptionInfo.HOURLY_CONSUMPTION_TYPE:
                 return getExpectedHourlyFuelConsumptionValues(startPosition, endPosition, allowedDeviation, consumptionInfo);
 
-            case "odometer":
+            case DeviceConsumptionInfo.ODOMETER_CONSUMPTION_TYPE:
                 return getExpectedDistanceFuelConsumptionValues(startPosition, endPosition, allowedDeviation, consumptionInfo);
 
-            case "enginelesshourly":
+            case DeviceConsumptionInfo.ENGINELESS_HOURLY_CONSUMPTION_TYPE:
                 return getExpectedEnginelessConsumptionValues(startPosition, endPosition, allowedDeviation, consumptionInfo);
 
             // All other categories, including "noconsumption" and default "empty" means that there is no expected fuel
@@ -105,8 +110,8 @@ public class FuelConsumptionChecker {
             // for sanity sake. The null that it returns will be treated as "unexpected consumption", and the event will
             // be treated as is.
 
-            case "empty":
-            case "noconsumption":
+            case DeviceConsumptionInfo.EMPTY_CONSUMPTION_TYPE:
+            case DeviceConsumptionInfo.NO_CONSUMPTION_CONSUMPTION_TYPE:
                 return new ExpectedFuelConsumption(0, 0, 0, allowedDeviation);
             default:
                 FuelSensorDataHandlerHelper.logDebugIfDeviceId("Found strange fuel consumption category vehicle", startPosition.getDeviceId());
@@ -157,7 +162,7 @@ public class FuelConsumptionChecker {
     }
 
 
-    private static ExpectedFuelConsumption getExpectedHourlyFuelConsumptionValues(Position startPosition,
+    public static ExpectedFuelConsumption getExpectedHourlyFuelConsumptionValues(Position startPosition,
                                                                                   Position endPosition,
                                                                                   double allowedDeviation,
                                                                                   DeviceConsumptionInfo consumptionInfo) {

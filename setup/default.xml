@@ -50,7 +50,7 @@
     </entry>
 
     <entry key='database.selectPositionsForRoute'>
-        SELECT deviceid, devicetime, latitude, longitude, speed, course, attributes
+        SELECT deviceid, fixtime as devicetime, latitude, longitude, speed, course, attributes
         FROM positions
         WHERE deviceId = :deviceId
         AND fixTime BETWEEN :from AND :to
@@ -59,7 +59,7 @@
     </entry>
 
     <entry key='database.selectPositionsForFuel'>
-        SELECT deviceid, devicetime, attributes
+        SELECT deviceid, fixtime as devicetime, attributes
         FROM positions
         WHERE deviceId = :deviceId
         AND fixTime BETWEEN :from AND :to
@@ -77,8 +77,8 @@
     <entry key="database.getLastPositionBefore">
         SELECT *
         FROM positions AS p
-        WHERE p.devicetime &lt; :deviceTime
-        ORDER BY p.devicetime desc
+        WHERE p.fixtime &lt; :fixtime
+        ORDER BY p.fixtime desc
         LIMIT 1
     </entry>
 
@@ -87,7 +87,7 @@
         FROM positions AS p
         where deviceid = :deviceId
         and valid = 1
-        order by devicetime desc
+        order by fixtime desc
         limit 1
     </entry>
 
@@ -135,7 +135,7 @@
         SELECT p.*
         FROM positions p
         INNER JOIN devices d ON p.id = d.positionid
-        ORDER BY p.devicetime;
+        ORDER BY p.fixtime;
     </entry>
 
     <entry key='database.selectLatestPositionsForProtocol'>
@@ -143,7 +143,7 @@
         FROM positions p
         INNER JOIN devices d ON p.id = d.positionid
         WHERE p.protocol = :protocol
-        ORDER BY p.devicetime;
+        ORDER BY p.fixtime;
     </entry>
 
     <entry key='database.updateLatestPosition'>

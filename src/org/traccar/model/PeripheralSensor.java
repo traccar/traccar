@@ -1,9 +1,6 @@
 package org.traccar.model;
 
-import com.google.common.collect.ImmutableMap;
-import org.apache.commons.lang3.tuple.Pair;
 import org.traccar.Context;
-import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.FuelConsumptionChecker;
 import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.FuelDataConstants;
 
 import java.util.Map;
@@ -145,6 +142,24 @@ public class PeripheralSensor extends ExtendedModel {
     public Optional<Double> getDrainThreshold() {
         if (this.getAttributes().containsKey(FuelDataConstants.DRAIN_THRESHOLD_FIELD_NAME)) {
             return Optional.of(this.getDouble(FuelDataConstants.DRAIN_THRESHOLD_FIELD_NAME));
+        }
+
+        // Should make the caller fall back to activity threshold set on device, or default from the config file
+        return Optional.empty();
+    }
+
+    public Optional<Double> getIgnOffDrainThreshold() {
+        if (this.getAttributes().containsKey(FuelDataConstants.IGN_OFF_DRAIN_THRESHOLD_FIELD_NAME)) {
+            return Optional.of(this.getDouble(FuelDataConstants.IGN_OFF_DRAIN_THRESHOLD_FIELD_NAME));
+        }
+
+        // Should make the caller fall back to activity threshold set on device, or default from the config file
+        return Optional.empty();
+    }
+
+    public Optional<Double> getIgnOnDrainThreshold() {
+        if (this.getAttributes().containsKey(FuelDataConstants.IGN_ON_DRAIN_THRESHOLD_FIELD_NAME)) {
+            return Optional.of(this.getDouble(FuelDataConstants.IGN_ON_DRAIN_THRESHOLD_FIELD_NAME));
         }
 
         // Should make the caller fall back to activity threshold set on device, or default from the config file

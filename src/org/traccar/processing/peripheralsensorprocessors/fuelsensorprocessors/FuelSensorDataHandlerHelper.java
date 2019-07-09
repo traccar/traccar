@@ -44,11 +44,28 @@ public class FuelSensorDataHandlerHelper {
     }
 
     public static List<Position> getRelevantPositionsSubList(TreeMultiset<Position> positionsForSensor,
-                                                              Position position,
-                                                              int minListSize,
-                                                              String sensorOutlierFieldName,
-                                                              boolean excludeOutliers,
-                                                              int currentEventLookBackSeconds) {
+                                                             Position position,
+                                                             int minListSize,
+                                                             String sensorOutlierFieldName,
+                                                             boolean excludeOutliers,
+                                                             int currentEventLookBackSeconds) {
+        return getRelevantPositionsSubList(positionsForSensor,
+                                           position,
+                                           minListSize,
+                                           sensorOutlierFieldName,
+                                           excludeOutliers,
+                                           currentEventLookBackSeconds,
+                                           0);
+
+    }
+
+    public static List<Position> getRelevantPositionsSubList(TreeMultiset<Position> positionsForSensor,
+                                                             Position position,
+                                                             int minListSize,
+                                                             String sensorOutlierFieldName,
+                                                             boolean excludeOutliers,
+                                                             int currentEventLookBackSeconds,
+                                                             long previousWindowStart) {
 
         if (positionsForSensor.size() < minListSize) {
             return positionsForSensor.stream()
@@ -70,12 +87,14 @@ public class FuelSensorDataHandlerHelper {
             logDebugIfDeviceId("[RELEVANT_SUBLIST] sublist is lesser than "
                               + minListSize + " returning " + positionsSubset.size(), deviceId);
             return positionsSubset.stream()
+                                  .filter(p -> p.getDeviceTime().getTime() > previousWindowStart)
                                   .filter(p -> !excludeOutliers || positionIsMarkedOutlier(p, sensorOutlierFieldName))
                                   .collect(Collectors.toList());
         }
 
         List<Position> filteredSublistToReturn =
                 positionsSubset.stream()
+                               .filter(p -> p.getDeviceTime().getTime() > previousWindowStart)
                                .filter(p -> !excludeOutliers || positionIsMarkedOutlier(p, sensorOutlierFieldName))
                                .collect(Collectors.toList());
 
@@ -125,37 +144,36 @@ public class FuelSensorDataHandlerHelper {
 
         double sumOfValues =
                 copyOfRawValues.stream()
-                                     .mapToDouble(p -> (double) p.getAttributes()
-                                                                 .get(calibFueldField))
-                                     .sum();
+                               .mapToDouble(p -> (double) p.getAttributes()
+                                                           .get(calibFueldField))
+                               .sum();
 
         double mean = sumOfValues / (double) listSize;
 
 
         double sumOfSquaredDifferenceOfMean =
                 copyOfRawValues.stream()
-                                     .mapToDouble(p -> {
-                                         double differenceOfMean =
-                                                 (double) p.getAttributes()
-                                                           .get(calibFueldField) - mean;
-                                         return differenceOfMean * differenceOfMean;
-                                     }).sum();
-
+                               .mapToDouble(p -> {
+                                   double differenceOfMean =
+                                           (double) p.getAttributes()
+                                                     .get(calibFueldField) - mean;
+                                   return differenceOfMean * differenceOfMean;
+                               }).sum();
 
 
         double rawFuelOfPositionEvaluated =
                 (double) copyOfRawValues.get(indexOfPositionEvaluated)
-                                              .getAttributes()
-                                              .get(calibFueldField);
+                                        .getAttributes()
+                                        .get(calibFueldField);
 
         copyOfRawValues.sort(Comparator.comparing(p -> (double) p.getAttributes()
-                                                                       .get(calibFueldField)));
+                                                                 .get(calibFueldField)));
 
         int midPointOfList = (listSize - 1) / 2;
 
         double medianRawFuelValue = (double) copyOfRawValues.get(midPointOfList)
-                                                                  .getAttributes()
-                                                                  .get(calibFueldField);
+                                                            .getAttributes()
+                                                            .get(calibFueldField);
 
         double standardDeviation = Math.sqrt(sumOfSquaredDifferenceOfMean / (double) listSize);
 
@@ -176,7 +194,7 @@ public class FuelSensorDataHandlerHelper {
         double upperBoundOnRawFuelValue = medianRawFuelValue + (MULTIPLIER * standardDeviation);
 
         boolean isOutlier = rawFuelOfPositionEvaluated < lowerBoundOnRawFuelValue
-                            || rawFuelOfPositionEvaluated > upperBoundOnRawFuelValue;
+                || rawFuelOfPositionEvaluated > upperBoundOnRawFuelValue;
 
         long deviceId = rawFuelOutlierSublist.get(0).getDeviceId();
         logDebugIfDeviceId("[OUTLIER_STAT] sumOfValues: " + sumOfValues
