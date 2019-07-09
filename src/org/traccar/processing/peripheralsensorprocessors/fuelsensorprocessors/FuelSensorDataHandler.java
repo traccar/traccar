@@ -328,14 +328,14 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
         // Load latest 24 hour of data for device
         try {
-            logDebugIfNotLoading(String.format("Loading data for %s protocol", protocol));
+            Log.info(String.format("Loading data for %s protocol", protocol));
 
             Collection<Position> latestPositionsOfDevicesByProtocol =
                     Context.getDataManager().getLatestPositionsForProtocol(protocol);
 
             if (latestPositionsOfDevicesByProtocol.isEmpty()) {
                 this.loadingOldDataFromDB = false;
-                logDebugIfNotLoading(String.format("Found 0 devices for %s protocol", protocol));
+                Log.info(String.format("Found 0 devices for %s protocol", protocol));
                 return;
             }
 

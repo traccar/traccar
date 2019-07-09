@@ -102,6 +102,7 @@ public class ServerManager {
 
     private void initProtocolServer(final Protocol protocol) {
         if (Context.getConfig().hasKey(protocol.getName() + ".port")) {
+            Log.info("Initializing server for: " + protocol.getName());
             protocol.initTrackerServers(serverList);
         }
     }
