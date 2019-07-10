@@ -107,7 +107,14 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                         continue;
                     }
 
-                    if (position.getDeviceTime().getTime() - lastPacketProcessed.get().getDeviceTime().getTime() > dataLossThresholdSeconds) {
+                    long lastTime = lastPacketProcessed.get().getDeviceTime().getTime();
+                    long currentTime = position.getDeviceTime().getTime();
+                    long diff = (currentTime - lastTime);
+                    boolean greater = diff > dataLossThresholdSeconds;
+                    String message = String.format("Data loss check for %s. last timestamp: %d, current timestamp: %d, diff: %d, >datalossseconds %b",
+                                                   lookUpKey, lastTime, currentTime, diff, greater);
+                    logDebugIfNotLoading(message, deviceId);
+                    if (greater) {
                         possibleDataLossByDevice.put(deviceId, true);
                     }
                 }
