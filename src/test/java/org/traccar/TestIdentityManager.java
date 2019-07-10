@@ -29,6 +29,14 @@ public final class TestIdentityManager implements IdentityManager {
         return createDevice();
     }
 
+    public String getDevicePassword(long id) {
+        return null;
+    }
+
+    public String getDevicePassword(long id, String defaultPassword) {
+        return defaultPassword;
+    }
+
     @Override
     public Position getLastPosition(long deviceId) {
         return null;

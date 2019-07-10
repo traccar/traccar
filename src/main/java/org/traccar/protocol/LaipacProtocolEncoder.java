@@ -21,7 +21,11 @@ import org.traccar.helper.Checksum;
 
 public class LaipacProtocolEncoder extends StringProtocolEncoder {
 
-    public LaipacProtocolEncoder() {
+    @Override
+    protected String formatCommand(Command command, String format, String... keys) {
+        String sentence = super.formatCommand(command, "$" + format, keys);
+        sentence += Checksum.nmea(sentence) + "\r\n";
+        return sentence;
     }
 
     @Override
@@ -29,28 +33,18 @@ public class LaipacProtocolEncoder extends StringProtocolEncoder {
 
         initDevicePassword(command, LaipacProtocolDecoder.DEFAULT_DEVICE_PASSWORD);
 
-        String commandSentence = null;
-
         switch (command.getType()) {
             case Command.TYPE_CUSTOM:
-                commandSentence = formatCommand(command, "${%s}",
+                return formatCommand(command, "{%s}",
                     Command.KEY_DATA);
-                break;
             case Command.TYPE_POSITION_SINGLE:
-                commandSentence = formatCommand(command, "$AVREQ,{%s},1",
+                return formatCommand(command, "AVREQ,{%s},1",
                     Command.KEY_DEVICE_PASSWORD);
-                break;
             case Command.TYPE_REBOOT_DEVICE:
-                commandSentence = formatCommand(command, "$AVRESET,{%s},{%s}",
+                return formatCommand(command, "AVRESET,{%s},{%s}",
                     Command.KEY_UNIQUE_ID, Command.KEY_DEVICE_PASSWORD);
-                break;
             default:
                 break;
-        }
-
-        if (commandSentence != null) {
-            commandSentence += Checksum.nmea(commandSentence) + "\r\n";
-            return commandSentence;
         }
 
         return null;

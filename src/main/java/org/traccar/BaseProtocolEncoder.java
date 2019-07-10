@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import io.netty.channel.ChannelPromise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.model.Command;
-import org.traccar.model.Device;
 
 public abstract class BaseProtocolEncoder extends ChannelOutboundHandlerAdapter {
 
@@ -34,13 +33,9 @@ public abstract class BaseProtocolEncoder extends ChannelOutboundHandlerAdapter 
 
     protected void initDevicePassword(Command command, String defaultPassword) {
         if (!command.getAttributes().containsKey(Command.KEY_DEVICE_PASSWORD)) {
-            Device device = Context.getIdentityManager().getById(command.getDeviceId());
-            String password = device.getString(Command.KEY_DEVICE_PASSWORD);
-            if (password != null) {
-                command.set(Command.KEY_DEVICE_PASSWORD, password);
-            } else {
-                command.set(Command.KEY_DEVICE_PASSWORD, defaultPassword);
-            }
+            String password = Context.getIdentityManager()
+                .getDevicePassword(command.getDeviceId(), defaultPassword);
+            command.set(Command.KEY_DEVICE_PASSWORD, password);
         }
     }
 

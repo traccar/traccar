@@ -26,8 +26,6 @@ import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.CellTower;
-import org.traccar.model.Device;
-import org.traccar.model.Command;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
 
@@ -121,21 +119,6 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         }
 
         return event;
-    }
-
-    private String getDevicePassword(DeviceSession deviceSession) {
-
-        String devicePassword = DEFAULT_DEVICE_PASSWORD;
-
-        Device device = Context.getIdentityManager().getById(deviceSession.getDeviceId());
-        if (device != null) {
-            String password = device.getString(Command.KEY_DEVICE_PASSWORD);
-            if (password != null) {
-                devicePassword = password;
-            }
-        }
-
-        return devicePassword;
     }
 
     private void sendEventResponse(
@@ -247,7 +230,8 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
             sendAcknowledge(status, event, checksum, channel, remoteAddress);
 
-            String devicePassword = getDevicePassword(deviceSession);
+            String devicePassword = Context.getIdentityManager()
+                .getDevicePassword(deviceSession.getDeviceId(), DEFAULT_DEVICE_PASSWORD);
             sendEventResponse(event, devicePassword, channel, remoteAddress);
         }
 
@@ -260,18 +244,19 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
         String sentence = (String) msg;
 
-        Parser parser = new Parser(PATTERN_ECHK, sentence);
-        if (parser.matches()) {
-            return handleEchk(sentence, parser, channel, remoteAddress);
-        }
-
-        parser = new Parser(PATTERN_AVRMC, sentence);
-        if (parser.matches()) {
-            return handleAvrmc(sentence, parser, channel, remoteAddress);
+        if (sentence.startsWith("$ECHK")) {
+            Parser parser = new Parser(PATTERN_ECHK, sentence);
+            if (parser.matches()) {
+                return handleEchk(sentence, parser, channel, remoteAddress);
+            }
+        } else if (sentence.startsWith("$AVRMC")) {
+            Parser parser = new Parser(PATTERN_AVRMC, sentence);
+            if (parser.matches()) {
+                return handleAvrmc(sentence, parser, channel, remoteAddress);
+            }
         }
 
         return null;
     }
-
 
 }

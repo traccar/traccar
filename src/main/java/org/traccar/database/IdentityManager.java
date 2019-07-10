@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,10 @@ public interface IdentityManager {
     Device getById(long id);
 
     Device getByUniqueId(String uniqueId) throws Exception;
+
+    String getDevicePassword(long id);
+
+    String getDevicePassword(long id, String defaultPassword);
 
     Position getLastPosition(long deviceId);
 
