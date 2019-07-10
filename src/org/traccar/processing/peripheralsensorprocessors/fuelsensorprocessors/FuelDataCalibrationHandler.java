@@ -104,11 +104,11 @@ public class FuelDataCalibrationHandler extends BaseDataHandler {
         Map.Entry<Long, SensorPointsMap> next = sensorPointsToVolumeMap.ceilingEntry(sensorFuelLevelPoints);
 
 
-        if (next == null && sensorFuelLevelPoints.equals(max.getKey())) {
+        if (next == null && sensorFuelLevelPoints >= max.getKey()) {
             next = max;
         }
 
-        if (previous == null && sensorFuelLevelPoints.equals(min.getKey())) {
+        if (previous == null && sensorFuelLevelPoints <= min.getKey()) {
             previous = min;
         }
 
