@@ -44,10 +44,9 @@ public class LaipacProtocolEncoder extends StringProtocolEncoder {
                 return formatCommand(command, "AVRESET,{%s},{%s}",
                     Command.KEY_UNIQUE_ID, Command.KEY_DEVICE_PASSWORD);
             default:
-                break;
+                return null;
         }
 
-        return null;
     }
 
 }

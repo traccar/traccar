@@ -115,14 +115,9 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         return devicesByUniqueId.get(uniqueId);
     }
 
-    public String getDevicePassword(long id) {
-
-        return getById(id).getString(Command.KEY_DEVICE_PASSWORD);
-    }
-
     public String getDevicePassword(long id, String defaultPassword) {
 
-        String password = getDevicePassword(id);
+        String password = getById(id).getString(Command.KEY_DEVICE_PASSWORD);
         if (password != null) {
             return password;
         }

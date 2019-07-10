@@ -167,8 +167,13 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
     }
 
-    private Object handleEchk(
-            String sentence, Parser parser, Channel channel, SocketAddress remoteAddress) {
+    private Object decodeEchk(
+            String sentence, Channel channel, SocketAddress remoteAddress) {
+
+        Parser parser = new Parser(PATTERN_ECHK, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
 
         if (channel != null) {
             channel.writeAndFlush(new NetworkMessage(sentence + "\r\n", remoteAddress));
@@ -177,8 +182,13 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
-    protected Object handleAvrmc(
-            String sentence, Parser parser, Channel channel, SocketAddress remoteAddress) {
+    protected Object decodeAvrmc(
+            String sentence, Channel channel, SocketAddress remoteAddress) {
+
+        Parser parser = new Parser(PATTERN_AVRMC, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
 
         DeviceSession deviceSession =
             getDeviceSession(channel, remoteAddress, parser.next());
@@ -245,15 +255,10 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         String sentence = (String) msg;
 
         if (sentence.startsWith("$ECHK")) {
-            Parser parser = new Parser(PATTERN_ECHK, sentence);
-            if (parser.matches()) {
-                return handleEchk(sentence, parser, channel, remoteAddress);
-            }
-        } else if (sentence.startsWith("$AVRMC")) {
-            Parser parser = new Parser(PATTERN_AVRMC, sentence);
-            if (parser.matches()) {
-                return handleAvrmc(sentence, parser, channel, remoteAddress);
-            }
+            return decodeEchk(sentence, channel, remoteAddress);
+        }
+        if (sentence.startsWith("$AVRMC")) {
+            return decodeAvrmc(sentence, channel, remoteAddress);
         }
 
         return null;
