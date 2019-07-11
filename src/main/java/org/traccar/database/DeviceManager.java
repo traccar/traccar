@@ -115,6 +115,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         return devicesByUniqueId.get(uniqueId);
     }
 
+    @Override
     public String getDevicePassword(long id, String defaultPassword) {
 
         String password = getById(id).getString(Command.KEY_DEVICE_PASSWORD);

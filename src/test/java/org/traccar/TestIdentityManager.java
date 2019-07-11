@@ -29,10 +29,7 @@ public final class TestIdentityManager implements IdentityManager {
         return createDevice();
     }
 
-    public String getDevicePassword(long id) {
-        return null;
-    }
-
+    @Override
     public String getDevicePassword(long id, String defaultPassword) {
         return defaultPassword;
     }
