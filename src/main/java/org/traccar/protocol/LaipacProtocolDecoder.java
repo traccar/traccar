@@ -40,15 +40,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
     public static final String DEFAULT_DEVICE_PASSWORD = "00000000";
 
-    private static final Pattern PATTERN_ECHK = new PatternBuilder()
-            .text("$ECHK")
-            .expression(",([^,]+)")             // identifier
-            .number(",(d+)")                    // sequence number
-            .text("*")
-            .number("(xx)")                     // checksum
-            .compile();
-
-    private static final Pattern PATTERN_AVRMC = new PatternBuilder()
+    private static final Pattern PATTERN = new PatternBuilder()
             .text("$AVRMC,")
             .expression("([^,]+),")              // identifier
             .number("(dd)(dd)(dd),")             // time (hhmmss)
@@ -174,11 +166,6 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
     private Object decodeEchk(
             String sentence, Channel channel, SocketAddress remoteAddress) {
 
-        Parser parser = new Parser(PATTERN_ECHK, sentence);
-        if (!parser.matches()) {
-            return null;
-        }
-
         if (channel != null) {
             channel.writeAndFlush(new NetworkMessage(sentence + "\r\n", remoteAddress));
         }
@@ -189,7 +176,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
     protected Object decodeAvrmc(
             String sentence, Channel channel, SocketAddress remoteAddress) {
 
-        Parser parser = new Parser(PATTERN_AVRMC, sentence);
+        Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
             return null;
         }
