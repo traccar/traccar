@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.Context;
+import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceState;
 import org.traccar.model.DeviceAccumulators;
@@ -112,6 +113,17 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         updateDeviceCache(forceUpdate);
 
         return devicesByUniqueId.get(uniqueId);
+    }
+
+    @Override
+    public String getDevicePassword(long id, String defaultPassword) {
+
+        String password = getById(id).getString(Command.KEY_DEVICE_PASSWORD);
+        if (password != null) {
+            return password;
+        }
+
+        return defaultPassword;
     }
 
     public Device getDeviceByPhone(String phone) {

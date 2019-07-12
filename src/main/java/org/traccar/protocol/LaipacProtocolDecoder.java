@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -37,29 +38,33 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
+    public static final String DEFAULT_DEVICE_PASSWORD = "00000000";
+
     private static final Pattern PATTERN = new PatternBuilder()
             .text("$AVRMC,")
             .expression("([^,]+),")              // identifier
             .number("(dd)(dd)(dd),")             // time (hhmmss)
             .expression("([AVRPavrp]),")         // validity
             .number("(dd)(dd.d+),")              // latitude
-            .expression("([NS]),")
+            .expression("([NS]),")               // latitude hemisphere
             .number("(ddd)(dd.d+),")             // longitude
-            .number("([EW]),")
+            .number("([EW]),")                   // longitude hemisphere
             .number("(d+.d+),")                  // speed
             .number("(d+.d+),")                  // course
             .number("(dd)(dd)(dd),")             // date (ddmmyy)
-            .expression("([abZXTSMHFE86430]),")  // event code
+            .expression("([0-9A-Za-z]),")        // event code
             .expression("([\\d.]+),")            // battery voltage
             .number("(d+),")                     // current mileage
             .number("(d),")                      // gps status
             .number("(d+),")                     // adc1
             .number("(d+)")                      // adc2
-            .number(",(xxxx)")                   // lac
-            .number("(xxxx),")                   // cid
-            .number("(ddd)")                     // mcc
-            .number("(ddd)")                     // mnc
+            .number(",(xxxx|x)")                 // lac | lac+cid = 0
+            .number("(xxxx),")                   // cid | nothing
+            .number("(ddd|d)")                   // mcc | mcc+mnc = 0
+            .number("(ddd)")                     // mnc | nothing
             .optional(4)
+            .expression(",([^*]*)")              // anything remaining (be forward compatible)
+            .optional(1)
             .text("*")
             .number("(xx)")                      // checksum
             .compile();
@@ -68,6 +73,8 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         switch (event) {
             case "Z":
                 return Position.ALARM_LOW_BATTERY;
+            case "Y":
+                return Position.ALARM_TOW;
             case "X":
                 return Position.ALARM_GEOFENCE_ENTER;
             case "T":
@@ -81,6 +88,8 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_GEOFENCE_EXIT;
             case "6":
                 return Position.ALARM_OVERSPEED;
+            case "5":
+                return Position.ALARM_POWER_CUT;
             case "3":
                 return Position.ALARM_SOS;
             default:
@@ -88,30 +97,84 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    @Override
-    protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+    private String decodeEvent(String event, Position position) {
 
-        String sentence = (String) msg;
-
-        if (sentence.startsWith("$ECHK") && channel != null) {
-            channel.writeAndFlush(new NetworkMessage(sentence + "\r\n", remoteAddress)); // heartbeat
-            return null;
+        if (event.length() == 1) {
+            char inputStatus = event.charAt(0);
+            if (inputStatus >= 'A' && inputStatus <= 'D') {
+                int inputStatusInt = inputStatus - 'A';
+                position.set(Position.PREFIX_IN + 1, inputStatusInt & 1);
+                position.set(Position.PREFIX_IN + 2, inputStatusInt & 2);
+                return null;
+            }
         }
+
+        return event;
+    }
+
+    private void sendEventResponse(
+            String event, String devicePassword, Channel channel, SocketAddress remoteAddress) {
+
+        String responseCode = null;
+
+        switch (event) {
+            case "3":
+                responseCode = "d";
+                break;
+            case "S":
+            case "T":
+                responseCode = "t";
+                break;
+            case "X":
+            case "4":
+                responseCode = "x";
+                break;
+            case "Y":
+                responseCode = "y";
+                break;
+            case "Z":
+                responseCode = "z";
+                break;
+            default:
+                break;
+        }
+
+        if (responseCode != null) {
+            String response = "$AVCFG," + devicePassword + "," + responseCode;
+            response += Checksum.nmea(response) + "\r\n";
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+        }
+
+    }
+
+    private void sendAcknowledge(
+            String status, String event, String checksum, Channel channel, SocketAddress remoteAddress) {
+
+        if (Character.isLowerCase(status.charAt(0))) {
+            String response = "$EAVACK," + event + "," + checksum;
+            response += Checksum.nmea(response) + "\r\n";
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+        }
+
+    }
+
+    protected Object decodeAvrmc(
+            String sentence, Channel channel, SocketAddress remoteAddress) {
 
         Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
             return null;
         }
 
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        DeviceSession deviceSession =
+            getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
             return null;
         }
 
         Position position = new Position(getProtocolName());
-        position.setDeviceId(deviceSession.getDeviceId());
 
+        position.setDeviceId(deviceSession.getDeviceId());
         DateBuilder dateBuilder = new DateBuilder()
                 .setTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
 
@@ -130,9 +193,9 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
         String event = parser.next();
         position.set(Position.KEY_ALARM, decodeAlarm(event));
-        position.set(Position.KEY_EVENT, event);
+        position.set(Position.KEY_EVENT, decodeEvent(event, position));
         position.set(Position.KEY_BATTERY, Double.parseDouble(parser.next().replaceAll("\\.", "")) * 0.001);
-        position.set(Position.KEY_ODOMETER, parser.nextDouble());
+        position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
         position.set(Position.KEY_GPS, parser.nextInt());
         position.set(Position.PREFIX_ADC + 1, parser.nextDouble() * 0.001);
         position.set(Position.PREFIX_ADC + 2, parser.nextDouble() * 0.001);
@@ -145,23 +208,37 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
             position.setNetwork(new Network(CellTower.from(mcc, mnc, lac, cid)));
         }
 
+        String unused = parser.next();
+
         String checksum = parser.next();
 
         if (channel != null) {
-            if (event.equals("3")) {
-                channel.writeAndFlush(new NetworkMessage("$AVCFG,00000000,d*31\r\n", remoteAddress));
-            } else if (event.equals("X") || event.equals("4")) {
-                channel.writeAndFlush(new NetworkMessage("$AVCFG,00000000,x*2D\r\n", remoteAddress));
-            } else if (event.equals("Z")) {
-                channel.writeAndFlush(new NetworkMessage("$AVCFG,00000000,z*2F\r\n", remoteAddress));
-            } else if (Character.isLowerCase(status.charAt(0))) {
-                String response = "$EAVACK," + event + "," + checksum;
-                response += Checksum.nmea(response) + "\r\n";
-                channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
-            }
+
+            sendAcknowledge(status, event, checksum, channel, remoteAddress);
+
+            String devicePassword = Context.getIdentityManager()
+                .getDevicePassword(deviceSession.getDeviceId(), DEFAULT_DEVICE_PASSWORD);
+            sendEventResponse(event, devicePassword, channel, remoteAddress);
         }
 
         return position;
+    }
+
+    @Override
+    protected Object decode(
+        Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+
+        String sentence = (String) msg;
+
+        if (sentence.startsWith("$ECHK")) {
+            if (channel != null) {
+                channel.writeAndFlush(new NetworkMessage(sentence + "\r\n", remoteAddress));
+            }
+        } else if (sentence.startsWith("$AVRMC")) {
+            return decodeAvrmc(sentence, channel, remoteAddress);
+        }
+
+        return null;
     }
 
 }

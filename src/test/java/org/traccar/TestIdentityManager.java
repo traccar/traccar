@@ -30,6 +30,11 @@ public final class TestIdentityManager implements IdentityManager {
     }
 
     @Override
+    public String getDevicePassword(long id, String defaultPassword) {
+        return defaultPassword;
+    }
+
+    @Override
     public Position getLastPosition(long deviceId) {
         return null;
     }
