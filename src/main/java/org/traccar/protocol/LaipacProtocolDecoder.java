@@ -99,17 +99,12 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
     private String decodeEvent(String event, Position position) {
 
-        position.set(Position.KEY_IGNITION, false);
-
         if (event.length() == 1) {
             char inputStatus = event.charAt(0);
             if (inputStatus >= 'A' && inputStatus <= 'D') {
                 int inputStatusInt = inputStatus - 'A';
                 position.set(Position.PREFIX_IN + 1, inputStatusInt & 1);
                 position.set(Position.PREFIX_IN + 2, inputStatusInt & 2);
-                if ((inputStatusInt & 1) != 0) {
-                    position.set(Position.KEY_IGNITION, true);
-                }
                 return null;
             }
         }
