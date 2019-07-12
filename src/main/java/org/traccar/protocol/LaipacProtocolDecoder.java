@@ -40,7 +40,20 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
     public static final String DEFAULT_DEVICE_PASSWORD = "00000000";
 
-    private static final Pattern PATTERN = new PatternBuilder()
+    private static final Pattern PATTERN_EAVSYS = new PatternBuilder()
+            .text("$EAVSYS,")
+            .expression("([^,]+),")              // identifier
+            .expression("([0-9]+),")             // iccid
+            .expression("([^,]*),")              // reserved
+            .expression("([^,]*),")              // reserved
+            .text("0x")
+            .number("(xx)")                      // product type
+            .number("(dd)(dd)(dd)")              // firmware version (major, minor, revision)
+            .text("*")
+            .number("(xx)")                      // checksum
+            .compile();
+
+    private static final Pattern PATTERN_AVRMC = new PatternBuilder()
             .text("$AVRMC,")
             .expression("([^,]+),")              // identifier
             .number("(dd)(dd)(dd),")             // time (hhmmss)
@@ -158,10 +171,45 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
     }
 
+    protected Object decodeEavsys(
+            String sentence, Channel channel, SocketAddress remoteAddress) {
+
+        Parser parser = new Parser(PATTERN_EAVSYS, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession =
+            getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        if (!getLastLocation(position, null)) {
+            return null;
+        }
+
+        position.set(Position.KEY_ICCID, parser.next());
+
+        String unused = parser.next();
+        unused = parser.next();
+
+        int hardware = parser.nextHexInt();
+        position.set(Position.KEY_VERSION_HW,
+            (hardware == 0x12) ? "SF-Lite" : (hardware == 0x52) ? "S911 Lola" : null);
+        position.set(Position.KEY_VERSION_FW, String.format("%d.%02d.%02d",
+            parser.nextInt(), parser.nextInt(), parser.nextInt()));
+
+        return position;
+    }
+
     protected Object decodeAvrmc(
             String sentence, Channel channel, SocketAddress remoteAddress) {
 
-        Parser parser = new Parser(PATTERN, sentence);
+        Parser parser = new Parser(PATTERN_AVRMC, sentence);
         if (!parser.matches()) {
             return null;
         }
@@ -234,6 +282,8 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
             if (channel != null) {
                 channel.writeAndFlush(new NetworkMessage(sentence + "\r\n", remoteAddress));
             }
+        } else if (sentence.startsWith("$EAVSYS")) {
+            return decodeEavsys(sentence, channel, remoteAddress);
         } else if (sentence.startsWith("$AVRMC")) {
             return decodeAvrmc(sentence, channel, remoteAddress);
         }
