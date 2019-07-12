@@ -163,16 +163,6 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
     }
 
-    private Object decodeEchk(
-            String sentence, Channel channel, SocketAddress remoteAddress) {
-
-        if (channel != null) {
-            channel.writeAndFlush(new NetworkMessage(sentence + "\r\n", remoteAddress));
-        }
-
-        return null;
-    }
-
     protected Object decodeAvrmc(
             String sentence, Channel channel, SocketAddress remoteAddress) {
 
@@ -246,9 +236,10 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         String sentence = (String) msg;
 
         if (sentence.startsWith("$ECHK")) {
-            return decodeEchk(sentence, channel, remoteAddress);
-        }
-        if (sentence.startsWith("$AVRMC")) {
+            if (channel != null) {
+                channel.writeAndFlush(new NetworkMessage(sentence + "\r\n", remoteAddress));
+            }
+        } else if (sentence.startsWith("$AVRMC")) {
             return decodeAvrmc(sentence, channel, remoteAddress);
         }
 
