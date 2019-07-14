@@ -33,6 +33,7 @@ import org.traccar.model.WifiAccessPoint;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 
 public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
 
@@ -148,6 +149,10 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                             position.getNetwork().addWifiAccessPoint(WifiAccessPoint.from(
                                     mac.substring(0, mac.length() - 1), rssi));
                         }
+                        break;
+                    case 0x24:
+                        position.setTime(new Date(buf.readUnsignedIntLE() * 1000));
+                        position.set(Position.KEY_STATUS, buf.readUnsignedIntLE());
                         break;
                     case 0x40:
                         buf.readUnsignedIntLE(); // timestamp
