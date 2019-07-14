@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,8 @@ import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.util.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -45,8 +46,6 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             .text("*GS")                         // header
             .number("d+,")                       // protocol version
             .number("(d+),")                     // imei
-            .number("(dd)(dd)(dd)")              // time (hhmmss)
-            .number("(dd)(dd)(dd),")             // date (ddmmyy)
             .expression("([^#]*)#?")             // data
             .compile();
 
@@ -68,6 +67,7 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private void decodeFragment(Position position, String fragment) {
+
         int dataIndex = fragment.indexOf(':');
         int index = 0;
         String[] values;
@@ -76,6 +76,7 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
         } else {
             values = fragment.substring(dataIndex + 1).split(";");
         }
+
         switch (fragment.substring(0, dataIndex)) {
             case "GPS":
                 position.setValid(values[index++].equals("A"));
@@ -171,42 +172,27 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private Object decodeData(DeviceSession deviceSession, Date time, String data) {
+    private Position decodePosition(DeviceSession deviceSession, String sentence) throws ParseException {
 
-        List<Position> positions = new LinkedList<>();
-        Position position = null;
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
         int index = 0;
-        String[] fragments = data.split(",");
+        String[] fragments = sentence.split(",");
 
-        while (index < fragments.length) {
+        position.setTime(new SimpleDateFormat("HHmmssddMMyy").parse(fragments[index++]));
 
-            if (fragments[index].isEmpty() || Character.isDigit(fragments[index].charAt(0))) {
-
-                if (position != null) {
-                    positions.add(position);
+        for (; index < fragments.length; index += 1) {
+            if (!fragments[index].isEmpty()) {
+                if (Character.isDigit(fragments[index].charAt(0))) {
+                    position.set(Position.KEY_EVENT, Integer.parseInt(fragments[index]));
+                } else {
+                    decodeFragment(position, fragments[index]);
                 }
-
-                position = new Position(getProtocolName());
-                position.setDeviceId(deviceSession.getDeviceId());
-                position.setTime(time);
-
-                if (!fragments[index++].isEmpty()) {
-                    position.set(Position.KEY_EVENT, Integer.parseInt(fragments[index - 1]));
-                }
-
-            } else {
-
-                decodeFragment(position, fragments[index++]);
-
             }
-
         }
 
-        if (position != null) {
-            positions.add(position);
-        }
-
-        return positions;
+        return position;
     }
 
     @Override
@@ -256,12 +242,11 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
 
         } else {
 
-            Date time = new Date();
-            if (parser.hasNext(6)) {
-                time = parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY);
+            List<Position> positions = new LinkedList<>();
+            for (String item : parser.next().split("$")) {
+                positions.add(decodePosition(deviceSession, item));
             }
-
-            return decodeData(deviceSession, time, parser.next());
+            return positions;
 
         }
     }
