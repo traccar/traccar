@@ -814,7 +814,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             getLastLocation(position, null);
 
             if (subType == 0x00) {
-                position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
+                position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort() * 0.01);
                 return position;
             } else if (subType == 0x05) {
                 int flags = buf.readUnsignedByte();
