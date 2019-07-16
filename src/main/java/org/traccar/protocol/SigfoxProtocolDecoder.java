@@ -16,6 +16,7 @@
 package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.FullHttpRequest;
@@ -25,7 +26,9 @@ import org.traccar.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.DataConverter;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.model.WifiAccessPoint;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -104,7 +107,9 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
                             position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                             break;
                         case 0x06:
-                            buf.skipBytes(7); // wifi
+                            String mac = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");
+                            position.setNetwork(new Network(WifiAccessPoint.from(
+                                    mac.substring(0, mac.length() - 1), buf.readUnsignedByte())));
                             break;
                         case 0x07:
                             buf.skipBytes(10); // wifi extended
@@ -124,6 +129,10 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
             }
         } finally {
             buf.release();
+        }
+
+        if (position.getLatitude() == 0 && position.getLongitude() == 0) {
+            getLastLocation(position, position.getDeviceTime());
         }
 
         if (json.containsKey("rssi")) {

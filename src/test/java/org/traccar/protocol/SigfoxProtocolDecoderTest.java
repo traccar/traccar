@@ -11,6 +11,9 @@ public class SigfoxProtocolDecoderTest extends ProtocolTest {
 
         SigfoxProtocolDecoder decoder = new SigfoxProtocolDecoder(null);
 
+        verifyAttributes(decoder, request(HttpMethod.POST, "/",
+                buffer("{ \"device\": \"40D310\", \"payload\": \"20061494480389f956042a\", \"time\": 1563043532, \"seqNumber\": 1076 }")));
+
         verifyPosition(decoder, request(HttpMethod.POST, "/",
                 buffer("{ \"device\": \"1CEDCE\", \"payload\": \"2002419b4a91c2c6580e0564\", \"time\": 1559924939, \"seqNumber\": 87 }")));
 
