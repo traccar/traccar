@@ -44,11 +44,9 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
             .text("$EAVSYS,")
             .expression("([^,]+),")              // identifier
             .expression("([0-9]+),")             // iccid
-            .expression("([^,]*),")              // reserved
-            .expression("([^,]*),")              // reserved
-            .text("0x")
-            .number("(xx)")                      // product type
-            .number("(dd)(dd)(dd)")              // firmware version (major, minor, revision)
+            .expression("(\\+?[0-9]*),")         // sim phone number
+            .expression("(?:[^,]*),")            // owner name
+            .expression("([^,]*)")               // firmware version
             .text("*")
             .number("(xx)")                      // checksum
             .compile();
@@ -188,20 +186,19 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        if (!getLastLocation(position, null)) {
-            return null;
-        }
+        getLastLocation(position, null);
 
         position.set(Position.KEY_ICCID, parser.next());
 
-        String unused = parser.next();
-        unused = parser.next();
+        String phoneNumber = parser.next();
+        if (!phoneNumber.isEmpty()) {
+            position.set(Position.KEY_PHONE_NUMBER, phoneNumber);
+        }
 
-        int hardware = parser.nextHexInt();
-        position.set(Position.KEY_VERSION_HW,
-            (hardware == 0x12) ? "SF-Lite" : (hardware == 0x52) ? "S911 Lola" : null);
-        position.set(Position.KEY_VERSION_FW, String.format("%d.%02d.%02d",
-            parser.nextInt(), parser.nextInt(), parser.nextInt()));
+        String firmware = parser.next();
+        if (!firmware.isEmpty()) {
+            position.set(Position.KEY_VERSION_FW, firmware);
+        }
 
         return position;
     }

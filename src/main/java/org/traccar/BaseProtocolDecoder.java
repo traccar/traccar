@@ -184,9 +184,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
         }
     }
 
-    public boolean getLastLocation(Position position, Date deviceTime) {
-        boolean found = false;
-
+    public void getLastLocation(Position position, Date deviceTime) {
         if (position.getDeviceId() != 0) {
             position.setOutdated(true);
 
@@ -200,7 +198,6 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
                 position.setSpeed(last.getSpeed());
                 position.setCourse(last.getCourse());
                 position.setAccuracy(last.getAccuracy());
-                found = true;
             } else {
                 position.setFixTime(new Date(0));
             }
@@ -211,8 +208,6 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
                 position.setDeviceTime(new Date());
             }
         }
-
-        return found;
     }
 
     @Override
