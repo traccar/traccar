@@ -22,7 +22,7 @@ public class LaipacProtocolDecoderTest extends ProtocolTest {
         verifyNull(decoder, text(
                 "$AVSYS,MSG00002,14406,7046811160,64*1A"));
 
-        verifyNotNull(decoder, text(
+        verifyAttributes(decoder, text(
                 "$EAVSYS,MSG00002,8931086013104404999,,Owner,0x52014406*76"));
 
         verifyNull(decoder, text(

@@ -44,9 +44,9 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
             .text("$EAVSYS,")
             .expression("([^,]+),")              // identifier
             .expression("([0-9]+),")             // iccid
-            .expression("(\\+?[0-9]*),")         // sim phone number
+            .expression("(\\+?[0-9]+)?,")        // sim phone number
             .expression("(?:[^,]*),")            // owner name
-            .expression("([^,]*)")               // firmware version
+            .expression("([^,]*)?")              // firmware version
             .text("*")
             .number("(xx)")                      // checksum
             .compile();
@@ -189,16 +189,8 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         getLastLocation(position, null);
 
         position.set(Position.KEY_ICCID, parser.next());
-
-        String phoneNumber = parser.next();
-        if (!phoneNumber.isEmpty()) {
-            position.set(Position.KEY_PHONE_NUMBER, phoneNumber);
-        }
-
-        String firmware = parser.next();
-        if (!firmware.isEmpty()) {
-            position.set(Position.KEY_VERSION_FW, firmware);
-        }
+        position.set(Position.KEY_PHONE, parser.next());
+        position.set(Position.KEY_VERSION_FW, parser.next());
 
         return position;
     }
