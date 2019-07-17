@@ -26,7 +26,7 @@ public interface IdentityManager {
 
     Device getByUniqueId(String uniqueId) throws Exception;
 
-    String getDevicePassword(long id, String defaultPassword);
+    String getDevicePassword(long id, String protocol, String defaultPassword);
 
     Position getLastPosition(long deviceId);
 

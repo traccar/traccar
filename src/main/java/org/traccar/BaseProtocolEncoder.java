@@ -46,7 +46,7 @@ public abstract class BaseProtocolEncoder extends ChannelOutboundHandlerAdapter 
     protected void initDevicePassword(Command command, String defaultPassword) {
         if (!command.getAttributes().containsKey(Command.KEY_DEVICE_PASSWORD)) {
             String password = Context.getIdentityManager()
-                .getDevicePassword(command.getDeviceId(), defaultPassword);
+                .getDevicePassword(command.getDeviceId(), getProtocolName(), defaultPassword);
             command.set(Command.KEY_DEVICE_PASSWORD, password);
         }
     }
