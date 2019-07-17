@@ -184,8 +184,8 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
 
         for (; index < fragments.length; index += 1) {
             if (!fragments[index].isEmpty()) {
-                if (Character.isDigit(fragments[index].charAt(0))) {
-                    position.set(Position.KEY_EVENT, Integer.parseInt(fragments[index]));
+                if (fragments[index].matches("\\p{XDigit}+")) {
+                    position.set(Position.KEY_EVENT, Integer.parseInt(fragments[index], 16));
                 } else {
                     decodeFragment(position, fragments[index]);
                 }
