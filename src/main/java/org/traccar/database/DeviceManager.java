@@ -325,7 +325,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
     @Override
     public boolean lookupAttributeBoolean(
             long deviceId, String attributeName, boolean defaultValue, boolean lookupConfig) {
-        Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
+        Object result = lookupAttribute(deviceId, attributeName, true, lookupConfig);
         if (result != null) {
             return result instanceof String ? Boolean.parseBoolean((String) result) : (Boolean) result;
         }
@@ -335,13 +335,13 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
     @Override
     public String lookupAttributeString(
             long deviceId, String attributeName, String defaultValue, boolean lookupConfig) {
-        Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
+        Object result = lookupAttribute(deviceId, attributeName, true, lookupConfig);
         return result != null ? (String) result : defaultValue;
     }
 
     @Override
     public int lookupAttributeInteger(long deviceId, String attributeName, int defaultValue, boolean lookupConfig) {
-        Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
+        Object result = lookupAttribute(deviceId, attributeName, true, lookupConfig);
         if (result != null) {
             return result instanceof String ? Integer.parseInt((String) result) : ((Number) result).intValue();
         }
@@ -351,7 +351,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
     @Override
     public long lookupAttributeLong(
             long deviceId, String attributeName, long defaultValue, boolean lookupConfig) {
-        Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
+        Object result = lookupAttribute(deviceId, attributeName, true, lookupConfig);
         if (result != null) {
             return result instanceof String ? Long.parseLong((String) result) : ((Number) result).longValue();
         }
@@ -360,14 +360,14 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
 
     public double lookupAttributeDouble(
             long deviceId, String attributeName, double defaultValue, boolean lookupConfig) {
-        Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
+        Object result = lookupAttribute(deviceId, attributeName, true, lookupConfig);
         if (result != null) {
             return result instanceof String ? Double.parseDouble((String) result) : ((Number) result).doubleValue();
         }
         return defaultValue;
     }
 
-    private Object lookupAttribute(long deviceId, String attributeName, boolean lookupConfig) {
+    private Object lookupAttribute(long deviceId, String attributeName, boolean lookupServer, boolean lookupConfig) {
         Object result = null;
         Device device = getById(deviceId);
         if (device != null) {
@@ -390,7 +390,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
             if (result == null) {
                 if (lookupConfig) {
                     result = Context.getConfig().getString(attributeName);
-                } else {
+                } else if (lookupServer) {
                     Server server = Context.getPermissionsManager().getServer();
                     result = server.getAttributes().get(attributeName);
                 }
