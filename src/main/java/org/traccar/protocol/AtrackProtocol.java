@@ -29,14 +29,14 @@ public class AtrackProtocol extends BaseProtocol {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new AtrackFrameDecoder());
-                pipeline.addLast(new AtrackProtocolEncoder());
+                pipeline.addLast(new AtrackProtocolEncoder(AtrackProtocol.this));
                 pipeline.addLast(new AtrackProtocolDecoder(AtrackProtocol.this));
             }
         });
         addServer(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast(new AtrackProtocolEncoder());
+                pipeline.addLast(new AtrackProtocolEncoder(AtrackProtocol.this));
                 pipeline.addLast(new AtrackProtocolDecoder(AtrackProtocol.this));
             }
         });

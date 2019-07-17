@@ -28,7 +28,7 @@ public class GranitProtocol extends BaseProtocol {
                 Command.TYPE_IDENTIFICATION,
                 Command.TYPE_REBOOT_DEVICE,
                 Command.TYPE_POSITION_SINGLE);
-        setTextCommandEncoder(new GranitProtocolSmsEncoder());
+        setTextCommandEncoder(new GranitProtocolSmsEncoder(GranitProtocol.this));
         setSupportedTextCommands(
                 Command.TYPE_REBOOT_DEVICE,
                 Command.TYPE_POSITION_PERIODIC);
@@ -36,7 +36,7 @@ public class GranitProtocol extends BaseProtocol {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new GranitFrameDecoder());
-                pipeline.addLast(new GranitProtocolEncoder());
+                pipeline.addLast(new GranitProtocolEncoder(GranitProtocol.this));
                 pipeline.addLast(new GranitProtocolDecoder(GranitProtocol.this));
             }
         });

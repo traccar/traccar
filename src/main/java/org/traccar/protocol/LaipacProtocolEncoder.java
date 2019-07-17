@@ -18,8 +18,13 @@ package org.traccar.protocol;
 import org.traccar.StringProtocolEncoder;
 import org.traccar.model.Command;
 import org.traccar.helper.Checksum;
+import org.traccar.Protocol;
 
 public class LaipacProtocolEncoder extends StringProtocolEncoder {
+
+    public LaipacProtocolEncoder(Protocol protocol) {
+        super(protocol);
+    }
 
     @Override
     protected String formatCommand(Command command, String format, String... keys) {

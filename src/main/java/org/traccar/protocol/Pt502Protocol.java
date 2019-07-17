@@ -35,7 +35,7 @@ public class Pt502Protocol extends BaseProtocol {
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new Pt502FrameDecoder());
                 pipeline.addLast(new StringEncoder());
-                pipeline.addLast(new Pt502ProtocolEncoder());
+                pipeline.addLast(new Pt502ProtocolEncoder(Pt502Protocol.this));
                 pipeline.addLast(new Pt502ProtocolDecoder(Pt502Protocol.this));
             }
         });

@@ -20,10 +20,15 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.traccar.StringProtocolEncoder;
 import org.traccar.model.Command;
+import org.traccar.Protocol;
 
 import java.nio.charset.StandardCharsets;
 
 public class EnforaProtocolEncoder extends StringProtocolEncoder {
+
+    public EnforaProtocolEncoder(Protocol protocol) {
+        super(protocol);
+    }
 
     private ByteBuf encodeContent(String content) {
 

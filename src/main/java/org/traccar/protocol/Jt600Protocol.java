@@ -34,7 +34,7 @@ public class Jt600Protocol extends BaseProtocol {
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new Jt600FrameDecoder());
                 pipeline.addLast(new StringEncoder());
-                pipeline.addLast(new Jt600ProtocolEncoder());
+                pipeline.addLast(new Jt600ProtocolEncoder(Jt600Protocol.this));
                 pipeline.addLast(new Jt600ProtocolDecoder(Jt600Protocol.this));
             }
         });

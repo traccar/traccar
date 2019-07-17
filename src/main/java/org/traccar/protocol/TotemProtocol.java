@@ -35,7 +35,7 @@ public class TotemProtocol extends BaseProtocol {
                 pipeline.addLast(new TotemFrameDecoder());
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
-                pipeline.addLast(new TotemProtocolEncoder());
+                pipeline.addLast(new TotemProtocolEncoder(TotemProtocol.this));
                 pipeline.addLast(new TotemProtocolDecoder(TotemProtocol.this));
             }
         });

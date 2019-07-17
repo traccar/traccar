@@ -29,7 +29,7 @@ public class BceProtocol extends BaseProtocol {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new BceFrameDecoder());
-                pipeline.addLast(new BceProtocolEncoder());
+                pipeline.addLast(new BceProtocolEncoder(BceProtocol.this));
                 pipeline.addLast(new BceProtocolDecoder(BceProtocol.this));
             }
         });

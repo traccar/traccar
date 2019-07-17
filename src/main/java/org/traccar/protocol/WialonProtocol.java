@@ -45,7 +45,7 @@ public class WialonProtocol extends BaseProtocol {
                 } else {
                     pipeline.addLast(new StringDecoder());
                 }
-                pipeline.addLast(new WialonProtocolEncoder());
+                pipeline.addLast(new WialonProtocolEncoder(WialonProtocol.this));
                 pipeline.addLast(new WialonProtocolDecoder(WialonProtocol.this));
             }
         });

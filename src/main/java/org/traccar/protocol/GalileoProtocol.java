@@ -30,7 +30,7 @@ public class GalileoProtocol extends BaseProtocol {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new GalileoFrameDecoder());
-                pipeline.addLast(new GalileoProtocolEncoder());
+                pipeline.addLast(new GalileoProtocolEncoder(GalileoProtocol.this));
                 pipeline.addLast(new GalileoProtocolDecoder(GalileoProtocol.this));
             }
         });

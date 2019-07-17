@@ -18,10 +18,15 @@ package org.traccar.protocol;
 import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.model.Command;
+import org.traccar.Protocol;
 
 import java.nio.charset.StandardCharsets;
 
 public class AtrackProtocolEncoder extends BaseProtocolEncoder {
+
+    public AtrackProtocolEncoder(Protocol protocol) {
+        super(protocol);
+    }
 
     @Override
     protected Object encodeCommand(Command command) {

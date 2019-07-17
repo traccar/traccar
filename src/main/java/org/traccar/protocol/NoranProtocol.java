@@ -32,7 +32,7 @@ public class NoranProtocol extends BaseProtocol {
         addServer(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast(new NoranProtocolEncoder());
+                pipeline.addLast(new NoranProtocolEncoder(NoranProtocol.this));
                 pipeline.addLast(new NoranProtocolDecoder(NoranProtocol.this));
             }
         });

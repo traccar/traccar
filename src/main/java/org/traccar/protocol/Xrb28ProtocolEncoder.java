@@ -18,8 +18,13 @@ package org.traccar.protocol;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.model.Command;
+import org.traccar.Protocol;
 
 public class Xrb28ProtocolEncoder extends BaseProtocolEncoder {
+
+    public Xrb28ProtocolEncoder(Protocol protocol) {
+        super(protocol);
+    }
 
     private String formatCommand(Command command, String content) {
         return String.format("\u00ff\u00ff*SCOS,OM,%s,%s#\n", getUniqueId(command.getDeviceId()), content);

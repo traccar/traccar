@@ -9,8 +9,8 @@ public class T800xProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        T800xProtocolEncoder encoder = new T800xProtocolEncoder();
-        
+        T800xProtocolEncoder encoder = new T800xProtocolEncoder(null);
+
         Command command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_CUSTOM);

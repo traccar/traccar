@@ -30,7 +30,7 @@ public class HuabaoProtocol extends BaseProtocol {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new HuabaoFrameDecoder());
-                pipeline.addLast(new HuabaoProtocolEncoder());
+                pipeline.addLast(new HuabaoProtocolEncoder(HuabaoProtocol.this));
                 pipeline.addLast(new HuabaoProtocolDecoder(HuabaoProtocol.this));
             }
         });

@@ -21,10 +21,15 @@ import org.traccar.BaseProtocolEncoder;
 import org.traccar.Context;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Command;
+import org.traccar.Protocol;
 
 import java.nio.charset.StandardCharsets;
 
 public class CastelProtocolEncoder extends BaseProtocolEncoder {
+
+    public CastelProtocolEncoder(Protocol protocol) {
+        super(protocol);
+    }
 
     private ByteBuf encodeContent(long deviceId, short type, ByteBuf content) {
 

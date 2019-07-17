@@ -35,7 +35,7 @@ public class XirgoProtocol extends BaseProtocol {
                 pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, "##"));
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
-                pipeline.addLast(new XirgoProtocolEncoder());
+                pipeline.addLast(new XirgoProtocolEncoder(XirgoProtocol.this));
                 pipeline.addLast(new XirgoProtocolDecoder(XirgoProtocol.this));
             }
         });
@@ -44,7 +44,7 @@ public class XirgoProtocol extends BaseProtocol {
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
-                pipeline.addLast(new XirgoProtocolEncoder());
+                pipeline.addLast(new XirgoProtocolEncoder(XirgoProtocol.this));
                 pipeline.addLast(new XirgoProtocolDecoder(XirgoProtocol.this));
             }
         });

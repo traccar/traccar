@@ -40,7 +40,7 @@ public class Xrb28Protocol extends BaseProtocol {
                 pipeline.addLast(new LineBasedFrameDecoder(1024));
                 pipeline.addLast(new StringEncoder(StandardCharsets.ISO_8859_1));
                 pipeline.addLast(new StringDecoder());
-                pipeline.addLast(new Xrb28ProtocolEncoder());
+                pipeline.addLast(new Xrb28ProtocolEncoder(Xrb28Protocol.this));
                 pipeline.addLast(new Xrb28ProtocolDecoder(Xrb28Protocol.this));
             }
         });

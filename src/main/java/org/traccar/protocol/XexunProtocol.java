@@ -42,7 +42,7 @@ public class XexunProtocol extends BaseProtocol {
                 }
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
-                pipeline.addLast(new XexunProtocolEncoder());
+                pipeline.addLast(new XexunProtocolEncoder(XexunProtocol.this));
                 pipeline.addLast(new XexunProtocolDecoder(XexunProtocol.this, full));
             }
         });

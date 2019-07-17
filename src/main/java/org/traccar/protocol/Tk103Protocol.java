@@ -51,7 +51,7 @@ public class Tk103Protocol extends BaseProtocol {
                 pipeline.addLast(new Tk103FrameDecoder());
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new StringEncoder());
-                pipeline.addLast(new Tk103ProtocolEncoder());
+                pipeline.addLast(new Tk103ProtocolEncoder(Tk103Protocol.this));
                 pipeline.addLast(new Tk103ProtocolDecoder(Tk103Protocol.this));
             }
         });
@@ -60,7 +60,7 @@ public class Tk103Protocol extends BaseProtocol {
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new StringEncoder());
-                pipeline.addLast(new Tk103ProtocolEncoder());
+                pipeline.addLast(new Tk103ProtocolEncoder(Tk103Protocol.this));
                 pipeline.addLast(new Tk103ProtocolDecoder(Tk103Protocol.this));
             }
         });

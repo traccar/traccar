@@ -19,8 +19,13 @@ import java.util.TimeZone;
 
 import org.traccar.StringProtocolEncoder;
 import org.traccar.model.Command;
+import org.traccar.Protocol;
 
 public class Pt502ProtocolEncoder extends StringProtocolEncoder implements StringProtocolEncoder.ValueFormatter {
+
+    public Pt502ProtocolEncoder(Protocol protocol) {
+        super(protocol);
+    }
 
     @Override
     public String formatValue(String key, Object value) {

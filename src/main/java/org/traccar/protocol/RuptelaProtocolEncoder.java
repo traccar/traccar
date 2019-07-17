@@ -20,10 +20,15 @@ import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Command;
+import org.traccar.Protocol;
 
 import java.nio.charset.StandardCharsets;
 
 public class RuptelaProtocolEncoder extends BaseProtocolEncoder {
+
+    public RuptelaProtocolEncoder(Protocol protocol) {
+        super(protocol);
+    }
 
     private ByteBuf encodeContent(int type, ByteBuf content) {
 

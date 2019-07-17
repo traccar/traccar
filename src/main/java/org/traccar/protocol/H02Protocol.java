@@ -38,7 +38,7 @@ public class H02Protocol extends BaseProtocol {
                 int messageLength = Context.getConfig().getInteger(getName() + ".messageLength");
                 pipeline.addLast(new H02FrameDecoder(messageLength));
                 pipeline.addLast(new StringEncoder());
-                pipeline.addLast(new H02ProtocolEncoder());
+                pipeline.addLast(new H02ProtocolEncoder(H02Protocol.this));
                 pipeline.addLast(new H02ProtocolDecoder(H02Protocol.this));
             }
         });
@@ -46,7 +46,7 @@ public class H02Protocol extends BaseProtocol {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new StringEncoder());
-                pipeline.addLast(new H02ProtocolEncoder());
+                pipeline.addLast(new H02ProtocolEncoder(H02Protocol.this));
                 pipeline.addLast(new H02ProtocolDecoder(H02Protocol.this));
             }
         });

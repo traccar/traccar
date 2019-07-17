@@ -20,6 +20,7 @@ import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.helper.DataConverter;
 import org.traccar.model.Command;
+import org.traccar.Protocol;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -28,7 +29,8 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
 
     private boolean connectionless;
 
-    public EelinkProtocolEncoder(boolean connectionless) {
+    public EelinkProtocolEncoder(Protocol protocol, boolean connectionless) {
+        super(protocol);
         this.connectionless = connectionless;
     }
 

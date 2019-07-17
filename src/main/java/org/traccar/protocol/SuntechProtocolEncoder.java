@@ -17,8 +17,13 @@ package org.traccar.protocol;
 
 import org.traccar.StringProtocolEncoder;
 import org.traccar.model.Command;
+import org.traccar.Protocol;
 
 public class SuntechProtocolEncoder extends StringProtocolEncoder {
+
+    public SuntechProtocolEncoder(Protocol protocol) {
+        super(protocol);
+    }
 
     @Override
     protected Object encodeCommand(Command command) {

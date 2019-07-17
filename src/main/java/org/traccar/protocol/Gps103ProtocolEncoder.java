@@ -17,8 +17,13 @@ package org.traccar.protocol;
 
 import org.traccar.StringProtocolEncoder;
 import org.traccar.model.Command;
+import org.traccar.Protocol;
 
 public class Gps103ProtocolEncoder extends StringProtocolEncoder implements StringProtocolEncoder.ValueFormatter {
+
+    public Gps103ProtocolEncoder(Protocol protocol) {
+        super(protocol);
+    }
 
     @Override
     public String formatValue(String key, Object value) {

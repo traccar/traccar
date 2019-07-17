@@ -18,8 +18,13 @@ package org.traccar.protocol;
 
 import org.traccar.StringProtocolEncoder;
 import org.traccar.model.Command;
+import org.traccar.Protocol;
 
 public class GranitProtocolSmsEncoder extends StringProtocolEncoder {
+
+    public GranitProtocolSmsEncoder(Protocol protocol) {
+        super(protocol);
+    }
 
     @Override
     protected String encodeCommand(Command command) {

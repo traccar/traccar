@@ -37,7 +37,7 @@ public class MeitrackProtocol extends BaseProtocol {
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new MeitrackFrameDecoder());
                 pipeline.addLast(new StringEncoder());
-                pipeline.addLast(new MeitrackProtocolEncoder());
+                pipeline.addLast(new MeitrackProtocolEncoder(MeitrackProtocol.this));
                 pipeline.addLast(new MeitrackProtocolDecoder(MeitrackProtocol.this));
             }
         });
@@ -45,7 +45,7 @@ public class MeitrackProtocol extends BaseProtocol {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new StringEncoder());
-                pipeline.addLast(new MeitrackProtocolEncoder());
+                pipeline.addLast(new MeitrackProtocolEncoder(MeitrackProtocol.this));
                 pipeline.addLast(new MeitrackProtocolDecoder(MeitrackProtocol.this));
             }
         });

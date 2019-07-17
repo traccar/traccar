@@ -35,7 +35,7 @@ public class PretraceProtocol extends BaseProtocol {
                 pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, ')'));
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
-                pipeline.addLast(new PretraceProtocolEncoder());
+                pipeline.addLast(new PretraceProtocolEncoder(PretraceProtocol.this));
                 pipeline.addLast(new PretraceProtocolDecoder(PretraceProtocol.this));
             }
         });

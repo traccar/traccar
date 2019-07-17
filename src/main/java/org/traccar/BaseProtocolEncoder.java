@@ -27,6 +27,18 @@ public abstract class BaseProtocolEncoder extends ChannelOutboundHandlerAdapter 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseProtocolEncoder.class);
 
+    private static final String PROTOCOL_UNKNOWN = "unknown";
+
+    private final Protocol protocol;
+
+    public BaseProtocolEncoder(Protocol protocol) {
+        this.protocol = protocol;
+    }
+
+    public String getProtocolName() {
+        return protocol != null ? protocol.getName() : PROTOCOL_UNKNOWN;
+    }
+
     protected String getUniqueId(long deviceId) {
         return Context.getIdentityManager().getById(deviceId).getUniqueId();
     }

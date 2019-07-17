@@ -19,8 +19,13 @@ import org.traccar.BaseProtocolEncoder;
 import org.traccar.Context;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Command;
+import org.traccar.Protocol;
 
 public class PretraceProtocolEncoder extends BaseProtocolEncoder {
+
+    public PretraceProtocolEncoder(Protocol protocol) {
+        super(protocol);
+    }
 
     private String formatCommand(String uniqueId, String data) {
         String content = uniqueId + data;

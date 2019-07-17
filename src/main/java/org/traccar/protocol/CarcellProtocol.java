@@ -35,7 +35,7 @@ public class CarcellProtocol extends BaseProtocol {
                 pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, '\r'));
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
-                pipeline.addLast(new CarcellProtocolEncoder());
+                pipeline.addLast(new CarcellProtocolEncoder(CarcellProtocol.this));
                 pipeline.addLast(new CarcellProtocolDecoder(CarcellProtocol.this));
             }
         });

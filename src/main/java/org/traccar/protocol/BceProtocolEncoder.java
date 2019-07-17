@@ -20,8 +20,13 @@ import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Command;
+import org.traccar.Protocol;
 
 public class BceProtocolEncoder extends BaseProtocolEncoder {
+
+    public BceProtocolEncoder(Protocol protocol) {
+        super(protocol);
+    }
 
     @Override
     protected Object encodeCommand(Command command) {

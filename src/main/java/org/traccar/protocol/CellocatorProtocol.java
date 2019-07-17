@@ -29,14 +29,14 @@ public class CellocatorProtocol extends BaseProtocol {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new CellocatorFrameDecoder());
-                pipeline.addLast(new CellocatorProtocolEncoder());
+                pipeline.addLast(new CellocatorProtocolEncoder(CellocatorProtocol.this));
                 pipeline.addLast(new CellocatorProtocolDecoder(CellocatorProtocol.this));
             }
         });
         addServer(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast(new CellocatorProtocolEncoder());
+                pipeline.addLast(new CellocatorProtocolEncoder(CellocatorProtocol.this));
                 pipeline.addLast(new CellocatorProtocolDecoder(CellocatorProtocol.this));
             }
         });

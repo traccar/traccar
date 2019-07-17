@@ -33,7 +33,7 @@ public class CityeasyProtocol extends BaseProtocol {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 2, 2, -4, 0));
-                pipeline.addLast(new CityeasyProtocolEncoder());
+                pipeline.addLast(new CityeasyProtocolEncoder(CityeasyProtocol.this));
                 pipeline.addLast(new CityeasyProtocolDecoder(CityeasyProtocol.this));
             }
         });

@@ -42,7 +42,7 @@ public class Gps103Protocol extends BaseProtocol {
                 pipeline.addLast(new CharacterDelimiterFrameDecoder(2048, false, "\r\n", "\n", ";", "*"));
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
-                pipeline.addLast(new Gps103ProtocolEncoder());
+                pipeline.addLast(new Gps103ProtocolEncoder(Gps103Protocol.this));
                 pipeline.addLast(new Gps103ProtocolDecoder(Gps103Protocol.this));
             }
         });
@@ -51,7 +51,7 @@ public class Gps103Protocol extends BaseProtocol {
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
-                pipeline.addLast(new Gps103ProtocolEncoder());
+                pipeline.addLast(new Gps103ProtocolEncoder(Gps103Protocol.this));
                 pipeline.addLast(new Gps103ProtocolDecoder(Gps103Protocol.this));
             }
         });

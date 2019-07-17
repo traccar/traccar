@@ -36,7 +36,7 @@ public class EsealProtocol extends BaseProtocol {
                 pipeline.addLast(new LineBasedFrameDecoder(1024));
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
-                pipeline.addLast(new EsealProtocolEncoder());
+                pipeline.addLast(new EsealProtocolEncoder(EsealProtocol.this));
                 pipeline.addLast(new EsealProtocolDecoder(EsealProtocol.this));
             }
         });

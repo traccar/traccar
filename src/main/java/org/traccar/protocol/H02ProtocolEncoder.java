@@ -19,12 +19,17 @@ package org.traccar.protocol;
 import org.traccar.Context;
 import org.traccar.StringProtocolEncoder;
 import org.traccar.model.Command;
+import org.traccar.Protocol;
 
 import java.util.Date;
 
 public class H02ProtocolEncoder extends StringProtocolEncoder {
 
     private static final String MARKER = "HQ";
+
+    public H02ProtocolEncoder(Protocol protocol) {
+        super(protocol);
+    }
 
     private Object formatCommand(Date time, String uniqueId, String type, String... params) {
 

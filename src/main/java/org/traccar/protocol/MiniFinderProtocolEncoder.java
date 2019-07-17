@@ -19,8 +19,13 @@ import java.util.TimeZone;
 
 import org.traccar.StringProtocolEncoder;
 import org.traccar.model.Command;
+import org.traccar.Protocol;
 
 public class MiniFinderProtocolEncoder extends StringProtocolEncoder implements StringProtocolEncoder.ValueFormatter {
+
+    public MiniFinderProtocolEncoder(Protocol protocol) {
+        super(protocol);
+    }
 
     @Override
     public String formatValue(String key, Object value) {

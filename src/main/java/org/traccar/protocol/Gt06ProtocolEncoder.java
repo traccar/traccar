@@ -21,10 +21,15 @@ import org.traccar.BaseProtocolEncoder;
 import org.traccar.Context;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Command;
+import org.traccar.Protocol;
 
 import java.nio.charset.StandardCharsets;
 
 public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
+
+    public Gt06ProtocolEncoder(Protocol protocol) {
+        super(protocol);
+    }
 
     private ByteBuf encodeContent(long deviceId, String content) {
 

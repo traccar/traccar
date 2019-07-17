@@ -30,7 +30,7 @@ public class T800xProtocol extends BaseProtocol {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 3, 2, -5, 0));
-                pipeline.addLast(new T800xProtocolEncoder());
+                pipeline.addLast(new T800xProtocolEncoder(T800xProtocol.this));
                 pipeline.addLast(new T800xProtocolDecoder(T800xProtocol.this));
             }
         });

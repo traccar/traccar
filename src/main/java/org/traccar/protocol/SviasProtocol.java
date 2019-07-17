@@ -42,7 +42,7 @@ public class SviasProtocol extends BaseProtocol {
                 pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, "]"));
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
-                pipeline.addLast(new SviasProtocolEncoder());
+                pipeline.addLast(new SviasProtocolEncoder(SviasProtocol.this));
                 pipeline.addLast(new SviasProtocolDecoder(SviasProtocol.this));
             }
         });

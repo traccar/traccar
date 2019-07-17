@@ -21,8 +21,13 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.model.Command;
+import org.traccar.Protocol;
 
 public class GranitProtocolEncoder extends BaseProtocolEncoder {
+
+    public GranitProtocolEncoder(Protocol protocol) {
+        super(protocol);
+    }
 
     private ByteBuf encodeCommand(String commandString) {
         ByteBuf buffer = Unpooled.buffer();

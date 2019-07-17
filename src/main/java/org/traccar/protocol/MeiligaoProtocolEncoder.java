@@ -21,11 +21,16 @@ import org.traccar.BaseProtocolEncoder;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DataConverter;
 import org.traccar.model.Command;
+import org.traccar.Protocol;
 
 import java.nio.charset.StandardCharsets;
 import java.util.TimeZone;
 
 public class MeiligaoProtocolEncoder extends BaseProtocolEncoder {
+
+    public MeiligaoProtocolEncoder(Protocol protocol) {
+        super(protocol);
+    }
 
     private ByteBuf encodeContent(long deviceId, int type, ByteBuf content) {
 

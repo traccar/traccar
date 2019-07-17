@@ -35,7 +35,7 @@ public class AdmProtocol extends BaseProtocol {
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 1024, 2, 1, -3, 0, true));
                 pipeline.addLast(new StringEncoder());
-                pipeline.addLast(new AdmProtocolEncoder());
+                pipeline.addLast(new AdmProtocolEncoder(AdmProtocol.this));
                 pipeline.addLast(new AdmProtocolDecoder(AdmProtocol.this));
             }
         });

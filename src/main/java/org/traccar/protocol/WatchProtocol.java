@@ -44,7 +44,7 @@ public class WatchProtocol extends BaseProtocol {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new WatchFrameDecoder());
-                pipeline.addLast(new WatchProtocolEncoder());
+                pipeline.addLast(new WatchProtocolEncoder(WatchProtocol.this));
                 pipeline.addLast(new WatchProtocolDecoder(WatchProtocol.this));
             }
         });

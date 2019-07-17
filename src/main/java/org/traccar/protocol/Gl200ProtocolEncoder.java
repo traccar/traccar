@@ -17,8 +17,13 @@ package org.traccar.protocol;
 
 import org.traccar.StringProtocolEncoder;
 import org.traccar.model.Command;
+import org.traccar.Protocol;
 
 public class Gl200ProtocolEncoder extends StringProtocolEncoder {
+
+    public Gl200ProtocolEncoder(Protocol protocol) {
+        super(protocol);
+    }
 
     @Override
     protected Object encodeCommand(Command command) {

@@ -19,10 +19,15 @@ import org.traccar.Context;
 import org.traccar.StringProtocolEncoder;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Command;
+import org.traccar.Protocol;
 
 import java.util.Map;
 
 public class MeitrackProtocolEncoder extends StringProtocolEncoder {
+
+    public MeitrackProtocolEncoder(Protocol protocol) {
+        super(protocol);
+    }
 
     private Object formatCommand(Command command, char dataId, String content) {
         String uniqueId = getUniqueId(command.getDeviceId());

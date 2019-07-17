@@ -21,6 +21,10 @@ import java.util.Map;
 
 public abstract class StringProtocolEncoder extends BaseProtocolEncoder {
 
+    public StringProtocolEncoder(Protocol protocol) {
+        super(protocol);
+    }
+
     public interface ValueFormatter {
         String formatValue(String key, Object value);
     }

@@ -44,7 +44,7 @@ public class MiniFinderProtocol extends BaseProtocol {
                 pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, ';'));
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
-                pipeline.addLast(new MiniFinderProtocolEncoder());
+                pipeline.addLast(new MiniFinderProtocolEncoder(MiniFinderProtocol.this));
                 pipeline.addLast(new MiniFinderProtocolDecoder(MiniFinderProtocol.this));
             }
         });
