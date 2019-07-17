@@ -9,7 +9,7 @@ public class CityeasyProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        CityeasyProtocolEncoder encoder = new CityeasyProtocolEncoder();
+        CityeasyProtocolEncoder encoder = new CityeasyProtocolEncoder(null);
 
         Command command = new Command();
         command.setDeviceId(1);

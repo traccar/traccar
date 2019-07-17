@@ -11,7 +11,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeOutputControl() {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder();
+        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -25,8 +25,8 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeEngineStop() throws Exception {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder();
-        
+        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null);
+
         Command command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_ENGINE_STOP);
@@ -38,8 +38,8 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodePositionSingle() throws Exception {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder();
-        
+        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null);
+
         Command command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_POSITION_SINGLE);
@@ -51,8 +51,8 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodePositionPeriodic() throws Exception {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder();
-        
+        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null);
+
         Command command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_POSITION_PERIODIC);
@@ -65,8 +65,8 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodePositionStop() throws Exception {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder();
-        
+        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null);
+
         Command command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_POSITION_STOP);
@@ -78,8 +78,8 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeGetVersion() throws Exception {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder();
-        
+        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null);
+
         Command command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_GET_VERSION);
@@ -91,8 +91,8 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeRebootDevice() throws Exception {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder();
-        
+        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null);
+
         Command command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_REBOOT_DEVICE);
@@ -104,8 +104,8 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeSetOdometer() throws Exception {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder();
-        
+        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null);
+
         Command command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_SET_ODOMETER);
@@ -117,7 +117,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodePositionSingleAlternative() throws Exception {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(true);
+        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null, true);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -130,7 +130,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodePositionPeriodicAlternative() throws Exception {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(true);
+        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null, true);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -143,7 +143,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodePositionStopAlternative() throws Exception {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(true);
+        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null, true);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -156,7 +156,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeGetVersionAlternative() throws Exception {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(true);
+        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null, true);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -169,7 +169,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeRebootDeviceAlternative() throws Exception {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(true);
+        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null, true);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -182,7 +182,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeIdentificationAlternative() throws Exception {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(true);
+        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null, true);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -195,7 +195,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeSosOnAlternative() throws Exception {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(true);
+        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null, true);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -209,7 +209,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeSosOffAlternative() throws Exception {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(true);
+        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null, true);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -223,7 +223,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeCustom() throws Exception {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder();
+        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -237,7 +237,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeCustomAlternative() throws Exception {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(true);
+        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null, true);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -251,7 +251,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeSetConnectionAlternative() throws Exception {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(true);
+        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null, true);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -266,7 +266,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeSosNumberAlternative() throws Exception {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(true);
+        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null, true);
 
         Command command = new Command();
         command.setDeviceId(1);

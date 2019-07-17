@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,13 @@ import org.traccar.BaseProtocolEncoder;
 import org.traccar.Context;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Command;
+import org.traccar.Protocol;
 
 public class PretraceProtocolEncoder extends BaseProtocolEncoder {
+
+    public PretraceProtocolEncoder(Protocol protocol) {
+        super(protocol);
+    }
 
     private String formatCommand(String uniqueId, String data) {
         String content = uniqueId + data;

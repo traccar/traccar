@@ -38,7 +38,7 @@ public class LaipacProtocol extends BaseProtocol {
                 pipeline.addLast(new LineBasedFrameDecoder(1024));
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
-                pipeline.addLast(new LaipacProtocolEncoder());
+                pipeline.addLast(new LaipacProtocolEncoder(LaipacProtocol.this));
                 pipeline.addLast(new LaipacProtocolDecoder(LaipacProtocol.this));
             }
         });

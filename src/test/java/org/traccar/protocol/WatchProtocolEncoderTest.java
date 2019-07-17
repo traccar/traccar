@@ -9,8 +9,8 @@ public class WatchProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        WatchProtocolEncoder encoder = new WatchProtocolEncoder();
-        
+        WatchProtocolEncoder encoder = new WatchProtocolEncoder(null);
+
         Command command;
 
         command = new Command();
@@ -60,7 +60,7 @@ public class WatchProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeTimezone() {
 
-        WatchProtocolEncoder encoder = new WatchProtocolEncoder();
+        WatchProtocolEncoder encoder = new WatchProtocolEncoder(null);
 
         Command command = new Command();
         command.setDeviceId(1);

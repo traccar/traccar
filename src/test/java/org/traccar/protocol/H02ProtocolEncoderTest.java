@@ -14,7 +14,7 @@ import static org.junit.Assert.assertEquals;
 
 public class H02ProtocolEncoderTest extends ProtocolTest {
 
-    private H02ProtocolEncoder encoder = new H02ProtocolEncoder();
+    private H02ProtocolEncoder encoder = new H02ProtocolEncoder(null);
     private Date time = Date.from(
             LocalDateTime.of(LocalDate.now(), LocalTime.of(1, 2, 3)).atZone(ZoneOffset.systemDefault()).toInstant());
 

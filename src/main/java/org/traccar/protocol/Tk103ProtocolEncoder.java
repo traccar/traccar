@@ -1,6 +1,6 @@
 /*
  * Copyright 2017 Christoph Krey (c@ckrey.de)
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +19,19 @@ package org.traccar.protocol;
 import org.traccar.Context;
 import org.traccar.StringProtocolEncoder;
 import org.traccar.model.Command;
+import org.traccar.Protocol;
 
 public class Tk103ProtocolEncoder extends StringProtocolEncoder {
 
     private final boolean forceAlternative;
 
-    public Tk103ProtocolEncoder() {
+    public Tk103ProtocolEncoder(Protocol protocol) {
+        super(protocol);
         this.forceAlternative = false;
     }
 
-    public Tk103ProtocolEncoder(boolean forceAlternative) {
+    public Tk103ProtocolEncoder(Protocol protocol, boolean forceAlternative) {
+        super(protocol);
         this.forceAlternative = forceAlternative;
     }
 

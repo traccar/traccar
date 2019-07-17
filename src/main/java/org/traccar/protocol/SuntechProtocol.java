@@ -39,7 +39,7 @@ public class SuntechProtocol extends BaseProtocol {
                 pipeline.addLast(new SuntechFrameDecoder());
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
-                pipeline.addLast(new SuntechProtocolEncoder());
+                pipeline.addLast(new SuntechProtocolEncoder(SuntechProtocol.this));
                 pipeline.addLast(new SuntechProtocolDecoder(SuntechProtocol.this));
             }
         });

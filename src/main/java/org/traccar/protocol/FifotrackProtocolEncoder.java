@@ -18,8 +18,13 @@ package org.traccar.protocol;
 import org.traccar.StringProtocolEncoder;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Command;
+import org.traccar.Protocol;
 
 public class FifotrackProtocolEncoder extends StringProtocolEncoder {
+
+    public FifotrackProtocolEncoder(Protocol protocol) {
+        super(protocol);
+    }
 
     private Object formatCommand(Command command, String content) {
         String uniqueId = getUniqueId(command.getDeviceId());

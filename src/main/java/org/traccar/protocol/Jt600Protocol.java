@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ public class Jt600Protocol extends BaseProtocol {
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new Jt600FrameDecoder());
                 pipeline.addLast(new StringEncoder());
-                pipeline.addLast(new Jt600ProtocolEncoder());
+                pipeline.addLast(new Jt600ProtocolEncoder(Jt600Protocol.this));
                 pipeline.addLast(new Jt600ProtocolDecoder(Jt600Protocol.this));
             }
         });

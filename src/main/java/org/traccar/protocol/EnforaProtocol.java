@@ -32,14 +32,14 @@ public class EnforaProtocol extends BaseProtocol {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 0, 2, -2, 2));
-                pipeline.addLast(new EnforaProtocolEncoder());
+                pipeline.addLast(new EnforaProtocolEncoder(EnforaProtocol.this));
                 pipeline.addLast(new EnforaProtocolDecoder(EnforaProtocol.this));
             }
         });
         addServer(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast(new EnforaProtocolEncoder());
+                pipeline.addLast(new EnforaProtocolEncoder(EnforaProtocol.this));
                 pipeline.addLast(new EnforaProtocolDecoder(EnforaProtocol.this));
             }
         });
