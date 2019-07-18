@@ -36,7 +36,7 @@ public class HuabaoProtocolEncoder extends BaseProtocolEncoder {
     protected Object encodeCommand(Command command) {
 
         boolean alternative = Context.getIdentityManager().lookupAttributeBoolean(
-                command.getDeviceId(), "huabao.alternative", false, true);
+                command.getDeviceId(), "huabao.alternative", false, false, true);
 
         ByteBuf id = Unpooled.wrappedBuffer(
                 DataConverter.parseHex(getUniqueId(command.getDeviceId())));

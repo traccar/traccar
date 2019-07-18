@@ -33,7 +33,8 @@ public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
 
     private ByteBuf encodeContent(long deviceId, String content) {
 
-        boolean language = Context.getIdentityManager().lookupAttributeBoolean(deviceId, "gt06.language", false, true);
+        boolean language = Context.getIdentityManager()
+            .lookupAttributeBoolean(deviceId, "gt06.language", false, false, true);
 
         ByteBuf buf = Unpooled.buffer();
 
@@ -66,7 +67,7 @@ public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
     protected Object encodeCommand(Command command) {
 
         boolean alternative = Context.getIdentityManager().lookupAttributeBoolean(
-                command.getDeviceId(), "gt06.alternative", false, true);
+                command.getDeviceId(), "gt06.alternative", false, false, true);
 
         switch (command.getType()) {
             case Command.TYPE_ENGINE_STOP:

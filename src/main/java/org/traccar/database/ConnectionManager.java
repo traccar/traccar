@@ -157,7 +157,7 @@ public class ConnectionManager {
 
         event = Main.getInjector().getInstance(OverspeedEventHandler.class)
                 .updateOverspeedState(deviceState, Context.getDeviceManager().
-                        lookupAttributeDouble(deviceId, OverspeedEventHandler.ATTRIBUTE_SPEED_LIMIT, 0, false));
+                        lookupAttributeDouble(deviceId, OverspeedEventHandler.ATTRIBUTE_SPEED_LIMIT, 0, true, false));
         if (event != null) {
             result.putAll(event);
         }
