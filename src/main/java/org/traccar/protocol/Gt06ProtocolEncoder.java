@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
  *
@@ -69,15 +70,16 @@ public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
         boolean alternative = Context.getIdentityManager().lookupAttributeBoolean(
                 command.getDeviceId(), getProtocolName() + ".alternative", false, false, true);
 
-        initDevicePassword(command, "123456");
+        String password = Context.getIdentityManager()
+                .getDevicePassword(command.getDeviceId(), getProtocolName(), "123456");
 
         switch (command.getType()) {
             case Command.TYPE_ENGINE_STOP:
                 return encodeContent(command.getDeviceId(),
-                    alternative ? "DYD," + Command.KEY_DEVICE_PASSWORD + "#" : "Relay,1#");
+                    alternative ? "DYD," + password + "#" : "Relay,1#");
             case Command.TYPE_ENGINE_RESUME:
                 return encodeContent(command.getDeviceId(),
-                    alternative ? "HFYD," + Command.KEY_DEVICE_PASSWORD + "#" : "Relay,0#");
+                    alternative ? "HFYD," + password + "#" : "Relay,0#");
             case Command.TYPE_CUSTOM:
                 return encodeContent(command.getDeviceId(), command.getString(Command.KEY_DATA));
             default:
