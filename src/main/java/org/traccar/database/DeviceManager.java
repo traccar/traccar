@@ -387,13 +387,12 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
                     }
                 }
             }
-            if (result == null) {
-                if (lookupConfig) {
-                    result = Context.getConfig().getString(attributeName);
-                } else if (lookupServer) {
-                    Server server = Context.getPermissionsManager().getServer();
-                    result = server.getAttributes().get(attributeName);
-                }
+            if (result == null && lookupConfig) {
+                result = Context.getConfig().getString(attributeName);
+            }
+            if (result == null && lookupServer) {
+                Server server = Context.getPermissionsManager().getServer();
+                result = server.getAttributes().get(attributeName);
             }
         }
         return result;
