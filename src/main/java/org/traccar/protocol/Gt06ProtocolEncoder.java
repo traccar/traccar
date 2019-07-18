@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
  *
