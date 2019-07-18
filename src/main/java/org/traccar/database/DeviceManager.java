@@ -118,7 +118,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
     @Override
     public String getDevicePassword(long id, String protocol, String defaultPassword) {
 
-        String password = lookupAttributeString(id, Command.KEY_DEVICE_PASSWORD, null, false);
+        String password = lookupAttributeString(id, Command.KEY_DEVICE_PASSWORD, null, false, false);
         if (password != null) {
             return password;
         }
