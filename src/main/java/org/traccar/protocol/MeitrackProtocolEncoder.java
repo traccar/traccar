@@ -43,7 +43,7 @@ public class MeitrackProtocolEncoder extends StringProtocolEncoder {
         Map<String, Object> attributes = command.getAttributes();
 
         boolean alternative = Context.getIdentityManager().lookupAttributeBoolean(
-                command.getDeviceId(), "meitrack.alternative", false, false, true);
+                command.getDeviceId(), getProtocolName() + ".alternative", false, false, true);
 
         switch (command.getType()) {
             case Command.TYPE_POSITION_SINGLE:

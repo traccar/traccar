@@ -43,7 +43,7 @@ public class Tk103ProtocolEncoder extends StringProtocolEncoder {
     protected Object encodeCommand(Command command) {
 
         boolean alternative = forceAlternative || Context.getIdentityManager().lookupAttributeBoolean(
-                command.getDeviceId(), "tk103.alternative", false, false, true);
+                command.getDeviceId(), getProtocolName() + ".alternative", false, false, true);
 
         initDevicePassword(command, "123456");
 

@@ -34,7 +34,7 @@ public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
     private ByteBuf encodeContent(long deviceId, String content) {
 
         boolean language = Context.getIdentityManager()
-            .lookupAttributeBoolean(deviceId, "gt06.language", false, false, true);
+            .lookupAttributeBoolean(deviceId, getProtocolName() + ".language", false, false, true);
 
         ByteBuf buf = Unpooled.buffer();
 
@@ -67,13 +67,17 @@ public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
     protected Object encodeCommand(Command command) {
 
         boolean alternative = Context.getIdentityManager().lookupAttributeBoolean(
-                command.getDeviceId(), "gt06.alternative", false, false, true);
+                command.getDeviceId(), getProtocolName() + ".alternative", false, false, true);
+
+        initDevicePassword(command, "123456");
 
         switch (command.getType()) {
             case Command.TYPE_ENGINE_STOP:
-                return encodeContent(command.getDeviceId(), alternative ? "DYD,123456#" : "Relay,1#");
+                return encodeContent(command.getDeviceId(),
+                    alternative ? "DYD," + Command.KEY_DEVICE_PASSWORD + "#" : "Relay,1#");
             case Command.TYPE_ENGINE_RESUME:
-                return encodeContent(command.getDeviceId(), alternative ? "HFYD,123456#" : "Relay,0#");
+                return encodeContent(command.getDeviceId(),
+                    alternative ? "HFYD," + Command.KEY_DEVICE_PASSWORD + "#" : "Relay,0#");
             case Command.TYPE_CUSTOM:
                 return encodeContent(command.getDeviceId(), command.getString(Command.KEY_DATA));
             default:
