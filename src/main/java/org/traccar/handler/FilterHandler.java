@@ -130,7 +130,7 @@ public class FilterHandler extends BaseDataHandler {
     private boolean skipAttributes(Position position) {
         if (skipAttributes) {
             String attributesString = Context.getIdentityManager().lookupAttributeString(
-                    position.getDeviceId(), "filter.skipAttributes", "", true);
+                    position.getDeviceId(), "filter.skipAttributes", "", false, true);
             for (String attribute : attributesString.split("[ ,]")) {
                 if (position.getAttributes().containsKey(attribute)) {
                     return true;

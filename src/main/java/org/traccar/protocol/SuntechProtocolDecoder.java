@@ -50,7 +50,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
     public int getProtocolType(long deviceId) {
         return Context.getIdentityManager().lookupAttributeInteger(
-                deviceId, getProtocolName() + ".protocolType", protocolType, true);
+                deviceId, getProtocolName() + ".protocolType", protocolType, false, true);
     }
 
     public void setHbm(boolean hbm) {
@@ -59,7 +59,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
     public boolean isHbm(long deviceId) {
         return Context.getIdentityManager().lookupAttributeBoolean(
-                deviceId, getProtocolName() + ".hbm", hbm, true);
+                deviceId, getProtocolName() + ".hbm", hbm, false, true);
     }
 
     public void setIncludeAdc(boolean includeAdc) {
@@ -68,7 +68,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
     public boolean isIncludeAdc(long deviceId) {
         return Context.getIdentityManager().lookupAttributeBoolean(
-                deviceId, getProtocolName() + ".includeAdc", includeAdc, true);
+                deviceId, getProtocolName() + ".includeAdc", includeAdc, false, true);
     }
 
     public void setIncludeRpm(boolean includeRpm) {
@@ -77,7 +77,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
     public boolean isIncludeRpm(long deviceId) {
         return Context.getIdentityManager().lookupAttributeBoolean(
-                deviceId, getProtocolName() + ".includeRpm", includeRpm, true);
+                deviceId, getProtocolName() + ".includeRpm", includeRpm, false, true);
     }
 
     public void setIncludeTemp(boolean includeTemp) {
@@ -86,7 +86,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
     public boolean isIncludeTemp(long deviceId) {
         return Context.getIdentityManager().lookupAttributeBoolean(
-                deviceId, getProtocolName() + ".includeTemp", includeTemp, true);
+                deviceId, getProtocolName() + ".includeTemp", includeTemp, false, true);
     }
 
     private Position decode9(

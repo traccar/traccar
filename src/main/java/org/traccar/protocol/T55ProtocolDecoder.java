@@ -103,7 +103,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
         if (deviceSession != null && channel != null && !(channel instanceof DatagramChannel)
                 && Context.getIdentityManager().lookupAttributeBoolean(
-                        deviceSession.getDeviceId(), getProtocolName() + ".ack", false, true)) {
+                        deviceSession.getDeviceId(), getProtocolName() + ".ack", false, false, true)) {
             channel.writeAndFlush(new NetworkMessage("OK1\r\n", remoteAddress));
         }
 

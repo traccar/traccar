@@ -46,31 +46,31 @@ public final class TestIdentityManager implements IdentityManager {
 
     @Override
     public boolean lookupAttributeBoolean(
-            long deviceId, String attributeName, boolean defaultValue, boolean lookupConfig) {
+            long deviceId, String attributeName, boolean defaultValue, boolean lookupServer, boolean lookupConfig) {
         return defaultValue;
     }
 
     @Override
     public String lookupAttributeString(
-            long deviceId, String attributeName, String defaultValue, boolean lookupConfig) {
+            long deviceId, String attributeName, String defaultValue, boolean lookupServer, boolean lookupConfig) {
         return "alarm,result";
     }
 
     @Override
     public int lookupAttributeInteger(
-            long deviceId, String attributeName, int defaultValue, boolean lookupConfig) {
+            long deviceId, String attributeName, int defaultValue, boolean lookupServer, boolean lookupConfig) {
         return defaultValue;
     }
 
     @Override
     public long lookupAttributeLong(
-            long deviceId, String attributeName, long defaultValue, boolean lookupConfig) {
+            long deviceId, String attributeName, long defaultValue, boolean lookupServer, boolean lookupConfig) {
         return defaultValue;
     }
 
     @Override
     public double lookupAttributeDouble(
-            long deviceId, String attributeName, double defaultValue, boolean lookupConfig) {
+            long deviceId, String attributeName, double defaultValue, boolean lookupServer, boolean lookupConfig) {
         return defaultValue;
     }
 

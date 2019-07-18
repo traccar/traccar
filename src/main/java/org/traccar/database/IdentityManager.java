@@ -32,14 +32,19 @@ public interface IdentityManager {
 
     boolean isLatestPosition(Position position);
 
-    boolean lookupAttributeBoolean(long deviceId, String attributeName, boolean defaultValue, boolean lookupConfig);
+    boolean lookupAttributeBoolean(
+            long deviceId, String attributeName, boolean defaultValue, boolean lookupServer, boolean lookupConfig);
 
-    String lookupAttributeString(long deviceId, String attributeName, String defaultValue, boolean lookupConfig);
+    String lookupAttributeString(
+            long deviceId, String attributeName, String defaultValue, boolean lookupServer, boolean lookupConfig);
 
-    int lookupAttributeInteger(long deviceId, String attributeName, int defaultValue, boolean lookupConfig);
+    int lookupAttributeInteger(
+            long deviceId, String attributeName, int defaultValue, boolean lookupServer, boolean lookupConfig);
 
-    long lookupAttributeLong(long deviceId, String attributeName, long defaultValue, boolean lookupConfig);
+    long lookupAttributeLong(
+            long deviceId, String attributeName, long defaultValue, boolean lookupServer, boolean lookupConfig);
 
-    double lookupAttributeDouble(long deviceId, String attributeName, double defaultValue, boolean lookupConfig);
+    double lookupAttributeDouble(
+            long deviceId, String attributeName, double defaultValue, boolean lookupServer, boolean lookupConfig);
 
 }

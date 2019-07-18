@@ -86,7 +86,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
 
     protected TimeZone getTimeZone(long deviceId, String defaultTimeZone) {
         TimeZone result = TimeZone.getTimeZone(defaultTimeZone);
-        String timeZoneName = identityManager.lookupAttributeString(deviceId, "decoder.timezone", null, true);
+        String timeZoneName = identityManager.lookupAttributeString(deviceId, "decoder.timezone", null, false, true);
         if (timeZoneName != null) {
             result = TimeZone.getTimeZone(timeZoneName);
         } else {
