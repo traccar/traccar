@@ -254,7 +254,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
             sendAcknowledge(status, event, checksum, channel, remoteAddress);
 
             String devicePassword = Context.getIdentityManager()
-                .getDevicePassword(deviceSession.getDeviceId(), DEFAULT_DEVICE_PASSWORD);
+                .getDevicePassword(deviceSession.getDeviceId(), getProtocolName(), DEFAULT_DEVICE_PASSWORD);
             sendEventResponse(event, devicePassword, channel, remoteAddress);
         }
 

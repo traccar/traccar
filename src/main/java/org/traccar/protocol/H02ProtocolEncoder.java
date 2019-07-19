@@ -60,7 +60,7 @@ public class H02ProtocolEncoder extends StringProtocolEncoder {
             case Command.TYPE_POSITION_PERIODIC:
                 String frequency = command.getAttributes().get(Command.KEY_FREQUENCY).toString();
                 if (Context.getIdentityManager().lookupAttributeBoolean(
-                        command.getDeviceId(), "h02.alternative", false, false, true)) {
+                        command.getDeviceId(), getProtocolName() + ".alternative", false, false, true)) {
                     return formatCommand(time, uniqueId, "D1", frequency);
                 } else {
                     return formatCommand(time, uniqueId, "S71", "22", frequency);

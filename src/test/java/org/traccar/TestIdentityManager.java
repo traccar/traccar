@@ -30,7 +30,7 @@ public final class TestIdentityManager implements IdentityManager {
     }
 
     @Override
-    public String getDevicePassword(long id, String defaultPassword) {
+    public String getDevicePassword(long id, String protocol, String defaultPassword) {
         return defaultPassword;
     }
 
