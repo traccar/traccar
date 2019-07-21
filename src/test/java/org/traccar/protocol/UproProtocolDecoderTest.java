@@ -10,6 +10,18 @@ public class UproProtocolDecoderTest extends ProtocolTest {
 
         UproProtocolDecoder decoder = new UproProtocolDecoder(null);
 
+        verifyAttributes(decoder, buffer(
+                "*VK201867282035754650,AH&B0000000000&W00&M990&N31&Z02&b2&T0458#"));
+
+        verifyAttributes(decoder, buffer(
+                "*VK201867282035455779,AH&B0000000000&W00&M940&N30&Z02&Y12922&T0268#"));
+
+        verifyPosition(decoder, buffer(
+                "*VK200867282035455779,BA&A0850065052928902036605660013170719&B0000000000&W00&G000030&M850&N20&O1808&o10&Y12922&T0081#"));
+
+        verifyAttributes(decoder, buffer(
+                "*VK200867282035455779,BA&X260,6,1016,13931,60;1016,13929,81;1016,14174,82;1016,13930,82&E190717103920&B0100000000&W00&G000030&M900&N23&O0000&o07&Y14014&T0015#"));
+
         verifyPosition(decoder, buffer(
                 "*HQ200861810538000002,BA&A0206033302618209658563620115180119&B0100000040&C6328680=&F0039&R2710&V0036&T09&K50000&N04&P0200#"));
 
