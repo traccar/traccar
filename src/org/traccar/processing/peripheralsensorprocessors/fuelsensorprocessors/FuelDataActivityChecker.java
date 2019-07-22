@@ -390,28 +390,43 @@ public class FuelDataActivityChecker {
                                               final DeviceConsumptionInfo consumptionInfo,
                                               final String deviceType) {
 
-        double finalVolume = fuelChangeVolume;
-        if (StringUtil.isNotBlank(deviceType)
-                && deviceType.equals(STATIONARY_TYPE)
-                && adjustVolumeFor.contains(fuelActivity.getActivityType().name())) {
-             finalVolume += getAdjustedVolume(consumptionInfo, fuelEventMetadata);
-        }
-
-        fuelActivity.setChangeVolume(finalVolume);
         fuelActivity.setActivityStartTime(fuelEventMetadata.getStartTime());
         fuelActivity.setActivityEndTime(fuelEventMetadata.getEndTime());
         fuelActivity.setActivityStartPosition(fuelEventMetadata.getActivityStartPosition());
         fuelActivity.setActivityEndPosition(fuelEventMetadata.getActivityEndPosition());
+
+        double finalVolume = fuelChangeVolume;
+        FuelSensorDataHandlerHelper.logDebugIfDeviceId(
+                "Adjustments: " + deviceType
+                        + " activity: " + fuelActivity.getActivityType().name()
+                        + " present: " + adjustVolumeFor.contains(fuelActivity.getActivityType().name())
+                , 95);
+
+        if (StringUtil.isNotBlank(deviceType)
+                && deviceType.equals(STATIONARY_TYPE)
+                && adjustVolumeFor.contains(fuelActivity.getActivityType().name())) {
+            double adjustedVolume = getAdjustedVolume(consumptionInfo, fuelEventMetadata);
+             finalVolume += adjustedVolume;
+            FuelSensorDataHandlerHelper.logDebugIfDeviceId("Volumes: " + adjustedVolume + " " + finalVolume, 95);
+        }
+
+        fuelActivity.setChangeVolume(finalVolume);
+
     }
 
     private static double getAdjustedVolume(DeviceConsumptionInfo consumptionInfo,
                                             FuelEventMetadata fuelEventMetadata) {
 
-        ExpectedFuelConsumption consumption = FuelConsumptionChecker.getExpectedHourlyFuelConsumptionValues(
-                fuelEventMetadata.getActivityStartPosition(),
-                fuelEventMetadata.getActivityEndPosition(),
-                0,
-                consumptionInfo);
+
+        Position start = fuelEventMetadata.getActivityStartPosition();
+        Position end = fuelEventMetadata.getActivityEndPosition();
+
+        FuelSensorDataHandlerHelper.logDebugIfDeviceId(
+                "Adjustments - start ign millis: " + start.getString(Position.KEY_TOTAL_IGN_ON_MILLIS) +
+                        " end ign millis: " + end.getString(Position.KEY_TOTAL_IGN_ON_MILLIS), 95);
+
+        ExpectedFuelConsumption consumption =
+                FuelConsumptionChecker.getExpectedHourlyFuelConsumptionValues(start, end, 0, consumptionInfo);
 
         return consumption.expectedCurrentFuelConsumed;
     }

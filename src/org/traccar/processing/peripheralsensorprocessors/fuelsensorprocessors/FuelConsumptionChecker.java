@@ -163,9 +163,9 @@ public class FuelConsumptionChecker {
 
 
     public static ExpectedFuelConsumption getExpectedHourlyFuelConsumptionValues(Position startPosition,
-                                                                                  Position endPosition,
-                                                                                  double allowedDeviation,
-                                                                                  DeviceConsumptionInfo consumptionInfo) {
+                                                                                 Position endPosition,
+                                                                                 double allowedDeviation,
+                                                                                 DeviceConsumptionInfo consumptionInfo) {
 
         long maxRunningTime = endPosition.getLong(Position.KEY_TOTAL_IGN_ON_MILLIS) - startPosition.getLong(Position.KEY_TOTAL_IGN_ON_MILLIS);
 
@@ -174,6 +174,13 @@ public class FuelConsumptionChecker {
         double expectedMinFuelConsumed = consumptionInfo.getMinDeviceConsumptionRate() * maxRunTimeHours;
         double expectedMaxFuelConsumed = consumptionInfo.getMaxDeviceConsumptionRate() * maxRunTimeHours;
         double expectedCurrentFuelConsumed = consumptionInfo.getAssumedDeviceConsumptionRate() * maxRunTimeHours;
+
+        FuelSensorDataHandlerHelper.logDebugIfDeviceId(
+                "Adjustments: maxRunningTime " + maxRunningTime
+                        + " in hours: " + maxRunTimeHours
+                        + " rate: " + consumptionInfo.getAssumedDeviceConsumptionRate()
+                        + " expectedCurrentFuelConsumed: " + expectedCurrentFuelConsumed,
+                95);
 
         ExpectedFuelConsumption expectedFuelConsumption = new ExpectedFuelConsumption(expectedMinFuelConsumed,
                                                                                       expectedMaxFuelConsumed,
