@@ -67,8 +67,6 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
             updateLatestKnownPosition(position);
 
-
-
             Optional<List<PeripheralSensor>> peripheralSensorOnDevice =
                     Context.getPeripheralSensorManager().getSensorByDeviceId(deviceId);
 
@@ -79,6 +77,18 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             }
 
             List<PeripheralSensor> sensorsOnDeviceList = peripheralSensorOnDevice.get();
+
+            ProcessingInfo processingInfo = Context.getDeviceManager().getDeviceProcessingInfo(deviceId);
+            String fuelProcessingType = processingInfo.getProcessingType();
+            switch (fuelProcessingType) {
+                case ProcessingInfo.AVG_FUEL_PROCESS_TYPE:
+                case ProcessingInfo.SUM_FUEL_PROCESS_TYPE:
+                    PeripheralSensor dummySensor = sensorsOnDeviceList.get(0).cloneMe(processingInfo.getFinalCalibFieldName());
+                    sensorsOnDeviceList.clear();
+                    sensorsOnDeviceList.add(dummySensor);
+                    break;
+            }
+
             if (sensorsOnDeviceList.isEmpty()) {
                 logDebugIfNotLoading(String.format("Sensors list empty for deviceId: %d. Refreshing sensors map.", deviceId), deviceId);
                 Context.getPeripheralSensorManager().refreshPeripheralSensorsMap();

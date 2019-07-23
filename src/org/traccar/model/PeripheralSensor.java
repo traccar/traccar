@@ -37,16 +37,16 @@ public class PeripheralSensor extends ExtendedModel {
         return deviceId;
     }
 
-    public void setDeviceId(int deviceId) {
-        this.deviceId = deviceId;
+    public void setDeviceId(Number deviceId) {
+        this.deviceId = deviceId.longValue();
     }
 
     public long getPeripheralSensorId() {
         return peripheralSensorId;
     }
 
-    public void setPeripheralSensorId(int peripheralSensorId) {
-        this.peripheralSensorId = peripheralSensorId;
+    public void setPeripheralSensorId(Number peripheralSensorId) {
+        this.peripheralSensorId = peripheralSensorId.longValue();
     }
 
     public String getTypeName() {
@@ -164,5 +164,24 @@ public class PeripheralSensor extends ExtendedModel {
 
         // Should make the caller fall back to activity threshold set on device, or default from the config file
         return Optional.empty();
+    }
+
+    public PeripheralSensor cloneMe(String finalCalibFieldName) {
+        PeripheralSensor peripheralSensor = new PeripheralSensor();
+        peripheralSensor.setDeviceId(this.getDeviceId());
+        peripheralSensor.setPeripheralSensorId(this.getPeripheralSensorId());
+        peripheralSensor.setTypeName(this.getTypeName());
+        peripheralSensor.setCalibrationData(this.getCalibrationData());
+
+        peripheralSensor.set(FuelDataConstants.CALIB_FUEL_ON_POSITION_NAME, finalCalibFieldName);
+        peripheralSensor.set(FuelDataConstants.OUTLIER_WINDOW_SIZE_FIELD_NAME, this.getOutlierWindowSize());
+        peripheralSensor.set(FuelDataConstants.MOVING_AVG_WINDOW_SIZE_FIELD_NAME, this.getMovingAvgWindowSize());
+        peripheralSensor.set(FuelDataConstants.ALERTS_WINDOW_SIZE_FIELD_NAME, this.getEventsWindowSize());
+        this.getFillThreshold().ifPresent(ft -> peripheralSensor.set(FuelDataConstants.FILL_THRESHOLD_FIELD_NAME, ft));
+        this.getDrainThreshold().ifPresent(dt -> peripheralSensor.set(FuelDataConstants.DRAIN_THRESHOLD_FIELD_NAME, dt));
+        this.getIgnOffDrainThreshold().ifPresent(igodt -> peripheralSensor.set(FuelDataConstants.IGN_OFF_DRAIN_THRESHOLD_FIELD_NAME, igodt));
+        this.getIgnOffDrainThreshold().ifPresent(igodt -> peripheralSensor.set(FuelDataConstants.IGN_ON_DRAIN_THRESHOLD_FIELD_NAME, igodt));
+
+        return peripheralSensor;
     }
 }

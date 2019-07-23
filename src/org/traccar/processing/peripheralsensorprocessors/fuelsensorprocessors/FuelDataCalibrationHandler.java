@@ -1,9 +1,7 @@
 package org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.traccar.BaseDataHandler;
 import org.traccar.Context;
-import org.traccar.helper.Log;
 import org.traccar.model.PeripheralSensor;
 import org.traccar.model.Position;
 import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.fueldataparsers.FuelDataParser;
@@ -11,10 +9,7 @@ import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.fu
 import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.fueldataparsers.omnicomm.DigitalLLSFuelDataParser;
 import org.traccar.transforms.model.SensorPointsMap;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class FuelDataCalibrationHandler extends BaseDataHandler {
@@ -29,7 +24,7 @@ public class FuelDataCalibrationHandler extends BaseDataHandler {
     @Override
     protected Position handlePosition(Position position) {
         long deviceId = position.getDeviceId();
-        Optional<List<PeripheralSensor>> sensorsOnDevice = Context.getPeripheralSensorManager().getSensorByDeviceId(deviceId);
+        Optional<List<PeripheralSensor>> sensorsOnDevice = Context.getPeripheralSensorManager().getLinkedPeripheralSensors(deviceId);
 
         if (!sensorsOnDevice.isPresent()) {
             FuelSensorDataHandlerHelper.logDebugIfDeviceId(String.format("No sensors found on deviceId: %d. Refreshing sensors map.", deviceId), deviceId);
@@ -51,7 +46,42 @@ public class FuelDataCalibrationHandler extends BaseDataHandler {
             }
             handleCalibrationData(position, deviceId, fuelSensor);
         }
+
+        ProcessingInfo processingInfo = Context.getDeviceManager().getDeviceProcessingInfo(deviceId);
+        String fuelProcessingType = processingInfo.getProcessingType();
+
+        switch (fuelProcessingType) {
+            case ProcessingInfo.AVG_FUEL_PROCESS_TYPE:
+            case ProcessingInfo.SUM_FUEL_PROCESS_TYPE:
+                relatedSensorDataProcessing(position, fuelSensorsList, processingInfo);
+                break;
+        }
+
         return position;
+    }
+
+    private void relatedSensorDataProcessing(Position position,
+                                             List<PeripheralSensor> sensorsOnDeviceList,
+                                             ProcessingInfo processingInfo) {
+
+        // NOTE: we'll need to ensure that the calib_fuel field names on each sensor in this case are different from the
+        // default "calib_fuel" and different from each other as well.
+
+        String fuelProcessingType = processingInfo.getProcessingType();
+        DoubleSummaryStatistics calibFuelValues = sensorsOnDeviceList.stream()
+                                                                     .map(PeripheralSensor::getCalibFuelFieldName)
+                                                                     .map(position::getDouble)
+                                                                     .mapToDouble(Double::valueOf)
+                                                                     .summaryStatistics();
+
+        switch(fuelProcessingType) {
+            case ProcessingInfo.AVG_FUEL_PROCESS_TYPE:
+                position.set(processingInfo.getFinalCalibFieldName(), calibFuelValues.getAverage());
+                break;
+            case ProcessingInfo.SUM_FUEL_PROCESS_TYPE:
+                position.set(processingInfo.getFinalCalibFieldName(), calibFuelValues.getSum());
+                break;
+        }
     }
 
     private void handleCalibrationData(Position position, long deviceId, PeripheralSensor fuelSensor) {
