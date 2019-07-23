@@ -243,7 +243,7 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
         } else {
 
             List<Position> positions = new LinkedList<>();
-            for (String item : parser.next().split("$")) {
+            for (String item : parser.next().split("\\$")) {
                 positions.add(decodePosition(deviceSession, item));
             }
             return positions;
