@@ -15,9 +15,9 @@
  */
 package org.traccar.model;
 
-import java.util.Date;
-
 import org.traccar.database.QueryIgnore;
+
+import java.util.Date;
 
 public class Position extends Message {
 
@@ -89,6 +89,10 @@ public class Position extends Message {
     public static final String KEY_DTCS = "dtcs";
     public static final String KEY_OBD_SPEED = "obdSpeed"; // knots
     public static final String KEY_OBD_ODOMETER = "obdOdometer"; // meters
+
+
+    public static final String KEY_MAX_ACCELERATION = "maxAcc";
+    public static final String KEY_MAX_DECELERATION = "maxDec";
 
     public static final String KEY_RESULT = "result";
 
