@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1224,8 +1224,11 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                 case "CAN":
                     result = decodeCan(channel, remoteAddress, sentence);
                     break;
+                case "CTN":
                 case "FRI":
                 case "GEO":
+                case "RTL":
+                case "DOG":
                 case "STR":
                     result = decodeFri(channel, remoteAddress, sentence);
                     break;
