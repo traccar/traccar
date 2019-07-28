@@ -619,12 +619,13 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
         // possible values for GNSS Status AVL_ID = 69 - https://wiki.teltonika.lt/view/FMB_AVL_ID
         // mark positions in GNSS sleep mode as valid
-        if(!position.getValid() && sat == 0 &&
-                ( gpsStatus == GNSS_IN_SLEEP_STATE ||
-                        sleep == SLEEP_GPS ||
-                        sleep == SLEEP_DEEP
+        if (!position.getValid() && sat == 0
+                &&
+                (gpsStatus == GNSS_IN_SLEEP_STATE
+                        || sleep == SLEEP_GPS
+                        || sleep == SLEEP_DEEP
                 )
-        ){
+        ) {
             position.setValid(true);
         }
     }
