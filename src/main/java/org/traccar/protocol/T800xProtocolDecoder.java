@@ -264,7 +264,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_BATTERY, BcdUtil.readInteger(buf, 2) * 0.1);
             position.set("solarPanel", BcdUtil.readInteger(buf, 2) * 0.1);
             position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
-            position.set(Position.KEY_STATUS, buf.readUnsignedShort());
+            position.set(Position.KEY_IGNITION, BitUtil.check(buf.readUnsignedShort(), 2));
 
         } else if (buf.readableBytes() >= 2) {
 
