@@ -80,17 +80,17 @@ public class LeafSpyProtocolDecoder extends BaseHttpProtocolDecoder {
                     case "Elv":
                         position.setAltitude(Double.parseDouble(value));
                         break;
-                    case "DevBat":
+                    case "SOC":
                         position.set(Position.KEY_BATTERY_LEVEL, Double.parseDouble(value));
                         break;
                     case "user":
                         position.set(Position.KEY_DRIVER_UNIQUE_ID, value);
                         break;
-                    case "SOC":
-                        position.set(Position.KEY_CHARGE, Double.parseDouble(value));
+                    case "ChrgMode":
+                        position.set(Position.KEY_CHARGE, Integer.parseInt(value) != 0);
                         break;
                     case "Odo":
-                        position.set(Position.KEY_OBD_ODOMETER, Integer.parseInt(value));
+                        position.set(Position.KEY_OBD_ODOMETER, Integer.parseInt(value) * 1000);
                         break;
                     default:
                         try {
@@ -122,11 +122,13 @@ public class LeafSpyProtocolDecoder extends BaseHttpProtocolDecoder {
         }
 
         if (position.getDeviceId() != 0) {
-            HttpResponse response = new DefaultFullHttpResponse(
-                HttpVersion.HTTP_1_1,
-                HttpResponseStatus.OK,
-                Unpooled.copiedBuffer("\"status\":\"0\"", StandardCharsets.US_ASCII));
-            channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
+            if(channel != null) {
+                HttpResponse response = new DefaultFullHttpResponse(
+                    HttpVersion.HTTP_1_1,
+                    HttpResponseStatus.OK,
+                    Unpooled.copiedBuffer("\"status\":\"0\"", StandardCharsets.US_ASCII));
+                channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
+            }
             return position;
         } else {
             sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
