@@ -44,6 +44,23 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
         return dateFormat.parse(data);
     }
 
+    private String decodeAlarm(int event) {
+        switch (event) {
+            case 5:
+                return Position.ALARM_SOS;
+            case 8:
+                return Position.ALARM_LOW_BATTERY;
+            case 9:
+                return Position.ALARM_GEOFENCE_ENTER;
+            case 10:
+                return Position.ALARM_GEOFENCE_EXIT;
+            case 12:
+                return Position.ALARM_POWER_OFF;
+            default:
+                return null;
+        }
+    }
+
     private void decodeLocation(Position position, String data) throws ParseException {
         int index = 0;
         String[] values = data.split("\\+");
@@ -57,7 +74,9 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(UnitsConverter.knotsFromMps(Double.parseDouble(values[index++])));
         position.setCourse(Integer.parseInt(values[index++]));
 
-        position.set(Position.KEY_EVENT, Integer.parseInt(values[index++]));
+        int event = Integer.parseInt(values[index++]);
+        position.set(Position.KEY_ALARM, decodeAlarm(event));
+        position.set(Position.KEY_EVENT, event);
         position.set(Position.KEY_BATTERY, Integer.parseInt(values[index++]) * 0.001);
     }
 
