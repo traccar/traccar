@@ -117,7 +117,9 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
 
         position.setNetwork(network);
 
-        position.set(Position.KEY_EVENT, Integer.parseInt(values[index++]));
+        int event = Integer.parseInt(values[index++]);
+        position.set(Position.KEY_ALARM, decodeAlarm(event));
+        position.set(Position.KEY_EVENT, event);
         position.set(Position.KEY_BATTERY, Integer.parseInt(values[index++]) * 0.001);
     }
 
@@ -131,7 +133,9 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
 
         index += 4; // fix values
 
-        position.set(Position.KEY_EVENT, Integer.parseInt(values[index++]));
+        int event = Integer.parseInt(values[index++]);
+        position.set(Position.KEY_ALARM, decodeAlarm(event));
+        position.set(Position.KEY_EVENT, event);
         position.set(Position.KEY_BATTERY, Integer.parseInt(values[index++]) * 0.001);
     }
 
