@@ -18,6 +18,8 @@ package org.traccar.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
@@ -35,9 +37,13 @@ import java.util.List;
 
 public class EgtsProtocolDecoder extends BaseProtocolDecoder {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(EgtsProtocolDecoder.class);
+
     public EgtsProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
+
+    private boolean useOidAsDeviceId = true;
 
     public static final int PT_RESPONSE = 0;
     public static final int PT_APPDATA = 1;
@@ -68,7 +74,7 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_ABS_CNTR_DATA = 25;
     public static final int MSG_ABS_LOOPIN_DATA = 26;
     public static final int MSG_LIQUID_LEVEL_SENSOR = 27;
-    public static final int MSG_PASSENGERS_COUNTERS  = 28;
+    public static final int MSG_PASSENGERS_COUNTERS = 28;
 
     private int packetId;
 
@@ -121,141 +127,186 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
 
         ByteBuf buf = (ByteBuf) msg;
 
-        int index = buf.getUnsignedShort(buf.readerIndex() + 5 + 2);
-        buf.skipBytes(buf.getUnsignedByte(buf.readerIndex() + 3));
-
         List<Position> positions = new LinkedList<>();
 
-        while (buf.readableBytes() > 2) {
+        // buf possibly contains multiple packets
+        while (buf.readableBytes() >= 11) {
 
-            int length = buf.readUnsignedShortLE();
-            int recordIndex = buf.readUnsignedShortLE();
-            int recordFlags = buf.readUnsignedByte();
+//            short packetFlags = buf.getUnsignedByte(buf.readerIndex() + 2);
+//            if (BitUtil.check(packetFlags, 5)) {
+//                int pra = buf.getUnsignedShortLE(10);
+//                int rca = buf.getUnsignedShortLE(12);
+//                short ttl = buf.getUnsignedByte(14);
+//                LOGGER.trace("PRA:{} RCA:{} TTL: {}", pra, rca, ttl);
+//            }
 
-            if (BitUtil.check(recordFlags, 0)) {
-                buf.readUnsignedIntLE(); // object id
+            short headerLength = buf.getUnsignedByte(buf.readerIndex() + 3);
+            int frameDataLength = buf.getUnsignedShortLE(buf.readerIndex() + 5);
+            int index = buf.getUnsignedShort(buf.readerIndex() + 5 + 2);
+            short packetType = buf.getUnsignedByte(buf.readerIndex() + 5 + 2 + 2);
+            buf.skipBytes(headerLength);
+
+            if (packetType == PT_RESPONSE) {
+                // some retranslator systems do send response on response packets
+                if (frameDataLength > 0) {
+                    buf.skipBytes(frameDataLength + 2); // 2-byte CRC is present only if frameData exists
+                }
+                continue;
             }
 
-            if (BitUtil.check(recordFlags, 1)) {
-                buf.readUnsignedIntLE(); // event id
-            }
-            if (BitUtil.check(recordFlags, 2)) {
-                buf.readUnsignedIntLE(); // time
-            }
+            int frameDataEnd = buf.readerIndex() + frameDataLength;
+            long oid = 0L;
+            while (buf.readerIndex() < frameDataEnd) {
 
-            int serviceType = buf.readUnsignedByte();
-            buf.readUnsignedByte(); // recipient service type
+                int length = buf.readUnsignedShortLE();
+                int recordIndex = buf.readUnsignedShortLE();
+                int recordFlags = buf.readUnsignedByte();
 
-            int recordEnd = buf.readerIndex() + length;
-
-            Position position = new Position(getProtocolName());
-            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
-            if (deviceSession != null) {
-                position.setDeviceId(deviceSession.getDeviceId());
-            }
-
-            ByteBuf response = Unpooled.buffer();
-            response.writeShortLE(recordIndex);
-            response.writeByte(0); // success
-            sendResponse(channel, PT_RESPONSE, index, serviceType, MSG_RECORD_RESPONSE, response);
-
-            while (buf.readerIndex() < recordEnd) {
-                int type = buf.readUnsignedByte();
-                int end = buf.readUnsignedShortLE() + buf.readerIndex();
-
-                if (type == MSG_TERM_IDENTITY) {
-
-                    buf.readUnsignedIntLE(); // object id
-                    int flags = buf.readUnsignedByte();
-
-                    if (BitUtil.check(flags, 0)) {
-                        buf.readUnsignedShortLE(); // home dispatcher identifier
-                    }
-                    if (BitUtil.check(flags, 1)) {
-                        getDeviceSession(
-                                channel, remoteAddress, buf.readSlice(15).toString(StandardCharsets.US_ASCII).trim());
-                    }
-                    if (BitUtil.check(flags, 2)) {
-                        getDeviceSession(
-                                channel, remoteAddress, buf.readSlice(16).toString(StandardCharsets.US_ASCII).trim());
-                    }
-                    if (BitUtil.check(flags, 3)) {
-                        buf.skipBytes(3); // language identifier
-                    }
-                    if (BitUtil.check(flags, 5)) {
-                        buf.skipBytes(3); // network identifier
-                    }
-                    if (BitUtil.check(flags, 6)) {
-                        buf.readUnsignedShortLE(); // buffer size
-                    }
-                    if (BitUtil.check(flags, 7)) {
-                        getDeviceSession(
-                                channel, remoteAddress, buf.readSlice(15).toString(StandardCharsets.US_ASCII).trim());
-                    }
-
-                    response = Unpooled.buffer();
-                    response.writeByte(0); // success
-                    sendResponse(channel, PT_APPDATA, 0, serviceType, MSG_RESULT_CODE, response);
-
-                } else if (type == MSG_POS_DATA) {
-
-                    position.setTime(new Date((buf.readUnsignedIntLE() + 1262304000) * 1000)); // since 2010-01-01
-                    position.setLatitude(buf.readUnsignedIntLE() * 90.0 / 0xFFFFFFFFL);
-                    position.setLongitude(buf.readUnsignedIntLE() * 180.0 / 0xFFFFFFFFL);
-
-                    int flags = buf.readUnsignedByte();
-                    position.setValid(BitUtil.check(flags, 0));
-                    if (BitUtil.check(flags, 5)) {
-                        position.setLatitude(-position.getLatitude());
-                    }
-                    if (BitUtil.check(flags, 6)) {
-                        position.setLongitude(-position.getLongitude());
-                    }
-
-                    int speed = buf.readUnsignedShortLE();
-                    position.setSpeed(UnitsConverter.knotsFromKph(BitUtil.to(speed, 14) * 0.1));
-                    position.setCourse(buf.readUnsignedByte() + (BitUtil.check(speed, 15) ? 0x100 : 0));
-
-                    position.set(Position.KEY_ODOMETER, buf.readUnsignedMediumLE() * 100);
-                    position.set(Position.KEY_INPUT, buf.readUnsignedByte());
-                    position.set(Position.KEY_EVENT, buf.readUnsignedByte());
-
-                    if (BitUtil.check(flags, 7)) {
-                        position.setAltitude(buf.readMediumLE());
-                    }
-
-                } else if (type == MSG_EXT_POS_DATA) {
-
-                    int flags = buf.readUnsignedByte();
-
-                    if (BitUtil.check(flags, 0)) {
-                        position.set(Position.KEY_VDOP, buf.readUnsignedShortLE());
-                    }
-                    if (BitUtil.check(flags, 1)) {
-                        position.set(Position.KEY_HDOP, buf.readUnsignedShortLE());
-                    }
-                    if (BitUtil.check(flags, 2)) {
-                        position.set(Position.KEY_PDOP, buf.readUnsignedShortLE());
-                    }
-                    if (BitUtil.check(flags, 3)) {
-                        position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
-                    }
-
-                } else if (type == MSG_AD_SENSORS_DATA) {
-
-                    buf.readUnsignedByte(); // inputs flags
-
-                    position.set(Position.KEY_OUTPUT, buf.readUnsignedByte());
-
-                    buf.readUnsignedByte(); // adc flags
-
+                if (BitUtil.check(recordFlags, 0)) {
+                    oid = buf.readUnsignedIntLE(); // object id
                 }
 
-                buf.readerIndex(end);
+                if (BitUtil.check(recordFlags, 1)) {
+                    buf.readUnsignedIntLE(); // event id
+                }
+                if (BitUtil.check(recordFlags, 2)) {
+                    buf.readUnsignedIntLE(); // time
+                }
+
+                int serviceType = buf.readUnsignedByte();
+                buf.readUnsignedByte(); // recipient service type
+
+                int recordEnd = buf.readerIndex() + length;
+
+                Position position = new Position(getProtocolName());
+                DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+                if (deviceSession != null) {
+                    position.setDeviceId(deviceSession.getDeviceId());
+                }
+
+                ByteBuf response = Unpooled.buffer();
+                response.writeShortLE(recordIndex);
+                response.writeByte(0); // success
+                sendResponse(channel, PT_RESPONSE, index, serviceType, MSG_RECORD_RESPONSE, response);
+
+                while (buf.readerIndex() < recordEnd) {
+                    int type = buf.readUnsignedByte();
+                    int end = buf.readUnsignedShortLE() + buf.readerIndex();
+//                    LOGGER.trace("{} {} {}", buf.readerIndex(), end, type);
+
+                    if (type == MSG_TERM_IDENTITY) {
+                        useOidAsDeviceId = false;
+
+                        buf.readUnsignedIntLE(); // object id
+                        int flags = buf.readUnsignedByte();
+
+                        if (BitUtil.check(flags, 0)) {
+                            buf.readUnsignedShortLE(); // home dispatcher identifier
+                        }
+                        if (BitUtil.check(flags, 1)) {
+                            String imei = buf.readSlice(15).toString(StandardCharsets.US_ASCII).trim();
+                            LOGGER.trace("[{}] Using IMEI1 as deviceId: {}", channel == null ? "" : channel.id(), imei);
+                            getDeviceSession(channel, remoteAddress, imei);
+                        }
+                        if (BitUtil.check(flags, 2)) {
+                            String imei = buf.readSlice(16).toString(StandardCharsets.US_ASCII).trim();
+                            LOGGER.trace("[{}] Using IMEI2 as deviceId: {}", channel == null ? "" : channel.id(), imei);
+                            getDeviceSession(channel, remoteAddress, imei);
+                        }
+                        if (BitUtil.check(flags, 3)) {
+                            buf.skipBytes(3); // language identifier
+                        }
+                        if (BitUtil.check(flags, 5)) {
+                            buf.skipBytes(3); // network identifier
+                        }
+                        if (BitUtil.check(flags, 6)) {
+                            buf.readUnsignedShortLE(); // buffer size
+                        }
+                        if (BitUtil.check(flags, 7)) {
+                            String imei = buf.readSlice(15).toString(StandardCharsets.US_ASCII).trim();
+                            LOGGER.trace("[{}] Using IMEI7 as deviceId: {}", channel == null ? "" : channel.id(), imei);
+                            getDeviceSession(channel, remoteAddress, imei);
+                        }
+
+                        response = Unpooled.buffer();
+                        response.writeByte(0); // success
+                        sendResponse(channel, PT_APPDATA, 0, serviceType, MSG_RESULT_CODE, response);
+
+                    } else if (type == MSG_POS_DATA) {
+
+                        position.setTime(new Date((buf.readUnsignedIntLE() + 1262304000) * 1000)); // since 2010-01-01
+                        position.setLatitude(buf.readUnsignedIntLE() * 90.0 / 0xFFFFFFFFL);
+                        position.setLongitude(buf.readUnsignedIntLE() * 180.0 / 0xFFFFFFFFL);
+
+                        int flags = buf.readUnsignedByte();
+                        position.setValid(BitUtil.check(flags, 0));
+                        if (BitUtil.check(flags, 5)) {
+                            position.setLatitude(-position.getLatitude());
+                        }
+                        if (BitUtil.check(flags, 6)) {
+                            position.setLongitude(-position.getLongitude());
+                        }
+
+                        int speed = buf.readUnsignedShortLE();
+                        position.setSpeed(UnitsConverter.knotsFromKph(BitUtil.to(speed, 14) * 0.1));
+                        position.setCourse(buf.readUnsignedByte() + (BitUtil.check(speed, 15) ? 0x100 : 0));
+
+                        position.set(Position.KEY_ODOMETER, buf.readUnsignedMediumLE() * 100);
+                        position.set(Position.KEY_INPUT, buf.readUnsignedByte());
+                        position.set(Position.KEY_EVENT, buf.readUnsignedByte());
+
+                        if (BitUtil.check(flags, 7)) {
+                            position.setAltitude(buf.readMediumLE());
+                        }
+
+                    } else if (type == MSG_EXT_POS_DATA) {
+
+                        int flags = buf.readUnsignedByte();
+
+                        if (BitUtil.check(flags, 0)) {
+                            position.set(Position.KEY_VDOP, buf.readUnsignedShortLE());
+                        }
+                        if (BitUtil.check(flags, 1)) {
+                            position.set(Position.KEY_HDOP, buf.readUnsignedShortLE());
+                        }
+                        if (BitUtil.check(flags, 2)) {
+                            position.set(Position.KEY_PDOP, buf.readUnsignedShortLE());
+                        }
+                        if (BitUtil.check(flags, 3)) {
+                            position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+                        }
+
+                    } else if (type == MSG_AD_SENSORS_DATA) {
+
+                        buf.readUnsignedByte(); // inputs flags
+
+                        position.set(Position.KEY_OUTPUT, buf.readUnsignedByte());
+
+                        buf.readUnsignedByte(); // adc flags
+
+                    }
+
+                    buf.readerIndex(end);
+                }
+
+                if (serviceType == SERVICE_TELEDATA && position.getFixTime() != null) {
+                    if (useOidAsDeviceId && oid != 0L) {
+                        LOGGER.debug("[{}] Using OID as deviceId: {}", channel == null ? "" : channel.id(), oid);
+                        deviceSession = getDeviceSession(channel, remoteAddress, true, String.valueOf(oid));
+                        if (deviceSession != null) {
+                            position.setDeviceId(deviceSession.getDeviceId());
+                        }
+                    }
+                    if (position.getDeviceId() != 0L) {
+                        positions.add(position);
+//                    } else {
+//                        LOGGER.debug("[{}] EGTS not authorized, OID: {}", channel.id(), oid);
+                    }
+                }
             }
 
-            if (serviceType == SERVICE_TELEDATA && deviceSession != null) {
-                positions.add(position);
+            if (frameDataLength > 0) {
+                buf.readerIndex(frameDataEnd + 2);
             }
         }
 
