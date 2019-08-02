@@ -132,14 +132,6 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
         // buf possibly contains multiple packets
         while (buf.readableBytes() >= 11) {
 
-//            short packetFlags = buf.getUnsignedByte(buf.readerIndex() + 2);
-//            if (BitUtil.check(packetFlags, 5)) {
-//                int pra = buf.getUnsignedShortLE(10);
-//                int rca = buf.getUnsignedShortLE(12);
-//                short ttl = buf.getUnsignedByte(14);
-//                LOGGER.trace("PRA:{} RCA:{} TTL: {}", pra, rca, ttl);
-//            }
-
             short headerLength = buf.getUnsignedByte(buf.readerIndex() + 3);
             int frameDataLength = buf.getUnsignedShortLE(buf.readerIndex() + 5);
             int index = buf.getUnsignedShort(buf.readerIndex() + 5 + 2);
@@ -192,7 +184,6 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
                 while (buf.readerIndex() < recordEnd) {
                     int type = buf.readUnsignedByte();
                     int end = buf.readUnsignedShortLE() + buf.readerIndex();
-//                    LOGGER.trace("{} {} {}", buf.readerIndex(), end, type);
 
                     if (type == MSG_TERM_IDENTITY) {
                         useOidAsDeviceId = false;
@@ -299,8 +290,6 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
                     }
                     if (position.getDeviceId() != 0L) {
                         positions.add(position);
-//                    } else {
-//                        LOGGER.debug("[{}] EGTS not authorized, OID: {}", channel.id(), oid);
                     }
                 }
             }
