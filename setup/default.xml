@@ -269,5 +269,6 @@
     <entry key='starcom.port'>5190</entry>
     <entry key='mictrack.port'>5191</entry>
     <entry key='plugin.port'>5192</entry>
+    <entry key='leafspy.port'>5193</entry>
 
 </properties>
