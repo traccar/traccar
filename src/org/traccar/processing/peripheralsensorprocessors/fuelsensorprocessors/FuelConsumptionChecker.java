@@ -13,7 +13,7 @@ import java.util.Optional;
 public class FuelConsumptionChecker {
 
     private static final long DEFAULT_MAX_CAPACITY = 500L;
-    private static final long MILLIS_IN_HOUR = 36_00_000L;
+    private static final double MILLIS_IN_HOUR = 36_00_000.0;
 
     public static boolean isFuelConsumptionAsExpected(Position startPosition,
                                                       Position endPosition,

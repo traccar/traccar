@@ -422,8 +422,8 @@ public class FuelDataActivityChecker {
         Position end = fuelEventMetadata.getActivityEndPosition();
 
         FuelSensorDataHandlerHelper.logDebugIfDeviceId(
-                "Adjustments - start ign millis: " + start.getString(Position.KEY_TOTAL_IGN_ON_MILLIS) +
-                        " end ign millis: " + end.getString(Position.KEY_TOTAL_IGN_ON_MILLIS), 95);
+                "Adjustments - start ign millis: " + start.getLong(Position.KEY_TOTAL_IGN_ON_MILLIS) +
+                        " end ign millis: " + end.getLong(Position.KEY_TOTAL_IGN_ON_MILLIS), 95);
 
         ExpectedFuelConsumption consumption =
                 FuelConsumptionChecker.getExpectedHourlyFuelConsumptionValues(start, end, 0, consumptionInfo);
