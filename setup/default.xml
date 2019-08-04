@@ -270,5 +270,6 @@
     <entry key='mictrack.port'>5191</entry>
     <entry key='plugin.port'>5192</entry>
     <entry key='leafspy.port'>5193</entry>
+    <entry key='naviset.port'>5194</entry>
 
 </properties>
