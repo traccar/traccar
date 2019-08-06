@@ -130,7 +130,6 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
         List<Position> positions = new LinkedList<>();
 
         short headerLength = buf.getUnsignedByte(buf.readerIndex() + 3);
-        int frameDataLength = buf.getUnsignedShortLE(buf.readerIndex() + 5);
         int index = buf.getUnsignedShort(buf.readerIndex() + 5 + 2);
         short packetType = buf.getUnsignedByte(buf.readerIndex() + 5 + 2 + 2);
         buf.skipBytes(headerLength);
