@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,8 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN = new PatternBuilder()
             .expression("[A-Z]{2,3}")
-            .number("APdd")
+            .expression("[A-Z]P")
+            .number("dd")
             .number("(dd)(dd)(dd)")              // date (yymmdd)
             .expression("([AV])")                // validity
             .number("(dd)(dd.d+)")               // latitude
@@ -57,7 +58,8 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
             .number("(ddd)")                     // battery
             .number("(d)")                       // acc
             .number("(dd)")                      // arm status
-            .number("(dd),")                     // working mode
+            .number("(dd)")                      // working mode
+            .number("(?:[0-2]{3})?,")
             .number("(d+),")                     // mcc
             .number("(d+),")                     // mnc
             .number("(d+),")                     // lac
@@ -181,7 +183,9 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
 
             return position;
 
-        } else if (type.equals("AP01") || type.equals("AP10")) {
+        } else if (type.equals("AP01") || type.equals("AP10") || type.equals("YP03")) {
+            org.traccar.helper.PatternUtil.MatchResult matchResult =
+                    org.traccar.helper.PatternUtil.checkPattern(PATTERN.pattern(), (String) msg);
 
             Parser parser = new Parser(PATTERN, sentence);
             if (!parser.matches()) {
