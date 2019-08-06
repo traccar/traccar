@@ -262,5 +262,15 @@
     <entry key='nyitech.port'>5182</entry>
     <entry key='neos.port'>5183</entry>
     <entry key='satsol.port'>5184</entry>
+    <entry key='globalstar.port'>5185</entry>
+    <entry key='sanul.port'>5186</entry>
+    <entry key='minifinder2.port'>5187</entry>
+    <entry key='radar.port'>5188</entry>
+    <entry key='techtlt.port'>5189</entry>
+    <entry key='starcom.port'>5190</entry>
+    <entry key='mictrack.port'>5191</entry>
+    <entry key='plugin.port'>5192</entry>
+    <entry key='leafspy.port'>5193</entry>
+    <entry key='naviset.port'>5194</entry>
 
 </properties>

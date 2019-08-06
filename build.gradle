@@ -1,0 +1,86 @@
+plugins {
+    id "java"
+    id "checkstyle"
+}
+
+repositories {
+    mavenCentral()
+}
+
+sourceCompatibility = "1.8"
+compileJava.options.encoding = "UTF-8"
+
+checkstyle {
+    configFile = "gradle/checkstyle.xml" as File
+    checkstyleTest.enabled = false
+}
+
+ext {
+    guiceVersion = "4.2.2"
+    jettyVersion = "9.4.18.v20190429"
+    jerseyVersion = "2.28"
+    jacksonVersion = "2.9.8"
+}
+
+dependencies {
+    implementation "commons-codec:commons-codec:1.12"
+    implementation "com.h2database:h2:1.4.199"
+    implementation "mysql:mysql-connector-java:8.0.15"
+    implementation "org.postgresql:postgresql:42.2.5"
+    implementation "com.microsoft.sqlserver:mssql-jdbc:7.2.2.jre8"
+    implementation "com.zaxxer:HikariCP:3.3.1"
+    implementation "io.netty:netty-all:4.1.35.Final"
+    implementation "org.slf4j:slf4j-jdk14:1.7.26"
+    implementation "com.google.inject:guice:$guiceVersion"
+    implementation "com.google.inject.extensions:guice-assistedinject:$guiceVersion"
+    implementation "org.owasp.encoder:encoder:1.2.2"
+    implementation "org.glassfish:javax.json:1.1.4"
+    implementation "org.eclipse.jetty:jetty-server:$jettyVersion"
+    implementation "org.eclipse.jetty:jetty-servlet:$jettyVersion"
+    implementation "org.eclipse.jetty:jetty-webapp:$jettyVersion"
+    implementation "org.eclipse.jetty:jetty-jndi:$jettyVersion"
+    implementation "org.eclipse.jetty:jetty-proxy:$jettyVersion"
+    implementation "org.eclipse.jetty.websocket:websocket-server:$jettyVersion"
+    implementation "org.glassfish.jersey.containers:jersey-container-servlet:$jerseyVersion"
+    implementation "org.glassfish.jersey.media:jersey-media-json-jackson:$jerseyVersion"
+    implementation "org.glassfish.jersey.inject:jersey-hk2:$jerseyVersion"
+    implementation "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:$jacksonVersion"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr353:$jacksonVersion"
+    implementation "org.liquibase:liquibase-core:3.6.3", {
+        exclude group: "ch.qos.logback", module: "logback-classic"
+    }
+    implementation "com.sun.mail:javax.mail:1.6.2"
+    implementation "org.jxls:jxls:2.4.7"
+    implementation "org.jxls:jxls-poi:1.0.16"
+    implementation "org.apache.velocity:velocity:1.7"
+    implementation "org.apache.velocity:velocity-tools:2.0"
+    implementation "org.apache.commons:commons-collections4:4.2"
+    implementation "org.mnode.ical4j:ical4j:2.0.5" // needs upgrade
+    implementation "com.fizzed:ch-smpp:6.0.0-netty4-beta-3"
+    implementation "net.java.dev.jna:jna-platform:5.3.1"
+    implementation "com.github.jnr:jnr-posix:3.0.49"
+    implementation "javax.xml.bind:jaxb-api:2.3.1"
+    implementation "com.sun.xml.bind:jaxb-core:2.3.0.1"
+    implementation "com.sun.xml.bind:jaxb-impl:2.3.2"
+    implementation "javax.activation:activation:1.1.1"
+    testImplementation "junit:junit:4.12"
+}
+
+task copyDependencies(type: Copy) {
+    into "$projectDir/target/lib"
+    from configurations.runtimeClasspath
+}
+task copyBinary(type: Copy) {
+    into "$projectDir/target"
+    from jar
+}
+assemble.dependsOn(copyBinary, copyDependencies)
+
+jar {
+    manifest {
+        attributes(
+                "Main-Class": "org.traccar.Main",
+                "Implementation-Version": "4.4",
+                "Class-Path": configurations.runtimeClasspath.files.collect { "lib/$it.name" }.join(" "))
+    }
+}
