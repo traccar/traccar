@@ -184,8 +184,6 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
             return position;
 
         } else if (type.equals("AP01") || type.equals("AP10") || type.equals("YP03")) {
-            org.traccar.helper.PatternUtil.MatchResult matchResult =
-                    org.traccar.helper.PatternUtil.checkPattern(PATTERN.pattern(), (String) msg);
 
             Parser parser = new Parser(PATTERN, sentence);
             if (!parser.matches()) {
