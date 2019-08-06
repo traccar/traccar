@@ -139,9 +139,8 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        int frameDataEnd = buf.readerIndex() + frameDataLength;
         long objectId = 0L;
-        while (buf.readerIndex() < frameDataEnd) {
+        while (buf.readableBytes() > 2) {
 
             int length = buf.readUnsignedShortLE();
             int recordIndex = buf.readUnsignedShortLE();
