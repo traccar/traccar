@@ -12,6 +12,10 @@ public class GoSafeProtocolDecoderTest extends ProtocolTest {
         GoSafeProtocolDecoder decoder = new GoSafeProtocolDecoder(null);
 
         verifyAttribute(decoder, text(
+                "*GS06,351535058659335,081234310719,,SYS:G6S;V3.37;V1.1.8,GPS:A;10;N23.169758;E113.450640;0;323;47;0.82,COT:18539;,ADC:10.81;4.07,DTT:4000;E0;0;0;0;1,IWD:0;1;9f00000655705d28;22.5#"),
+                Position.PREFIX_TEMP + 1, 22.5);
+
+        verifyAttribute(decoder, text(
                 "*GS06,359568052580548,091946150719,1C,SYS:G3C;V1.40;V1.0.4,GPS:A;5;S25.750200;E28.204858;0;0;1337;1.68,COT:,ADC:13.12;4.06,DTT:4004;C6;0;0;10000000;0$091948150719,,SYS:G3C;V1.40;V1.0.4,GPS:A;5;S25.750200;E28.204858;0;0;1337;1.68,COT:,ADC:12.96;4.06,DTT:4004;C6;0;0;0;1#"),
                 Position.KEY_EVENT, 0x1C);
 

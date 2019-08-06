@@ -13,6 +13,9 @@ public class TrvProtocolDecoderTest extends ProtocolTest {
         verifyNull(decoder, text(
                 "TRVAP00352121088015548"));
 
+        verifyPosition(decoder, text(
+                "TRVYP03190805A1828.9242N07353.9423E000.0150716029.0010000810020201112,404,27,184,10229"));
+
         verifyNotNull(decoder, text(
                 "IWAP02,zh_cn,0,6,260,1,11002|39252|9,11002|35112|23,11002|11043|24,11002|39253|24,11002|13751|24,11018|8102|26,3,a|c0-4a-00-b6-9c-f5|64&a|c0-4a-00-b6-9c-f5|64&a|18-a6-f7-92-35-da|84"));
 
