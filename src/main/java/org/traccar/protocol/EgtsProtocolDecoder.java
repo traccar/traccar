@@ -43,7 +43,7 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private boolean useOidAsDeviceId = true;
+    private boolean useObjectIdAsDeviceId = true;
 
     public static final int PT_RESPONSE = 0;
     public static final int PT_APPDATA = 1;
@@ -136,12 +136,11 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
         buf.skipBytes(headerLength);
 
         if (packetType == PT_RESPONSE) {
-            // some retranslator systems do send response on response packets - just skip them
             return null;
         }
 
         int frameDataEnd = buf.readerIndex() + frameDataLength;
-        long oid = 0L;
+        long objectId = 0L;
         while (buf.readerIndex() < frameDataEnd) {
 
             int length = buf.readUnsignedShortLE();
@@ -149,7 +148,7 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
             int recordFlags = buf.readUnsignedByte();
 
             if (BitUtil.check(recordFlags, 0)) {
-                oid = buf.readUnsignedIntLE(); // object id
+                objectId = buf.readUnsignedIntLE();
             }
 
             if (BitUtil.check(recordFlags, 1)) {
@@ -180,7 +179,7 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
                 int end = buf.readUnsignedShortLE() + buf.readerIndex();
 
                 if (type == MSG_TERM_IDENTITY) {
-                    useOidAsDeviceId = false;
+                    useObjectIdAsDeviceId = false;
 
                     buf.readUnsignedIntLE(); // object id
                     int flags = buf.readUnsignedByte();
@@ -189,14 +188,12 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
                         buf.readUnsignedShortLE(); // home dispatcher identifier
                     }
                     if (BitUtil.check(flags, 1)) {
-                        String imei = buf.readSlice(15).toString(StandardCharsets.US_ASCII).trim();
-                        LOGGER.trace("[{}] Using IMEI1 as deviceId: {}", channel == null ? "" : channel.id(), imei);
-                        getDeviceSession(channel, remoteAddress, imei);
+                        getDeviceSession(
+                                channel, remoteAddress, buf.readSlice(15).toString(StandardCharsets.US_ASCII).trim());
                     }
                     if (BitUtil.check(flags, 2)) {
-                        String imei = buf.readSlice(16).toString(StandardCharsets.US_ASCII).trim();
-                        LOGGER.trace("[{}] Using IMEI2 as deviceId: {}", channel == null ? "" : channel.id(), imei);
-                        getDeviceSession(channel, remoteAddress, imei);
+                        getDeviceSession(
+                                channel, remoteAddress, buf.readSlice(16).toString(StandardCharsets.US_ASCII).trim());
                     }
                     if (BitUtil.check(flags, 3)) {
                         buf.skipBytes(3); // language identifier
@@ -208,9 +205,8 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
                         buf.readUnsignedShortLE(); // buffer size
                     }
                     if (BitUtil.check(flags, 7)) {
-                        String imei = buf.readSlice(15).toString(StandardCharsets.US_ASCII).trim();
-                        LOGGER.trace("[{}] Using IMEI7 as deviceId: {}", channel == null ? "" : channel.id(), imei);
-                        getDeviceSession(channel, remoteAddress, imei);
+                        getDeviceSession(
+                                channel, remoteAddress, buf.readSlice(15).toString(StandardCharsets.US_ASCII).trim());
                     }
 
                     response = Unpooled.buffer();
@@ -274,15 +270,15 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
                 buf.readerIndex(end);
             }
 
-            if (serviceType == SERVICE_TELEDATA && position.getFixTime() != null) {
-                if (useOidAsDeviceId && oid != 0L) {
-                    LOGGER.debug("[{}] Using OID as deviceId: {}", channel == null ? "" : channel.id(), oid);
-                    deviceSession = getDeviceSession(channel, remoteAddress, true, String.valueOf(oid));
+            if (serviceType == SERVICE_TELEDATA && position.getValid()) {
+                if (useObjectIdAsDeviceId && objectId != 0L) {
+                    LOGGER.debug("[{}] Using objectId as deviceId: {}", channel == null ? "" : channel.id(), objectId);
+                    deviceSession = getDeviceSession(channel, remoteAddress, true, String.valueOf(objectId));
                     if (deviceSession != null) {
                         position.setDeviceId(deviceSession.getDeviceId());
                     }
                 }
-                if (position.getDeviceId() != 0L) {
+                if (deviceSession != null) {
                     positions.add(position);
                 }
             }
