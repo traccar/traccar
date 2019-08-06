@@ -76,9 +76,10 @@ public final class ObdDecoder {
     }
 
     public static Map.Entry<String, Object> decodeData(int pid, int value, boolean convert) {
+        final int maybeConverted = convert ? value * 100 / 255 : value;
         switch (pid) {
             case 0x04:
-                return createEntry(Position.KEY_ENGINE_LOAD, convert ? value * 100 / 255 : value);
+                return createEntry(Position.KEY_ENGINE_LOAD, maybeConverted);
             case 0x05:
                 return createEntry(Position.KEY_COOLANT_TEMP, convert ? value - 40 : value);
             case 0x0B:
@@ -90,11 +91,11 @@ public final class ObdDecoder {
             case 0x0F:
                 return createEntry("intakeTemp", convert ? value - 40 : value);
             case 0x11:
-                return createEntry(Position.KEY_THROTTLE, convert ? value * 100 / 255 : value);
+                return createEntry(Position.KEY_THROTTLE, maybeConverted);
             case 0x21:
                 return createEntry("milDistance", value);
             case 0x2F:
-                return createEntry(Position.KEY_FUEL_LEVEL, convert ? value * 100 / 255 : value);
+                return createEntry(Position.KEY_FUEL_LEVEL, maybeConverted);
             case 0x31:
                 return createEntry("clearedDistance", value);
             default:

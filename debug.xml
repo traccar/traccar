@@ -20,6 +20,11 @@
     <entry key='database.user'>sa</entry>
     <entry key='database.password'></entry>
 
+    <entry key='database.driver'>org.postgresql.Driver</entry>
+    <entry key='database.url'>jdbc:postgresql://127.0.0.1:5432/traccardb</entry>
+    <entry key='database.user'>traccar</entry>
+    <entry key='database.password'>traccar01</entry>
+
     <entry key='atrack.custom'>true</entry>
 
 </properties>

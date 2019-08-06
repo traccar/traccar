@@ -172,7 +172,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
                     value = 0;
                     break;
             }
-            position.add(ObdDecoder.decodeData(pids[i], value, false));
+            position.add(ObdDecoder.decodeData(pids[i], value, true));
         }
     }
 
@@ -182,8 +182,8 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedIntLE(); // UTC time
         position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
         position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedIntLE());
-        position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedIntLE());
-        buf.readUnsignedShortLE(); // current fuel consumption
+        position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedIntLE() * 0.01);
+        position.set(Position.KEY_FUEL_CONSUMPTION_TRIP, buf.readUnsignedShortLE() * 0.01);
         position.set(Position.KEY_STATUS, buf.readUnsignedIntLE());
         buf.skipBytes(8);
     }
@@ -317,8 +317,8 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedIntLE(); // UTC time
             long odometer = buf.readUnsignedIntLE();
             long tripOdometer = buf.readUnsignedIntLE();
-            long fuelConsumption = buf.readUnsignedIntLE();
-            buf.readUnsignedShortLE(); // current fuel consumption
+            double fuelConsumption = buf.readUnsignedIntLE() * 0.01;
+            double tripFuelConsumption = buf.readUnsignedShortLE() * 0.01;
             long status = buf.readUnsignedIntLE();
             buf.skipBytes(8);
 
@@ -331,6 +331,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_ODOMETER, odometer);
                 position.set(Position.KEY_ODOMETER_TRIP, tripOdometer);
                 position.set(Position.KEY_FUEL_CONSUMPTION, fuelConsumption);
+                position.set(Position.KEY_FUEL_CONSUMPTION_TRIP, tripFuelConsumption);
                 position.set(Position.KEY_STATUS, status);
                 positions.add(position);
             }
