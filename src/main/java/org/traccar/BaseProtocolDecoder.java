@@ -149,8 +149,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     public DeviceSession getDeviceSession(
             Channel channel, SocketAddress remoteAddress, boolean ignoreCache, String... uniqueIds) {
         if (channel != null && BasePipelineFactory.getHandler(channel.pipeline(), HttpRequestDecoder.class) != null
-                || ignoreCache
-                || config.getBoolean("decoder.ignoreSessionCache")) {
+                || ignoreCache || config.getBoolean("decoder.ignoreSessionCache")) {
             long deviceId = findDeviceId(remoteAddress, uniqueIds);
             if (deviceId != 0) {
                 if (connectionManager != null) {

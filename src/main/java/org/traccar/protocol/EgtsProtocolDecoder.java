@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@ package org.traccar.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
@@ -36,8 +34,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class EgtsProtocolDecoder extends BaseProtocolDecoder {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(EgtsProtocolDecoder.class);
 
     public EgtsProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -270,7 +266,6 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
 
             if (serviceType == SERVICE_TELEDATA && position.getValid()) {
                 if (useObjectIdAsDeviceId && objectId != 0L) {
-                    LOGGER.debug("[{}] Using objectId as deviceId: {}", channel == null ? "" : channel.id(), objectId);
                     deviceSession = getDeviceSession(channel, remoteAddress, true, String.valueOf(objectId));
                     if (deviceSession != null) {
                         position.setDeviceId(deviceSession.getDeviceId());
