@@ -22,6 +22,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -76,7 +77,7 @@ public class RetranslatorProtocolDecoder extends BaseProtocolDecoder {
                 position.setLongitude(buf.readDoubleLE());
                 position.setLatitude(buf.readDoubleLE());
                 position.setAltitude(buf.readDoubleLE());
-                position.setSpeed(buf.readShort());
+                position.setSpeed(UnitsConverter.knotsFromKph(buf.readShort()));
                 position.setCourse(buf.readShort());
                 position.set(Position.KEY_SATELLITES, buf.readByte());
             } else {
