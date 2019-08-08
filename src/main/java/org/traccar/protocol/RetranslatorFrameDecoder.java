@@ -26,6 +26,11 @@ public class RetranslatorFrameDecoder extends BaseFrameDecoder {
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
+        if (buf.readableBytes() < 4) {
+            // Workaround of some retranslators send 'fb01' after last full frame
+            return null;
+        }
+
         int length = 4 + buf.getIntLE(buf.readerIndex());
         if (buf.readableBytes() >= length) {
             return buf.readRetainedSlice(length);
