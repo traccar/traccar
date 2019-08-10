@@ -276,12 +276,15 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             return;
         }
 
+        ProcessingInfo processingInfo = Context.getDeviceManager().getDeviceProcessingInfo(deviceId);
+        String finalCalibField = processingInfo.getFinalCalibFieldName();
         switch(attributeToUpdate) {
             case ALL_FUEL_FIELDS:
                 String calibFuelDataField = fuelSensor.getCalibFuelFieldName();
                 String fuelDataField = fuelSensor.getFuelDataFieldName();
                 position.set(calibFuelDataField, (double) lastKnownPosition.getAttributes().get(calibFuelDataField));
                 position.set(fuelDataField, (double) lastKnownPosition.getAttributes().get(fuelDataField));
+                position.set(finalCalibField, (double) lastKnownPosition.getAttributes().get(finalCalibField));
                 break;
         }
     }
