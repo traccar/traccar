@@ -1,8 +1,10 @@
 package org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors;
 
 import com.google.common.collect.Sets;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.util.StringUtil;
 import org.traccar.Context;
+import org.traccar.helper.Log;
 import org.traccar.model.PeripheralSensor;
 import org.traccar.model.Position;
 import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.FuelActivity.FuelActivityType;
@@ -45,9 +47,17 @@ public class FuelDataActivityChecker {
         double rightMean = rightSum / (midPoint + 1);
         double diffInMeans = leftMean - rightMean;
 
+        Position lowestInLHWindow = readingsForDevice.get(0);
+        Position highestInLHWindow = readingsForDevice.get(midPoint);
+        Position lowestInRHWindow = readingsForDevice.get(midPoint + 1);
+        Position highestInRHWindow = readingsForDevice.get(readingsSize - 1);
+
         long deviceId = readingsForDevice.get(0).getDeviceId();
 
         DeviceConsumptionInfo consumptionInfo = Context.getDeviceManager().getDeviceConsumptionInfo(deviceId);
+        String deviceType = Context.getDeviceManager().getById(deviceId).getString(TYPE_ATTR_NAME);
+        boolean isStationary = StringUtils.isNoneBlank(deviceType) && deviceType.equals(STATIONARY_TYPE);
+
         double fuelLevelChangeThreshold = consumptionInfo.getFuelActivityThreshold();
 
         String deviceSensorLookupKey = deviceId + "_" + fuelSensor.getPeripheralSensorId();
@@ -71,7 +81,6 @@ public class FuelDataActivityChecker {
 
         boolean isEnginelessHourly = consumptionInfo.getDeviceConsumptionType().toLowerCase().equals(DeviceConsumptionInfo.ENGINELESS_HOURLY_CONSUMPTION_TYPE);
 
-
         Optional<String> possibleActivityStartTypeStartType = determinePossibleActivityStartType(diffInMeans,
                                                                                                  fillThreshold,
                                                                                                  drainThresholdToUseForStart);
@@ -84,13 +93,14 @@ public class FuelDataActivityChecker {
             // We connect the ignition to the pump that drains fuel from the tank, and check if the ignition
             // was on when we detected the start of the event, and off when the event end is detected.
             boolean isDrain = startType.equals(FuelActivityType.FUEL_DRAIN.name());
+            boolean isFill = startType.equals(FuelActivityType.FUEL_FILL.name());
 
             if (isEnginelessHourly && isDrain && !ignitionOnInAnyRHWindow) {
                 FuelSensorDataHandlerHelper.logDebugIfDeviceId("Detected fuel drain start but ignition not on in any RH Window", deviceId);
                 return new FuelActivity();
             }
 
-            String logMessage = String.format("Fuel event started: %d %b %b", deviceId, isDrain, ignitionOnInAnyRHWindow);
+            String logMessage = String.format("Fuel event started: %d %b %b %b", deviceId, isDrain, isFill, ignitionOnInAnyRHWindow);
             FuelSensorDataHandlerHelper.logDebugIfDeviceId(logMessage, deviceId);
 
             String oppositeEventType = startType.equals(FuelActivityType.FUEL_FILL.name())? FuelActivityType.FUEL_DRAIN.name() :
@@ -109,17 +119,33 @@ public class FuelDataActivityChecker {
 
                 FuelEventMetadata fuelEventMetadata = deviceFuelEventMetadata.get(activityLookupKey);
                 double leftMedian = getMedianValue(readingsForDevice, 0, midPoint + 1, fuelSensor);
-                fuelEventMetadata.setStartLevel(leftMedian);
+
+                Position eventStartPosition = midPointPosition;
+                double startLevel = leftMedian;
+
+                if (isStationary && ignitionOnInAnyRHWindow) {
+                    if (isFill) {
+                        eventStartPosition = lowestInRHWindow;
+                        startLevel = lowestInRHWindow.getDouble(fuelSensor.getCalibFuelFieldName());
+                        Log.info("Setting start to lowestInRHWindow");
+                    } else if (isDrain) {
+                        eventStartPosition = highestInRHWindow;
+                        startLevel = highestInRHWindow.getDouble(fuelSensor.getCalibFuelFieldName());
+                        Log.info("Setting start to highestInRHWindow");
+                    }
+                }
+
+                fuelEventMetadata.setStartLevel(startLevel);
 
                 fuelEventMetadata.setErrorCheckStart((double) readingsForDevice.get(0)
                                                                                .getAttributes()
                                                                                .get(calibFuelDataField));
 
-                fuelEventMetadata.setStartTime(midPointPosition.getDeviceTime());
-                fuelEventMetadata.setActivityStartPosition(midPointPosition);
+                fuelEventMetadata.setStartTime(eventStartPosition.getDeviceTime());
+                fuelEventMetadata.setActivityStartPosition(eventStartPosition);
 
                 FuelSensorDataHandlerHelper.logDebugIfDeviceId("[FUEL_ACTIVITY_START] Activity start detected: lookupKey" + activityLookupKey + " at: "
-                                  + midPointPosition.getDeviceTime(), deviceId);
+                                  + eventStartPosition.getDeviceTime(), deviceId);
 
                 StringBuilder rawFuelValuesInReadings = new StringBuilder();
                 StringBuilder timestamps = new StringBuilder();
@@ -167,6 +193,7 @@ public class FuelDataActivityChecker {
 
             String endType = possibleActivityEndType.get();
             boolean isEndDrain = endType.equals(FuelActivityType.FUEL_DRAIN.name());
+            boolean isEndFill = endType.equals(FuelActivityType.FUEL_FILL.name());
 
             if (isEnginelessHourly && isEndDrain && ignitionOnRHWindowLast) {
 
@@ -182,16 +209,31 @@ public class FuelDataActivityChecker {
 
             Position midPointPosition = readingsForDevice.get(midPoint);
             FuelEventMetadata fuelEventMetadata = deviceFuelEventMetadata.get(activityLookupKey);
-
             double rightMedian = getMedianValue(readingsForDevice, midPoint, readingsSize, fuelSensor);
-            fuelEventMetadata.setEndLevel(rightMedian);
+
+            Position endPosition = midPointPosition;
+            double endLevel = rightMedian;
+
+            if (isStationary && ignitionOnRHWindowLast) {
+                if (isEndFill) {
+                    endPosition = highestInLHWindow;
+                    endLevel = endPosition.getDouble(fuelSensor.getCalibFuelFieldName());
+                    Log.info("Setting end to highestInLHWindow");
+                } else if (isEndDrain) {
+                    endPosition = lowestInLHWindow;
+                    endLevel = endPosition.getDouble(fuelSensor.getCalibFuelFieldName());
+                    Log.info("Setting end to lowestInLHWindow");
+                }
+            }
+
+            fuelEventMetadata.setEndLevel(endLevel);
 
             fuelEventMetadata.setErrorCheckEnd((double) readingsForDevice.get(readingsForDevice.size() - 1)
                                                                          .getAttributes()
                                                                          .get(calibFuelDataField));
 
-            fuelEventMetadata.setEndTime(midPointPosition.getDeviceTime());
-            fuelEventMetadata.setActivityEndPosition(midPointPosition);
+            fuelEventMetadata.setEndTime(endPosition.getDeviceTime());
+            fuelEventMetadata.setActivityEndPosition(endPosition);
 
             double fuelChangeVolume = fuelEventMetadata.getEndLevel() - fuelEventMetadata.getStartLevel();
             double errorCheckFuelChange = fuelEventMetadata.getErrorCheckEnd() - fuelEventMetadata.getErrorCheckStart();
@@ -201,7 +243,7 @@ public class FuelDataActivityChecker {
             appendActivityWindow(readingsForDevice, fuelEventMetadata);
 
             FuelSensorDataHandlerHelper.logDebugIfDeviceId("[FUEL_ACTIVITY_END] Activity end detected: lookupKey" + activityLookupKey + " at: "
-                              + midPointPosition.getDeviceTime(), deviceId);
+                              + endPosition.getDeviceTime(), deviceId);
 
             StringBuilder rawFuelValuesInReadings = new StringBuilder();
             StringBuilder timestamps = new StringBuilder();
@@ -213,9 +255,9 @@ public class FuelDataActivityChecker {
             FuelSensorDataHandlerHelper.logDebugIfDeviceId("[FUEL_ACTIVITY_END] rawFuelValues that crossed threshold for lookupKey: " + activityLookupKey
                               + " - " + rawFuelValuesInReadings, deviceId);
             FuelSensorDataHandlerHelper.logDebugIfDeviceId("[FUEL_ACTIVITY_END] corresponding timestamps: " + timestamps, deviceId);
-            FuelSensorDataHandlerHelper.logDebugIfDeviceId("[FUEL_ACTIVITY_END] Midpoint: " + midPointPosition.getAttributes()
+            FuelSensorDataHandlerHelper.logDebugIfDeviceId("[FUEL_ACTIVITY_END] Midpoint: " + endPosition.getAttributes()
                                                                          .get(calibFuelDataField), deviceId);
-            FuelSensorDataHandlerHelper.logDebugIfDeviceId("[FUEL_ACTIVITY_END] Right median: " + rightMedian, deviceId);
+            FuelSensorDataHandlerHelper.logDebugIfDeviceId("[FUEL_ACTIVITY_END] Right median: " + endLevel, deviceId);
             FuelSensorDataHandlerHelper.logDebugIfDeviceId("[FUEL_ACTIVITY_END] metadata: " + fuelEventMetadata, deviceId);
             FuelSensorDataHandlerHelper.logDebugIfDeviceId("[FUEL_ACTIVITY_END] fuelChangeVolume: " + fuelChangeVolume, deviceId);
             FuelSensorDataHandlerHelper.logDebugIfDeviceId("[FUEL_ACTIVITY_END] errorCheckFuelChange: " + errorCheckFuelChange, deviceId);
@@ -223,8 +265,6 @@ public class FuelDataActivityChecker {
             Optional<Long> maxCapacity = Context.getPeripheralSensorManager().getFuelTankMaxCapacity(deviceId, fuelSensor.getPeripheralSensorId());
 
             // If fuel consumption is not as expected, means we have some activity going on.
-            String deviceType = Context.getDeviceManager().getById(deviceId).getString(TYPE_ATTR_NAME);
-
             if (fuelChangeVolume < 0.0) {
                 fuelActivity.setActivityType(FuelActivity.FuelActivityType.FUEL_DRAIN);
                 setActivityParameters(fuelActivity, fuelEventMetadata, fuelChangeVolume, consumptionInfo, deviceType);
@@ -396,18 +436,12 @@ public class FuelDataActivityChecker {
         fuelActivity.setActivityEndPosition(fuelEventMetadata.getActivityEndPosition());
 
         double finalVolume = fuelChangeVolume;
-        FuelSensorDataHandlerHelper.logDebugIfDeviceId(
-                "Adjustments: " + deviceType
-                        + " activity: " + fuelActivity.getActivityType().name()
-                        + " present: " + adjustVolumeFor.contains(fuelActivity.getActivityType().name())
-                , 95);
 
         if (StringUtil.isNotBlank(deviceType)
                 && deviceType.equals(STATIONARY_TYPE)
                 && adjustVolumeFor.contains(fuelActivity.getActivityType().name())) {
             double adjustedVolume = getAdjustedVolume(consumptionInfo, fuelEventMetadata);
-             finalVolume += adjustedVolume;
-            FuelSensorDataHandlerHelper.logDebugIfDeviceId("Volumes: " + adjustedVolume + " " + finalVolume, 95);
+            finalVolume += adjustedVolume;
         }
 
         fuelActivity.setChangeVolume(finalVolume);
@@ -420,10 +454,6 @@ public class FuelDataActivityChecker {
 
         Position start = fuelEventMetadata.getActivityStartPosition();
         Position end = fuelEventMetadata.getActivityEndPosition();
-
-        FuelSensorDataHandlerHelper.logDebugIfDeviceId(
-                "Adjustments - start ign millis: " + start.getLong(Position.KEY_TOTAL_IGN_ON_MILLIS) +
-                        " end ign millis: " + end.getLong(Position.KEY_TOTAL_IGN_ON_MILLIS), 95);
 
         ExpectedFuelConsumption consumption =
                 FuelConsumptionChecker.getExpectedHourlyFuelConsumptionValues(start, end, 0, consumptionInfo);
