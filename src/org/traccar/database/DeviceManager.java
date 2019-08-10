@@ -35,6 +35,7 @@ import org.traccar.model.Group;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
 import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.DeviceConsumptionInfo;
+import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.ProcessingInfo;
 
 public class DeviceManager extends BaseObjectManager<Device> implements IdentityManager, ManagableObjects {
 
@@ -53,6 +54,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
     private final Map<Long, DeviceState> deviceStates = new ConcurrentHashMap<>();
 
     private final Map<Long, DeviceConsumptionInfo> deviceConsumptionMap = new ConcurrentHashMap<>();
+    private final Map<Long, ProcessingInfo> deviceProcessingInfoMap = new ConcurrentHashMap<>();
 
     public DeviceManager(DataManager dataManager) {
         super(dataManager, Device.class);
@@ -205,6 +207,9 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         DeviceConsumptionInfo deviceConsumptionInfo = new DeviceConsumptionInfo(device);
         deviceConsumptionMap.put(device.getId(), deviceConsumptionInfo);
 
+        ProcessingInfo deviceProcessingInfo = new ProcessingInfo(device);
+        deviceProcessingInfoMap.put(device.getId(), deviceProcessingInfo);
+
     }
 
     public DeviceConsumptionInfo getDeviceConsumptionInfo(long deviceId) {
@@ -214,6 +219,14 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         }
 
         return deviceConsumptionMap.getOrDefault(deviceId, new DeviceConsumptionInfo());
+    }
+
+    public ProcessingInfo getDeviceProcessingInfo(long deviceId) {
+        if (!deviceProcessingInfoMap.containsKey(deviceId)) {
+            refreshItems();
+        }
+
+        return deviceProcessingInfoMap.get(deviceId);
     }
 
     @Override
