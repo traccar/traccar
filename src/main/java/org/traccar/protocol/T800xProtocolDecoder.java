@@ -37,9 +37,17 @@ import java.util.Date;
 
 public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
+    private short header = DEFAULT_HEADER;
+
+    public short getHeader() {
+        return header;
+    }
+
     public T800xProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
+
+    public static final short DEFAULT_HEADER = 0x2323;
 
     public static final int MSG_LOGIN = 0x01;
     public static final int MSG_GPS = 0x02;
@@ -110,7 +118,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
         ByteBuf buf = (ByteBuf) msg;
 
-        short header = buf.readShort();
+        header = buf.readShort();
         int type = buf.readUnsignedByte();
         buf.readUnsignedShort(); // length
         int index = buf.readUnsignedShort();
@@ -128,7 +136,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
         if (type == MSG_GPS || type == MSG_ALARM) {
 
-            return decodePosition(channel, deviceSession, buf, header, type, index, imei);
+            return decodePosition(channel, deviceSession, buf, type, index, imei);
 
         } else if (type == MSG_NETWORK) {
 
@@ -169,7 +177,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
     private Position decodePosition(
             Channel channel, DeviceSession deviceSession,
-            ByteBuf buf, short header, int type, int index, ByteBuf imei) {
+            ByteBuf buf, int type, int index, ByteBuf imei) {
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
