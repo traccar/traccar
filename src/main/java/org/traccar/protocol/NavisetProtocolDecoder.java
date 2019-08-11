@@ -29,6 +29,8 @@ import org.traccar.model.Position;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 public class NavisetProtocolDecoder extends BaseProtocolDecoder {
 
@@ -55,7 +57,6 @@ public class NavisetProtocolDecoder extends BaseProtocolDecoder {
         }
 
         int length = buf.readUnsignedShortLE();
-        BitUtil.between(length, 12, 14); // version
         int type = BitUtil.between(length, 14, 16);
         buf.readUnsignedShortLE(); // device number
 
@@ -65,27 +66,181 @@ public class NavisetProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == MSG_DATA) {
 
+            List<Position> positions = new LinkedList<>();
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
             if (deviceSession == null) {
                 return null;
             }
 
-            Position position = new Position(getProtocolName());
-            position.setDeviceId(deviceSession.getDeviceId());
+            while (buf.readableBytes() > 2) {
 
-            buf.readUnsignedByte(); // mask
-            position.set(Position.KEY_INDEX, buf.readUnsignedShortLE());
-            position.set(Position.KEY_STATUS, buf.readUnsignedByte());
+                Position position = new Position(getProtocolName());
+                position.setDeviceId(deviceSession.getDeviceId());
+                int blockMask = buf.readUnsignedByte();
 
-            position.setValid(true);
-            position.setTime(new Date(buf.readUnsignedIntLE() * 1000));
-            position.setLatitude(buf.readUnsignedIntLE() * 0.000001);
-            position.setLongitude(buf.readUnsignedIntLE() * 0.000001);
-            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShortLE() * 0.1));
+                position.set(Position.KEY_INDEX, buf.readUnsignedShortLE());
+                position.set(Position.KEY_STATUS, buf.readUnsignedByte());
 
-            // additional data
+                position.setValid(true);
+                position.setTime(new Date(buf.readUnsignedIntLE() * 1000));
+                position.setLatitude(buf.readUnsignedIntLE() * 0.000001);
+                position.setLongitude(buf.readUnsignedIntLE() * 0.000001);
+                position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShortLE() * 0.1));
 
-            return position;
+                if (BitUtil.check(blockMask, 0)) {
+                    int dataMask = buf.readUnsignedByte();
+                    if (BitUtil.check(dataMask, 0)) {
+                        int satellites = buf.readUnsignedByte();
+                        position.setValid(BitUtil.check(satellites, 7));
+                        position.set(Position.KEY_SATELLITES, BitUtil.to(satellites, 7));
+                    }
+                    if (BitUtil.check(dataMask, 1)) {
+                        position.setCourse(buf.readUnsignedShortLE() * 0.1);
+                    }
+                    if (BitUtil.check(dataMask, 2)) {
+                        position.setAltitude(buf.readShortLE());
+                    }
+                    if (BitUtil.check(dataMask, 3)) {
+                        position.set(Position.KEY_HDOP, buf.readUnsignedByte() * 0.1);
+                    }
+                    if (BitUtil.check(dataMask, 4)) {
+                        position.set(Position.KEY_POWER, buf.readUnsignedShortLE() * 0.001);
+                        position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.001);
+                    }
+                    if (BitUtil.check(dataMask, 5)) {
+                        position.set(Position.KEY_INPUT, buf.readUnsignedByte());
+                        position.set(Position.KEY_OUTPUT, buf.readUnsignedByte());
+                    }
+                    if (BitUtil.check(dataMask, 6)) {
+                        position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
+                    }
+                    if (BitUtil.check(dataMask, 7)) {
+                        buf.skipBytes(6); // accelerometer
+                    }
+                }
+
+                if (BitUtil.check(blockMask, 1)) {
+                    int dataMask = buf.readUnsignedByte();
+                    for (int i = 0; i < 8; i++) {
+                        if (BitUtil.check(dataMask, i)) {
+                            position.set(Position.PREFIX_ADC + (i + 1), buf.readUnsignedShortLE());
+                        }
+                    }
+                }
+
+                if (BitUtil.check(blockMask, 2)) {
+                    int dataMask = buf.readUnsignedByte();
+                    if (BitUtil.check(dataMask, 0)) {
+                        position.set(Position.KEY_DEVICE_TEMP, (int) buf.readByte());
+                    }
+                    if (BitUtil.check(dataMask, 1)) {
+                        buf.skipBytes(6); // key code
+                    }
+                    if (BitUtil.check(dataMask, 2)) {
+                        position.set(Position.PREFIX_TEMP + 1, (int) buf.readByte());
+                        position.set(Position.PREFIX_TEMP + 2, (int) buf.readByte());
+                    }
+                    if (BitUtil.check(dataMask, 3)) {
+                        position.set(Position.PREFIX_TEMP + 3, (int) buf.readByte());
+                        position.set(Position.PREFIX_TEMP + 4, (int) buf.readByte());
+                    }
+                    if (BitUtil.check(dataMask, 4)) {
+                        position.set(Position.PREFIX_TEMP + 5, (int) buf.readByte());
+                        position.set(Position.PREFIX_TEMP + 6, (int) buf.readByte());
+                        position.set(Position.PREFIX_TEMP + 7, (int) buf.readByte());
+                        position.set(Position.PREFIX_TEMP + 8, (int) buf.readByte());
+                    }
+                    if (BitUtil.check(dataMask, 5)) {
+                        position.set(Position.KEY_HOURS, buf.readUnsignedShortLE() / 60.0);
+                    }
+                    if (BitUtil.check(dataMask, 6)) {
+                        buf.readUnsignedByte(); // extra status
+                    }
+                    if (BitUtil.check(dataMask, 7)) {
+                        buf.readUnsignedByte(); // geofence
+                    }
+                }
+
+                if (BitUtil.check(blockMask, 3)) {
+                    int dataMask = buf.readUnsignedByte();
+                    if (BitUtil.check(dataMask, 0)) {
+                        position.set("fuel1", buf.readUnsignedShortLE());
+                    }
+                    if (BitUtil.check(dataMask, 1)) {
+                        position.set("fuel2", buf.readUnsignedShortLE());
+                    }
+                    if (BitUtil.check(dataMask, 2)) {
+                        position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedShortLE());
+                    }
+                    if (BitUtil.check(dataMask, 3)) {
+                        buf.skipBytes(18);
+                    }
+                    if (BitUtil.check(dataMask, 4)) {
+                        buf.readUnsignedByte(); // fuel 1 temperature
+                    }
+                    if (BitUtil.check(dataMask, 5)) {
+                        buf.readUnsignedByte(); // fuel 2 temperature
+                    }
+                    if (BitUtil.check(dataMask, 6)) {
+                        buf.readUnsignedShortLE(); // fuel 1 frequency
+                    }
+                    if (BitUtil.check(dataMask, 7)) {
+                        buf.readUnsignedShortLE(); // fuel 2 frequency
+                    }
+                }
+
+                if (BitUtil.check(blockMask, 4)) {
+                    int dataMask = buf.readUnsignedByte();
+                    if (BitUtil.check(dataMask, 0)) {
+                        buf.readUnsignedByte(); // fuel level (percentage)
+                        position.set(Position.KEY_RPM, buf.readUnsignedShortLE());
+                        position.set(Position.KEY_COOLANT_TEMP, (int) buf.readByte());
+                    }
+                    if (BitUtil.check(dataMask, 1)) {
+                        buf.readUnsignedIntLE(); // fuel consumption
+                    }
+                    if (BitUtil.check(dataMask, 2)) {
+                        position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
+                    }
+                    for (int i = 3; i < 8; i++) {
+                        if (BitUtil.check(dataMask, i)) {
+                            buf.readUnsignedShortLE(); // axle weight
+                        }
+                    }
+                }
+
+                if (BitUtil.check(blockMask, 4)) {
+                    int dataMask = buf.readUnsignedByte();
+                    if (BitUtil.check(dataMask, 0)) {
+                        buf.readUnsignedByte(); // speed
+                    }
+                    if (BitUtil.check(dataMask, 1)) {
+                        buf.readUnsignedMediumLE(); // prefix S
+                    }
+                    if (BitUtil.check(dataMask, 2)) {
+                        buf.readUnsignedIntLE(); // prefix P
+                    }
+                    if (BitUtil.check(dataMask, 3)) {
+                        buf.readUnsignedIntLE(); // prefix A or B
+                    }
+                    if (BitUtil.check(dataMask, 4)) {
+                        buf.readUnsignedShortLE(); // prefix R
+                    }
+                    if (BitUtil.check(dataMask, 5)) {
+                        buf.skipBytes(26);
+                    }
+                    if (BitUtil.check(dataMask, 6)) {
+                        buf.readUnsignedIntLE(); // reserved
+                    }
+                    if (BitUtil.check(dataMask, 7)) {
+                        buf.readUnsignedIntLE(); // reserved
+                    }
+                }
+
+                positions.add(position);
+            }
+
+            return positions;
         }
 
         return null;
