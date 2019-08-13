@@ -52,9 +52,9 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
         }
 
         buf.writeShort(EelinkProtocolDecoder.HEADER_KEY);
-        buf.writeByte(EelinkProtocolDecoder.MSG_DOWNLINK);
+        buf.writeByte(type);
         buf.writeShort(2 + (content != null ? content.readableBytes() : 0)); // length
-        buf.writeShort(0); // index
+        buf.writeShort(index); // index
 
         if (content != null) {
             buf.writeBytes(content);
