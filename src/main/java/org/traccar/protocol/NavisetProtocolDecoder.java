@@ -72,15 +72,15 @@ public class NavisetProtocolDecoder extends BaseProtocolDecoder {
                 return null;
             }
 
+            int blockMask = buf.readUnsignedByte();
+
             while (buf.readableBytes() > 2) {
 
                 Position position = new Position(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());
-                int blockMask = buf.readUnsignedByte();
 
                 position.set(Position.KEY_INDEX, buf.readUnsignedShortLE());
                 position.set(Position.KEY_STATUS, buf.readUnsignedByte());
-
                 position.setValid(true);
                 position.setTime(new Date(buf.readUnsignedIntLE() * 1000));
                 position.setLatitude(buf.readUnsignedIntLE() * 0.000001);
