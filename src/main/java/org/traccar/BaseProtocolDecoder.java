@@ -21,6 +21,7 @@ import io.netty.handler.codec.http.HttpRequestDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.database.ConnectionManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.database.StatisticsManager;
@@ -149,7 +150,9 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     public DeviceSession getDeviceSession(
             Channel channel, SocketAddress remoteAddress, boolean ignoreCache, String... uniqueIds) {
         if (channel != null && BasePipelineFactory.getHandler(channel.pipeline(), HttpRequestDecoder.class) != null
-                || ignoreCache || config.getBoolean("decoder.ignoreSessionCache")) {
+                || ignoreCache
+                || config.getBoolean(Keys.SERVER_IGNORE_SESSION_CACHE)
+                || config.getBoolean(Keys.PROTOCOL_IGNORE_SESSION_CACHE.withPrefix(getProtocolName()))) {
             long deviceId = findDeviceId(remoteAddress, uniqueIds);
             if (deviceId != 0) {
                 if (connectionManager != null) {

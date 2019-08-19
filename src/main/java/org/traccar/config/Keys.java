@@ -33,6 +33,18 @@ public final class Keys {
             "server.timeout", Integer.class);
 
     /**
+     * Ignoring session cache for partial protocol
+     */
+    public static final ConfigSuffix PROTOCOL_IGNORE_SESSION_CACHE = new ConfigSuffix(
+            ".decoder.ignoreSessionCache", Boolean.class);
+
+    /**
+     * Ignoring session cache for all protocols
+     */
+    public static final ConfigKey SERVER_IGNORE_SESSION_CACHE = new ConfigKey(
+            "decoder.ignoreSessionCache", Boolean.class);
+
+    /**
      * Address for uploading aggregated anonymous usage statistics. Uploaded information is the same you can see on the
      * statistics screen in the web app. It does not include any sensitive (e.g. locations).
      */
