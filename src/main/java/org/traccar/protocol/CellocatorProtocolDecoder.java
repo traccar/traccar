@@ -43,29 +43,52 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
 
     public static final int MSG_SERVER_ACKNOWLEDGE = 4;
 
-    private byte commandCount;
+    public static ByteBuf encodeContent(int type, int uniqueId, int packetNumber, ByteBuf content) {
+
+        ByteBuf buf = Unpooled.buffer();
+        buf.writeByte('M');
+        buf.writeByte('C');
+        buf.writeByte('G');
+        buf.writeByte('P');
+        buf.writeByte(type);
+        buf.writeIntLE(uniqueId);
+        buf.writeByte(packetNumber);
+        buf.writeIntLE(0); // authentication code
+        buf.writeBytes(content);
+
+        byte checksum = 0;
+        for (int i = 4; i < buf.writerIndex(); i++) {
+            checksum += buf.getByte(i);
+        }
+        buf.writeByte(checksum);
+
+        return buf;
+    }
 
     private void sendResponse(Channel channel, SocketAddress remoteAddress, long deviceId, byte packetNumber) {
         if (channel != null) {
-            ByteBuf reply = Unpooled.buffer(28);
-            reply.writeByte('M');
-            reply.writeByte('C');
-            reply.writeByte('G');
-            reply.writeByte('P');
-            reply.writeByte(MSG_SERVER_ACKNOWLEDGE);
-            reply.writeIntLE((int) deviceId);
-            reply.writeByte(commandCount++);
-            reply.writeIntLE(0); // authentication code
-            reply.writeByte(0);
-            reply.writeByte(packetNumber);
-            reply.writeZero(11);
+            ByteBuf content = Unpooled.buffer();
+            content.writeByte(0);
+            content.writeByte(packetNumber);
+            content.writeZero(11);
 
-            byte checksum = 0;
-            for (int i = 4; i < 27; i++) {
-                checksum += reply.getByte(i);
-            }
-            reply.writeByte(checksum);
+            ByteBuf reply = encodeContent(MSG_SERVER_ACKNOWLEDGE, (int) deviceId, packetNumber, content);
+            channel.writeAndFlush(new NetworkMessage(reply, remoteAddress));
+        }
+    }
 
+    private void sendModuleResponse(Channel channel, SocketAddress remoteAddress, long deviceId, byte packetNumber) {
+        if (channel != null) {
+            ByteBuf content = Unpooled.buffer();
+            content.writeByte(0x80);
+            content.writeShortLE(10); // modules length
+            content.writeIntLE(0); // reserved
+            content.writeByte(9); // ack module type
+            content.writeShortLE(3); // module length
+            content.writeByte(0); // ack
+            content.writeShortLE(0); // reserved
+
+            ByteBuf reply = encodeContent(MSG_SERVER_ACKNOWLEDGE, (int) deviceId, packetNumber, content);
             channel.writeAndFlush(new NetworkMessage(reply, remoteAddress));
         }
     }
@@ -225,7 +248,11 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
         }
         byte packetNumber = buf.readByte();
 
-        sendResponse(channel, remoteAddress, deviceUniqueId, packetNumber);
+        if (type == MSG_CLIENT_MODULAR_EXT) {
+            sendModuleResponse(channel, remoteAddress, deviceUniqueId, packetNumber);
+        } else {
+            sendResponse(channel, remoteAddress, deviceUniqueId, packetNumber);
+        }
 
         if (type == MSG_CLIENT_STATUS) {
             return decodeStatus(buf, deviceSession, alternative);
