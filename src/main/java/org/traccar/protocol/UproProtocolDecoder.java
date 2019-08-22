@@ -211,10 +211,6 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                 case 'S':
                     position.set("obdTraffic", ByteBufUtil.hexDump(data));
                     break;
-                case 'T':
-                    position.set(Position.KEY_BATTERY_LEVEL,
-                            Integer.parseInt(data.readSlice(2).toString(StandardCharsets.US_ASCII)));
-                    break;
                 case 'V':
                     position.set(Position.KEY_POWER,
                             Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII)) * 0.1);
