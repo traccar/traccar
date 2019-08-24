@@ -245,7 +245,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
             position.setNetwork(new Network(CellTower.from(mcc, mnc, lac, cid)));
         }
 
-        String unused = parser.next();
+        parser.next(); // unused
 
         String checksum = parser.next();
 

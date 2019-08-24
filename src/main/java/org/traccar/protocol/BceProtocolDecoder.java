@@ -97,7 +97,7 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private void decodeMask2(ByteBuf buf, int mask, Position position) {
+    private void decodeMask2(ByteBuf buf, int mask) {
 
         if (BitUtil.check(mask, 0)) {
             buf.readUnsignedShortLE(); // wheel speed
@@ -223,7 +223,7 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
 
                     if (masks.size() >= 2) {
                         mask = masks.get(1);
-                        decodeMask2(buf, mask, position);
+                        decodeMask2(buf, mask);
                     }
 
                     if (masks.size() >= 3) {

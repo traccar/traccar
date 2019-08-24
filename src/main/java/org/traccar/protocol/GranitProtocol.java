@@ -28,7 +28,7 @@ public class GranitProtocol extends BaseProtocol {
                 Command.TYPE_IDENTIFICATION,
                 Command.TYPE_REBOOT_DEVICE,
                 Command.TYPE_POSITION_SINGLE);
-        setTextCommandEncoder(new GranitProtocolSmsEncoder(GranitProtocol.this));
+        setTextCommandEncoder(new GranitProtocolSmsEncoder(this));
         setSupportedTextCommands(
                 Command.TYPE_REBOOT_DEVICE,
                 Command.TYPE_POSITION_PERIODIC);
