@@ -26,6 +26,9 @@ public class WialonProtocolDecoderTest extends ProtocolTest {
                 "#D#101118;061143;0756.0930;N;12338.6403;E;18.223;99.766;-4.000;10;0.800;NA;NA;NA;NA;101_521347:1:521249,101_521126:1:6593598,101_521127:1:774780,101_521072_21.1:1:0,101_521072_21.2:1:71353;F24A"));
 
         verifyPosition(decoder, text(
+                "99999999#D#101118;061143;0756.0930;N;12338.6403;E;18.223;99.766;-4.000;10;0.800;NA;NA;NA;NA;101_521347:1:521249,101_521126:1:6593598,101_521127:1:774780,101_521072_21.1:1:0,101_521072_21.2:1:71353;F24A"));
+
+        verifyPosition(decoder, text(
                 "#D#151216;135910;5321.1466;N;04441.7929;E;87;156;265.000000;12;1.000000;241;NA;NA;NA;odo:2:0.000000,total_fuel:1:430087,can_fls:1:201,can_taho:1:11623,can_mileage:1:140367515"));
 
         verifyPosition(decoder, text(
@@ -33,6 +36,10 @@ public class WialonProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, text(
                 "#SD#270413;205601;5544.6025;N;03739.6834;E;1;2;3;4"),
+                position("2013-04-27 20:56:01.000", true, 55.74338, 37.66139));
+
+        verifyPosition(decoder, text(
+                "99999999#SD#270413;205601;5544.6025;N;03739.6834;E;1;2;3;4"),
                 position("2013-04-27 20:56:01.000", true, 55.74338, 37.66139));
 
         verifyPosition(decoder, text(
