@@ -50,6 +50,22 @@ public class WialonProtocol extends BaseProtocol {
                 pipeline.addLast(new WialonProtocolDecoder(WialonProtocol.this));
             }
         });
+        addServer(new TrackerServer(true, getName()) {
+            @Override
+            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+                pipeline.addLast(new LineBasedFrameDecoder(4 * 1024));
+                boolean utf8 = Context.getConfig().getBoolean(getName() + ".utf8");
+                if (utf8) {
+                    pipeline.addLast(new StringEncoder(StandardCharsets.UTF_8));
+                    pipeline.addLast(new StringDecoder(StandardCharsets.UTF_8));
+                } else {
+                    pipeline.addLast(new StringEncoder());
+                    pipeline.addLast(new StringDecoder());
+                }
+                pipeline.addLast(new WialonProtocolEncoder(WialonProtocol.this));
+                pipeline.addLast(new WialonProtocolDecoder(WialonProtocol.this));
+            }
+        });
     }
 
 }
