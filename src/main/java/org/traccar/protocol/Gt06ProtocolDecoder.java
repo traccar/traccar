@@ -81,6 +81,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_X1_PHOTO_INFO = 0x35;
     public static final int MSG_X1_PHOTO_DATA = 0x36;
     public static final int MSG_WIFI_2 = 0x69;
+    public static final int MSG_GPS_MODULAR = 0x70;
     public static final int MSG_COMMAND_0 = 0x80;
     public static final int MSG_COMMAND_1 = 0x81;
     public static final int MSG_COMMAND_2 = 0x82;
@@ -955,6 +956,10 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             return position;
 
+        } else if (type == MSG_GPS_MODULAR) {
+
+            return decodeExtendedModular(channel, buf, deviceSession, type);
+
         } else {
 
             return decodeExtendedOther(channel, buf, deviceSession, type);
@@ -962,6 +967,82 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         return null;
+    }
+
+    private Object decodeExtendedModular(Channel channel, ByteBuf buf, DeviceSession deviceSession, int type) {
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        while (buf.readableBytes() > 6) {
+            int moduleType = buf.readUnsignedShort();
+            int moduleLength = buf.readUnsignedShort();
+            switch (moduleType) {
+                case 0x18:
+                    position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.01);
+                    break;
+                case 0x28:
+                    position.set(Position.KEY_HDOP, buf.readUnsignedByte() * 0.1);
+                    break;
+                case 0x29:
+                    position.set(Position.KEY_INDEX, buf.readUnsignedInt());
+                    break;
+                case 0x2a:
+                    position.set(Position.KEY_INPUT, buf.readUnsignedByte());
+                    break;
+                case 0x2b:
+                    int event = buf.readUnsignedByte();
+                    switch (event) {
+                        case 0x11:
+                            position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                            break;
+                        case 0x12:
+                            position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
+                            break;
+                        case 0x13:
+                            position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
+                            break;
+                        case 0x14:
+                            position.set(Position.KEY_ALARM, Position.ALARM_REMOVING);
+                            break;
+                        default:
+                            break;
+                    }
+                    position.set(Position.KEY_EVENT, event);
+                    break;
+                case 0x2e:
+                    position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
+                    break;
+                case 0x33:
+                    position.setTime(new Date(buf.readUnsignedInt() * 1000));
+                    position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+                    position.setAltitude(buf.readShort());
+
+                    double latitude = buf.readUnsignedInt() / 60.0 / 30000.0;
+                    double longitude = buf.readUnsignedInt() / 60.0 / 30000.0;
+                    position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
+
+                    int flags = buf.readUnsignedShort();
+                    position.setCourse(BitUtil.to(flags, 10));
+                    position.setValid(BitUtil.check(flags, 12));
+
+                    if (!BitUtil.check(flags, 10)) {
+                        latitude = -latitude;
+                    }
+                    if (BitUtil.check(flags, 11)) {
+                        longitude = -longitude;
+                    }
+
+                    position.setLatitude(latitude);
+                    position.setLongitude(longitude);
+                    break;
+                default:
+                    buf.skipBytes(moduleLength);
+                    break;
+            }
+        }
+
+        return position;
     }
 
     private Object decodeExtendedOther(Channel channel, ByteBuf buf, DeviceSession deviceSession, int type) {
