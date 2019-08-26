@@ -101,6 +101,13 @@ public final class Keys {
             "forward.json", Boolean.class);
 
     /**
+     * Position forwarding queue size. A ring buffer of the specified size is used to queue positions.
+     * If negative, zero, or not specified, queueing is disabled. (Legacy behaviour)
+     */
+    public static final ConfigKey FORWARD_QUEUE_SIZE = new ConfigKey(
+            "forward.queue.size", Integer.class);
+
+    /**
      * Boolean flag to enable or disable position filtering.
      */
     public static final ConfigKey FILTER_ENABLE = new ConfigKey(
