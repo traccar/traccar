@@ -1,5 +1,6 @@
 package org.traccar.model;
 
+import org.eclipse.jetty.util.StringUtil;
 import org.traccar.Context;
 import org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors.FuelDataConstants;
 
@@ -82,13 +83,13 @@ public class PeripheralSensor extends ExtendedModel {
         String calibFuelDataField =
                 this.getString(FuelDataConstants.CALIB_FUEL_ON_POSITION_NAME);
 
-        return calibFuelDataField == null?  Position.KEY_CALIBRATED_FUEL_LEVEL : calibFuelDataField;
+        return StringUtil.isBlank(calibFuelDataField)?  Position.KEY_CALIBRATED_FUEL_LEVEL : calibFuelDataField;
     }
 
     public String getFuelDataFieldName() {
         String fuelDataField =
                 this.getString(FuelDataConstants.SMOOTHED_FUEL_ON_POSITION_NAME);
-        return fuelDataField == null? Position.KEY_FUEL_LEVEL: fuelDataField;
+        return StringUtil.isBlank(fuelDataField)? Position.KEY_FUEL_LEVEL: fuelDataField;
     };
 
     public String getFuelOutlierFieldName() {
@@ -97,7 +98,7 @@ public class PeripheralSensor extends ExtendedModel {
         String fuelDataField =
                 this.getString(FuelDataConstants.SMOOTHED_FUEL_ON_POSITION_NAME);
 
-        return fuelDataField == null? defaultName : fuelDataField + "_is_outlier";
+        return StringUtil.isBlank(fuelDataField)? defaultName : fuelDataField + "_is_outlier";
     }
 
     public int getOutlierWindowSize() {

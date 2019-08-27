@@ -135,7 +135,7 @@ public class FuelSensorDataHandlerHelper {
         List<Position> copyOfRawValues = new ArrayList<>();
         for (Position p : rawFuelOutlierSublist) {
             Position tempPosition = new Position();
-            tempPosition.set(calibFueldField, (double) p.getAttributes().get(calibFueldField));
+            tempPosition.set(calibFueldField, p.getDouble(calibFueldField));
             tempPosition.setDeviceTime(p.getDeviceTime());
             copyOfRawValues.add(tempPosition);
         }
@@ -144,8 +144,7 @@ public class FuelSensorDataHandlerHelper {
 
         double sumOfValues =
                 copyOfRawValues.stream()
-                               .mapToDouble(p -> (double) p.getAttributes()
-                                                           .get(calibFueldField))
+                               .mapToDouble(p -> p.getDouble(calibFueldField))
                                .sum();
 
         double mean = sumOfValues / (double) listSize;
@@ -155,25 +154,19 @@ public class FuelSensorDataHandlerHelper {
                 copyOfRawValues.stream()
                                .mapToDouble(p -> {
                                    double differenceOfMean =
-                                           (double) p.getAttributes()
-                                                     .get(calibFueldField) - mean;
+                                           p.getDouble(calibFueldField) - mean;
                                    return differenceOfMean * differenceOfMean;
                                }).sum();
 
 
         double rawFuelOfPositionEvaluated =
-                (double) copyOfRawValues.get(indexOfPositionEvaluated)
-                                        .getAttributes()
-                                        .get(calibFueldField);
+                copyOfRawValues.get(indexOfPositionEvaluated).getDouble(calibFueldField);
 
-        copyOfRawValues.sort(Comparator.comparing(p -> (double) p.getAttributes()
-                                                                 .get(calibFueldField)));
+        copyOfRawValues.sort(Comparator.comparing(p -> p.getDouble(calibFueldField)));
 
         int midPointOfList = (listSize - 1) / 2;
 
-        double medianRawFuelValue = (double) copyOfRawValues.get(midPointOfList)
-                                                            .getAttributes()
-                                                            .get(calibFueldField);
+        double medianRawFuelValue = copyOfRawValues.get(midPointOfList).getDouble(calibFueldField);
 
         double standardDeviation = Math.sqrt(sumOfSquaredDifferenceOfMean / (double) listSize);
 
@@ -218,7 +211,7 @@ public class FuelSensorDataHandlerHelper {
         double size = 0.0;
 
         for (Position position : fuelLevelReadings) {
-            double level = (Double) position.getAttributes().get(fuelSensor.getCalibFuelFieldName());
+            double level = position.getDouble(fuelSensor.getCalibFuelFieldName());
             if (level > 0.0 && !Double.isNaN(level)) {
                 total += level;
                 size += 1.0;
