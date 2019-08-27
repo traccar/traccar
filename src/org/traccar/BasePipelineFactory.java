@@ -193,7 +193,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             ignitionEventHandler = new IgnitionEventHandler();
 //            maintenanceEventHandler = new MaintenanceEventHandler();
 //            driverEventHandler = new DriverEventHandler();
-//            commonGPSEventsHandler = new CommonGPSEventsHandler();
+            commonGPSEventsHandler = new CommonGPSEventsHandler();
             aquilaAEventsHandler = new AquilaAEventsHandler();
         }
     }
