@@ -87,6 +87,8 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                     sensorsOnDeviceList.clear();
                     sensorsOnDeviceList.add(dummySensor);
                     break;
+                default:
+                    break;
             }
 
             if (sensorsOnDeviceList.isEmpty()) {
@@ -278,13 +280,23 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
         ProcessingInfo processingInfo = Context.getDeviceManager().getDeviceProcessingInfo(deviceId);
         String finalCalibField = processingInfo.getFinalCalibFieldName();
+
         switch(attributeToUpdate) {
             case ALL_FUEL_FIELDS:
                 String calibFuelDataField = fuelSensor.getCalibFuelFieldName();
                 String fuelDataField = fuelSensor.getFuelDataFieldName();
-                position.set(calibFuelDataField, (double) lastKnownPosition.getAttributes().get(calibFuelDataField));
-                position.set(fuelDataField, (double) lastKnownPosition.getAttributes().get(fuelDataField));
-                position.set(finalCalibField, (double) lastKnownPosition.getAttributes().get(finalCalibField));
+                if (lastKnownPosition.getAttributes().containsKey(calibFuelDataField)) {
+                    position.set(calibFuelDataField, (double) lastKnownPosition.getAttributes().get(calibFuelDataField));
+                }
+
+                if (lastKnownPosition.getAttributes().containsKey(fuelDataField)) {
+                    position.set(fuelDataField, (double) lastKnownPosition.getAttributes().get(fuelDataField));
+                }
+
+                if (lastKnownPosition.getAttributes().containsKey(finalCalibField)) {
+                    position.set(finalCalibField, (double) lastKnownPosition.getAttributes().get(finalCalibField));
+                }
+
                 break;
         }
     }

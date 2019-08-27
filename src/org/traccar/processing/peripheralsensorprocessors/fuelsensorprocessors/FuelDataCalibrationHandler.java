@@ -55,6 +55,8 @@ public class FuelDataCalibrationHandler extends BaseDataHandler {
             case ProcessingInfo.SUM_FUEL_PROCESS_TYPE:
                 relatedSensorDataProcessing(position, fuelSensorsList, processingInfo);
                 break;
+            default:
+                break;
         }
 
         return position;
