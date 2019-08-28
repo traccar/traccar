@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ public class TotemProtocol extends BaseProtocol {
                 pipeline.addLast(new TotemFrameDecoder());
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
-                pipeline.addLast(new TotemProtocolEncoder());
+                pipeline.addLast(new TotemProtocolEncoder(TotemProtocol.this));
                 pipeline.addLast(new TotemProtocolDecoder(TotemProtocol.this));
             }
         });

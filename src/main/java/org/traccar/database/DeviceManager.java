@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.Context;
+import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceState;
 import org.traccar.model.DeviceAccumulators;
@@ -112,6 +113,24 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         updateDeviceCache(forceUpdate);
 
         return devicesByUniqueId.get(uniqueId);
+    }
+
+    @Override
+    public String getDevicePassword(long id, String protocol, String defaultPassword) {
+
+        String password = lookupAttributeString(id, Command.KEY_DEVICE_PASSWORD, null, false, false);
+        if (password != null) {
+            return password;
+        }
+
+        if (protocol != null) {
+            password = Context.getConfig().getString(protocol + "." + Command.KEY_DEVICE_PASSWORD);
+            if (password != null) {
+                return password;
+            }
+        }
+
+        return defaultPassword;
     }
 
     public Device getDeviceByPhone(String phone) {
@@ -312,8 +331,8 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
 
     @Override
     public boolean lookupAttributeBoolean(
-            long deviceId, String attributeName, boolean defaultValue, boolean lookupConfig) {
-        Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
+            long deviceId, String attributeName, boolean defaultValue, boolean lookupServer, boolean lookupConfig) {
+        Object result = lookupAttribute(deviceId, attributeName, lookupServer, lookupConfig);
         if (result != null) {
             return result instanceof String ? Boolean.parseBoolean((String) result) : (Boolean) result;
         }
@@ -322,14 +341,15 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
 
     @Override
     public String lookupAttributeString(
-            long deviceId, String attributeName, String defaultValue, boolean lookupConfig) {
-        Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
+            long deviceId, String attributeName, String defaultValue, boolean lookupServer, boolean lookupConfig) {
+        Object result = lookupAttribute(deviceId, attributeName, lookupServer, lookupConfig);
         return result != null ? (String) result : defaultValue;
     }
 
     @Override
-    public int lookupAttributeInteger(long deviceId, String attributeName, int defaultValue, boolean lookupConfig) {
-        Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
+    public int lookupAttributeInteger(
+            long deviceId, String attributeName, int defaultValue, boolean lookupServer, boolean lookupConfig) {
+        Object result = lookupAttribute(deviceId, attributeName, lookupServer, lookupConfig);
         if (result != null) {
             return result instanceof String ? Integer.parseInt((String) result) : ((Number) result).intValue();
         }
@@ -338,8 +358,8 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
 
     @Override
     public long lookupAttributeLong(
-            long deviceId, String attributeName, long defaultValue, boolean lookupConfig) {
-        Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
+            long deviceId, String attributeName, long defaultValue, boolean lookupServer, boolean lookupConfig) {
+        Object result = lookupAttribute(deviceId, attributeName, lookupServer, lookupConfig);
         if (result != null) {
             return result instanceof String ? Long.parseLong((String) result) : ((Number) result).longValue();
         }
@@ -347,15 +367,15 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
     }
 
     public double lookupAttributeDouble(
-            long deviceId, String attributeName, double defaultValue, boolean lookupConfig) {
-        Object result = lookupAttribute(deviceId, attributeName, lookupConfig);
+            long deviceId, String attributeName, double defaultValue, boolean lookupServer, boolean lookupConfig) {
+        Object result = lookupAttribute(deviceId, attributeName, lookupServer, lookupConfig);
         if (result != null) {
             return result instanceof String ? Double.parseDouble((String) result) : ((Number) result).doubleValue();
         }
         return defaultValue;
     }
 
-    private Object lookupAttribute(long deviceId, String attributeName, boolean lookupConfig) {
+    private Object lookupAttribute(long deviceId, String attributeName, boolean lookupServer, boolean lookupConfig) {
         Object result = null;
         Device device = getById(deviceId);
         if (device != null) {
@@ -375,13 +395,12 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
                     }
                 }
             }
-            if (result == null) {
-                if (lookupConfig) {
-                    result = Context.getConfig().getString(attributeName);
-                } else {
-                    Server server = Context.getPermissionsManager().getServer();
-                    result = server.getAttributes().get(attributeName);
-                }
+            if (result == null && lookupServer) {
+                Server server = Context.getPermissionsManager().getServer();
+                result = server.getAttributes().get(attributeName);
+            }
+            if (result == null && lookupConfig) {
+                result = Context.getConfig().getString(attributeName);
             }
         }
         return result;

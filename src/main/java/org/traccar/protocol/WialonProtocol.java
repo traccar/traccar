@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,14 +38,31 @@ public class WialonProtocol extends BaseProtocol {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new LineBasedFrameDecoder(4 * 1024));
-                pipeline.addLast(new StringEncoder());
                 boolean utf8 = Context.getConfig().getBoolean(getName() + ".utf8");
                 if (utf8) {
+                    pipeline.addLast(new StringEncoder(StandardCharsets.UTF_8));
                     pipeline.addLast(new StringDecoder(StandardCharsets.UTF_8));
                 } else {
+                    pipeline.addLast(new StringEncoder());
                     pipeline.addLast(new StringDecoder());
                 }
-                pipeline.addLast(new WialonProtocolEncoder());
+                pipeline.addLast(new WialonProtocolEncoder(WialonProtocol.this));
+                pipeline.addLast(new WialonProtocolDecoder(WialonProtocol.this));
+            }
+        });
+        addServer(new TrackerServer(true, getName()) {
+            @Override
+            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+                pipeline.addLast(new LineBasedFrameDecoder(4 * 1024));
+                boolean utf8 = Context.getConfig().getBoolean(getName() + ".utf8");
+                if (utf8) {
+                    pipeline.addLast(new StringEncoder(StandardCharsets.UTF_8));
+                    pipeline.addLast(new StringDecoder(StandardCharsets.UTF_8));
+                } else {
+                    pipeline.addLast(new StringEncoder());
+                    pipeline.addLast(new StringDecoder());
+                }
+                pipeline.addLast(new WialonProtocolEncoder(WialonProtocol.this));
                 pipeline.addLast(new WialonProtocolDecoder(WialonProtocol.this));
             }
         });

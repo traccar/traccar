@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "version": "4.5",
+        "version": "4.6",
         "title": "traccar"
     },
     "host": "demo.traccar.org",
@@ -1746,7 +1746,7 @@
                     "type": "integer"
                 },
                 "calendarId": {
-                    "description": "Geofence Id, can be second parameter only and only in combination with userId",
+                    "description": "Calendar Id, can be second parameter only and only in combination with userId",
                     "type": "integer"
                 },
                 "attributeId": {

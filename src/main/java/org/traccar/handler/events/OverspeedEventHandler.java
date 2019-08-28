@@ -120,7 +120,7 @@ public class OverspeedEventHandler extends BaseEventHandler {
             return null;
         }
 
-        double speedLimit = deviceManager.lookupAttributeDouble(deviceId, ATTRIBUTE_SPEED_LIMIT, 0, false);
+        double speedLimit = deviceManager.lookupAttributeDouble(deviceId, ATTRIBUTE_SPEED_LIMIT, 0, true, false);
 
         double geofenceSpeedLimit = 0;
         long overspeedGeofenceId = 0;

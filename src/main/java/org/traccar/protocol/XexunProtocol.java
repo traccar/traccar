@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ public class XexunProtocol extends BaseProtocol {
                 }
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
-                pipeline.addLast(new XexunProtocolEncoder());
+                pipeline.addLast(new XexunProtocolEncoder(XexunProtocol.this));
                 pipeline.addLast(new XexunProtocolDecoder(XexunProtocol.this, full));
             }
         });

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,10 @@ import org.traccar.model.Command;
 import java.util.Map;
 
 public abstract class StringProtocolEncoder extends BaseProtocolEncoder {
+
+    public StringProtocolEncoder(Protocol protocol) {
+        super(protocol);
+    }
 
     public interface ValueFormatter {
         String formatValue(String key, Object value);

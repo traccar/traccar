@@ -12,6 +12,9 @@ public class ItsProtocolDecoderTest extends ProtocolTest {
         ItsProtocolDecoder decoder = new ItsProtocolDecoder(null);
 
         verifyPosition(decoder, text(
+                "$,ID01,SAT,1.0.0,NR,1,L,868345034056903,DL3CAB1021,1,27052019,040234,28.359895,N,76.927879,E,0.0,285.6,12,254.9,1.4,0.7,IDEA,1,1,12.6,3.8,0,25,404,04,0138,0927,4ECD,0138,41,1C2B,0138,37,D77A,0138,34,D843,0138,33,0000,00,0.03,0.00,000091,A3,*"));
+
+        verifyPosition(decoder, text(
                 "$NMP,GPSBOX,1.6.8,NR,H,868997035844834,0000,1,220519,035419,28.6291409,N,77.3928299,E,015.2,157.40,07,197.86,2.1,1.0,airtel,1,1,13.3,4.1,0,O,31,404,10,0099,79b4,(-57,0099,334c,x,x,x,x,x,x,x,x,x),0012,00,000348,2,08.4,00.3,(0,0,0),CD*"));
 
         verifyPosition(decoder, text(

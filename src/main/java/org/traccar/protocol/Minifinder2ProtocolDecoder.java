@@ -33,6 +33,7 @@ import org.traccar.model.WifiAccessPoint;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 
 public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
 
@@ -87,7 +88,7 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
 
             ByteBuf response = Unpooled.buffer();
             response.writeByte(0xAB); // header
-            response.writeByte(0x28); // properties
+            response.writeByte(0x00); // properties
             response.writeShortLE(content.readableBytes());
             response.writeShortLE(Checksum.crc16(Checksum.CRC16_XMODEM, content.nioBuffer()));
             response.writeShortLE(index);
@@ -148,6 +149,10 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                             position.getNetwork().addWifiAccessPoint(WifiAccessPoint.from(
                                     mac.substring(0, mac.length() - 1), rssi));
                         }
+                        break;
+                    case 0x24:
+                        position.setTime(new Date(buf.readUnsignedIntLE() * 1000));
+                        position.set(Position.KEY_STATUS, buf.readUnsignedIntLE());
                         break;
                     case 0x40:
                         buf.readUnsignedIntLE(); // timestamp

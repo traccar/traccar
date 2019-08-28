@@ -197,8 +197,9 @@ public final class Keys {
             "time.protocols", String.class);
 
     /**
-     * Replaces coordinates with last known if change is less than a 'coordinates.error' meters. Helps to avoid
-     * coordinates jumps during parking period.
+     * Replaces coordinates with last known if change is less than a 'coordinates.minError' meters
+     * or more than a 'coordinates.maxError' meters. Helps to avoid coordinates jumps during parking period
+     * or jumps to zero coordinates.
      */
     public static final ConfigKey COORDINATES_FILTER = new ConfigKey(
             "coordinates.filter", Boolean.class);
@@ -214,7 +215,7 @@ public final class Keys {
      * Position is also marked as 'invalid'.
      */
     public static final ConfigKey COORDINATES_MAX_ERROR = new ConfigKey(
-            "filter.maxError", Integer.class);
+            "coordinates.maxError", Integer.class);
 
     /**
      * Enable to save device IP addresses information. Disabled by default.

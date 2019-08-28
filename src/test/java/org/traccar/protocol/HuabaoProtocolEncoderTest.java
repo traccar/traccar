@@ -11,8 +11,8 @@ public class HuabaoProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        HuabaoProtocolEncoder encoder = new HuabaoProtocolEncoder();
-        
+        HuabaoProtocolEncoder encoder = new HuabaoProtocolEncoder(null);
+
         Command command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_ENGINE_STOP);

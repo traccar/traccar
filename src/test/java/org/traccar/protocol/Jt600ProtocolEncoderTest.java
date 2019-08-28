@@ -7,7 +7,7 @@ import org.traccar.ProtocolTest;
 import org.traccar.model.Command;
 
 public class Jt600ProtocolEncoderTest extends ProtocolTest {
-    Jt600ProtocolEncoder encoder = new Jt600ProtocolEncoder();
+    Jt600ProtocolEncoder encoder = new Jt600ProtocolEncoder(null);
     Command command = new Command();
 
     @Test

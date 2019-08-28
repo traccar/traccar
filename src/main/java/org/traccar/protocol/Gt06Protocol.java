@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ public class Gt06Protocol extends BaseProtocol {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new Gt06FrameDecoder());
-                pipeline.addLast(new Gt06ProtocolEncoder());
+                pipeline.addLast(new Gt06ProtocolEncoder(Gt06Protocol.this));
                 pipeline.addLast(new Gt06ProtocolDecoder(Gt06Protocol.this));
             }
         });

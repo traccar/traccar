@@ -42,7 +42,7 @@ public final class Trips {
 
     private static Collection<TripReport> detectTrips(long deviceId, Date from, Date to) throws SQLException {
         boolean ignoreOdometer = Context.getDeviceManager()
-                .lookupAttributeBoolean(deviceId, "report.ignoreOdometer", false, true);
+                .lookupAttributeBoolean(deviceId, "report.ignoreOdometer", false, false, true);
 
         IdentityManager identityManager = Main.getInjector().getInstance(IdentityManager.class);
         DeviceManager deviceManager = Main.getInjector().getInstance(DeviceManager.class);

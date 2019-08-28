@@ -1,6 +1,6 @@
 /*
  * Copyright 2017 Christoph Krey (c@ckrey.de)
- * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public class Tk103Protocol extends BaseProtocol {
                 pipeline.addLast(new Tk103FrameDecoder());
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new StringEncoder());
-                pipeline.addLast(new Tk103ProtocolEncoder());
+                pipeline.addLast(new Tk103ProtocolEncoder(Tk103Protocol.this));
                 pipeline.addLast(new Tk103ProtocolDecoder(Tk103Protocol.this));
             }
         });
@@ -60,7 +60,7 @@ public class Tk103Protocol extends BaseProtocol {
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new StringEncoder());
-                pipeline.addLast(new Tk103ProtocolEncoder());
+                pipeline.addLast(new Tk103ProtocolEncoder(Tk103Protocol.this));
                 pipeline.addLast(new Tk103ProtocolDecoder(Tk103Protocol.this));
             }
         });

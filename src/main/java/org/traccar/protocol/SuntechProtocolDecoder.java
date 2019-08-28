@@ -50,7 +50,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
     public int getProtocolType(long deviceId) {
         return Context.getIdentityManager().lookupAttributeInteger(
-                deviceId, getProtocolName() + ".protocolType", protocolType, true);
+                deviceId, getProtocolName() + ".protocolType", protocolType, false, true);
     }
 
     public void setHbm(boolean hbm) {
@@ -59,7 +59,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
     public boolean isHbm(long deviceId) {
         return Context.getIdentityManager().lookupAttributeBoolean(
-                deviceId, getProtocolName() + ".hbm", hbm, true);
+                deviceId, getProtocolName() + ".hbm", hbm, false, true);
     }
 
     public void setIncludeAdc(boolean includeAdc) {
@@ -68,7 +68,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
     public boolean isIncludeAdc(long deviceId) {
         return Context.getIdentityManager().lookupAttributeBoolean(
-                deviceId, getProtocolName() + ".includeAdc", includeAdc, true);
+                deviceId, getProtocolName() + ".includeAdc", includeAdc, false, true);
     }
 
     public void setIncludeRpm(boolean includeRpm) {
@@ -77,7 +77,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
     public boolean isIncludeRpm(long deviceId) {
         return Context.getIdentityManager().lookupAttributeBoolean(
-                deviceId, getProtocolName() + ".includeRpm", includeRpm, true);
+                deviceId, getProtocolName() + ".includeRpm", includeRpm, false, true);
     }
 
     public void setIncludeTemp(boolean includeTemp) {
@@ -86,7 +86,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
     public boolean isIncludeTemp(long deviceId) {
         return Context.getIdentityManager().lookupAttributeBoolean(
-                deviceId, getProtocolName() + ".includeTemp", includeTemp, true);
+                deviceId, getProtocolName() + ".includeTemp", includeTemp, false, true);
     }
 
     private Position decode9(
@@ -327,24 +327,36 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                 int remaining = Integer.parseInt(values[index++]);
                 while (remaining > 0) {
                     String attribute = values[index++];
-                    String[] pair = attribute.split("=");
-                    if (pair.length >= 2) {
-                        String value = pair[1].trim();
-                        if (value.contains(".")) {
-                            value = value.substring(0, value.indexOf('.'));
+                    if (attribute.startsWith("CabAVL")) {
+                        String[] data = attribute.split(",");
+                        double fuel1 = Double.parseDouble(data[2]);
+                        if (fuel1 > 0) {
+                            position.set("fuel1", fuel1);
                         }
-                        switch (pair[0].charAt(0)) {
-                            case 't':
-                                position.set(Position.PREFIX_TEMP + pair[0].charAt(2), Integer.parseInt(value, 16));
-                                break;
-                            case 'N':
-                                position.set("fuel" + pair[0].charAt(2), Integer.parseInt(value, 16));
-                                break;
-                            case 'Q':
-                                position.set("drivingQuality", Integer.parseInt(value, 16));
-                                break;
-                            default:
-                                break;
+                        double fuel2 = Double.parseDouble(data[3]);
+                        if (fuel2 > 0) {
+                            position.set("fuel2", fuel2);
+                        }
+                    } else {
+                        String[] pair = attribute.split("=");
+                        if (pair.length >= 2) {
+                            String value = pair[1].trim();
+                            if (value.contains(".")) {
+                                value = value.substring(0, value.indexOf('.'));
+                            }
+                            switch (pair[0].charAt(0)) {
+                                case 't':
+                                    position.set(Position.PREFIX_TEMP + pair[0].charAt(2), Integer.parseInt(value, 16));
+                                    break;
+                                case 'N':
+                                    position.set("fuel" + pair[0].charAt(2), Integer.parseInt(value, 16));
+                                    break;
+                                case 'Q':
+                                    position.set("drivingQuality", Integer.parseInt(value, 16));
+                                    break;
+                                default:
+                                    break;
+                            }
                         }
                     }
                     remaining -= attribute.length() + 1;
@@ -409,7 +421,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
         String type = values[index++];
 
-        if (!type.equals("STT")) {
+        if (!type.equals("STT") && !type.equals("ALT")) {
             return null;
         }
 

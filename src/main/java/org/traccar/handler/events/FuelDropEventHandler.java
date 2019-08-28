@@ -47,7 +47,7 @@ public class FuelDropEventHandler extends BaseEventHandler {
         }
 
         double fuelDropThreshold = identityManager
-                .lookupAttributeDouble(device.getId(), ATTRIBUTE_FUEL_DROP_THRESHOLD, 0, false);
+                .lookupAttributeDouble(device.getId(), ATTRIBUTE_FUEL_DROP_THRESHOLD, 0, true, false);
 
         if (fuelDropThreshold > 0) {
             Position lastPosition = identityManager.getLastPosition(position.getDeviceId());
