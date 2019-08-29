@@ -70,7 +70,7 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
         ByteBuf buf = Unpooled.wrappedBuffer(DataConverter.parseHex(data));
         try {
             int event = buf.readUnsignedByte();
-            if ((event >> 4) == 0) {
+            if (event >> 4 == 0) {
 
                 position.setValid(true);
                 position.setLatitude(buf.readIntLE() * 0.0000001);

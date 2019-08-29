@@ -163,8 +163,15 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
                 position.set("tagData", values[index++]);
                 break;
             case "IWD":
-                if (index < values.length && values[index + 1].equals("0")) {
-                    position.set(Position.KEY_DRIVER_UNIQUE_ID, values[index + 2]);
+                while (index < values.length) {
+                    int sensorIndex = Integer.parseInt(values[index++]);
+                    int dataType = Integer.parseInt(values[index++]);
+                    if (dataType == 0) {
+                        position.set(Position.KEY_DRIVER_UNIQUE_ID, values[index++]);
+                    } else if (dataType == 1) {
+                        index += 1; // temperature sensor serial number
+                        position.set(Position.PREFIX_TEMP + sensorIndex, Double.parseDouble(values[index++]));
+                    }
                 }
                 break;
             default:

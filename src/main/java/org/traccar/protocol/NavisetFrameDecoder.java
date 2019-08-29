@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,24 +19,17 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseFrameDecoder;
+import org.traccar.helper.BitUtil;
 
-public class TramigoFrameDecoder extends BaseFrameDecoder {
+public class NavisetFrameDecoder extends BaseFrameDecoder {
 
     @Override
-    protected Object decode(ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
+    protected Object decode(
+            ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
-        if (buf.readableBytes() < 20) {
-            return null;
-        }
+        int length = 2 + BitUtil.to(buf.getUnsignedShortLE(buf.readerIndex()), 12) + 2;
 
-        int length;
-        if (buf.getUnsignedByte(buf.readerIndex()) == 0x80) {
-            length = buf.getUnsignedShortLE(buf.readerIndex() + 6);
-        } else {
-            length = buf.getUnsignedShort(buf.readerIndex() + 6);
-        }
-
-        if (length <= buf.readableBytes()) {
+        if (buf.readableBytes() >= length) {
             return buf.readRetainedSlice(length);
         }
 

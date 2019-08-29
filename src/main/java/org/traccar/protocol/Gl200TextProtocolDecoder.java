@@ -119,9 +119,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private static final Pattern PATTERN_LOCATION = new PatternBuilder()
-            .number("(d{1,2})?,")                // hdop
+            .number("(d{1,2}.?d?)?,")            // hdop
             .number("(d{1,3}.d)?,")              // speed
-            .number("(d{1,3})?,")                // course
+            .number("(d{1,3}.?d?)?,")            // course
             .number("(-?d{1,5}.d)?,")            // altitude
             .number("(-?d{1,3}.d{6})?,")         // longitude
             .number("(-?d{1,2}.d{6})?,")         // latitude
@@ -184,7 +184,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)?,")                    // power
             .number("d{1,2},").optional()        // report type
             .number("d{1,2},").optional()        // count
-            .number(",").optional()              // reserved
+            .number("d*,").optional()            // reserved
             .number("(d+),").optional()          // battery
             .expression("((?:")
             .expression(PATTERN_LOCATION.pattern())
@@ -202,6 +202,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .or()
             .number("(d{1,7}.d)?,").optional()   // odometer
             .number("(d{1,3})?,")                // battery
+            .or()
+            .number("(-?d),")                    // rssi
+            .number("(d{1,3}),")                 // battery
             .groupEnd()
             .any()
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
@@ -514,7 +517,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void decodeLocation(Position position, Parser parser) {
-        Integer hdop = parser.nextInt();
+        Double hdop = parser.nextDouble();
         position.setValid(hdop == null || hdop > 0);
         position.set(Position.KEY_HDOP, hdop);
 
@@ -847,6 +850,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (parser.hasNext()) {
             position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
         }
+        position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
+        position.set(Position.KEY_RSSI, parser.nextInt());
         position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
 
         decodeDeviceTime(position, parser);

@@ -1,6 +1,6 @@
 /*
- * Copyright 2016 - 2019 Anton Tananaev (anton@traccar.org)
- * Copyright 2017 - 2018 Andrey Kunitsyn (andrey@traccar.org)
+ * Copyright 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 Jesse Hills (jesserockz@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,28 +16,23 @@
  */
 package org.traccar.protocol;
 
+import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpRequestDecoder;
+import io.netty.handler.codec.http.HttpResponseEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
-import org.traccar.model.Command;
 
-public class GranitProtocol extends BaseProtocol {
+public class LeafSpyProtocol extends BaseProtocol {
 
-    public GranitProtocol() {
-        setSupportedDataCommands(
-                Command.TYPE_IDENTIFICATION,
-                Command.TYPE_REBOOT_DEVICE,
-                Command.TYPE_POSITION_SINGLE);
-        setTextCommandEncoder(new GranitProtocolSmsEncoder(this));
-        setSupportedTextCommands(
-                Command.TYPE_REBOOT_DEVICE,
-                Command.TYPE_POSITION_PERIODIC);
+    public LeafSpyProtocol() {
         addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast(new GranitFrameDecoder());
-                pipeline.addLast(new GranitProtocolEncoder(GranitProtocol.this));
-                pipeline.addLast(new GranitProtocolDecoder(GranitProtocol.this));
+                pipeline.addLast(new HttpResponseEncoder());
+                pipeline.addLast(new HttpRequestDecoder());
+                pipeline.addLast(new HttpObjectAggregator(16384));
+                pipeline.addLast(new LeafSpyProtocolDecoder(LeafSpyProtocol.this));
             }
         });
     }

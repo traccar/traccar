@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ public class GotopProtocolDecoder extends BaseProtocolDecoder {
             .number("DATE:(dd)(dd)(dd),")        // date (yyddmm)
             .number("TIME:(dd)(dd)(dd),")        // time (hhmmss)
             .number("LAT:(d+.d+)([NS]),")        // latitude
-            .number("LOT:(d+.d+)([EW]),")        // longitude
+            .number("LO[NT]:(d+.d+)([EW]),")     // longitude
             .text("Speed:").number("(d+.d+),")   // speed
             .expression("([^,]+),")              // status
             .number("(d+)?")                     // course
