@@ -3,6 +3,7 @@ package org.traccar.protocol;
 import io.netty.handler.codec.http.HttpMethod;
 import org.junit.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class SigfoxProtocolDecoderTest extends ProtocolTest {
 
@@ -10,6 +11,10 @@ public class SigfoxProtocolDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         SigfoxProtocolDecoder decoder = new SigfoxProtocolDecoder(null);
+
+        verifyAttribute(decoder, request(HttpMethod.POST, "/",
+                buffer("{ \"device\": \"40D310\", \"payload\": \"62\", \"time\": 1563043532, \"seqNumber\": 1076 }")),
+                Position.KEY_ALARM, Position.ALARM_SOS);
 
         verifyAttributes(decoder, request(HttpMethod.POST, "/",
                 buffer("{ \"device\": \"40D310\", \"payload\": \"20061494480389f956042a\", \"time\": 1563043532, \"seqNumber\": 1076 }")));
