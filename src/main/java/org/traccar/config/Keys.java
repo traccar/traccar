@@ -108,6 +108,13 @@ public final class Keys {
             "forward.queue.size", Integer.class);
 
     /**
+     * Position forwarding queue concurrency. Defines how many HTTP requests can be pending at any time.
+     * If queueing is enabled, and this value is less than one, it's ignored and forced to be one.
+     */
+    public static final ConfigKey FORWARD_QUEUE_CONCURRENCY = new ConfigKey(
+            "forward.queue.concurrency", Integer.class);
+
+    /**
      * Boolean flag to enable or disable position filtering.
      */
     public static final ConfigKey FILTER_ENABLE = new ConfigKey(
