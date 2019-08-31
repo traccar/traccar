@@ -58,7 +58,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         buf.writeShort(type);
         buf.writeShort(data.readableBytes());
         buf.writeBytes(id);
-        buf.writeShort(1); // index
+        buf.writeShort(0); // index
         buf.writeBytes(data);
         data.release();
         buf.writeByte(Checksum.xor(buf.nioBuffer(1, buf.readableBytes() - 1)));
@@ -131,7 +131,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 ByteBuf response = Unpooled.buffer();
                 response.writeShort(index);
                 response.writeByte(RESULT_SUCCESS);
-                response.writeBytes("authentication".getBytes(StandardCharsets.US_ASCII));
+                response.writeBytes(ByteBufUtil.hexDump(id).getBytes(StandardCharsets.US_ASCII));
                 channel.writeAndFlush(new NetworkMessage(
                         formatMessage(MSG_TERMINAL_REGISTER_RESPONSE, id, response), remoteAddress));
             }
