@@ -26,6 +26,7 @@ import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -73,6 +74,16 @@ public class RaceDynamicsProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
+    private String imei;
+
+    private void sendResponse(Channel channel, SocketAddress remoteAddress, int type) {
+        if (channel != null) {
+            String response = String.format(
+                    "$GPRMC,%1$d,%2$td%2$tm%2$ty,%2$tH%2$tM%2$tS,%3$s,\r\n", type, new Date(), imei);
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -85,10 +96,9 @@ public class RaceDynamicsProtocolDecoder extends BaseProtocolDecoder {
 
             Parser parser = new Parser(PATTERN_LOGIN, sentence);
             if (parser.matches()) {
-                getDeviceSession(channel, remoteAddress, parser.next());
-                if (channel != null) {
-                    channel.writeAndFlush(new NetworkMessage(sentence + "\r\n", remoteAddress));
-                }
+                imei = parser.next();
+                getDeviceSession(channel, remoteAddress, imei);
+                sendResponse(channel, remoteAddress, type);
             }
 
         } else if (type == MSG_LOCATION) {
@@ -130,6 +140,8 @@ public class RaceDynamicsProtocolDecoder extends BaseProtocolDecoder {
 
                 }
             }
+
+            sendResponse(channel, remoteAddress, type);
 
             return positions;
 
