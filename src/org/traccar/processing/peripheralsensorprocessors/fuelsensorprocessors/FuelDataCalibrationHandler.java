@@ -26,7 +26,7 @@ public class FuelDataCalibrationHandler extends BaseDataHandler {
         long deviceId = position.getDeviceId();
         Optional<List<PeripheralSensor>> sensorsOnDevice = Context.getPeripheralSensorManager().getLinkedPeripheralSensors(deviceId);
 
-        if (!sensorsOnDevice.isPresent()) {
+        if (!sensorsOnDevice.isPresent() || sensorsOnDevice.get().isEmpty()) {
             FuelSensorDataHandlerHelper.logDebugIfDeviceId(String.format("No sensors found on deviceId: %d. Refreshing sensors map.", deviceId), deviceId);
             Context.getPeripheralSensorManager().refreshPeripheralSensorsMap();
             return position;
@@ -35,7 +35,6 @@ public class FuelDataCalibrationHandler extends BaseDataHandler {
         List<PeripheralSensor> fuelSensorsList = sensorsOnDevice.get();
         if (fuelSensorsList.isEmpty()) {
             FuelSensorDataHandlerHelper.logDebugIfDeviceId(String.format("Sensors list empty for deviceId: %d. Refreshing sensors map.", deviceId), deviceId);
-            Context.getPeripheralSensorManager().refreshPeripheralSensorsMap();
             return position;
         }
 

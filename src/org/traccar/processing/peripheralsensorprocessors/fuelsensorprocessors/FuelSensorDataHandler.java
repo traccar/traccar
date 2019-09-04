@@ -1,5 +1,6 @@
 package org.traccar.processing.peripheralsensorprocessors.fuelsensorprocessors;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.TreeMultiset;
 import org.traccar.BaseDataHandler;
 import org.traccar.Context;
@@ -70,13 +71,13 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             Optional<List<PeripheralSensor>> peripheralSensorOnDevice =
                     Context.getPeripheralSensorManager().getSensorByDeviceId(deviceId);
 
-            if (!peripheralSensorOnDevice.isPresent()) {
-                logDebugIfNotLoading(String.format("No sensors found on deviceId: %d. Refreshing sensors map.", deviceId), deviceId);
-                Context.getPeripheralSensorManager().refreshPeripheralSensorsMap();
+            if (!peripheralSensorOnDevice.isPresent() || peripheralSensorOnDevice.get().isEmpty()) {
+                logDebugIfNotLoading(String.format("No sensors found on deviceId: %d. Skipping fuel processing.", deviceId));
                 return position;
             }
 
             List<PeripheralSensor> sensorsOnDeviceList = peripheralSensorOnDevice.get();
+            List<PeripheralSensor> sensorsListForProcessing = sensorsOnDeviceList;
 
             ProcessingInfo processingInfo = Context.getDeviceManager().getDeviceProcessingInfo(deviceId);
             String fuelProcessingType = processingInfo.getProcessingType();
@@ -84,20 +85,14 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                 case ProcessingInfo.AVG_FUEL_PROCESS_TYPE:
                 case ProcessingInfo.SUM_FUEL_PROCESS_TYPE:
                     PeripheralSensor dummySensor = sensorsOnDeviceList.get(0).cloneMe(processingInfo.getFinalCalibFieldName());
-                    sensorsOnDeviceList.clear();
-                    sensorsOnDeviceList.add(dummySensor);
+                    sensorsListForProcessing = Lists.newArrayList();
+                    sensorsListForProcessing.add(dummySensor);
                     break;
                 default:
                     break;
             }
 
-            if (sensorsOnDeviceList.isEmpty()) {
-                logDebugIfNotLoading(String.format("Sensors list empty for deviceId: %d. Refreshing sensors map.", deviceId), deviceId);
-                Context.getPeripheralSensorManager().refreshPeripheralSensorsMap();
-                return position;
-            }
-
-            for (PeripheralSensor sensorOnDevice : sensorsOnDeviceList) {
+            for (PeripheralSensor sensorOnDevice : sensorsListForProcessing) {
                 long sensorID = sensorOnDevice.getPeripheralSensorId();
                 logDebugIfNotLoading(String.format("[FuelSensorDataHandler] Running sensor loop on %d %d", position.getDeviceId(), sensorID), deviceId);
                 String lookUpKey = getLookupKey(deviceId, sensorID);
@@ -279,22 +274,15 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         }
 
         ProcessingInfo processingInfo = Context.getDeviceManager().getDeviceProcessingInfo(deviceId);
-        String finalCalibField = processingInfo.getFinalCalibFieldName();
 
         switch(attributeToUpdate) {
             case ALL_FUEL_FIELDS:
-                String calibFuelDataField = fuelSensor.getCalibFuelFieldName();
-                String fuelDataField = fuelSensor.getFuelDataFieldName();
-                if (lastKnownPosition.getAttributes().containsKey(calibFuelDataField)) {
-                    position.set(calibFuelDataField, (double) lastKnownPosition.getAttributes().get(calibFuelDataField));
-                }
-
-                if (lastKnownPosition.getAttributes().containsKey(fuelDataField)) {
-                    position.set(fuelDataField, (double) lastKnownPosition.getAttributes().get(fuelDataField));
-                }
-
-                if (lastKnownPosition.getAttributes().containsKey(finalCalibField)) {
-                    position.set(finalCalibField, (double) lastKnownPosition.getAttributes().get(finalCalibField));
+                Set<String> attributes = lastKnownPosition.getAttributes().keySet();
+                for (String attr : attributes) {
+                    String lowerCaseAttr = attr.toLowerCase();
+                    if (lowerCaseAttr.contains("fuel") || lowerCaseAttr.contains("calib")) {
+                        position.set(attr, lastKnownPosition.getDouble(attr));
+                    }
                 }
 
                 break;
