@@ -127,7 +127,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             case 67:
                 double battery = readValue(buf, length, false) * 0.001;
                 position.set(Position.KEY_BATTERY, battery);
-                if (battery < 2.0) {
+                if (battery < 3.5) {
                     position.set(Position.KEY_INTERNAL_BATTERY_LOW, true);
                 }
                 break;

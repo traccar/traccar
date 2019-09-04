@@ -185,7 +185,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
         if (Context.getConfig().getBoolean("event.enable")) {
 //            commandResultEventHandler = new CommandResultEventHandler();
-//            overspeedEventHandler = Context.getOverspeedEventHandler();
+            overspeedEventHandler = Context.getOverspeedEventHandler();
 //            fuelDropEventHandler = new FuelDropEventHandler();
             motionEventHandler = Context.getMotionEventHandler();
 //            geofenceEventHandler = new GeofenceEventHandler();
@@ -193,7 +193,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             ignitionEventHandler = new IgnitionEventHandler();
 //            maintenanceEventHandler = new MaintenanceEventHandler();
 //            driverEventHandler = new DriverEventHandler();
-//            commonGPSEventsHandler = new CommonGPSEventsHandler();
+            commonGPSEventsHandler = new CommonGPSEventsHandler();
             aquilaAEventsHandler = new AquilaAEventsHandler();
         }
     }

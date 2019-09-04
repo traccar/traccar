@@ -101,6 +101,11 @@ public class OverspeedEventHandler extends BaseEventHandler {
     @Override
     protected Map<Event, Position> analyzePosition(Position position) {
 
+
+        if (position.getProtocol().toLowerCase().equals("aquila")) {
+            return null;
+        }
+
         long deviceId = position.getDeviceId();
         Device device = Context.getIdentityManager().getById(deviceId);
         if (device == null) {
@@ -110,7 +115,7 @@ public class OverspeedEventHandler extends BaseEventHandler {
             return null;
         }
 
-        double speedLimit = Context.getDeviceManager().lookupAttributeDouble(deviceId, ATTRIBUTE_SPEED_LIMIT, 0, false);
+        double speedLimit = Context.getDeviceManager().lookupAttributeDouble(deviceId, ATTRIBUTE_SPEED_LIMIT, 0, true);
 
         double geofenceSpeedLimit = 0;
         long overspeedGeofenceId = 0;

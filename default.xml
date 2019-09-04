@@ -21,6 +21,12 @@
     <entry key='event.enable'>true</entry>
     <entry key='processing.computedAttributes.enable'>true</entry>
 
+    <!-- speed limit in knots -->
+    <entry key='speedLimit'>32</entry>
+    <entry key='event.overspeed.minimalDuration'>60</entry>
+    <entry key='event.overspeed.notRepeat'>true</entry>
+    <entry key='event.overspeed.preferLowest'>true</entry>
+
     <entry key='media.path'>./media</entry>
 
     <entry key='server.statistics'>https://www.traccar.org/analytics/</entry>
