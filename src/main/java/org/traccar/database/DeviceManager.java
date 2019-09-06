@@ -74,7 +74,11 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         Device device = new Device();
         device.setName(uniqueId);
         device.setUniqueId(uniqueId);
-        device.setCategory(Context.getConfig().getString("database.registerUnknown.defaultCategory"));
+
+        String defaultCategory = Context.getConfig().getString("database.registerUnknown.defaultCategory");
+        if (defaultCategory != null && !defaultCategory.isEmpty()) {
+            device.setCategory(defaultCategory);
+        }
 
         long defaultGroupId = Context.getConfig().getLong("database.registerUnknown.defaultGroupId");
         if (defaultGroupId != 0) {

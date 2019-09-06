@@ -29,7 +29,14 @@ public class EelinkProtocol extends BaseProtocol {
                 Command.TYPE_POSITION_SINGLE,
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME,
-                Command.TYPE_REBOOT_DEVICE);
+                Command.TYPE_REBOOT_DEVICE,
+                Command.TYPE_GET_VERSION,
+                Command.TYPE_SEND_SMS,
+                Command.TYPE_POSITION_PERIODIC,
+                Command.TYPE_POSITION_STOP,
+                Command.TYPE_SET_TIMEZONE,
+                Command.TYPE_SOS_NUMBER,
+                Command.TYPE_OUTPUT_CONTROL);
         addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {

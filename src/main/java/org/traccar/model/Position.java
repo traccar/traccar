@@ -90,7 +90,10 @@ public class Position extends Message {
     public static final String KEY_OBD_SPEED = "obdSpeed"; // knots
     public static final String KEY_OBD_ODOMETER = "obdOdometer"; // meters
 
-    public static final String KEY_RESULT = "result";
+    public static final String KEY_RESULT = "result"; // command results
+
+    public static final String KEY_PHONE_NUMBER = "phoneNumber";
+    public static final String KEY_MESSAGE = "message"; // sms message
 
     public static final String KEY_DRIVER_UNIQUE_ID = "driverUniqueId";
 

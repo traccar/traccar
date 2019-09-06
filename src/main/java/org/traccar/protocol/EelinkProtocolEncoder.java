@@ -51,11 +51,10 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
             buf.writeBytes(DataConverter.parseHex('0' + uniqueId));
         }
 
-        buf.writeByte(0x67);
-        buf.writeByte(0x67);
+        buf.writeShort(EelinkProtocolDecoder.HEADER_KEY);
         buf.writeByte(type);
         buf.writeShort(2 + (content != null ? content.readableBytes() : 0)); // length
-        buf.writeShort(index);
+        buf.writeShort(index); // index
 
         if (content != null) {
             buf.writeBytes(content);
@@ -64,8 +63,7 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
         ByteBuf result = Unpooled.buffer();
 
         if (connectionless) {
-            result.writeByte('E');
-            result.writeByte('L');
+            result.writeShort(EelinkProtocolDecoder.UDP_HEADER_KEY);
             result.writeShort(2 + buf.readableBytes()); // length
             result.writeShort(checksum(buf.nioBuffer()));
         }
@@ -80,7 +78,7 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
 
         ByteBuf buf = Unpooled.buffer();
 
-        buf.writeByte(0x01); // command
+        buf.writeByte(EelinkProtocolDecoder.MSG_SIGN_COMMAND); // command
         buf.writeInt(0); // server id
         buf.writeBytes(content.getBytes(StandardCharsets.UTF_8));
 
@@ -101,9 +99,49 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
                 return encodeContent(command.getDeviceId(), "RELAY,0#");
             case Command.TYPE_REBOOT_DEVICE:
                 return encodeContent(command.getDeviceId(), "RESET#");
+            case Command.TYPE_GET_VERSION:
+                return encodeContent(command.getDeviceId(), "VERSION#");
+            case Command.TYPE_GET_DEVICE_STATUS:
+                return encodeContent(command.getDeviceId(), "STATUS#");
+            case Command.TYPE_POSITION_PERIODIC:
+                return encodeContent(command.getDeviceId(), "TIMER,"
+                        + command.getInteger(Command.KEY_FREQUENCY) + ",1#");
+            case Command.TYPE_POSITION_STOP:
+                return encodeContent(command.getDeviceId(), "TIMER,0,0#");
+            case Command.TYPE_OUTPUT_CONTROL:
+                Integer port = command.getInteger(Command.KEY_INDEX);
+                Boolean value = command.getBoolean(Command.KEY_DATA);
+                if (port < 1 || port > 9) {
+                    return null;
+                }
+                StringBuilder state = new StringBuilder("0000");
+                StringBuilder mask = new StringBuilder("0000");
+                mask.setCharAt(port - 1, '1');
+                state.setCharAt(port - 1, (value ? '1' : '0'));
+                return encodeContent(command.getDeviceId(), "PORT," + state + "," + mask + "#");
+            case Command.TYPE_SET_TIMEZONE:
+                int tz = command.getInteger(Command.KEY_TIMEZONE);
+                return encodeContent(command.getDeviceId(), "GMT,"
+                        + (tz < 0 ? "E" : "W") + "," + (tz / 3600 / 60) + "#");
+            case Command.TYPE_SOS_NUMBER:
+                String sosPhoneNumber = command.getString(Command.KEY_DATA);
+                if (sosPhoneNumber != null && !sosPhoneNumber.isEmpty()) {
+                    return encodeContent(command.getDeviceId(), "SOS,A," + sosPhoneNumber + "#");
+                } else {
+                    return encodeContent(command.getDeviceId(), "SOS,D#");
+                }
+            case Command.TYPE_SEND_SMS:
+                String phoneNumber = command.getString(Command.KEY_PHONE);
+                String message = command.getString(Command.KEY_MESSAGE);
+                if (phoneNumber != null && !phoneNumber.isEmpty()
+                        && message != null && !message.isEmpty()) {
+                    return encodeContent(command.getDeviceId(), "FW," + phoneNumber + "," + message + "#");
+                }
+                break;
             default:
                 return null;
         }
-    }
 
+        return null;
+    }
 }

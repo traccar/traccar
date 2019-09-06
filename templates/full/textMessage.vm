@@ -3,7 +3,14 @@
 <html>
 <body>
 Device: $device.name<br>
+#if ($event.exists("phone_number"))
+From: $event.getString("phone_number")<br>
+#end
+#if ($event.exists("raw_message"))
+Message:  $event.getString("raw_message")<br>
+#else
 Message:  $event.getString("message")<br>
+#end
 Time: $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.serverTime, $locale, $timezone)<br>
 </body>
 </html>  

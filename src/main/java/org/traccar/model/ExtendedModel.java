@@ -124,4 +124,14 @@ public class ExtendedModel extends BaseModel {
         }
     }
 
+    public void remove(String key) {
+        if (attributes.containsKey(key)) {
+            attributes.remove(key);
+        }
+    }
+
+    public boolean exists(String key) {
+        return attributes.containsKey(key);
+    }
+
 }
