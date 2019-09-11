@@ -267,7 +267,10 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
             sendResponse(channel, id, index, "TKQ");
 
-        } else if (type.equals("PULSE") || type.equals("heart") || type.equals("bphrt")) {
+        } else if (type.equalsIgnoreCase("PULSE")
+                || type.equalsIgnoreCase("HEART")
+                || type.equalsIgnoreCase("BLOOD")
+                || type.equalsIgnoreCase("BPHRT")) {
 
             if (buf.isReadable()) {
 
@@ -279,11 +282,14 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
                 String[] values = buf.toString(StandardCharsets.US_ASCII).split(",");
                 int valueIndex = 0;
 
-                if (type.equals("bphrt")) {
+                if (type.equalsIgnoreCase("BPHRT") || type.equalsIgnoreCase("BLOOD")) {
                     position.set("pressureHigh", values[valueIndex++]);
                     position.set("pressureLow", values[valueIndex++]);
                 }
-                position.set(Position.KEY_HEART_RATE, Integer.parseInt(values[valueIndex]));
+
+                if (valueIndex <= values.length - 1) {
+                    position.set(Position.KEY_HEART_RATE, Integer.parseInt(values[valueIndex]));
+                }
 
                 return position;
 
