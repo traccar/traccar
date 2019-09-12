@@ -272,5 +272,6 @@
     <entry key='leafspy.port'>5193</entry>
     <entry key='naviset.port'>5194</entry>
     <entry key='racedynamics.port'>5195</entry>
+    <entry key='rst.port'>5196</entry>
 
 </properties>
