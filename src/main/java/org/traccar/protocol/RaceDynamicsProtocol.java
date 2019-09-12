@@ -28,7 +28,7 @@ public class RaceDynamicsProtocol extends BaseProtocol {
         addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast(new LineBasedFrameDecoder(1024));
+                pipeline.addLast(new LineBasedFrameDecoder(1500));
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new RaceDynamicsProtocolDecoder(RaceDynamicsProtocol.this));
