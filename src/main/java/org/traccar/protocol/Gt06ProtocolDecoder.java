@@ -988,7 +988,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_INDEX, buf.readUnsignedInt());
                     break;
                 case 0x2a:
-                    position.set(Position.KEY_INPUT, buf.readUnsignedByte());
+                    int input = buf.readUnsignedByte();
+                    position.set(Position.KEY_DOOR, BitUtil.to(input, 4));
+                    position.set("tamper", BitUtil.from(input, 4));
                     break;
                 case 0x2b:
                     int event = buf.readUnsignedByte();
