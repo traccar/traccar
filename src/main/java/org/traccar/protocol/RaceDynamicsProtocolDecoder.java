@@ -71,6 +71,17 @@ public class RaceDynamicsProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // power
             .number("[01],")                     // power status
             .number("(d+),")                     // battery
+            .number("([01]),")                   // panic
+            .number("d+,")
+            .number("d+,")
+            .number("(d),")                      // overspeed
+            .number("d+,")                       // speed limit
+            .number("d+,")                       // tachometer
+            .number("d+,d+,d+,")                 // aux
+            .number("d+,")                       // geofence id
+            .number("d+,")                       // road speed type
+            .number("d+,")                       // ibutton count
+            .number("(d),")                      // overdriver alert
             .any()
             .compile();
 
@@ -135,6 +146,13 @@ public class RaceDynamicsProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
                     position.set(Position.KEY_POWER, parser.nextInt() * 0.01);
                     position.set(Position.KEY_BATTERY, parser.nextInt() * 0.01);
+                    position.set(Position.KEY_ALARM, parser.nextInt() > 0 ? Position.ALARM_SOS : null);
+                    position.set(Position.KEY_ALARM, parser.nextInt() > 0 ? Position.ALARM_OVERSPEED : null);
+
+                    int overDriver = parser.nextInt();
+                    if (overDriver > 0) {
+                        position.set("overDriver", overDriver);
+                    }
 
                     positions.add(position);
 
