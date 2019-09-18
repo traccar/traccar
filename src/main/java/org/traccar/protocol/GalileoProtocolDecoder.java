@@ -318,7 +318,9 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedByte(); // part number
             photo.writeBytes(buf, length - 1);
 
-        } else {
+            sendResponse(channel, 0x07, buf.readUnsignedShortLE());
+
+        } else if (photo != null) {
 
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
             String uniqueId = Context.getIdentityManager().getById(deviceSession.getDeviceId()).getUniqueId();
@@ -333,8 +335,6 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
             photo = null;
 
         }
-
-        sendResponse(channel, 0x07, buf.readUnsignedShortLE());
 
         return position;
     }
