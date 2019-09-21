@@ -273,5 +273,6 @@
     <entry key='naviset.port'>5194</entry>
     <entry key='racedynamics.port'>5195</entry>
     <entry key='rst.port'>5196</entry>
+    <entry key='pt215.port'>5197</entry>
 
 </properties>
