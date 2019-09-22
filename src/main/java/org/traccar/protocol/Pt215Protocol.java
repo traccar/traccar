@@ -26,7 +26,7 @@ public class Pt215Protocol extends BaseProtocol {
         addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 2, 1, 2, 0));
+                pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 2, 1, -1, 0));
                 pipeline.addLast(new Pt215ProtocolDecoder(Pt215Protocol.this));
             }
         });
