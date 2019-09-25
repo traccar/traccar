@@ -92,7 +92,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         buf.readByte(); // header
 
-        boolean longFormat = buf.getUnsignedByte(buf.readerIndex()) == 0x75;
+        boolean longFormat = buf.getUnsignedByte(buf.readerIndex()) >> 4 == 0x7;
 
         String id = String.valueOf(Long.parseLong(ByteBufUtil.hexDump(buf.readSlice(5))));
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
