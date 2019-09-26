@@ -45,8 +45,8 @@ public class RstProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd):(dd):(dd);")           // event time
             .number("(dd)-(dd)-(dddd) ")         // fix date
             .number("(dd):(dd):(dd);")           // fix time
-            .number("(-?d+.d+);")                // longitude
             .number("(-?d+.d+);")                // latitude
+            .number("(-?d+.d+);")                // longitude
             .number("(d+);")                     // speed
             .number("(d+);")                     // course
             .number("(-?d+);")                   // altitude
@@ -88,8 +88,8 @@ public class RstProtocolDecoder extends BaseProtocolDecoder {
 
         position.setDeviceTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
         position.setFixTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
-        position.setLongitude(parser.nextDouble());
         position.setLatitude(parser.nextDouble());
+        position.setLongitude(parser.nextDouble());
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt()));
         position.setCourse(parser.nextInt());
         position.setAltitude(parser.nextInt());
