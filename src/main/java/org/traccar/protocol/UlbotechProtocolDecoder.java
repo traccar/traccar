@@ -237,12 +237,13 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
 
                 case DATA_GPS:
                     hasLocation = true;
-                    position.setValid(true);
                     position.setLatitude(buf.readInt() / 1000000.0);
                     position.setLongitude(buf.readInt() / 1000000.0);
                     position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
                     position.setCourse(buf.readUnsignedShort());
-                    position.set(Position.KEY_HDOP, buf.readUnsignedShort());
+                    int hdop = buf.readUnsignedShort();
+                    position.setValid(hdop < 9999);
+                    position.set(Position.KEY_HDOP, hdop * 0.01);
                     break;
 
                 case DATA_LBS:
