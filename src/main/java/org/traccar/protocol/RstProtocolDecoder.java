@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -35,12 +36,12 @@ public class RstProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN = new PatternBuilder()
             .text("RST;")
-            .expression("[AL];")
-            .expression("[^,]+;")                // model
-            .expression(".{5};")                 // firmware
+            .expression("([AL]);")               // archive
+            .expression("([^,]+);")              // model
+            .expression("(.{5});")               // firmware
             .number("(d{9});")                   // serial number
-            .number("d+;")                       // index
-            .number("d+;")                       // type
+            .number("(d+);")                     // index
+            .number("(d+);")                     // type
             .number("(dd)-(dd)-(dddd) ")         // event date
             .number("(dd):(dd):(dd);")           // event time
             .number("(dd)-(dd)-(dddd) ")         // fix date
@@ -78,7 +79,19 @@ public class RstProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        String archive = parser.next();
+        String model = parser.next();
+        String firmware = parser.next();
+        String serial = parser.next();
+        int index = parser.nextInt();
+        int type = parser.nextInt();
+
+        if (channel != null && archive.equals("A")) {
+            String response = "RST;A;" + model + ";" + firmware + ";" + serial + ";" + index + ";" + type + ";FIM;";
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, serial);
         if (deviceSession == null) {
             return null;
         }
