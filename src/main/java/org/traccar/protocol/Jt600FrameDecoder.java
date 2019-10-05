@@ -35,7 +35,7 @@ public class Jt600FrameDecoder extends BaseFrameDecoder {
         char type = (char) buf.getByte(buf.readerIndex());
 
         if (type == '$') {
-            boolean longFormat = buf.getUnsignedByte(buf.readerIndex() + 1) == 0x75;
+            boolean longFormat = Jt600ProtocolDecoder.isLongFormat(buf, buf.readerIndex() + 1);
             int length = buf.getUnsignedShort(buf.readerIndex() + (longFormat ? 8 : 7)) + 10;
             if (length <= buf.readableBytes()) {
                 return buf.readRetainedSlice(length);

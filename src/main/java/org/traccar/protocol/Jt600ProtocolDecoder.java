@@ -86,13 +86,17 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
     }
 
+    static boolean isLongFormat(ByteBuf buf, int flagIndex) {
+        return buf.getUnsignedByte(flagIndex) >> 4 == 0x7;
+    }
+
     private List<Position> decodeBinary(ByteBuf buf, Channel channel, SocketAddress remoteAddress) {
 
         List<Position> positions = new LinkedList<>();
 
         buf.readByte(); // header
 
-        boolean longFormat = buf.getUnsignedByte(buf.readerIndex()) >> 4 == 0x7;
+        boolean longFormat = isLongFormat(buf, buf.readerIndex());
 
         String id = String.valueOf(Long.parseLong(ByteBufUtil.hexDump(buf.readSlice(5))));
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
