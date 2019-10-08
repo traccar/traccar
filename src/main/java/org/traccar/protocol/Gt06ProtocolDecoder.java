@@ -103,6 +103,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_MULTIMEDIA = 0x21;
     public static final int MSG_BMS_2 = 0x40;
     public static final int MSG_MULTIMEDIA_2 = 0x41;
+    public static final int MSG_ALARM = 0x95;
 
     private static boolean isSupported(int type) {
         return hasGps(type) || hasLbs(type) || hasStatus(type);
@@ -749,6 +750,39 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_EVENT, buf.readUnsignedByte()); // reason
                 position.set(Position.KEY_ARCHIVE, buf.readUnsignedByte() > 0);
             }
+
+        } else if (type == MSG_ALARM) {
+
+            DateBuilder dateBuilder = new DateBuilder(deviceSession.getTimeZone())
+                    .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
+                    .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
+
+            getLastLocation(position, dateBuilder.getDate());
+
+            short alarmType = buf.readUnsignedByte();
+
+            switch (alarmType) {
+                case 0x80:
+                    position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
+                    break;
+                case 0x87:
+                    position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+                    break;
+                case 0x90:
+                    position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+                    break;
+                case 0x91:
+                    position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+                    break;
+                case 0x92:
+                    position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
+                    break;
+                default:
+                    position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+                    break;
+            }
+
+            position.set("alarmValue", buf.readShort());
 
         } else {
 
