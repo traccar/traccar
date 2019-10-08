@@ -44,9 +44,11 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.reports.Events;
 import org.traccar.reports.Summary;
+import org.traccar.reports.Matrix;
 import org.traccar.reports.Trips;
 import org.traccar.reports.model.StopReport;
 import org.traccar.reports.model.SummaryReport;
+import org.traccar.reports.model.MatrixReport;
 import org.traccar.reports.model.TripReport;
 import org.traccar.reports.Route;
 import org.traccar.reports.Stops;
@@ -137,6 +139,15 @@ public class ReportResource extends BaseResource {
             Events.getExcel(stream, getUserId(), deviceIds, groupIds, types,
                     DateUtil.parseDate(from), DateUtil.parseDate(to));
         });
+    }
+
+    @Path("matrix")
+    @GET
+    public Collection<MatrixReport> getMatrix(
+            @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
+            @QueryParam("destLat") Double destLat, @QueryParam("destLon") Double destLon) throws SQLException {
+        return Matrix.getObjects(getUserId(), deviceIds, groupIds,
+              destLat, destLon);
     }
 
     @Path("summary")
