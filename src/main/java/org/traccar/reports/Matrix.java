@@ -68,7 +68,7 @@ public final class Matrix {
             String annotations = "distance,duration";
             String finalUrl = String.format(
                 "%s%f,%f;%f,%f?sources=%d&destinations=%d&annotations=%s&key=%s",
-                baseUrl, devLat, devLon, destLat, destLon, sources, destinations, annotations, key);
+                baseUrl, devLon, devLat, destLon, destLat, sources, destinations, annotations, key);
 
             Invocation.Builder request = Context.getClient().target(finalUrl)
                 .request();

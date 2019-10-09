@@ -10,3 +10,4 @@ nbactions.xml
 .gradle
 out
 build
+bin
