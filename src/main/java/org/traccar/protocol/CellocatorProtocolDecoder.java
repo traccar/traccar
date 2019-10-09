@@ -88,7 +88,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
             content.writeByte(0); // ack
             content.writeShortLE(0); // reserved
 
-            ByteBuf reply = encodeContent(MSG_SERVER_ACKNOWLEDGE, (int) deviceId, packetNumber, content);
+            ByteBuf reply = encodeContent(MSG_CLIENT_MODULAR_EXT, (int) deviceId, packetNumber, content);
             channel.writeAndFlush(new NetworkMessage(reply, remoteAddress));
         }
     }
