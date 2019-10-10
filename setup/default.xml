@@ -274,5 +274,6 @@
     <entry key='racedynamics.port'>5195</entry>
     <entry key='rst.port'>5196</entry>
     <entry key='pt215.port'>5197</entry>
+    <entry key='pacifictrack.port'>5198</entry>
 
 </properties>
