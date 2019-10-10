@@ -38,6 +38,26 @@ public class MatrixReport {
         this.deviceName = deviceName;
     }
 
+    private double devLat;
+
+    public double getDevLat() {
+        return devLat;
+    }
+
+    public void setDevLat(double devLat) {
+        this.devLat = devLat;
+    }
+
+    private double devLon;
+
+    public double getDevLon() {
+        return devLon;
+    }
+
+    public void setDevLon(double devLon) {
+        this.devLon = devLon;
+    }
+
     private double destLat;
 
     public double getDestLat() {

@@ -18,77 +18,117 @@ package org.traccar.reports;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Collection;
 
 import org.traccar.Context;
-import org.traccar.model.Position;
 import org.traccar.reports.model.MatrixReport;
 
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
+import javax.json.Json;
+import javax.json.JsonArray;
 import javax.json.JsonObject;
-
 
 public final class Matrix {
 
     private Matrix() {
     }
 
-    private static MatrixReport calculateMatrixResult(
-        long deviceId, Double destLat, Double destLon)throws SQLException {
-        MatrixReport result = new MatrixReport();
-        Position last = Context.getIdentityManager().getLastPosition(deviceId);
-        double devLat = last.getLatitude();
-        double devLon = last.getLongitude();
+    private static ArrayList<MatrixReport> calculateMatrixResult(
+        long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
+        Double destLat, Double destLon)
+        throws SQLException {
 
-        result.setDeviceId(deviceId);
-        result.setDeviceName(Context.getIdentityManager().getById(deviceId).getName());
-        result.setDestLat(destLat);
-        result.setDestLon(destLon);
-
-        System.out.println(devLat);
-        System.out.println(devLon);
-        System.out.println(destLat);
-        System.out.println(destLon);
+        ArrayList<MatrixReport> result = new ArrayList<>();
+        List<List<Double>> sourceCoord = new ArrayList<List<Double>>();
+        ArrayList<Double> destCoord = new ArrayList<>();
+        destCoord.add(destLon);
+        destCoord.add(destLat);
 
 //        Context.getDirections().getMatrix(45.44, 343.334, 34.234, 3434.3);
 
-        double distance = 0;
-        int duration = 0;
-        int sources = 0;
-        int destinations = 1;
+        for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
+            Context.getPermissionsManager().checkDevice(userId, deviceId);
+            List<Double> devCoord = new ArrayList<>();
+            devCoord.add(Context.getIdentityManager().getLastPosition(deviceId).getLongitude());
+            devCoord.add(Context.getIdentityManager().getLastPosition(deviceId).getLatitude());
+            sourceCoord.add(devCoord);
+        }
+
         String service = Context.getConfig().getString("matrix.server");
-        System.out.println(service);
         String key = Context.getConfig().getString("matrix.key");
-        System.out.println(key);
+
+        JsonArray distances = Json.createArrayBuilder().build();
+        JsonArray durations = Json.createArrayBuilder().build();
 
         if (service.equals("locationiq")) {
             String baseUrl = "https://us1.locationiq.com/v1/matrix/driving/";
+            int destinationsLocationIq = 0;
             String annotations = "distance,duration";
+
+            String coordLocationIq = "";
+            String sourcesLocationIq = "";
+
+            int i = 1;
+            for (List<Double> coord : sourceCoord) {
+                int j = 1;
+                for (double point : coord) {
+                    coordLocationIq += point;
+                    if (j < coord.size()) {
+                        coordLocationIq += ",";
+                    }
+                    j++;
+                }
+                sourcesLocationIq += i;
+                if (i < sourceCoord.size()) {
+                    coordLocationIq += ";";
+                    sourcesLocationIq += ";";
+                }
+                i++;
+            }
+
+            String destLocationIq = "";
+            int j = 1;
+            for (double point : destCoord) {
+                destLocationIq += point;
+                if (j < destCoord.size()) {
+                    destLocationIq += ",";
+                }
+                j++;
+            }
+
             String finalUrl = String.format(
-                "%s%f,%f;%f,%f?sources=%d&destinations=%d&annotations=%s&key=%s",
-                baseUrl, devLon, devLat, destLon, destLat, sources, destinations, annotations, key);
+                "%s%s;%s?destinations=%d&sources=%s&annotations=%s&key=%s",
+                baseUrl, destLocationIq, coordLocationIq, destinationsLocationIq, sourcesLocationIq, annotations, key);
 
             Invocation.Builder request = Context.getClient().target(finalUrl)
                 .request();
 
             JsonObject result1 = request.get(JsonObject.class);
-            System.out.println(result1);
 
-            distance = result1.getJsonArray("distances").getJsonArray(0).getJsonNumber(0).doubleValue();
-            System.out.println(distance);
+            distances = result1.getJsonArray("distances");
 
-            duration = result1.getJsonArray("durations").getJsonArray(0).getJsonNumber(0).intValue();
-            System.out.println(duration);
+            durations = result1.getJsonArray("durations");
+
         } else if (service.equals("openroute")) {
             String baseUrl = "https://api.openrouteservice.org/v2/matrix/driving-car";
 
-            String payload1 = String.format("{\"locations\":[[%f,%f],[%f,%f]],",
-                devLon, devLat, destLon, destLat);
+            List<List<Double>> coordOpenRoute = sourceCoord;
+            coordOpenRoute.add(destCoord);
+            int destinationsOpenRoute = coordOpenRoute.size() - 1;
 
-            String payload2 = String.format("\"sources\":[%d],\"destinations\":[%d],",
-                sources, destinations);
+            List<Integer> sourcesOpenRoute = new ArrayList<>();
+            int i = 0;
+            for (i = 0; i < (coordOpenRoute.size() - 1); i++) {
+                sourcesOpenRoute.add(i);
+            }
+
+            String payload1 = String.format("{\"locations\":%s,", coordOpenRoute);
+
+            String payload2 = String.format("\"sources\":%s,\"destinations\":[%d],",
+                sourcesOpenRoute, destinationsOpenRoute);
 
             String payload3 = String.format("\"metrics\":[\"distance\",\"duration\"]}");
 
@@ -102,17 +142,28 @@ public final class Matrix {
                 .post(payload);
 
             JsonObject result1 = request.readEntity(JsonObject.class);
-            System.out.println(result1);
 
-            distance = result1.getJsonArray("distances").getJsonArray(0).getJsonNumber(0).doubleValue();
-            System.out.println(distance);
+            distances = result1.getJsonArray("distances");
 
-            duration = result1.getJsonArray("durations").getJsonArray(0).getJsonNumber(0).intValue();
-            System.out.println(duration);
+            durations = result1.getJsonArray("durations");
         }
 
-        result.setTime(duration * 1000);
-        result.setDistance(distance);
+        int dev = 0;
+
+        for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
+            Context.getPermissionsManager().checkDevice(userId, deviceId);
+            MatrixReport matrixReport = new MatrixReport();
+            matrixReport.setDeviceId(deviceId);
+            matrixReport.setDeviceName(Context.getIdentityManager().getById(deviceId).getName());
+            matrixReport.setDestLat(destLat);
+            matrixReport.setDestLon(destLon);
+            matrixReport.setDevLat(Context.getIdentityManager().getLastPosition(deviceId).getLatitude());
+            matrixReport.setDevLon(Context.getIdentityManager().getLastPosition(deviceId).getLongitude());
+            matrixReport.setDistance(distances.getJsonArray(dev).getJsonNumber(0).doubleValue());
+            matrixReport.setTime(durations.getJsonArray(dev).getJsonNumber(0).intValue() * 1000);
+            result.add(matrixReport);
+            dev++;
+        }
 
         return result;
     }
@@ -120,10 +171,7 @@ public final class Matrix {
     public static Collection<MatrixReport> getObjects(long userId, Collection<Long> deviceIds,
             Collection<Long> groupIds, Double destLat, Double destLon) throws SQLException {
         ArrayList<MatrixReport> result = new ArrayList<>();
-        for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
-            Context.getPermissionsManager().checkDevice(userId, deviceId);
-            result.add(calculateMatrixResult(deviceId, destLat, destLon));
-        }
+        result = calculateMatrixResult(userId, deviceIds, groupIds, destLat, destLon);
         return result;
     }
 
