@@ -29,6 +29,9 @@ import org.traccar.database.GeofenceManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.database.MaintenancesManager;
 import org.traccar.database.StatisticsManager;
+import org.traccar.directions.matrix.LocationIQMatrix;
+import org.traccar.directions.matrix.Matrix;
+import org.traccar.directions.matrix.OpenRouteServiceMatrix;
 import org.traccar.geocoder.AddressFormat;
 import org.traccar.geocoder.BanGeocoder;
 import org.traccar.geocoder.BingMapsGeocoder;
@@ -196,6 +199,25 @@ public class MainModule extends AbstractModule {
                     return new UnwiredGeolocationProvider(url, key);
                 default:
                     return new MozillaGeolocationProvider(key);
+            }
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public static Matrix provideMatrix(Config config) {
+        if (config.getBoolean(Keys.MATRIX_ENABLE)) {
+            String type = config.getString(Keys.MATRIX_TYPE, "locationiq");
+            String url = config.getString(Keys.MATRIX_URL);
+            String key = config.getString(Keys.MATRIX_KEY);
+
+            switch (type) {
+                case "openrouteservice":
+                    return new OpenRouteServiceMatrix(url, key);
+                case "locationiq":
+                default:
+                    return new LocationIQMatrix(url, key);
             }
         }
         return null;

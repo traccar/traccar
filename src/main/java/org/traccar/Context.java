@@ -42,6 +42,7 @@ import org.traccar.database.NotificationManager;
 import org.traccar.database.PermissionsManager;
 import org.traccar.database.UsersManager;
 import org.traccar.geocoder.Geocoder;
+import org.traccar.directions.matrix.Matrix;
 import org.traccar.helper.Log;
 import org.traccar.helper.SanitizerModule;
 import org.traccar.model.Attribute;
@@ -151,6 +152,10 @@ public final class Context {
 
     public static Geocoder getGeocoder() {
         return Main.getInjector() != null ? Main.getInjector().getInstance(Geocoder.class) : null;
+    }
+
+    public static Matrix getMatrix() {
+        return Main.getInjector() != null ? Main.getInjector().getInstance(Matrix.class) : null;
     }
 
     private static WebServer webServer;
