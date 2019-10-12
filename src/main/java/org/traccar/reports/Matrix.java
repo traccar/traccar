@@ -25,14 +25,10 @@ import org.traccar.Context;
 import org.traccar.directions.matrix.MatrixResponse;
 import org.traccar.reports.model.MatrixReport;
 
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.Response;
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-
 public final class Matrix {
+
+    private Matrix() {
+    }
 
     private static ArrayList<MatrixReport> calculateMatrixResult(
         long userId, Collection<Long> deviceIds, Collection<Long> groupIds,

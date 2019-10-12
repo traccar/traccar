@@ -13,9 +13,12 @@ public class LocationIQMatrix extends JsonMatrix {
     }
 
     @Override
-    public MatrixResponse getMatrixResponse (String url, String key,
+    public MatrixResponse getMatrixResponse(String url, String key,
                                              List<List<Double>> sourceCoord, ArrayList<Double> destCoord) {
-        if (url == null) url = "https://us1.locationiq.com/v1/matrix/driving/";
+        if (url == null) {
+            url = "https://us1.locationiq.com/v1/matrix/driving/";
+        }
+
         int destinationsLocationIq = 0;
         String annotations = "distance,duration";
 

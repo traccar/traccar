@@ -9,14 +9,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OpenRouteServiceMatrix extends JsonMatrix {
-    public OpenRouteServiceMatrix (String url, String key) {
+    public OpenRouteServiceMatrix(String url, String key) {
         super(url, key);
     }
 
     @Override
-    public MatrixResponse getMatrixResponse (String url, String key,
+    public MatrixResponse getMatrixResponse(String url, String key,
                                              List<List<Double>> sourceCoord, ArrayList<Double> destCoord) {
-        if (url == null) url = "https://api.openrouteservice.org/v2/matrix/driving-car";
+        if (url == null) {
+            url = "https://api.openrouteservice.org/v2/matrix/driving-car";
+        }
 
         List<List<Double>> coordOpenRoute = sourceCoord;
         coordOpenRoute.add(destCoord);
