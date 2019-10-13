@@ -1503,7 +1503,8 @@
                     "type": "number"
                 },
                 "network": {
-                    "type": "string"
+                    "type": "object",
+                    "additionalProperties": true
                 },
                 "attributes": {
                     "type": "object",
