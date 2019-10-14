@@ -1,26 +1,43 @@
 package org.traccar.directions.matrix;
 
-import javax.json.JsonArray;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MatrixResponse {
 
-    private JsonArray distances;
+    private List<Double> distances = new ArrayList<>();
 
-    public JsonArray getDistances() {
+    public List<Double> getDistances() {
         return distances;
     }
 
-    public void setDistances(JsonArray distances) {
+    public void setDistances(List<Double> distances) {
         this.distances = distances;
     }
 
-    private JsonArray durations;
+    public double getDistance(int index) {
+        return this.distances.get(index);
+    }
 
-    public JsonArray getDurations() {
+    public void setDistance(double distance) {
+        this.distances.add(distance);
+    }
+
+    private List<Integer> durations = new ArrayList<>();
+
+    public List<Integer> getDurations() {
         return durations;
     }
 
-    public void setDurations(JsonArray durations) {
+    public void setDurations(List<Integer> durations) {
         this.durations = durations;
+    }
+
+    public int getDuration(int index) {
+        return this.durations.get(index);
+    }
+
+    public void setDuration(int duration) {
+        this.durations.add(duration);
     }
 }

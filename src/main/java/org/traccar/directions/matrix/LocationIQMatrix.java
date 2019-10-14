@@ -60,13 +60,25 @@ public class LocationIQMatrix extends JsonMatrix {
         Invocation.Builder request = Context.getClient().target(finalUrl)
                 .request();
 
-        JsonObject result1 = request.get(JsonObject.class);
+        JsonObject aResult = request.get(JsonObject.class);
 
         MatrixResponse result = new MatrixResponse();
 
-        result.setDistances(result1.getJsonArray("distances"));
+        for (int dev = 0; dev < aResult.getJsonArray("distances").size(); dev++) {
+            result.setDistance(aResult
+                    .getJsonArray("distances")
+                    .getJsonArray(dev)
+                    .getJsonNumber(0)
+                    .doubleValue());
+        }
 
-        result.setDurations(result1.getJsonArray("durations"));
+        for (int dev = 0; dev < aResult.getJsonArray("durations").size(); dev++) {
+            result.setDuration(aResult
+                    .getJsonArray("durations")
+                    .getJsonArray(dev)
+                    .getJsonNumber(0)
+                    .intValue());
+        }
 
         return result;
     }

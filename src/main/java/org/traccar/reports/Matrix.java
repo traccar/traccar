@@ -63,8 +63,8 @@ public final class Matrix {
             matrixReport.setDestLon(destLon);
             matrixReport.setDevLat(Context.getIdentityManager().getLastPosition(deviceId).getLatitude());
             matrixReport.setDevLon(Context.getIdentityManager().getLastPosition(deviceId).getLongitude());
-            matrixReport.setDistance(matrixResponse.getDistances().getJsonArray(dev).getJsonNumber(0).doubleValue());
-            matrixReport.setTime(matrixResponse.getDurations().getJsonArray(dev).getJsonNumber(0).intValue() * 1000);
+            matrixReport.setDistance(matrixResponse.getDistance(dev));
+            matrixReport.setTime(matrixResponse.getDuration(dev) * 1000);
             result.add(matrixReport);
             dev++;
         }

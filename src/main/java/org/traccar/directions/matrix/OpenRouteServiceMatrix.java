@@ -46,13 +46,25 @@ public class OpenRouteServiceMatrix extends JsonMatrix {
                         "application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8")
                 .post(payload);
 
-        JsonObject result1 = request.readEntity(JsonObject.class);
+        JsonObject aResult = request.readEntity(JsonObject.class);
 
         MatrixResponse result = new MatrixResponse();
 
-        result.setDistances(result1.getJsonArray("distances"));
+        for (int dev = 0; dev < aResult.getJsonArray("distances").size(); dev++) {
+            result.setDistance(aResult
+                    .getJsonArray("distances")
+                    .getJsonArray(dev)
+                    .getJsonNumber(0)
+                    .doubleValue());
+        }
 
-        result.setDurations(result1.getJsonArray("durations"));
+        for (int dev = 0; dev < aResult.getJsonArray("durations").size(); dev++) {
+            result.setDuration(aResult
+                    .getJsonArray("durations")
+                    .getJsonArray(dev)
+                    .getJsonNumber(0)
+                    .intValue());
+        }
 
         return result;
     }
