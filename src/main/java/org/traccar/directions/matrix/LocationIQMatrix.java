@@ -19,43 +19,46 @@ public class LocationIQMatrix extends JsonMatrix {
             url = "https://us1.locationiq.com/v1/matrix/driving/";
         }
 
-        int destinationsLocationIq = 0;
         String annotations = "distance,duration";
+        String destinationCoordinates = "";
+        String destinationIndexes = "0";
+        String sourceCoordinates = "";
+        String sourceIndexes = "";
 
-        String coordLocationIq = "";
-        String sourcesLocationIq = "";
-
-        int i = 1;
-        for (List<Double> coord : sourceCoord) {
-            int j = 1;
-            for (double point : coord) {
-                coordLocationIq += point;
-                if (j < coord.size()) {
-                    coordLocationIq += ",";
-                }
-                j++;
+        int destinationIterator = 1;
+        for (double point : destCoord) {
+            destinationCoordinates += point;
+            if (destinationIterator < destCoord.size()) {
+                destinationCoordinates += ",";
             }
-            sourcesLocationIq += i;
-            if (i < sourceCoord.size()) {
-                coordLocationIq += ";";
-                sourcesLocationIq += ";";
-            }
-            i++;
+            destinationIterator++;
         }
 
-        String destLocationIq = "";
-        int j = 1;
-        for (double point : destCoord) {
-            destLocationIq += point;
-            if (j < destCoord.size()) {
-                destLocationIq += ",";
+        int sourceIterator = 1;
+        for (List<Double> coord : sourceCoord) {
+            int coordIterator = 1;
+            for (double point : coord) {
+                sourceCoordinates += point;
+                if (coordIterator < coord.size()) {
+                    sourceCoordinates += ",";
+                }
+                coordIterator++;
             }
-            j++;
+            sourceIndexes += sourceIterator;
+            if (sourceIterator < sourceCoord.size()) {
+                sourceCoordinates += ";";
+                sourceIndexes += ";";
+            }
+            sourceIterator++;
         }
 
         String finalUrl = String.format(
-                "%s%s;%s?destinations=%d&sources=%s&annotations=%s&key=%s",
-                url, destLocationIq, coordLocationIq, destinationsLocationIq, sourcesLocationIq, annotations, key);
+                "%s%s;%s?destinations=%s&sources=%s&annotations=%s&key=%s",
+                url,
+                destinationCoordinates, sourceCoordinates,
+                destinationIndexes, sourceIndexes,
+                annotations,
+                key);
 
         Invocation.Builder request = Context.getClient().target(finalUrl)
                 .request();
