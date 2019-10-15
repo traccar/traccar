@@ -2,9 +2,13 @@ package org.traccar.directions.matrix;
 
 import org.traccar.Context;
 
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,31 +24,57 @@ public class OpenRouteServiceMatrix extends JsonMatrix {
             url = "https://api.openrouteservice.org/v2/matrix/driving-car";
         }
 
-        List<List<Double>> coordOpenRoute = sourceCoord;
-        coordOpenRoute.add(destCoord);
-        int destinationsOpenRoute = coordOpenRoute.size() - 1;
-
-        List<Integer> sourcesOpenRoute = new ArrayList<>();
-        int i = 0;
-        for (i = 0; i < (coordOpenRoute.size() - 1); i++) {
-            sourcesOpenRoute.add(i);
+        JsonArrayBuilder locationsBuilder = Json.createArrayBuilder();
+        for (List<Double> location : sourceCoord) {
+            JsonArrayBuilder sourceCoordinatesBuilder = Json.createArrayBuilder();
+            for (double point : location) {
+                sourceCoordinatesBuilder.add(point);
+            }
+            JsonArray sourceCoordinates = sourceCoordinatesBuilder.build();
+            locationsBuilder.add(sourceCoordinates);
         }
+        JsonArrayBuilder destinationCoordinatesBuilder = Json.createArrayBuilder();
 
-        String payload1 = String.format("{\"locations\":%s,", coordOpenRoute);
+        for (double point : destCoord) {
+            destinationCoordinatesBuilder.add(point);
+        }
+        JsonArray destinationCoordinates = destinationCoordinatesBuilder.build();
 
-        String payload2 = String.format("\"sources\":%s,\"destinations\":[%d],",
-                sourcesOpenRoute, destinationsOpenRoute);
+        locationsBuilder.add(destinationCoordinates);
+        JsonArray locations = locationsBuilder.build();
 
-        String payload3 = "\"metrics\":[\"distance\",\"duration\"]}";
+        JsonArrayBuilder sourceIndexesBuilder = Json.createArrayBuilder();
+        for (int i = 0; i < (locations.size() - 1); i++) {
+            sourceIndexesBuilder.add(i);
+        }
+        JsonArray sourceIndexes = sourceIndexesBuilder.build();
 
-        Entity<String> payload = Entity.json(payload1 + payload2 + payload3);
+        JsonArray destinationIndexes = Json.createArrayBuilder()
+            .add(locations.size() - 1)
+            .build();
+
+        JsonObject requestBodyObject = Json.createObjectBuilder()
+                .add("locations", locations)
+                .add("destinations", destinationIndexes)
+                .add("sources", sourceIndexes)
+                .add("metrics", Json.createArrayBuilder()
+                    .add("distance")
+                    .add("duration"))
+                .build();
+
+
+        StringWriter stringWriter = new StringWriter();
+        Json.createWriter(stringWriter).write(requestBodyObject);
+        String requestBodyString = stringWriter.toString();
+
+        Entity<String> requestBodyEntity = Entity.json(requestBodyString);
 
         Response request = Context.getClient().target(url)
                 .request()
                 .header("Authorization", key)
                 .header("Accept",
                         "application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8")
-                .post(payload);
+                .post(requestBodyEntity);
 
         JsonObject aResult = request.readEntity(JsonObject.class);
 
