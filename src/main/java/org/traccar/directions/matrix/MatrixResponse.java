@@ -5,39 +5,31 @@ import java.util.List;
 
 public class MatrixResponse {
 
-    private List<Double> distances = new ArrayList<>();
+    private List<List<Double>> distances = new ArrayList<>();
 
-    public List<Double> getDistances() {
+    public List<List<Double>> getDistances() {
         return distances;
     }
 
-    public void setDistances(List<Double> distances) {
+    public void setDistances(List<List<Double>> distances) {
         this.distances = distances;
     }
 
     public double getDistance(int index) {
-        return this.distances.get(index);
+        return this.distances.get(index).get(0);
     }
 
-    public void setDistance(double distance) {
-        this.distances.add(distance);
-    }
+    private List<List<Integer>> durations = new ArrayList<>();
 
-    private List<Integer> durations = new ArrayList<>();
-
-    public List<Integer> getDurations() {
+    public List<List<Integer>> getDurations() {
         return durations;
     }
 
-    public void setDurations(List<Integer> durations) {
+    public void setDurations(List<List<Integer>> durations) {
         this.durations = durations;
     }
 
     public int getDuration(int index) {
-        return this.durations.get(index);
-    }
-
-    public void setDuration(int duration) {
-        this.durations.add(duration);
+        return this.durations.get(index).get(0);
     }
 }

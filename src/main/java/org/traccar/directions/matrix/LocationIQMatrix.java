@@ -15,7 +15,7 @@ public class LocationIQMatrix extends JsonMatrix {
     }
 
     @Override
-    public MatrixResponse getMatrixResponse(String url, String key,
+    public JsonObject getMatrixResponse(String url, String key,
                                              List<List<Double>> sourceCoord, ArrayList<Double> destCoord) {
         if (url == null) {
             url = "https://us1.locationiq.com/v1/matrix/driving/";
@@ -54,26 +54,6 @@ public class LocationIQMatrix extends JsonMatrix {
         Invocation.Builder request = Context.getClient().target(finalUrl)
                 .request();
 
-        JsonObject aResult = request.get(JsonObject.class);
-
-        MatrixResponse result = new MatrixResponse();
-
-        for (int dev = 0; dev < aResult.getJsonArray("distances").size(); dev++) {
-            result.setDistance(aResult
-                    .getJsonArray("distances")
-                    .getJsonArray(dev)
-                    .getJsonNumber(0)
-                    .doubleValue());
-        }
-
-        for (int dev = 0; dev < aResult.getJsonArray("durations").size(); dev++) {
-            result.setDuration(aResult
-                    .getJsonArray("durations")
-                    .getJsonArray(dev)
-                    .getJsonNumber(0)
-                    .intValue());
-        }
-
-        return result;
+        return request.get(JsonObject.class);
     }
 }
