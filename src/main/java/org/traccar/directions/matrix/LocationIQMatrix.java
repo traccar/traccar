@@ -6,6 +6,8 @@ import javax.json.JsonObject;
 import javax.ws.rs.client.Invocation;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.StringJoiner;
 
 public class LocationIQMatrix extends JsonMatrix {
     public LocationIQMatrix(String url, String key) {
@@ -18,44 +20,33 @@ public class LocationIQMatrix extends JsonMatrix {
         if (url == null) {
             url = "https://us1.locationiq.com/v1/matrix/driving/";
         }
-
         String annotations = "distance,duration";
-        String destinationCoordinates = "";
-        String destinationIndexes = "0";
-        String sourceCoordinates = "";
-        String sourceIndexes = "";
 
-        int destinationIterator = 1;
-        for (double point : destCoord) {
-            destinationCoordinates += point;
-            if (destinationIterator < destCoord.size()) {
-                destinationCoordinates += ",";
-            }
-            destinationIterator++;
-        }
+        List<List<Double>> locationsArray = new ArrayList<>(sourceCoord);
+        locationsArray.add(destCoord);
 
-        int sourceIterator = 1;
-        for (List<Double> coord : sourceCoord) {
-            int coordIterator = 1;
-            for (double point : coord) {
-                sourceCoordinates += point;
-                if (coordIterator < coord.size()) {
-                    sourceCoordinates += ",";
-                }
-                coordIterator++;
+        StringJoiner locationsStringJoiner = new StringJoiner(";");
+        for (List<Double> coordinates : locationsArray) {
+            StringJoiner locationStringJoiner = new StringJoiner(",");
+            for (Double point : coordinates) {
+                locationStringJoiner.add(Objects.toString(point));
             }
-            sourceIndexes += sourceIterator;
-            if (sourceIterator < sourceCoord.size()) {
-                sourceCoordinates += ";";
-                sourceIndexes += ";";
-            }
-            sourceIterator++;
+            locationsStringJoiner.add(locationStringJoiner.toString());
         }
+        String locations = locationsStringJoiner.toString();
+
+        StringJoiner sourceIndexesJoiner = new StringJoiner(";");
+        for (int i = 0; i < (locationsArray.size() - 1); i++) {
+            sourceIndexesJoiner.add(Objects.toString(i));
+        }
+        String sourceIndexes = sourceIndexesJoiner.toString();
+
+        String destinationIndexes = Objects.toString(locationsArray.size() - 1);
 
         String finalUrl = String.format(
-                "%s%s;%s?destinations=%s&sources=%s&annotations=%s&key=%s",
+                "%s%s?destinations=%s&sources=%s&annotations=%s&key=%s",
                 url,
-                destinationCoordinates, sourceCoordinates,
+                locations,
                 destinationIndexes, sourceIndexes,
                 annotations,
                 key);
