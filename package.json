@@ -5,6 +5,7 @@
   "productName": "co-LOCATE",
   "cordovaId": "io.colocate.app",
   "author": "Godwin peter .O <me@godwin.dev>",
+  "license": "MIT",
   "private": false,
   "scripts": {
     "lint": "eslint --ext .js,.vue src",
