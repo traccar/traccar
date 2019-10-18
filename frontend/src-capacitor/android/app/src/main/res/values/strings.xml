@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">co-LOCATE</string>
+    <string name="title_activity_main">co-LOCATE</string>
+    <string name="package_name">io.colocate.app</string>
+    <string name="fileprovider_authority">io.colocate.app.fileprovider</string>
+    <string name="custom_url_scheme">io.colocate.app</string>
+</resources>

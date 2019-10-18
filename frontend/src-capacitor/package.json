@@ -1,0 +1,12 @@
+{
+  "name": "colocate",
+  "version": "0.0.1",
+  "description": "Intial boot",
+  "author": "Godwin peter .O <me@godwin.dev>",
+  "private": true,
+  "dependencies": {
+    "@capacitor/android": "^1.2.1",
+    "@capacitor/cli": "^1.0.0",
+    "@capacitor/core": "^1.0.0"
+  }
+}

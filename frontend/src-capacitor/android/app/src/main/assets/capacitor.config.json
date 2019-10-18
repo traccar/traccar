@@ -1,0 +1,10 @@
+{
+  "appId": "io.colocate.app",
+  "appName": "co-LOCATE",
+  "bundledWebRuntime": false,
+  "npmClient": "yarn",
+  "webDir": "www",
+  "server": {
+    "url": "http://10.1.62.6:3450"
+  }
+}
