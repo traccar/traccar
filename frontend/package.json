@@ -3,15 +3,23 @@
   "version": "0.0.1",
   "description": "Intial boot",
   "productName": "co-LOCATE",
-  "cordovaId": "io.colocate.apps",
-  "capacitorId": "",
+  "cordovaId": "io.colocate.app",
   "author": "Godwin peter .O <me@godwin.dev>",
-  "private": true,
+  "private": false,
   "scripts": {
     "lint": "eslint --ext .js,.vue src",
     "test": "echo \"No test specified\" && exit 0",
+    "update": "cd frontend && quasar upgrade",
     "dev": "cd frontend && quasar dev",
-    "dev:ssr": "cd frontend && quasar dev -m ssr"
+    "dev:ssr": "cd frontend && quasar dev -m ssr",
+    "dev:android": "cd frontend && quasar dev -m capacitor -T android",
+    "dev:ios": "cd frontend && quasar dev -m capacitor -T ios",
+    "dev:desktop": "cd frontend && quasar dev -m electron",
+    "build": "cd frontend && quasar build",
+    "build:ssr": "cd frontend && quasar build -m ssr",
+    "build:android": "cd frontend && quasar build -m capacitor -T android",
+    "build:ios": "cd frontend && quasar build -m capacitor -T ios",
+    "build:desktop": "cd frontend && quasar build -m electron"
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
