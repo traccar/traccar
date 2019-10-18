@@ -12,6 +12,7 @@ nbactions.xml
 .gradle
 out
 build
+bin
 
 ## For frontend ignore
 
