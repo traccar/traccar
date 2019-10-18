@@ -157,7 +157,19 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (readable) {
-                position.set(Position.KEY_RESULT, buf.readSlice(length).toString(StandardCharsets.US_ASCII));
+                String data = buf.readSlice(length).toString(StandardCharsets.US_ASCII).trim();
+                if (data.startsWith("UUUUww") && data.endsWith("SSS")) {
+                    String[] values = data.substring(6, data.length() - 4).split(";");
+                    for (int i = 0; i < 8; i++) {
+                        position.set("axle" + (i + 1), Double.parseDouble(values[i]));
+                    }
+                    position.set("loadTruck", Double.parseDouble(values[8]));
+                    position.set("loadTrailer", Double.parseDouble(values[9]));
+                    position.set("totalTruck", Double.parseDouble(values[10]));
+                    position.set("totalTrailer", Double.parseDouble(values[11]));
+                } else {
+                    position.set(Position.KEY_RESULT, data);
+                }
             } else {
                 position.set(Position.KEY_RESULT, ByteBufUtil.hexDump(buf.readSlice(length)));
             }

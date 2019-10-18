@@ -271,5 +271,9 @@
     <entry key='plugin.port'>5192</entry>
     <entry key='leafspy.port'>5193</entry>
     <entry key='naviset.port'>5194</entry>
+    <entry key='racedynamics.port'>5195</entry>
+    <entry key='rst.port'>5196</entry>
+    <entry key='pt215.port'>5197</entry>
+    <entry key='pacifictrack.port'>5198</entry>
 
 </properties>

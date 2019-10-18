@@ -31,15 +31,24 @@ import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
 
+import java.math.BigInteger;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
+    private short header = DEFAULT_HEADER;
+
+    public short getHeader() {
+        return header;
+    }
+
     public T800xProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
+
+    public static final short DEFAULT_HEADER = 0x2323;
 
     public static final int MSG_LOGIN = 0x01;
     public static final int MSG_GPS = 0x02;
@@ -110,7 +119,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
         ByteBuf buf = (ByteBuf) msg;
 
-        short header = buf.readShort();
+        header = buf.readShort();
         int type = buf.readUnsignedByte();
         buf.readUnsignedShort(); // length
         int index = buf.readUnsignedShort();
@@ -128,7 +137,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
         if (type == MSG_GPS || type == MSG_ALARM) {
 
-            return decodePosition(channel, deviceSession, buf, header, type, index, imei);
+            return decodePosition(channel, deviceSession, buf, type, index, imei);
 
         } else if (type == MSG_NETWORK) {
 
@@ -169,7 +178,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
     private Position decodePosition(
             Channel channel, DeviceSession deviceSession,
-            ByteBuf buf, short header, int type, int index, ByteBuf imei) {
+            ByteBuf buf, int type, int index, ByteBuf imei) {
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
@@ -257,14 +266,39 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
         if (header == 0x2727) {
 
-            buf.skipBytes(5); // acceleration
+            byte[] accelerationBytes = new byte[5];
+            buf.readBytes(accelerationBytes);
+            long acceleration = new BigInteger(accelerationBytes).longValue();
+            double accelerationZ = BitUtil.between(acceleration, 8, 15) + BitUtil.between(acceleration, 4, 8) * 0.1;
+            if (!BitUtil.check(acceleration, 15)) {
+                accelerationZ = -accelerationZ;
+            }
+            double accelerationY = BitUtil.between(acceleration, 20, 27) + BitUtil.between(acceleration, 16, 20) * 0.1;
+            if (!BitUtil.check(acceleration, 27)) {
+                accelerationY = -accelerationY;
+            }
+            double accelerationX = BitUtil.between(acceleration, 28, 32) + BitUtil.between(acceleration, 32, 39) * 0.1;
+            if (!BitUtil.check(acceleration, 39)) {
+                accelerationX = -accelerationX;
+            }
+            position.set(Position.KEY_G_SENSOR, "[" + accelerationX + "," + accelerationY + "," + accelerationZ + "]");
+
             position.set(Position.KEY_BATTERY_LEVEL, BcdUtil.readInteger(buf, 2));
             position.set(Position.KEY_DEVICE_TEMP, (int) buf.readByte());
             position.set("lightSensor", BcdUtil.readInteger(buf, 2) * 0.1);
             position.set(Position.KEY_BATTERY, BcdUtil.readInteger(buf, 2) * 0.1);
             position.set("solarPanel", BcdUtil.readInteger(buf, 2) * 0.1);
             position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
-            position.set(Position.KEY_IGNITION, BitUtil.check(buf.readUnsignedShort(), 2));
+
+            int inputStatus = buf.readUnsignedShort();
+            position.set(Position.KEY_IGNITION, BitUtil.check(inputStatus, 2));
+            position.set(Position.KEY_RSSI, BitUtil.between(inputStatus, 4, 11));
+
+            buf.readUnsignedShort(); // ignition on upload interval
+            buf.readUnsignedInt(); // ignition off upload interval
+            buf.readUnsignedByte(); // angle upload interval
+            buf.readUnsignedShort(); // distance upload interval
+            buf.readUnsignedByte(); // heartbeat
 
         } else if (buf.readableBytes() >= 2) {
 

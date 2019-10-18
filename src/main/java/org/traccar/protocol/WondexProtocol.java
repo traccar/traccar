@@ -25,7 +25,6 @@ import io.netty.handler.codec.string.StringEncoder;
 public class WondexProtocol extends BaseProtocol {
 
     public WondexProtocol() {
-        setTextCommandEncoder(new WondexProtocolEncoder(WondexProtocol.this));
         setSupportedCommands(
                 Command.TYPE_GET_DEVICE_STATUS,
                 Command.TYPE_GET_MODEM_STATUS,
@@ -33,6 +32,7 @@ public class WondexProtocol extends BaseProtocol {
                 Command.TYPE_POSITION_SINGLE,
                 Command.TYPE_GET_VERSION,
                 Command.TYPE_IDENTIFICATION);
+        setTextCommandEncoder(new WondexProtocolEncoder(this));
         addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {

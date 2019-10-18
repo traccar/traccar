@@ -96,6 +96,19 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
+    private static final Pattern PATTERN_GPIOP = new PatternBuilder()
+            .text("$GPIOP,")
+            .number("[01]{8},")                  // inputs
+            .number("[01]{8},")                  // outputs
+            .number("d+.d+,")                    // adc 1
+            .number("d+.d+,")                    // adc 2
+            .number("d+.d+,")                    // adc 3
+            .number("d+.d+,")                    // adc 4
+            .number("(d+.d+),")                  // power
+            .number("(d+.d+)")                   // battery
+            .any()
+            .compile();
+
     private Position position = null;
 
     private Position decodeGprmc(
@@ -225,6 +238,24 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private Position decodeGpiop(DeviceSession deviceSession, String sentence) {
+
+        Parser parser = new Parser(PATTERN_GPIOP, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, null);
+
+        position.set(Position.KEY_POWER, parser.nextDouble());
+        position.set(Position.KEY_BATTERY, parser.nextDouble());
+
+        return position;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -275,6 +306,8 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             return decodeGprma(deviceSession, sentence);
         } else if (sentence.startsWith("$TRCCR") && deviceSession != null) {
             return decodeTrccr(deviceSession, sentence);
+        } else if (sentence.startsWith("$GPIOP")) {
+            return decodeGpiop(deviceSession, sentence);
         }
 
         return null;

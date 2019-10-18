@@ -81,11 +81,13 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_X1_PHOTO_INFO = 0x35;
     public static final int MSG_X1_PHOTO_DATA = 0x36;
     public static final int MSG_WIFI_2 = 0x69;
+    public static final int MSG_GPS_MODULAR = 0x70;
     public static final int MSG_COMMAND_0 = 0x80;
     public static final int MSG_COMMAND_1 = 0x81;
     public static final int MSG_COMMAND_2 = 0x82;
     public static final int MSG_TIME_REQUEST = 0x8A;
     public static final int MSG_INFO = 0x94;
+    public static final int MSG_RFID = 0x9B;
     public static final int MSG_STRING_INFO = 0x21;
     public static final int MSG_GPS_2 = 0xA0;
     public static final int MSG_LBS_2 = 0xA1;
@@ -101,6 +103,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_MULTIMEDIA = 0x21;
     public static final int MSG_BMS_2 = 0x40;
     public static final int MSG_MULTIMEDIA_2 = 0x41;
+    public static final int MSG_ALARM = 0x95;
 
     private static boolean isSupported(int type) {
         return hasGps(type) || hasLbs(type) || hasStatus(type);
@@ -748,6 +751,39 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_ARCHIVE, buf.readUnsignedByte() > 0);
             }
 
+        } else if (type == MSG_ALARM) {
+
+            DateBuilder dateBuilder = new DateBuilder(deviceSession.getTimeZone())
+                    .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
+                    .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
+
+            getLastLocation(position, dateBuilder.getDate());
+
+            short alarmType = buf.readUnsignedByte();
+
+            switch (alarmType) {
+                case 0x80:
+                    position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
+                    break;
+                case 0x87:
+                    position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+                    break;
+                case 0x90:
+                    position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+                    break;
+                case 0x91:
+                    position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+                    break;
+                case 0x92:
+                    position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
+                    break;
+                default:
+                    position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+                    break;
+            }
+
+            position.set("alarmValue", buf.readShort());
+
         } else {
 
             if (dataLength > 0) {
@@ -942,6 +978,22 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             return position;
 
+        } else if (type == MSG_RFID) {
+
+            getLastLocation(position, null);
+
+            buf.readUnsignedByte(); // external device type code
+            buf.readUnsignedByte(); // card type
+            position.set(
+                    Position.KEY_DRIVER_UNIQUE_ID,
+                    buf.readCharSequence(buf.readableBytes() - 9, StandardCharsets.US_ASCII).toString());
+
+            return position;
+
+        } else if (type == MSG_GPS_MODULAR) {
+
+            return decodeExtendedModular(channel, buf, deviceSession, type);
+
         } else {
 
             return decodeExtendedOther(channel, buf, deviceSession, type);
@@ -949,6 +1001,84 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         return null;
+    }
+
+    private Object decodeExtendedModular(Channel channel, ByteBuf buf, DeviceSession deviceSession, int type) {
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        while (buf.readableBytes() > 6) {
+            int moduleType = buf.readUnsignedShort();
+            int moduleLength = buf.readUnsignedShort();
+            switch (moduleType) {
+                case 0x18:
+                    position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.01);
+                    break;
+                case 0x28:
+                    position.set(Position.KEY_HDOP, buf.readUnsignedByte() * 0.1);
+                    break;
+                case 0x29:
+                    position.set(Position.KEY_INDEX, buf.readUnsignedInt());
+                    break;
+                case 0x2a:
+                    int input = buf.readUnsignedByte();
+                    position.set(Position.KEY_DOOR, BitUtil.to(input, 4) > 0);
+                    position.set("tamper", BitUtil.from(input, 4) > 0);
+                    break;
+                case 0x2b:
+                    int event = buf.readUnsignedByte();
+                    switch (event) {
+                        case 0x11:
+                            position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                            break;
+                        case 0x12:
+                            position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
+                            break;
+                        case 0x13:
+                            position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
+                            break;
+                        case 0x14:
+                            position.set(Position.KEY_ALARM, Position.ALARM_REMOVING);
+                            break;
+                        default:
+                            break;
+                    }
+                    position.set(Position.KEY_EVENT, event);
+                    break;
+                case 0x2e:
+                    position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
+                    break;
+                case 0x33:
+                    position.setTime(new Date(buf.readUnsignedInt() * 1000));
+                    position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+                    position.setAltitude(buf.readShort());
+
+                    double latitude = buf.readUnsignedInt() / 60.0 / 30000.0;
+                    double longitude = buf.readUnsignedInt() / 60.0 / 30000.0;
+                    position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
+
+                    int flags = buf.readUnsignedShort();
+                    position.setCourse(BitUtil.to(flags, 10));
+                    position.setValid(BitUtil.check(flags, 12));
+
+                    if (!BitUtil.check(flags, 10)) {
+                        latitude = -latitude;
+                    }
+                    if (BitUtil.check(flags, 11)) {
+                        longitude = -longitude;
+                    }
+
+                    position.setLatitude(latitude);
+                    position.setLongitude(longitude);
+                    break;
+                default:
+                    buf.skipBytes(moduleLength);
+                    break;
+            }
+        }
+
+        return position;
     }
 
     private Object decodeExtendedOther(Channel channel, ByteBuf buf, DeviceSession deviceSession, int type) {

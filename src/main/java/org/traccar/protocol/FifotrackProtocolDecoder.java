@@ -60,7 +60,7 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
             .number("(-?d+),")                   // altitude
             .number("(d+),")                     // odometer
             .number("d+,")                       // runtime
-            .number("(xxxx),")                   // status
+            .number("(x{4,8}),")                 // status
             .number("(x+)?,")                    // input
             .number("(x+)?,")                    // output
             .number("(d+)|")                     // mcc
@@ -151,7 +151,7 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
         position.setAltitude(parser.nextInt());
 
         position.set(Position.KEY_ODOMETER, parser.nextLong());
-        position.set(Position.KEY_STATUS, parser.nextHexInt());
+        position.set(Position.KEY_STATUS, parser.nextHexLong());
         position.set(Position.KEY_INPUT, parser.nextHexInt());
         position.set(Position.KEY_OUTPUT, parser.nextHexInt());
 

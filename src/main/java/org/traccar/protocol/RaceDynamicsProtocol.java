@@ -1,6 +1,5 @@
 /*
- * Copyright 2016 - 2019 Anton Tananaev (anton@traccar.org)
- * Copyright 2017 - 2018 Andrey Kunitsyn (andrey@traccar.org)
+ * Copyright 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,28 +15,23 @@
  */
 package org.traccar.protocol;
 
+import io.netty.handler.codec.LineBasedFrameDecoder;
+import io.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
-import org.traccar.model.Command;
 
-public class GranitProtocol extends BaseProtocol {
+public class RaceDynamicsProtocol extends BaseProtocol {
 
-    public GranitProtocol() {
-        setSupportedDataCommands(
-                Command.TYPE_IDENTIFICATION,
-                Command.TYPE_REBOOT_DEVICE,
-                Command.TYPE_POSITION_SINGLE);
-        setTextCommandEncoder(new GranitProtocolSmsEncoder(this));
-        setSupportedTextCommands(
-                Command.TYPE_REBOOT_DEVICE,
-                Command.TYPE_POSITION_PERIODIC);
+    public RaceDynamicsProtocol() {
         addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast(new GranitFrameDecoder());
-                pipeline.addLast(new GranitProtocolEncoder(GranitProtocol.this));
-                pipeline.addLast(new GranitProtocolDecoder(GranitProtocol.this));
+                pipeline.addLast(new LineBasedFrameDecoder(1500));
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new RaceDynamicsProtocolDecoder(RaceDynamicsProtocol.this));
             }
         });
     }

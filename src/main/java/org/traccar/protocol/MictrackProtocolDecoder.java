@@ -71,7 +71,7 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(decodeTime(values[index++]));
         position.setLatitude(Double.parseDouble(values[index++]));
         position.setLongitude(Double.parseDouble(values[index++]));
-        position.setSpeed(UnitsConverter.knotsFromMps(Double.parseDouble(values[index++])));
+        position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(values[index++])));
         position.setCourse(Integer.parseInt(values[index++]));
 
         int event = Integer.parseInt(values[index++]);
