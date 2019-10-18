@@ -4,10 +4,6 @@
 
 Frontend for task and routing based GPS fleet management system.
 
-Other parts of Traccar solution include:
-
-- [Traccar web app](https://github.com/traccar/traccar-web)
-
 ## Features
 
 Some of the available features include:
