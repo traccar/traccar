@@ -1,8 +1,8 @@
-# [Colocate](https://colocate.io)
+# [Colocate](https://gpproton.github.io/colocate/)
 
 ## Overview
 
-Frontend for task and routing based GPS fleet management system.
+An updated frontend of Traccar opensource for task and routing based GPS fleet management system.
 
 ## Features
 
