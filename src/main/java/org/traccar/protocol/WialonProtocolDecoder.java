@@ -38,6 +38,14 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
+    private static final Pattern PATTERN_ANY = new PatternBuilder()
+            .expression("([^#]*)?")              // imei
+            .text("#")                           // start byte
+            .expression("([^#]+)")               // type
+            .text("#")                           // separator
+            .expression("(.*)")                  // message
+            .compile();
+
     private static final Pattern PATTERN = new PatternBuilder()
             .number("(dd)(dd)(dd);")             // date (ddmmyy)
             .number("(dd)(dd)(dd);")             // time (hhmmss)
@@ -62,7 +70,8 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
     private void sendResponse(Channel channel, SocketAddress remoteAddress, String type, Integer number) {
         if (channel != null) {
             StringBuilder response = new StringBuilder("#A");
-            response.append(type.substring(1));
+            response.append(type);
+            response.append("#");
             if (number != null) {
                 response.append(number);
             }
@@ -71,9 +80,9 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private Position decodePosition(Channel channel, SocketAddress remoteAddress, String substring) {
+    private Position decodePosition(Channel channel, SocketAddress remoteAddress, String id, String substring) {
 
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
         if (deviceSession == null) {
             return null;
         }
@@ -135,12 +144,20 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         String sentence = (String) msg;
-        String type = sentence.substring(0, sentence.indexOf('#', 1) + 1);
+
+        Parser parser = new Parser(PATTERN_ANY, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        String id = parser.next();
+        String type = parser.next();
+        String data = parser.next();
 
         switch (type) {
 
-            case "#L#":
-                String[] values = sentence.substring(3).split(";");
+            case "L":
+                String[] values = data.split(";");
 
                 String imei = values[0].indexOf('.') >= 0 ? values[1] : values[0];
                 DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
@@ -149,14 +166,14 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
                 }
                 break;
 
-            case "#P#":
+            case "P":
                 sendResponse(channel, remoteAddress, type, null); // heartbeat
                 break;
 
-            case "#D#":
-            case "#SD#":
+            case "D":
+            case "SD":
                 Position position = decodePosition(
-                        channel, remoteAddress, sentence.substring(sentence.indexOf('#', 1) + 1));
+                        channel, remoteAddress, id, data);
 
                 if (position != null) {
                     sendResponse(channel, remoteAddress, type, 1);
@@ -164,12 +181,12 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
                 }
                 break;
 
-            case "#B#":
-                String[] messages = sentence.substring(sentence.indexOf('#', 1) + 1).split("\\|");
+            case "B":
+                String[] messages = data.split("\\|");
                 List<Position> positions = new LinkedList<>();
 
                 for (String message : messages) {
-                    position = decodePosition(channel, remoteAddress, message);
+                    position = decodePosition(channel, remoteAddress, id, message);
                     if (position != null) {
                         position.set(Position.KEY_ARCHIVE, true);
                         positions.add(position);
@@ -182,14 +199,14 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
                 }
                 break;
 
-            case "#M#":
-                deviceSession = getDeviceSession(channel, remoteAddress);
+            case "M":
+                deviceSession = getDeviceSession(channel, remoteAddress, id);
                 if (deviceSession != null) {
                     position = new Position(getProtocolName());
                     position.setDeviceId(deviceSession.getDeviceId());
                     getLastLocation(position, new Date());
                     position.setValid(false);
-                    position.set(Position.KEY_RESULT, sentence.substring(sentence.indexOf('#', 1) + 1));
+                    position.set(Position.KEY_RESULT, data);
                     sendResponse(channel, remoteAddress, type, 1);
                     return position;
                 }

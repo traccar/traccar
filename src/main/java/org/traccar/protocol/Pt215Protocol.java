@@ -1,6 +1,5 @@
 /*
- * Copyright 2016 - 2019 Anton Tananaev (anton@traccar.org)
- * Copyright 2017 - 2018 Andrey Kunitsyn (andrey@traccar.org)
+ * Copyright 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,25 +18,15 @@ package org.traccar.protocol;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
-import org.traccar.model.Command;
 
-public class GranitProtocol extends BaseProtocol {
+public class Pt215Protocol extends BaseProtocol {
 
-    public GranitProtocol() {
-        setSupportedDataCommands(
-                Command.TYPE_IDENTIFICATION,
-                Command.TYPE_REBOOT_DEVICE,
-                Command.TYPE_POSITION_SINGLE);
-        setTextCommandEncoder(new GranitProtocolSmsEncoder(this));
-        setSupportedTextCommands(
-                Command.TYPE_REBOOT_DEVICE,
-                Command.TYPE_POSITION_PERIODIC);
+    public Pt215Protocol() {
         addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast(new GranitFrameDecoder());
-                pipeline.addLast(new GranitProtocolEncoder(GranitProtocol.this));
-                pipeline.addLast(new GranitProtocolDecoder(GranitProtocol.this));
+                pipeline.addLast(new Pt215FrameDecoder());
+                pipeline.addLast(new Pt215ProtocolDecoder(Pt215Protocol.this));
             }
         });
     }

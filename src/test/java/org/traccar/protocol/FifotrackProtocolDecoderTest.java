@@ -11,6 +11,9 @@ public class FifotrackProtocolDecoderTest extends ProtocolTest {
 
         FifotrackProtocolDecoder decoder = new FifotrackProtocolDecoder(null);
 
+        verifyPosition(decoder, buffer(
+                "$$116,869270049149999,5,A01,4,190925080127,V,-15.804260,35.061506,0,0,1198,0,0,900000C0,02,0,650|10|12C|B24,18B|4C8|72,1,*01"));
+
         verifyAttribute(decoder, buffer(
                 "$$123,869467049296388,B996,A01,2,190624131813,V,22.333746,113.590670,0,124,-1,26347,0,0004,00,0,460|0|2694|5A5D,174|0|0|0,B48CEB,*77"),
                 Position.KEY_ALARM, Position.ALARM_SOS);

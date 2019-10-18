@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,36 +20,36 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseFrameDecoder;
 
-import java.text.ParseException;
+public class Pt215FrameDecoder extends BaseFrameDecoder {
 
-public class Jt600FrameDecoder extends BaseFrameDecoder {
+    private ByteBuf decodeFrame(ByteBuf buf, int length) {
+        if (buf.readableBytes() >= length) {
+            return buf.readRetainedSlice(length);
+        }
+        return null;
+    }
 
     @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
-        if (buf.readableBytes() < 10) {
+        if (buf.readableBytes() < 5) {
             return null;
         }
 
-        char type = (char) buf.getByte(buf.readerIndex());
+        int type = buf.getUnsignedByte(buf.readerIndex() + 2 + 1);
+        switch (type) {
+            case Pt215ProtocolDecoder.MSG_LOGIN:
+                return decodeFrame(buf, 15);
+            case Pt215ProtocolDecoder.MSG_GPS_REALTIME:
+            case Pt215ProtocolDecoder.MSG_GPS_OFFLINE:
+                return decodeFrame(buf, 27);
+            case Pt215ProtocolDecoder.MSG_STATUS:
+                return decodeFrame(buf, 11);
+            default:
+                return null;
 
-        if (type == '$') {
-            boolean longFormat = Jt600ProtocolDecoder.isLongFormat(buf, buf.readerIndex() + 1);
-            int length = buf.getUnsignedShort(buf.readerIndex() + (longFormat ? 8 : 7)) + 10;
-            if (length <= buf.readableBytes()) {
-                return buf.readRetainedSlice(length);
-            }
-        } else if (type == '(') {
-            int endIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ')');
-            if (endIndex != -1) {
-                return buf.readRetainedSlice(endIndex + 1);
-            }
-        } else {
-            throw new ParseException(null, 0); // unknown message
         }
-
-        return null;
     }
 
 }

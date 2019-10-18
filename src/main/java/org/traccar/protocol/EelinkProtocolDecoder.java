@@ -412,7 +412,8 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
                 return decodeNew(deviceSession, buf, type, index);
 
-            } else if (type == MSG_HEARTBEAT && buf.readableBytes() >= 2) {
+            } else if (type == MSG_HEARTBEAT && buf.readableBytes() >= 2
+                    || type == MSG_OBD && buf.readableBytes() == 4) {
 
                 Position position = new Position(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());

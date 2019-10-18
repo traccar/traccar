@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "version": "4.5",
+        "version": "4.6",
         "title": "traccar"
     },
     "host": "demo.traccar.org",
@@ -1503,7 +1503,8 @@
                     "type": "number"
                 },
                 "network": {
-                    "type": "string"
+                    "type": "object",
+                    "additionalProperties": true
                 },
                 "attributes": {
                     "type": "object",

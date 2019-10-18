@@ -17,6 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.helper.DataConverter;
 import org.traccar.model.Command;
@@ -34,12 +35,11 @@ public class T800xProtocolEncoder extends BaseProtocolEncoder {
         super(protocol);
     }
 
-    private ByteBuf encodeContent(Command command, String content) {
+    private ByteBuf encodeContent(Command command, short header, String content) {
 
         ByteBuf buf = Unpooled.buffer();
 
-        buf.writeByte('%');
-        buf.writeByte('%');
+        buf.writeShort(header);
         buf.writeByte(T800xProtocolDecoder.MSG_COMMAND);
         buf.writeShort(7 + 8 + 1 + content.length());
         buf.writeShort(1); // serial number
@@ -51,11 +51,16 @@ public class T800xProtocolEncoder extends BaseProtocolEncoder {
     }
 
     @Override
-    protected Object encodeCommand(Command command) {
+    protected Object encodeCommand(Channel channel, Command command) {
+
+        short header = T800xProtocolDecoder.DEFAULT_HEADER;
+        if (channel != null) {
+            header = channel.pipeline().get(T800xProtocolDecoder.class).getHeader();
+        }
 
         switch (command.getType()) {
             case Command.TYPE_CUSTOM:
-                return encodeContent(command, command.getString(Command.KEY_DATA));
+                return encodeContent(command, header, command.getString(Command.KEY_DATA));
             default:
                 return null;
         }

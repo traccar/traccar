@@ -11,6 +11,9 @@ public class TzoneProtocolDecoderTest extends ProtocolTest {
         TzoneProtocolDecoder decoder = new TzoneProtocolDecoder(null);
 
         verifyAttributes(decoder, binary(
+                "545A004B2424041302000000086706003324776413030C0A1A2900180513030C0A1A25080F7E1028CAC830000A000F0000000005000AA53201633D05046000010009AA201737019408973B0032B0260D0A"));
+
+        verifyAttributes(decoder, binary(
                 "545a005b24240406010800000866050033819630120911071824000472bd8e5b0008aac01b07019b04bb002f00040b06161154000e100132ff2006161152000e080096ff4606161151000e1e0101ff1406161156000db6405bff490024469e0d0a"));
 
         verifyAttributes(decoder, binary(

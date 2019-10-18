@@ -17,6 +17,21 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
         verifyNull(decoder, binary(
                 "78780D01086471700328358100093F040D0A"));
 
+        verifyAttribute(decoder, binary(
+                "78780c95130a071223200100013ad10d0a"),
+                Position.KEY_ALARM, Position.ALARM_GENERAL);
+
+        verifyAttribute(decoder, binary(
+                "797900a87000000001020035000101003300125d7e3a180600d504b598f708814b3a001d1500340006125d7e39dc000011000a012e02620000000000000001000803537601000129800002000803102608593397620003000a89012608522933976266001800020172002b000114002c00045d7df3c70009000106000a000109002800010d002e00040000f25d002a000111002900040000017e0030000a000100b4000a00b402d0000591250d0a"),
+                Position.KEY_ALARM, Position.ALARM_REMOVING);
+
+        verifyPosition(decoder, binary(
+                "797900a87000000001020035000100003300125d62bf3a0800e804b5994308814a87001d5d00340006115d62bf29000011000a012e02620000000000000001000803537601000129800002000803102608593397620003000a8901260852293397626600180002017d002b000116002c00045d6278ea0009000108000a00010b002800010b002e00040000f0c1002a00010000290004000000be0030000a000100b4000a00b402d00006c5490d0a"));
+
+        verifyAttribute(decoder, binary(
+                "797900149b03023539303042343843454238410300139ba40d0a"),
+                Position.KEY_DRIVER_UNIQUE_ID, "5900B48CEB");
+
         verifyPosition(decoder, binary(
                 "787821121303120b2524c70138e363085b549003d43301940057d200cd52c000006aa1ca0d0a"));
 
@@ -289,6 +304,17 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
         verifyNull(decoder, binary(
                 "7878058A000688290D0A"));
 
+        verifyAttribute(decoder, binary(
+                "78780c95130a0209321c90000112800d0a"),
+                Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+
+        verifyAttribute(decoder, binary(
+                "78780c95130a0209321c90000112800d0a"),
+                "alarmValue", 1);
+
+        verifyAttribute(decoder, binary(
+                "78780c95130a0209321c91000112800d0a"),
+                Position.KEY_ALARM, Position.ALARM_BRAKING);
     }
 
 }
