@@ -1,0 +1,7 @@
+{
+  "appId": "io.colocate.app",
+  "appName": "co-LOCATE",
+  "bundledWebRuntime": false,
+  "npmClient": "yarn",
+  "webDir": "www"
+}
