@@ -38,46 +38,6 @@ public class MatrixReport {
         this.deviceName = deviceName;
     }
 
-    private double deviceLatitude;
-
-    public double getDeviceLatitude() {
-        return deviceLatitude;
-    }
-
-    public void setDeviceLatitude(double deviceLatitude) {
-        this.deviceLatitude = deviceLatitude;
-    }
-
-    private double deviceLongitude;
-
-    public double getDeviceLongitude() {
-        return deviceLongitude;
-    }
-
-    public void setDeviceLongitude(double deviceLongitude) {
-        this.deviceLongitude = deviceLongitude;
-    }
-
-    private double destinationLatitude;
-
-    public double getDestinationLatitude() {
-        return destinationLatitude;
-    }
-
-    public void setDestinationLatitude(double destinationLatitude) {
-        this.destinationLatitude = destinationLatitude;
-    }
-
-    private double destinationLongitude;
-
-    public double getDestinationLongitude() {
-        return destinationLongitude;
-    }
-
-    public void setDestinationLongitude(double destinationLongitude) {
-        this.destinationLongitude = destinationLongitude;
-    }
-
     private long time;
 
     public long getTime() {

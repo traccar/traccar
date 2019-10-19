@@ -56,10 +56,6 @@ public final class Matrix {
             MatrixReport matrixReport = new MatrixReport();
             matrixReport.setDeviceId(deviceId);
             matrixReport.setDeviceName(Context.getIdentityManager().getById(deviceId).getName());
-            matrixReport.setDestinationLatitude(latitude);
-            matrixReport.setDestinationLongitude(longitude);
-            matrixReport.setDeviceLatitude(Context.getIdentityManager().getLastPosition(deviceId).getLatitude());
-            matrixReport.setDestinationLongitude(Context.getIdentityManager().getLastPosition(deviceId).getLongitude());
             matrixReport.setDistance(matrixResponse.getDistance(deviceIndex));
             matrixReport.setTime(matrixResponse.getDuration(deviceIndex) * 1000);
             result.add(matrixReport);
