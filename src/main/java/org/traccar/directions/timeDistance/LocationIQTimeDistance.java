@@ -1,4 +1,4 @@
-package org.traccar.directions.matrix;
+package org.traccar.directions.timeDistance;
 
 import org.traccar.Context;
 
@@ -8,20 +8,20 @@ import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-public class LocationIQMatrix extends JsonMatrix {
-    public LocationIQMatrix(String url, String key) {
+public class LocationIQTimeDistance extends JsonTimeDistance {
+    public LocationIQTimeDistance(String url, String key) {
         super(url, key);
     }
 
     @Override
-    public JsonObject getMatrixResponse(String url, String key, MatrixRequest matrixRequest) {
+    public JsonObject getTimeDistanceResponse(String url, String key, TimeDistanceRequest timeDistanceRequest) {
         if (url == null) {
             url = "https://us1.locationiq.com/v1/matrix/driving/";
         }
-        String metrics = String.join(",", matrixRequest.getMetrics());
+        String metrics = String.join(",", timeDistanceRequest.getMetrics());
 
         StringJoiner locationsStringJoiner = new StringJoiner(";");
-        for (List<Double> coordinates : matrixRequest.getLocations()) {
+        for (List<Double> coordinates : timeDistanceRequest.getLocations()) {
             StringJoiner locationStringJoiner = new StringJoiner(",");
             for (Double point : coordinates) {
                 locationStringJoiner.add(Objects.toString(point));
@@ -31,12 +31,12 @@ public class LocationIQMatrix extends JsonMatrix {
         String locations = locationsStringJoiner.toString();
 
         StringJoiner sourcesJoiner = new StringJoiner(";");
-        for (int source : matrixRequest.getSources()) {
+        for (int source : timeDistanceRequest.getSources()) {
             sourcesJoiner.add(Objects.toString(source));
         }
         String sources = sourcesJoiner.toString();
 
-        String destinations = Objects.toString(matrixRequest.getDestinations().get(0));
+        String destinations = Objects.toString(timeDistanceRequest.getDestinations().get(0));
 
         String finalUrl = String.format(
                 "%s%s?destinations=%s&sources=%s&annotations=%s&key=%s",

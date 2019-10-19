@@ -16,7 +16,7 @@
  */
 package org.traccar.reports.model;
 
-public class MatrixReport {
+public class TimeDistanceReport {
 
     private long deviceId;
 

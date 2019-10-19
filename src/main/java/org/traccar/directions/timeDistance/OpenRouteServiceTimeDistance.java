@@ -1,4 +1,4 @@
-package org.traccar.directions.matrix;
+package org.traccar.directions.timeDistance;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.traccar.Context;
@@ -7,20 +7,20 @@ import javax.json.JsonObject;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 
-public class OpenRouteServiceMatrix extends JsonMatrix {
-    public OpenRouteServiceMatrix(String url, String key) {
+public class OpenRouteServiceTimeDistance extends JsonTimeDistance {
+    public OpenRouteServiceTimeDistance(String url, String key) {
         super(url, key);
     }
 
     @Override
-    public JsonObject getMatrixResponse(String url, String key, MatrixRequest matrixRequest) {
+    public JsonObject getTimeDistanceResponse(String url, String key, TimeDistanceRequest timeDistanceRequest) {
         if (url == null) {
             url = "https://api.openrouteservice.org/v2/matrix/driving-car";
         }
 
         String requestBodyString = null;
         try {
-            requestBodyString = JsonMatrixObjectMapper.getObjectMapper().writeValueAsString(matrixRequest);
+            requestBodyString = JsonTimeDistanceObjectMapper.getObjectMapper().writeValueAsString(timeDistanceRequest);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }

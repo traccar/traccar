@@ -21,19 +21,19 @@ import java.util.List;
 import java.util.Collection;
 
 import org.traccar.Context;
-import org.traccar.directions.matrix.MatrixResponse;
-import org.traccar.reports.model.MatrixReport;
+import org.traccar.directions.timeDistance.TimeDistanceResponse;
+import org.traccar.reports.model.TimeDistanceReport;
 
-public final class Matrix {
+public final class TimeDistance {
 
-    private Matrix() {
+    private TimeDistance() {
     }
 
-    private static ArrayList<MatrixReport> calculateMatrixResult(
+    private static ArrayList<TimeDistanceReport> calculateTimeDistanceResult(
         long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
         Double latitude, Double longitude) {
 
-        ArrayList<MatrixReport> result = new ArrayList<>();
+        ArrayList<TimeDistanceReport> result = new ArrayList<>();
         List<List<Double>> sourceLocations = new ArrayList<>();
         ArrayList<Double> destinationLocation = new ArrayList<>();
         destinationLocation.add(longitude);
@@ -47,27 +47,29 @@ public final class Matrix {
             sourceLocations.add(deviceLocation);
         }
 
-        MatrixResponse matrixResponse = Context.getMatrix().getMatrix(sourceLocations, destinationLocation);
+        TimeDistanceResponse timeDistanceResponse = Context.getMatrix().getTimeDistanceMatrix(sourceLocations,
+                destinationLocation);
 
         int deviceIndex = 0;
 
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            MatrixReport matrixReport = new MatrixReport();
-            matrixReport.setDeviceId(deviceId);
-            matrixReport.setDeviceName(Context.getIdentityManager().getById(deviceId).getName());
-            matrixReport.setDistance(matrixResponse.getDistance(deviceIndex));
-            matrixReport.setTime(matrixResponse.getDuration(deviceIndex) * 1000);
-            result.add(matrixReport);
+            TimeDistanceReport timeDistanceReport = new TimeDistanceReport();
+            timeDistanceReport.setDeviceId(deviceId);
+            timeDistanceReport.setDeviceName(Context.getIdentityManager().getById(deviceId).getName());
+            timeDistanceReport.setDistance(timeDistanceResponse.getDistance(deviceIndex));
+            timeDistanceReport.setTime(timeDistanceResponse.getDuration(deviceIndex) * 1000);
+            result.add(timeDistanceReport);
             deviceIndex++;
         }
 
         return result;
     }
 
-    public static Collection<MatrixReport> getObjects(long userId, Collection<Long> deviceIds,
-            Collection<Long> groupIds, Double latitude, Double longitude) {
-        return calculateMatrixResult(userId, deviceIds, groupIds, latitude, longitude);
+    public static Collection<TimeDistanceReport> getObjects(long userId, Collection<Long> deviceIds,
+                                                            Collection<Long> groupIds,
+                                                            Double latitude, Double longitude) {
+        return calculateTimeDistanceResult(userId, deviceIds, groupIds, latitude, longitude);
     }
 
 }

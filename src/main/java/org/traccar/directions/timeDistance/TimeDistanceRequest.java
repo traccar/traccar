@@ -1,9 +1,9 @@
-package org.traccar.directions.matrix;
+package org.traccar.directions.timeDistance;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MatrixRequest {
+public class TimeDistanceRequest {
     private List<List<Double>> locations = new ArrayList<>();
 
     public List<List<Double>> getLocations() {

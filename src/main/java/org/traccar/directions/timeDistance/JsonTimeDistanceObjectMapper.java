@@ -1,11 +1,11 @@
-package org.traccar.directions.matrix;
+package org.traccar.directions.timeDistance;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public final class JsonMatrixObjectMapper {
+public final class JsonTimeDistanceObjectMapper {
 
-    private JsonMatrixObjectMapper() { };
+    private JsonTimeDistanceObjectMapper() { };
 
     private static ObjectMapper objectMapper = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

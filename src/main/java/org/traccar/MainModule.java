@@ -29,9 +29,9 @@ import org.traccar.database.GeofenceManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.database.MaintenancesManager;
 import org.traccar.database.StatisticsManager;
-import org.traccar.directions.matrix.LocationIQMatrix;
-import org.traccar.directions.matrix.Matrix;
-import org.traccar.directions.matrix.OpenRouteServiceMatrix;
+import org.traccar.directions.timeDistance.LocationIQTimeDistance;
+import org.traccar.directions.timeDistance.TimeDistanceMatrix;
+import org.traccar.directions.timeDistance.OpenRouteServiceTimeDistance;
 import org.traccar.geocoder.AddressFormat;
 import org.traccar.geocoder.BanGeocoder;
 import org.traccar.geocoder.BingMapsGeocoder;
@@ -206,7 +206,7 @@ public class MainModule extends AbstractModule {
 
     @Singleton
     @Provides
-    public static Matrix provideMatrix(Config config) {
+    public static TimeDistanceMatrix provideMatrix(Config config) {
         if (config.getBoolean(Keys.MATRIX_ENABLE)) {
             String type = config.getString(Keys.MATRIX_TYPE, "locationiq");
             String url = config.getString(Keys.MATRIX_URL);
@@ -214,10 +214,10 @@ public class MainModule extends AbstractModule {
 
             switch (type) {
                 case "openrouteservice":
-                    return new OpenRouteServiceMatrix(url, key);
+                    return new OpenRouteServiceTimeDistance(url, key);
                 case "locationiq":
                 default:
-                    return new LocationIQMatrix(url, key);
+                    return new LocationIQTimeDistance(url, key);
             }
         }
         return null;
