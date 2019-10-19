@@ -145,9 +145,9 @@ public class ReportResource extends BaseResource {
     @GET
     public Collection<MatrixReport> getMatrix(
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
-            @QueryParam("destLat") Double destLat, @QueryParam("destLon") Double destLon) throws SQLException {
+            @QueryParam("latitude") Double latitude, @QueryParam("longitude") Double longitude) throws SQLException {
         return Matrix.getObjects(getUserId(), deviceIds, groupIds,
-              destLat, destLon);
+                latitude, longitude);
     }
 
     @Path("summary")

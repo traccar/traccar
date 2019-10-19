@@ -1,16 +1,11 @@
 package org.traccar.directions.matrix;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javax.json.JsonObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class JsonMatrix implements Matrix {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(JsonMatrix.class);
 
     private final String url;
     private final String key;
@@ -21,10 +16,10 @@ public abstract class JsonMatrix implements Matrix {
     }
 
     @Override
-    public MatrixResponse getMatrix(List<List<Double>> sourceCoord, ArrayList<Double> destCoord) {
+    public MatrixResponse getMatrix(List<List<Double>> sourceLocations, ArrayList<Double> destinationLocation) {
 
-        List<List<Double>> locations = new ArrayList<>(sourceCoord);
-        locations.add(destCoord);
+        List<List<Double>> locations = new ArrayList<>(sourceLocations);
+        locations.add(destinationLocation);
 
         List<Integer> sourceIndexes = new ArrayList<>();
         for (int i = 0; i < (locations.size() - 1); i++) {

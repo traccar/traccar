@@ -16,7 +16,6 @@
  */
 package org.traccar.reports;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Collection;
@@ -32,51 +31,47 @@ public final class Matrix {
 
     private static ArrayList<MatrixReport> calculateMatrixResult(
         long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
-        Double destLat, Double destLon)
-        throws SQLException {
+        Double latitude, Double longitude) {
 
         ArrayList<MatrixReport> result = new ArrayList<>();
-        List<List<Double>> sourceCoord = new ArrayList<>();
-        ArrayList<Double> destCoord = new ArrayList<>();
-        destCoord.add(destLon);
-        destCoord.add(destLat);
-
+        List<List<Double>> sourceLocations = new ArrayList<>();
+        ArrayList<Double> destinationLocation = new ArrayList<>();
+        destinationLocation.add(longitude);
+        destinationLocation.add(latitude);
 
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            List<Double> devCoord = new ArrayList<>();
-            devCoord.add(Context.getIdentityManager().getLastPosition(deviceId).getLongitude());
-            devCoord.add(Context.getIdentityManager().getLastPosition(deviceId).getLatitude());
-            sourceCoord.add(devCoord);
+            List<Double> deviceLocation = new ArrayList<>();
+            deviceLocation.add(Context.getIdentityManager().getLastPosition(deviceId).getLongitude());
+            deviceLocation.add(Context.getIdentityManager().getLastPosition(deviceId).getLatitude());
+            sourceLocations.add(deviceLocation);
         }
 
-        MatrixResponse matrixResponse = Context.getMatrix().getMatrix(sourceCoord, destCoord);
+        MatrixResponse matrixResponse = Context.getMatrix().getMatrix(sourceLocations, destinationLocation);
 
-        int dev = 0;
+        int deviceIndex = 0;
 
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
             MatrixReport matrixReport = new MatrixReport();
             matrixReport.setDeviceId(deviceId);
             matrixReport.setDeviceName(Context.getIdentityManager().getById(deviceId).getName());
-            matrixReport.setDestLat(destLat);
-            matrixReport.setDestLon(destLon);
-            matrixReport.setDevLat(Context.getIdentityManager().getLastPosition(deviceId).getLatitude());
-            matrixReport.setDevLon(Context.getIdentityManager().getLastPosition(deviceId).getLongitude());
-            matrixReport.setDistance(matrixResponse.getDistance(dev));
-            matrixReport.setTime(matrixResponse.getDuration(dev) * 1000);
+            matrixReport.setDestinationLatitude(latitude);
+            matrixReport.setDestinationLongitude(longitude);
+            matrixReport.setDeviceLatitude(Context.getIdentityManager().getLastPosition(deviceId).getLatitude());
+            matrixReport.setDestinationLongitude(Context.getIdentityManager().getLastPosition(deviceId).getLongitude());
+            matrixReport.setDistance(matrixResponse.getDistance(deviceIndex));
+            matrixReport.setTime(matrixResponse.getDuration(deviceIndex) * 1000);
             result.add(matrixReport);
-            dev++;
+            deviceIndex++;
         }
 
         return result;
     }
 
     public static Collection<MatrixReport> getObjects(long userId, Collection<Long> deviceIds,
-            Collection<Long> groupIds, Double destLat, Double destLon) throws SQLException {
-        ArrayList<MatrixReport> result = new ArrayList<>();
-        result = calculateMatrixResult(userId, deviceIds, groupIds, destLat, destLon);
-        return result;
+            Collection<Long> groupIds, Double latitude, Double longitude) {
+        return calculateMatrixResult(userId, deviceIds, groupIds, latitude, longitude);
     }
 
 }

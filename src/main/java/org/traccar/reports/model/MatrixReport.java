@@ -38,44 +38,44 @@ public class MatrixReport {
         this.deviceName = deviceName;
     }
 
-    private double devLat;
+    private double deviceLatitude;
 
-    public double getDevLat() {
-        return devLat;
+    public double getDeviceLatitude() {
+        return deviceLatitude;
     }
 
-    public void setDevLat(double devLat) {
-        this.devLat = devLat;
+    public void setDeviceLatitude(double deviceLatitude) {
+        this.deviceLatitude = deviceLatitude;
     }
 
-    private double devLon;
+    private double deviceLongitude;
 
-    public double getDevLon() {
-        return devLon;
+    public double getDeviceLongitude() {
+        return deviceLongitude;
     }
 
-    public void setDevLon(double devLon) {
-        this.devLon = devLon;
+    public void setDeviceLongitude(double deviceLongitude) {
+        this.deviceLongitude = deviceLongitude;
     }
 
-    private double destLat;
+    private double destinationLatitude;
 
-    public double getDestLat() {
-        return destLat;
+    public double getDestinationLatitude() {
+        return destinationLatitude;
     }
 
-    public void setDestLat(double destLat) {
-        this.destLat = destLat;
+    public void setDestinationLatitude(double destinationLatitude) {
+        this.destinationLatitude = destinationLatitude;
     }
 
-    private double destLon;
+    private double destinationLongitude;
 
-    public double getDestLon() {
-        return destLon;
+    public double getDestinationLongitude() {
+        return destinationLongitude;
     }
 
-    public void setDestLon(double destLon) {
-        this.destLon = destLon;
+    public void setDestinationLongitude(double destinationLongitude) {
+        this.destinationLongitude = destinationLongitude;
     }
 
     private long time;
