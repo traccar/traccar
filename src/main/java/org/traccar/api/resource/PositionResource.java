@@ -107,13 +107,12 @@ public class PositionResource extends BaseResource {
                 delete.add(position);
             }
         } else if (deviceId == 0) {
-        	delete.addAll(Context.getDeviceManager().getInitialState(getUserId()));
+            delete.addAll(Context.getDeviceManager().getInitialState(getUserId()));
         } else {
             Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
             delete.addAll(Context.getDataManager().getPositions(
                            deviceId, DateUtil.parseDate(from), DateUtil.parseDate(to)));
         }
-
         for (Position position : delete) {
             Context.getDataManager().removeObject(Position.class, position.getId());
         }
