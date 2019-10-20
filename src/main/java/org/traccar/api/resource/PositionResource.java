@@ -23,6 +23,7 @@ import org.traccar.web.CsvBuilder;
 import org.traccar.web.GpxBuilder;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -91,6 +92,32 @@ public class PositionResource extends BaseResource {
         gpx.addPositions(Context.getDataManager().getPositions(
                 deviceId, DateUtil.parseDate(from), DateUtil.parseDate(to)));
         return Response.ok(gpx.build()).header(HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE_GPX).build();
+    }
+    
+    @DELETE
+    public Collection<Position> remove(
+    		@QueryParam("deviceId") long deviceId, @QueryParam("id") List<Long> positionIds,
+            @QueryParam("from") String from, @QueryParam("to") String to)
+            throws SQLException {
+        ArrayList<Position> delete = new ArrayList<>();
+        if (!positionIds.isEmpty()) {
+            for (Long positionId : positionIds) {
+                Position position = Context.getDataManager().getObject(Position.class, positionId);
+                Context.getPermissionsManager().checkDevice(getUserId(), position.getDeviceId());
+                delete.add(position);
+            }
+        } else if (deviceId == 0) {
+        	delete.addAll(Context.getDeviceManager().getInitialState(getUserId()));
+        } else {
+            Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
+            delete.addAll(Context.getDataManager().getPositions(
+                           deviceId, DateUtil.parseDate(from), DateUtil.parseDate(to)));
+        }
+        
+        for (Position position : delete) {
+            Context.getDataManager().removeObject(Position.class, position.getId());
+        }
+        return delete;
     }
 
 }
