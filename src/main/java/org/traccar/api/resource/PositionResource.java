@@ -93,10 +93,10 @@ public class PositionResource extends BaseResource {
                 deviceId, DateUtil.parseDate(from), DateUtil.parseDate(to)));
         return Response.ok(gpx.build()).header(HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE_GPX).build();
     }
-    
+
     @DELETE
     public Collection<Position> remove(
-    		@QueryParam("deviceId") long deviceId, @QueryParam("id") List<Long> positionIds,
+            @QueryParam("deviceId") long deviceId, @QueryParam("id") List<Long> positionIds,
             @QueryParam("from") String from, @QueryParam("to") String to)
             throws SQLException {
         ArrayList<Position> delete = new ArrayList<>();
@@ -113,7 +113,7 @@ public class PositionResource extends BaseResource {
             delete.addAll(Context.getDataManager().getPositions(
                            deviceId, DateUtil.parseDate(from), DateUtil.parseDate(to)));
         }
-        
+
         for (Position position : delete) {
             Context.getDataManager().removeObject(Position.class, position.getId());
         }
