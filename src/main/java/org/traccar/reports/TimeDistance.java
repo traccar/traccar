@@ -30,8 +30,7 @@ public final class TimeDistance {
     }
 
     private static ArrayList<TimeDistanceReport> calculateTimeDistanceResult(
-        long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
-        Double latitude, Double longitude) {
+            long userId, Collection<Long> deviceIds, Collection<Long> groupIds, Double latitude, Double longitude) {
 
         ArrayList<TimeDistanceReport> result = new ArrayList<>();
         List<List<Double>> sourceLocations = new ArrayList<>();
@@ -68,8 +67,7 @@ public final class TimeDistance {
     }
 
     public static Collection<TimeDistanceReport> getObjects(long userId, Collection<Long> deviceIds,
-                                                            Collection<Long> groupIds,
-                                                            Double latitude, Double longitude) {
+            Collection<Long> groupIds, Double latitude, Double longitude) {
         return calculateTimeDistanceResult(userId, deviceIds, groupIds, latitude, longitude);
     }
 
