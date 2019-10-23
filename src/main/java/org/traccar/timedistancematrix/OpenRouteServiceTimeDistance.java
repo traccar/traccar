@@ -21,9 +21,7 @@ public class OpenRouteServiceTimeDistance extends JsonTimeDistance {
 
         String requestBodyString = null;
         try {
-            requestBodyString = JsonTimeDistanceObjectMapper
-                    .getObjectMapper()
-                    .writeValueAsString(timeDistanceRequest);
+            requestBodyString = Context.getObjectMapper().writeValueAsString(timeDistanceRequest);
         } catch (JsonProcessingException e) {
             LOGGER.warn(String.valueOf(e));
         }

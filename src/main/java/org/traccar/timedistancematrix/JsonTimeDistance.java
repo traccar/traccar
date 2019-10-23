@@ -1,7 +1,9 @@
 package org.traccar.timedistancematrix;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.Context;
 
 import javax.json.JsonObject;
 import javax.ws.rs.ClientErrorException;
@@ -55,9 +57,9 @@ public abstract class JsonTimeDistance implements TimeDistanceMatrix {
 
         TimeDistanceResponse result = null;
         try {
-            result = JsonTimeDistanceObjectMapper
-                        .getObjectMapper()
-                        .readValue(resultJson.toString(), TimeDistanceResponse.class);
+            result = Context.getObjectMapper().readerFor(TimeDistanceResponse.class)
+                    .without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                    .readValue(resultJson.toString());
         } catch (IOException e) {
             LOGGER.warn("Time distance response error", e);
         }
