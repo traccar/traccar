@@ -31,7 +31,7 @@ public class OpenRouteServiceTimeDistance extends JsonTimeDistance {
                 .request()
                 .header("Authorization", key)
                 .header("Accept",
-                        "application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8")
+                        "application/json; charset=utf-8")
                 .post(requestBodyEntity);
 
         return request.readEntity(JsonObject.class);
