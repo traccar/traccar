@@ -6,7 +6,6 @@ import org.traccar.Context;
 import javax.json.JsonObject;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.Response;
 
 public class OpenRouteServiceTimeDistance extends JsonTimeDistance {
     public OpenRouteServiceTimeDistance(String url, String key) {
@@ -31,14 +30,15 @@ public class OpenRouteServiceTimeDistance extends JsonTimeDistance {
 
         Entity<String> requestBodyEntity = Entity.json(requestBodyString);
 
-        Response request = Context.getClient().target(url)
+        return Context
+                .getClient()
+                .target(url)
                 .request()
                 .header("Authorization", key)
                 .header("Accept",
                         "application/json; charset=utf-8")
-                .post(requestBodyEntity);
-
-        return request.readEntity(JsonObject.class);
+                .post(requestBodyEntity)
+                .readEntity(JsonObject.class);
 
     }
 }

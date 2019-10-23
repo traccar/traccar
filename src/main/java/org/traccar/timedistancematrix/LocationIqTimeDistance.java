@@ -4,7 +4,6 @@ import org.traccar.Context;
 
 import javax.json.JsonObject;
 import javax.ws.rs.ClientErrorException;
-import javax.ws.rs.client.Invocation;
 import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -48,9 +47,10 @@ public class LocationIqTimeDistance extends JsonTimeDistance {
                 metrics,
                 key);
 
-        Invocation.Builder request = Context.getClient().target(finalUrl)
-                .request();
-
-        return request.get(JsonObject.class);
+        return Context
+                .getClient()
+                .target(finalUrl)
+                .request()
+                .get(JsonObject.class);
     }
 }
