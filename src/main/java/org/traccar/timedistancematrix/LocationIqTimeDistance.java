@@ -3,6 +3,7 @@ package org.traccar.timedistancematrix;
 import org.traccar.Context;
 
 import javax.json.JsonObject;
+import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.Invocation;
 import java.util.List;
 import java.util.Objects;
@@ -14,7 +15,8 @@ public class LocationIqTimeDistance extends JsonTimeDistance {
     }
 
     @Override
-    public JsonObject getTimeDistanceResponse(String url, String key, TimeDistanceRequest timeDistanceRequest) {
+    public JsonObject getTimeDistanceResponse(String url, String key, TimeDistanceRequest timeDistanceRequest)
+            throws ClientErrorException {
         if (url == null) {
             url = "https://us1.locationiq.com/v1/matrix/driving/";
         }

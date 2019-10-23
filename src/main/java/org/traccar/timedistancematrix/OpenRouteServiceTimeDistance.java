@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.traccar.Context;
 
 import javax.json.JsonObject;
+import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 
@@ -13,16 +14,19 @@ public class OpenRouteServiceTimeDistance extends JsonTimeDistance {
     }
 
     @Override
-    public JsonObject getTimeDistanceResponse(String url, String key, TimeDistanceRequest timeDistanceRequest) {
+    public JsonObject getTimeDistanceResponse(String url, String key, TimeDistanceRequest timeDistanceRequest)
+            throws ClientErrorException {
         if (url == null) {
             url = "https://api.openrouteservice.org/v2/matrix/driving-car";
         }
 
         String requestBodyString = null;
         try {
-            requestBodyString = JsonTimeDistanceObjectMapper.getObjectMapper().writeValueAsString(timeDistanceRequest);
+            requestBodyString = JsonTimeDistanceObjectMapper
+                    .getObjectMapper()
+                    .writeValueAsString(timeDistanceRequest);
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            LOGGER.warn(String.valueOf(e));
         }
 
         Entity<String> requestBodyEntity = Entity.json(requestBodyString);

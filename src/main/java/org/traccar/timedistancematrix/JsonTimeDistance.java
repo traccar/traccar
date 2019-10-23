@@ -1,11 +1,17 @@
 package org.traccar.timedistancematrix;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.json.JsonObject;
+import javax.ws.rs.ClientErrorException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class JsonTimeDistance implements TimeDistanceMatrix {
+
+    static final Logger LOGGER = LoggerFactory.getLogger(JsonTimeDistance.class);
 
     private final String url;
     private final String key;
@@ -40,22 +46,27 @@ public abstract class JsonTimeDistance implements TimeDistanceMatrix {
         timeDistanceRequest.setDestinations(destinationIndexes);
         timeDistanceRequest.setMetrics(metrics);
 
-        JsonObject resultJson = getTimeDistanceResponse(this.url, this.key, timeDistanceRequest);
+        JsonObject resultJson = null;
+        try {
+            resultJson = getTimeDistanceResponse(this.url, this.key, timeDistanceRequest);
+        } catch (ClientErrorException e) {
+            LOGGER.warn("Time distance network error", e);
+        }
 
-        TimeDistanceResponse result = new TimeDistanceResponse();
-
+        TimeDistanceResponse result = null;
         try {
             result = JsonTimeDistanceObjectMapper
                         .getObjectMapper()
                         .readValue(resultJson.toString(), TimeDistanceResponse.class);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.warn("Time distance response error", e);
         }
 
         return result;
     }
 
-    JsonObject getTimeDistanceResponse(String url, String key, TimeDistanceRequest timeDistanceRequest) {
+    JsonObject getTimeDistanceResponse(String url, String key, TimeDistanceRequest timeDistanceRequest)
+            throws ClientErrorException {
         return null;
     }
 }
