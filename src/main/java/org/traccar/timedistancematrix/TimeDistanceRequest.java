@@ -1,4 +1,4 @@
-package org.traccar.directions.timeDistance;
+package org.traccar.timedistancematrix;
 
 import java.util.ArrayList;
 import java.util.List;

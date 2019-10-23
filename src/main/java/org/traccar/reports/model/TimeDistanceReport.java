@@ -58,4 +58,3 @@ public class TimeDistanceReport {
         this.distance = distance;
     }
 }
-

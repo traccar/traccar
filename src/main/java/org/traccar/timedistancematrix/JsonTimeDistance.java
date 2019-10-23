@@ -1,4 +1,4 @@
-package org.traccar.directions.timeDistance;
+package org.traccar.timedistancematrix;
 
 import javax.json.JsonObject;
 import java.io.IOException;

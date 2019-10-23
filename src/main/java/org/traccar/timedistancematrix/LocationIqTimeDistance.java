@@ -1,4 +1,4 @@
-package org.traccar.directions.timeDistance;
+package org.traccar.timedistancematrix;
 
 import org.traccar.Context;
 
@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-public class LocationIQTimeDistance extends JsonTimeDistance {
-    public LocationIQTimeDistance(String url, String key) {
+public class LocationIqTimeDistance extends JsonTimeDistance {
+    public LocationIqTimeDistance(String url, String key) {
         super(url, key);
     }
 

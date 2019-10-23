@@ -41,7 +41,7 @@ import org.traccar.database.MediaManager;
 import org.traccar.database.NotificationManager;
 import org.traccar.database.PermissionsManager;
 import org.traccar.database.UsersManager;
-import org.traccar.directions.timeDistance.TimeDistanceMatrix;
+import org.traccar.timedistancematrix.TimeDistanceMatrix;
 import org.traccar.geocoder.Geocoder;
 import org.traccar.helper.Log;
 import org.traccar.helper.SanitizerModule;
@@ -154,7 +154,7 @@ public final class Context {
         return Main.getInjector() != null ? Main.getInjector().getInstance(Geocoder.class) : null;
     }
 
-    public static TimeDistanceMatrix getMatrix() {
+    public static TimeDistanceMatrix getTimeDistanceMatrix() {
         return Main.getInjector() != null ? Main.getInjector().getInstance(TimeDistanceMatrix.class) : null;
     }
 

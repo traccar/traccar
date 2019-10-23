@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Collection;
 
 import org.traccar.Context;
-import org.traccar.directions.timeDistance.TimeDistanceResponse;
+import org.traccar.timedistancematrix.TimeDistanceResponse;
 import org.traccar.reports.model.TimeDistanceReport;
 
 public final class TimeDistance {
@@ -47,8 +47,9 @@ public final class TimeDistance {
             sourceLocations.add(deviceLocation);
         }
 
-        TimeDistanceResponse timeDistanceResponse = Context.getMatrix().getTimeDistanceMatrix(sourceLocations,
-                destinationLocation);
+        TimeDistanceResponse timeDistanceResponse = Context
+                .getTimeDistanceMatrix()
+                .getTimeDistanceMatrix(sourceLocations, destinationLocation);
 
         int deviceIndex = 0;
 

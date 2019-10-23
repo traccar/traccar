@@ -29,9 +29,9 @@ import org.traccar.database.GeofenceManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.database.MaintenancesManager;
 import org.traccar.database.StatisticsManager;
-import org.traccar.directions.timeDistance.LocationIQTimeDistance;
-import org.traccar.directions.timeDistance.TimeDistanceMatrix;
-import org.traccar.directions.timeDistance.OpenRouteServiceTimeDistance;
+import org.traccar.timedistancematrix.LocationIqTimeDistance;
+import org.traccar.timedistancematrix.TimeDistanceMatrix;
+import org.traccar.timedistancematrix.OpenRouteServiceTimeDistance;
 import org.traccar.geocoder.AddressFormat;
 import org.traccar.geocoder.BanGeocoder;
 import org.traccar.geocoder.BingMapsGeocoder;
@@ -207,17 +207,17 @@ public class MainModule extends AbstractModule {
     @Singleton
     @Provides
     public static TimeDistanceMatrix provideMatrix(Config config) {
-        if (config.getBoolean(Keys.MATRIX_ENABLE)) {
-            String type = config.getString(Keys.MATRIX_TYPE, "locationiq");
-            String url = config.getString(Keys.MATRIX_URL);
-            String key = config.getString(Keys.MATRIX_KEY);
+        if (config.getBoolean(Keys.TIMEDISTANCEMATRIX_ENABLE)) {
+            String type = config.getString(Keys.TIMEDISTANCEMATRIX_TYPE, "locationiq");
+            String url = config.getString(Keys.TIMEDISTANCEMATRIX_URL);
+            String key = config.getString(Keys.TIMEDISTANCEMATRIX_KEY);
 
             switch (type) {
                 case "openrouteservice":
                     return new OpenRouteServiceTimeDistance(url, key);
                 case "locationiq":
                 default:
-                    return new LocationIQTimeDistance(url, key);
+                    return new LocationIqTimeDistance(url, key);
             }
         }
         return null;

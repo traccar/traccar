@@ -43,15 +43,15 @@ import org.traccar.helper.DateUtil;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.reports.Events;
-import org.traccar.reports.Route;
 import org.traccar.reports.Summary;
 import org.traccar.reports.Trips;
-import org.traccar.reports.Stops;
 import org.traccar.reports.TimeDistance;
 import org.traccar.reports.model.StopReport;
 import org.traccar.reports.model.SummaryReport;
 import org.traccar.reports.model.TimeDistanceReport;
 import org.traccar.reports.model.TripReport;
+import org.traccar.reports.Route;
+import org.traccar.reports.Stops;
 
 @Path("reports")
 @Produces(MediaType.APPLICATION_JSON)
@@ -143,7 +143,7 @@ public class ReportResource extends BaseResource {
 
     @Path("time-distance")
     @GET
-    public Collection<TimeDistanceReport> getMatrix(
+    public Collection<TimeDistanceReport> getTimeDistanceMatrix(
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("latitude") Double latitude, @QueryParam("longitude") Double longitude) throws SQLException {
         return TimeDistance.getObjects(getUserId(), deviceIds, groupIds,

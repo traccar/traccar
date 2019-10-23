@@ -1,4 +1,4 @@
-package org.traccar.directions.timeDistance;
+package org.traccar.timedistancematrix;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
