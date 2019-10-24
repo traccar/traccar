@@ -1,7 +1,7 @@
 {
   "name": "colocate",
   "version": "0.0.1",
-  "description": "Intial boot",
+  "description": "Initial boot",
   "productName": "co-LOCATE",
   "cordovaId": "io.colocate.app",
   "author": "Godwin peter .O <me@godwin.dev>",
@@ -16,9 +16,12 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
+    "@turf/turf": "^5.1.6",
     "axios": "^0.18.1",
+    "leaflet": "^1.5.1",
     "quasar": "^1.2.4",
-    "vue-i18n": "^8.0.0"
+    "vue-i18n": "^8.0.0",
+    "vue2-leaflet": "^2.2.1"
   },
   "devDependencies": {
     "@quasar/app": "^1.2.2",
