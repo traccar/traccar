@@ -8,9 +8,10 @@
             <q-input
               rounded
               outlined
-              bg-color="grey-2 text-red-10"
+              dense
+              bg-color="grey-2 text-grey-7"
               :input-style="{ borderColor: '#f445d3' }"
-              color="red-10 text-red-10"
+              color="grey-7 text-grey-7"
               v-model="username"
               label="Username"
               lazy-rules
@@ -19,15 +20,16 @@
               ]"
             >
               <template v-slot:prepend>
-                <q-icon color="red-10" name="person" />
+                <q-icon color="grey-7" name="person" />
               </template>
             </q-input>
 
             <q-input
               rounded
               outlined
-              bg-color="grey-2 text-red-10"
-              color="red-10"
+              dense
+              bg-color="grey-2 text-grey-7"
+              color="grey-7"
               type="password"
               v-model="password"
               label="Password"
@@ -38,22 +40,28 @@
               ]"
             >
               <template v-slot:prepend>
-                <q-icon color="red-10" name="lock" />
+                <q-icon color="grey-7" name="lock" />
               </template>
             </q-input>
           </q-card-section>
           <q-card-actions>
-            <q-toggle color="red-10" v-model="remember" label="Remember me." />
+            <q-toggle
+              dense
+              color="grey-7"
+              v-model="remember"
+              label="Remember me."
+            />
             <q-space />
             <q-btn
               label="Sign In"
+              size="md"
               type="submit"
+              class="q-mr-sm"
               style="padding: 0px 25px 0px 25px; margin-rigth: 0px;"
-              color="red-10"
+              color="grey-7"
               no-caps
               unelevated
               rounded
-              dense
             />
           </q-card-actions>
           <q-card-section></q-card-section>
@@ -68,11 +76,11 @@
 
 <script>
 export default {
-  name: "Login",
+  name: "login",
   data() {
     return {
-      username: null,
-      password: null,
+      username: "",
+      password: "",
 
       remember: true
     };
@@ -82,7 +90,7 @@ export default {
     onSubmit() {
       if (this.remember !== true) {
         this.$q.notify({
-          color: "red-5",
+          color: "grey-5",
           textColor: "white",
           icon: "fas fa-exclamation-triangle",
           message: "You need to accept the license and terms first"
