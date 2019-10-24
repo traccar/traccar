@@ -25,7 +25,7 @@ public abstract class JsonTimeDistance implements TimeDistanceMatrix {
 
     @Override
     public TimeDistanceResponse getTimeDistanceMatrix(List<List<Double>> sourceLocations,
-            ArrayList<Double> destinationLocation) {
+            List<Double> destinationLocation) {
 
         List<List<Double>> locations = new ArrayList<>(sourceLocations);
         locations.add(destinationLocation);

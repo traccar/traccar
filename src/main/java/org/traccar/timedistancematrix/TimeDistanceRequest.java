@@ -1,10 +1,9 @@
 package org.traccar.timedistancematrix;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class TimeDistanceRequest {
-    private List<List<Double>> locations = new ArrayList<>();
+    private List<List<Double>> locations;
 
     public List<List<Double>> getLocations() {
         return locations;
@@ -14,7 +13,7 @@ public class TimeDistanceRequest {
         this.locations = locations;
     }
 
-    private List<Integer> sources = new ArrayList<>();
+    private List<Integer> sources;
 
     public List<Integer> getSources() {
         return sources;
@@ -24,7 +23,7 @@ public class TimeDistanceRequest {
         this.sources = sources;
     }
 
-    private List<Integer> destinations = new ArrayList<>();
+    private List<Integer> destinations;
 
     public List<Integer> getDestinations() {
         return destinations;
@@ -34,7 +33,7 @@ public class TimeDistanceRequest {
         this.destinations = destinations;
     }
 
-    private List<String> metrics = new ArrayList<>();
+    private List<String> metrics;
 
     public List<String> getMetrics() {
         return metrics;
