@@ -1,35 +1,31 @@
 {
   "name": "colocate",
   "version": "0.0.1",
-  "description": "Intial boot",
+  "description": "Initial boot",
   "productName": "co-LOCATE",
   "cordovaId": "io.colocate.app",
   "author": "Godwin peter .O <me@godwin.dev>",
   "license": "MIT",
   "private": false,
   "scripts": {
-    "lint": "eslint --ext .js,.vue src",
+    "lint": "cd frontend && eslint --ext .js,.vue src",
+    "lint:fix": "cd frontend && eslint --ext .js,.vue src --fix",
     "test": "echo \"No test specified\" && exit 0",
-    "update": "cd frontend && quasar upgrade",
+    "upgrade": "cd frontend && quasar upgrade",
     "dev": "cd frontend && quasar dev",
-    "dev:ssr": "cd frontend && quasar dev -m ssr",
-    "dev:android": "cd frontend && quasar dev -m capacitor -T android",
-    "dev:ios": "cd frontend && quasar dev -m capacitor -T ios",
-    "dev:desktop": "cd frontend && quasar dev -m electron",
-    "build": "cd frontend && quasar build",
-    "build:ssr": "cd frontend && quasar build -m ssr",
-    "build:android": "cd frontend && quasar build -m capacitor -T android",
-    "build:ios": "cd frontend && quasar build -m capacitor -T ios",
-    "build:desktop": "cd frontend && quasar build -m electron"
+    "build": "cd frontend && quasar build"
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
+    "@turf/turf": "^5.1.6",
     "axios": "^0.18.1",
-    "quasar": "^1.0.0",
-    "vue-i18n": "^8.0.0"
+    "leaflet": "^1.5.1",
+    "quasar": "^1.2.4",
+    "vue-i18n": "^8.0.0",
+    "vue2-leaflet": "^2.2.1"
   },
   "devDependencies": {
-    "@quasar/app": "^1.0.0",
+    "@quasar/app": "^1.2.2",
     "@vue/eslint-config-prettier": "^4.0.0",
     "babel-eslint": "^10.0.1",
     "eslint": "^5.10.0",
