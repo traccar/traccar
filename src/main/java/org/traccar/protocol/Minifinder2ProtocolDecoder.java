@@ -117,6 +117,10 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                     case 0x02:
                         position.set(Position.KEY_ALARM, decodeAlarm(buf.readIntLE()));
                         break;
+                    case 0x14:
+                        position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+                        position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.001);
+                        break;
                     case 0x20:
                         position.setLatitude(buf.readIntLE() * 0.0000001);
                         position.setLongitude(buf.readIntLE() * 0.0000001);
