@@ -1,0 +1,22 @@
+{
+  "name": "CapacitorCordova",
+  "module_name": "Cordova",
+  "version": "1.2.1",
+  "summary": "Capacitor Cordova Compatibility Layer",
+  "homepage": "https://ionic-team.github.io/capacitor",
+  "license": "MIT",
+  "authors": {
+    "Ionic Team": "hi@ionicframework.com"
+  },
+  "source": {
+    "git": "https://github.com/ionic-team/capacitor",
+    "tag": "1.2.1"
+  },
+  "platforms": {
+    "ios": "11.0"
+  },
+  "source_files": "ios/CapacitorCordova/**/*.{h,m}",
+  "public_header_files": "ios/CapacitorCordova/CapacitorCordova/Classes/Public/*.h",
+  "requires_arc": true,
+  "frameworks": "WebKit"
+}
