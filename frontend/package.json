@@ -8,7 +8,8 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "lint": "eslint --ext .js,.vue src",
+    "lint": "cd frontend && eslint --ext .js,.vue src",
+    "lint:fix": "cd frontend && eslint --ext .js,.vue src --fix",
     "test": "echo \"No test specified\" && exit 0",
     "upgrade": "cd frontend && quasar upgrade",
     "dev": "cd frontend && quasar dev",
