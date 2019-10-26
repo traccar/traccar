@@ -188,17 +188,6 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_OUTPUT, output);
                     position.set(Position.KEY_STATUS, status);
 
-                } else if (fieldId == 27) {
-
-                    position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
-                    position.set(Position.KEY_HOURS, buf.readUnsignedIntLE() * 1000);
-
-
-                } else if (fieldId == 26) {
-
-                    position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedIntLE());
-                    position.set("TripHours", buf.readUnsignedIntLE() * 1000);
-
                 } else if (fieldId == 6) {
 
                     while (buf.readerIndex() < fieldEnd) {
@@ -222,6 +211,16 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
                                 break;
                         }
                     }
+
+                } else if (fieldId == 26) {
+
+                    position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedIntLE());
+                    position.set("tripHours", buf.readUnsignedIntLE() * 1000);
+
+                } else if (fieldId == 27) {
+
+                    position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
+                    position.set(Position.KEY_HOURS, buf.readUnsignedIntLE() * 1000);
 
                 }
 
