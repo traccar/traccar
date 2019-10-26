@@ -189,19 +189,15 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_STATUS, status);
                    
                 } else if (fieldId == 27) {
-                    int odometer = buf.readIntLE();
-                    int runhours = buf.readIntLE();
 
-                    position.set("DeviceOdo", odometer);
-                    position.set("DeviceRunHours", runhours);
+                    position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
+                    position.set("DeviceRunTime", buf.readUnsignedIntLE());
 
 
                 } else if (fieldId == 26) {
-                    int tripodometer = buf.readIntLE();
-                    int triprunhours = buf.readIntLE();
 
-                    position.set("TripOdo", tripodometer);
-                    position.set("TripRunTime", triprunhours);                    
+                    position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedIntLE());
+                    position.set("TripRunTime", buf.readUnsignedIntLE());                  
 
                 } else if (fieldId == 6) {
 
