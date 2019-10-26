@@ -187,7 +187,7 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_INPUT, input);
                     position.set(Position.KEY_OUTPUT, output);
                     position.set(Position.KEY_STATUS, status);
-                   
+
                 } else if (fieldId == 27) {
 
                     position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
@@ -197,7 +197,7 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
                 } else if (fieldId == 26) {
 
                     position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedIntLE());
-                    position.set("TripRunTime", buf.readUnsignedIntLE());                  
+                    position.set("TripRunTime", buf.readUnsignedIntLE());
 
                 } else if (fieldId == 6) {
 
