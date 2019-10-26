@@ -156,7 +156,9 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         break;
                     case 0x24:
                         position.setTime(new Date(buf.readUnsignedIntLE() * 1000));
-                        position.set(Position.KEY_STATUS, buf.readUnsignedIntLE());
+                        long status = buf.readUnsignedIntLE();
+                        position.set(Position.KEY_BATTERY_LEVEL, BitUtil.from(status, 24));
+                        position.set(Position.KEY_STATUS, status);
                         break;
                     case 0x40:
                         buf.readUnsignedIntLE(); // timestamp
