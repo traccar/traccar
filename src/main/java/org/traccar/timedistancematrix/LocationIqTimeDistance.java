@@ -26,16 +26,21 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 public class LocationIqTimeDistance extends JsonTimeDistance {
+    private final String url;
+    private final String key;
+
     public LocationIqTimeDistance(String url, String key) {
-        super(url, key);
+        if (url == null) {
+            this.url = "https://us1.locationiq.com/v1/matrix/driving/";
+        } else {
+            this.url = url;
+        }
+        this.key = key;
     }
 
     @Override
-    public JsonObject getTimeDistanceResponse(String url, String key, TimeDistanceRequest timeDistanceRequest)
+    public JsonObject getTimeDistanceResponse(TimeDistanceRequest timeDistanceRequest)
             throws ClientErrorException {
-        if (url == null) {
-            url = "https://us1.locationiq.com/v1/matrix/driving/";
-        }
         String metrics = String.join(",", timeDistanceRequest.getMetrics());
 
         StringJoiner locationsStringJoiner = new StringJoiner(";");

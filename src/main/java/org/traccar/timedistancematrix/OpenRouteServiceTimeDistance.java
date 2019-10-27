@@ -25,16 +25,21 @@ import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.Entity;
 
 public class OpenRouteServiceTimeDistance extends JsonTimeDistance {
+    private final String url;
+    private final String key;
+
     public OpenRouteServiceTimeDistance(String url, String key) {
-        super(url, key);
+        if (url == null) {
+            this.url = "https://api.openrouteservice.org/v2/matrix/driving-car";
+        } else {
+            this.url = url;
+        }
+        this.key = key;
     }
 
     @Override
-    public JsonObject getTimeDistanceResponse(String url, String key, TimeDistanceRequest timeDistanceRequest)
+    public JsonObject getTimeDistanceResponse(TimeDistanceRequest timeDistanceRequest)
             throws ClientErrorException {
-        if (url == null) {
-            url = "https://api.openrouteservice.org/v2/matrix/driving-car";
-        }
 
         String requestBodyString = null;
         try {

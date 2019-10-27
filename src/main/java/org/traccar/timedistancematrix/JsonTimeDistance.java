@@ -32,14 +32,6 @@ public abstract class JsonTimeDistance implements TimeDistanceMatrix {
 
     static final Logger LOGGER = LoggerFactory.getLogger(JsonTimeDistance.class);
 
-    private final String url;
-    private final String key;
-
-    JsonTimeDistance(String url, String key) {
-        this.url = url;
-        this.key = key;
-    }
-
     @Override
     public TimeDistanceResponse getTimeDistanceMatrix(List<List<Double>> sourceLocations,
             List<Double> destinationLocation) {
@@ -67,7 +59,7 @@ public abstract class JsonTimeDistance implements TimeDistanceMatrix {
 
         JsonObject resultJson = null;
         try {
-            resultJson = getTimeDistanceResponse(this.url, this.key, timeDistanceRequest);
+            resultJson = getTimeDistanceResponse(timeDistanceRequest);
         } catch (ClientErrorException e) {
             LOGGER.warn("Time distance network error", e);
         }
@@ -84,7 +76,7 @@ public abstract class JsonTimeDistance implements TimeDistanceMatrix {
         return result;
     }
 
-    JsonObject getTimeDistanceResponse(String url, String key, TimeDistanceRequest timeDistanceRequest)
+    JsonObject getTimeDistanceResponse(TimeDistanceRequest timeDistanceRequest)
             throws ClientErrorException {
         return null;
     }
