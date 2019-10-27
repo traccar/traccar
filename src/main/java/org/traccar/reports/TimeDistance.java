@@ -35,11 +35,12 @@ public final class TimeDistance {
 
         ArrayList<TimeDistanceReport> result = new ArrayList<>();
         List<List<Double>> sourceLocations = new ArrayList<>();
-        ArrayList<Double> destinationLocation = new ArrayList<>();
+        List<Double> destinationLocation = new ArrayList<>();
         destinationLocation.add(longitude);
         destinationLocation.add(latitude);
+        List<Long> deviceList = new ArrayList<>(ReportUtils.getDeviceList(deviceIds, groupIds));
 
-        for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
+        for (long deviceId: deviceList) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
             List<Double> deviceLocation = new ArrayList<>();
             deviceLocation.add(Context.getIdentityManager().getLastPosition(deviceId).getLongitude());
@@ -51,9 +52,8 @@ public final class TimeDistance {
                 .getTimeDistanceMatrix()
                 .getTimeDistanceMatrix(sourceLocations, destinationLocation);
 
-        int deviceIndex = 0;
-
-        for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
+        for (int deviceIndex = 0; deviceIndex < deviceList.size(); deviceIndex++) {
+            long deviceId = deviceList.get(deviceIndex);
             Context.getPermissionsManager().checkDevice(userId, deviceId);
             TimeDistanceReport timeDistanceReport = new TimeDistanceReport();
             timeDistanceReport.setDeviceId(deviceId);
@@ -61,7 +61,6 @@ public final class TimeDistance {
             timeDistanceReport.setDistance(timeDistanceResponse.getDistance(deviceIndex));
             timeDistanceReport.setTime(timeDistanceResponse.getDuration(deviceIndex) * 1000);
             result.add(timeDistanceReport);
-            deviceIndex++;
         }
 
         return result;
