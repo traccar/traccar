@@ -15,18 +15,22 @@
  */
 package org.traccar.protocol;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -501,20 +505,120 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private Position decodeBinary(
+            Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
+
+        buf.readUnsignedByte(); // header
+        buf.readUnsignedShort(); // length
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, ByteBufUtil.hexDump(buf.readSlice(5)));
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        int mask = buf.readUnsignedMedium();
+
+        if (BitUtil.check(mask, 1)) {
+            buf.readUnsignedByte(); // model
+        }
+
+        if (BitUtil.check(mask, 2)) {
+            position.set(Position.KEY_VERSION_FW, String.format("%d.%d.%d",
+                    buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte()));
+        }
+
+        if (BitUtil.check(mask, 3) && buf.readUnsignedByte() == 0) {
+            position.set(Position.KEY_ARCHIVE, true);
+        }
+
+        if (BitUtil.check(mask, 4) && BitUtil.check(mask, 5)) {
+            position.setTime(new DateBuilder()
+                    .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
+                    .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
+                    .getDate());
+        }
+
+        if (BitUtil.check(mask, 6)) {
+            buf.readUnsignedInt(); // cell
+        }
+
+        if (BitUtil.check(mask, 7)) {
+            buf.readUnsignedShort(); // mcc
+        }
+
+        if (BitUtil.check(mask, 8)) {
+            buf.readUnsignedShort(); // mnc
+        }
+
+        if (BitUtil.check(mask, 9)) {
+            buf.readUnsignedShort(); // lac
+        }
+
+        if (BitUtil.check(mask, 10)) {
+            position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+        }
+
+        if (BitUtil.check(mask, 11)) {
+            long value = buf.readUnsignedInt();
+            if (BitUtil.check(value, 31)) {
+                value = -BitUtil.to(value, 31);
+            }
+            position.setLatitude(value / 1000000.0);
+        }
+
+        if (BitUtil.check(mask, 12)) {
+            long value = buf.readUnsignedInt();
+            if (BitUtil.check(value, 31)) {
+                value = -BitUtil.to(value, 31);
+            }
+            position.setLongitude(value / 1000000.0);
+        }
+
+        if (BitUtil.check(mask, 13)) {
+            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort() / 100.0));
+        }
+
+        if (BitUtil.check(mask, 14)) {
+            position.setCourse(buf.readUnsignedShort() / 100.0);
+        }
+
+        if (BitUtil.check(mask, 15)) {
+            position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+        }
+
+        if (BitUtil.check(mask, 16)) {
+            position.setValid(buf.readUnsignedByte() > 0);
+        }
+
+        return position;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        String[] values = ((String) msg).split(";");
+        ByteBuf buf = (ByteBuf) msg;
 
-        if (values[0].length() < 5) {
-            return decodeUniversal(channel, remoteAddress, values);
-        } else if (values[0].startsWith("ST9")) {
-            return decode9(channel, remoteAddress, values);
-        } else if (values[0].startsWith("ST4")) {
-            return decode4(channel, remoteAddress, values);
+        if (buf.getByte(buf.readerIndex()) == (byte) 0x81) {
+
+            return decodeBinary(channel, remoteAddress, buf);
+
         } else {
-            return decode2356(channel, remoteAddress, values[0].substring(0, 5), values);
+
+            String[] values = buf.toString(StandardCharsets.US_ASCII).split(";");
+
+            if (values[0].length() < 5) {
+                return decodeUniversal(channel, remoteAddress, values);
+            } else if (values[0].startsWith("ST9")) {
+                return decode9(channel, remoteAddress, values);
+            } else if (values[0].startsWith("ST4")) {
+                return decode4(channel, remoteAddress, values);
+            } else {
+                return decode2356(channel, remoteAddress, values[0].substring(0, 5), values);
+            }
         }
     }
 

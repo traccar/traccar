@@ -15,7 +15,6 @@
  */
 package org.traccar.protocol;
 
-import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
@@ -38,7 +37,6 @@ public class SuntechProtocol extends BaseProtocol {
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new SuntechFrameDecoder());
                 pipeline.addLast(new StringEncoder());
-                pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new SuntechProtocolEncoder(SuntechProtocol.this));
                 pipeline.addLast(new SuntechProtocolDecoder(SuntechProtocol.this));
             }
