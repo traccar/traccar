@@ -83,11 +83,11 @@ public class RstProtocolDecoder extends BaseProtocolDecoder {
         String model = parser.next();
         String firmware = parser.next();
         String serial = parser.next();
-        int index = parser.nextInt();
-        int type = parser.nextInt();
+        parser.nextInt(); // index
+        parser.nextInt(); // type
 
         if (channel != null && archive.equals("A")) {
-            String response = "RST;A;" + model + ";" + firmware + ";" + serial + ";" + index + ";" + type + ";FIM;";
+            String response = "RST;A;" + model + ";" + firmware + ";" + serial + ";1;6;FIM;";
             channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
 
