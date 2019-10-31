@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -66,7 +67,7 @@ public class StarcomProtocolDecoder extends BaseProtocolDecoder {
                     position.setAltitude(Double.parseDouble(value));
                     break;
                 case "velocity":
-                    position.setSpeed(Integer.parseInt(value));
+                    position.setSpeed(UnitsConverter.knotsFromKph(Integer.parseInt(value)));
                     break;
                 case "heading":
                     position.setCourse(Integer.parseInt(value));
