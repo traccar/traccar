@@ -304,7 +304,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_POWER, Double.parseDouble(values[index++]));
 
         String io = values[index++];
-        if (io.length() == 6) {
+        if (io.length() >= 6) {
             position.set(Position.KEY_IGNITION, io.charAt(0) == '1');
             position.set(Position.PREFIX_IN + 1, io.charAt(1) == '1');
             position.set(Position.PREFIX_IN + 2, io.charAt(2) == '1');
