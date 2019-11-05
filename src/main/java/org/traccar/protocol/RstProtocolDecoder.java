@@ -20,6 +20,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -120,7 +121,10 @@ public class RstProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_ODOMETER, parser.nextInt());
         position.set(Position.KEY_RSSI, parser.nextInt());
         position.set(Position.PREFIX_TEMP + 1, (int) parser.nextHexInt().byteValue());
-        position.set(Position.KEY_STATUS, parser.nextHexInt() << 8 + parser.nextHexInt());
+
+        int status = parser.nextHexInt() << 8 + parser.nextHexInt();
+        position.set(Position.KEY_IGNITION, BitUtil.check(status, 7));
+        position.set(Position.KEY_STATUS, status);
 
         return position;
     }
