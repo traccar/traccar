@@ -40,12 +40,12 @@ public class PluginProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd)(dd)(dd),")             // time (hhmmss)
             .number("(-?d+.d+),")                // longitude
             .number("(-?d+.d+),")                // latitude
-            .number("(d+),")                     // speed
+            .number("(d+.?d*),")                 // speed
             .number("(d+),")                     // course
             .number("(-?d+),")                   // altitude
             .number("(-?d+),")                   // satellites
             .number("d+,")                       // type
-            .number("(d+),")                     // odometer
+            .number("(d+.?d*),")                 // odometer
             .number("(d+),")                     // status
             .expression("[^,]*,")
             .expression("[^,]*,")
@@ -78,12 +78,12 @@ public class PluginProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(parser.nextDateTime());
         position.setLongitude(parser.nextDouble());
         position.setLatitude(parser.nextDouble());
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt()));
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
         position.setCourse(parser.nextInt());
         position.setAltitude(parser.nextInt());
 
         position.set(Position.KEY_SATELLITES, parser.nextInt());
-        position.set(Position.KEY_ODOMETER, parser.nextInt());
+        position.set(Position.KEY_ODOMETER, (long) (parser.nextDouble() * 1000));
         position.set(Position.KEY_STATUS, parser.nextInt());
         position.set(Position.KEY_EVENT, parser.nextInt());
 
