@@ -62,6 +62,9 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
 
         SuntechProtocolDecoder decoder = new SuntechProtocolDecoder(null);
 
+        verifyPosition(decoder, buffer(
+                "ST390STT;007579860;18;302;20191101;11:28:51;145b49;-23.267030;-047.298142;000.000;000.00;9;1;5;11.93;000000;2;0003;000002;4.03;0;20010000;22470;724;05;-58;5211;1"));
+
         verifyAttribute(decoder, binary(
                 "81004e05200013383fffff3401000300130b020b2a0500000000000000000000000047f9ec846a06500000000012010200000123a1002904ba00010fb40000000000000000000000000000000000005989"),
                 Position.KEY_IGNITION, false);
