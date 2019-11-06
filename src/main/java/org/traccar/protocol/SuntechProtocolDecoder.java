@@ -593,6 +593,16 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             position.setValid(buf.readUnsignedByte() > 0);
         }
 
+        if (BitUtil.check(mask, 17)) {
+            int input = buf.readUnsignedByte();
+            position.set(Position.KEY_IGNITION, BitUtil.check(input, 0));
+            position.set(Position.KEY_INPUT, input);
+        }
+
+        if (BitUtil.check(mask, 18)) {
+            position.set(Position.KEY_OUTPUT, buf.readUnsignedByte());
+        }
+
         return position;
     }
 
