@@ -11,6 +11,9 @@ public class UproProtocolDecoderTest extends ProtocolTest {
 
         UproProtocolDecoder decoder = new UproProtocolDecoder(null);
 
+        verifyPosition(decoder, buffer(
+                "*HQ201861909268000132,BA&A1820223307024309650492530000311019&B0100000000&F0000&V0036&R0500&J000182&M0052&W00000091&I231026027BD39090827BD5ACA04&X(501E0)(B0000)(E0136)(J01E0)(L3)(k8937204016201240376F)&K00200&T85&N01#"));
+
         verifyAttribute(decoder, buffer(
                 "*VK200867282036729446,BA&A1759265051877702037465660022210819&B0000000000&W00&G000030&M830&N26&O1706&o11&T0783#"),
                 Position.KEY_BATTERY_LEVEL, 83.0);

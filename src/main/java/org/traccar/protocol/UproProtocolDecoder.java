@@ -171,12 +171,31 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                     position.setAltitude(
                             Integer.parseInt(data.readSlice(6).toString(StandardCharsets.US_ASCII)) * 0.1);
                     break;
+                case 'J':
+                    if (data.readableBytes() == 6) {
+                        char index = (char) data.readUnsignedByte();
+                        int status = data.readUnsignedByte();
+                        double value = Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII)) * 0.1;
+                        if (BitUtil.check(status, 0)) {
+                            value = -value;
+                        }
+                        position.set(Position.PREFIX_TEMP + index, value);
+                    }
+                    break;
                 case 'K':
                     position.set("statusExtended", data.toString(StandardCharsets.US_ASCII));
                     break;
                 case 'M':
-                    position.set(Position.KEY_BATTERY_LEVEL,
-                            Integer.parseInt(data.readSlice(3).toString(StandardCharsets.US_ASCII)) * 0.1);
+                    if (data.readableBytes() == 3) {
+                        position.set(Position.KEY_BATTERY_LEVEL,
+                                Integer.parseInt(data.readSlice(3).toString(StandardCharsets.US_ASCII)) * 0.1);
+                    } else if (data.readableBytes() == 4) {
+                        char index = (char) data.readUnsignedByte();
+                        data.readUnsignedByte(); // status
+                        position.set(
+                                "humidity" + index,
+                                Integer.parseInt(data.readSlice(2).toString(StandardCharsets.US_ASCII)));
+                    }
                     break;
                 case 'N':
                     position.set(Position.KEY_RSSI,
