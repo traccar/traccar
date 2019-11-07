@@ -548,6 +548,15 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.01);
             position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
 
+            long portInfo = buf.readUnsignedInt();
+
+            position.set(Position.KEY_INPUT, buf.readUnsignedByte());
+            position.set(Position.KEY_OUTPUT, buf.readUnsignedByte());
+
+            for (int i = 1; i <= BitUtil.between(portInfo, 20, 24); i++) {
+                position.set(Position.PREFIX_ADC + i, buf.readUnsignedShort() * 0.01);
+            }
+
             return position;
 
         } else if (type == MSG_X1_PHOTO_INFO) {
