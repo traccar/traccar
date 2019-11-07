@@ -26,12 +26,9 @@ public class OpenCellIdGeolocationProvider implements GeolocationProvider {
 
     private String url;
 
-    public OpenCellIdGeolocationProvider(String key) {
-        this("http://opencellid.org/cell/get", key);
-    }
-
     public OpenCellIdGeolocationProvider(String url, String key) {
-        this.url = url + "?format=json&mcc=%d&mnc=%d&lac=%d&cellid=%d&key=" + key;
+        this.url = (url == null ? "http://opencellid.org/cell/get" : url)
+              + "?format=json&mcc=%d&mnc=%d&lac=%d&cellid=%d&key=" + key;
     }
 
     @Override
