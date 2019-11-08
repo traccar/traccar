@@ -274,17 +274,26 @@ public class FuelSensorDataHandler extends BaseDataHandler {
         }
 
         ProcessingInfo processingInfo = Context.getDeviceManager().getDeviceProcessingInfo(deviceId);
+        String finalCalibField = processingInfo.getFinalCalibFieldName();
 
         switch(attributeToUpdate) {
             case ALL_FUEL_FIELDS:
-                Set<String> attributes = lastKnownPosition.getAttributes().keySet();
-                for (String attr : attributes) {
-                    String lowerCaseAttr = attr.toLowerCase();
-                    if (lowerCaseAttr.contains("fuel") || lowerCaseAttr.contains("calib")) {
-                        position.set(attr, lastKnownPosition.getDouble(attr));
-                    }
+                String calibFuelDataField = fuelSensor.getCalibFuelFieldName();
+                String fuelDataField = fuelSensor.getFuelDataFieldName();
+                if (lastKnownPosition.getAttributes().containsKey(calibFuelDataField)) {
+                    position.set(calibFuelDataField, (double) lastKnownPosition.getAttributes().get(calibFuelDataField));
                 }
 
+                if (lastKnownPosition.getAttributes().containsKey(fuelDataField)) {
+                    position.set(fuelDataField, (double) lastKnownPosition.getAttributes().get(fuelDataField));
+                }
+
+                if (lastKnownPosition.getAttributes().containsKey(finalCalibField)) {
+                    position.set(finalCalibField, (double) lastKnownPosition.getAttributes().get(finalCalibField));
+                }
+
+                break;
+            default:
                 break;
         }
     }

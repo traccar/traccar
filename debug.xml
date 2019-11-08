@@ -59,6 +59,7 @@
 
     <entry key='database.user'>root</entry>
     <entry key='database.password'></entry>
+    <entry key='database.maxPoolSize'>40</entry>
 
     <entry key='aquila.port'>5089</entry>
     <!--<entry key='intellitrac.port'>6037</entry>-->
