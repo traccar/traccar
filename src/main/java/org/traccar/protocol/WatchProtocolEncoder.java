@@ -47,6 +47,8 @@ public class WatchProtocolEncoder extends StringProtocolEncoder implements Strin
             return DataConverter.printHex(value.toString().getBytes(StandardCharsets.UTF_16BE));
         } else if (key.equals(Command.KEY_ENABLE)) {
             return (boolean) value ? "1" : "0";
+        } else if (key.equals(Command.KEY_LANGUAGE)) {
+            return String.valueOf(value);
         }
 
         return null;
@@ -161,7 +163,7 @@ public class WatchProtocolEncoder extends StringProtocolEncoder implements Strin
             case Command.TYPE_POSITION_PERIODIC:
                 return formatTextCommand(channel, command, "UPLOAD,{%s}", Command.KEY_FREQUENCY);
             case Command.TYPE_SET_TIMEZONE:
-                return formatTextCommand(channel, command, "LZ,,{%s}", Command.KEY_TIMEZONE);
+                return formatTextCommand(channel, command, "LZ,{%s},{%s}", Command.KEY_LANGUAGE, Command.KEY_TIMEZONE);
             case Command.TYPE_SET_INDICATOR:
                 return formatTextCommand(channel, command, "FLOWER,{%s}", Command.KEY_DATA);
             default:
