@@ -17,7 +17,10 @@ package org.traccar;
 
 import org.traccar.model.Command;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public abstract class StringProtocolEncoder extends BaseProtocolEncoder {
 
@@ -33,6 +36,7 @@ public abstract class StringProtocolEncoder extends BaseProtocolEncoder {
 
         String result = String.format(format, (Object[]) keys);
 
+        Set<String> missingKeys = new HashSet<>(Arrays.asList(keys));
         result = result.replaceAll("\\{" + Command.KEY_UNIQUE_ID + "}", getUniqueId(command.getDeviceId()));
         for (Map.Entry<String, Object> entry : command.getAttributes().entrySet()) {
             String value = null;
@@ -43,6 +47,10 @@ public abstract class StringProtocolEncoder extends BaseProtocolEncoder {
                 value = entry.getValue().toString();
             }
             result = result.replaceAll("\\{" + entry.getKey() + "}", value);
+            missingKeys.remove(entry.getKey());
+        }
+        for (String key : missingKeys) {
+            result = result.replaceAll("\\{" + key + "}", "");
         }
 
         return result;
