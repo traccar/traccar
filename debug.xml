@@ -11,6 +11,7 @@
     <entry key='web.console'>true</entry>
 
     <entry key='geocoder.enable'>false</entry>
+    <entry key='geocoder.type'>ban</entry>
 
     <entry key='logger.console'>true</entry>
 
