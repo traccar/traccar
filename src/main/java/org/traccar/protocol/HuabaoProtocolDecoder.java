@@ -98,6 +98,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(value, 20)) {
             return Position.ALARM_GEOFENCE;
         }
+        if (BitUtil.check(value, 28)) {
+            return Position.ALARM_MOVEMENT;
+        }
         if (BitUtil.check(value, 29)) {
             return Position.ALARM_ACCIDENT;
         }
@@ -160,22 +163,23 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedInt()));
 
-        int flags = buf.readInt();
+        int status = buf.readInt();
 
-        position.set(Position.KEY_IGNITION, BitUtil.check(flags, 0));
+        position.set(Position.KEY_IGNITION, BitUtil.check(status, 0));
+        position.set(Position.KEY_BLOCKED, BitUtil.check(status, 10));
 
-        position.setValid(BitUtil.check(flags, 1));
+        position.setValid(BitUtil.check(status, 1));
 
         double lat = buf.readUnsignedInt() * 0.000001;
         double lon = buf.readUnsignedInt() * 0.000001;
 
-        if (BitUtil.check(flags, 2)) {
+        if (BitUtil.check(status, 2)) {
             position.setLatitude(-lat);
         } else {
             position.setLatitude(lat);
         }
 
-        if (BitUtil.check(flags, 3)) {
+        if (BitUtil.check(status, 3)) {
             position.setLongitude(-lon);
         } else {
             position.setLongitude(lon);
@@ -230,6 +234,15 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                         position.set(
                                 Position.KEY_VIN, buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
                     }
+                    break;
+                case 0xD0:
+                    long userStatus = buf.readUnsignedInt();
+                    if (BitUtil.check(userStatus, 3)) {
+                        position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
+                    }
+                    break;
+                case 0xD3:
+                    position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.1);
                     break;
                 default:
                     break;
