@@ -39,7 +39,7 @@ public abstract class StringProtocolEncoder extends BaseProtocolEncoder {
                 if (valueFormatter != null) {
                     value = valueFormatter.formatValue(keys[i], object);
                 }
-                if (value == null) {
+                if (value == null && object != null) {
                     value = object.toString();
                 }
                 if (value == null) {
