@@ -209,7 +209,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         sendResponse(channel, false, MSG_X1_PHOTO_DATA, 0, content);
     }
 
-    private boolean decodeGps(Position position, ByteBuf buf, boolean hasLength, TimeZone timezone) {
+    public static boolean decodeGps(Position position, ByteBuf buf, boolean hasLength, TimeZone timezone) {
 
         DateBuilder dateBuilder = new DateBuilder(timezone)
                 .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
