@@ -275,5 +275,7 @@
     <entry key='rst.port'>5196</entry>
     <entry key='pt215.port'>5197</entry>
     <entry key='pacifictrack.port'>5198</entry>
+    <entry key='topin.port'>5199</entry>
+    <entry key='outsafe.port'>5200</entry>
 
 </properties>
