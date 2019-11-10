@@ -17,8 +17,6 @@ package org.traccar;
 
 import org.traccar.model.Command;
 
-import java.util.Map;
-
 public abstract class StringProtocolEncoder extends BaseProtocolEncoder {
 
     public StringProtocolEncoder(Protocol protocol) {
@@ -31,21 +29,27 @@ public abstract class StringProtocolEncoder extends BaseProtocolEncoder {
 
     protected String formatCommand(Command command, String format, ValueFormatter valueFormatter, String... keys) {
 
-        String result = String.format(format, (Object[]) keys);
-
-        result = result.replaceAll("\\{" + Command.KEY_UNIQUE_ID + "}", getUniqueId(command.getDeviceId()));
-        for (Map.Entry<String, Object> entry : command.getAttributes().entrySet()) {
+        Object[] values = new String[keys.length];
+        for (int i = 0; i < keys.length; i++) {
             String value = null;
-            if (valueFormatter != null) {
-                value = valueFormatter.formatValue(entry.getKey(), entry.getValue());
+            if (keys[i].equals(Command.KEY_UNIQUE_ID)) {
+                value = getUniqueId(command.getDeviceId());
+            } else {
+                Object object = command.getAttributes().get(keys[i]);
+                if (valueFormatter != null) {
+                    value = valueFormatter.formatValue(keys[i], object);
+                }
+                if (value == null) {
+                    value = object.toString();
+                }
+                if (value == null) {
+                    value = "";
+                }
             }
-            if (value == null) {
-                value = entry.getValue().toString();
-            }
-            result = result.replaceAll("\\{" + entry.getKey() + "}", value);
+            values[i] = value;
         }
 
-        return result;
+        return String.format(format, values);
     }
 
     protected String formatCommand(Command command, String format, String... keys) {
