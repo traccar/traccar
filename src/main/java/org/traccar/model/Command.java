@@ -68,6 +68,7 @@ public class Command extends Message implements Cloneable {
 
     public static final String KEY_UNIQUE_ID = "uniqueId";
     public static final String KEY_FREQUENCY = "frequency";
+    public static final String KEY_LANGUAGE = "language";
     public static final String KEY_TIMEZONE = "timezone";
     public static final String KEY_DEVICE_PASSWORD = "devicePassword";
     public static final String KEY_RADIUS = "radius";
