@@ -39,13 +39,16 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_GPS_OFFLINE = 0x11;
     public static final int MSG_STATUS = 0x13;
 
-    private void sendResponse(Channel channel, ByteBuf content) {
+    private void sendResponse(Channel channel, int type, ByteBuf content) {
         if (channel != null) {
             ByteBuf response = Unpooled.buffer();
             response.writeShort(0x7878);
+            response.writeByte(1 + content.readableBytes());
+            response.writeByte(type);
             response.writeBytes(content);
             response.writeByte('\r');
             response.writeByte('\n');
+            content.release();
             channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
     }
@@ -66,9 +69,8 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
             String imei = ByteBufUtil.hexDump(buf.readSlice(8)).substring(1);
             deviceSession = getDeviceSession(channel, remoteAddress, imei);
             ByteBuf content = Unpooled.buffer();
-            content.writeByte(type);
             content.writeByte(deviceSession != null ? 0x01 : 0x44);
-            sendResponse(channel, content);
+            sendResponse(channel, type, content);
             return null;
         } else {
             deviceSession = getDeviceSession(channel, remoteAddress);
@@ -87,10 +89,8 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
             Gt06ProtocolDecoder.decodeGps(position, buf, false, TimeZone.getTimeZone("UTC"));
 
             ByteBuf content = Unpooled.buffer();
-            content.writeByte(0);
-            content.writeByte(type);
             content.writeBytes(time);
-            sendResponse(channel, content);
+            sendResponse(channel, type, content);
 
             return position;
 
@@ -115,8 +115,6 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_VERSION_FW, firmware);
 
             ByteBuf content = Unpooled.buffer();
-            content.writeByte(length);
-            content.writeByte(type);
             content.writeByte(battery);
             content.writeByte(firmware);
             content.writeByte(timezone);
@@ -124,7 +122,7 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
             if (length >= 7) {
                 content.writeByte(signal);
             }
-            sendResponse(channel, content);
+            sendResponse(channel, type, content);
 
             return position;
 
