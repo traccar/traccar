@@ -272,7 +272,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
         position.set(Position.KEY_TYPE, type);
 
-        if (protocol.equals("ST300") || protocol.equals("ST500") || protocol.equals("ST600")) {
+        if (protocol.startsWith("ST3") || protocol.equals("ST500") || protocol.equals("ST600")) {
             index += 1; // model
         }
 
@@ -508,7 +508,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
     private Position decodeBinary(
             Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
 
-        buf.readUnsignedByte(); // header
+        int type = buf.readUnsignedByte();
         buf.readUnsignedShort(); // length
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, ByteBufUtil.hexDump(buf.readSlice(5)));
@@ -591,6 +591,23 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
         if (BitUtil.check(mask, 16)) {
             position.setValid(buf.readUnsignedByte() > 0);
+        }
+
+        if (BitUtil.check(mask, 17)) {
+            int input = buf.readUnsignedByte();
+            position.set(Position.KEY_IGNITION, BitUtil.check(input, 0));
+            position.set(Position.KEY_INPUT, input);
+        }
+
+        if (BitUtil.check(mask, 18)) {
+            position.set(Position.KEY_OUTPUT, buf.readUnsignedByte());
+        }
+
+        if (BitUtil.check(mask, 19)) {
+            int value = buf.readUnsignedByte();
+            if (type == 0x82) {
+                position.set(Position.KEY_ALARM, decodeAlert(value));
+            }
         }
 
         return position;
