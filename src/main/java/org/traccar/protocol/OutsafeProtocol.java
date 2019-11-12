@@ -31,7 +31,7 @@ public class OutsafeProtocol extends BaseProtocol {
                 pipeline.addLast(new HttpResponseEncoder());
                 pipeline.addLast(new HttpRequestDecoder());
                 pipeline.addLast(new HttpObjectAggregator(65535));
-                pipeline.addLast(new SigfoxProtocolDecoder(OutsafeProtocol.this));
+                pipeline.addLast(new OutsafeProtocolDecoder(OutsafeProtocol.this));
             }
         });
     }

@@ -12,6 +12,9 @@ public class OutsafeProtocolDecoderTest extends ProtocolTest {
         OutsafeProtocolDecoder decoder = new OutsafeProtocolDecoder(null);
 
         verifyPosition(decoder, request(HttpMethod.POST, "/",
+                buffer("{\"device\":\"862061044762093\",\"owner\":\"\",\"data\":{\"cmd\":\"GEO\",\"ms1\":82,\"ms2\":80,\"ms3\":5266,\"ms4\":-68,\"observation\":\"$NMEA 323455\",\"content\":null},\"time\":null,\"origin\":\"TCP\",\"latitude\":19.334734,\"longitude\":-99.307236,\"altitude\":2000,\"heading\":0,\"rssi\":123}")));
+
+        verifyPosition(decoder, request(HttpMethod.POST, "/",
                 buffer("{\"device\":\"1e09d88a-fe8e-4dee-90b9-6297088ff3de\",\"owner\":\"\",\"data\":{\"cmd\":\"GEO\",\"ms1\":82,\"ms2\":80,\"ms3\":5266,\"ms4\":-68,\"observation\":\"$NMEA 323455\",\"content\":null},\"time\":null,\"origin\":\"TCP\",\"latitude\":19.334734,\"longitude\":-99.307236,\"altitude\":2000,\"heading\":0,\"rssi\":123}")));
 
     }
