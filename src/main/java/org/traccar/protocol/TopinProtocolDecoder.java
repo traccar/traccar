@@ -23,7 +23,10 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.model.WifiAccessPoint;
 
 import java.net.SocketAddress;
 import java.util.TimeZone;
@@ -38,6 +41,8 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_GPS = 0x10;
     public static final int MSG_GPS_OFFLINE = 0x11;
     public static final int MSG_STATUS = 0x13;
+    public static final int MSG_WIFI_OFFLINE = 0x17;
+    public static final int MSG_WIFI = 0x69;
 
     private void sendResponse(Channel channel, int type, ByteBuf content) {
         if (channel != null) {
@@ -122,6 +127,39 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
             if (length >= 7) {
                 content.writeByte(signal);
             }
+            sendResponse(channel, type, content);
+
+            return position;
+
+        } else if (type == MSG_WIFI || type == MSG_WIFI_OFFLINE) {
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            ByteBuf time = buf.readSlice(6);
+
+            Network network = new Network();
+            for (int i = 0; i < length; i++) {
+                String mac = String.format("%02x:%02x:%02x:%02x:%02x:%02x",
+                        buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte(),
+                        buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
+                network.addWifiAccessPoint(WifiAccessPoint.from(mac, buf.readUnsignedByte()));
+            }
+
+            int cellCount = buf.readUnsignedByte();
+            int mcc = buf.readUnsignedShort();
+            int mnc = buf.readUnsignedByte();
+            for (int i = 0; i < cellCount; i++) {
+                network.addCellTower(CellTower.from(
+                        mcc, mnc, buf.readUnsignedShort(), buf.readUnsignedShort(), buf.readUnsignedByte()));
+            }
+
+            position.setNetwork(network);
+
+            ByteBuf content = Unpooled.buffer();
+            content.writeBytes(time);
             sendResponse(channel, type, content);
 
             return position;
