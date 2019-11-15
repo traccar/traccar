@@ -270,4 +270,3 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
     }
 
 }
-
