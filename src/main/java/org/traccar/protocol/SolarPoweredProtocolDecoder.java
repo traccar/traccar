@@ -73,7 +73,7 @@ public class SolarPoweredProtocolDecoder extends BaseProtocolDecoder {
                             position.setLatitude(-position.getLatitude());
                         }
                         position.setLongitude(buf.readUnsignedInt() * 0.000001);
-                        if (BitUtil.check(status, 3)) {
+                        if (BitUtil.check(status, 2)) {
                             position.setLongitude(-position.getLongitude());
                         }
                         position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
