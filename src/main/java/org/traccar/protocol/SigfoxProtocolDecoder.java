@@ -31,7 +31,10 @@ import org.traccar.model.Position;
 import org.traccar.model.WifiAccessPoint;
 
 import javax.json.Json;
+import javax.json.JsonNumber;
 import javax.json.JsonObject;
+import javax.json.JsonString;
+import javax.json.JsonValue;
 import java.io.StringReader;
 import java.net.SocketAddress;
 import java.net.URLDecoder;
@@ -42,6 +45,30 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
 
     public SigfoxProtocolDecoder(Protocol protocol) {
         super(protocol);
+    }
+
+    private int getJsonInt(JsonObject json, String key) {
+        JsonValue value = json.get(key);
+        if (value != null) {
+            if (value.getValueType() == JsonValue.ValueType.NUMBER) {
+                return ((JsonNumber) value).intValue();
+            } else if (value.getValueType() == JsonValue.ValueType.STRING) {
+                return Integer.parseInt(((JsonString) value).getString());
+            }
+        }
+        return 0;
+    }
+
+    private double getJsonDouble(JsonObject json, String key) {
+        JsonValue value = json.get(key);
+        if (value != null) {
+            if (value.getValueType() == JsonValue.ValueType.NUMBER) {
+                return ((JsonNumber) value).doubleValue();
+            } else if (value.getValueType() == JsonValue.ValueType.STRING) {
+                return Double.parseDouble(((JsonString) value).getString());
+            }
+        }
+        return 0;
     }
 
     @Override
@@ -65,18 +92,24 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         if (json.containsKey("time")) {
-            position.setTime(new Date(json.getInt("time") * 1000L));
+            position.setTime(new Date(getJsonInt(json, "time") * 1000L));
         } else {
             position.setTime(new Date());
         }
 
-        if (json.containsKey("location")) {
+        if (json.containsKey("location") || json.containsKey("lat") && json.containsKey("lng")) {
 
-            JsonObject location = json.getJsonObject("location");
+
+            JsonObject location;
+            if (json.containsKey("location")) {
+                location = json.getJsonObject("location");
+            } else {
+                location = json;
+            }
 
             position.setValid(true);
-            position.setLatitude(location.getJsonNumber("lat").doubleValue());
-            position.setLongitude(location.getJsonNumber("lng").doubleValue());
+            position.setLatitude(getJsonDouble(location, "lat"));
+            position.setLongitude(getJsonDouble(location, "lng"));
 
         } else {
 
@@ -154,10 +187,10 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
         }
 
         if (json.containsKey("rssi")) {
-            position.set(Position.KEY_RSSI, json.getJsonNumber("rssi").doubleValue());
+            position.set(Position.KEY_RSSI, getJsonDouble(json, "rssi"));
         }
         if (json.containsKey("seqNumber")) {
-            position.set(Position.KEY_INDEX, json.getInt("seqNumber"));
+            position.set(Position.KEY_INDEX, getJsonInt(json, "seqNumber"));
         }
 
         sendResponse(channel, HttpResponseStatus.OK);

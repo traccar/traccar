@@ -13,6 +13,9 @@ public class SigfoxProtocolDecoderTest extends ProtocolTest {
         SigfoxProtocolDecoder decoder = new SigfoxProtocolDecoder(null);
 
         verifyPosition(decoder, request(HttpMethod.POST, "/",
+                buffer("{  \"device\" : \"33827B\",  \"data\" : \"1f03198e63807f08836402ff\",  \"time\" : \"1574346702\",  \"snr\" : \"8.82\",  \"station\" : \"140A\",  \"avgSnr\" : \"11.28\",  \"lat\" : \"52.0\",  \"lng\" : \"-8.0\",  \"rssi\" : \"-141.00\",  \"seqNumber\" : \"3662\"}")));
+
+        verifyPosition(decoder, request(HttpMethod.POST, "/",
                 buffer("{ \"device\": \"49F941\", \"location\": {\"lat\":19.48954345634299,\"lng\":-99.09340606338463,\"radius\":1983,\"source\":2,\"status\":1} }")));
 
         verifyAttribute(decoder, request(HttpMethod.POST, "/",
