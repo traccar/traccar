@@ -14,6 +14,9 @@ public class H02ProtocolDecoderTest extends ProtocolTest {
         verifyNull(decoder, buffer(
                 "*HQ,135790246811220,HTBT#"));
 
+        verifyPosition(decoder, buffer(
+                "*HQ,865205035331981,V1,132926,A,1935.3933,N,07920.4134,E,  3.34,342,280519,FFFFFFFF#"));
+
         verifyPosition(decoder, binary(
                 "24702802061601234020031910125482600612695044000000ffffbbff000000000000000001760d04e2c9934d"));
 
