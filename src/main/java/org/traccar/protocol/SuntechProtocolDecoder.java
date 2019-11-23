@@ -38,6 +38,8 @@ import java.util.TimeZone;
 
 public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
+    private String prefix;
+
     private int protocolType;
     private boolean hbm;
     private boolean includeAdc;
@@ -46,6 +48,10 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
     public SuntechProtocolDecoder(Protocol protocol) {
         super(protocol);
+    }
+
+    public String getPrefix() {
+        return prefix;
     }
 
     public void setProtocolType(int protocolType) {
@@ -626,15 +632,16 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         } else {
 
             String[] values = buf.toString(StandardCharsets.US_ASCII).split(";");
+            prefix = values[0];
 
-            if (values[0].length() < 5) {
+            if (prefix.length() < 5) {
                 return decodeUniversal(channel, remoteAddress, values);
-            } else if (values[0].startsWith("ST9")) {
+            } else if (prefix.startsWith("ST9")) {
                 return decode9(channel, remoteAddress, values);
-            } else if (values[0].startsWith("ST4")) {
+            } else if (prefix.startsWith("ST4")) {
                 return decode4(channel, remoteAddress, values);
             } else {
-                return decode2356(channel, remoteAddress, values[0].substring(0, 5), values);
+                return decode2356(channel, remoteAddress, prefix.substring(0, 5), values);
             }
         }
     }
