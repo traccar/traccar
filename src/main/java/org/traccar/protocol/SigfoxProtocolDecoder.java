@@ -24,6 +24,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.Protocol;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.DataConverter;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Network;
@@ -97,8 +98,8 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
             position.setTime(new Date());
         }
 
-        if (json.containsKey("location") || json.containsKey("lat") && json.containsKey("lng")) {
-
+        if (json.containsKey("location")
+                || json.containsKey("lat") && json.containsKey("lng") && !json.containsKey("data")) {
 
             JsonObject location;
             if (json.containsKey("location")) {
@@ -117,7 +118,25 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
             ByteBuf buf = Unpooled.wrappedBuffer(DataConverter.parseHex(data));
             try {
                 int event = buf.readUnsignedByte();
-                if (event >> 4 == 0) {
+                if (event == 0x0f || event == 0x1f) {
+
+                    position.setValid(event >> 4 > 0);
+
+                    long value;
+                    value = buf.readUnsignedInt();
+                    position.setLatitude(BitUtil.to(value, 31) * 0.000001);
+                    if (BitUtil.check(value, 31)) {
+                        position.setLatitude(-position.getLatitude());
+                    }
+                    value = buf.readUnsignedInt();
+                    position.setLongitude(BitUtil.to(value, 31) * 0.000001);
+                    if (BitUtil.check(value, 31)) {
+                        position.setLongitude(-position.getLongitude());
+                    }
+
+                    position.set(Position.KEY_BATTERY, (int) buf.readUnsignedByte());
+
+                } else if (event >> 4 == 0) {
 
                     position.setValid(true);
                     position.setLatitude(buf.readIntLE() * 0.0000001);
