@@ -1020,7 +1020,28 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         while (buf.readableBytes() > 6) {
             int moduleType = buf.readUnsignedShort();
             int moduleLength = buf.readUnsignedShort();
+
             switch (moduleType) {
+                case 0x03:
+                    position.set(Position.KEY_ICCID, ByteBufUtil.hexDump(buf.readSlice(10)));
+                    break;
+                case 0x09:
+                    position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+                    break;
+                case 0x0a:
+                    position.set(Position.KEY_SATELLITES_VISIBLE, buf.readUnsignedByte());
+                    break;
+                case 0x11:
+                    CellTower cellTower = CellTower.from(
+                            buf.readUnsignedShort(),
+                            buf.readUnsignedShort(),
+                            buf.readUnsignedShort(),
+                            buf.readUnsignedMedium(),
+                            buf.readUnsignedByte());
+                    if (cellTower.getCellId() > 0) {
+                        position.setNetwork(new Network(cellTower));
+                    }
+                    break;
                 case 0x18:
                     position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.01);
                     break;
@@ -1080,6 +1101,11 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
                     position.setLatitude(latitude);
                     position.setLongitude(longitude);
+                    break;
+                case 0x34:
+                    position.set(Position.KEY_EVENT, buf.readUnsignedByte());
+                    buf.readUnsignedIntLE(); // time
+                    buf.skipBytes(buf.readUnsignedByte()); // content
                     break;
                 default:
                     buf.skipBytes(moduleLength);
