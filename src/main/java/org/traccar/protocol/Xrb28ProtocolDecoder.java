@@ -47,7 +47,7 @@ public class Xrb28ProtocolDecoder extends BaseProtocolDecoder {
             .expression("..,")                   // vendor
             .number("d{15},")                    // imei
             .expression("..,")                   // type
-            .number("0,")                        // reserved
+            .number("[01],")                     // reserved
             .number("(dd)(dd)(dd).d+,")          // time (hhmmss)
             .expression("([AV]),")               // validity
             .number("(dd)(dd.d+),")              // latitude
