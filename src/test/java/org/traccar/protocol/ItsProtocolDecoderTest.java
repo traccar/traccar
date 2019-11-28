@@ -11,6 +11,9 @@ public class ItsProtocolDecoderTest extends ProtocolTest {
 
         ItsProtocolDecoder decoder = new ItsProtocolDecoder(null);
 
+        verifyNull(decoder, text(
+                "$LGN,,869867037009679,3.2AIH,9.99546000,N,76.35886167,E"));
+
         verifyPosition(decoder, text(
                 "$,ID01,SAT,1.0.0,NR,1,L,868345034056903,DL3CAB1021,1,27052019,040234,28.359895,N,76.927879,E,0.0,285.6,12,254.9,1.4,0.7,IDEA,1,1,12.6,3.8,0,25,404,04,0138,0927,4ECD,0138,41,1C2B,0138,37,D77A,0138,34,D843,0138,33,0000,00,0.03,0.00,000091,A3,*"));
 
