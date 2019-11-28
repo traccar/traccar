@@ -252,7 +252,6 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.1);
                     break;
                 default:
-                    System.out.print(String.format("%02x ", subtype));
                     break;
             }
             buf.readerIndex(endIndex);
