@@ -625,7 +625,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
         ByteBuf buf = (ByteBuf) msg;
 
-        if (buf.getByte(buf.readerIndex()) == (byte) 0x81) {
+        if (buf.getByte(buf.readerIndex() + 1) == 0) {
 
             return decodeBinary(channel, remoteAddress, buf);
 
