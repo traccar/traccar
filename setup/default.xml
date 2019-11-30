@@ -279,5 +279,6 @@
     <entry key='outsafe.port'>5200</entry>
     <entry key='solarpowered.port'>5201</entry>
     <entry key='motor.port'>5202</entry>
+    <entry key='omnicomm.port'>5203</entry>
 
 </properties>
