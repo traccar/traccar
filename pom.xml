@@ -364,11 +364,7 @@
                             <inputDirectories>
                                 <include>src/main/proto</include>
                             </inputDirectories>
-                            <outputTargets>
-                                <outputTarget>
-                                    <type>java</type>
-                                </outputTarget>
-                            </outputTargets>
+                            <outputDirectory>src/main/java</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
