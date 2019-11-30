@@ -5,6 +5,8 @@
 
 <module name="Checker">
 
+    <suppress files="[\\/]protobuf[\\/]" checks="[a-zA-Z0-9]*" />
+
     <!--<property name="fileExtensions" value="java, properties, xml"/>-->
 
     <!-- Checks whether files end with a new line.                        -->
