@@ -15,6 +15,7 @@
         <jetty.version>9.4.20.v20190813</jetty.version>
         <jersey.version>2.29</jersey.version>
         <jackson.version>2.9.9</jackson.version> <!-- same version as jersey-media-json-jackson dependency -->
+        <protobuf.version>3.11.0</protobuf.version>
     </properties>
 
     <dependencies>
@@ -211,6 +212,11 @@
             <version>3.0.50</version>
         </dependency>
         <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>${protobuf.version}</version>
+        </dependency>
+        <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
             <version>2.3.1</version>
@@ -342,6 +348,30 @@
                         <version>1.1</version>
                     </dependency>
                 </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>com.github.os72</groupId>
+                <artifactId>protoc-jar-maven-plugin</artifactId>
+                <version>3.8.0</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <protocArtifact>com.google.protobuf:protoc:${protobuf.version}</protocArtifact>
+                            <inputDirectories>
+                                <include>src/main/proto</include>
+                            </inputDirectories>
+                            <outputTargets>
+                                <outputTarget>
+                                    <type>java</type>
+                                </outputTarget>
+                            </outputTargets>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <artifactId>maven-site-plugin</artifactId>

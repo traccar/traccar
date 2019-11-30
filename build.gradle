@@ -1,10 +1,19 @@
 plugins {
     id "java"
     id "checkstyle"
+    id "com.google.protobuf" version "0.8.10"
 }
 
 repositories {
     mavenCentral()
+}
+
+ext {
+    guiceVersion = "4.2.2"
+    jettyVersion = "9.4.20.v20190813"
+    jerseyVersion = "2.29"
+    jacksonVersion = "2.9.9" // same version as jersey-media-json-jackson dependency
+    protobufVersion = "3.11.0"
 }
 
 sourceCompatibility = "1.8"
@@ -15,11 +24,10 @@ checkstyle {
     checkstyleTest.enabled = false
 }
 
-ext {
-    guiceVersion = "4.2.2"
-    jettyVersion = "9.4.20.v20190813"
-    jerseyVersion = "2.29"
-    jacksonVersion = "2.9.9" // same version as jersey-media-json-jackson dependency
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:$protobufVersion"
+    }
 }
 
 dependencies {
@@ -59,6 +67,7 @@ dependencies {
     implementation "com.fizzed:ch-smpp:6.0.0-netty4-beta-3"
     implementation "net.java.dev.jna:jna-platform:5.4.0"
     implementation "com.github.jnr:jnr-posix:3.0.50"
+    implementation "com.google.protobuf:protobuf-java:$protobufVersion"
     implementation "javax.xml.bind:jaxb-api:2.3.1"
     implementation "com.sun.xml.bind:jaxb-core:2.3.0.1"
     implementation "com.sun.xml.bind:jaxb-impl:2.3.2"
