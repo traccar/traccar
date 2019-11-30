@@ -20,6 +20,7 @@ sourceCompatibility = "1.8"
 compileJava.options.encoding = "UTF-8"
 
 checkstyle {
+    toolVersion = "8.26"
     configFile = "gradle/checkstyle.xml" as File
     checkstyleTest.enabled = false
 }
