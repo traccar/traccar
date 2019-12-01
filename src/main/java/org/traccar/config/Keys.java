@@ -103,7 +103,7 @@ public final class Keys {
     /**
      * Position forwarding retrying enable. When enabled, additional attempts are made to deliver positions.
      * If initial delivery fails, because of an unreachable server or an HTTP response different from '200 OK',
-     * the software waits for 'forward.retry.delay.min' seconds to retry delivery. On subsecuent failures, this
+     * the software waits for 'forward.retry.delay.min' seconds to retry delivery. On subsequent failures, this
      * delay is incremented by 1 second up to 'forward.retry.delay.max'. On successful delivery, the delay is reset
      * to 'forward.retry.delay.min'. Pending positions to be delivered are limited to 'forward.retry.pending.limit'.
      * If this limit is reached, positions are discarded before next retry.
