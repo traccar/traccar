@@ -101,18 +101,36 @@ public final class Keys {
             "forward.json", Boolean.class);
 
     /**
-     * Position forwarding queue size. A ring buffer of the specified size is used to queue positions.
-     * If negative, zero, or not specified, queueing is disabled. (Legacy behaviour)
+     * Position forwarding retrying enable. When enabled, additional attempts are made to deliver positions.
+     * If initial delivery fails, because of an unreachable server or an HTTP response different from '200 OK',
+     * the software waits for 'forward.retry.delay.min' seconds to retry delivery. On subsecuent failures, this
+     * delay is incremented by 1 second up to 'forward.retry.delay.max'. On successful delivery, the delay is reset
+     * to 'forward.retry.delay.min'. Pending positions to be delivered are limited to 'forward.retry.pending.limit'.
+     * If this limit is reached, positions are discarded before next retry.
      */
-    public static final ConfigKey FORWARD_QUEUE_SIZE = new ConfigKey(
-            "forward.queue.size", Integer.class);
+    public static final ConfigKey FORWARD_RETRY_ENABLE = new ConfigKey(
+            "forward.retry.enable", Boolean.class);
 
     /**
-     * Position forwarding queue concurrency. Defines how many HTTP requests can be pending at any time.
-     * If queueing is enabled, and this value is less than one, it's ignored and forced to be one.
+     * Position forwarding retry minimum delay in seconds.
+     * Can be set to anything between 1 and 3600 seconds. Defaults to 1 second.
      */
-    public static final ConfigKey FORWARD_QUEUE_CONCURRENCY = new ConfigKey(
-            "forward.queue.concurrency", Integer.class);
+    public static final ConfigKey FORWARD_RETRY_DELAY_MIN = new ConfigKey(
+            "forward.retry.delay.min", Integer.class);
+
+    /**
+     * Position forwarding retry maximum delay in seconds.
+     * Can be set to anything between 1 and 3600 seconds. Defaults to 10 seconds.
+     */
+    public static final ConfigKey FORWARD_RETRY_DELAY_MAX = new ConfigKey(
+            "forward.retry.delay.max", Integer.class);
+
+    /**
+     * Position forwarding retry pending limit.
+     * Can be set to anything greater than 0. Defaults to 100 positions.
+     */
+    public static final ConfigKey FORWARD_RETRY_PENDING_LIMIT = new ConfigKey(
+            "forward.retry.pending.limit", Integer.class);
 
     /**
      * Boolean flag to enable or disable position filtering.
