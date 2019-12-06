@@ -58,7 +58,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         buf.writeShort(type);
         buf.writeShort(data.readableBytes());
         buf.writeBytes(id);
-        buf.writeShort(1); // index
+        buf.writeShort(0); // index
         buf.writeBytes(data);
         data.release();
         buf.writeByte(Checksum.xor(buf.nioBuffer(1, buf.readableBytes() - 1)));
@@ -98,6 +98,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(value, 20)) {
             return Position.ALARM_GEOFENCE;
         }
+        if (BitUtil.check(value, 28)) {
+            return Position.ALARM_MOVEMENT;
+        }
         if (BitUtil.check(value, 29)) {
             return Position.ALARM_ACCIDENT;
         }
@@ -131,7 +134,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 ByteBuf response = Unpooled.buffer();
                 response.writeShort(index);
                 response.writeByte(RESULT_SUCCESS);
-                response.writeBytes("authentication".getBytes(StandardCharsets.US_ASCII));
+                response.writeBytes(ByteBufUtil.hexDump(id).getBytes(StandardCharsets.US_ASCII));
                 channel.writeAndFlush(new NetworkMessage(
                         formatMessage(MSG_TERMINAL_REGISTER_RESPONSE, id, response), remoteAddress));
             }
@@ -160,22 +163,23 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedInt()));
 
-        int flags = buf.readInt();
+        int status = buf.readInt();
 
-        position.set(Position.KEY_IGNITION, BitUtil.check(flags, 0));
+        position.set(Position.KEY_IGNITION, BitUtil.check(status, 0));
+        position.set(Position.KEY_BLOCKED, BitUtil.check(status, 10));
 
-        position.setValid(BitUtil.check(flags, 1));
+        position.setValid(BitUtil.check(status, 1));
 
         double lat = buf.readUnsignedInt() * 0.000001;
         double lon = buf.readUnsignedInt() * 0.000001;
 
-        if (BitUtil.check(flags, 2)) {
+        if (BitUtil.check(status, 2)) {
             position.setLatitude(-lat);
         } else {
             position.setLatitude(lat);
         }
 
-        if (BitUtil.check(flags, 3)) {
+        if (BitUtil.check(status, 3)) {
             position.setLongitude(-lon);
         } else {
             position.setLongitude(lon);
@@ -197,9 +201,13 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         while (buf.readableBytes() > 2) {
             int subtype = buf.readUnsignedByte();
             int length = buf.readUnsignedByte();
+            int endIndex = buf.readerIndex() + length;
             switch (subtype) {
                 case 0x01:
                     position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 100);
+                    break;
+                case 0x02:
+                    position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedShort() * 0.1);
                     break;
                 case 0x30:
                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());
@@ -207,10 +215,46 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 case 0x31:
                     position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                     break;
+                case 0x33:
+                    String sentence = buf.readCharSequence(length, StandardCharsets.US_ASCII).toString();
+                    if (sentence.startsWith("*M00")) {
+                        String lockStatus = sentence.substring(8, 8 + 7);
+                        position.set(Position.KEY_BATTERY, Integer.parseInt(lockStatus.substring(2, 5)) * 0.01);
+                    }
+                    break;
+                case 0x91:
+                    position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.1);
+                    position.set(Position.KEY_RPM, buf.readUnsignedShort());
+                    position.set(Position.KEY_OBD_SPEED, buf.readUnsignedByte());
+                    position.set(Position.KEY_THROTTLE, buf.readUnsignedByte() * 100 / 255);
+                    position.set(Position.KEY_ENGINE_LOAD, buf.readUnsignedByte() * 100 / 255);
+                    position.set(Position.KEY_COOLANT_TEMP, buf.readUnsignedByte() - 40);
+                    buf.readUnsignedShort();
+                    position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedShort() * 0.01);
+                    buf.readUnsignedShort();
+                    buf.readUnsignedInt();
+                    buf.readUnsignedShort();
+                    position.set(Position.KEY_FUEL_USED, buf.readUnsignedShort() * 0.01);
+                    break;
+                case 0x94:
+                    if (length > 0) {
+                        position.set(
+                                Position.KEY_VIN, buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
+                    }
+                    break;
+                case 0xD0:
+                    long userStatus = buf.readUnsignedInt();
+                    if (BitUtil.check(userStatus, 3)) {
+                        position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
+                    }
+                    break;
+                case 0xD3:
+                    position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.1);
+                    break;
                 default:
-                    buf.skipBytes(length);
                     break;
             }
+            buf.readerIndex(endIndex);
         }
 
         return position;

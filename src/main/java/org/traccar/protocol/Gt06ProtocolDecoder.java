@@ -103,6 +103,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_MULTIMEDIA = 0x21;
     public static final int MSG_BMS_2 = 0x40;
     public static final int MSG_MULTIMEDIA_2 = 0x41;
+    public static final int MSG_ALARM = 0x95;
 
     private static boolean isSupported(int type) {
         return hasGps(type) || hasLbs(type) || hasStatus(type);
@@ -208,7 +209,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         sendResponse(channel, false, MSG_X1_PHOTO_DATA, 0, content);
     }
 
-    private boolean decodeGps(Position position, ByteBuf buf, boolean hasLength, TimeZone timezone) {
+    public static boolean decodeGps(Position position, ByteBuf buf, boolean hasLength, TimeZone timezone) {
 
         DateBuilder dateBuilder = new DateBuilder(timezone)
                 .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
@@ -547,6 +548,15 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.01);
             position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
 
+            long portInfo = buf.readUnsignedInt();
+
+            position.set(Position.KEY_INPUT, buf.readUnsignedByte());
+            position.set(Position.KEY_OUTPUT, buf.readUnsignedByte());
+
+            for (int i = 1; i <= BitUtil.between(portInfo, 20, 24); i++) {
+                position.set(Position.PREFIX_ADC + i, buf.readUnsignedShort() * 0.01);
+            }
+
             return position;
 
         } else if (type == MSG_X1_PHOTO_INFO) {
@@ -749,6 +759,39 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_EVENT, buf.readUnsignedByte()); // reason
                 position.set(Position.KEY_ARCHIVE, buf.readUnsignedByte() > 0);
             }
+
+        } else if (type == MSG_ALARM) {
+
+            DateBuilder dateBuilder = new DateBuilder(deviceSession.getTimeZone())
+                    .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
+                    .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
+
+            getLastLocation(position, dateBuilder.getDate());
+
+            short alarmType = buf.readUnsignedByte();
+
+            switch (alarmType) {
+                case 0x80:
+                    position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
+                    break;
+                case 0x87:
+                    position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+                    break;
+                case 0x90:
+                    position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+                    break;
+                case 0x91:
+                    position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+                    break;
+                case 0x92:
+                    position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
+                    break;
+                default:
+                    position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+                    break;
+            }
+
+            position.set("alarmValue", buf.readShort());
 
         } else {
 
@@ -977,7 +1020,28 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         while (buf.readableBytes() > 6) {
             int moduleType = buf.readUnsignedShort();
             int moduleLength = buf.readUnsignedShort();
+
             switch (moduleType) {
+                case 0x03:
+                    position.set(Position.KEY_ICCID, ByteBufUtil.hexDump(buf.readSlice(10)));
+                    break;
+                case 0x09:
+                    position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+                    break;
+                case 0x0a:
+                    position.set(Position.KEY_SATELLITES_VISIBLE, buf.readUnsignedByte());
+                    break;
+                case 0x11:
+                    CellTower cellTower = CellTower.from(
+                            buf.readUnsignedShort(),
+                            buf.readUnsignedShort(),
+                            buf.readUnsignedShort(),
+                            buf.readUnsignedMedium(),
+                            buf.readUnsignedByte());
+                    if (cellTower.getCellId() > 0) {
+                        position.setNetwork(new Network(cellTower));
+                    }
+                    break;
                 case 0x18:
                     position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.01);
                     break;
@@ -988,7 +1052,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_INDEX, buf.readUnsignedInt());
                     break;
                 case 0x2a:
-                    position.set(Position.KEY_INPUT, buf.readUnsignedByte());
+                    int input = buf.readUnsignedByte();
+                    position.set(Position.KEY_DOOR, BitUtil.to(input, 4) > 0);
+                    position.set("tamper", BitUtil.from(input, 4) > 0);
                     break;
                 case 0x2b:
                     int event = buf.readUnsignedByte();
@@ -1035,6 +1101,11 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
                     position.setLatitude(latitude);
                     position.setLongitude(longitude);
+                    break;
+                case 0x34:
+                    position.set(Position.KEY_EVENT, buf.readUnsignedByte());
+                    buf.readUnsignedIntLE(); // time
+                    buf.skipBytes(buf.readUnsignedByte()); // content
                     break;
                 default:
                     buf.skipBytes(moduleLength);

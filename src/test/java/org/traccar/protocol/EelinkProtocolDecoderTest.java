@@ -14,6 +14,10 @@ public class EelinkProtocolDecoderTest extends ProtocolTest {
         verifyNull(decoder, binary(
                 "454C0027E753035254407167747167670100180002035254407167747100200205020500010432000086BD"));
 
+        verifyAttribute(decoder, binary(
+                "6767070006000e0077035d"),
+                Position.KEY_IGNITION, true);
+
         verifyAttributes(decoder, binary(
                 "676707006502df5c89fde800bc3fa8030302005555045b555555057a5555550b225555550c105c55550d115555550e7e5555550f4555555510017b5555112b5555551f01ed5555208005b0012100005555407ad000004237f5555589000000498a0000aef78b00000000"));
 

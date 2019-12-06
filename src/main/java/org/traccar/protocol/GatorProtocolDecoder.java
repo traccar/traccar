@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,8 +120,10 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Position.KEY_STATUS, buf.readUnsignedByte());
             position.set("key", buf.readUnsignedByte());
-            position.set("oil", buf.readUnsignedShort() / 10.0);
-            position.set(Position.KEY_POWER, buf.readUnsignedByte() + buf.readUnsignedByte() * 0.01);
+
+            position.set(Position.PREFIX_ADC + 1, buf.readUnsignedByte() + buf.readUnsignedByte() * 0.01);
+            position.set(Position.PREFIX_ADC + 2, buf.readUnsignedByte() + buf.readUnsignedByte() * 0.01);
+
             position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
 
             return position;

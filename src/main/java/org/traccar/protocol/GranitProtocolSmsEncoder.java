@@ -32,7 +32,7 @@ public class GranitProtocolSmsEncoder extends StringProtocolEncoder {
         case Command.TYPE_REBOOT_DEVICE:
             return "BB+RESET";
         case Command.TYPE_POSITION_PERIODIC:
-            return formatCommand(command, "BB+BBMD={%s}", Command.KEY_FREQUENCY);
+            return formatCommand(command, "BB+BBMD=%s", Command.KEY_FREQUENCY);
         default:
             return null;
         }

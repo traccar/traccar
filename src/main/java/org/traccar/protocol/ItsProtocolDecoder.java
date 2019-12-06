@@ -41,7 +41,7 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             .text("$")
             .expression(",?[^,]+,")              // event
             .groupBegin()
-            .expression("[^,]+,")                // vendor
+            .expression("[^,]*,")                // vendor
             .expression("[^,]+,")                // firmware version
             .expression("(..),")                 // status
             .number("(d+),").optional()          // event

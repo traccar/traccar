@@ -29,6 +29,7 @@ import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -97,7 +98,7 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private void decodeMask2(ByteBuf buf, int mask) {
+    private void decodeMask2(ByteBuf buf, int mask, Position position) {
 
         if (BitUtil.check(mask, 0)) {
             buf.readUnsignedShortLE(); // wheel speed
@@ -106,31 +107,31 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedByte(); // acceleration pedal
         }
         if (BitUtil.check(mask, 2)) {
-            buf.readUnsignedIntLE(); // total fuel used
+            position.set(Position.KEY_FUEL_USED, buf.readUnsignedIntLE());
         }
         if (BitUtil.check(mask, 3)) {
-            buf.readUnsignedByte(); // fuel level
+            position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte());
         }
         if (BitUtil.check(mask, 4)) {
-            buf.readUnsignedShortLE(); // engine speed
+            position.set(Position.KEY_RPM, buf.readUnsignedShortLE());
         }
         if (BitUtil.check(mask, 5)) {
-            buf.readUnsignedIntLE(); // total hours
+            position.set(Position.KEY_HOURS, buf.readUnsignedIntLE());
         }
         if (BitUtil.check(mask, 6)) {
-            buf.readUnsignedIntLE(); // total distance
+            position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
         }
         if (BitUtil.check(mask, 7)) {
-            buf.readUnsignedByte(); // engine coolant
+            position.set(Position.KEY_COOLANT_TEMP, (int) buf.readByte());
         }
         if (BitUtil.check(mask, 8)) {
-            buf.readUnsignedByte(); // fuel level 2
+            position.set("fuel2", buf.readUnsignedByte());
         }
         if (BitUtil.check(mask, 9)) {
-            buf.readUnsignedByte(); // engine load
+            position.set(Position.KEY_ENGINE_LOAD, buf.readUnsignedByte());
         }
         if (BitUtil.check(mask, 10)) {
-            buf.readUnsignedShortLE(); // service distance
+            position.set(Position.KEY_ODOMETER_SERVICE, buf.readUnsignedShortLE());
         }
         if (BitUtil.check(mask, 11)) {
             buf.skipBytes(8); // sensors
@@ -142,7 +143,7 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
             buf.skipBytes(8); // trailer id
         }
         if (BitUtil.check(mask, 14)) {
-            buf.readUnsignedShortLE(); // fuel rate
+            position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedShortLE());
         }
     }
 
@@ -152,10 +153,10 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedShortLE(); // fuel economy
         }
         if (BitUtil.check(mask, 1)) {
-            buf.readUnsignedIntLE(); // fuel consumption
+            position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedIntLE());
         }
         if (BitUtil.check(mask, 2)) {
-            buf.readUnsignedMediumLE(); // axle weight
+            position.set(Position.KEY_AXLE_WEIGHT, buf.readUnsignedMediumLE());
         }
         if (BitUtil.check(mask, 3)) {
             buf.readUnsignedByte(); // mil status
@@ -168,6 +169,70 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
         }
         if (BitUtil.check(mask, 6)) {
             position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(buf.readLongLE()));
+        }
+        if (BitUtil.check(mask, 7)) {
+            buf.readUnsignedShortLE(); // dallas temperature
+        }
+        if (BitUtil.check(mask, 8)) {
+            buf.readUnsignedShortLE(); // dallas humidity
+        }
+        if (BitUtil.check(mask, 9)) {
+            buf.skipBytes(6); // lls group 1
+        }
+        if (BitUtil.check(mask, 10)) {
+            buf.skipBytes(6); // lls group 2
+        }
+        if (BitUtil.check(mask, 11)) {
+            buf.skipBytes(21); // j1979 group 1
+        }
+        if (BitUtil.check(mask, 12)) {
+            buf.skipBytes(20); // j1979 dtc
+        }
+        if (BitUtil.check(mask, 13)) {
+            buf.skipBytes(9); // j1708 group 1
+        }
+        if (BitUtil.check(mask, 14)) {
+            buf.skipBytes(21); // driving quality
+        }
+    }
+
+    private void decodeMask4(ByteBuf buf, int mask, Position position) {
+
+        if (BitUtil.check(mask, 0)) {
+            buf.readUnsignedIntLE();
+        }
+        if (BitUtil.check(mask, 1)) {
+            buf.skipBytes(30); // lls group 3
+        }
+        if (BitUtil.check(mask, 2)) {
+            buf.readUnsignedIntLE(); // instant fuel consumption
+        }
+        if (BitUtil.check(mask, 3)) {
+            buf.skipBytes(10); // axle weight group
+        }
+        if (BitUtil.check(mask, 4)) {
+            buf.readUnsignedByte();
+        }
+        if (BitUtil.check(mask, 5)) {
+            buf.readUnsignedShortLE();
+        }
+        if (BitUtil.check(mask, 6)) {
+            buf.readUnsignedByte(); // maximum acceleration
+            buf.readUnsignedByte(); // maximum deceleration
+            buf.readUnsignedByte(); // maximum cornering
+        }
+        if (BitUtil.check(mask, 7)) {
+            buf.skipBytes(16);
+        }
+        if (BitUtil.check(mask, 8)) {
+            buf.skipBytes(40); // temperature sensors
+        }
+        if (BitUtil.check(mask, 9)) {
+            position.set("driver1", buf.readCharSequence(16, StandardCharsets.US_ASCII).toString().trim());
+            position.set("driver2", buf.readCharSequence(16, StandardCharsets.US_ASCII).toString().trim());
+        }
+        if (BitUtil.check(mask, 10)) {
+            position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
         }
     }
 
@@ -223,12 +288,17 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
 
                     if (masks.size() >= 2) {
                         mask = masks.get(1);
-                        decodeMask2(buf, mask);
+                        decodeMask2(buf, mask, position);
                     }
 
                     if (masks.size() >= 3) {
                         mask = masks.get(2);
                         decodeMask3(buf, mask, position);
+                    }
+
+                    if (masks.size() >= 4) {
+                        mask = masks.get(3);
+                        decodeMask4(buf, mask, position);
                     }
                 }
 

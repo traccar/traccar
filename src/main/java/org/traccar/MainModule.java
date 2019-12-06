@@ -191,7 +191,7 @@ public class MainModule extends AbstractModule {
                 case "google":
                     return new GoogleGeolocationProvider(key);
                 case "opencellid":
-                    return new OpenCellIdGeolocationProvider(key);
+                    return new OpenCellIdGeolocationProvider(url, key);
                 case "unwired":
                     return new UnwiredGeolocationProvider(url, key);
                 default:

@@ -185,7 +185,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)(dd.d+),")              // longitude
             .groupEnd()
             .expression("([EW]),")
-            .number("(d+.?d*),")                 // speed
+            .number(" *(d+.?d*),")               // speed
             .number("(d+.?d*)?,")                // course
             .number("(?:d+,)?")                  // battery
             .number("(?:(dd)(dd)(dd))?")         // date (ddmmyy)

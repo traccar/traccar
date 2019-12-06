@@ -23,6 +23,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.ObdDecoder;
@@ -185,7 +186,14 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedIntLE());
         position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedIntLE());
         buf.readUnsignedShortLE(); // current fuel consumption
-        position.set(Position.KEY_STATUS, buf.readUnsignedIntLE());
+
+        long state = buf.readUnsignedIntLE();
+        position.set(Position.KEY_IGNITION, BitUtil.check(state, 8 + 2));
+        position.set(Position.KEY_ALARM, BitUtil.check(state, 3 * 8 + 4) ? Position.ALARM_ACCELERATION : null);
+        position.set(Position.KEY_ALARM, BitUtil.check(state, 3 * 8 + 5) ? Position.ALARM_BRAKING : null);
+        position.set(Position.KEY_ALARM, BitUtil.check(state, 3 * 8 + 6) ? Position.ALARM_IDLE : null);
+        position.set(Position.KEY_STATUS, state);
+
         buf.skipBytes(8);
     }
 
