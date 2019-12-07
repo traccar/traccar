@@ -73,7 +73,7 @@ public class PacificTrackProtocolDecoder extends BaseProtocolDecoder {
                     position.setValid(BitUtil.check(buf.readUnsignedByte(), 4));
                     int date = buf.readUnsignedByte();
                     DateBuilder dateBuilder = new DateBuilder()
-                            .setDate(2000 + BitUtil.from(date, 4), BitUtil.to(date, 4), buf.readUnsignedByte())
+                            .setDate(2010 + BitUtil.from(date, 4), BitUtil.to(date, 4), buf.readUnsignedByte())
                             .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
                     position.setTime(dateBuilder.getDate());
                     position.setLatitude(buf.readUnsignedInt() / 1000000.0 - 90.0);
@@ -84,7 +84,7 @@ public class PacificTrackProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_INDEX, buf.readUnsignedShort());
                     break;
                 case 0x100:
-                    String imei = ByteBufUtil.hexDump(buf.readSlice(8)).substring(1);
+                    String imei = ByteBufUtil.hexDump(buf.readSlice(8)).substring(0, 15);
                     deviceSession = getDeviceSession(channel, remoteAddress, imei);
                     break;
                 default:
