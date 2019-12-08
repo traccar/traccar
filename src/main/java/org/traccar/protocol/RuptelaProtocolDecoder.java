@@ -19,6 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -33,6 +34,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
+
+    private ByteBuf photo;
 
     public RuptelaProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -246,6 +249,42 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
             }
 
             return positions;
+
+        } else if (type == MSG_FILES) {
+
+            int subtype = buf.readUnsignedByte();
+            int source = buf.readUnsignedByte();
+
+            if (subtype == 2) {
+                ByteBuf filename = buf.readSlice(8);
+                int total = buf.readUnsignedShort();
+                int current = buf.readUnsignedShort();
+                if (photo == null) {
+                    photo = Unpooled.buffer();
+                }
+                photo.writeBytes(buf.readSlice(buf.readableBytes() - 2));
+                if (current < total - 1) {
+                    ByteBuf content = Unpooled.buffer();
+                    content.writeByte(subtype);
+                    content.writeByte(source);
+                    content.writeBytes(filename);
+                    content.writeShort(current + 1);
+                    ByteBuf response = RuptelaProtocolEncoder.encodeContent(type, content);
+                    content.release();
+                    if (channel != null) {
+                        channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+                    }
+                } else {
+                    Position position = new Position(getProtocolName());
+                    position.setDeviceId(deviceSession.getDeviceId());
+                    getLastLocation(position, null);
+                    position.set(Position.KEY_IMAGE, Context.getMediaManager().writeFile(imei, photo, "jpg"));
+                    photo.release();
+                    photo = null;
+                }
+            }
+
+            return null;
 
         } else {
 
