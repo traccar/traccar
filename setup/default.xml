@@ -280,5 +280,6 @@
     <entry key='solarpowered.port'>5201</entry>
     <entry key='motor.port'>5202</entry>
     <entry key='omnicomm.port'>5203</entry>
+    <entry key='s168.port'>5204</entry>
 
 </properties>
