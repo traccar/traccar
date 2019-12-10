@@ -80,7 +80,7 @@ public class PacificTrackProtocolDecoder extends BaseProtocolDecoder {
                     position.setLongitude(buf.readUnsignedInt() / 1000000.0 - 180.0);
                     int speedAndCourse = buf.readUnsignedMedium();
                     position.setCourse(BitUtil.from(speedAndCourse, 12));
-                    position.setSpeed(UnitsConverter.knotsFromKph(BitUtil.to(speedAndCourse, 12)));
+                    position.setSpeed(UnitsConverter.knotsFromKph(BitUtil.to(speedAndCourse, 12) * 0.1));
                     position.set(Position.KEY_INDEX, buf.readUnsignedShort());
                     break;
                 case 0x100:
