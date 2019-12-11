@@ -281,6 +281,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_IMAGE, Context.getMediaManager().writeFile(imei, photo, "jpg"));
                     photo.release();
                     photo = null;
+                    return position;
                 }
             }
 
