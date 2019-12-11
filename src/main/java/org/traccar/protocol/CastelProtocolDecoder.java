@@ -188,10 +188,10 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedShortLE(); // current fuel consumption
 
         long state = buf.readUnsignedIntLE();
-        position.set(Position.KEY_IGNITION, BitUtil.check(state, 8 + 2));
-        position.set(Position.KEY_ALARM, BitUtil.check(state, 3 * 8 + 4) ? Position.ALARM_ACCELERATION : null);
-        position.set(Position.KEY_ALARM, BitUtil.check(state, 3 * 8 + 5) ? Position.ALARM_BRAKING : null);
-        position.set(Position.KEY_ALARM, BitUtil.check(state, 3 * 8 + 6) ? Position.ALARM_IDLE : null);
+        position.set(Position.KEY_ALARM, BitUtil.check(state, 4) ? Position.ALARM_ACCELERATION : null);
+        position.set(Position.KEY_ALARM, BitUtil.check(state, 5) ? Position.ALARM_BRAKING : null);
+        position.set(Position.KEY_ALARM, BitUtil.check(state, 6) ? Position.ALARM_IDLE : null);
+        position.set(Position.KEY_IGNITION, BitUtil.check(state, 2 * 8 + 2));
         position.set(Position.KEY_STATUS, state);
 
         buf.skipBytes(8);
