@@ -18,10 +18,13 @@ package org.traccar.protocol;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.helper.Checksum;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 import org.traccar.protobuf.OmnicommMessageOuterClass;
@@ -38,7 +41,9 @@ public class OmnicommProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public static final int MSG_IDENTIFICATION = 0x80;
-    public static final int MSG_CONTAINER_IM = 0x86;
+    public static final int MSG_ARCHIVE_INQUIRY = 0x85;
+    public static final int MSG_ARCHIVE_DATA = 0x86;
+    public static final int MSG_REMOVE_ARCHIVE_INQUIRY = 0x87;
 
     private OmnicommMessageOuterClass.OmnicommMessage parseProto(
             ByteBuf buf, int length) throws InvalidProtocolBufferException {
@@ -58,6 +63,19 @@ public class OmnicommProtocolDecoder extends BaseProtocolDecoder {
                 .getDefaultInstance().getParserForType().parseFrom(array, offset, length);
     }
 
+    private void sendResponse(Channel channel, int type, long index) {
+        if (channel != null) {
+            ByteBuf response = Unpooled.buffer();
+            response.writeByte(0xC0);
+            response.writeByte(type);
+            response.writeShortLE(4);
+            response.writeIntLE((int) index);
+            response.writeShortLE(Checksum.crc16(Checksum.CRC16_CCITT_FALSE,
+                    response.nioBuffer(1, response.writerIndex() - 1)));
+            channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -71,15 +89,16 @@ public class OmnicommProtocolDecoder extends BaseProtocolDecoder {
         if (type == MSG_IDENTIFICATION) {
 
             getDeviceSession(channel, remoteAddress, String.valueOf(buf.readUnsignedIntLE()));
+            sendResponse(channel, MSG_ARCHIVE_INQUIRY, 0);
 
-        } else if (type == MSG_CONTAINER_IM) {
+        } else if (type == MSG_ARCHIVE_DATA) {
 
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
             if (deviceSession == null) {
                 return null;
             }
 
-            buf.readUnsignedIntLE(); // record number
+            long index = buf.readUnsignedIntLE();
             buf.readUnsignedIntLE(); // time
             buf.readUnsignedByte(); // priority
 
@@ -107,7 +126,12 @@ public class OmnicommProtocolDecoder extends BaseProtocolDecoder {
                 positions.add(position);
             }
 
-            return positions;
+            if (positions.isEmpty()) {
+                sendResponse(channel, MSG_REMOVE_ARCHIVE_INQUIRY, index + 1);
+                return null;
+            } else {
+                return positions;
+            }
         }
 
         return null;
