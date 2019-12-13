@@ -18,6 +18,7 @@
   <include file="changelog-3.15.xml" relativeToChangelogFile="true" />
   <include file="changelog-3.15-orangecells.xml" relativeToChangelogFile="true" />
   <include file="changelog-3.15-orangecells-peripheral.xml" relativeToChangelogFile="true" />
+  <include file="changelog-3.15-orangecells-customer.xml" relativeToChangelogFile="true" />
   <include file="changelog-3.16.xml" relativeToChangelogFile="true" />
   <include file="changelog-3.17-fcm-notifications.xml" relativeToChangelogFile="true" />
   <include file="changelog-3.17.xml" relativeToChangelogFile="true" />

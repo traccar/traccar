@@ -33,18 +33,19 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Path("devices")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class DeviceResource extends BaseObjectResource<Device> {
 
+    private Comparator<Device> compareByLastUpdate;
+
     public DeviceResource() {
         super(Device.class);
+        compareByLastUpdate = Comparator.comparing(o -> ((Long) o.getLastUpdate().getTime()));
     }
 
     @GET
@@ -83,8 +84,14 @@ public class DeviceResource extends BaseObjectResource<Device> {
                 result.add(deviceId);
             }
         }
-        return deviceManager.getItems(result);
+
+        Collection<Device> devicesToReturn = deviceManager.getItems(result);
+        Collections.sort(devicesToReturn.stream().collect(Collectors.toList()),
+                         compareByLastUpdate);
+
+        return devicesToReturn;
     }
+
 
     @Path("{id}/distance")
     @PUT
