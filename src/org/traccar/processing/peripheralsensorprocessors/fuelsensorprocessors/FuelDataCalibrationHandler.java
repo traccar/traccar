@@ -33,10 +33,6 @@ public class FuelDataCalibrationHandler extends BaseDataHandler {
         }
 
         List<PeripheralSensor> fuelSensorsList = sensorsOnDevice.get();
-        if (fuelSensorsList.isEmpty()) {
-            FuelSensorDataHandlerHelper.logDebugIfDeviceId(String.format("Sensors list empty for deviceId: %d. Refreshing sensors map.", deviceId), deviceId);
-            return position;
-        }
 
         for (PeripheralSensor fuelSensor : fuelSensorsList) {
             String calibFuelField = fuelSensor.getCalibFuelFieldName();

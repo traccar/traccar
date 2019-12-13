@@ -72,7 +72,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                     Context.getPeripheralSensorManager().getSensorByDeviceId(deviceId);
 
             if (!peripheralSensorOnDevice.isPresent() || peripheralSensorOnDevice.get().isEmpty()) {
-                logDebugIfNotLoading(String.format("No sensors found on deviceId: %d. Skipping fuel processing.", deviceId));
+                logDebugIfNotLoading(String.format("No sensors found on deviceId: %d. Refreshing sensors map.", deviceId), deviceId);
                 return position;
             }
 
@@ -92,7 +92,12 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                     break;
             }
 
-            for (PeripheralSensor sensorOnDevice : sensorsListForProcessing) {
+            if (sensorsOnDeviceList.isEmpty()) {
+                logDebugIfNotLoading(String.format("Sensors list empty for deviceId: %d. Refreshing sensors map.", deviceId), deviceId);
+                return position;
+            }
+
+            for (PeripheralSensor sensorOnDevice : sensorsOnDeviceList) {
                 long sensorID = sensorOnDevice.getPeripheralSensorId();
                 logDebugIfNotLoading(String.format("[FuelSensorDataHandler] Running sensor loop on %d %d", position.getDeviceId(), sensorID), deviceId);
                 String lookUpKey = getLookupKey(deviceId, sensorID);
