@@ -1175,193 +1175,399 @@ CREATE SEQUENCE  SEQ_TC_STATISTICS  START WITH 1  INCREMENT BY 1  CACHE 300;
 CREATE SEQUENCE  SEQ_TC_USERS  START WITH 1  INCREMENT BY 1  CACHE 100;
 
 --# TRIGGERS CREATION ---
-CREATE TRIGGER  TRIG_DATABASECHANGELOG
+--------------------------------------------------------
+--  DDL for Trigger TRIG_DATABASECHANGELOG
+--------------------------------------------------------
+
+  CREATE OR REPLACE TRIGGER "TRACCAR"."TRIG_DATABASECHANGELOG" 
 BEFORE INSERT ON DATABASECHANGELOG
  FOR EACH ROW
 DECLARE
+DbMax number;
 BEGIN
   IF( :new.id IS NULL )
   THEN
     :new.id := SEQ_DATABASECHANGELOG.nextval;
   END IF;
+  
+  EXCEPTION WHEN DUP_VAL_ON_INDEX THEN
+ Select nvl(max(id),0) into DbMax from DATABASECHANGELOG;
+    while (DbMax > SEQ_DATABASECHANGELOG.nextval)
+        loop
+        null;
+        end loop;
+         :new.id := SEQ_DATABASECHANGELOG.nextval;
+         
 END;
-/
 
-CREATE TRIGGER  TRIG_DATABASECHANGELOGLOCK
+/
+ALTER TRIGGER "TRACCAR"."TRIG_DATABASECHANGELOG" ENABLE;
+--------------------------------------------------------
+--  DDL for Trigger TRIG_DATABASECHANGELOGLOCK
+--------------------------------------------------------
+
+  CREATE OR REPLACE TRIGGER "TRACCAR"."TRIG_DATABASECHANGELOGLOCK" 
  BEFORE INSERT ON DATABASECHANGELOGLOCK
  FOR EACH ROW
 DECLARE
+DbMax number;
 BEGIN
   IF( :new.id IS NULL )
   THEN
     :new.id := SEQ_DATABASECHANGELOGLOCK.nextval;
   END IF;
+  
+   EXCEPTION WHEN DUP_VAL_ON_INDEX THEN
+ Select nvl(max(id),0) into DbMax from DATABASECHANGELOGLOCK;
+    while (DbMax > SEQ_DATABASECHANGELOGLOCK.nextval)
+        loop
+        null;
+        end loop;
+         :new.id := SEQ_DATABASECHANGELOGLOCK.nextval;
 END;
-/
 
-CREATE TRIGGER  TRIG_TC_ATTRIBUTES
+/
+ALTER TRIGGER "TRACCAR"."TRIG_DATABASECHANGELOGLOCK" ENABLE;
+--------------------------------------------------------
+--  DDL for Trigger TRIG_TC_ATTRIBUTES
+--------------------------------------------------------
+
+  CREATE OR REPLACE TRIGGER "TRACCAR"."TRIG_TC_ATTRIBUTES" 
 BEFORE INSERT ON TC_ATTRIBUTES
   FOR EACH ROW
 DECLARE
+DbMax number;
 BEGIN
   IF( :new.id IS NULL )
   THEN
     :new.id := SEQ_TC_ATTRIBUTES.nextval;
   END IF;
+  
+ EXCEPTION WHEN DUP_VAL_ON_INDEX THEN
+ Select nvl(max(id),0) into DbMax from TC_ATTRIBUTES;
+    while (DbMax > SEQ_TC_ATTRIBUTES.nextval)
+        loop
+        null;
+        end loop;
+         :new.id := SEQ_TC_ATTRIBUTES.nextval;
 END;
 
-CREATE TRIGGER  TRIG_TC_CALENDARS
+/
+ALTER TRIGGER "TRACCAR"."TRIG_TC_ATTRIBUTES" ENABLE;
+--------------------------------------------------------
+--  DDL for Trigger TRIG_TC_CALENDARS
+--------------------------------------------------------
+
+  CREATE OR REPLACE TRIGGER "TRACCAR"."TRIG_TC_CALENDARS" 
 BEFORE INSERT ON TC_CALENDARS
   FOR EACH ROW
 DECLARE
+DbMax number;
 BEGIN
   IF( :new.id IS NULL )
   THEN
     :new.id := SEQ_TC_CALENDARS.nextval;
   END IF;
+  
+   EXCEPTION WHEN DUP_VAL_ON_INDEX THEN
+ Select nvl(max(id),0) into DbMax from TC_CALENDARS;
+    while (DbMax > SEQ_TC_CALENDARS.nextval)
+        loop
+        null;
+        end loop;
+         :new.id := SEQ_TC_CALENDARS.nextval;
 END;
-/
 
-CREATE TRIGGER  TRIG_TC_COMMANDS
+/
+ALTER TRIGGER "TRACCAR"."TRIG_TC_CALENDARS" ENABLE;
+--------------------------------------------------------
+--  DDL for Trigger TRIG_TC_COMMANDS
+--------------------------------------------------------
+
+  CREATE OR REPLACE TRIGGER "TRACCAR"."TRIG_TC_COMMANDS" 
  BEFORE INSERT ON TC_COMMANDS
   FOR EACH ROW
 DECLARE
+DbMax number;
 BEGIN
   IF( :new.id IS NULL )
   THEN
     :new.id := SEQ_TC_COMMANDS.nextval;
   END IF;
+  
+     EXCEPTION WHEN DUP_VAL_ON_INDEX THEN
+ Select nvl(max(id),0) into DbMax from TC_COMMANDS;
+    while (DbMax > SEQ_TC_COMMANDS.nextval)
+        loop
+        null;
+        end loop;
+         :new.id := SEQ_TC_COMMANDS.nextval;
+         
 END;
-/
 
-CREATE TRIGGER  TRIG_TC_DEVICES
+/
+ALTER TRIGGER "TRACCAR"."TRIG_TC_COMMANDS" ENABLE;
+--------------------------------------------------------
+--  DDL for Trigger TRIG_TC_DEVICES
+--------------------------------------------------------
+
+  CREATE OR REPLACE TRIGGER "TRACCAR"."TRIG_TC_DEVICES" 
  BEFORE INSERT ON TC_DEVICES
   FOR EACH ROW
 DECLARE
+DbMax number;
 BEGIN
   IF( :new.id IS NULL )
   THEN
     :new.id := SEQ_TC_DEVICES.nextval;
   END IF;
+       EXCEPTION WHEN DUP_VAL_ON_INDEX THEN
+ Select nvl(max(id),0) into DbMax from TC_DEVICES;
+    while (DbMax > SEQ_TC_DEVICES.nextval)
+        loop
+        null;
+        end loop;
+         :new.id := SEQ_TC_DEVICES.nextval;
+         
 END;
-/
 
-CREATE TRIGGER  TRIG_TC_DRIVERS
-BEFORE INSERT ON TC_DRIVERS
-  FOR EACH ROW
-DECLARE
-BEGIN
-  IF( :new.id IS NULL )
-  THEN
-    :new.id := SEQ_TC_DRIVERS.nextval;
-  END IF;
-END;
 /
+ALTER TRIGGER "TRACCAR"."TRIG_TC_DEVICES" ENABLE;
 
-CREATE TRIGGER  TRIG_TC_EVENTS
+--------------------------------------------------------
+--  DDL for Trigger TRIG_TC_EVENTS
+--------------------------------------------------------
+
+  CREATE OR REPLACE TRIGGER "TRACCAR"."TRIG_TC_EVENTS" 
 BEFORE INSERT ON TC_EVENTS
   FOR EACH ROW
 DECLARE
+DbMax number;
 BEGIN
   IF( :new.id IS NULL )
   THEN
     :new.id := SEQ_TC_EVENTS.nextval;
   END IF;
+  
+EXCEPTION WHEN DUP_VAL_ON_INDEX THEN
+ Select nvl(max(id),0) into DbMax from TC_EVENTS;
+    while (DbMax > SEQ_TC_EVENTS.nextval)
+        loop
+        null;
+        end loop;
+         :new.id := SEQ_TC_EVENTS.nextval;
 END;
-/
 
-CREATE TRIGGER  TRIG_TC_GEOFENCES
+/
+ALTER TRIGGER "TRACCAR"."TRIG_TC_EVENTS" ENABLE;
+--------------------------------------------------------
+--  DDL for Trigger TRIG_TC_GEOFENCES
+--------------------------------------------------------
+
+  CREATE OR REPLACE TRIGGER "TRACCAR"."TRIG_TC_GEOFENCES" 
 BEFORE INSERT ON TC_GEOFENCES
   FOR EACH ROW
 DECLARE
+DbMax number;
 BEGIN
   IF( :new.id IS NULL )
   THEN
     :new.id := SEQ_TC_GEOFENCES.nextval;
   END IF;
+  
+EXCEPTION WHEN DUP_VAL_ON_INDEX THEN
+ Select nvl(max(id),0) into DbMax from TC_GEOFENCES;
+    while (DbMax > SEQ_TC_GEOFENCES.nextval)
+        loop
+        null;
+        end loop;
+         :new.id := SEQ_TC_GEOFENCES.nextval;  
 END;
-/
 
-CREATE TRIGGER  TRIG_TC_GROUPS
+/
+ALTER TRIGGER "TRACCAR"."TRIG_TC_GEOFENCES" ENABLE;
+--------------------------------------------------------
+--  DDL for Trigger TRIG_TC_GROUPS
+--------------------------------------------------------
+
+  CREATE OR REPLACE TRIGGER "TRACCAR"."TRIG_TC_GROUPS" 
 BEFORE INSERT ON TC_GROUPS
   FOR EACH ROW
 DECLARE
+DbMax number;
 BEGIN
   IF( :new.id IS NULL )
   THEN
     :new.id := SEQ_TC_GROUPS.nextval;
   END IF;
+  
+EXCEPTION WHEN DUP_VAL_ON_INDEX THEN
+ Select nvl(max(id),0) into DbMax from TC_GROUPS;
+    while (DbMax > SEQ_TC_GROUPS.nextval)
+        loop
+        null;
+        end loop;
+         :new.id := SEQ_TC_GROUPS.nextval;   
 END;
-/
 
-CREATE TRIGGER  TRIG_TC_MAINTENANCES
+/
+ALTER TRIGGER "TRACCAR"."TRIG_TC_GROUPS" ENABLE;
+--------------------------------------------------------
+--  DDL for Trigger TRIG_TC_MAINTENANCES
+--------------------------------------------------------
+
+  CREATE OR REPLACE TRIGGER "TRACCAR"."TRIG_TC_MAINTENANCES" 
 BEFORE INSERT ON TC_MAINTENANCES
   FOR EACH ROW
 DECLARE
+DbMax number;
 BEGIN
   IF( :new.id IS NULL )
   THEN
     :new.id := SEQ_TC_MAINTENANCES.nextval;
   END IF;
+  
+EXCEPTION WHEN DUP_VAL_ON_INDEX THEN
+ Select nvl(max(id),0) into DbMax from TC_MAINTENANCES;
+    while (DbMax > SEQ_TC_MAINTENANCES.nextval)
+        loop
+        null;
+        end loop;
+         :new.id := SEQ_TC_MAINTENANCES.nextval;     
+  
 END;
-/
 
-CREATE TRIGGER  TRIG_TC_NOTIFICATIONS
+/
+ALTER TRIGGER "TRACCAR"."TRIG_TC_MAINTENANCES" ENABLE;
+--------------------------------------------------------
+--  DDL for Trigger TRIG_TC_NOTIFICATIONS
+--------------------------------------------------------
+
+  CREATE OR REPLACE TRIGGER "TRACCAR"."TRIG_TC_NOTIFICATIONS" 
  BEFORE INSERT ON TC_NOTIFICATIONS
   FOR EACH ROW
 DECLARE
+DbMax number;
 BEGIN
   IF( :new.id IS NULL )
   THEN
     :new.id := SEQ_TC_NOTIFICATIONS.nextval;
   END IF;
-END;
-/
 
-CREATE TRIGGER  TRIG_TC_POSITIONS
+EXCEPTION WHEN DUP_VAL_ON_INDEX THEN
+ Select nvl(max(id),0) into DbMax from TC_NOTIFICATIONS;
+    while (DbMax > SEQ_TC_NOTIFICATIONS.nextval)
+        loop
+        null;
+        end loop;
+         :new.id := SEQ_TC_NOTIFICATIONS.nextval;    
+END;
+
+/
+ALTER TRIGGER "TRACCAR"."TRIG_TC_NOTIFICATIONS" ENABLE;
+--------------------------------------------------------
+--  DDL for Trigger TRIG_TC_POSITIONS
+--------------------------------------------------------
+
+  CREATE OR REPLACE TRIGGER "TRACCAR"."TRIG_TC_POSITIONS" 
  BEFORE INSERT ON TC_POSITIONS
   FOR EACH ROW
 DECLARE
+DbMax number;
 BEGIN
   IF( :new.id IS NULL )
   THEN
     :new.id := SEQ_TC_POSITIONS.nextval;
   END IF;
-END;
-/
 
-CREATE TRIGGER  TRIG_TC_SERVERS
+EXCEPTION WHEN DUP_VAL_ON_INDEX THEN
+ Select nvl(max(id),0) into DbMax from TC_POSITIONS;
+    while (DbMax > SEQ_TC_POSITIONS.nextval)
+        loop
+        null;
+        end loop;
+         :new.id := SEQ_TC_POSITIONS.nextval;    
+         
+END;
+
+/
+ALTER TRIGGER "TRACCAR"."TRIG_TC_POSITIONS" ENABLE;
+--------------------------------------------------------
+--  DDL for Trigger TRIG_TC_SERVERS
+--------------------------------------------------------
+
+  CREATE OR REPLACE TRIGGER "TRACCAR"."TRIG_TC_SERVERS" 
  BEFORE INSERT ON TC_SERVERS
   FOR EACH ROW
 DECLARE
+DbMax number;
 BEGIN
   IF( :new.id IS NULL )
   THEN
     :new.id := SEQ_TC_SERVERS.nextval;
   END IF;
-END;
-/
 
-CREATE TRIGGER  TRIG_TC_STATISTICS
+EXCEPTION WHEN DUP_VAL_ON_INDEX THEN
+ Select nvl(max(id),0) into DbMax from TC_SERVERS;
+    while (DbMax > SEQ_TC_SERVERS.nextval)
+        loop
+        null;
+        end loop;
+         :new.id := SEQ_TC_SERVERS.nextval;    
+END;
+
+/
+ALTER TRIGGER "TRACCAR"."TRIG_TC_SERVERS" ENABLE;
+--------------------------------------------------------
+--  DDL for Trigger TRIG_TC_STATISTICS
+--------------------------------------------------------
+
+  CREATE OR REPLACE TRIGGER "TRACCAR"."TRIG_TC_STATISTICS" 
  BEFORE INSERT ON TC_STATISTICS
   FOR EACH ROW
 DECLARE
+DbMax number;
 BEGIN
   IF( :new.id IS NULL )
   THEN
     :new.id := SEQ_TC_STATISTICS.nextval;
   END IF;
+  
+EXCEPTION WHEN DUP_VAL_ON_INDEX THEN
+ Select nvl(max(id),0) into DbMax from TC_STATISTICS;
+    while (DbMax > SEQ_TC_STATISTICS.nextval)
+        loop
+        null;
+        end loop;
+         :new.id := SEQ_TC_STATISTICS.nextval;   
 END;
-/
 
-CREATE TRIGGER  TRIG_TC_USERS
+/
+ALTER TRIGGER "TRACCAR"."TRIG_TC_STATISTICS" ENABLE;
+--------------------------------------------------------
+--  DDL for Trigger TRIG_TC_USERS
+--------------------------------------------------------
+
+  CREATE OR REPLACE TRIGGER "TRACCAR"."TRIG_TC_USERS" 
  BEFORE INSERT ON TC_USERS
   FOR EACH ROW
 DECLARE
+DbMax number;
 BEGIN
   IF( :new.id IS NULL )
   THEN
     :new.id := SEQ_TC_USERS.nextval;
   END IF;
+  
+EXCEPTION WHEN DUP_VAL_ON_INDEX THEN
+ Select nvl(max(id),0) into DbMax from TC_USERS;
+    while (DbMax > SEQ_TC_USERS.nextval)
+        loop
+        null;
+        end loop;
+         :new.id := SEQ_TC_USERS.nextval;    
 END;
+
 /
+ALTER TRIGGER "TRACCAR"."TRIG_TC_USERS" ENABLE;
+
