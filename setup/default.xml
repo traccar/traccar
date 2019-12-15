@@ -281,5 +281,6 @@
     <entry key='motor.port'>5202</entry>
     <entry key='omnicomm.port'>5203</entry>
     <entry key='s168.port'>5204</entry>
+    <entry key='vnet.port'>5205</entry>
 
 </properties>
