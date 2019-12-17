@@ -123,7 +123,9 @@ public class OmnicommProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_SATELLITES, nav.getGPSNSat());
                 }
 
-                positions.add(position);
+                if (position.getFixTime() != null) {
+                    positions.add(position);
+                }
             }
 
             if (positions.isEmpty()) {
