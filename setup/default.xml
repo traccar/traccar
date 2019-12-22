@@ -282,5 +282,6 @@
     <entry key='omnicomm.port'>5203</entry>
     <entry key='s168.port'>5204</entry>
     <entry key='vnet.port'>5205</entry>
+    <entry key='blue.port'>5206</entry>
 
 </properties>
