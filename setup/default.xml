@@ -41,6 +41,15 @@
     <entry key='database.ignoreUnknown'>true</entry>
     <entry key='database.generateQueries'>true</entry>
     <entry key='database.changelog'>./schema/changelog-master.xml</entry>
+    
+    <entry key='Dup_database.ClassPath'>C:\Program Files\Traccar\lib\</entry>
+	<entry key='Dup_database.driverFile'>C:\Program Files\Traccar\lib\ojdbc6_g.jar</entry>
+	<entry key='Dup_database.driver'>oracle.jdbc.OracleDriver</entry>
+	<entry key='Dup_database.url'>jdbc:oracle:oci:traccar2/abc:@(DESCRIPTION =(ADDRESS = (PROTOCOL = TCP)(HOST = ANJUM-PC)(PORT = 1521))(CONNECT_DATA =(SERVER = DEDICATED)(SERVICE_NAME = XE)))</entry>
+	<entry key='Dup_database.user'>traccar2</entry>
+	<entry key='Dup_database.password'>abc</entry>
+	<entry key='Dup_database.checkConnection'>SELECT 1 FROM DUAL</entry>	
+    
  
     <entry key='database.loginUser'>
         SELECT * FROM tc_users
