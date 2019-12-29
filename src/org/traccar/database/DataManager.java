@@ -19,8 +19,8 @@ import java.beans.Introspector;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -40,8 +40,9 @@ import liquibase.resource.ResourceAccessor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.Config;
+import org.traccar.config.Config;
 import org.traccar.Context;
+import org.traccar.helper.DateUtil;
 import org.traccar.model.Attribute;
 import org.traccar.model.Device;
 import org.traccar.model.Driver;
@@ -76,18 +77,28 @@ public class DataManager {
     private final Config config;
 
     private DataSource dataSource;
+    private DataSource Dup_dataSource;
+    private boolean Duplicate_Database;
 
     private boolean generateQueries;
 
-    private boolean forceLdap;
+    private final boolean forceLdap;
 
     public DataManager(Config config) throws Exception {
         this.config = config;
-
+        Duplicate_Database=false;
+        
         forceLdap = config.getBoolean("ldap.force");
+        Duplicate_Database = config.getBoolean("database.Duplicate");
 
         initDatabase();
         initDatabaseSchema();
+        if (Duplicate_Database) 
+        {
+            initDatabase(Duplicate_Database);
+            initDatabaseSchema(Duplicate_Database);
+        }
+        
     }
 
     private void initDatabase() throws Exception {
@@ -102,7 +113,8 @@ public class DataManager {
 
             String driverFile = config.getString("database.driverFile");
             if (driverFile != null) {
-                ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+                URLClassLoader classLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+                //  ClassLoader classLoader = ClassLoader.getSystemClassLoader();
                 try {
                     Method method = classLoader.getClass().getDeclaredMethod("addURL", URL.class);
                     method.setAccessible(true);
@@ -141,6 +153,47 @@ public class DataManager {
         }
     }
 
+    private void initDatabase(boolean Duplicate) throws Exception {
+            String driverFile = config.getString("Dup_database.driverFile");
+            if (driverFile != null) {
+                URLClassLoader classLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+               try {
+                    Method method = classLoader.getClass().getDeclaredMethod("addURL", URL.class);
+                    method.setAccessible(true);
+                    method.invoke(classLoader, new File(driverFile).toURI().toURL());
+                } catch (NoSuchMethodException e) {
+                    Method method = classLoader.getClass().getDeclaredMethod("appendToClassPathForInstrumentation", String.class);
+                    method.setAccessible(true);
+                    method.invoke(classLoader, driverFile);
+                }
+            }
+
+            String driver = config.getString("Dup_database.driver");
+            if (driver != null) {
+                Class.forName(driver);
+            }
+            LOGGER.info("Query not provided: ");
+
+            HikariConfig hikariConfig = new HikariConfig();
+            hikariConfig.setDriverClassName(config.getString("Dup_database.driver"));
+            hikariConfig.setJdbcUrl(config.getString("Dup_database.url"));
+            hikariConfig.setUsername(config.getString("Dup_database.user"));
+            hikariConfig.setPassword(config.getString("Dup_database.password"));
+            hikariConfig.setConnectionInitSql(config.getString("Dup_database.checkConnection"));
+            hikariConfig.setIdleTimeout(600000);
+           
+            Dup_dataSource = new HikariDataSource(hikariConfig);
+
+        }
+    public static boolean idClass(String Class)
+    {  
+       if (Class.equals("device") || Class.equals("group") || Class.equals("user")|| Class.equals("manageduser")|| Class.equals("geofence")|| Class.equals("driver") 
+           || Class.equals("attribute") || Class.equals("calendar")|| Class.equals("command") || Class.equals("maintenance")|| Class.equals("notification") ) 
+        { return true; }
+        else
+        { return false;}
+    }
+    
     public static String constructObjectQuery(String action, Class<?> clazz, boolean extended) {
         switch (action) {
             case ACTION_INSERT:
@@ -152,6 +205,7 @@ public class DataManager {
                 Set<Method> methods = new HashSet<>(Arrays.asList(clazz.getMethods()));
                 methods.removeAll(Arrays.asList(Object.class.getMethods()));
                 methods.removeAll(Arrays.asList(BaseModel.class.getMethods()));
+                
                 for (Method method : methods) {
                     boolean skip;
                     if (extended) {
@@ -172,10 +226,14 @@ public class DataManager {
                 }
                 fields.setLength(fields.length() - 2);
                 if (action.equals(ACTION_INSERT)) {
+                   
                     values.setLength(values.length() - 2);
                     result.append("INSERT INTO ").append(getObjectsTableName(clazz)).append(" (");
                     result.append(fields).append(") ");
                     result.append("VALUES (").append(values).append(")");
+                    
+                    
+                    
                 } else {
                     result.append("UPDATE ").append(getObjectsTableName(clazz)).append(" SET ");
                     result.append(fields);
@@ -193,6 +251,48 @@ public class DataManager {
         }
     }
 
+    public static String constructObjectQuery(Class<?> clazz,Long IdKey) {
+        String action=ACTION_INSERT;
+                StringBuilder result = new StringBuilder();
+                StringBuilder fields = new StringBuilder();
+                StringBuilder values = new StringBuilder();
+
+                Set<Method> methods = new HashSet<>(Arrays.asList(clazz.getMethods()));
+                methods.removeAll(Arrays.asList(Object.class.getMethods()));
+                methods.removeAll(Arrays.asList(BaseModel.class.getMethods()));
+                
+                if (idClass(clazz.getSimpleName().toLowerCase())) 
+                    {
+                        fields.append("id,");
+                        values.append(":id,");
+                    }
+                
+                for (Method method : methods) {
+                    boolean skip;
+                    skip = method.isAnnotationPresent(QueryIgnore.class)
+                                || method.isAnnotationPresent(QueryExtended.class) && !action.equals(ACTION_INSERT);
+                    
+                    if (!skip && method.getName().startsWith("get") && method.getParameterTypes().length == 0) {
+                        String name = Introspector.decapitalize(method.getName().substring(3));
+                        
+                            fields.append(name).append(", ");
+                            values.append(":").append(name).append(", ");
+                        
+                    }
+                }
+                fields.setLength(fields.length() - 2);
+                
+                   
+                    values.setLength(values.length() - 2);
+                    result.append("INSERT INTO ").append(getObjectsTableName(clazz)).append(" (");
+                    result.append(fields).append(") ");
+                    result.append("VALUES (").append(values).append(")");
+                
+                return result.toString();
+}
+    
+
+    
     public static String constructPermissionQuery(String action, Class<?> owner, Class<?> property) {
         switch (action) {
             case ACTION_SELECT_ALL:
@@ -223,8 +323,13 @@ public class DataManager {
         return getQuery(action, clazz, false);
     }
 
+   public String getQuery(Class<?> clazz,Long IdKey) {
+        return constructObjectQuery(clazz, IdKey);
+    }
+
     public String getQuery(String action, Class<?> clazz, boolean extended) {
         String queryName;
+        
         if (action.equals(ACTION_SELECT_ALL)) {
             queryName = "database.select" + clazz.getSimpleName() + "s";
         } else {
@@ -245,8 +350,8 @@ public class DataManager {
 
         return query;
     }
-
-    public String getQuery(String action, Class<?> owner, Class<?> property) {
+    
+   public String getQuery(String action, Class<?> owner, Class<?> property) {
         String queryName;
         switch (action) {
             case ACTION_SELECT_ALL:
@@ -313,6 +418,27 @@ public class DataManager {
         }
     }
 
+    private void initDatabaseSchema(boolean Duplicate) throws SQLException, LiquibaseException {
+
+        if (config.hasKey("database.changelog")) {
+
+            ResourceAccessor resourceAccessor = new FileSystemResourceAccessor();
+
+            Database database = DatabaseFactory.getInstance().openDatabase(
+                    config.getString("Dup_database.url"),
+                    config.getString("Dup_database.user"),
+                    config.getString("Dup_database.password"),
+                    config.getString("Dup_database.driver"),
+                    null, null, null, resourceAccessor);
+
+            Liquibase liquibase = new Liquibase(
+                    config.getString("Dup_database.changelog"), resourceAccessor, database);
+
+            liquibase.clearCheckSums();
+            liquibase.update(new Contexts());
+        }
+    }
+
     public User login(String email, String password) throws SQLException {
         User user = QueryBuilder.create(dataSource, getQuery("database.loginUser"))
                 .setString("email", email.trim())
@@ -337,6 +463,12 @@ public class DataManager {
         QueryBuilder.create(dataSource, getQuery(ACTION_UPDATE, Device.class, true))
                 .setObject(device)
                 .executeUpdate();
+        if (Duplicate_Database)
+        {
+                QueryBuilder.create(Dup_dataSource, getQuery(ACTION_UPDATE, Device.class, true))
+                .setObject(device)
+                .executeUpdate();
+        }
     }
 
     public Collection<Position> getPositions(long deviceId, Date from, Date to) throws SQLException {
@@ -352,6 +484,14 @@ public class DataManager {
                 .setDate("now", new Date())
                 .setObject(position)
                 .executeUpdate();
+        if (Duplicate_Database)
+        {
+        QueryBuilder.create(Dup_dataSource, getQuery("Dup_database.updateLatestPosition"))
+                .setDate("now", new Date())
+                .setObject(position)
+                .executeUpdate();
+        }
+        
     }
 
     public Collection<Position> getLatestPositions() throws SQLException {
@@ -363,8 +503,7 @@ public class DataManager {
         long historyDays = config.getInteger("database.historyDays");
         if (historyDays != 0) {
             Date timeLimit = new Date(System.currentTimeMillis() - historyDays * 24 * 3600 * 1000);
-            LOGGER.info(
-                    "Clearing history earlier than " + new SimpleDateFormat(Context.DATE_FORMAT).format(timeLimit));
+            LOGGER.info("Clearing history earlier than " + DateUtil.formatDate(timeLimit, false));
             QueryBuilder.create(dataSource, getQuery("database.deletePositions"))
                     .setDate("serverTime", timeLimit)
                     .executeUpdate();
@@ -454,9 +593,17 @@ public class DataManager {
     }
 
     public void addObject(BaseModel entity) throws SQLException {
-        entity.setId(QueryBuilder.create(dataSource, getQuery(ACTION_INSERT, entity.getClass()), true)
+        Long ids;
+        ids=(QueryBuilder.create(dataSource, getQuery(ACTION_INSERT, entity.getClass()), true)
                 .setObject(entity)
                 .executeUpdate());
+        entity.setId(ids);
+        if (Duplicate_Database)
+        {
+        ids=(QueryBuilder.create(Dup_dataSource, getQuery(entity.getClass(),ids), ids)
+                .setObject(entity)
+                .executeUpdate(ids));
+        }
     }
 
     public void updateObject(BaseModel entity) throws SQLException {
@@ -467,7 +614,17 @@ public class DataManager {
             QueryBuilder.create(dataSource, getQuery(ACTION_UPDATE, User.class, true))
                     .setObject(entity)
                     .executeUpdate();
+        if (Duplicate_Database)    
+        {
+        QueryBuilder.create(Dup_dataSource, getQuery(ACTION_UPDATE, entity.getClass()))
+                .setObject(entity)
+                .executeUpdate();
+        if (entity instanceof User && ((User) entity).getHashedPassword() != null) {
+            QueryBuilder.create(Dup_dataSource, getQuery(ACTION_UPDATE, User.class, true))
+                    .setObject(entity)
+                    .executeUpdate();
         }
+        }}
     }
 
     public void removeObject(Class<? extends BaseModel> clazz, long entityId) throws SQLException {
