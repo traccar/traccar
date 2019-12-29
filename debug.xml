@@ -18,7 +18,7 @@
     <entry key='database.url'>jdbc:h2:./target/database</entry>
     <entry key='database.user'>sa</entry>
     <entry key='database.password'></entry>
-
+    <entry key='database.Duplicate'>true</entry>
     <entry key='atrack.custom'>true</entry>
 
 </properties>
