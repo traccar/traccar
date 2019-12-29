@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.traccar.Context;
 import org.traccar.model.MiscFormatter;
 import org.traccar.model.Permission;
-
+import java.sql.Statement;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -31,7 +31,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Collection;
@@ -41,7 +40,8 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
+//import java.sql.DatabaseMetaData;
+        
 public final class QueryBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryBuilder.class);
@@ -53,23 +53,55 @@ public final class QueryBuilder {
     private final boolean returnGeneratedKeys;
 
     private QueryBuilder(DataSource dataSource, String query, boolean returnGeneratedKeys) throws SQLException {
+        //DatabaseMetaData md;
+
         this.query = query;
         this.returnGeneratedKeys = returnGeneratedKeys;
         if (query != null) {
             connection = dataSource.getConnection();
+          //  md = connection.getMetaData();
             String parsedQuery = parse(query.trim(), indexMap);
+
+            
             try {
                 if (returnGeneratedKeys) {
-                    statement = connection.prepareStatement(parsedQuery, Statement.RETURN_GENERATED_KEYS);
+                    int[] ColIndex={1};
+                    statement = connection.prepareStatement(parsedQuery, ColIndex);
+                    //if (md.supportsGetGeneratedKeys()) { //statement = connection.prepareStatement(parsedQuery, Statement.RETURN_GENERATED_KEYS); }  else
                 } else {
                     statement = connection.prepareStatement(parsedQuery);
                 }
+
+                
             } catch (SQLException error) {
                 connection.close();
+                LOGGER.error(query);
                 throw error;
             }
         }
     }
+   
+private QueryBuilder(DataSource dataSource, String query, Long IdKey) throws SQLException {
+        
+        this.query = query;
+        this.returnGeneratedKeys=false;
+        
+        if (query != null) {
+            connection = dataSource.getConnection();
+
+            String parsedQuery = parse(query.trim(), indexMap);
+            try {
+                statement = connection.prepareStatement(parsedQuery);
+                }
+            catch (SQLException error) {
+                connection.close();
+                LOGGER.error(query);
+                throw error;
+            }
+        
+    }
+ }
+        
 
     private static String parse(String query, Map<String, List<Integer>> paramMap) {
 
@@ -140,6 +172,10 @@ public final class QueryBuilder {
         return new QueryBuilder(dataSource, query, returnGeneratedKeys);
     }
 
+    public static QueryBuilder create(DataSource dataSource, String query,Long IdKey) throws SQLException {
+        return new QueryBuilder(dataSource, query, IdKey);
+    }
+        
     private List<Integer> indexes(String name) {
         name = name.toLowerCase();
         List<Integer> result = indexMap.get(name);
@@ -291,6 +327,7 @@ public final class QueryBuilder {
                             setString(name, Context.getObjectMapper().writeValueAsString(method.invoke(object)));
                         }
                     }
+                  
                 } catch (IllegalAccessException | InvocationTargetException | JsonProcessingException error) {
                     LOGGER.warn("Get property error", error);
                 }
@@ -477,12 +514,15 @@ public final class QueryBuilder {
 
         if (query != null) {
             try {
+                
+                //statement.setNull(1, Types.INTEGER);
                 statement.execute();
                 if (returnGeneratedKeys) {
                     ResultSet resultSet = statement.getGeneratedKeys();
-                    if (resultSet.next()) {
-                        return resultSet.getLong(1);
-                    }
+                   
+                   if (resultSet.next()) {
+                       return resultSet.getLong(1);
+                   }
                 }
             } finally {
                 statement.close();
@@ -492,6 +532,33 @@ public final class QueryBuilder {
         return 0;
     }
 
+   public long executeUpdate(Long IdKey) throws SQLException {
+
+        if (query != null) {
+            try {
+                statement.setLong(1, IdKey);
+                
+      //          LOGGER.warn("ExecuteUpdate Query "+query);
+        //        LOGGER.warn("ExecuteUpdate statement "+statement);
+
+                //statement.setNull(1, Types.INTEGER);
+                statement.execute();
+                if (returnGeneratedKeys) {
+                    ResultSet resultSet = statement.getGeneratedKeys();
+                   
+                   if (resultSet.next()) {
+                       return resultSet.getLong(1);
+                   }
+                }
+            } finally {
+                statement.close();
+                connection.close();
+            }
+        }
+        return 0;
+    }
+    
+    
     public Collection<Permission> executePermissionsQuery() throws SQLException, ClassNotFoundException {
         List<Permission> result = new LinkedList<>();
         if (query != null) {
