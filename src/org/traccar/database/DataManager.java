@@ -187,7 +187,7 @@ public class DataManager {
         }
     public static boolean idClass(String Class)
     {  
-       if (Class.equals("device") || Class.equals("group") || Class.equals("user")|| Class.equals("manageduser")|| Class.equals("geofence")|| Class.equals("driver") 
+       if (Class.equals("position")||Class.equals("device") || Class.equals("group") || Class.equals("user")|| Class.equals("manageduser")|| Class.equals("geofence")|| Class.equals("driver") 
            || Class.equals("attribute") || Class.equals("calendar")|| Class.equals("command") || Class.equals("maintenance")|| Class.equals("notification") ) 
         { return true; }
         else
@@ -480,13 +480,13 @@ public class DataManager {
     }
 
     public void updateLatestPosition(Position position) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.updateLatestPosition"))
+      QueryBuilder.create(dataSource, getQuery("database.updateLatestPosition"))
                 .setDate("now", new Date())
                 .setObject(position)
                 .executeUpdate();
         if (Duplicate_Database)
         {
-        QueryBuilder.create(Dup_dataSource, getQuery("Dup_database.updateLatestPosition"))
+        QueryBuilder.create(Dup_dataSource, getQuery("Dup_database.updateLatestPosition"),false)
                 .setDate("now", new Date())
                 .setObject(position)
                 .executeUpdate();
@@ -575,6 +575,7 @@ public class DataManager {
 
     public void linkObject(Class<?> owner, long ownerId, Class<?> property, long propertyId, boolean link)
             throws SQLException {
+        
         QueryBuilder.create(dataSource, getQuery(link ? ACTION_INSERT : ACTION_DELETE, owner, property))
                 .setLong(makeNameId(owner), ownerId)
                 .setLong(makeNameId(property), propertyId)
@@ -594,15 +595,16 @@ public class DataManager {
 
     public void addObject(BaseModel entity) throws SQLException {
         Long ids;
+        
         ids=(QueryBuilder.create(dataSource, getQuery(ACTION_INSERT, entity.getClass()), true)
                 .setObject(entity)
                 .executeUpdate());
         entity.setId(ids);
         if (Duplicate_Database)
         {
-        ids=(QueryBuilder.create(Dup_dataSource, getQuery(entity.getClass(),ids), ids)
+        QueryBuilder.create(Dup_dataSource, getQuery(entity.getClass(),ids),false)
                 .setObject(entity)
-                .executeUpdate(ids));
+                .executeUpdate(ids);
         }
     }
 
