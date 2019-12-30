@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.traccar.Context;
 import org.traccar.model.MiscFormatter;
 import org.traccar.model.Permission;
-import java.sql.Statement;
+//import java.sql.Statement;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -81,29 +81,7 @@ public final class QueryBuilder {
         }
     }
    
-private QueryBuilder(DataSource dataSource, String query, Long IdKey) throws SQLException {
-        
-        this.query = query;
-        this.returnGeneratedKeys=false;
-        
-        if (query != null) {
-            connection = dataSource.getConnection();
-
-            String parsedQuery = parse(query.trim(), indexMap);
-            try {
-                statement = connection.prepareStatement(parsedQuery);
-                }
-            catch (SQLException error) {
-                connection.close();
-                LOGGER.error(query);
-                throw error;
-            }
-        
-    }
- }
-        
-
-    private static String parse(String query, Map<String, List<Integer>> paramMap) {
+private static String parse(String query, Map<String, List<Integer>> paramMap) {
 
         int length = query.length();
         StringBuilder parsedQuery = new StringBuilder(length);
@@ -172,10 +150,6 @@ private QueryBuilder(DataSource dataSource, String query, Long IdKey) throws SQL
         return new QueryBuilder(dataSource, query, returnGeneratedKeys);
     }
 
-    public static QueryBuilder create(DataSource dataSource, String query,Long IdKey) throws SQLException {
-        return new QueryBuilder(dataSource, query, IdKey);
-    }
-        
     private List<Integer> indexes(String name) {
         name = name.toLowerCase();
         List<Integer> result = indexMap.get(name);
@@ -524,7 +498,11 @@ private QueryBuilder(DataSource dataSource, String query, Long IdKey) throws SQL
                        return resultSet.getLong(1);
                    }
                 }
-            } finally {
+     
+            } 
+                      catch (SQLException error) {   LOGGER.error(query+error);  statement.close();  connection.close();}
+
+            finally {
                 statement.close();
                 connection.close();
             }
@@ -538,8 +516,6 @@ private QueryBuilder(DataSource dataSource, String query, Long IdKey) throws SQL
             try {
                 statement.setLong(1, IdKey);
                 
-      //          LOGGER.warn("ExecuteUpdate Query "+query);
-        //        LOGGER.warn("ExecuteUpdate statement "+statement);
 
                 //statement.setNull(1, Types.INTEGER);
                 statement.execute();
