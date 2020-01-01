@@ -75,6 +75,7 @@ dependencies {
     implementation "com.sun.xml.bind:jaxb-impl:2.3.2"
     implementation "javax.activation:activation:1.1.1"
     testImplementation "junit:junit:4.12"
+    testImplementation group: 'org.springframework', name: 'spring-test', version: '5.2.2.RELEASE'
 }
 
 task copyDependencies(type: Copy) {

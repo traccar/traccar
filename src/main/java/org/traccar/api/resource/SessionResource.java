@@ -18,6 +18,7 @@ package org.traccar.api.resource;
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.helper.DataConverter;
+import org.traccar.helper.IpRetriever;
 import org.traccar.helper.LogAction;
 import org.traccar.model.User;
 
@@ -106,6 +107,7 @@ public class SessionResource extends BaseResource {
             LogAction.login(user.getId());
             return user;
         } else {
+            LogAction.failedLogin(IpRetriever.retrieveIP(request));
             throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).build());
         }
     }
