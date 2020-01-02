@@ -16,22 +16,22 @@ public class IpRetrieverTest {
     private MockHttpServletRequest mockHttpServletRequest;
 
     @Before
-    public void init(){
+    public void init() {
         mockHttpServletRequest = new MockHttpServletRequest();
     }
 
     @Test
-    public void testIpBehindReverseProxy(){
+    public void testIpBehindReverseProxy() {
         mockHttpServletRequest.setRemoteAddr(GATEWAY_IP_ADDRESS);
-        mockHttpServletRequest.addHeader("X-FORWARDED-FOR",IP_ADDRESS_BEHIND_REVERSE_PROXY);
+        mockHttpServletRequest.addHeader("X-FORWARDED-FOR", IP_ADDRESS_BEHIND_REVERSE_PROXY);
 
         assertEquals(NORMAL_IP_ADDRESS, IpRetriever.retrieveIP(mockHttpServletRequest));
     }
 
     @Test
-    public void testNormalIp(){
-            mockHttpServletRequest.setRemoteAddr(NORMAL_IP_ADDRESS);
-            assertEquals(NORMAL_IP_ADDRESS, IpRetriever.retrieveIP(mockHttpServletRequest));
+    public void testNormalIp() {
+        mockHttpServletRequest.setRemoteAddr(NORMAL_IP_ADDRESS);
+        assertEquals(NORMAL_IP_ADDRESS, IpRetriever.retrieveIP(mockHttpServletRequest));
 
     }
 

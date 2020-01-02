@@ -78,11 +78,9 @@ public final class LogAction {
 
     public static void failedLogin(String ipAddress) {
 
-        if(ipAddress == null || ipAddress.isEmpty()) {
+        if (ipAddress == null || ipAddress.isEmpty()) {
             LOGGER.info(ACTION_FAILED_LOGIN_NO_IP);
-            }
-
-        else{
+        } else {
             LOGGER.info(String.format(
                     PATTERN_FAILED_LOGIN, ipAddress));
         }
@@ -101,7 +99,7 @@ public final class LogAction {
     }
 
     private static void logLinkAction(String action, long userId,
-            Class<?> owner, long ownerId, Class<?> property, long propertyId) {
+                                      Class<?> owner, long ownerId, Class<?> property, long propertyId) {
         LOGGER.info(String.format(
                 PATTERN_LINK, userId, action,
                 Introspector.decapitalize(owner.getSimpleName()), ownerId,
