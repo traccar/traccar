@@ -27,12 +27,15 @@ public final class IpRetriever {
                 return ipAddress;
             }
 
-        } else return null;
+        } else {
+            return null;
+        }
 
     }
 
     /**
-     * If the server is behind a reverse proxy, the header value will also contain the IP's from load balancer and reverse proxy
+     * If the server is behind a reverse proxy, the header value will also
+     * contain the IP's from load balancer and reverse proxy.
      * This method gets rid of them.
      *
      * @param ipAddress IP address value from the header
