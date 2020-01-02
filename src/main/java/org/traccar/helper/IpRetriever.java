@@ -3,7 +3,7 @@ package org.traccar.helper;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Gets the client's IP address regardless of whether the server is behind a proxy server or a load balancer.
+ * Gets the client's IP address regardless of whether the server is behind a proxy/reverse proxy server or a load balancer.
  *
  */
 public final class IpRetriever
@@ -12,8 +12,7 @@ public final class IpRetriever
 
         /**
          * Retrieves the client's IP address.
-         * Handles the cases like whether the server is behind a proxy server or a load balancer
-         * also if the request is being made by using a reverse proxy.
+         * Handles the cases like whether the server is behind a proxy/reverse proxy server or a load balancer
          *
          * @param request {@link HttpServletRequest} instance
          * @return client's IP address
@@ -36,7 +35,7 @@ public final class IpRetriever
     }
 
         /**
-         * If the request uses a reverse proxy, the header value will also contain load balancer and reverse proxy server IPs
+         * If the server is behind a reverse proxy, the header value will also contain the IP's from load balancer and reverse proxy
          * This method gets rid of them.
          *
          * @param ipAddress IP address value from the header
