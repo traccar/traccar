@@ -283,5 +283,6 @@
     <entry key='s168.port'>5204</entry>
     <entry key='vnet.port'>5205</entry>
     <entry key='blue.port'>5206</entry>
+    <entry key='pst.port'>5207</entry>
 
 </properties>
