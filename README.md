@@ -1,9 +1,32 @@
 # [Traccar](https://www.traccar.org)
-[![Build Status](https://travis-ci.org/traccar/traccar.svg?branch=master)](https://travis-ci.org/tananaev/traccar)
+[![Build Status](https://travis-ci.org/traccar/traccar.svg?branch=master)](https://travis-ci.org/traccar/traccar)
 
 ## Overview
 
-Traccar is open source server for various GPS tracking devices. Project is written in Java and works on most platforms with installed Java Runtime Environment.
+Traccar is an open source GPS tracking system. This repository contains Java-based back-end service. It supports more than 170 GPS protocols and more than 1500 models of GPS tracking devices. Traccar can be used with any major SQL database system. It also provides easy to use [REST API](https://www.traccar.org/traccar-api/).
+
+Other parts of Traccar solution include:
+
+- [Traccar web app](https://github.com/traccar/traccar-web)
+- [Traccar Manager Android app](https://github.com/traccar/traccar-manager-android)
+- [Traccar Manager iOS app](https://github.com/traccar/traccar-manager-ios)
+
+There is also a set of mobile apps that you can use for tracking mobile devices:
+
+- [Traccar Client Android app](https://github.com/traccar/traccar-client-android)
+- [Traccar Client iOS app](https://github.com/traccar/traccar-client-ios)
+
+## Features
+
+Some of the available features include:
+
+- Real-time GPS tracking
+- Driver behaviour monitoring
+- Detailed and summary reports
+- Geofencing functionality
+- Alarms and notifications
+- Account and device management
+- Email and SMS support
 
 ## Build
 

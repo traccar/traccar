@@ -11,18 +11,15 @@
     <entry key='web.console'>true</entry>
 
     <entry key='geocoder.enable'>false</entry>
+    <entry key='geocoder.type'>ban</entry>
 
-    <entry key='logger.file'>target/tracker-server.log</entry>
+    <entry key='logger.console'>true</entry>
 
     <entry key='database.driver'>org.h2.Driver</entry>
     <entry key='database.url'>jdbc:h2:./target/database</entry>
     <entry key='database.user'>sa</entry>
     <entry key='database.password'></entry>
 
-    <entry key='intellitrac.port'>6037</entry>
-
-    <!--<entry key='ldap.enable'>true</entry>
-    <entry key='ldap.url'>ldap://ldap.forumsys.com:389</entry>
-    <entry key='ldap.context'>dc=example,dc=com</entry>-->
+    <entry key='atrack.custom'>true</entry>
 
 </properties>

@@ -7,3 +7,7 @@ nbactions.xml
 *.iml
 .DS_Store
 .checkstyle
+.gradle
+out
+build
+src/main/java/org/traccar/protobuf

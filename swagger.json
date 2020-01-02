@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "version": "3.17",
+        "version": "4.6",
         "title": "traccar"
     },
     "host": "demo.traccar.org",
@@ -168,11 +168,22 @@
                     {
                         "name": "deviceId",
                         "in": "query",
+                        "description" : "Internal device identifier. Only works if device has already reported some locations",
+                        "required" : false,
                         "type": "integer"
+                    },
+                    {
+                        "name": "protocol",
+                        "in": "query",
+                        "description" : "Protocol name. Can be used instead of device id",
+                        "required" : false,
+                        "type": "string"
                     },
                     {
                         "name": "textChannel",
                         "in": "query",
+                        "description" : "When `true` return SMS commands. If not specified or `false` return data commands",
+                        "required" : false,
                         "type": "boolean"
                     }
                 ],
@@ -286,9 +297,9 @@
                 }
             }
         },
-        "/devices/{id}/distance": {
+        "/devices/{id}/accumulators": {
             "put": {
-                "summary": "Update the distance counter of the Device",
+                "summary": "Update total distance and hours of the Device",
                 "parameters": [
                     {
                         "$ref": "#/parameters/entityId"
@@ -298,7 +309,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/DeviceTotalDistance"
+                            "$ref": "#/definitions/DeviceAccumulators"
                         }
                     }
                 ],
@@ -1351,10 +1362,10 @@
                 }
             }
         },
-        "/maintenances": {
+        "/maintenance": {
             "get": {
-                "summary": "Fetch a list of Maintenances",
-                "description": "Without params, it returns a list of Maintenances the user has access to",
+                "summary": "Fetch a list of Maintenance",
+                "description": "Without params, it returns a list of Maintenance the user has access to",
                 "parameters": [
                     {
                         "$ref": "#/parameters/all"
@@ -1401,7 +1412,7 @@
                 }
             }
         },
-        "/maintenances/{id}": {
+        "/maintenance/{id}": {
             "put": {
                 "summary": "Update a Maintenance",
                 "parameters": [
@@ -1492,9 +1503,13 @@
                     "type": "number"
                 },
                 "network": {
-                    "type": "string"
+                    "type": "object",
+                    "additionalProperties": true
                 },
-                "attributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "User": {
@@ -1561,7 +1576,10 @@
                 "token": {
                     "type": "string"
                 },
-                "attributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "Server": {
@@ -1614,7 +1632,10 @@
                 "coordinateFormat": {
                     "type": "string"
                 },
-                "attributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "Command": {
@@ -1631,7 +1652,10 @@
                 "type": {
                     "type": "string"
                 },
-                "attributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "Device": {
@@ -1680,7 +1704,10 @@
                         "type": "integer"
                     }
                 },
-                "attributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "Group": {
@@ -1694,7 +1721,10 @@
                 "groupId": {
                     "type": "integer"
                 },
-                "attributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "Permission": {
@@ -1717,7 +1747,7 @@
                     "type": "integer"
                 },
                 "calendarId": {
-                    "description": "Geofence Id, can be second parameter only and only in combination with userId",
+                    "description": "Calendar Id, can be second parameter only and only in combination with userId",
                     "type": "integer"
                 },
                 "attributeId": {
@@ -1758,7 +1788,10 @@
                 "calendarId": {
                     "type": "integer"
                 },
-                "attributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "Notification": {
@@ -1784,7 +1817,10 @@
                 "calendarId": {
                     "type": "integer"
                 },
-                "attributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "NotificationType": {
@@ -1819,7 +1855,10 @@
                 "maintenanceId": {
                     "type": "integer"
                 },
-                "attributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "ReportSummary": {
@@ -1977,7 +2016,7 @@
                 }
             }
         },
-        "DeviceTotalDistance": {
+        "DeviceAccumulators": {
             "properties": {
                 "deviceId": {
                     "type": "integer"
@@ -1985,6 +2024,9 @@
                 "totalDistance": {
                     "type": "number",
                     "description": "in meters"
+                },
+                "hours": {
+                    "type": "number"
                 }
             }
         },
@@ -2000,7 +2042,10 @@
                     "type": "string",
                     "description": "base64 encoded in iCalendar format"
                 },
-                "atributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "Attribute": {
@@ -2034,7 +2079,10 @@
                 "uniqueId": {
                     "type": "string"
                 },
-                "atributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         },
         "Maintenance": {
@@ -2054,7 +2102,10 @@
                 "period": {
                     "type": "number"
                 },
-                "atributes": {}
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
             }
         }
     },
