@@ -26,27 +26,7 @@ import java.util.Properties;
 import com.ning.http.client.AsyncHttpClientConfigDefaults;
 import org.apache.velocity.app.VelocityEngine;
 import org.eclipse.jetty.util.URIUtil;
-import org.traccar.database.CalendarManager;
-import org.traccar.database.CommandsManager;
-import org.traccar.database.AttributesManager;
-import org.traccar.database.BaseObjectManager;
-import org.traccar.database.ConnectionManager;
-import org.traccar.database.DataManager;
-import org.traccar.database.DeviceManager;
-import org.traccar.database.DriversManager;
-import org.traccar.database.IdentityManager;
-import org.traccar.database.LdapProvider;
-import org.traccar.database.MaintenancesManager;
-import org.traccar.database.MediaManager;
-import org.traccar.database.NotificationManager;
-import org.traccar.database.FCMPushNotificationManager;
-import org.traccar.database.FCMUserTokenManager;
-import org.traccar.database.PeripheralSensorManager;
-import org.traccar.database.PermissionsManager;
-import org.traccar.database.GeofenceManager;
-import org.traccar.database.GroupsManager;
-import org.traccar.database.StatisticsManager;
-import org.traccar.database.UsersManager;
+import org.traccar.database.*;
 import org.traccar.events.MotionEventHandler;
 import org.traccar.events.OverspeedEventHandler;
 import org.traccar.geocoder.AddressFormat;
@@ -134,6 +114,18 @@ public final class Context {
 
     public static MediaManager getMediaManager() {
         return mediaManager;
+    }
+
+    private static CustomersManager customersManager;
+
+    public static CustomersManager getCustomersManager() {
+        return customersManager;
+    }
+
+    private static CustomerLocationManager customerLocationManager;
+
+    public static CustomerLocationManager getCustomerLocationManager() {
+        return customerLocationManager;
     }
 
     private static UsersManager usersManager;
@@ -386,6 +378,8 @@ public final class Context {
             usersManager = new UsersManager(dataManager);
             groupsManager = new GroupsManager(dataManager);
             deviceManager = new DeviceManager(dataManager);
+            customersManager = new CustomersManager(dataManager);
+            customerLocationManager = new CustomerLocationManager(dataManager);
         }
 
         identityManager = deviceManager;

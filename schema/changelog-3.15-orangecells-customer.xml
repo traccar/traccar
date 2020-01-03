@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+        logicalFilePath="changelog-3.15-orangecells">
+
+    <changeSet author="saurako" id="changelog-3.15-orangecells-customer">
+        <createTable tableName="customers">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="name" type="VARCHAR(200)">
+                <constraints unique="true" />
+            </column>
+            <column name="attributes" type="VARCHAR(4096)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <createTable tableName="customerlocations">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="customerid" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="latitude" type="DOUBLE">
+                <constraints nullable="false" />
+            </column>
+            <column name="longitude" type="DOUBLE">
+                <constraints nullable="false" />
+            </column>
+            <column name="address" type="VARCHAR(4096)">
+                <constraints nullable="false" />
+            </column>
+            <column name="attributes" type="VARCHAR(4096)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="customerlocations"
+                                 baseColumnNames="customerid"
+                                 referencedTableName="customers"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_customerlocation_customer"
+                                 onDelete="CASCADE" />
+
+    </changeSet>
+</databaseChangeLog>
