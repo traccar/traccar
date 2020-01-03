@@ -6,6 +6,9 @@ import javax.servlet.http.HttpServletRequest;
 public final class ServletHelper {
 
 
+    private ServletHelper() {
+    }
+
     public static String retrieveRemoteAddress(HttpServletRequest request) {
 
         if (request != null) {
@@ -21,7 +24,5 @@ public final class ServletHelper {
         } else {
             return null;
         }
-
-
     }
 }
