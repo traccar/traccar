@@ -19,6 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -287,9 +288,15 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
     private void sendResponse(Channel channel, SocketAddress remoteAddress, String id, String type) {
         if (channel != null && id != null) {
-            DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+            String response;
+            DateFormat dateFormat = new SimpleDateFormat(type.equals("R12") ? "HHmmss" : "yyyyMMddHHmmss");
             dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-            String response = String.format("*HQ,%s,V4,%s,%s#", id, type, dateFormat.format(new Date()));
+            String time = dateFormat.format(new Date());
+            if (type.equals("R12")) {
+                response = String.format("*HQ,%s,%s,%s#", id, type, time);
+            } else {
+                response = String.format("*HQ,%s,V4,%s,%s#", id, type, time);
+            }
             channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
     }
@@ -316,6 +323,8 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext() && parser.next().equals("V1")) {
             sendResponse(channel, remoteAddress, id, "V1");
+        } else if (Context.getConfig().getBoolean(getProtocolName() + ".ack")) {
+            sendResponse(channel, remoteAddress, id, "R12");
         }
 
         DateBuilder dateBuilder = new DateBuilder();
