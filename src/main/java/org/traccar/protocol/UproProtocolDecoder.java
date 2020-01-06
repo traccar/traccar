@@ -172,7 +172,7 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                             Integer.parseInt(data.readSlice(6).toString(StandardCharsets.US_ASCII)) * 0.1);
                     break;
                 case 'J':
-                    if (data.readableBytes() == 6) {
+                    if (data.readableBytes() >= 6) {
                         char index = (char) data.readUnsignedByte();
                         int status = data.readUnsignedByte();
                         double value = Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII)) * 0.1;
