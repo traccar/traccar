@@ -102,7 +102,7 @@ public class PstProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
 
-            return position;
+            return position.getFixTime() != null ? position : null;
         }
 
         return null;

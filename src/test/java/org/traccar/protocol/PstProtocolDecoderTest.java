@@ -11,6 +11,9 @@ public class PstProtocolDecoderTest extends ProtocolTest {
         PstProtocolDecoder decoder = new PstProtocolDecoder(null);
 
         verifyNull(decoder, binary(
+                "2faf9b4c0600000012054f36ec194000bfa9"));
+
+        verifyNull(decoder, binary(
                 "2faf9b5605e40000e0022faf9b560196cb2f003f0c72ab56129ae0847ac98801cd1ed8"));
 
         verifyNull(decoder, binary(
