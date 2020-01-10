@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -241,6 +241,10 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_ARCHIVE, values[index++].equals("0") ? true : null);
         position.set(Position.KEY_INDEX, Integer.parseInt(values[index++]));
         position.set(Position.KEY_STATUS, Integer.parseInt(values[index++]));
+
+        if (values[index].length() == 3) {
+            index += 1; // collaborative network
+        }
 
         DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHH:mm:ss");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
