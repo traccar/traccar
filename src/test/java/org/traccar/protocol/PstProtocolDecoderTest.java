@@ -10,6 +10,12 @@ public class PstProtocolDecoderTest extends ProtocolTest {
 
         PstProtocolDecoder decoder = new PstProtocolDecoder(null);
 
+        verifyPosition(decoder, binary(
+                "2faf9ab606000004c7055052ec88c0070b04000015050c09b500a25271c733e0720d01fe0f045052ec8410145052ba07858413918af325e7020802fe010001051103ffff0015023bbdc87d"));
+
+        verifyPosition(decoder, binary(
+                "2faf9ab606000004c7055052ec88c0070b04000015050c09b500a25271c733e0720d01fe0f045052ec8410145052ba07858413918af325e7020802fe010001051103ffff0015023bbdc87d"));
+
         verifyNull(decoder, binary(
                 "2faf9b4c0600000012054f36ec194000bfa9"));
 

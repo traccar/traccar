@@ -41,14 +41,16 @@ public class PstProtocolDecoder extends BaseProtocolDecoder {
                 .setYear((int) BitUtil.between(value, 26, 32))
                 .setMonth((int) BitUtil.between(value, 22, 26))
                 .setDay((int) BitUtil.between(value, 17, 22))
-                .setMonth((int) BitUtil.between(value, 12, 17))
-                .setMonth((int) BitUtil.between(value, 6, 12))
-                .setMonth((int) BitUtil.between(value, 0, 6)).getDate();
+                .setHour((int) BitUtil.between(value, 12, 17))
+                .setMinute((int) BitUtil.between(value, 6, 12))
+                .setSecond((int) BitUtil.between(value, 0, 6)).getDate();
     }
 
     private double readCoordinate(ByteBuf buf) {
         long value = buf.readUnsignedInt();
-        return (BitUtil.from(value, 16) + BitUtil.to(value, 16) * 0.00001) / 60;
+        int sign = BitUtil.check(value, 31) ? -1 : 1;
+        value = BitUtil.to(value, 31);
+        return sign * (BitUtil.from(value, 16) + BitUtil.to(value, 16) * 0.00001) / 60;
     }
 
     @Override
@@ -85,7 +87,10 @@ public class PstProtocolDecoder extends BaseProtocolDecoder {
 
                 switch (tag) {
                     case 0x0D:
-                        position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte() * 5);
+                        int battery = buf.readUnsignedByte();
+                        if (battery <= 20) {
+                            position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte() * 5);
+                        }
                         break;
                     case 0x10:
                         position.setFixTime(readDate(buf));
