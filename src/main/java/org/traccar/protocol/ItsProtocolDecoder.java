@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,8 +81,8 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             .number("([01]{2}),")                // outputs
             .groupBegin()
             .number("d+,")                       // index
-            .number("(d+.d+),")                  // adc1
-            .number("(d+.d+),")                  // adc2
+            .number("(d+.?d*),")                 // adc1
+            .number("(d+.?d*),")                 // adc2
             .groupEnd("?")
             .groupEnd("?")
             .or()
@@ -195,22 +195,25 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
 
             position.set("emergency", parser.nextInt() > 0);
 
-            String[] cells = parser.next().split(",");
-            int mcc = Integer.parseInt(cells[1]);
-            int mnc = Integer.parseInt(cells[2]);
-            int lac = Integer.parseInt(cells[3], 16);
-            int cid = Integer.parseInt(cells[4], 16);
-            Network network = new Network(CellTower.from(mcc, mnc, lac, cid, Integer.parseInt(cells[0])));
-            if (!cells[5].startsWith("(")) {
-                for (int i = 0; i < 4; i++) {
-                    lac = Integer.parseInt(cells[5 + 3 * i + 1], 16);
-                    cid = Integer.parseInt(cells[5 + 3 * i + 2], 16);
-                    if (lac > 0 && cid > 0) {
-                        network.addCellTower(CellTower.from(mcc, mnc, lac, cid));
+            String cellsString = parser.next();
+            if (!cellsString.contains("x")) {
+                String[] cells = cellsString.split(",");
+                int mcc = Integer.parseInt(cells[1]);
+                int mnc = Integer.parseInt(cells[2]);
+                int lac = Integer.parseInt(cells[3], 16);
+                int cid = Integer.parseInt(cells[4], 16);
+                Network network = new Network(CellTower.from(mcc, mnc, lac, cid, Integer.parseInt(cells[0])));
+                if (!cells[5].startsWith("(")) {
+                    for (int i = 0; i < 4; i++) {
+                        lac = Integer.parseInt(cells[5 + 3 * i + 1], 16);
+                        cid = Integer.parseInt(cells[5 + 3 * i + 2], 16);
+                        if (lac > 0 && cid > 0) {
+                            network.addCellTower(CellTower.from(mcc, mnc, lac, cid));
+                        }
                     }
                 }
+                position.setNetwork(network);
             }
-            position.setNetwork(network);
 
             String input = parser.next();
             if (input.charAt(input.length() - 1) == '2') {
