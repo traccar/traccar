@@ -42,8 +42,16 @@ public class IgnitionStateHandler extends BaseDataHandler {
             return position;
         }
 
+        Position lastPosition = Context.getDeviceManager().getLastPosition(deviceId);
+        if (lastPosition.getDeviceTime().getTime() > position.getDeviceTime().getTime()) {
+            Log.debug(String.format("Back dated payload for calculating ignition for deviceId: %d. Ignoring.", deviceId));
+            return position;
+        }
+
         int upperThreshold = device.getInteger(BATTERY_UPPER_MILLI_VOLTS_THRESHOLD_FIELD_NAME);
         int lowerThreshold = device.getInteger(BATTERY_LOWER_MILLI_VOLTS_THRESHOLD_FIELD_NAME);
+
+        
 
         if (maybeCurrentVoltage.get() > upperThreshold) {
             position.set(Position.KEY_CALCULATED_IGNITION, true);
