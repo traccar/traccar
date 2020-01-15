@@ -71,6 +71,8 @@ public class Position extends Message {
     public static final String KEY_TOTAL_DISTANCE = "totalDistance"; // meters
     public static final String KEY_IGN_ON_MILLIS = "ignOnMillis"; // Since last on.
     public static final String KEY_TOTAL_IGN_ON_MILLIS = "totalIgnOnMillis"; // Ever, after we started tracking.
+    public static final String KEY_CALC_IGN_ON_MILLIS = "ignCalcOnMillis";
+    public static final String KEY_TOTAL_CALC_IGN_ON_MILLIS = "totalIgnCalcOnMillis";
     public static final String KEY_RPM = "rpm";
     public static final String KEY_VIN = "vin";
     public static final String KEY_APPROXIMATE = "approximate";
