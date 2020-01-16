@@ -109,6 +109,9 @@ public class H02ProtocolDecoderTest extends ProtocolTest {
 
         verifyAttributes(decoder, buffer(
                 "*HQ,4208150188,NBR,210249,260,6,0,7,1014,50675,37,1014,50633,27,1014,17933,18,1014,17231,15,1014,50632,12,1014,13211,11,1014,17031,10,281216,FFFFFBFF,2#"));
+        
+        verifyAttributes(decoder, buffer(
+                "*HQ,7401004662,NBR,160453,234,10,0,2,21580,27766,-67,21580,27766,-67,291019,FFFFFBFF,6#"));
 
         verifyAttributes(decoder, buffer(
                 "*HQ,1600068812,NBR,141335,262,02,255,6,431,17003,26,431,11101,13,431,6353,13,431,22172,13,431,11093,13,431,60861,10,151216,FFFFFBFF#"));
