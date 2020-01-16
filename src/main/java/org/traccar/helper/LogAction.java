@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,14 +38,13 @@ public final class LogAction {
 
     private static final String ACTION_LOGIN = "login";
     private static final String ACTION_LOGOUT = "logout";
-    private static final String ACTION_FAILED_LOGIN_NO_IP = "Failed Login Attempt. IP address: failed to retrieve";
 
     private static final String ACTION_DEVICE_ACCUMULATORS = "resetDeviceAccumulators";
 
     private static final String PATTERN_OBJECT = "user: %d, action: %s, object: %s, id: %d";
     private static final String PATTERN_LINK = "user: %d, action: %s, owner: %s, id: %d, property: %s, id: %d";
     private static final String PATTERN_LOGIN = "user: %d, action: %s";
-    private static final String PATTERN_FAILED_LOGIN = "Failed Login Attempt. IP address: %s";
+    private static final String PATTERN_LOGIN_FAILED = "login failed from: %s";
     private static final String PATTERN_DEVICE_ACCUMULATORS = "user: %d, action: %s, deviceId: %d";
 
     public static void create(long userId, BaseModel object) {
@@ -76,17 +75,12 @@ public final class LogAction {
         logLoginAction(ACTION_LOGOUT, userId);
     }
 
-    public static void failedLogin(String ipAddress) {
-
-        if (ipAddress == null || ipAddress.isEmpty()) {
-            LOGGER.info(ACTION_FAILED_LOGIN_NO_IP);
-        } else {
-            LOGGER.info(String.format(
-                    PATTERN_FAILED_LOGIN, ipAddress));
+    public static void failedLogin(String remoteAddress) {
+        if (remoteAddress == null || remoteAddress.isEmpty()) {
+            remoteAddress = "unknown";
         }
-
+        LOGGER.info(String.format(PATTERN_LOGIN_FAILED, remoteAddress));
     }
-
 
     public static void resetDeviceAccumulators(long userId, long deviceId) {
         LOGGER.info(String.format(
