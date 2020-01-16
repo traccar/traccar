@@ -10,7 +10,7 @@
 
     <preConditions onFail="MARK_RAN">
       <not>
-        <indexExists tableName="user_device_user_id" />
+        <indexExists indexName="user_device_user_id" />
       </not>
     </preConditions>
 
