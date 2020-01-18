@@ -1001,7 +1001,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == MSG_GPS_MODULAR) {
 
-            return decodeExtendedModular(channel, buf, deviceSession, type);
+            return decodeExtendedModular(buf, deviceSession);
 
         } else {
 
@@ -1012,7 +1012,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
-    private Object decodeExtendedModular(Channel channel, ByteBuf buf, DeviceSession deviceSession, int type) {
+    private Object decodeExtendedModular(ByteBuf buf, DeviceSession deviceSession) {
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
