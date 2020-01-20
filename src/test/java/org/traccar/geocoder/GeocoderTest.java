@@ -73,7 +73,7 @@ public class GeocoderTest {
     @Ignore
     @Test
     public void testHere() {
-        Geocoder geocoder = new HereGeocoder("", "", null, 0, new AddressFormat());
+        Geocoder geocoder = new HereGeocoder("https://reverse.geocoder.ls.hereapi.com/6.2/reversegeocode.json", "", "", null, 0, new AddressFormat());
         String address = geocoder.getAddress(48.8575, 2.2944, null);
         assertEquals("6 Avenue Gustave Eiffel, Paris, Île-de-France, FRA", address);
     }
