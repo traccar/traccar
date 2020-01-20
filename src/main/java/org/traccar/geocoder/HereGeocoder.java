@@ -30,7 +30,8 @@ public class HereGeocoder extends JsonGeocoder {
         return url;
     }
 
-    public HereGeocoder(String url, String id, String key, String language, int cacheSize, AddressFormat addressFormat) {
+    public HereGeocoder(String url, String id, String key, String language,
+                        int cacheSize, AddressFormat addressFormat) {
         super(formatUrl(url, id, key, language), cacheSize, addressFormat);
     }
 
