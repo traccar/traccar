@@ -375,6 +375,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                     }
                     remaining -= attribute.length() + 1;
                 }
+                index += 1; // checksum
                 break;
             default:
                 break;
