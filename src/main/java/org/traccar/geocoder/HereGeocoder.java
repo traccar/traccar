@@ -29,7 +29,7 @@ public class HereGeocoder extends JsonGeocoder {
         url += "&app_code=" + key;
         url += "&apiKey=" + key;
         if (language != null) {
-          url += "&language=" + language;
+            url += "&language=" + language;
         }
         return url;
     }
