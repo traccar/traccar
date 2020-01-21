@@ -170,7 +170,7 @@ public class MainModule extends AbstractModule {
                 case "ban":
                     return new BanGeocoder(cacheSize, addressFormat);
                 case "here":
-                    return new HereGeocoder(id, key, language, cacheSize, addressFormat);
+                    return new HereGeocoder(url, id, key, language, cacheSize, addressFormat);
                 case "mapmyindia":
                     return new MapmyIndiaGeocoder(url, key, cacheSize, addressFormat);
                 default:
