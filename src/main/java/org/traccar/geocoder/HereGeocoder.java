@@ -29,14 +29,14 @@ public class HereGeocoder extends JsonGeocoder {
       url += "&app_code=" + key;
       url += "&apiKey=" + key;
       if (language != null) {
-          url += "&language=" + language;
+        url += "&language=" + language;
       }
       return url;
     }
 
-    public HereGeocoder(String url, String id, String key, String language,
-                        int cacheSize, AddressFormat addressFormat) {
-        super(formatUrl(url, id, key, language), cacheSize, addressFormat);
+    public HereGeocoder(
+        String url, String id, String key, String language, int cacheSize, AddressFormat addressFormat) {
+      super(formatUrl(url, id, key, language), cacheSize, addressFormat);
     }
 
     @Override
