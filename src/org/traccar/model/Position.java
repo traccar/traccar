@@ -61,6 +61,7 @@ public class Position extends Message {
     public static final String KEY_VERSION_HW = "versionHw";
     public static final String KEY_TYPE = "type";
     public static final String KEY_IGNITION = "ignition";
+    public static final String KEY_CALCULATED_IGNITION = "ignCalc";
     public static final String KEY_FLAGS = "flags";
     public static final String KEY_ANTENNA = "antenna";
     public static final String KEY_CHARGE = "charge";
@@ -70,6 +71,8 @@ public class Position extends Message {
     public static final String KEY_TOTAL_DISTANCE = "totalDistance"; // meters
     public static final String KEY_IGN_ON_MILLIS = "ignOnMillis"; // Since last on.
     public static final String KEY_TOTAL_IGN_ON_MILLIS = "totalIgnOnMillis"; // Ever, after we started tracking.
+    public static final String KEY_CALC_IGN_ON_MILLIS = "ignCalcOnMillis";
+    public static final String KEY_TOTAL_CALC_IGN_ON_MILLIS = "totalIgnCalcOnMillis";
     public static final String KEY_RPM = "rpm";
     public static final String KEY_VIN = "vin";
     public static final String KEY_APPROXIMATE = "approximate";

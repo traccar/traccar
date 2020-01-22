@@ -45,7 +45,7 @@ public class DeviceResource extends BaseObjectResource<Device> {
 
     public DeviceResource() {
         super(Device.class);
-        compareByLastUpdate = Comparator.comparing(o -> ((Long) o.getLastUpdate().getTime()));
+        compareByLastUpdate = Comparator.comparing(o -> o.getLastUpdate() == null? 0L : ((Long) o.getLastUpdate().getTime()));
     }
 
     @GET
