@@ -26,7 +26,7 @@ public class BlueProtocol extends BaseProtocol {
         addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 1, 2, 3, 0));
+                pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 1, 2, -2, 0));
                 pipeline.addLast(new BlueProtocolDecoder(BlueProtocol.this));
             }
         });
