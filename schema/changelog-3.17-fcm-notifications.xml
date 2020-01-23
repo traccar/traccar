@@ -159,6 +159,14 @@
         </insert>
     </changeSet>
 
+    <changeSet author="saurako" id="changelog-3.17-fcm-notifications-add-idling-event">
+        <insert tableName="fcmpushnotificationtypes">
+            <column name="eventtype" value="deviceStandstill" />
+            <column name="prettyName" value="Device Idling" />
+            <column name="notificationString" value="Device idling detected"/>
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>
 
 
