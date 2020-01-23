@@ -37,6 +37,7 @@ public class StandstillEventHandler extends BaseEventHandler {
 
         if (!deviceIdlingStartPositionMap.containsKey(deviceId)) {
             if (position.getLong(Position.KEY_IGN_ON_MILLIS) > 0) {
+                Log.debug(String.format("[idling] Starting meter on %d", deviceId));
                 deviceIdlingStartPositionMap.put(deviceId, position);
             }
             return null;
@@ -54,8 +55,10 @@ public class StandstillEventHandler extends BaseEventHandler {
             return null;
         }
 
-        if (position.getDeviceTime().getTime() - lastPosition.getDeviceTime().getTime() >= DATA_LOSS_FOR_IGNITION_MILLIS) {
+        Position actualLastPosition = Context.getDeviceManager().getLastPosition(deviceId);
+        if (position.getDeviceTime().getTime() - actualLastPosition.getDeviceTime().getTime() >= DATA_LOSS_FOR_IGNITION_MILLIS) {
             // Reset if data loss
+            Log.debug(String.format("[idling] Data loss detected on %d. Resetting meter.", deviceId));
             if (deviceIdlingStartPositionMap.containsKey(deviceId)) {
                 deviceIdlingStartPositionMap.remove(deviceId);
             }
@@ -70,6 +73,8 @@ public class StandstillEventHandler extends BaseEventHandler {
         long deviceRunTime = position.getLong(Position.KEY_TOTAL_IGN_ON_MILLIS) - lastPosition.getLong(Position.KEY_TOTAL_IGN_ON_MILLIS);
         double distance = position.getDouble(Position.KEY_TOTAL_DISTANCE) - lastPosition.getDouble(Position.KEY_TOTAL_DISTANCE);
 
+        Log.debug(String.format("[idling] Checkign idling on %d. runTime: %d distance: %f", deviceId, deviceRunTime, distance));
+
         if (deviceRunTime > maxIdlingTimeMillis && distance < MIN_DISTANCE) { // Engine run but not moved
             Event event = new Event(Event.TYPE_DEVICE_STANDSTILL, position.getDeviceId(), lastPosition.getId(), lastPosition.getDeviceTime());
             event.set("endPositionId", position.getId());
@@ -82,8 +87,11 @@ public class StandstillEventHandler extends BaseEventHandler {
         }
 
         if (distance > MIN_DISTANCE) {
+            Log.debug(String.format("[idling] Allowed movement detected on %d. runTime: %d distance: %f", deviceId, deviceRunTime, distance));
             deviceIdlingStartPositionMap.put(deviceId, position);
         }
+
+        Log.debug(String.format("[idling] Idling on %d not sufficient by time or distance. runTime: %d distance: %f", deviceId, deviceRunTime, distance));
 
         // If the deviceRunTime is lesser than the max idling time, we don't care if the device has moved or not.
         return null;
