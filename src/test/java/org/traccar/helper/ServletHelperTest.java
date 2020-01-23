@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 public class ServletHelperTest {
 
     @Test
-    public void testIpBehindReverseProxy() {
+    public void testRetrieveRemoteAddressProxyMultiple() {
         MockRequest request = new MockRequest();
         request.setRemoteAddress("147.120.1.5");
         request.addHeader("X-FORWARDED-FOR", "231.23.45.65, 10.20.10.33, 10.20.20.34");
@@ -20,7 +20,16 @@ public class ServletHelperTest {
     }
 
     @Test
-    public void testNormalIp() {
+    public void testRetrieveRemoteAddressProxySingle() {
+        MockRequest request = new MockRequest();
+        request.setRemoteAddress("147.120.1.5");
+        request.addHeader("X-FORWARDED-FOR", "231.23.45.65");
+
+        assertEquals("231.23.45.65", ServletHelper.retrieveRemoteAddress(request));
+    }
+
+    @Test
+    public void testRetrieveRemoteAddressNoProxy() {
         MockRequest request = new MockRequest();
         request.setRemoteAddress("231.23.45.65");
 
