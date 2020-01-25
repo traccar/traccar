@@ -730,6 +730,14 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 decodeStatus(position, buf);
             }
 
+            if (type == MSG_GPS_LBS_1 && buf.readableBytes() > 75 + 6) {
+                position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+                String data = buf.readCharSequence(buf.readUnsignedByte(), StandardCharsets.US_ASCII).toString();
+                buf.readUnsignedByte(); // alarm
+                buf.readUnsignedByte(); // swiped
+                position.set("driverLicense", data.trim());
+            }
+
             if (type == MSG_GPS_LBS_1 && buf.readableBytes() == 2 + 6) {
                 int mask = buf.readUnsignedShort();
                 position.set(Position.KEY_IGNITION, BitUtil.check(mask, 8 + 7));
