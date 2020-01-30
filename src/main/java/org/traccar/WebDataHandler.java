@@ -20,6 +20,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.channel.ChannelHandler;
 import io.netty.util.Timeout;
 import io.netty.util.TimerTask;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
@@ -52,6 +54,8 @@ public class WebDataHandler extends BaseDataHandler {
 
     private static final String KEY_POSITION = "position";
     private static final String KEY_DEVICE = "device";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebDataHandler.class);
 
     private final IdentityManager identityManager;
     private final ObjectMapper objectMapper;
@@ -219,19 +223,29 @@ public class WebDataHandler extends BaseDataHandler {
 
             private void retry() {
                 try {
-                    if (retryEnabled && deliveryPendingCurrent.get() <= deliveryPendingLimit) {
-                        GlobalTimer.getTimer().newTimeout(new TimerTask() {
-                            @Override
-                            public void run(Timeout timeout) {
-                                if (!timeout.isCancelled()) {
-                                    if (delay < retryDelayMax) {
-                                        delay++;
+                    String message = "Position forwarding failed.";
+                    if (!retryEnabled) {
+                        LOGGER.warn(message);
+                    } else {
+                        int pending = deliveryPendingCurrent.get();
+                        if (pending <= deliveryPendingLimit) {
+                            LOGGER.warn(message + " Pending: " + pending
+                                + ". Retrying in " + delay + " seconds.");
+                            GlobalTimer.getTimer().newTimeout(new TimerTask() {
+                                @Override
+                                public void run(Timeout timeout) {
+                                    if (!timeout.isCancelled()) {
+                                        if (delay < retryDelayMax) {
+                                            delay++;
+                                        }
+                                        send();
                                     }
-                                    send();
                                 }
-                            }
-                        }, delay, TimeUnit.SECONDS);
-                        return;
+                            }, delay, TimeUnit.SECONDS);
+                            return;
+                        }
+                        LOGGER.warn(message + " Pending: " + pending
+                            + ". Delivery will not be retried.");
                     }
                 } catch (Exception e) {
                 }
