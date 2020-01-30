@@ -104,23 +104,22 @@ public final class Keys {
      * Position forwarding retrying enable. When enabled, additional attempts are made to deliver positions.
      * If initial delivery fails, because of an unreachable server or an HTTP response different from '200 OK',
      * the software waits for 'forward.retry.delay.min' seconds to retry delivery. On subsequent failures, this
-     * delay is incremented by 1 second up to 'forward.retry.delay.max'. On successful delivery, the delay is reset
-     * to 'forward.retry.delay.min'. Pending positions to be delivered are limited to 'forward.retry.pending.limit'.
-     * If this limit is reached, positions are discarded before next retry.
+     * delay is incremented by 1 second up to 'forward.retry.delay.max'. Positions pending to be delivered
+     * are limited to 'forward.retry.pending.limit'. If this limit is reached, positions get discarded.
      */
     public static final ConfigKey FORWARD_RETRY_ENABLE = new ConfigKey(
             "forward.retry.enable", Boolean.class);
 
     /**
      * Position forwarding retry minimum delay in seconds.
-     * Can be set to anything between 1 and 3600 seconds. Defaults to 1 second.
+     * Can be set to anything greater than 0. Defaults to 1 second.
      */
     public static final ConfigKey FORWARD_RETRY_DELAY_MIN = new ConfigKey(
             "forward.retry.delay.min", Integer.class);
 
     /**
      * Position forwarding retry maximum delay in seconds.
-     * Can be set to anything between 1 and 3600 seconds. Defaults to 10 seconds.
+     * Can be set to anything greater than 0. Defaults to 10 seconds.
      */
     public static final ConfigKey FORWARD_RETRY_DELAY_MAX = new ConfigKey(
             "forward.retry.delay.max", Integer.class);

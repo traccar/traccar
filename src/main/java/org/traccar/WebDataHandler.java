@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,9 @@ package org.traccar;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.channel.ChannelHandler;
+import io.netty.util.Timeout;
+import io.netty.util.TimerTask;
+
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.IdentityManager;
@@ -41,6 +44,7 @@ import java.util.Calendar;
 import java.util.Formatter;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @ChannelHandler.Sharable
@@ -57,12 +61,11 @@ public class WebDataHandler extends BaseDataHandler {
     private final String header;
     private final boolean json;
 
-    private final Boolean retryEnabled;
-    private final Integer retryDelayMin;
-    private final Integer retryDelayMax;
-    private final Integer deliveryPendingLimit;
+    private final boolean retryEnabled;
+    private final int retryDelayMin;
+    private final int retryDelayMax;
+    private final int deliveryPendingLimit;
 
-    private AtomicInteger deliveryFaliuresInRow;
     private AtomicInteger deliveryPendingCurrent;
 
     @Inject
@@ -77,17 +80,10 @@ public class WebDataHandler extends BaseDataHandler {
         this.json = config.getBoolean(Keys.FORWARD_JSON);
 
         this.retryEnabled = config.getBoolean(Keys.FORWARD_RETRY_ENABLE);
+        this.retryDelayMin = config.getInteger(Keys.FORWARD_RETRY_DELAY_MIN, 1);
+        this.retryDelayMax = config.getInteger(Keys.FORWARD_RETRY_DELAY_MAX, 10);
+        this.deliveryPendingLimit = config.getInteger(Keys.FORWARD_RETRY_PENDING_LIMIT, 100);
 
-        Integer retryDelayMin = config.getInteger(Keys.FORWARD_RETRY_DELAY_MIN, 1);
-        this.retryDelayMin = (retryDelayMin > 0 && retryDelayMin < 3600) ? retryDelayMin : 1;
-
-        Integer retryDelayMax = config.getInteger(Keys.FORWARD_RETRY_DELAY_MAX, 10);
-        this.retryDelayMax = (retryDelayMax > retryDelayMin && retryDelayMax < 3600) ? retryDelayMax : retryDelayMin;
-
-        Integer deliveryPendingLimit = config.getInteger(Keys.FORWARD_RETRY_PENDING_LIMIT, 100);
-        this.deliveryPendingLimit = (retryDelayMax > 0) ? deliveryPendingLimit : 100;
-
-        this.deliveryFaliuresInRow = new AtomicInteger(0);
         this.deliveryPendingCurrent = new AtomicInteger(0);
     }
 
@@ -183,15 +179,15 @@ public class WebDataHandler extends BaseDataHandler {
 
         class AsyncRequestAndCallback implements InvocationCallback<Response> {
 
-            private Integer delay = retryDelayMin;
-            private Map<String, Object> jsonPayload;
+            private int delay = retryDelayMin;
+            private Map<String, Object> payload;
             private Invocation.Builder requestBuilder;
 
             AsyncRequestAndCallback(Position position) {
 
                 String formattedUrl;
                 try {
-                    formattedUrl = (json) ? url : formatRequest(position);
+                    formattedUrl = json ? url : formatRequest(position);
                 } catch (UnsupportedEncodingException | JsonProcessingException e) {
                     throw new RuntimeException("Forwarding formatting error", e);
                 }
@@ -205,7 +201,7 @@ public class WebDataHandler extends BaseDataHandler {
                 }
 
                 if (json) {
-                    jsonPayload = prepareJsonPayload(position);
+                    payload = prepareJsonPayload(position);
                 }
 
                 deliveryPendingCurrent.incrementAndGet();
@@ -215,7 +211,7 @@ public class WebDataHandler extends BaseDataHandler {
 
             private void send() {
                 if (json) {
-                    requestBuilder.async().post(Entity.json(jsonPayload), this);
+                    requestBuilder.async().post(Entity.json(payload), this);
                 } else {
                     requestBuilder.async().get(this);
                 }
@@ -223,36 +219,35 @@ public class WebDataHandler extends BaseDataHandler {
 
             private void retry() {
                 try {
-                    deliveryFaliuresInRow.incrementAndGet();
-                    if (!retryEnabled || deliveryPendingCurrent.get() > deliveryPendingLimit) {
-                        deliveryPendingCurrent.decrementAndGet();
-                    } else {
-                        Integer i = 0;
-                        for ( ; i < delay; i++) {
-                            Thread.sleep(1000);
-                            if (deliveryFaliuresInRow.get() == 0) {
-                                delay = retryDelayMin;
-                                break;
+                    if (retryEnabled && deliveryPendingCurrent.get() <= deliveryPendingLimit) {
+                        GlobalTimer.getTimer().newTimeout(new TimerTask() {
+                            @Override
+                            public void run(Timeout timeout) {
+                                if (!timeout.isCancelled()) {
+                                    if (delay < retryDelayMax) {
+                                        delay++;
+                                    }
+                                    send();
+                                }
                             }
-                        }
-                        if (i >= delay && delay < retryDelayMax) {
-                            delay++;
-                        }
-                        send();
+                        }, delay, TimeUnit.SECONDS);
+                        return;
                     }
                 } catch (Exception e) {
                 }
+                deliveryPendingCurrent.decrementAndGet();
             }
 
+            @Override
             public void completed(Response response) {
                 if (response.getStatus() == 200) {
-                    deliveryFaliuresInRow.set(0);
                     deliveryPendingCurrent.decrementAndGet();
                 } else {
                     retry();
                 }
             }
 
+            @Override
             public void failed(Throwable throwable) {
                 retry();
             }
