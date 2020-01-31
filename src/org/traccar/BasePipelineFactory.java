@@ -40,7 +40,7 @@ import org.traccar.events.OverspeedEventHandler;
 import org.traccar.events.AlertEventHandler;
 import org.traccar.events.custom.AquilaAEventsHandler;
 import org.traccar.events.custom.CommonGPSEventsHandler;
-import org.traccar.events.custom.StandstillEventHandler;
+import org.traccar.events.custom.IdlingEventHandler;
 import org.traccar.helper.Log;
 import org.traccar.processing.ComputedAttributesHandler;
 import org.traccar.processing.CopyAttributesHandler;
@@ -79,7 +79,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
     private DriverEventHandler driverEventHandler;
     private CommonGPSEventsHandler commonGPSEventsHandler;
     private AquilaAEventsHandler aquilaAEventsHandler;
-    private StandstillEventHandler standstillEventHandler;
+    private IdlingEventHandler idlingEventHandler;
 
     private static final class OpenChannelHandler extends SimpleChannelHandler {
 
@@ -199,7 +199,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 //            driverEventHandler = new DriverEventHandler();
             commonGPSEventsHandler = new CommonGPSEventsHandler();
             aquilaAEventsHandler = new AquilaAEventsHandler();
-            standstillEventHandler = new StandstillEventHandler();
+            idlingEventHandler = new IdlingEventHandler();
         }
     }
 
@@ -325,8 +325,8 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             pipeline.addLast("AquilaAEventsHandler", aquilaAEventsHandler);
         }
 
-        if (standstillEventHandler != null) {
-            pipeline.addLast("StandstillEventHandler", standstillEventHandler);
+        if (idlingEventHandler != null) {
+            pipeline.addLast("IdlingEventHandler", idlingEventHandler);
         }
 
         pipeline.addLast("mainHandler", new MainEventHandler());

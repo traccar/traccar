@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class StandstillEventHandler extends BaseEventHandler {
+public class IdlingEventHandler extends BaseEventHandler {
 
     private Map<Long, Position> deviceIdlingStartPositionMap = new ConcurrentHashMap<>();
 
@@ -76,7 +76,7 @@ public class StandstillEventHandler extends BaseEventHandler {
         Log.debug(String.format("[idling] Checkign idling on %d. runTime: %d distance: %f", deviceId, deviceRunTime, distance));
 
         if (deviceRunTime > maxIdlingTimeMillis && distance < MIN_DISTANCE) { // Engine run but not moved
-            Event event = new Event(Event.TYPE_DEVICE_STANDSTILL, position.getDeviceId(), lastPosition.getId(), lastPosition.getDeviceTime());
+            Event event = new Event(Event.TYPE_DEVICE_IDLING, position.getDeviceId(), lastPosition.getId(), lastPosition.getDeviceTime());
             event.set("endPositionId", position.getId());
             event.set("startTime", lastPosition.getDeviceTime().getTime());
             event.set("endTime", position.getDeviceTime().getTime());
