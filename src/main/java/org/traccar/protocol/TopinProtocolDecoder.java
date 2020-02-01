@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,11 +44,11 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_WIFI_OFFLINE = 0x17;
     public static final int MSG_WIFI = 0x69;
 
-    private void sendResponse(Channel channel, int type, ByteBuf content) {
+    private void sendResponse(Channel channel, int length, int type, ByteBuf content) {
         if (channel != null) {
             ByteBuf response = Unpooled.buffer();
             response.writeShort(0x7878);
-            response.writeByte(1 + content.readableBytes());
+            response.writeByte(length);
             response.writeByte(type);
             response.writeBytes(content);
             response.writeByte('\r');
@@ -75,7 +75,7 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
             deviceSession = getDeviceSession(channel, remoteAddress, imei);
             ByteBuf content = Unpooled.buffer();
             content.writeByte(deviceSession != null ? 0x01 : 0x44);
-            sendResponse(channel, type, content);
+            sendResponse(channel, length, type, content);
             return null;
         } else {
             deviceSession = getDeviceSession(channel, remoteAddress);
@@ -95,7 +95,7 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
 
             ByteBuf content = Unpooled.buffer();
             content.writeBytes(time);
-            sendResponse(channel, type, content);
+            sendResponse(channel, length, type, content);
 
             return position;
 
@@ -127,7 +127,7 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
             if (length >= 7) {
                 content.writeByte(signal);
             }
-            sendResponse(channel, type, content);
+            sendResponse(channel, length, type, content);
 
             return position;
 
@@ -160,7 +160,7 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
 
             ByteBuf content = Unpooled.buffer();
             content.writeBytes(time);
-            sendResponse(channel, type, content);
+            sendResponse(channel, length, type, content);
 
             return position;
 
