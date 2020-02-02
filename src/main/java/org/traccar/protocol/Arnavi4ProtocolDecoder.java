@@ -15,17 +15,17 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -52,30 +52,24 @@ public class Arnavi4ProtocolDecoder extends BaseProtocolDecoder {
 
     private void sendResponse(Channel channel, byte version, int index) {
         if (channel != null) {
-            final ChannelBuffer response;
+            ByteBuf response = Unpooled.buffer();
+            response.writeByte(0x7b);
             if (version == HEADER_VERSION_1) {
-                response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 4);
-                response.writeByte(0x7b);
                 response.writeByte(0x00);
                 response.writeByte((byte) index);
-                response.writeByte(0x7d);
             } else if (version == HEADER_VERSION_2) {
-                response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 9);
-                response.writeByte(0x7b);
                 response.writeByte(0x04);
                 response.writeByte(0x00);
-                byte[] timeBytes = ByteBuffer.allocate(4).putInt((int) (System.currentTimeMillis() / 1000)).array();
-                response.writeByte(Checksum.modulo256(timeBytes));
-                response.writeBytes(timeBytes);
-                response.writeByte(0x7d);
-            } else {
-                return; // Ignore unsupported header's versions
+                ByteBuffer time = ByteBuffer.allocate(4).putInt((int) (System.currentTimeMillis() / 1000));
+                response.writeByte(Checksum.modulo256(time));
+                response.writeBytes(time);
             }
-            channel.write(response);
+            response.writeByte(0x7d);
+            channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
     }
 
-    private Position decodePosition(DeviceSession deviceSession, ChannelBuffer buf, int length, Date time) {
+    private Position decodePosition(DeviceSession deviceSession, ByteBuf buf, int length, Date time) {
 
         final Position position = new Position();
         position.setProtocol(getProtocolName());
@@ -88,12 +82,12 @@ public class Arnavi4ProtocolDecoder extends BaseProtocolDecoder {
             short tag = buf.readUnsignedByte();
             switch (tag) {
                 case TAG_LATITUDE:
-                    position.setLatitude(buf.readFloat());
+                    position.setLatitude(buf.readFloatLE());
                     position.setValid(true);
                     break;
 
                 case TAG_LONGITUDE:
-                    position.setLongitude(buf.readFloat());
+                    position.setLongitude(buf.readFloatLE());
                     position.setValid(true);
                     break;
 
@@ -101,26 +95,25 @@ public class Arnavi4ProtocolDecoder extends BaseProtocolDecoder {
                     position.setCourse(buf.readUnsignedByte() * 2);
                     position.setAltitude(buf.readUnsignedByte() * 10);
                     byte satellites = buf.readByte();
-                    position.set(Position.KEY_SATELLITES, satellites & 0x0F + (satellites >> 4) & 0x0F); // gps+glonass
+                    position.set(Position.KEY_SATELLITES, satellites & 0x0F + (satellites >> 4) & 0x0F);
                     position.setSpeed(buf.readUnsignedByte());
                     break;
 
                 default:
-                    buf.readBytes(4); // Skip unsupported tags
+                    buf.skipBytes(4);
                     break;
             }
 
-            readBytes += 5; // 1 byte tag + 4 bytes value
+            readBytes += 1 + 4;
         }
 
         return position;
     }
 
     @Override
-    protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+    protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
+        ByteBuf buf = (ByteBuf) msg;
 
         byte startSign = buf.readByte();
 
@@ -128,7 +121,7 @@ public class Arnavi4ProtocolDecoder extends BaseProtocolDecoder {
 
             byte version = buf.readByte();
 
-            String imei = String.valueOf(buf.readLong());
+            String imei = String.valueOf(buf.readLongLE());
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
 
             if (deviceSession != null) {
@@ -155,20 +148,20 @@ public class Arnavi4ProtocolDecoder extends BaseProtocolDecoder {
                 case RECORD_TEXT:
                 case RECORD_FILE:
                 case RECORD_BINARY:
-                    int length = buf.readUnsignedShort();
-                    Date time = new Date(buf.readUnsignedInt() * 1000);
+                    int length = buf.readUnsignedShortLE();
+                    Date time = new Date(buf.readUnsignedIntLE() * 1000);
 
                     if (recordType == RECORD_DATA) {
                         positions.add(decodePosition(deviceSession, buf, length, time));
                     } else {
-                        buf.readBytes(length); // Skip other types of record
+                        buf.readBytes(length);
                     }
 
-                    buf.readUnsignedByte(); // crc
+                    buf.readUnsignedByte(); // checksum
                     break;
 
                 default:
-                    return null; // Ignore unsupported types of record
+                    return null;
             }
 
             recordType = buf.readByte();

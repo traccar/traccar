@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.assertEquals;
@@ -34,6 +35,15 @@ public class ChecksumTest {
     public void testLuhn() {
         assertEquals(7, Checksum.luhn(12345678901234L));
         assertEquals(0, Checksum.luhn(63070019470771L));
+    }
+
+    @Test
+    public void testModulo256() {
+        assertEquals(0x00, Checksum.modulo256(ByteBuffer.wrap(new byte[] {0x00})));
+        assertEquals(0x00, Checksum.modulo256(ByteBuffer.wrap(new byte[] {0x00, 0x00, 0x00})));
+        assertEquals(0xca, Checksum.modulo256(ByteBuffer.wrap(new byte[] {0x77, 0x77, 0x77, 0x77, 0x77, 0x77})));
+
+
     }
 
 }

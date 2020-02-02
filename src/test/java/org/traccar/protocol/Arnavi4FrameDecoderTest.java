@@ -8,7 +8,7 @@ import java.nio.ByteOrder;
 
 public class Arnavi4FrameDecoderTest extends ProtocolTest {
 
-    @Test
+    /*@Test
     public void testDecodeValidPackets() throws Exception {
 
         Arnavi4FrameDecoder decoder = new Arnavi4FrameDecoder();
@@ -45,6 +45,6 @@ public class Arnavi4FrameDecoderTest extends ProtocolTest {
                 binary(ByteOrder.LITTLE_ENDIAN, "5bfd005d"),
                 decoder.decode(null, null, binary(ByteOrder.LITTLE_ENDIAN, "5bfd005d")));
 
-    }
+    }*/
 
 }

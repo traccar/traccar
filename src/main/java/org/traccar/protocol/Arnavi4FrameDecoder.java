@@ -15,12 +15,12 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.frame.FrameDecoder;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import org.traccar.BaseFrameDecoder;
 
-public class Arnavi4FrameDecoder extends FrameDecoder {
+public class Arnavi4FrameDecoder extends BaseFrameDecoder {
 
     private static final int MIN_LENGTH = 4;
     private static final int HEADER_LENGTH = 10;
@@ -32,8 +32,7 @@ public class Arnavi4FrameDecoder extends FrameDecoder {
     private boolean firstPacket = true;
 
     @Override
-    protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
+    protected Object decode(ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
         if (buf.readableBytes() < MIN_LENGTH) {
             return null;
@@ -44,19 +43,19 @@ public class Arnavi4FrameDecoder extends FrameDecoder {
             firstPacket = false;
             length = HEADER_LENGTH;
         } else {
-            int index = buf.getUnsignedByte(1); // parcel number
+            int index = buf.getUnsignedByte(1);
             if (index == COMMAND_ANSWER_PARCEL_NUMBER) {
                 length = COMMAND_ANSWER_PACKET_LENGTH;
             } else {
-                int pos = 2; // start sign + parcel number
+                int pos = 2;
                 while (pos + PACKET_WRAPPER_LENGTH < buf.readableBytes()
                         && buf.getByte(pos) != PACKAGE_END_SIGN) {
 
                     int dataLength = buf.getUnsignedShort(pos + 1);
-                    pos += PACKET_WRAPPER_LENGTH + dataLength; // packet type + data length + unixtime + data + crc
+                    pos += PACKET_WRAPPER_LENGTH + dataLength;
                 }
 
-                if (buf.getByte(pos) != PACKAGE_END_SIGN) { // end sign
+                if (buf.getByte(pos) != PACKAGE_END_SIGN) {
                     return null;
                 }
 
