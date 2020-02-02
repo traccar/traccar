@@ -51,7 +51,7 @@ public class Arnavi4FrameDecoder extends BaseFrameDecoder {
                 while (pos + PACKET_WRAPPER_LENGTH < buf.readableBytes()
                         && buf.getByte(pos) != PACKAGE_END_SIGN) {
 
-                    int dataLength = buf.getUnsignedShort(pos + 1);
+                    int dataLength = buf.getUnsignedShortLE(pos + 1);
                     pos += PACKET_WRAPPER_LENGTH + dataLength;
                 }
 
