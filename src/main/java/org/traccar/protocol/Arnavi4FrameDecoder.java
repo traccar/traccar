@@ -1,4 +1,5 @@
 /*
+ * Copyright 2020 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Ivan Muratov (binakot@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,11 +23,9 @@ import org.traccar.BaseFrameDecoder;
 
 public class Arnavi4FrameDecoder extends BaseFrameDecoder {
 
-    private static final int MIN_LENGTH = 4;
     private static final int HEADER_LENGTH = 10;
     private static final int PACKET_WRAPPER_LENGTH = 8;
-    private static final int COMMAND_ANSWER_PACKET_LENGTH = 4;
-    private static final int COMMAND_ANSWER_PARCEL_NUMBER = 0xfd;
+    private static final int RESULT_TYPE = 0xfd;
     private static final byte PACKAGE_END_SIGN = 0x5d;
 
     private boolean firstPacket = true;
@@ -34,7 +33,7 @@ public class Arnavi4FrameDecoder extends BaseFrameDecoder {
     @Override
     protected Object decode(ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
-        if (buf.readableBytes() < MIN_LENGTH) {
+        if (buf.readableBytes() < 4) {
             return null;
         }
 
@@ -43,23 +42,18 @@ public class Arnavi4FrameDecoder extends BaseFrameDecoder {
             firstPacket = false;
             length = HEADER_LENGTH;
         } else {
-            int index = buf.getUnsignedByte(1);
-            if (index == COMMAND_ANSWER_PARCEL_NUMBER) {
-                length = COMMAND_ANSWER_PACKET_LENGTH;
+            int type = buf.getUnsignedByte(1);
+            if (type == RESULT_TYPE) {
+                length = 4;
             } else {
-                int pos = 2;
-                while (pos + PACKET_WRAPPER_LENGTH < buf.readableBytes()
-                        && buf.getByte(pos) != PACKAGE_END_SIGN) {
-
-                    int dataLength = buf.getUnsignedShortLE(pos + 1);
-                    pos += PACKET_WRAPPER_LENGTH + dataLength;
+                int index = 2;
+                while (index + PACKET_WRAPPER_LENGTH < buf.readableBytes() && buf.getByte(index) != PACKAGE_END_SIGN) {
+                    index += PACKET_WRAPPER_LENGTH + buf.getUnsignedShortLE(index + 1);
                 }
-
-                if (buf.getByte(pos) != PACKAGE_END_SIGN) {
+                if (buf.getByte(index) != PACKAGE_END_SIGN) {
                     return null;
                 }
-
-                length = pos + 1;
+                length = index + 1;
             }
         }
 
