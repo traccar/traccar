@@ -3,14 +3,14 @@ package org.traccar.protocol;
 import org.junit.Test;
 import org.traccar.ProtocolTest;
 
-public class Arnavi4ProtocolDecoderTest extends ProtocolTest {
+public class ArnaviBinaryProtocolDecoderTest extends ProtocolTest {
 
     @Test
     public void testHeader1Decode() throws Exception {
 
-        Arnavi4ProtocolDecoder decoder;
+        ArnaviBinaryProtocolDecoder decoder;
 
-        decoder = new Arnavi4ProtocolDecoder(new Arnavi4Protocol());
+        decoder = new ArnaviBinaryProtocolDecoder(null);
 
         verifyNull(decoder, binary(
                 "ff22f30c45f5c90f0300"));
@@ -23,9 +23,9 @@ public class Arnavi4ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testHeader2Decode() throws Exception {
 
-        Arnavi4ProtocolDecoder decoder;
+        ArnaviBinaryProtocolDecoder decoder;
 
-        decoder = new Arnavi4ProtocolDecoder(new Arnavi4Protocol());
+        decoder = new ArnaviBinaryProtocolDecoder(null);
 
         verifyNull(decoder, binary(
                 "ff23f30c45f5c90f0300"));

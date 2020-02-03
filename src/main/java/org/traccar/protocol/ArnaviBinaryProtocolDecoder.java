@@ -22,6 +22,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
+import org.traccar.Protocol;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Position;
 
@@ -31,7 +32,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Arnavi4ProtocolDecoder extends BaseProtocolDecoder {
+public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
 
     private static final byte HEADER_START_SIGN = (byte) 0xff;
     private static final byte HEADER_VERSION_1 = 0x22;
@@ -47,7 +48,7 @@ public class Arnavi4ProtocolDecoder extends BaseProtocolDecoder {
     private static final byte TAG_LONGITUDE = 4;
     private static final byte TAG_COORD_PARAMS = 5;
 
-    public Arnavi4ProtocolDecoder(Arnavi4Protocol protocol) {
+    public ArnaviBinaryProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

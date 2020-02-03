@@ -3,12 +3,16 @@ package org.traccar.protocol;
 import org.junit.Test;
 import org.traccar.ProtocolTest;
 
-public class Arnavi4FrameDecoderTest extends ProtocolTest {
+public class ArnaviFrameDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecodeValidPackets() throws Exception {
 
-        Arnavi4FrameDecoder decoder = new Arnavi4FrameDecoder();
+        ArnaviFrameDecoder decoder = new ArnaviFrameDecoder();
+
+        verifyFrame(
+                binary("2441562c563344492c38353136342c3231342c2d312c31392c30303030344634462c30303030303935452c30433030303030322c3836333037313031333034313631382c38393939373031353630333832353236363232462c2a3039"),
+                decoder.decode(null, null, binary("2441562c563344492c38353136342c3231342c2d312c31392c30303030344634462c30303030303935452c30433030303030322c3836333037313031333034313631382c38393939373031353630333832353236363232462c2a30390d0a")));
 
         verifyFrame(
                 binary("ff22f30c45f5c90f0300"),

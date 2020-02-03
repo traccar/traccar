@@ -20,8 +20,9 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseFrameDecoder;
+import org.traccar.helper.BufferUtil;
 
-public class Arnavi4FrameDecoder extends BaseFrameDecoder {
+public class ArnaviFrameDecoder extends BaseFrameDecoder {
 
     private static final int HEADER_LENGTH = 10;
     private static final int PACKET_WRAPPER_LENGTH = 8;
@@ -37,28 +38,41 @@ public class Arnavi4FrameDecoder extends BaseFrameDecoder {
             return null;
         }
 
-        int length;
-        if (firstPacket) {
-            firstPacket = false;
-            length = HEADER_LENGTH;
-        } else {
-            int type = buf.getUnsignedByte(1);
-            if (type == RESULT_TYPE) {
-                length = 4;
-            } else {
-                int index = 2;
-                while (index + PACKET_WRAPPER_LENGTH < buf.readableBytes() && buf.getByte(index) != PACKAGE_END_SIGN) {
-                    index += PACKET_WRAPPER_LENGTH + buf.getUnsignedShortLE(index + 1);
-                }
-                if (buf.getByte(index) != PACKAGE_END_SIGN) {
-                    return null;
-                }
-                length = index + 1;
-            }
-        }
+        if (buf.getByte(buf.readerIndex()) == '$') {
 
-        if (buf.readableBytes() >= length) {
-            return buf.readBytes(length);
+            int index = BufferUtil.indexOf("\r\n", buf);
+            if (index > 0) {
+                ByteBuf frame = buf.readRetainedSlice(index - buf.readerIndex());
+                buf.skipBytes(2);
+                return frame;
+            }
+
+        } else {
+
+            int length;
+            if (firstPacket) {
+                firstPacket = false;
+                length = HEADER_LENGTH;
+            } else {
+                int type = buf.getUnsignedByte(1);
+                if (type == RESULT_TYPE) {
+                    length = 4;
+                } else {
+                    int index = 2;
+                    while (index + PACKET_WRAPPER_LENGTH < buf.readableBytes() && buf.getByte(index) != PACKAGE_END_SIGN) {
+                        index += PACKET_WRAPPER_LENGTH + buf.getUnsignedShortLE(index + 1);
+                    }
+                    if (buf.getByte(index) != PACKAGE_END_SIGN) {
+                        return null;
+                    }
+                    length = index + 1;
+                }
+            }
+
+            if (buf.readableBytes() >= length) {
+                return buf.readRetainedSlice(length);
+            }
+
         }
 
         return null;

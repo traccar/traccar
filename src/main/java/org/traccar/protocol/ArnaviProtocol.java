@@ -31,7 +31,7 @@ public class ArnaviProtocol extends BaseProtocol {
                 pipeline.addLast(new LineBasedFrameDecoder(1024));
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new StringEncoder());
-                pipeline.addLast(new ArnaviProtocolDecoder(ArnaviProtocol.this));
+                pipeline.addLast(new ArnaviTextProtocolDecoder(ArnaviProtocol.this));
             }
         });
     }

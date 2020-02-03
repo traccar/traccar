@@ -27,9 +27,9 @@ import org.traccar.model.Position;
 import java.net.SocketAddress;
 import java.util.regex.Pattern;
 
-public class ArnaviProtocolDecoder extends BaseProtocolDecoder {
+public class ArnaviTextProtocolDecoder extends BaseProtocolDecoder {
 
-    public ArnaviProtocolDecoder(Protocol protocol) {
+    public ArnaviTextProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
