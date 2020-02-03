@@ -59,7 +59,8 @@ public class ArnaviFrameDecoder extends BaseFrameDecoder {
                     length = 4;
                 } else {
                     int index = 2;
-                    while (index + PACKET_WRAPPER_LENGTH < buf.readableBytes() && buf.getByte(index) != PACKAGE_END_SIGN) {
+                    while (index + PACKET_WRAPPER_LENGTH < buf.readableBytes()
+                            && buf.getByte(index) != PACKAGE_END_SIGN) {
                         index += PACKET_WRAPPER_LENGTH + buf.getUnsignedShortLE(index + 1);
                     }
                     if (buf.getByte(index) != PACKAGE_END_SIGN) {
