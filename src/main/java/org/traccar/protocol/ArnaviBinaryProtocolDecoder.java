@@ -63,7 +63,8 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                 response.writeByte(0x04);
                 response.writeByte(0x00);
                 ByteBuffer time = ByteBuffer.allocate(4).putInt((int) (System.currentTimeMillis() / 1000));
-                response.writeByte(Checksum.modulo256(time));
+                time.position(0);
+                response.writeByte(Checksum.modulo256(time.slice()));
                 response.writeBytes(time);
             }
             response.writeByte(0x7d);
