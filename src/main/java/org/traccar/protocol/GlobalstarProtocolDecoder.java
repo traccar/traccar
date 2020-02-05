@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import io.netty.channel.Channel;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import org.traccar.BaseHttpProtocolDecoder;
@@ -50,6 +51,7 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
@@ -103,19 +105,21 @@ public class GlobalstarProtocolDecoder extends BaseHttpProtocolDecoder {
         ByteBuf content = Unpooled.buffer();
         transformer.transform(new DOMSource(document), new StreamResult(new ByteBufOutputStream(content)));
 
-        FullHttpResponse response = new DefaultFullHttpResponse(
-                HttpVersion.HTTP_1_1, HttpResponseStatus.OK, content);
         if (channel != null) {
+            FullHttpResponse response = new DefaultFullHttpResponse(
+                    HttpVersion.HTTP_1_1, HttpResponseStatus.OK, content);
+            response.headers().add(HttpHeaderNames.CONTENT_LENGTH, content.readableBytes());
             channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
     }
-
 
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         FullHttpRequest request = (FullHttpRequest) msg;
+
+        sendResponse(channel, "test");
 
         Document document = documentBuilder.parse(new ByteBufferBackedInputStream(request.content().nioBuffer()));
         NodeList nodes = (NodeList) messageExpression.evaluate(document, XPathConstants.NODESET);
