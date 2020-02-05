@@ -27,6 +27,7 @@ import org.traccar.helper.Checksum;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.Date;
 import java.util.LinkedList;
@@ -63,7 +64,7 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                 response.writeByte(0x04);
                 response.writeByte(0x00);
                 ByteBuffer time = ByteBuffer.allocate(4).putInt((int) (System.currentTimeMillis() / 1000));
-                time.position(0);
+                ((Buffer) time).position(0);
                 response.writeByte(Checksum.modulo256(time.slice()));
                 response.writeBytes(time);
             }
