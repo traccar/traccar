@@ -66,6 +66,19 @@ public class BlueProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private String decodeAlarm(int value) {
+        switch (value) {
+            case 1:
+                return Position.ALARM_SOS;
+            case 8:
+                return Position.ALARM_OVERSPEED;
+            case 19:
+                return Position.ALARM_LOW_POWER;
+            default:
+                return null;
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -123,9 +136,24 @@ public class BlueProtocolDecoder extends BaseProtocolDecoder {
 
                 buf.readUnsignedByte(); // status 2
                 buf.readUnsignedByte(); // status 3
-                buf.readUnsignedByte(); // status 4
+
+                status = buf.readUnsignedByte(); // status 4
+                int ignition = BitUtil.between(status, 2, 4);
+                if (ignition == 0b01) {
+                    position.set(Position.KEY_IGNITION, false);
+                }
+                if (ignition == 0b10) {
+                    position.set(Position.KEY_IGNITION, true);
+                }
+
                 buf.readUnsignedByte(); // status 5
                 buf.readUnsignedByte(); // status 6
+
+                position.set(Position.KEY_STATUS, buf.readUnsignedShort());
+
+            } else if (type == 0x81) {
+
+                position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
 
             } else if (type == 0x84) {
 
