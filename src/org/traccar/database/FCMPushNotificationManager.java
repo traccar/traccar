@@ -29,6 +29,7 @@ public class FCMPushNotificationManager extends ExtendedObjectManager<FCMPushNot
             Context.getConfig().getInteger("fcm.event.fuel.ttl");
 
     private final Map<Long, Map<Long, Set<Long>>> fcmNotificationsMap = new ConcurrentHashMap<>();
+    private final Map<Long, Set<Long>> deviceIdToUniqueEventIdMap = new ConcurrentHashMap<>();
 
     public FCMPushNotificationManager(DataManager dataManager) {
         super(dataManager, FCMPushNotification.class);
@@ -60,11 +61,31 @@ public class FCMPushNotificationManager extends ExtendedObjectManager<FCMPushNot
                     }
 
                     usersOfDevice.get(userId).add(fcmPushNotification.getEventTypeId());
+
+                    if (!deviceIdToUniqueEventIdMap.containsKey(deviceId)) {
+                        deviceIdToUniqueEventIdMap.put(deviceId, new ConcurrentHashSet<>());
+                    }
+
+                    deviceIdToUniqueEventIdMap.get(deviceId).add(fcmPushNotification.getEventTypeId());
                 }
             }
         } catch (SQLException error) {
             Log.warning(error);
         }
+    }
+
+    public boolean deviceHasNotificationTypeEnabled(long deviceId, String eventType) {
+
+        if (deviceIdToUniqueEventIdMap.containsKey(deviceId)) {
+            Map<String, Long> typeToIdMap = FCMPushNotificationTypeManager.getFCMPushNotificationStringToIdMap();
+            if (typeToIdMap.containsKey(eventType)) {
+                long eventId = typeToIdMap.get(eventType);
+                Set<Long> deviceEvents = deviceIdToUniqueEventIdMap.get(deviceId);
+                return deviceEvents.contains(eventId);
+            }
+        }
+
+        return false;
     }
 
     private Optional<Set<Long>> getFCMDeviceNotificationForUser(long deviceId, long userId) {
@@ -103,9 +124,9 @@ public class FCMPushNotificationManager extends ExtendedObjectManager<FCMPushNot
         if (event.getAttributes().containsKey("startTime")) {
             startTime = (long) event.getAttributes().get("startTime");
         }
-        String starTimeString = getDateTimeStringInTimezone(startTime);
+        String startTimeString = getDateTimeStringInTimezone(startTime);
         String title = String.format("%s (%s)", device.getName(), device.getRegistrationNumber());
-        String body = String.format("[%s]: Vehicle %s", starTimeString,
+        String body = String.format("[%s]: Vehicle %s", startTimeString,
                                     FCMPushNotificationTypeManager.getFcmPushNotificationTypeToStringMap()
                                                                   .get(eventType));
 
