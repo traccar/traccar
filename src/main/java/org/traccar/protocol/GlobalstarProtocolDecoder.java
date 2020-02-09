@@ -107,7 +107,9 @@ public class GlobalstarProtocolDecoder extends BaseHttpProtocolDecoder {
         if (channel != null) {
             FullHttpResponse response = new DefaultFullHttpResponse(
                     HttpVersion.HTTP_1_1, HttpResponseStatus.OK, content);
-            response.headers().add(HttpHeaderNames.CONTENT_LENGTH, content.readableBytes());
+            response.headers()
+                    .add(HttpHeaderNames.CONTENT_LENGTH, content.readableBytes())
+                    .add(HttpHeaderNames.CONTENT_TYPE, "text/xml");
             channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
     }
