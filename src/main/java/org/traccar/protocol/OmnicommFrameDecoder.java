@@ -27,18 +27,18 @@ public class OmnicommFrameDecoder extends BaseFrameDecoder {
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
-        if (buf.readableBytes() < 10) {
+        if (buf.readableBytes() < 6) {
             return null;
         }
 
-        int endIndex = buf.getUnsignedShortLE(2) + buf.readerIndex() + 5;
+        int endIndex = buf.getUnsignedShortLE(buf.readerIndex() + 2) + buf.readerIndex() + 6;
         if (buf.writerIndex() < endIndex) {
             return null;
         }
 
         ByteBuf result = Unpooled.buffer();
         result.writeByte(buf.readUnsignedByte());
-        while (buf.readerIndex() <= endIndex) {
+        while (buf.readerIndex() < endIndex) {
             int b = buf.readUnsignedByte();
             if (b == 0xDB) {
                 int ext = buf.readUnsignedByte();
@@ -47,11 +47,12 @@ public class OmnicommFrameDecoder extends BaseFrameDecoder {
                 } else if (ext == 0xDD) {
                     result.writeByte(0xDB);
                 }
+                endIndex += 1;
             } else {
                 result.writeByte(b);
             }
         }
-        return  result;
+        return result;
     }
 
 }

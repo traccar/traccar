@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,6 +44,7 @@ public final class LogAction {
     private static final String PATTERN_OBJECT = "user: %d, action: %s, object: %s, id: %d";
     private static final String PATTERN_LINK = "user: %d, action: %s, owner: %s, id: %d, property: %s, id: %d";
     private static final String PATTERN_LOGIN = "user: %d, action: %s";
+    private static final String PATTERN_LOGIN_FAILED = "login failed from: %s";
     private static final String PATTERN_DEVICE_ACCUMULATORS = "user: %d, action: %s, deviceId: %d";
 
     public static void create(long userId, BaseModel object) {
@@ -74,6 +75,13 @@ public final class LogAction {
         logLoginAction(ACTION_LOGOUT, userId);
     }
 
+    public static void failedLogin(String remoteAddress) {
+        if (remoteAddress == null || remoteAddress.isEmpty()) {
+            remoteAddress = "unknown";
+        }
+        LOGGER.info(String.format(PATTERN_LOGIN_FAILED, remoteAddress));
+    }
+
     public static void resetDeviceAccumulators(long userId, long deviceId) {
         LOGGER.info(String.format(
                 PATTERN_DEVICE_ACCUMULATORS, userId, ACTION_DEVICE_ACCUMULATORS, deviceId));
@@ -85,7 +93,7 @@ public final class LogAction {
     }
 
     private static void logLinkAction(String action, long userId,
-            Class<?> owner, long ownerId, Class<?> property, long propertyId) {
+                                      Class<?> owner, long ownerId, Class<?> property, long propertyId) {
         LOGGER.info(String.format(
                 PATTERN_LINK, userId, action,
                 Introspector.decapitalize(owner.getSimpleName()), ownerId,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -242,6 +242,10 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_INDEX, Integer.parseInt(values[index++]));
         position.set(Position.KEY_STATUS, Integer.parseInt(values[index++]));
 
+        if (values[index].length() == 3) {
+            index += 1; // collaborative network
+        }
+
         DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHH:mm:ss");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         position.setTime(dateFormat.parse(values[index++] + values[index++]));
@@ -371,6 +375,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                     }
                     remaining -= attribute.length() + 1;
                 }
+                index += 1; // checksum
                 break;
             default:
                 break;
@@ -609,10 +614,21 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_OUTPUT, buf.readUnsignedByte());
         }
 
+        int alertId = 0;
         if (BitUtil.check(mask, 19)) {
-            int value = buf.readUnsignedByte();
+            alertId = buf.readUnsignedByte();
             if (type == 0x82) {
-                position.set(Position.KEY_ALARM, decodeAlert(value));
+                position.set(Position.KEY_ALARM, decodeAlert(alertId));
+            }
+        }
+
+        if (BitUtil.check(mask, 20)) {
+            buf.readUnsignedShort(); // alert mod
+        }
+
+        if (BitUtil.check(mask, 21)) {
+            if (alertId == 59) {
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, ByteBufUtil.hexDump(buf.readSlice(8)));
             }
         }
 

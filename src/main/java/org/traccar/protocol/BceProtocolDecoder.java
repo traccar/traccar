@@ -83,10 +83,10 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
             buf.skipBytes(4);
         }
         if (BitUtil.check(mask, 12)) {
-            buf.skipBytes(2);
+            position.set("fuel1", buf.readUnsignedShort());
         }
         if (BitUtil.check(mask, 13)) {
-            buf.skipBytes(2);
+            position.set("fuel2", buf.readUnsignedShort());
         }
 
         if (BitUtil.check(mask, 14)) {

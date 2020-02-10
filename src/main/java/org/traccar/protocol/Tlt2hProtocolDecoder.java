@@ -36,10 +36,18 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN_HEADER = new PatternBuilder()
-            .number("#(d+)#")                    // imei
-            .any()
-            .expression("#([^#]+)#")             // status
-            .number("d+")                        // number of records
+            .number("#(d+)")                     // imei
+            .expression("#[^#]*")                // user
+            .number("#d+")                       // password
+            .groupBegin()
+            .number("#([01])")                   // door
+            .number("#(d+)")                     // fuel voltage
+            .number("#(d+)")                     // power
+            .number("#(d+)")                     // battery
+            .number("#(d+)")                     // temperature
+            .groupEnd("?")
+            .expression("#([^#]+)")              // status
+            .number("#d+")                       // number of records
             .compile();
 
     private static final Pattern PATTERN_POSITION = new PatternBuilder()
@@ -114,6 +122,19 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
+        Boolean door = null;
+        Double adc = null;
+        Double power = null;
+        Double battery = null;
+        Double temperature = null;
+        if (parser.hasNext(5)) {
+            door = parser.nextInt() == 1;
+            adc = parser.nextInt() * 0.1;
+            power = parser.nextInt() * 0.1;
+            battery = parser.nextInt() * 0.1;
+            temperature = parser.nextInt() * 0.1;
+        }
+
         String status = parser.next();
 
         String[] messages = sentence.substring(sentence.indexOf('\n') + 1).split("\r\n");
@@ -140,6 +161,11 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
                 dateBuilder.setDateReverse(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
                 position.setTime(dateBuilder.getDate());
 
+                position.set(Position.KEY_DOOR, door);
+                position.set(Position.PREFIX_ADC + 1, adc);
+                position.set(Position.KEY_POWER, power);
+                position.set(Position.KEY_BATTERY, battery);
+                position.set(Position.PREFIX_TEMP + 1, temperature);
                 decodeStatus(position, status);
 
                 positions.add(position);

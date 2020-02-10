@@ -31,7 +31,7 @@ public class RuptelaProtocolEncoder extends BaseProtocolEncoder {
         super(protocol);
     }
 
-    private ByteBuf encodeContent(int type, ByteBuf content) {
+    public static ByteBuf encodeContent(int type, ByteBuf content) {
 
         ByteBuf buf = Unpooled.buffer();
 
