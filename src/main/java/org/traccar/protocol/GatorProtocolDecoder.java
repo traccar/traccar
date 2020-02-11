@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BcdUtil;
+import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -58,16 +59,16 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
         return String.format("%02d%02d%02d%02d%02d", d1, d2, d3, d4, d5);
     }
 
-    private void sendResponse(Channel channel, SocketAddress remoteAddress, byte calibration) {
+    private void sendResponse(Channel channel, SocketAddress remoteAddress, int type, int checksum) {
         if (channel != null) {
             ByteBuf response = Unpooled.buffer();
-            response.writeByte(0x24); response.writeByte(0x24); // header
-            response.writeByte(MSG_HEARTBEAT); // size
-            response.writeShort(5);
-            response.writeByte(calibration);
-            response.writeByte(0); // main order
-            response.writeByte(0); // slave order
-            response.writeByte(1); // calibration
+            response.writeShort(0x2424); // header
+            response.writeByte(MSG_HEARTBEAT);
+            response.writeShort(5); // length
+            response.writeByte(checksum);
+            response.writeByte(type);
+            response.writeByte(0); // subtype
+            response.writeByte(Checksum.sum(response.nioBuffer(2, response.writerIndex())));
             response.writeByte(0x0D);
             channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
@@ -87,7 +88,7 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedByte(), buf.readUnsignedByte(),
                 buf.readUnsignedByte(), buf.readUnsignedByte());
 
-        sendResponse(channel, remoteAddress, buf.getByte(buf.writerIndex() - 2));
+        sendResponse(channel, remoteAddress, type, buf.getByte(buf.writerIndex() - 2));
 
         if (type == MSG_POSITION_DATA || type == MSG_ROLLCALL_RESPONSE
                 || type == MSG_ALARM_DATA || type == MSG_BLIND_AREA) {
