@@ -28,6 +28,7 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.model.WifiAccessPoint;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -139,6 +140,8 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Position.KEY_ODOMETER, buf.readUnsignedShort() * 1000);
 
+            Network network = new Network();
+
             while (buf.readableBytes() > 4) {
                 int subtype = buf.readUnsignedShort();
                 int length = buf.readUnsignedShort() - 4;
@@ -164,7 +167,6 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
                                 Position.KEY_VIN, buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
                         break;
                     case 0x0020:
-                        Network network = new Network();
                         String[] cells = buf.readCharSequence(
                                 length, StandardCharsets.US_ASCII).toString().split("\\+");
                         for (String cell : cells) {
@@ -173,12 +175,23 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
                                     Integer.parseInt(values[0]), Integer.parseInt(values[1]),
                                     Integer.parseInt(values[2], 16), Integer.parseInt(values[3], 16)));
                         }
-                        position.setNetwork(network);
+                        break;
+                    case 0x0021:
+                        String[] points = buf.readCharSequence(
+                                length, StandardCharsets.US_ASCII).toString().split("\\+");
+                        for (String point : points) {
+                            String[] values = point.split("@");
+                            network.addWifiAccessPoint(WifiAccessPoint.from(values[0], Integer.parseInt(values[1])));
+                        }
                         break;
                     default:
                         buf.skipBytes(length);
                         break;
                 }
+            }
+
+            if (network.getCellTowers() != null || network.getWifiAccessPoints() != null) {
+                position.setNetwork(network);
             }
 
             sendResponse(channel, MSG_POSITION_RSP, index, null);
