@@ -68,7 +68,7 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
             response.writeByte(checksum);
             response.writeByte(type);
             response.writeByte(0); // subtype
-            response.writeByte(Checksum.sum(response.nioBuffer(2, response.writerIndex())));
+            response.writeByte(Checksum.xor(response.nioBuffer(2, response.writerIndex())));
             response.writeByte(0x0D);
             channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
