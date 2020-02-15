@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -217,9 +217,9 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedShortLE();
         }
         if (BitUtil.check(mask, 6)) {
-            buf.readUnsignedByte(); // maximum acceleration
-            buf.readUnsignedByte(); // maximum deceleration
-            buf.readUnsignedByte(); // maximum cornering
+            position.set("maxAcceleration", buf.readUnsignedByte());
+            position.set("maxBraking", buf.readUnsignedByte());
+            position.set("maxCornering", buf.readUnsignedByte());
         }
         if (BitUtil.check(mask, 7)) {
             buf.skipBytes(16);
