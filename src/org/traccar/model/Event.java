@@ -48,6 +48,7 @@ public class Event extends Message {
 
     public static final String TYPE_DEVICE_MOVING = "deviceMoving";
     public static final String TYPE_DEVICE_STOPPED = "deviceStopped";
+    public static final String TYPE_DEVICE_IDLING = "deviceIdling";
     public static final String TYPE_DEVICE_STANDSTILL = "deviceStandstill";
 
     public static final String TYPE_DEVICE_OVERSPEED = "deviceOverspeed";

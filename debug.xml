@@ -36,7 +36,8 @@
     <entry key='processing.peripheralSensorData.currentEventLookBackSeconds'>2400</entry>
     <entry key='processing.peripheralSensorData.dataLossThresholdSeconds'>300</entry>
     <entry key='processing.peripheralSensorData.ignitionDataLossThresholdSeconds'>300</entry>
-    <entry key='idlingMaxTimeSeconds'>300</entry>
+    <entry key='idlingMaxTimeSeconds'>900</entry>
+    <entry key='standStillMaxTimeSeconds'>900</entry>
 
     <entry key='processing.peripheralSensorData.minValuesForMovingAverage'>9</entry>
     <entry key='processing.peripheralSensorData.minValuesForOutlierDetection'>21</entry>
