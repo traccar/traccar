@@ -397,7 +397,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
             if (isIncludeAdc(deviceSession.getDeviceId())) {
                 for (int i = 1; i <= 3; i++) {
-                    if (!values[index++].isEmpty()) {
+                    if (index < values.length && !values[index++].isEmpty()) {
                         position.set(Position.PREFIX_ADC + i, Double.parseDouble(values[index - 1]));
                     }
                 }

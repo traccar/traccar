@@ -13,6 +13,11 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
 
         decoder.setHbm(true);
         decoder.setIncludeAdc(true);
+
+        verifyAttribute(decoder, buffer(
+                "ST600STT;008594432;20;492;20200212;18:58:30;060bb0e1;334;20;36bb;45;+19.337897;-099.064489;000.398;000.00;12;1;5049883;13.61;100100;2;1198;013762;4.2;1;4.68"),
+                Position.PREFIX_ADC + 1, 4.68);
+
         decoder.setIncludeTemp(true);
 
         verifyAttribute(decoder, buffer(
