@@ -18,6 +18,7 @@ package org.traccar;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.channel.ChannelHandler;
+import io.netty.util.Timer;
 import io.netty.util.Timeout;
 import io.netty.util.TimerTask;
 import org.slf4j.Logger;
@@ -66,11 +67,11 @@ public class WebDataHandler extends BaseDataHandler {
     private final boolean json;
 
     private final boolean retryEnabled;
-    private final int retryDelayMin;
-    private final int retryDelayMax;
-    private final int deliveryPendingLimit;
+    private final int retryDelay;
+    private final int retryCount;
+    private final int retryLimit;
 
-    private AtomicInteger deliveryPendingCurrent;
+    private AtomicInteger deliveryPending;
 
     @Inject
     public WebDataHandler(
@@ -84,11 +85,11 @@ public class WebDataHandler extends BaseDataHandler {
         this.json = config.getBoolean(Keys.FORWARD_JSON);
 
         this.retryEnabled = config.getBoolean(Keys.FORWARD_RETRY_ENABLE);
-        this.retryDelayMin = config.getInteger(Keys.FORWARD_RETRY_DELAY_MIN, 1);
-        this.retryDelayMax = config.getInteger(Keys.FORWARD_RETRY_DELAY_MAX, 10);
-        this.deliveryPendingLimit = config.getInteger(Keys.FORWARD_RETRY_PENDING_LIMIT, 100);
+        this.retryDelay = config.getInteger(Keys.FORWARD_RETRY_DELAY, 100);
+        this.retryCount = config.getInteger(Keys.FORWARD_RETRY_COUNT, 10);
+        this.retryLimit = config.getInteger(Keys.FORWARD_RETRY_LIMIT, 100);
 
-        this.deliveryPendingCurrent = new AtomicInteger(0);
+        this.deliveryPending = new AtomicInteger(0);
     }
 
     private static String formatSentence(Position position) {
@@ -183,7 +184,7 @@ public class WebDataHandler extends BaseDataHandler {
 
         class AsyncRequestAndCallback implements InvocationCallback<Response> {
 
-            private int delay = retryDelayMin;
+            private int retries = 0;
             private Map<String, Object> payload;
             private Invocation.Builder requestBuilder;
 
@@ -208,7 +209,7 @@ public class WebDataHandler extends BaseDataHandler {
                     payload = prepareJsonPayload(position);
                 }
 
-                deliveryPendingCurrent.incrementAndGet();
+                deliveryPending.incrementAndGet();
 
                 send();
             }
@@ -222,40 +223,37 @@ public class WebDataHandler extends BaseDataHandler {
             }
 
             private void retry() {
+                boolean ok = false;
                 try {
-                    String message = "Position forwarding failed.";
-                    if (!retryEnabled) {
-                        LOGGER.warn(message);
-                    } else {
-                        int pending = deliveryPendingCurrent.get();
-                        if (pending <= deliveryPendingLimit) {
-                            LOGGER.warn(message + " Pending: " + pending
-                                + ". Retrying in " + delay + " seconds.");
-                            GlobalTimer.getTimer().newTimeout(new TimerTask() {
-                                @Override
-                                public void run(Timeout timeout) {
+                    if (retryEnabled && deliveryPending.get() <= retryLimit && retries < retryCount) {
+                        Main.getInjector().getInstance(Timer.class).newTimeout(new TimerTask() {
+                            @Override
+                            public void run(Timeout timeout) {
+                                boolean ok = false;
+                                try {
                                     if (!timeout.isCancelled()) {
-                                        if (delay < retryDelayMax) {
-                                            delay++;
-                                        }
                                         send();
+                                        ok = true;
+                                    }
+                                } finally {
+                                    if (!ok) {
+                                        deliveryPending.decrementAndGet();
                                     }
                                 }
-                            }, delay, TimeUnit.SECONDS);
-                            return;
-                        }
-                        LOGGER.warn(message + " Pending: " + pending
-                            + ". Delivery will not be retried.");
+                            }
+                        }, retryDelay * (int) Math.pow(2, retries++), TimeUnit.MILLISECONDS);
+                        ok = true;
                     }
-                } catch (Exception e) {
+                } finally {
+                    int pending = ok ? deliveryPending.get() : deliveryPending.decrementAndGet();
+                    LOGGER.warn("Position forwarding failed: " + pending + " pending");
                 }
-                deliveryPendingCurrent.decrementAndGet();
             }
 
             @Override
             public void completed(Response response) {
-                if (response.getStatus() == 200) {
-                    deliveryPendingCurrent.decrementAndGet();
+                if (response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL) {
+                    deliveryPending.decrementAndGet();
                 } else {
                     retry();
                 }
