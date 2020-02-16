@@ -77,10 +77,12 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             }
 
             List<PeripheralSensor> sensorsOnDeviceList = peripheralSensorOnDevice.get();
-            List<PeripheralSensor> sensorsListForProcessing = sensorsOnDeviceList;
+            List<PeripheralSensor> sensorsListForProcessing = new ArrayList<>();
+            sensorsListForProcessing.addAll(sensorsOnDeviceList);
 
             ProcessingInfo processingInfo = Context.getDeviceManager().getDeviceProcessingInfo(deviceId);
             String fuelProcessingType = processingInfo.getProcessingType();
+
             switch (fuelProcessingType) {
                 case ProcessingInfo.AVG_FUEL_PROCESS_TYPE:
                 case ProcessingInfo.SUM_FUEL_PROCESS_TYPE:
@@ -92,12 +94,12 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                     break;
             }
 
-            if (sensorsOnDeviceList.isEmpty()) {
+            if (sensorsListForProcessing.isEmpty()) {
                 logDebugIfNotLoading(String.format("Sensors list empty for deviceId: %d. Refreshing sensors map.", deviceId), deviceId);
                 return position;
             }
 
-            for (PeripheralSensor sensorOnDevice : sensorsOnDeviceList) {
+            for (PeripheralSensor sensorOnDevice : sensorsListForProcessing) {
                 long sensorID = sensorOnDevice.getPeripheralSensorId();
                 logDebugIfNotLoading(String.format("[FuelSensorDataHandler] Running sensor loop on %d %d", position.getDeviceId(), sensorID), deviceId);
                 String lookUpKey = getLookupKey(deviceId, sensorID);
