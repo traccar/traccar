@@ -113,7 +113,7 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte());
         }
         if (BitUtil.check(mask, 4)) {
-            position.set(Position.KEY_RPM, buf.readUnsignedShortLE());
+            position.set(Position.KEY_RPM, buf.readUnsignedShortLE() * 0.0125);
         }
         if (BitUtil.check(mask, 5)) {
             position.set(Position.KEY_HOURS, buf.readUnsignedIntLE());
@@ -122,7 +122,7 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
         }
         if (BitUtil.check(mask, 7)) {
-            position.set(Position.KEY_COOLANT_TEMP, (int) buf.readByte());
+            position.set(Position.KEY_COOLANT_TEMP, buf.readByte() - 40);
         }
         if (BitUtil.check(mask, 8)) {
             position.set("fuel2", buf.readUnsignedByte());
