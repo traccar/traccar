@@ -120,8 +120,6 @@ public class GlobalstarProtocolDecoder extends BaseHttpProtocolDecoder {
 
         FullHttpRequest request = (FullHttpRequest) msg;
 
-        sendResponse(channel, "test");
-
         Document document = documentBuilder.parse(new ByteBufferBackedInputStream(request.content().nioBuffer()));
         NodeList nodes = (NodeList) messageExpression.evaluate(document, XPathConstants.NODESET);
 
