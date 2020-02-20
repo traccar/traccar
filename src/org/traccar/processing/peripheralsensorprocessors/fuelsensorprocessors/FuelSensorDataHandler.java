@@ -562,12 +562,14 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
             if (!this.loadingOldDataFromDB && relevantPositionsListForAlerts.size() >= fuelSensor.getEventsWindowSize()) {
                 previousAlertWindowStart.put(lookupKey, relevantPositionsListForAlerts.get(0));
-                FuelActivity fuelActivity =
+                Optional<FuelActivity> fuelActivity =
                         FuelDataActivityChecker.checkForActivity(relevantPositionsListForAlerts,
                                                                  deviceFuelEventMetadata,
                                                                  fuelSensor);
 
-                sendNotificationIfNecessary(deviceId, fuelActivity, fuelSensor, fuelTankMaxVolume);
+                if (fuelActivity.isPresent()) {
+                    sendNotificationIfNecessary(deviceId, fuelActivity.get(), fuelSensor, fuelTankMaxVolume);
+                }
             }
         }
 

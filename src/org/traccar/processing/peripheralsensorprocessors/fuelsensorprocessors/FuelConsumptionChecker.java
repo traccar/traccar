@@ -218,8 +218,11 @@ public class FuelConsumptionChecker {
     public static boolean isFuelConsumptionAsExpected(final double calculatedFuelChangeVolume,
                                                       final ExpectedFuelConsumption expectedFuelConsumption) {
 
-        return Math.abs(calculatedFuelChangeVolume) > expectedFuelConsumption.allowedDeviation
-               && Math.abs(calculatedFuelChangeVolume) >= expectedFuelConsumption.expectedMinFuelConsumed
-               && Math.abs(calculatedFuelChangeVolume) <= expectedFuelConsumption.expectedMaxFuelConsumed;
+        boolean withinExpectedConsumption =
+                Math.abs(calculatedFuelChangeVolume) >= expectedFuelConsumption.expectedMinFuelConsumed
+                        && Math.abs(calculatedFuelChangeVolume) <= expectedFuelConsumption.expectedMaxFuelConsumed;
+
+        return withinExpectedConsumption || Math.abs(calculatedFuelChangeVolume) > expectedFuelConsumption.allowedDeviation;
+
     }
 }
