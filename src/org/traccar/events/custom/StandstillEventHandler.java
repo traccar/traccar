@@ -38,8 +38,10 @@ public class StandstillEventHandler extends BaseEventHandler {
         }
 
         if (!deviceStandstillStartPositionMap.containsKey(deviceId)) {
-            Log.debug(String.format("[standstill] Starting meter on %d", deviceId));
-            deviceStandstillStartPositionMap.put(deviceId, position);
+            if (position.getLong(Position.KEY_IGN_ON_MILLIS) == 0 && position.getDouble(Position.KEY_DISTANCE) == 0.0) {
+                Log.debug(String.format("[standstill] Starting meter on %d", deviceId));
+                deviceStandstillStartPositionMap.put(deviceId, position);
+            }
             return null;
         }
 
@@ -59,7 +61,8 @@ public class StandstillEventHandler extends BaseEventHandler {
         if (position.getDeviceTime().getTime() - actualLastPosition.getDeviceTime().getTime() >= DATA_LOSS_THRESHOLD_MILLIS) {
             // Reset if data loss
             Log.debug(String.format("[standstill]  Data loss detected on %d. Resetting meter.", deviceId));
-            deviceStandstillStartPositionMap.put(deviceId, position);
+            deviceStandstillStartPositionMap.remove(deviceId);
+
             if (deviceCurrentEventMap.containsKey(deviceId)) {
                 deviceCurrentEventMap.remove(deviceId);
             }

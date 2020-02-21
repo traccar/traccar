@@ -44,7 +44,7 @@ public class IdlingEventHandler extends BaseEventHandler {
                                             true) * 1000L;
 
         if (!deviceIdlingStartPositionMap.containsKey(deviceId)) {
-            if (position.getLong(Position.KEY_IGN_ON_MILLIS) > 0) {
+            if (position.getLong(Position.KEY_IGN_ON_MILLIS) > 0 && position.getDouble(Position.KEY_DISTANCE) == 0.0) {
                 Log.debug(String.format("[idling] Starting meter on %d", deviceId));
                 deviceIdlingStartPositionMap.put(deviceId, position);
             }
@@ -73,10 +73,6 @@ public class IdlingEventHandler extends BaseEventHandler {
 
             if (deviceCurrentEventMap.containsKey(deviceId)) {
                 deviceCurrentEventMap.remove(deviceId);
-            }
-
-            if (position.getLong(Position.KEY_IGN_ON_MILLIS) > 0) {
-                deviceIdlingStartPositionMap.put(deviceId, position);
             }
 
             return null;
