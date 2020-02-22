@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -45,24 +45,45 @@ public abstract class ExtendedObjectManager<T extends BaseModel> extends SimpleO
     }
 
     public final Set<Long> getGroupItems(long groupId) {
-        if (!groupItems.containsKey(groupId)) {
-            groupItems.put(groupId, new HashSet<Long>());
+        try {
+            readLock();
+            Set<Long> result = groupItems.get(groupId);
+            if (result != null) {
+                return new HashSet<>(result);
+            } else {
+                return new HashSet<>();
+            }
+        } finally {
+            readUnlock();
         }
-        return groupItems.get(groupId);
     }
 
     public final Set<Long> getDeviceItems(long deviceId) {
-        if (!deviceItems.containsKey(deviceId)) {
-            deviceItems.put(deviceId, new HashSet<Long>());
+        try {
+            readLock();
+            Set<Long> result = deviceItems.get(deviceId);
+            if (result != null) {
+                return new HashSet<>(result);
+            } else {
+                return new HashSet<>();
+            }
+        } finally {
+            readUnlock();
         }
-        return deviceItems.get(deviceId);
     }
 
     public Set<Long> getAllDeviceItems(long deviceId) {
-        if (!deviceItemsWithGroups.containsKey(deviceId)) {
-            deviceItemsWithGroups.put(deviceId, new HashSet<Long>());
+        try {
+            readLock();
+            Set<Long> result = deviceItemsWithGroups.get(deviceId);
+            if (result != null) {
+                return new HashSet<>(result);
+            } else {
+                return new HashSet<>();
+            }
+        } finally {
+            readUnlock();
         }
-        return deviceItemsWithGroups.get(deviceId);
     }
 
     @Override
@@ -74,41 +95,48 @@ public abstract class ExtendedObjectManager<T extends BaseModel> extends SimpleO
     public void refreshExtendedPermissions() {
         if (getDataManager() != null) {
             try {
-
                 Collection<Permission> databaseGroupPermissions =
                         getDataManager().getPermissions(Group.class, getBaseClass());
-
-                groupItems.clear();
-                for (Permission groupPermission : databaseGroupPermissions) {
-                    getGroupItems(groupPermission.getOwnerId()).add(groupPermission.getPropertyId());
-                }
 
                 Collection<Permission> databaseDevicePermissions =
                         getDataManager().getPermissions(Device.class, getBaseClass());
 
+                writeLock();
+
+                groupItems.clear();
                 deviceItems.clear();
                 deviceItemsWithGroups.clear();
 
+                for (Permission groupPermission : databaseGroupPermissions) {
+                    groupItems
+                            .computeIfAbsent(groupPermission.getOwnerId(), key -> new HashSet<>())
+                            .add(groupPermission.getPropertyId());
+                }
+
                 for (Permission devicePermission : databaseDevicePermissions) {
-                    getDeviceItems(devicePermission.getOwnerId()).add(devicePermission.getPropertyId());
-                    getAllDeviceItems(devicePermission.getOwnerId()).add(devicePermission.getPropertyId());
+                    deviceItems
+                            .computeIfAbsent(devicePermission.getOwnerId(), key -> new HashSet<>())
+                            .add(devicePermission.getPropertyId());
+                    deviceItemsWithGroups
+                            .computeIfAbsent(devicePermission.getOwnerId(), key -> new HashSet<>())
+                            .add(devicePermission.getPropertyId());
                 }
 
                 for (Device device : Context.getDeviceManager().getAllDevices()) {
                     long groupId = device.getGroupId();
-                    while (groupId != 0) {
-                        getAllDeviceItems(device.getId()).addAll(getGroupItems(groupId));
+                    while (groupId > 0) {
+                        deviceItemsWithGroups
+                                .computeIfAbsent(device.getId(), key -> new HashSet<>())
+                                .addAll(groupItems.getOrDefault(groupId, new HashSet<>()));
                         Group group = Context.getGroupsManager().getById(groupId);
-                        if (group != null) {
-                            groupId = group.getGroupId();
-                        } else {
-                            groupId = 0;
-                        }
+                        groupId = group != null ? group.getGroupId() : 0;
                     }
                 }
 
             } catch (SQLException | ClassNotFoundException error) {
                 LOGGER.warn("Refresh permissions error", error);
+            } finally {
+                writeUnlock();
             }
         }
     }

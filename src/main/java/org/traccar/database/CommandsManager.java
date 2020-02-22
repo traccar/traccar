@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -142,14 +142,33 @@ public class CommandsManager  extends ExtendedObjectManager<Command> {
     }
 
     private Queue<Command> getDeviceQueue(long deviceId) {
-        if (!deviceQueues.containsKey(deviceId)) {
-            deviceQueues.put(deviceId, new ConcurrentLinkedQueue<Command>());
+        Queue<Command> deviceQueue;
+        try {
+            readLock();
+            deviceQueue = deviceQueues.get(deviceId);
+        } finally {
+            readUnlock();
         }
-        return deviceQueues.get(deviceId);
+        if (deviceQueue != null) {
+            return deviceQueue;
+        } else {
+            try {
+                writeLock();
+                return deviceQueues.computeIfAbsent(deviceId, key -> new ConcurrentLinkedQueue<>());
+            } finally {
+                writeUnlock();
+            }
+        }
     }
 
     public void sendQueuedCommands(ActiveDevice activeDevice) {
-        Queue<Command> deviceQueue = deviceQueues.get(activeDevice.getDeviceId());
+        Queue<Command> deviceQueue;
+        try {
+            readLock();
+            deviceQueue = deviceQueues.get(activeDevice.getDeviceId());
+        } finally {
+            readUnlock();
+        }
         if (deviceQueue != null) {
             Command command = deviceQueue.poll();
             while (command != null) {
