@@ -193,6 +193,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
             Position lastPosition = deviceLastKnownOdometerPositionLookup.get(deviceId);
             position.set(Position.KEY_ODOMETER, ((Number) lastPosition.getAttributes().get(Position.KEY_ODOMETER)).longValue());
+            return;
         }
 
         if ((position.getAttributes().containsKey(calibFuelDataField) &&
@@ -201,6 +202,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                         ((Number) position.getAttributes().get(Position.KEY_POWER)).doubleValue()  <= 0.0)) {
             logDebugIfNotLoading(String.format("Device power too low, updating with last known fuel level for deviceId %s", deviceId), deviceId);
             updateWithLastAvailable(position, ALL_FUEL_FIELDS, fuelSensor);
+            return;
         }
 
         if (position.getBoolean(Position.KEY_CHARGE)) {
