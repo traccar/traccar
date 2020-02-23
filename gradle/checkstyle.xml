@@ -5,6 +5,8 @@
 
 <module name="Checker">
 
+    <module name="SuppressWarningsFilter"/>
+
     <module name="SuppressionSingleFilter">
         <property name="files" value="[/\\]protobuf[/\\]"/>
         <property name="checks" value=".*"/>
@@ -50,6 +52,8 @@
     <!-- </module> -->
 
     <module name="TreeWalker">
+
+        <module name="SuppressWarningsHolder"/>
 
         <!-- Checks for Naming Conventions.                  -->
         <!-- See http://checkstyle.sf.net/config_naming.html -->

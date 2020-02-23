@@ -84,7 +84,8 @@ public class HealthCheckService {
     }
 
     interface SystemD extends Library {
-        int sd_notify(int unset_environment, String state);
+        @SuppressWarnings("checkstyle:MethodName")
+        int sd_notify(@SuppressWarnings("checkstyle:ParameterName") int unset_environment, String state);
     }
 
 }
