@@ -38,7 +38,7 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN_HEADER = new PatternBuilder()
             .number("#(d+)")                     // imei
             .expression("#[^#]*")                // user
-            .number("#d+")                       // password
+            .number("#d*")                       // password
             .groupBegin()
             .number("#([01])")                   // door
             .number("#(d+)")                     // fuel voltage
