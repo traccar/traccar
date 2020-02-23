@@ -80,6 +80,17 @@ public class StandstillEventHandler extends BaseEventHandler {
         long deviceRunTime = position.getLong(Position.KEY_TOTAL_IGN_ON_MILLIS) - standStillStartPosition.getLong(Position.KEY_TOTAL_IGN_ON_MILLIS);
         double distance = position.getDouble(Position.KEY_TOTAL_DISTANCE) - standStillStartPosition.getDouble(Position.KEY_TOTAL_DISTANCE);
 
+        if (deviceStandstillStartPositionMap.containsKey(deviceId)) {
+            if (distance > MIN_DISTANCE || deviceRunTime > 0) {
+                if (deviceCurrentEventMap.containsKey(deviceId)) {
+                    finalizeEvent(position, deviceId, deviceStandstillTime);
+                } else {
+                    // Reset meter coz movement / ignition detected within time limit.
+                    deviceStandstillStartPositionMap.remove(deviceId);
+                }
+            }
+        }
+
         Log.debug(String.format("[standstill] Checking standstill on %d. deviceStandstillTime: %d, deviceRunTime: %d distance: %f", deviceId, deviceStandstillTime, deviceRunTime, distance));
 
         if (deviceStandstillTime > maxStandstillTimeMillis
@@ -114,25 +125,14 @@ public class StandstillEventHandler extends BaseEventHandler {
             Log.debug(String.format("[standstill] Movement or ignition detected on %d. standStillTime: %d distance: %f", deviceId, deviceStandstillTime, distance));
             if (deviceCurrentEventMap.containsKey(deviceId)) {
                 // Device moved. End the event and update it db.
-                Event finalizedEvent = deviceCurrentEventMap.get(deviceId);
-                accumulateStandingTime(finalizedEvent, position, deviceStandstillTime);
-
-                try {
-                    Log.debug(String.format("[standstill] Updating final standstill time for %d: ", deviceId));
-                    Context.getDataManager().updateObject(finalizedEvent);
-                    deviceCurrentEventMap.remove(deviceId);
-                    deviceStandstillStartPositionMap.remove(deviceId);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    Log.debug(String.format("[standstill] Error updating event for deviceId: %d, startTime: %d", deviceId, finalizedEvent.getDeviceTime().getTime()));
-                }
+                finalizeEvent(position, deviceId, deviceStandstillTime);
 
                 return null;   // Don't make a new event in the db.
             }
 
             if (deviceStandstillStartPositionMap.containsKey(deviceId)) {
                 // Reset since we detected either movement or ignition
-                deviceStandstillStartPositionMap.put(deviceId, position);
+                deviceStandstillStartPositionMap.remove(deviceId, position);
             }
         }
 
@@ -140,6 +140,21 @@ public class StandstillEventHandler extends BaseEventHandler {
 
         // Device didn't stand for too long or moved within the allowed limit.
         return null;
+    }
+
+    private void finalizeEvent(Position position, long deviceId, long deviceStandstillTime) {
+        Event finalizedEvent = deviceCurrentEventMap.get(deviceId);
+        accumulateStandingTime(finalizedEvent, position, deviceStandstillTime);
+
+        try {
+            Log.debug(String.format("[standstill] Updating final standstill time for %d: ", deviceId));
+            Context.getDataManager().updateObject(finalizedEvent);
+            deviceCurrentEventMap.remove(deviceId);
+            deviceStandstillStartPositionMap.remove(deviceId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            Log.debug(String.format("[standstill] Error updating event for deviceId: %d, startTime: %d", deviceId, finalizedEvent.getDeviceTime().getTime()));
+        }
     }
 
     private void accumulateStandingTime(Event event, Position currentPosition, long deviceStandstillTime) {

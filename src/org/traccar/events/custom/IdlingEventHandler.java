@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class IdlingEventHandler extends BaseEventHandler {
 
-    private Map<Long, Position> deviceIdlingStartPositionMap = new ConcurrentHashMap<>();
+    private Map<Long, Position> deviceIdlingStartPositionMap = new ConcurrentHashMap<>();  //1
     private Map<Long, Event> deviceCurrentEventMap = new ConcurrentHashMap<>();
 
     private static long DATA_LOSS_FOR_IGNITION_MILLIS;
@@ -81,6 +81,19 @@ public class IdlingEventHandler extends BaseEventHandler {
         long deviceRunTime = position.getLong(Position.KEY_TOTAL_IGN_ON_MILLIS) - idlingStartPosition.getLong(Position.KEY_TOTAL_IGN_ON_MILLIS);
         double distance = position.getDouble(Position.KEY_TOTAL_DISTANCE) - idlingStartPosition.getDouble(Position.KEY_TOTAL_DISTANCE);
 
+        if (deviceIdlingStartPositionMap.containsKey(deviceId)) { // Keep this condition this way, else it becomes confusing.
+            if (!(position.getLong(Position.KEY_IGN_ON_MILLIS) == 0 || position.getDouble(Position.KEY_DISTANCE) > 0.0)) {
+                if (deviceCurrentEventMap.containsKey(deviceId)) {
+                    finalizeEvent(position, deviceId);
+                } else {
+                    // Reset coz ignition or movement after we started movement.
+                    deviceIdlingStartPositionMap.remove(deviceId);
+                }
+                return null;
+            }
+        }
+
+
         Log.debug(String.format("[idling] Checking idling on %d. runTime: %d distance: %f", deviceId, deviceRunTime, distance));
 
         if (deviceRunTime > maxIdlingTimeMillis
@@ -109,24 +122,14 @@ public class IdlingEventHandler extends BaseEventHandler {
         if (position.getLong(Position.KEY_IGN_ON_MILLIS) == 0 || distance > MIN_DISTANCE) {
             Log.debug(String.format("[idling] Allowed movement detected or ignition switched off on %d. runTime: %d distance: %f", deviceId, deviceRunTime, distance));
             if (deviceCurrentEventMap.containsKey(deviceId)) {
-                Event finalizedEvent = deviceCurrentEventMap.get(deviceId);
-                accumulateIdlingTime(finalizedEvent, position);
-
-                try {
-                    Log.debug(String.format("[idling] Updating final idling time for %d", deviceId));
-                    Context.getDataManager().updateObject(finalizedEvent);
-                    deviceCurrentEventMap.remove(deviceId);
-                    deviceIdlingStartPositionMap.remove(deviceId);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    Log.debug(String.format("[idling] Error updating event for deviceId: %d, startTime: %d", deviceId, finalizedEvent.getDeviceTime().getTime()));
-                }
-                return null;   // Make a new event in the db.
+                finalizeEvent(position, deviceId);
+                return null;   // Don't make a new event in the db.
             }
 
             if (deviceIdlingStartPositionMap.containsKey(deviceId)) {
-                // Reset since we detected either movement or ignition
-                deviceIdlingStartPositionMap.put(deviceId, position);
+                // Reset since we detected either movement or ignition within
+                deviceIdlingStartPositionMap.remove(deviceId, position);
+                deviceCurrentEventMap.remove(deviceId);
             }
 
         }
@@ -135,6 +138,21 @@ public class IdlingEventHandler extends BaseEventHandler {
 
         // If the deviceRunTime is lesser than the max idling time, we don't care if the device has moved or not.
         return null;
+    }
+
+    private void finalizeEvent(Position position, long deviceId) {
+        Event finalizedEvent = deviceCurrentEventMap.get(deviceId);
+        accumulateIdlingTime(finalizedEvent, position);
+
+        try {
+            Log.debug(String.format("[idling] Updating final idling time for %d", deviceId));
+            Context.getDataManager().updateObject(finalizedEvent);
+            deviceCurrentEventMap.remove(deviceId);
+            deviceIdlingStartPositionMap.remove(deviceId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            Log.debug(String.format("[idling] Error updating event for deviceId: %d, startTime: %d", deviceId, finalizedEvent.getDeviceTime().getTime()));
+        }
     }
 
     private void accumulateIdlingTime(Event event, Position currentPosition) {
