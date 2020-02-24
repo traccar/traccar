@@ -222,7 +222,7 @@ public class FuelConsumptionChecker {
                 Math.abs(calculatedFuelChangeVolume) >= expectedFuelConsumption.expectedMinFuelConsumed
                         && Math.abs(calculatedFuelChangeVolume) <= expectedFuelConsumption.expectedMaxFuelConsumed;
 
-        return withinExpectedConsumption || Math.abs(calculatedFuelChangeVolume) > expectedFuelConsumption.allowedDeviation;
+        return withinExpectedConsumption || Math.abs(calculatedFuelChangeVolume) < expectedFuelConsumption.allowedDeviation;
 
     }
 }
