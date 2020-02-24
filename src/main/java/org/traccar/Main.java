@@ -140,13 +140,6 @@ public final class Main {
                 Context.getWebServer().start();
             }
 
-            new Timer().schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    Context.getWebServer().stop();
-                }
-            }, 10 * 60 * 1000);
-
             scheduleHealthCheck();
             scheduleDatabaseCleanup();
 
