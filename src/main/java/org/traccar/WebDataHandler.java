@@ -53,10 +53,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 @ChannelHandler.Sharable
 public class WebDataHandler extends BaseDataHandler {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebDataHandler.class);
+
     private static final String KEY_POSITION = "position";
     private static final String KEY_DEVICE = "device";
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(WebDataHandler.class);
 
     private final IdentityManager identityManager;
     private final ObjectMapper objectMapper;
@@ -179,94 +179,98 @@ public class WebDataHandler extends BaseDataHandler {
         return request;
     }
 
+    class AsyncRequestAndCallback implements InvocationCallback<Response>, TimerTask {
+
+        private int retries = 0;
+        private Map<String, Object> payload;
+        private Invocation.Builder requestBuilder;
+
+        AsyncRequestAndCallback(Position position) {
+
+            String formattedUrl;
+            try {
+                formattedUrl = json ? url : formatRequest(position);
+            } catch (UnsupportedEncodingException | JsonProcessingException e) {
+                throw new RuntimeException("Forwarding formatting error", e);
+            }
+
+            requestBuilder = client.target(formattedUrl).request();
+            if (header != null && !header.isEmpty()) {
+                for (String line: header.split("\\r?\\n")) {
+                    String[] values = line.split(":", 2);
+                    requestBuilder.header(values[0].trim(), values[1].trim());
+                }
+            }
+
+            if (json) {
+                payload = prepareJsonPayload(position);
+            }
+
+            deliveryPending.incrementAndGet();
+        }
+
+        private void send() {
+            if (json) {
+                requestBuilder.async().post(Entity.json(payload), this);
+            } else {
+                requestBuilder.async().get(this);
+            }
+        }
+
+        private void retry() {
+            boolean scheduled = false;
+            try {
+                if (retryEnabled && deliveryPending.get() <= retryLimit && retries < retryCount) {
+                    schedule();
+                    scheduled = true;
+                }
+            } finally {
+                int pending = scheduled ? deliveryPending.get() : deliveryPending.decrementAndGet();
+                LOGGER.warn("Position forwarding failed: " + pending + " pending");
+            }
+        }
+
+        private void schedule() {
+            Main.getInjector().getInstance(Timer.class).newTimeout(
+                this, retryDelay * (int) Math.pow(2, retries++), TimeUnit.MILLISECONDS);
+        }
+
+        @Override
+        public void completed(Response response) {
+            if (response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL) {
+                deliveryPending.decrementAndGet();
+            } else {
+                retry();
+            }
+        }
+
+        @Override
+        public void failed(Throwable throwable) {
+            retry();
+        }
+
+        @Override
+        public void run(Timeout timeout) {
+            boolean sent = false;
+            try {
+                if (!timeout.isCancelled()) {
+                    send();
+                    sent = true;
+                }
+            } finally {
+                if (!sent) {
+                    deliveryPending.decrementAndGet();
+                }
+            }
+        }
+
+    }
+
     @Override
     protected Position handlePosition(Position position) {
 
-        class AsyncRequestAndCallback implements InvocationCallback<Response> {
-
-            private int retries = 0;
-            private Map<String, Object> payload;
-            private Invocation.Builder requestBuilder;
-
-            AsyncRequestAndCallback(Position position) {
-
-                String formattedUrl;
-                try {
-                    formattedUrl = json ? url : formatRequest(position);
-                } catch (UnsupportedEncodingException | JsonProcessingException e) {
-                    throw new RuntimeException("Forwarding formatting error", e);
-                }
-
-                requestBuilder = client.target(formattedUrl).request();
-                if (header != null && !header.isEmpty()) {
-                    for (String line: header.split("\\r?\\n")) {
-                        String[] values = line.split(":", 2);
-                        requestBuilder.header(values[0].trim(), values[1].trim());
-                    }
-                }
-
-                if (json) {
-                    payload = prepareJsonPayload(position);
-                }
-
-                deliveryPending.incrementAndGet();
-
-                send();
-            }
-
-            private void send() {
-                if (json) {
-                    requestBuilder.async().post(Entity.json(payload), this);
-                } else {
-                    requestBuilder.async().get(this);
-                }
-            }
-
-            private void retry() {
-                boolean ok = false;
-                try {
-                    if (retryEnabled && deliveryPending.get() <= retryLimit && retries < retryCount) {
-                        Main.getInjector().getInstance(Timer.class).newTimeout(new TimerTask() {
-                            @Override
-                            public void run(Timeout timeout) {
-                                boolean ok = false;
-                                try {
-                                    if (!timeout.isCancelled()) {
-                                        send();
-                                        ok = true;
-                                    }
-                                } finally {
-                                    if (!ok) {
-                                        deliveryPending.decrementAndGet();
-                                    }
-                                }
-                            }
-                        }, retryDelay * (int) Math.pow(2, retries++), TimeUnit.MILLISECONDS);
-                        ok = true;
-                    }
-                } finally {
-                    int pending = ok ? deliveryPending.get() : deliveryPending.decrementAndGet();
-                    LOGGER.warn("Position forwarding failed: " + pending + " pending");
-                }
-            }
-
-            @Override
-            public void completed(Response response) {
-                if (response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL) {
-                    deliveryPending.decrementAndGet();
-                } else {
-                    retry();
-                }
-            }
-
-            @Override
-            public void failed(Throwable throwable) {
-                retry();
-            }
-
-        }
-
-        new AsyncRequestAndCallback(position);
+        AsyncRequestAndCallback request = new AsyncRequestAndCallback(position);
+        request.send();
 
         return position;
     }

@@ -378,7 +378,7 @@ public class MainModule extends AbstractModule {
 
     @Singleton
     @Provides
-    public static Timer provideGlobalTimer() {
+    public static Timer provideTimer() {
         return GlobalTimer.getTimer();
     }
 
