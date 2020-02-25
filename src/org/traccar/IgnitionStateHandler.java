@@ -9,10 +9,13 @@ import java.util.Optional;
 public class IgnitionStateHandler extends BaseDataHandler {
 
     private static long DATA_LOSS_FOR_IGNITION_MILLIS;
+    private static int MIN_DISTANCE;
 
     static {
         DATA_LOSS_FOR_IGNITION_MILLIS =
                 Context.getConfig().getLong("processing.peripheralSensorData.ignitionDataLossThresholdSeconds") * 1000L;
+        MIN_DISTANCE =
+                Context.getConfig().getInteger("coordinates.minError");
     }
 
     private String BATTERY_UPPER_MILLI_VOLTS_THRESHOLD_FIELD_NAME = "ext_volt_upper";
@@ -71,11 +74,13 @@ public class IgnitionStateHandler extends BaseDataHandler {
 
         int upperThreshold = device.getInteger(BATTERY_UPPER_MILLI_VOLTS_THRESHOLD_FIELD_NAME);
         int lowerThreshold = device.getInteger(BATTERY_LOWER_MILLI_VOLTS_THRESHOLD_FIELD_NAME);
+        double distance = position.getDouble(Position.KEY_DISTANCE);
 
-        if (maybeCurrentVoltage.get() > upperThreshold) {
+        if (maybeCurrentVoltage.get() > upperThreshold || distance > MIN_DISTANCE) {
             position.set(Position.KEY_CALCULATED_IGNITION, true);
-        } else if (maybeCurrentVoltage.get() <= upperThreshold
-            && maybeCurrentVoltage.get() >= lowerThreshold) {
+        } else if (distance > MIN_DISTANCE ||
+                (maybeCurrentVoltage.get() <= upperThreshold
+                        && maybeCurrentVoltage.get() >= lowerThreshold)) {
             // Carry forward the previous value, if present.
             if (lastPosition.getAttributes().containsKey(Position.KEY_CALCULATED_IGNITION)) {
                 position.set(Position.KEY_CALCULATED_IGNITION, lastPosition.getBoolean(Position.KEY_CALCULATED_IGNITION));

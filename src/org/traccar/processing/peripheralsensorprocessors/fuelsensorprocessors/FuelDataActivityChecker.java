@@ -25,7 +25,7 @@ public class FuelDataActivityChecker {
         adjustVolumeFor.add(FuelActivityType.PROBABLE_FUEL_FILL.name());
     }
 
-    public static FuelActivity checkForActivity(List<Position> readingsForDevice,
+    public static Optional<FuelActivity> checkForActivity(List<Position> readingsForDevice,
                                                 Map<String, FuelEventMetadata> deviceFuelEventMetadata,
                                                 PeripheralSensor fuelSensor) {
 
@@ -97,7 +97,7 @@ public class FuelDataActivityChecker {
 
             if (isEnginelessHourly && isDrain && !ignitionOnInAnyRHWindow) {
                 FuelSensorDataHandlerHelper.logDebugIfDeviceId("Detected fuel drain start but ignition not on in any RH Window", deviceId);
-                return new FuelActivity();
+                return Optional.of(new FuelActivity());
             }
 
             String logMessage = String.format("Fuel event started: %d %b %b %b", deviceId, isDrain, isFill, ignitionOnInAnyRHWindow);
@@ -178,6 +178,7 @@ public class FuelDataActivityChecker {
                 // and end of the event. So just add to the window list
                 appendActivityWindow(readingsForDevice, deviceFuelEventMetadata.get(activityLookupKey));
             }
+            return Optional.empty();
         }
 
         boolean ignitionOnRHWindowLast = readingsForDevice.get(readingsSize - 1).getBoolean(Position.KEY_IGNITION);
@@ -199,7 +200,7 @@ public class FuelDataActivityChecker {
 
                 // Ignition is still on, we're probably not done with the "drain" for the "enginelesshourly" types.
                 FuelSensorDataHandlerHelper.logDebugIfDeviceId("Detected fuel drain end but ignition is still on last rh window", deviceId);
-                return new FuelActivity();
+                return Optional.of(new FuelActivity());
             }
 
             String logMessage = String.format("Fuel event ended: %d %b %b %f", deviceId, isEndDrain, ignitionOnRHWindowLast, drainThresholdToUseForEnd);
@@ -224,6 +225,12 @@ public class FuelDataActivityChecker {
                     endLevel = endPosition.getDouble(fuelSensor.getCalibFuelFieldName());
                     Log.info("Setting end to lowestInLHWindow");
                 }
+            }
+
+            if (fuelEventMetadata.getActivityStartPosition().equals(endPosition)) {
+                // This can happen with stationary devices, because when we look for the start of the event and the ignition is on, we pick the latest position in the RHW
+                // For high consumption units, an activity end can be detected as early as when that picked position becomes the midpoint of the end detect window.
+                return Optional.empty();
             }
 
             fuelEventMetadata.setEndLevel(endLevel);
@@ -284,7 +291,7 @@ public class FuelDataActivityChecker {
             }
         }
 
-        return fuelActivity;
+        return Optional.of(fuelActivity);
     }
 
     private static String getActivityLookupKey(String deviceSensorLookupKey, String activityTypeName) {

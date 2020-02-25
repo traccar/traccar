@@ -77,10 +77,12 @@ public class FuelSensorDataHandler extends BaseDataHandler {
             }
 
             List<PeripheralSensor> sensorsOnDeviceList = peripheralSensorOnDevice.get();
-            List<PeripheralSensor> sensorsListForProcessing = sensorsOnDeviceList;
+            List<PeripheralSensor> sensorsListForProcessing = new ArrayList<>();
+            sensorsListForProcessing.addAll(sensorsOnDeviceList);
 
             ProcessingInfo processingInfo = Context.getDeviceManager().getDeviceProcessingInfo(deviceId);
             String fuelProcessingType = processingInfo.getProcessingType();
+
             switch (fuelProcessingType) {
                 case ProcessingInfo.AVG_FUEL_PROCESS_TYPE:
                 case ProcessingInfo.SUM_FUEL_PROCESS_TYPE:
@@ -92,12 +94,12 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                     break;
             }
 
-            if (sensorsOnDeviceList.isEmpty()) {
+            if (sensorsListForProcessing.isEmpty()) {
                 logDebugIfNotLoading(String.format("Sensors list empty for deviceId: %d. Refreshing sensors map.", deviceId), deviceId);
                 return position;
             }
 
-            for (PeripheralSensor sensorOnDevice : sensorsOnDeviceList) {
+            for (PeripheralSensor sensorOnDevice : sensorsListForProcessing) {
                 long sensorID = sensorOnDevice.getPeripheralSensorId();
                 logDebugIfNotLoading(String.format("[FuelSensorDataHandler] Running sensor loop on %d %d", position.getDeviceId(), sensorID), deviceId);
                 String lookUpKey = getLookupKey(deviceId, sensorID);
@@ -191,6 +193,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
             Position lastPosition = deviceLastKnownOdometerPositionLookup.get(deviceId);
             position.set(Position.KEY_ODOMETER, ((Number) lastPosition.getAttributes().get(Position.KEY_ODOMETER)).longValue());
+            return;
         }
 
         if ((position.getAttributes().containsKey(calibFuelDataField) &&
@@ -199,6 +202,7 @@ public class FuelSensorDataHandler extends BaseDataHandler {
                         ((Number) position.getAttributes().get(Position.KEY_POWER)).doubleValue()  <= 0.0)) {
             logDebugIfNotLoading(String.format("Device power too low, updating with last known fuel level for deviceId %s", deviceId), deviceId);
             updateWithLastAvailable(position, ALL_FUEL_FIELDS, fuelSensor);
+            return;
         }
 
         if (position.getBoolean(Position.KEY_CHARGE)) {
@@ -560,12 +564,14 @@ public class FuelSensorDataHandler extends BaseDataHandler {
 
             if (!this.loadingOldDataFromDB && relevantPositionsListForAlerts.size() >= fuelSensor.getEventsWindowSize()) {
                 previousAlertWindowStart.put(lookupKey, relevantPositionsListForAlerts.get(0));
-                FuelActivity fuelActivity =
+                Optional<FuelActivity> fuelActivity =
                         FuelDataActivityChecker.checkForActivity(relevantPositionsListForAlerts,
                                                                  deviceFuelEventMetadata,
                                                                  fuelSensor);
 
-                sendNotificationIfNecessary(deviceId, fuelActivity, fuelSensor, fuelTankMaxVolume);
+                if (fuelActivity.isPresent()) {
+                    sendNotificationIfNecessary(deviceId, fuelActivity.get(), fuelSensor, fuelTankMaxVolume);
+                }
             }
         }
 
