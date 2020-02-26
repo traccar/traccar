@@ -21,6 +21,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -88,7 +89,10 @@ public class EskyProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(parser.nextDouble());
 
         if (parser.hasNext(3)) {
-            position.set(Position.KEY_INPUT, parser.nextHexInt());
+            int input = parser.nextHexInt();
+            position.set(Position.KEY_IGNITION, !BitUtil.check(input, 0));
+            position.set(Position.PREFIX_IN + 1, !BitUtil.check(input, 1));
+            position.set(Position.PREFIX_IN + 2, !BitUtil.check(input, 2));
             position.set(Position.KEY_EVENT, parser.nextInt());
             position.set(Position.KEY_ODOMETER, parser.nextInt());
         }
