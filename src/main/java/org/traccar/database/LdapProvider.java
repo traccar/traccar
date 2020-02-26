@@ -177,7 +177,7 @@ public class LdapProvider {
     }
 
     public String encodeForLdap(String input) {
-        if( input == null ) {
+        if (input == null) {
             return null;
         }
         StringBuilder sb = new StringBuilder();
