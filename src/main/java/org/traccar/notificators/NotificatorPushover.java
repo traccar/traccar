@@ -54,10 +54,10 @@ public class NotificatorPushover extends Notificator {
         // see https://pushover.net/api
         token = Context.getConfig().getString("notificator.pushover.token"); // (required) token from pushover.net
         user = Context.getConfig().getString("notificator.pushover.user"); // (required) user from pushover.net
-        device = Context.getConfig().getString("notificator.pushover.device",""); // optional:
+        device = Context.getConfig().getString("notificator.pushover.device", ""); // optional:
         // your user's device name to send the message directly
         // to that device, rather than all of the user's devices (multiple devices may be separated by a comma)
-        title = Context.getConfig().getString("notificator.pushover.title",""); // optional: your message's title,
+        title = Context.getConfig().getString("notificator.pushover.title", ""); // optional: your message's title,
         // otherwise your app's name is used
     }
 
