@@ -217,9 +217,9 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedShortLE();
         }
         if (BitUtil.check(mask, 6)) {
-            position.set("maxAcceleration", buf.readUnsignedByte());
-            position.set("maxBraking", buf.readUnsignedByte());
-            position.set("maxCornering", buf.readUnsignedByte());
+            position.set("maxAcceleration", buf.readUnsignedByte() * 0.02);
+            position.set("maxBraking", buf.readUnsignedByte() * 0.02);
+            position.set("maxCornering", buf.readUnsignedByte() * 0.02);
         }
         if (BitUtil.check(mask, 7)) {
             buf.skipBytes(16);
