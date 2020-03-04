@@ -33,6 +33,8 @@ import org.traccar.model.Position;
 import org.traccar.model.Group;
 
 import javax.inject.Inject;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
@@ -184,6 +186,7 @@ public class WebDataHandler extends BaseDataHandler {
         private int retries = 0;
         private Map<String, Object> payload;
         private Invocation.Builder requestBuilder;
+        private MediaType mediaType = MediaType.APPLICATION_JSON_TYPE;
 
         AsyncRequestAndCallback(Position position) {
 
@@ -198,7 +201,12 @@ public class WebDataHandler extends BaseDataHandler {
             if (header != null && !header.isEmpty()) {
                 for (String line: header.split("\\r?\\n")) {
                     String[] values = line.split(":", 2);
-                    requestBuilder.header(values[0].trim(), values[1].trim());
+                    String headerName = values[0].trim();
+                    String headerValue = values[1].trim();
+                    requestBuilder.header(headerName, headerValue);
+                    if (headerName.equals(HttpHeaders.CONTENT_TYPE)) {
+                        mediaType = MediaType.valueOf(headerValue);
+                    }
                 }
             }
 
@@ -211,7 +219,11 @@ public class WebDataHandler extends BaseDataHandler {
 
         private void send() {
             if (json) {
-                requestBuilder.async().post(Entity.json(payload), this);
+                try {
+                    requestBuilder.async().post(Entity.entity(objectMapper.writeValueAsString(payload), mediaType), this);
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException("Failed to serialize payload to json: " + payload);
+                }
             } else {
                 requestBuilder.async().get(this);
             }
