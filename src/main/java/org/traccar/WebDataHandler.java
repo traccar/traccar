@@ -192,7 +192,7 @@ public class WebDataHandler extends BaseDataHandler {
 
             String formattedUrl;
             try {
-                formattedUrl = json ? url : formatRequest(position);
+                formattedUrl = formatRequest(position);
             } catch (UnsupportedEncodingException | JsonProcessingException e) {
                 throw new RuntimeException("Forwarding formatting error", e);
             }
@@ -203,9 +203,10 @@ public class WebDataHandler extends BaseDataHandler {
                     String[] values = line.split(":", 2);
                     String headerName = values[0].trim();
                     String headerValue = values[1].trim();
-                    requestBuilder.header(headerName, headerValue);
                     if (headerName.equals(HttpHeaders.CONTENT_TYPE)) {
                         mediaType = MediaType.valueOf(headerValue);
+                    } else {
+                        requestBuilder.header(headerName, headerValue);
                     }
                 }
             }
@@ -220,9 +221,10 @@ public class WebDataHandler extends BaseDataHandler {
         private void send() {
             if (json) {
                 try {
-                    requestBuilder.async().post(Entity.entity(objectMapper.writeValueAsString(payload), mediaType), this);
+                    Entity<String> entity = Entity.entity(objectMapper.writeValueAsString(payload), mediaType);
+                    requestBuilder.async().post(entity, this);
                 } catch (JsonProcessingException e) {
-                    throw new RuntimeException("Failed to serialize payload to json: " + payload);
+                    throw new RuntimeException("Failed to serialize location to json", e);
                 }
             } else {
                 requestBuilder.async().get(this);
