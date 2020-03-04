@@ -116,11 +116,11 @@ public class NotificatorPushover extends Notificator {
             if (properties.getProperty("notificator.pushover.device") != null) {
                 device = properties.getProperty("notificator.pushover.device");
             }
-            if (properties.getProperty("notificator.pushover.title") != null) { 
+            if (properties.getProperty("notificator.pushover.title") != null) {
                 title = properties.getProperty("notificator.pushover.title");
             }
-        } 
-        
+        }
+
         if (token == null) {
             LOGGER.warn("Pushover token not found");
             return;
@@ -131,11 +131,13 @@ public class NotificatorPushover extends Notificator {
             return;
         }
 
-        if (device == null)
+        if (device == null) {
             device = "";
+        }
 
-        if (title == null)
+        if (title == null) {
             title = "";
+        }
 
         Message message = new Message();
         message.token = token;
