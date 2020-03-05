@@ -113,7 +113,7 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte());
         }
         if (BitUtil.check(mask, 4)) {
-            position.set(Position.KEY_RPM, buf.readUnsignedShortLE() * 0.0125);
+            position.set(Position.KEY_RPM, buf.readUnsignedShortLE() * 0.125);
         }
         if (BitUtil.check(mask, 5)) {
             position.set(Position.KEY_HOURS, buf.readUnsignedIntLE());
