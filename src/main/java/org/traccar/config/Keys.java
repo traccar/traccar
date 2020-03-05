@@ -101,6 +101,13 @@ public final class Keys {
             "forward.json", Boolean.class);
 
     /**
+     * Boolean value to enable URL parameters in json mode. For example, {uniqueId} for device identifier,
+     * {latitude} and {longitude} for coordinates.
+     */
+    public static final ConfigKey FORWARD_URL_VARIABLES = new ConfigKey(
+        "forward.urlVariables", Boolean.class);
+
+    /**
      * Position forwarding retrying enable. When enabled, additional attempts are made to deliver positions. If initial
      * delivery fails, because of an unreachable server or an HTTP response different from '2xx', the software waits
      * for 'forward.retry.delay' milliseconds to retry delivery. On subsequent failures, this delay is duplicated.

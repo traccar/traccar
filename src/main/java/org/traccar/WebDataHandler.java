@@ -33,6 +33,8 @@ import org.traccar.model.Position;
 import org.traccar.model.Group;
 
 import javax.inject.Inject;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
@@ -65,6 +67,7 @@ public class WebDataHandler extends BaseDataHandler {
     private final String url;
     private final String header;
     private final boolean json;
+    private final boolean urlVariables;
 
     private final boolean retryEnabled;
     private final int retryDelay;
@@ -83,6 +86,7 @@ public class WebDataHandler extends BaseDataHandler {
         this.url = config.getString(Keys.FORWARD_URL);
         this.header = config.getString(Keys.FORWARD_HEADER);
         this.json = config.getBoolean(Keys.FORWARD_JSON);
+        this.urlVariables = config.getBoolean(Keys.FORWARD_URL_VARIABLES);
 
         this.retryEnabled = config.getBoolean(Keys.FORWARD_RETRY_ENABLE);
         this.retryDelay = config.getInteger(Keys.FORWARD_RETRY_DELAY, 100);
@@ -184,12 +188,13 @@ public class WebDataHandler extends BaseDataHandler {
         private int retries = 0;
         private Map<String, Object> payload;
         private Invocation.Builder requestBuilder;
+        private MediaType mediaType = MediaType.APPLICATION_JSON_TYPE;
 
         AsyncRequestAndCallback(Position position) {
 
             String formattedUrl;
             try {
-                formattedUrl = json ? url : formatRequest(position);
+                formattedUrl = (json && !urlVariables) ? url : formatRequest(position);
             } catch (UnsupportedEncodingException | JsonProcessingException e) {
                 throw new RuntimeException("Forwarding formatting error", e);
             }
@@ -198,7 +203,13 @@ public class WebDataHandler extends BaseDataHandler {
             if (header != null && !header.isEmpty()) {
                 for (String line: header.split("\\r?\\n")) {
                     String[] values = line.split(":", 2);
-                    requestBuilder.header(values[0].trim(), values[1].trim());
+                    String headerName = values[0].trim();
+                    String headerValue = values[1].trim();
+                    if (headerName.equals(HttpHeaders.CONTENT_TYPE)) {
+                        mediaType = MediaType.valueOf(headerValue);
+                    } else {
+                        requestBuilder.header(headerName, headerValue);
+                    }
                 }
             }
 
@@ -211,7 +222,12 @@ public class WebDataHandler extends BaseDataHandler {
 
         private void send() {
             if (json) {
-                requestBuilder.async().post(Entity.json(payload), this);
+                try {
+                    Entity<String> entity = Entity.entity(objectMapper.writeValueAsString(payload), mediaType);
+                    requestBuilder.async().post(entity, this);
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException("Failed to serialize location to json", e);
+                }
             } else {
                 requestBuilder.async().get(this);
             }
