@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2014 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,8 +42,8 @@ public class TelicProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd)(dd)(dd)")              // date (ddmmyy)
             .number("(dd)(dd)(dd),")             // time (hhmmss)
             .groupBegin()
-            .number("(-?d{9}),")                 // longitude
-            .number("(-?d{8}),")                 // latitude
+            .number("(-?d{7,}),")                // longitude
+            .number("(-?d{6,}),")                // latitude
             .or()
             .number("(-?d+),")                   // longitude
             .number("(-?d+),")                   // latitude
