@@ -42,8 +42,8 @@ public class TelicProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd)(dd)(dd)")              // date (ddmmyy)
             .number("(dd)(dd)(dd),")             // time (hhmmss)
             .groupBegin()
-            .number("(-?d{7,}),")                // longitude
-            .number("(-?d{6,}),")                // latitude
+            .number("(-?d{8,}),")                // longitude
+            .number("(-?d{7,}),")                // latitude
             .or()
             .number("(-?d+),")                   // longitude
             .number("(-?d+),")                   // latitude
