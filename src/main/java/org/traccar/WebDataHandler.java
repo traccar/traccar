@@ -67,7 +67,7 @@ public class WebDataHandler extends BaseDataHandler {
     private final String url;
     private final String header;
     private final boolean json;
-    private final boolean jsonUrlVariables;
+    private final boolean urlVariables;
 
     private final boolean retryEnabled;
     private final int retryDelay;
@@ -86,7 +86,7 @@ public class WebDataHandler extends BaseDataHandler {
         this.url = config.getString(Keys.FORWARD_URL);
         this.header = config.getString(Keys.FORWARD_HEADER);
         this.json = config.getBoolean(Keys.FORWARD_JSON);
-        this.jsonUrlVariables = config.getBoolean(Keys.FORWARD_JSON_URL_VARIABLES);
+        this.urlVariables = config.getBoolean(Keys.FORWARD_URL_VARIABLES);
 
         this.retryEnabled = config.getBoolean(Keys.FORWARD_RETRY_ENABLE);
         this.retryDelay = config.getInteger(Keys.FORWARD_RETRY_DELAY, 100);
@@ -194,7 +194,7 @@ public class WebDataHandler extends BaseDataHandler {
 
             String formattedUrl;
             try {
-                formattedUrl = (json && !jsonUrlVariables) ? url : formatRequest(position);
+                formattedUrl = (json && !urlVariables) ? url : formatRequest(position);
             } catch (UnsupportedEncodingException | JsonProcessingException e) {
                 throw new RuntimeException("Forwarding formatting error", e);
             }

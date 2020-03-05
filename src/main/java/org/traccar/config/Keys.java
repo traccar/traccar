@@ -104,8 +104,8 @@ public final class Keys {
      * Boolean value to enable URL parameters in json mode. For example, {uniqueId} for device identifier,
      * {latitude} and {longitude} for coordinates.
      */
-    public static final ConfigKey FORWARD_JSON_URL_VARIABLES = new ConfigKey(
-        "forward.json.url.variables", Boolean.class);
+    public static final ConfigKey FORWARD_URL_VARIABLES = new ConfigKey(
+        "forward.urlVariables", Boolean.class);
 
     /**
      * Position forwarding retrying enable. When enabled, additional attempts are made to deliver positions. If initial
