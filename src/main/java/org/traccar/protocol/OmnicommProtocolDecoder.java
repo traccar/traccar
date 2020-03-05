@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,16 +111,29 @@ public class OmnicommProtocolDecoder extends BaseProtocolDecoder {
                 Position position = new Position(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());
 
+                if (message.hasGeneral()) {
+                    OmnicommMessageOuterClass.OmnicommMessage.General data = message.getGeneral();
+                    position.set(Position.KEY_POWER, data.getUboard() * 0.1);
+                    position.set(Position.KEY_BATTERY_LEVEL, data.getBatLife());
+                }
+
                 if (message.hasNAV()) {
-                    OmnicommMessageOuterClass.OmnicommMessage.NAV nav = message.getNAV();
+                    OmnicommMessageOuterClass.OmnicommMessage.NAV data = message.getNAV();
                     position.setValid(true);
-                    position.setTime(new Date((nav.getGPSTime() + 1230768000) * 1000L)); // from 2009-01-01 12:00
-                    position.setLatitude(nav.getLAT() * 0.0000001);
-                    position.setLongitude(nav.getLON() * 0.0000001);
-                    position.setSpeed(UnitsConverter.knotsFromKph(nav.getGPSVel() * 0.1));
-                    position.setCourse(nav.getGPSDir());
-                    position.setAltitude(nav.getGPSAlt() * 0.1);
-                    position.set(Position.KEY_SATELLITES, nav.getGPSNSat());
+                    position.setTime(new Date((data.getGPSTime() + 1230768000) * 1000L)); // from 2009-01-01 12:00
+                    position.setLatitude(data.getLAT() * 0.0000001);
+                    position.setLongitude(data.getLON() * 0.0000001);
+                    position.setSpeed(UnitsConverter.knotsFromKph(data.getGPSVel() * 0.1));
+                    position.setCourse(data.getGPSDir());
+                    position.setAltitude(data.getGPSAlt() * 0.1);
+                    position.set(Position.KEY_SATELLITES, data.getGPSNSat());
+                }
+
+                if (message.hasLLSDt()) {
+                    OmnicommMessageOuterClass.OmnicommMessage.LLSDt data = message.getLLSDt();
+                    position.set("fuel1Temp", data.getTLLS1());
+                    position.set("fuel1", data.getCLLS1());
+                    position.set("fuel1State", data.getFLLS1());
                 }
 
                 if (position.getFixTime() != null) {
