@@ -36,36 +36,20 @@ public class NotificatorPushover extends Notificator {
 
     private static Properties getProperties(PropertiesProvider provider) {
         Properties properties = new Properties();
-        // (required) token from pushover.net
-        String token = provider.getString("notificator.pushover.token");
-        if (token != null) {
-            properties.put("notificator.pushover.token", token);
-        }
-        // (required) user from pushover.net
-        String user = provider.getString("notificator.pushover.user");
-        if (user != null) {
-            properties.put("notificator.pushover.user", user);
-        }
         // optional: your user's device name to send the message directly
         // to that device, rather than all of the user's devices (multiple devices may be separated by a comma)
         String device = provider.getString("notificator.pushover.device");
         if (device != null) {
             properties.put("notificator.pushover.device", device);
         }
-        // optional: your message's title, otherwise your app's name is used
-        String title = provider.getString("notificator.pushover.title");
-        if (title != null) {
-            properties.put("notificator.pushover.title", title);
-        }
         return properties;
     }
 
 
     private final String url;
-    private String token;
-    private String puser;
+    private final String token;
+    private final String puser;
     private String device;
-    private String title;
 
     public static class Message {
         @JsonProperty("token")
@@ -74,8 +58,6 @@ public class NotificatorPushover extends Notificator {
         private String user;
         @JsonProperty("device")
         private String device;
-        @JsonProperty("title")
-        private String title;
         @JsonProperty("message")
         private String message;
     }
@@ -83,6 +65,8 @@ public class NotificatorPushover extends Notificator {
     public NotificatorPushover() {
         // see https://pushover.net/api
         url = "https://api.pushover.net/1/messages.json";
+        token = Context.getConfig().getString("notificator.pushover.token"); // (required) token from pushover.net
+        puser = Context.getConfig().getString("notificator.pushover.user"); // (required) user from pushover.net
     }
 
     @Override
@@ -90,34 +74,18 @@ public class NotificatorPushover extends Notificator {
 
         User user = Context.getPermissionsManager().getUser(userId);
 
-        token = null;
-        puser = null;
         device = null;
-        title = null;
-
         Properties properties = null;
 
         properties = getProperties(new PropertiesProvider(Context.getConfig()));
         if (properties != null) {
-            token = properties.getProperty("notificator.pushover.token");
-            puser = properties.getProperty("notificator.pushover.user");
             device = properties.getProperty("notificator.pushover.device");
-            title = properties.getProperty("notificator.pushover.title");
         }
 
         properties = getProperties(new PropertiesProvider(user));
         if (properties != null) {
-            if (properties.getProperty("notificator.pushover.token") != null) {
-                token = properties.getProperty("notificator.pushover.token");
-            }
-            if (properties.getProperty("notificator.pushover.user") != null) {
-                puser = properties.getProperty("notificator.pushover.user");
-            }
             if (properties.getProperty("notificator.pushover.device") != null) {
                 device = properties.getProperty("notificator.pushover.device");
-            }
-            if (properties.getProperty("notificator.pushover.title") != null) {
-                title = properties.getProperty("notificator.pushover.title");
             }
         }
 
@@ -135,15 +103,10 @@ public class NotificatorPushover extends Notificator {
             device = "";
         }
 
-        if (title == null) {
-            title = "";
-        }
-
         Message message = new Message();
         message.token = token;
         message.user = puser;
         message.device = device;
-        message.title = title;
         message.message = NotificationFormatter.formatShortMessage(userId, event, position);
 
         Context.getClient().target(url).request()
