@@ -21,11 +21,8 @@ import org.slf4j.LoggerFactory;
 import org.traccar.Context;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
-import org.traccar.notification.NotificationFormatter;
-
 import org.traccar.model.User;
-import org.traccar.notification.PropertiesProvider;
-import java.util.Properties;
+import org.traccar.notification.NotificationFormatter;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.InvocationCallback;
@@ -34,22 +31,9 @@ public class NotificatorPushover extends Notificator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificatorPushover.class);
 
-    private static Properties getProperties(PropertiesProvider provider) {
-        Properties properties = new Properties();
-        // optional: your user's device name to send the message directly
-        // to that device, rather than all of the user's devices (multiple devices may be separated by a comma)
-        String device = provider.getString("notificator.pushover.device");
-        if (device != null) {
-            properties.put("notificator.pushover.device", device);
-        }
-        return properties;
-    }
-
-
     private final String url;
     private final String token;
     private final String puser;
-    private String device;
 
     public static class Message {
         @JsonProperty("token")
@@ -72,21 +56,15 @@ public class NotificatorPushover extends Notificator {
     @Override
     public void sendSync(long userId, Event event, Position position) {
 
-        User user = Context.getPermissionsManager().getUser(userId);
+        final User user = Context.getPermissionsManager().getUser(userId);
 
-        device = null;
-        Properties properties = null;
+        String device = "";
 
-        properties = getProperties(new PropertiesProvider(Context.getConfig()));
-        if (properties != null) {
-            device = properties.getProperty("notificator.pushover.device");
-        }
-
-        properties = getProperties(new PropertiesProvider(user));
-        if (properties != null) {
-            if (properties.getProperty("notificator.pushover.device") != null) {
-                device = properties.getProperty("notificator.pushover.device");
-            }
+        if (user.getAttributes().containsKey("notificator.pushover.device")) {
+            // optional: your user's device name to send the message directly
+            // to that device, rather than all of the user's devices (multiple devices may be separated by a comma)
+            // i.e.: device1,device2 (no space)
+            device = user.getString("notificator.pushover.device").replaceAll(" *, *", ",");
         }
 
         if (token == null) {
@@ -97,10 +75,6 @@ public class NotificatorPushover extends Notificator {
         if (puser == null) {
             LOGGER.warn("Pushover user not found");
             return;
-        }
-
-        if (device == null) {
-            device = "";
         }
 
         Message message = new Message();
