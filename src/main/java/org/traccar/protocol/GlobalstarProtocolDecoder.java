@@ -97,7 +97,7 @@ public class GlobalstarProtocolDecoder extends BaseHttpProtocolDecoder {
         rootElement.appendChild(state);
 
         Element stateMessage = document.createElement("stateMessage");
-        stateMessage.appendChild(document.createTextNode("Messages received and stored successfully"));
+        stateMessage.appendChild(document.createTextNode("Store OK"));
         rootElement.appendChild(stateMessage);
 
         Transformer transformer = TransformerFactory.newInstance().newTransformer();
