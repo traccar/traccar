@@ -47,10 +47,9 @@ public class NotificatorPushover extends Notificator {
     }
 
     public NotificatorPushover() {
-        // see https://pushover.net/api
         url = "https://api.pushover.net/1/messages.json";
-        token = Context.getConfig().getString("notificator.pushover.token"); // (required) token from pushover.net
-        puser = Context.getConfig().getString("notificator.pushover.user"); // (required) user from pushover.net
+        token = Context.getConfig().getString("notificator.pushover.token");
+        puser = Context.getConfig().getString("notificator.pushover.user");
     }
 
     @Override
@@ -61,9 +60,6 @@ public class NotificatorPushover extends Notificator {
         String device = "";
 
         if (user.getAttributes().containsKey("notificator.pushover.device")) {
-            // optional: your user's device name to send the message directly
-            // to that device, rather than all of the user's devices (multiple devices may be separated by a comma)
-            // i.e.: device1,device2 (no space)
             device = user.getString("notificator.pushover.device").replaceAll(" *, *", ",");
         }
 
