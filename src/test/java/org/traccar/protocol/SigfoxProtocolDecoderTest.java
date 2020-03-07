@@ -13,6 +13,9 @@ public class SigfoxProtocolDecoderTest extends ProtocolTest {
         SigfoxProtocolDecoder decoder = new SigfoxProtocolDecoder(null);
 
         verifyPosition(decoder, request(HttpMethod.POST, "/",
+                buffer("{\"deviceId\":\"3377BC\",\"snr\":\"16.46\",\"rssi\":\"-123.00\",\"station\":\"-123.00\",\"seqNum\":\"3042\",\"newPosition\":true,\"latitude\":51.9189749,\"longitude\":-8.3979322,\"positionTime\":\"1582801850\",\"moving\":false,\"magChange\":false,\"magStatus\":false,\"temperature\":-2,\"battery\":\"null\",\"batteryPercentage\":\"null\",\"lastSeen\":\"1582801850\",\"fwVersion\":\"null\",\"dlConfig\":\"null\",\"recievedPayload\":\"09495a9085f5c94c\"}")));
+
+        verifyPosition(decoder, request(HttpMethod.POST, "/",
                 buffer("{  \"device\" : \"33827B\",  \"data\" : \"1f03198e63807f08836402ff\",  \"time\" : \"1574346702\",  \"snr\" : \"8.82\",  \"station\" : \"140A\",  \"avgSnr\" : \"11.28\",  \"lat\" : \"52.0\",  \"lng\" : \"-8.0\",  \"rssi\" : \"-141.00\",  \"seqNumber\" : \"3662\"}")));
 
         verifyPosition(decoder, request(HttpMethod.POST, "/",
