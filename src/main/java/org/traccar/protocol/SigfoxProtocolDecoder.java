@@ -101,8 +101,14 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
 
         if (json.containsKey("time")) {
             position.setTime(new Date(getJsonInt(json, "time") * 1000L));
+        } else if (json.containsKey("positionTime")) {
+            position.setTime(new Date(getJsonInt(json, "positionTime") * 1000L));
         } else {
             position.setTime(new Date());
+        }
+
+        if (json.containsKey("lastSeen")) {
+            position.setDeviceTime(new Date(getJsonInt(json, "lastSeen") * 1000L));
         }
 
         if (json.containsKey("location")
@@ -119,6 +125,16 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
             position.setValid(true);
             position.setLatitude(getJsonDouble(location, location.containsKey("lat") ? "lat" : "latitude"));
             position.setLongitude(getJsonDouble(location, location.containsKey("lng") ? "lng" : "longitude"));
+
+            if (location.containsKey("moving")) {
+                position.set(Position.KEY_MOTION, location.getBoolean("moving"));
+            }
+            if (location.containsKey("magStatus")) {
+                position.set(Position.KEY_BLOCKED, location.getBoolean("magStatus"));
+            }
+            if (location.containsKey("temperature")) {
+                position.set(Position.KEY_DEVICE_TEMP, location.getJsonNumber("temperature").doubleValue());
+            }
 
         } else {
 
