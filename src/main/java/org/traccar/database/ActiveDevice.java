@@ -16,6 +16,8 @@
 package org.traccar.database;
 
 import io.netty.channel.Channel;
+import io.netty.handler.codec.http.HttpRequestDecoder;
+import org.traccar.BasePipelineFactory;
 import org.traccar.Protocol;
 import org.traccar.model.Command;
 
@@ -41,6 +43,10 @@ public class ActiveDevice {
 
     public long getDeviceId() {
         return deviceId;
+    }
+
+    public boolean supportsLiveCommands() {
+        return BasePipelineFactory.getHandler(channel.pipeline(), HttpRequestDecoder.class) == null;
     }
 
     public void sendCommand(Command command) {

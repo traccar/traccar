@@ -76,7 +76,12 @@ public class CommandsManager  extends ExtendedObjectManager<Command> {
         } else {
             ActiveDevice activeDevice = Context.getConnectionManager().getActiveDevice(deviceId);
             if (activeDevice != null) {
-                activeDevice.sendCommand(command);
+                if (activeDevice.supportsLiveCommands()) {
+                    activeDevice.sendCommand(command);
+                } else {
+                    getDeviceQueue(deviceId).add(command);
+                    return false;
+                }
             } else if (!queueing) {
                 throw new RuntimeException("Device is not online");
             } else {
