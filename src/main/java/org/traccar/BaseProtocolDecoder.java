@@ -21,10 +21,12 @@ import io.netty.handler.codec.http.HttpRequestDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
+import org.traccar.database.CommandsManager;
 import org.traccar.database.ConnectionManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.database.StatisticsManager;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 
@@ -244,6 +246,16 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
         }
         if (deviceId > 0) {
             connectionManager.updateDevice(deviceId, Device.STATUS_ONLINE, new Date());
+        }
+        sendQueuedCommands(channel, remoteAddress, deviceId);
+    }
+
+    protected void sendQueuedCommands(Channel channel, SocketAddress remoteAddress, long deviceId) {
+        CommandsManager commandsManager = Context.getCommandsManager();
+        if (commandsManager != null) {
+            for (Command command : commandsManager.readQueuedCommands(deviceId)) {
+                protocol.sendDataCommand(channel, remoteAddress, command);
+            }
         }
     }
 

@@ -161,21 +161,27 @@ public class CommandsManager  extends ExtendedObjectManager<Command> {
         }
     }
 
-    public void sendQueuedCommands(ActiveDevice activeDevice) {
+    public Collection<Command> readQueuedCommands(long deviceId) {
+        return readQueuedCommands(deviceId, Integer.MAX_VALUE);
+    }
+
+    public Collection<Command> readQueuedCommands(long deviceId, int count) {
         Queue<Command> deviceQueue;
         try {
             readLock();
-            deviceQueue = deviceQueues.get(activeDevice.getDeviceId());
+            deviceQueue = deviceQueues.get(deviceId);
         } finally {
             readUnlock();
         }
+        Collection<Command> result = new ArrayList<>();
         if (deviceQueue != null) {
             Command command = deviceQueue.poll();
-            while (command != null) {
-                activeDevice.sendCommand(command);
+            while (command != null && result.size() < count) {
+                result.add(command);
                 command = deviceQueue.poll();
             }
         }
+        return result;
     }
 
 }
