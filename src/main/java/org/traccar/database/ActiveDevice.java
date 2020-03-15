@@ -16,7 +16,6 @@
 package org.traccar.database;
 
 import io.netty.channel.Channel;
-import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.model.Command;
 
