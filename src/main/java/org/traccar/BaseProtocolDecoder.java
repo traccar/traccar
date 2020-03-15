@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -227,9 +227,9 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
             if (decodedMessage instanceof Position) {
                 position = (Position) decodedMessage;
             } else if (decodedMessage instanceof Collection) {
-                Collection positions = (Collection) decodedMessage;
+                Collection<Position> positions = (Collection) decodedMessage;
                 if (!positions.isEmpty()) {
-                    position = (Position) positions.iterator().next();
+                    position = positions.iterator().next();
                 }
             }
         }
