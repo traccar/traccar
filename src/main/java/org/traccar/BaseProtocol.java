@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,11 +65,6 @@ public abstract class BaseProtocol implements Protocol {
     }
 
     public void setSupportedTextCommands(String... commands) {
-        supportedTextCommands.addAll(Arrays.asList(commands));
-    }
-
-    public void setSupportedCommands(String... commands) {
-        supportedDataCommands.addAll(Arrays.asList(commands));
         supportedTextCommands.addAll(Arrays.asList(commands));
     }
 
