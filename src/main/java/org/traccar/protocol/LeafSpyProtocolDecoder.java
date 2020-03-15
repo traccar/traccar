@@ -122,13 +122,8 @@ public class LeafSpyProtocolDecoder extends BaseHttpProtocolDecoder {
         }
 
         if (position.getDeviceId() != 0) {
-            if (channel != null) {
-                HttpResponse response = new DefaultFullHttpResponse(
-                    HttpVersion.HTTP_1_1,
-                    HttpResponseStatus.OK,
+            sendResponse(channel, HttpResponseStatus.OK,
                     Unpooled.copiedBuffer("\"status\":\"0\"", StandardCharsets.US_ASCII));
-                channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
-            }
             return position;
         } else {
             sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
