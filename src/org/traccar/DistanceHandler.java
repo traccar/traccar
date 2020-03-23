@@ -41,8 +41,8 @@ public class DistanceHandler extends BaseDataHandler {
     }
 
     private Position getLastPosition(long deviceId) {
-        if (Context.getIdentityManager() != null) {
-            return Context.getIdentityManager().getLastPosition(deviceId);
+        if (Context.getDataManager() != null) {
+            return Context.getDeviceManager().getLastValidPosition(deviceId);
         }
         return null;
     }

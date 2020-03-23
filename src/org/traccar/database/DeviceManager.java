@@ -50,6 +50,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
     private AtomicLong devicesLastUpdate = new AtomicLong();
 
     private final Map<Long, Position> positions = new ConcurrentHashMap<>();
+    private final Map<Long, Position> validPositions = new ConcurrentHashMap<>();
 
     private final Map<Long, DeviceState> deviceStates = new ConcurrentHashMap<>();
 
@@ -257,6 +258,10 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
             try {
                 for (Position position : getDataManager().getLatestPositions()) {
                     positions.put(position.getDeviceId(), position);
+                    Collection<Position> lastValidPositions = getDataManager().getLastValidPosition(position.getDeviceId());
+                    if (!lastValidPositions.isEmpty()) {
+                        validPositions.put(position.getDeviceId(), lastValidPositions.iterator().next());
+                    }
                 }
             } catch (SQLException error) {
                 Log.warning(error);
@@ -267,6 +272,12 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
     public boolean isLatestPosition(Position position) {
         Position lastPosition = getLastPosition(position.getDeviceId());
         return lastPosition == null || position.getFixTime().compareTo(lastPosition.getFixTime()) >= 0;
+    }
+
+    public boolean isLatestValidPosition (Position position) {
+        Position lastValidPosition = getLastValidPosition(position.getDeviceId());
+        return position.getValid()
+                && (lastValidPosition == null || position.getFixTime().compareTo(lastValidPosition.getFixTime()) >= 0);
     }
 
     public void updateLatestPosition(Position position) throws SQLException {
@@ -285,11 +296,19 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
                 Context.getConnectionManager().updatePosition(position);
             }
         }
+
+        if (isLatestValidPosition(position)) {
+            validPositions.put(position.getDeviceId(), position);
+        }
     }
 
     @Override
     public Position getLastPosition(long deviceId) {
         return positions.get(deviceId);
+    }
+
+    public Position getLastValidPosition(long deviceId) {
+        return validPositions.get(deviceId);
     }
 
     public Collection<Position> getInitialState(long userId) {
