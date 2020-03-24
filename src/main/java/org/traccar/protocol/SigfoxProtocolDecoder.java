@@ -48,6 +48,31 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
         super(protocol);
     }
 
+    private boolean jsonContains(JsonObject json, String key) {
+        if (json.containsKey(key)) {
+            JsonValue value = json.get(key);
+            if (value.getValueType() == JsonValue.ValueType.STRING) {
+                return !((JsonString) value).getString().equals("null");
+
+            } else {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean getJsonBoolean(JsonObject json, String key) {
+        JsonValue value = json.get(key);
+        if (value != null) {
+            if (value.getValueType() == JsonValue.ValueType.STRING) {
+                return Boolean.parseBoolean(((JsonString) value).getString());
+            } else {
+                return value.getValueType() == JsonValue.ValueType.TRUE;
+            }
+        }
+        return false;
+    }
+
     private int getJsonInt(JsonObject json, String key) {
         JsonValue value = json.get(key);
         if (value != null) {
@@ -99,46 +124,36 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        if (json.containsKey("time")) {
+        if (jsonContains(json, "time")) {
             position.setTime(new Date(getJsonInt(json, "time") * 1000L));
-        } else if (json.containsKey("positionTime")) {
+        } else if (jsonContains(json, "positionTime")) {
             position.setTime(new Date(getJsonInt(json, "positionTime") * 1000L));
         } else {
             position.setTime(new Date());
         }
 
-        if (json.containsKey("lastSeen")) {
+        if (jsonContains(json, "lastSeen")) {
             position.setDeviceTime(new Date(getJsonInt(json, "lastSeen") * 1000L));
         }
 
-        if (json.containsKey("location")
-                || json.containsKey("lat") && json.containsKey("lng") && !json.containsKey("data")
-                || json.containsKey("latitude") && json.containsKey("longitude") && !json.containsKey("data")) {
+        if (jsonContains(json, "location")
+                || jsonContains(json, "lat") && jsonContains(json, "lng") && !jsonContains(json, "data")
+                || jsonContains(json, "latitude") && jsonContains(json, "longitude") && !jsonContains(json, "data")) {
 
             JsonObject location;
-            if (json.containsKey("location")) {
+            if (jsonContains(json, "location")) {
                 location = json.getJsonObject("location");
             } else {
                 location = json;
             }
 
             position.setValid(true);
-            position.setLatitude(getJsonDouble(location, location.containsKey("lat") ? "lat" : "latitude"));
-            position.setLongitude(getJsonDouble(location, location.containsKey("lng") ? "lng" : "longitude"));
+            position.setLatitude(getJsonDouble(location, jsonContains(location, "lat") ? "lat" : "latitude"));
+            position.setLongitude(getJsonDouble(location, jsonContains(location, "lng") ? "lng" : "longitude"));
 
-            if (location.containsKey("moving")) {
-                position.set(Position.KEY_MOTION, location.getBoolean("moving"));
-            }
-            if (location.containsKey("magStatus")) {
-                position.set(Position.KEY_BLOCKED, location.getBoolean("magStatus"));
-            }
-            if (location.containsKey("temperature")) {
-                position.set(Position.KEY_DEVICE_TEMP, location.getJsonNumber("temperature").doubleValue());
-            }
+        } else if (jsonContains(json, "data") || jsonContains(json, "payload")) {
 
-        } else {
-
-            String data = json.getString(json.containsKey("data") ? "data" : "payload");
+            String data = json.getString(jsonContains(json, "data") ? "data" : "payload");
             ByteBuf buf = Unpooled.wrappedBuffer(DataConverter.parseHex(data));
             try {
                 int event = buf.readUnsignedByte();
@@ -229,10 +244,19 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
             getLastLocation(position, position.getDeviceTime());
         }
 
-        if (json.containsKey("rssi")) {
+        if (jsonContains(json, "moving")) {
+            position.set(Position.KEY_MOTION, getJsonBoolean(json, "moving"));
+        }
+        if (jsonContains(json, "magStatus")) {
+            position.set(Position.KEY_BLOCKED, getJsonBoolean(json, "magStatus"));
+        }
+        if (jsonContains(json, "temperature")) {
+            position.set(Position.KEY_DEVICE_TEMP, getJsonDouble(json, "temperature"));
+        }
+        if (jsonContains(json, "rssi")) {
             position.set(Position.KEY_RSSI, getJsonDouble(json, "rssi"));
         }
-        if (json.containsKey("seqNumber")) {
+        if (jsonContains(json, "seqNumber")) {
             position.set(Position.KEY_INDEX, getJsonInt(json, "seqNumber"));
         }
 

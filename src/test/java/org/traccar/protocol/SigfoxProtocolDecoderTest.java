@@ -12,6 +12,12 @@ public class SigfoxProtocolDecoderTest extends ProtocolTest {
 
         SigfoxProtocolDecoder decoder = new SigfoxProtocolDecoder(null);
 
+        verifyAttributes(decoder, request(HttpMethod.POST, "/",
+                buffer("{\"messageType\":\"accelerometer\",\"deviceId\":\"testdev001\",\"snr\":\"1234\",\"rssi\":\"-120.00\",\"station\":\"5678\",\"seqNum\":\"9123\",\"newPosition\":false,\"latitude\":\"null\",\"longitude\":\"null\",\"positionTime\":\"null\",\"moving\":true,\"magChange\":\"true\",\"magStatus\":\"true\",\"temperature\":\"7.5\",\"battery\":\"null\",\"batteryPercentage\":\"null\",\"lastSeen\":\"1582560425\",\"fwVersion\":\"null\",\"dlConfig\":\"null\",\"recievedPayload\":\"cb020051\"}")));
+
+        verifyAttributes(decoder, request(HttpMethod.POST, "/",
+                buffer("{\"messageType\":\"downlinkAcknowledgement\",\"deviceId\":\"testdev002\",\"snr\":\"1234\",\"rssi\":\"-120.00\",\"station\":\"5678\",\"seqNum\":\"9123\",\"newPosition\":false,\"latitude\":\"null\",\"longitude\":\"null\",\"positionTime\":\"null\",\"moving\":false,\"magChange\":\"true\",\"magStatus\":\"true\",\"temperature\":\"8.5\",\"battery\":\"3.6\",\"batteryPercentage\":\"100\",\"lastSeen\":\"1582560425\",\"fwVersion\":\"1.15\",\"dlConfig\":\"808c180202140216\",\"recievedPayload\":\"cf808c180202140216b4010f\"}")));
+
         verifyPosition(decoder, request(HttpMethod.POST, "/",
                 buffer("{\"deviceId\":\"3377BC\",\"snr\":\"16.46\",\"rssi\":\"-123.00\",\"station\":\"-123.00\",\"seqNum\":\"3042\",\"newPosition\":true,\"latitude\":51.9189749,\"longitude\":-8.3979322,\"positionTime\":\"1582801850\",\"moving\":false,\"magChange\":false,\"magStatus\":false,\"temperature\":-2,\"battery\":\"null\",\"batteryPercentage\":\"null\",\"lastSeen\":\"1582801850\",\"fwVersion\":\"null\",\"dlConfig\":\"null\",\"recievedPayload\":\"09495a9085f5c94c\"}")));
 
