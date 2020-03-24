@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import javax.ws.rs.core.Response;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 @Path("positions")
@@ -63,8 +64,12 @@ public class PositionResource extends BaseResource {
             return Context.getDeviceManager().getInitialState(getUserId());
         } else {
             Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
-            return Context.getDataManager().getPositions(
-                    deviceId, DateUtil.parseDate(from), DateUtil.parseDate(to));
+            if (from != null && to != null) {
+                return Context.getDataManager().getPositions(
+                        deviceId, DateUtil.parseDate(from), DateUtil.parseDate(to));
+            } else {
+                return Collections.singleton(Context.getDeviceManager().getLastPosition(deviceId));
+            }
         }
     }
 
