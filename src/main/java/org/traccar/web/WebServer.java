@@ -95,12 +95,13 @@ public class WebServer {
             }
         });
 
+        GzipHandler gzipHandler = new GzipHandler();
+
         HandlerList handlers = new HandlerList();
         initClientProxy(config, handlers);
         handlers.addHandler(servletHandler);
-        GzipHandler gzipHandler = new GzipHandler();
-        gzipHandler.setHandler(handlers);
-        server.setHandler(gzipHandler);
+        handlers.addHandler(gzipHandler);
+        server.setHandler(handlers);
     }
 
     private void initClientProxy(Config config, HandlerList handlers) {
