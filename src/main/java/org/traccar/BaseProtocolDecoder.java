@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,12 @@ import io.netty.handler.codec.http.HttpRequestDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
+import org.traccar.database.CommandsManager;
 import org.traccar.database.ConnectionManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.database.StatisticsManager;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 
@@ -227,20 +229,32 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
             if (decodedMessage instanceof Position) {
                 position = (Position) decodedMessage;
             } else if (decodedMessage instanceof Collection) {
-                Collection positions = (Collection) decodedMessage;
+                Collection<Position> positions = (Collection) decodedMessage;
                 if (!positions.isEmpty()) {
-                    position = (Position) positions.iterator().next();
+                    position = positions.iterator().next();
                 }
             }
         }
+        long deviceId = 0;
         if (position != null) {
-            connectionManager.updateDevice(
-                    position.getDeviceId(), Device.STATUS_ONLINE, new Date());
+            deviceId = position.getDeviceId();
         } else {
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
             if (deviceSession != null) {
-                connectionManager.updateDevice(
-                        deviceSession.getDeviceId(), Device.STATUS_ONLINE, new Date());
+                deviceId = deviceSession.getDeviceId();
+            }
+        }
+        if (deviceId > 0) {
+            connectionManager.updateDevice(deviceId, Device.STATUS_ONLINE, new Date());
+        }
+        sendQueuedCommands(channel, remoteAddress, deviceId);
+    }
+
+    protected void sendQueuedCommands(Channel channel, SocketAddress remoteAddress, long deviceId) {
+        CommandsManager commandsManager = Context.getCommandsManager();
+        if (commandsManager != null) {
+            for (Command command : commandsManager.readQueuedCommands(deviceId)) {
+                protocol.sendDataCommand(channel, remoteAddress, command);
             }
         }
     }

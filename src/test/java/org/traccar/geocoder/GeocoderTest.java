@@ -32,7 +32,7 @@ public class GeocoderTest {
     @Ignore
     @Test
     public void testGisgraphy() {
-        Geocoder geocoder = new GisgraphyGeocoder(new AddressFormat());
+        Geocoder geocoder = new GisgraphyGeocoder(null, 0, new AddressFormat());
         String address = geocoder.getAddress(48.8530000, 2.3400000, null);
         assertEquals("Rue du Jardinet, Paris, Île-de-France, FR", address);
     }

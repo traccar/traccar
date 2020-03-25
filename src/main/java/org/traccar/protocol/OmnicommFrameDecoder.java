@@ -27,11 +27,11 @@ public class OmnicommFrameDecoder extends BaseFrameDecoder {
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
-        if (buf.readableBytes() < 10) {
+        if (buf.readableBytes() < 6) {
             return null;
         }
 
-        int endIndex = buf.getUnsignedShortLE(2) + buf.readerIndex() + 6;
+        int endIndex = buf.getUnsignedShortLE(buf.readerIndex() + 2) + buf.readerIndex() + 6;
         if (buf.writerIndex() < endIndex) {
             return null;
         }

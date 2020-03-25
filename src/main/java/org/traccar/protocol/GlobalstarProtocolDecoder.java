@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import io.netty.channel.Channel;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import org.traccar.BaseHttpProtocolDecoder;
@@ -96,20 +97,22 @@ public class GlobalstarProtocolDecoder extends BaseHttpProtocolDecoder {
         rootElement.appendChild(state);
 
         Element stateMessage = document.createElement("stateMessage");
-        stateMessage.appendChild(document.createTextNode("Messages received and stored successfully"));
+        stateMessage.appendChild(document.createTextNode("Store OK"));
         rootElement.appendChild(stateMessage);
 
         Transformer transformer = TransformerFactory.newInstance().newTransformer();
         ByteBuf content = Unpooled.buffer();
         transformer.transform(new DOMSource(document), new StreamResult(new ByteBufOutputStream(content)));
 
-        FullHttpResponse response = new DefaultFullHttpResponse(
-                HttpVersion.HTTP_1_1, HttpResponseStatus.OK, content);
         if (channel != null) {
+            FullHttpResponse response = new DefaultFullHttpResponse(
+                    HttpVersion.HTTP_1_1, HttpResponseStatus.OK, content);
+            response.headers()
+                    .add(HttpHeaderNames.CONTENT_LENGTH, content.readableBytes())
+                    .add(HttpHeaderNames.CONTENT_TYPE, "text/xml");
             channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
     }
-
 
     @Override
     protected Object decode(

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,14 @@
 package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.model.Position;
 
@@ -39,6 +42,41 @@ public class BlueProtocolDecoder extends BaseProtocolDecoder {
         double minutes = value % 100 + buf.readUnsignedShort() * 0.0001;
         double coordinate = degrees + minutes / 60;
         return negative ? -coordinate : coordinate;
+    }
+
+    private void sendResponse(Channel channel, int deviceIndex) {
+        if (channel != null) {
+
+            ByteBuf response = Unpooled.buffer();
+            response.writeByte(0xaa);
+            response.writeShort(2 + 1 + 1 + 6 + 1);
+            response.writeByte(0x86); // version
+            response.writeByte(0);
+
+            response.writeByte(6); // data length
+            response.writeByte(0xa4); // type
+            response.writeByte(0); // server index
+            response.writeByte(deviceIndex);
+            response.writeByte(0);
+            response.writeByte(0);
+
+            response.writeByte(Checksum.xor(response.nioBuffer(1, response.writerIndex() - 1)));
+
+            channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
+        }
+    }
+
+    private String decodeAlarm(int value) {
+        switch (value) {
+            case 1:
+                return Position.ALARM_SOS;
+            case 8:
+                return Position.ALARM_OVERSPEED;
+            case 19:
+                return Position.ALARM_LOW_POWER;
+            default:
+                return null;
+        }
     }
 
     @Override
@@ -66,7 +104,7 @@ public class BlueProtocolDecoder extends BaseProtocolDecoder {
             int frameEnd = buf.readerIndex() + buf.readUnsignedByte();
 
             int type = buf.readUnsignedByte();
-            buf.readUnsignedByte(); // reference id
+            int index = buf.readUnsignedByte();
             buf.readUnsignedByte();
             buf.readUnsignedByte(); // flags
 
@@ -98,9 +136,28 @@ public class BlueProtocolDecoder extends BaseProtocolDecoder {
 
                 buf.readUnsignedByte(); // status 2
                 buf.readUnsignedByte(); // status 3
-                buf.readUnsignedByte(); // status 4
+
+                status = buf.readUnsignedByte(); // status 4
+                int ignition = BitUtil.between(status, 2, 4);
+                if (ignition == 0b01) {
+                    position.set(Position.KEY_IGNITION, false);
+                }
+                if (ignition == 0b10) {
+                    position.set(Position.KEY_IGNITION, true);
+                }
+
                 buf.readUnsignedByte(); // status 5
                 buf.readUnsignedByte(); // status 6
+
+                position.set(Position.KEY_STATUS, buf.readUnsignedShort());
+
+            } else if (type == 0x81) {
+
+                position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
+
+            } else if (type == 0x84) {
+
+                sendResponse(channel, index);
 
             }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,6 +116,32 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
                     return Position.ALARM_POWER_CUT;
                 case 16:
                     return Position.ALARM_POWER_RESTORED;
+                case 17:
+                    return Position.ALARM_LOW_BATTERY;
+                case 18:
+                    return Position.ALARM_OVERSPEED;
+                case 20:
+                    return Position.ALARM_GPS_ANTENNA_CUT;
+                case 21:
+                    return Position.ALARM_VIBRATION;
+                case 23:
+                    return Position.ALARM_ACCELERATION;
+                case 24:
+                    return Position.ALARM_BRAKING;
+                case 27:
+                    return Position.ALARM_FATIGUE_DRIVING;
+                case 30:
+                case 32:
+                    return Position.ALARM_JAMMING;
+                case 33:
+                    return Position.ALARM_GEOFENCE_EXIT;
+                case 34:
+                    return Position.ALARM_GEOFENCE_ENTER;
+                case 35:
+                    return Position.ALARM_IDLE;
+                case 40:
+                case 41:
+                    return Position.ALARM_TEMPERATURE;
                 default:
                     return null;
             }

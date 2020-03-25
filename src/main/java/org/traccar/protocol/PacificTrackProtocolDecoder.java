@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ public class PacificTrackProtocolDecoder extends BaseProtocolDecoder {
         while (buf.isReadable()) {
 
             int segmentId = readBitExt(buf);
-            int segmentLength = readBitExt(buf);
+            int segmentEnd = readBitExt(buf) + buf.readerIndex();
 
             switch (segmentId) {
                 case 0x01:
@@ -83,12 +83,60 @@ public class PacificTrackProtocolDecoder extends BaseProtocolDecoder {
                     position.setSpeed(UnitsConverter.knotsFromKph(BitUtil.to(speedAndCourse, 12) * 0.1));
                     position.set(Position.KEY_INDEX, buf.readUnsignedShort());
                     break;
+                case 0x92:
+                    while (buf.readerIndex() < segmentEnd) {
+                        int field = buf.readUnsignedByte();
+                        int fieldPrefix = BitUtil.from(field, 5);
+                        if (fieldPrefix < 0b100) {
+                            switch (BitUtil.between(field, 2, 5)) {
+                                case 0b000:
+                                    position.set("bus", BitUtil.to(field, 2));
+                                case 0b001:
+                                    position.set("currentGear", BitUtil.to(field, 2));
+                                    break;
+                                default:
+                                    break;
+                            }
+                        } else if (fieldPrefix < 0b101) {
+                            switch (BitUtil.to(field, 5)) {
+                                case 0b00000:
+                                    position.set(Position.KEY_OBD_SPEED, buf.readUnsignedByte());
+                                    break;
+                                case 0b00001:
+                                    position.set(Position.KEY_RPM, buf.readUnsignedByte() * 32);
+                                    break;
+                                default:
+                                    buf.readUnsignedByte();
+                                    break;
+                            }
+                        } else if (fieldPrefix < 0b110) {
+                            buf.readUnsignedShort();
+                        }  else if (fieldPrefix < 0b111) {
+                            switch (BitUtil.to(field, 5)) {
+                                case 0b00000:
+                                    position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 100);
+                                    break;
+                                case 0b00001:
+                                    position.set(Position.KEY_HOURS, buf.readUnsignedInt() * 180);
+                                    break;
+                                case 0b00010:
+                                    position.set("idleHours", buf.readUnsignedInt() * 180);
+                                    break;
+                                default:
+                                    buf.readUnsignedInt();
+                                    break;
+                            }
+                        } else {
+                            buf.skipBytes(buf.readUnsignedByte());
+                        }
+                    }
+                    break;
                 case 0x100:
                     String imei = ByteBufUtil.hexDump(buf.readSlice(8)).substring(0, 15);
                     deviceSession = getDeviceSession(channel, remoteAddress, imei);
                     break;
                 default:
-                    buf.skipBytes(segmentLength);
+                    buf.readerIndex(segmentEnd);
                     break;
             }
         }

@@ -11,6 +11,10 @@ public class OmnicommFrameDecoderTest extends ProtocolTest {
         OmnicommFrameDecoder decoder = new OmnicommFrameDecoder();
 
         verifyFrame(
+                binary("c08600004566"),
+                decoder.decode(null, null, binary("c08600004566")));
+
+        verifyFrame(
                 binary("c080080061a61915340100001dec"),
                 decoder.decode(null, null, binary("c080080061a61915340100001dec")));
 

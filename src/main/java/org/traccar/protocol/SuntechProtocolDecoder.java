@@ -397,7 +397,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
             if (isIncludeAdc(deviceSession.getDeviceId())) {
                 for (int i = 1; i <= 3; i++) {
-                    if (!values[index++].isEmpty()) {
+                    if (index < values.length && !values[index++].isEmpty()) {
                         position.set(Position.PREFIX_ADC + i, Double.parseDouble(values[index - 1]));
                     }
                 }
@@ -614,10 +614,21 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_OUTPUT, buf.readUnsignedByte());
         }
 
+        int alertId = 0;
         if (BitUtil.check(mask, 19)) {
-            int value = buf.readUnsignedByte();
+            alertId = buf.readUnsignedByte();
             if (type == 0x82) {
-                position.set(Position.KEY_ALARM, decodeAlert(value));
+                position.set(Position.KEY_ALARM, decodeAlert(alertId));
+            }
+        }
+
+        if (BitUtil.check(mask, 20)) {
+            buf.readUnsignedShort(); // alert mod
+        }
+
+        if (BitUtil.check(mask, 21)) {
+            if (alertId == 59) {
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, ByteBufUtil.hexDump(buf.readSlice(8)));
             }
         }
 

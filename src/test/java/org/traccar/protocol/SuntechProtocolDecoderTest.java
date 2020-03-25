@@ -13,6 +13,11 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
 
         decoder.setHbm(true);
         decoder.setIncludeAdc(true);
+
+        verifyAttribute(decoder, buffer(
+                "ST600STT;008594432;20;492;20200212;18:58:30;060bb0e1;334;20;36bb;45;+19.337897;-099.064489;000.398;000.00;12;1;5049883;13.61;100100;2;1198;013762;4.2;1;4.68"),
+                Position.PREFIX_ADC + 1, 4.68);
+
         decoder.setIncludeTemp(true);
 
         verifyAttribute(decoder, buffer(
@@ -61,6 +66,10 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         SuntechProtocolDecoder decoder = new SuntechProtocolDecoder(null);
+
+        verifyAttribute(decoder, binary(
+                "82004d05800000553fffff360100100114020410293902ccccf102dc007b00053c00476fa18469e87f000000000b0100003b00081d00000113f3f8010000049e00000000000000001d00000113f3f801"),
+                Position.KEY_DRIVER_UNIQUE_ID, "1d00000113f3f801");
 
         verifyPosition(decoder, buffer(
                 "ST410STT;007638094;426;01;24153;724;4;-65;365;0;24161;724;4;365;0;0;24162;724;4;365;0;0;24363;724;4;365;0;0;24151;724;4;365;0;0;24991;724;4;365;0;0;24373;724;4;365;0;0;3.98;1;0176;2;016;20200106;19:18:04;-15.571860;-056.062637;000.852;238.28;6;1;201"));

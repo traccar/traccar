@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,10 +83,10 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
             buf.skipBytes(4);
         }
         if (BitUtil.check(mask, 12)) {
-            buf.skipBytes(2);
+            position.set("fuel1", buf.readUnsignedShort());
         }
         if (BitUtil.check(mask, 13)) {
-            buf.skipBytes(2);
+            position.set("fuel2", buf.readUnsignedShort());
         }
 
         if (BitUtil.check(mask, 14)) {
@@ -113,7 +113,7 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte());
         }
         if (BitUtil.check(mask, 4)) {
-            position.set(Position.KEY_RPM, buf.readUnsignedShortLE());
+            position.set(Position.KEY_RPM, buf.readUnsignedShortLE() * 0.125);
         }
         if (BitUtil.check(mask, 5)) {
             position.set(Position.KEY_HOURS, buf.readUnsignedIntLE());
@@ -122,7 +122,7 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
         }
         if (BitUtil.check(mask, 7)) {
-            position.set(Position.KEY_COOLANT_TEMP, (int) buf.readByte());
+            position.set(Position.KEY_COOLANT_TEMP, buf.readByte() - 40);
         }
         if (BitUtil.check(mask, 8)) {
             position.set("fuel2", buf.readUnsignedByte());
@@ -217,9 +217,9 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedShortLE();
         }
         if (BitUtil.check(mask, 6)) {
-            buf.readUnsignedByte(); // maximum acceleration
-            buf.readUnsignedByte(); // maximum deceleration
-            buf.readUnsignedByte(); // maximum cornering
+            position.set("maxAcceleration", buf.readUnsignedByte() * 0.02);
+            position.set("maxBraking", buf.readUnsignedByte() * 0.02);
+            position.set("maxCornering", buf.readUnsignedByte() * 0.02);
         }
         if (BitUtil.check(mask, 7)) {
             buf.skipBytes(16);

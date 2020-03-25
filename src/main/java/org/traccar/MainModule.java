@@ -73,6 +73,7 @@ import org.traccar.reports.model.TripsConfig;
 
 import javax.annotation.Nullable;
 import javax.ws.rs.client.Client;
+import io.netty.util.Timer;
 
 public class MainModule extends AbstractModule {
 
@@ -373,6 +374,12 @@ public class MainModule extends AbstractModule {
     @Provides
     public static DriverEventHandler provideDriverEventHandler(IdentityManager identityManager) {
         return new DriverEventHandler(identityManager);
+    }
+
+    @Singleton
+    @Provides
+    public static Timer provideTimer() {
+        return GlobalTimer.getTimer();
     }
 
     @Override

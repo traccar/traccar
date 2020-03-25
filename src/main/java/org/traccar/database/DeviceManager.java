@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,11 +58,16 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
     public DeviceManager(DataManager dataManager) {
         super(dataManager, Device.class);
         this.config = Context.getConfig();
-        if (devicesByPhone == null) {
-            devicesByPhone = new ConcurrentHashMap<>();
-        }
-        if (devicesByUniqueId == null) {
-            devicesByUniqueId = new ConcurrentHashMap<>();
+        try {
+            writeLock();
+            if (devicesByPhone == null) {
+                devicesByPhone = new ConcurrentHashMap<>();
+            }
+            if (devicesByUniqueId == null) {
+                devicesByUniqueId = new ConcurrentHashMap<>();
+            }
+        } finally {
+            writeUnlock();
         }
         dataRefreshDelay = config.getLong("database.refreshDelay", DEFAULT_REFRESH_DELAY) * 1000;
         lookupGroupsAttribute = config.getBoolean("deviceManager.lookupGroupsAttribute");
@@ -108,11 +113,20 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
 
     @Override
     public Device getByUniqueId(String uniqueId) throws SQLException {
-        boolean forceUpdate = !devicesByUniqueId.containsKey(uniqueId) && !config.getBoolean("database.ignoreUnknown");
-
+        boolean forceUpdate;
+        try {
+            readLock();
+            forceUpdate = !devicesByUniqueId.containsKey(uniqueId) && !config.getBoolean("database.ignoreUnknown");
+        } finally {
+            readUnlock();
+        }
         updateDeviceCache(forceUpdate);
-
-        return devicesByUniqueId.get(uniqueId);
+        try {
+            readLock();
+            return devicesByUniqueId.get(uniqueId);
+        } finally {
+            readUnlock();
+        }
     }
 
     @Override
@@ -134,7 +148,12 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
     }
 
     public Device getDeviceByPhone(String phone) {
-        return devicesByPhone.get(phone);
+        try {
+            readLock();
+            return devicesByPhone.get(phone);
+        } finally {
+            readUnlock();
+        }
     }
 
     @Override
@@ -176,8 +195,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
     }
 
     public Set<Long> getAllManagedItems(long userId) {
-        Set<Long> result = new HashSet<>();
-        result.addAll(getAllUserItems(userId));
+        Set<Long> result = new HashSet<>(getAllUserItems(userId));
         for (long managedUserId : Context.getUsersManager().getUserItems(userId)) {
             result.addAll(getAllUserItems(managedUserId));
         }
@@ -186,34 +204,68 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
 
     @Override
     public Set<Long> getManagedItems(long userId) {
-        Set<Long> result = new HashSet<>();
-        result.addAll(getUserItems(userId));
+        Set<Long> result = new HashSet<>(getUserItems(userId));
         for (long managedUserId : Context.getUsersManager().getUserItems(userId)) {
             result.addAll(getUserItems(managedUserId));
         }
         return result;
     }
 
-    private void putUniqueDeviceId(Device device) {
-        if (devicesByUniqueId == null) {
-            devicesByUniqueId = new ConcurrentHashMap<>(getAllItems().size());
+    private void addByUniqueId(Device device) {
+        try {
+            writeLock();
+            if (devicesByUniqueId == null) {
+                devicesByUniqueId = new ConcurrentHashMap<>();
+            }
+            devicesByUniqueId.put(device.getUniqueId(), device);
+        } finally {
+            writeUnlock();
         }
-        devicesByUniqueId.put(device.getUniqueId(), device);
     }
 
-    private void putPhone(Device device) {
-        if (devicesByPhone == null) {
-            devicesByPhone = new ConcurrentHashMap<>(getAllItems().size());
+    private void removeByUniqueId(String deviceUniqueId) {
+        try {
+            writeLock();
+            if (devicesByUniqueId != null) {
+                devicesByUniqueId.remove(deviceUniqueId);
+            }
+        } finally {
+            writeUnlock();
         }
-        devicesByPhone.put(device.getPhone(), device);
+    }
+
+    private void addByPhone(Device device) {
+        try {
+            writeLock();
+            if (devicesByPhone == null) {
+                devicesByPhone = new ConcurrentHashMap<>();
+            }
+            devicesByPhone.put(device.getPhone(), device);
+        } finally {
+            writeUnlock();
+        }
+    }
+
+    private void removeByPhone(String phone) {
+        if (phone == null || phone.isEmpty()) {
+            return;
+        }
+        try {
+            writeLock();
+            if (devicesByPhone != null) {
+                devicesByPhone.remove(phone);
+            }
+        } finally {
+            writeUnlock();
+        }
     }
 
     @Override
     protected void addNewItem(Device device) {
         super.addNewItem(device);
-        putUniqueDeviceId(device);
+        addByUniqueId(device);
         if (device.getPhone() != null  && !device.getPhone().isEmpty()) {
-            putPhone(device);
+            addByPhone(device);
         }
         if (Context.getGeofenceManager() != null) {
             Position lastPosition = getLastPosition(device.getId());
@@ -234,18 +286,16 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         cachedDevice.setDisabled(device.getDisabled());
         cachedDevice.setAttributes(device.getAttributes());
         if (!device.getUniqueId().equals(cachedDevice.getUniqueId())) {
-            devicesByUniqueId.remove(cachedDevice.getUniqueId());
+            removeByUniqueId(cachedDevice.getUniqueId());
             cachedDevice.setUniqueId(device.getUniqueId());
-            putUniqueDeviceId(cachedDevice);
+            addByUniqueId(cachedDevice);
         }
         if (device.getPhone() != null && !device.getPhone().isEmpty()
                 && !device.getPhone().equals(cachedDevice.getPhone())) {
             String phone = cachedDevice.getPhone();
-            if (phone != null && !phone.isEmpty()) {
-                devicesByPhone.remove(phone);
-            }
+            removeByPhone(phone);
             cachedDevice.setPhone(device.getPhone());
-            putPhone(cachedDevice);
+            addByPhone(cachedDevice);
         }
     }
 
@@ -256,10 +306,8 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
             String deviceUniqueId = cachedDevice.getUniqueId();
             String phone = cachedDevice.getPhone();
             super.removeCachedItem(deviceId);
-            devicesByUniqueId.remove(deviceUniqueId);
-            if (phone != null && !phone.isEmpty()) {
-                devicesByPhone.remove(phone);
-            }
+            removeByUniqueId(deviceUniqueId);
+            removeByPhone(phone);
         }
         positions.remove(deviceId);
     }

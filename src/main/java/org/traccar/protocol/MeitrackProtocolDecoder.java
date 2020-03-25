@@ -70,7 +70,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)|")                     // mnc
             .number("(x+)|")                     // lac
             .number("(x+),")                     // cid
-            .number("(x+),")                     // state
+            .number("(xx)")                      // input
+            .number("(xx),")                     // output
             .number("(x+)?|")                    // adc1
             .number("(x+)?|")                    // adc2
             .number("(x+)?|")                    // adc3
@@ -149,39 +150,38 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(deviceSession.getDeviceId());
 
-        int event = parser.nextInt(0);
+        int event = parser.nextInt();
         position.set(Position.KEY_EVENT, event);
         position.set(Position.KEY_ALARM, decodeAlarm(event));
 
-        position.setLatitude(parser.nextDouble(0));
-        position.setLongitude(parser.nextDouble(0));
+        position.setLatitude(parser.nextDouble());
+        position.setLongitude(parser.nextDouble());
 
         position.setTime(parser.nextDateTime());
 
         position.setValid(parser.next().equals("A"));
 
         position.set(Position.KEY_SATELLITES, parser.nextInt());
-        int rssi = parser.nextInt(0);
+        int rssi = parser.nextInt();
 
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
-        position.setCourse(parser.nextDouble(0));
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+        position.setCourse(parser.nextDouble());
 
         position.set(Position.KEY_HDOP, parser.nextDouble());
 
-        position.setAltitude(parser.nextDouble(0));
+        position.setAltitude(parser.nextDouble());
 
-        position.set(Position.KEY_ODOMETER, parser.nextInt(0));
+        position.set(Position.KEY_ODOMETER, parser.nextInt());
         position.set("runtime", parser.next());
 
         position.setNetwork(new Network(CellTower.from(
-                parser.nextInt(0), parser.nextInt(0), parser.nextHexInt(0), parser.nextHexInt(0), rssi)));
+                parser.nextInt(), parser.nextInt(), parser.nextHexInt(), parser.nextHexInt(), rssi)));
 
-        position.set(Position.KEY_STATUS, parser.next());
+        position.set(Position.KEY_OUTPUT, parser.nextHexInt());
+        position.set(Position.KEY_INPUT, parser.nextHexInt());
 
         for (int i = 1; i <= 3; i++) {
-            if (parser.hasNext()) {
-                position.set(Position.PREFIX_ADC + i, parser.nextHexInt(0));
-            }
+            position.set(Position.PREFIX_ADC + i, parser.nextHexInt());
         }
 
         String deviceModel = Context.getIdentityManager().getById(deviceSession.getDeviceId()).getModel();

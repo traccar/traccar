@@ -55,8 +55,8 @@ public class ExtendedObjectResource<T extends BaseModel> extends BaseObjectResou
             Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
             result.retainAll(manager.getDeviceItems(deviceId));
         }
-        return manager.getItems(result);
 
+        return manager.getItems(result);
     }
 
 }

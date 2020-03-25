@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,31 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
         super(protocol);
     }
 
+    private boolean jsonContains(JsonObject json, String key) {
+        if (json.containsKey(key)) {
+            JsonValue value = json.get(key);
+            if (value.getValueType() == JsonValue.ValueType.STRING) {
+                return !((JsonString) value).getString().equals("null");
+
+            } else {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean getJsonBoolean(JsonObject json, String key) {
+        JsonValue value = json.get(key);
+        if (value != null) {
+            if (value.getValueType() == JsonValue.ValueType.STRING) {
+                return Boolean.parseBoolean(((JsonString) value).getString());
+            } else {
+                return value.getValueType() == JsonValue.ValueType.TRUE;
+            }
+        }
+        return false;
+    }
+
     private int getJsonInt(JsonObject json, String key) {
         JsonValue value = json.get(key);
         if (value != null) {
@@ -83,7 +108,14 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
         }
         JsonObject json = Json.createReader(new StringReader(content)).readObject();
 
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, json.getString("device"));
+        String deviceId;
+        if (json.containsKey("device")) {
+            deviceId = json.getString("device");
+        } else {
+            deviceId = json.getString("deviceId");
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, deviceId);
         if (deviceSession == null) {
             sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
             return null;
@@ -92,29 +124,36 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        if (json.containsKey("time")) {
+        if (jsonContains(json, "time")) {
             position.setTime(new Date(getJsonInt(json, "time") * 1000L));
+        } else if (jsonContains(json, "positionTime")) {
+            position.setTime(new Date(getJsonInt(json, "positionTime") * 1000L));
         } else {
             position.setTime(new Date());
         }
 
-        if (json.containsKey("location")
-                || json.containsKey("lat") && json.containsKey("lng") && !json.containsKey("data")) {
+        if (jsonContains(json, "lastSeen")) {
+            position.setDeviceTime(new Date(getJsonInt(json, "lastSeen") * 1000L));
+        }
+
+        if (jsonContains(json, "location")
+                || jsonContains(json, "lat") && jsonContains(json, "lng") && !jsonContains(json, "data")
+                || jsonContains(json, "latitude") && jsonContains(json, "longitude") && !jsonContains(json, "data")) {
 
             JsonObject location;
-            if (json.containsKey("location")) {
+            if (jsonContains(json, "location")) {
                 location = json.getJsonObject("location");
             } else {
                 location = json;
             }
 
             position.setValid(true);
-            position.setLatitude(getJsonDouble(location, "lat"));
-            position.setLongitude(getJsonDouble(location, "lng"));
+            position.setLatitude(getJsonDouble(location, jsonContains(location, "lat") ? "lat" : "latitude"));
+            position.setLongitude(getJsonDouble(location, jsonContains(location, "lng") ? "lng" : "longitude"));
 
-        } else {
+        } else if (jsonContains(json, "data") || jsonContains(json, "payload")) {
 
-            String data = json.getString(json.containsKey("data") ? "data" : "payload");
+            String data = json.getString(jsonContains(json, "data") ? "data" : "payload");
             ByteBuf buf = Unpooled.wrappedBuffer(DataConverter.parseHex(data));
             try {
                 int event = buf.readUnsignedByte();
@@ -205,10 +244,19 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
             getLastLocation(position, position.getDeviceTime());
         }
 
-        if (json.containsKey("rssi")) {
+        if (jsonContains(json, "moving")) {
+            position.set(Position.KEY_MOTION, getJsonBoolean(json, "moving"));
+        }
+        if (jsonContains(json, "magStatus")) {
+            position.set(Position.KEY_BLOCKED, getJsonBoolean(json, "magStatus"));
+        }
+        if (jsonContains(json, "temperature")) {
+            position.set(Position.KEY_DEVICE_TEMP, getJsonDouble(json, "temperature"));
+        }
+        if (jsonContains(json, "rssi")) {
             position.set(Position.KEY_RSSI, getJsonDouble(json, "rssi"));
         }
-        if (json.containsKey("seqNumber")) {
+        if (jsonContains(json, "seqNumber")) {
             position.set(Position.KEY_INDEX, getJsonInt(json, "seqNumber"));
         }
 

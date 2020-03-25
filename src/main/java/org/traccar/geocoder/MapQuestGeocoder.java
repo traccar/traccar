@@ -1,6 +1,6 @@
 /*
  * Copyright 2014 - 2015 Stefaan Van Dooren (stefaan.vandooren@gmail.com)
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,16 @@ import javax.json.JsonObject;
 
 public class MapQuestGeocoder extends JsonGeocoder {
 
+    private static String formatUrl(String url, String key) {
+        if (url == null) {
+            url = "http://www.mapquestapi.com/geocoding/v1/reverse";
+        }
+        url += "?key=" + key + "&location=%f,%f";
+        return url;
+    }
+
     public MapQuestGeocoder(String url, String key, int cacheSize, AddressFormat addressFormat) {
-        super(url + "?key=" + key + "&location=%f,%f", cacheSize, addressFormat);
+        super(formatUrl(url, key), cacheSize, addressFormat);
     }
 
     @Override
