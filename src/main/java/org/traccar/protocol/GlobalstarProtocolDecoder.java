@@ -30,7 +30,9 @@ import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.DataConverter;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -139,7 +141,15 @@ public class GlobalstarProtocolDecoder extends BaseHttpProtocolDecoder {
                 ByteBuf buf = Unpooled.wrappedBuffer(
                         DataConverter.parseHex(xPath.evaluate("payload", node).substring(2)));
 
-                buf.readUnsignedByte(); // flags
+                int flags = buf.readUnsignedByte();
+                position.set(Position.PREFIX_IN + 1, BitUtil.check(flags, 1));
+                position.set(Position.PREFIX_IN + 2, BitUtil.check(flags, 2));
+                position.set(Position.KEY_CHARGE, BitUtil.check(flags, 3));
+                if (BitUtil.check(flags, 4)) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
+                }
+
+                position.setCourse(BitUtil.from(flags, 5) * 45);
 
                 position.setLatitude(buf.readUnsignedMedium() * 90.0 / (1 << 23));
                 if (position.getLatitude() > 90) {
@@ -151,8 +161,9 @@ public class GlobalstarProtocolDecoder extends BaseHttpProtocolDecoder {
                     position.setLongitude(position.getLongitude() - 360);
                 }
 
-                buf.readUnsignedByte(); // status
-                buf.readUnsignedByte(); // status
+                position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
+
+                position.set("batteryReplace", BitUtil.check(buf.readUnsignedByte(), 7));
 
                 positions.add(position);
 
