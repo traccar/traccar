@@ -513,6 +513,14 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             position.setValid(values[index++].equals("1"));
         }
 
+        if (BitUtil.check(mask, 17)) {
+            position.set(Position.KEY_INPUT, Integer.parseInt(values[index++]));
+        }
+
+        if (BitUtil.check(mask, 18)) {
+            position.set(Position.KEY_OUTPUT, Integer.parseInt(values[index++]));
+        }
+
         return position;
     }
 

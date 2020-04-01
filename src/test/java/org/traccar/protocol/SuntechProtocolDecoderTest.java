@@ -67,6 +67,10 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
 
         SuntechProtocolDecoder decoder = new SuntechProtocolDecoder(null);
 
+        verifyAttribute(decoder, buffer(
+                "STT;0560001616;BFFFFF;56;1.0.15;1;20200219;20:52:25;00008D6C;334;20;0925;24;+20.741764;-103.430364;0.00;0.00;19;1;00000001;00000000;2;1;1765;00008003;0.0;12.14;136598"),
+                Position.KEY_INPUT, 1);
+
         verifyAttribute(decoder, binary(
                 "82004d05800000553fffff360100100114020410293902ccccf102dc007b00053c00476fa18469e87f000000000b0100003b00081d00000113f3f8010000049e00000000000000001d00000113f3f801"),
                 Position.KEY_DRIVER_UNIQUE_ID, "1d00000113f3f801");
