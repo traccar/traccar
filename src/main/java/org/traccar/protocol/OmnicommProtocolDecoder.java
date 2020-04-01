@@ -24,6 +24,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -115,6 +116,8 @@ public class OmnicommProtocolDecoder extends BaseProtocolDecoder {
                     OmnicommMessageOuterClass.OmnicommMessage.General data = message.getGeneral();
                     position.set(Position.KEY_POWER, data.getUboard() * 0.1);
                     position.set(Position.KEY_BATTERY_LEVEL, data.getBatLife());
+                    position.set(Position.KEY_IGNITION, BitUtil.check(data.getFLG(), 0));
+                    position.set(Position.KEY_RPM, data.getTImp());
                 }
 
                 if (message.hasNAV()) {
