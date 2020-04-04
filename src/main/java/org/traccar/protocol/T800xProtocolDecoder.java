@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -177,8 +177,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private Position decodePosition(
-            Channel channel, DeviceSession deviceSession,
-            ByteBuf buf, int type, int index, ByteBuf imei) {
+            Channel channel, DeviceSession deviceSession, ByteBuf buf, int type, int index, ByteBuf imei) {
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
@@ -214,8 +213,10 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.PREFIX_OUT + (i + 1), BitUtil.check(io, 7 + i));
             }
 
-            position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
-            position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort());
+            if (header != 0x2626) {
+                position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
+                position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort());
+            }
 
         }
 

@@ -425,7 +425,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
     private List<Position> decodeText(Channel channel, SocketAddress remoteAddress, String sentence) {
 
-        int startIndex = 0;
+        int startIndex = -1;
         for (int i = 0; i < 4; i++) {
             startIndex = sentence.indexOf(',', startIndex + 1);
         }

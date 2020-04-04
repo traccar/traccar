@@ -154,9 +154,20 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                                     mac.substring(0, mac.length() - 1), rssi));
                         }
                         break;
+                    case 0x23:
+                        if (endIndex > buf.readerIndex()) {
+                            buf.skipBytes(6); // mac
+                        }
+                        if (endIndex > buf.readerIndex()) {
+                            position.setLatitude(buf.readIntLE() * 0.0000001);
+                            position.setLongitude(buf.readIntLE() * 0.0000001);
+                        }
+                        break;
                     case 0x24:
                         position.setTime(new Date(buf.readUnsignedIntLE() * 1000));
-                        position.set(Position.KEY_STATUS, buf.readUnsignedIntLE());
+                        long status = buf.readUnsignedIntLE();
+                        position.set(Position.KEY_BATTERY_LEVEL, BitUtil.from(status, 24));
+                        position.set(Position.KEY_STATUS, status);
                         break;
                     case 0x40:
                         buf.readUnsignedIntLE(); // timestamp

@@ -23,7 +23,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
-    public void testEncodeEngineStop() throws Exception {
+    public void testEncodeEngineStop() {
 
         Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null);
 
@@ -36,7 +36,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
-    public void testEncodePositionSingle() throws Exception {
+    public void testEncodePositionSingle() {
 
         Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null);
 
@@ -49,7 +49,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
-    public void testEncodePositionPeriodic() throws Exception {
+    public void testEncodePositionPeriodic() {
 
         Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null);
 
@@ -63,7 +63,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
-    public void testEncodePositionStop() throws Exception {
+    public void testEncodePositionStop() {
 
         Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null);
 
@@ -76,7 +76,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
-    public void testEncodeGetVersion() throws Exception {
+    public void testEncodeGetVersion() {
 
         Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null);
 
@@ -89,7 +89,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
-    public void testEncodeRebootDevice() throws Exception {
+    public void testEncodeRebootDevice() {
 
         Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null);
 
@@ -102,7 +102,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
-    public void testEncodeSetOdometer() throws Exception {
+    public void testEncodeSetOdometer() {
 
         Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null);
 
@@ -115,7 +115,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
-    public void testEncodePositionSingleAlternative() throws Exception {
+    public void testEncodePositionSingleAlternative() {
 
         Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null, true);
 
@@ -128,7 +128,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
-    public void testEncodePositionPeriodicAlternative() throws Exception {
+    public void testEncodePositionPeriodicAlternative() {
 
         Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null, true);
 
@@ -141,7 +141,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
-    public void testEncodePositionStopAlternative() throws Exception {
+    public void testEncodePositionStopAlternative() {
 
         Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null, true);
 
@@ -154,7 +154,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
-    public void testEncodeGetVersionAlternative() throws Exception {
+    public void testEncodeGetVersionAlternative() {
 
         Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null, true);
 
@@ -167,7 +167,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
-    public void testEncodeRebootDeviceAlternative() throws Exception {
+    public void testEncodeRebootDeviceAlternative() {
 
         Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null, true);
 
@@ -180,7 +180,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
-    public void testEncodeIdentificationAlternative() throws Exception {
+    public void testEncodeIdentificationAlternative() {
 
         Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null, true);
 
@@ -193,7 +193,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
-    public void testEncodeSosOnAlternative() throws Exception {
+    public void testEncodeSosOnAlternative() {
 
         Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null, true);
 
@@ -207,7 +207,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
-    public void testEncodeSosOffAlternative() throws Exception {
+    public void testEncodeSosOffAlternative() {
 
         Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null, true);
 
@@ -221,7 +221,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
-    public void testEncodeCustom() throws Exception {
+    public void testEncodeCustom() {
 
         Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null);
 
@@ -235,7 +235,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
-    public void testEncodeCustomAlternative() throws Exception {
+    public void testEncodeCustomAlternative() {
 
         Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null, true);
 
@@ -249,7 +249,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
-    public void testEncodeSetConnectionAlternative() throws Exception {
+    public void testEncodeSetConnectionAlternative() {
 
         Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null, true);
 
@@ -264,7 +264,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
-    public void testEncodeSosNumberAlternative() throws Exception {
+    public void testEncodeSosNumberAlternative() {
 
         Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null, true);
 

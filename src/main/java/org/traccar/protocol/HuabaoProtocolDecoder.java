@@ -98,6 +98,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(value, 20)) {
             return Position.ALARM_GEOFENCE;
         }
+        if (BitUtil.check(value, 28)) {
+            return Position.ALARM_MOVEMENT;
+        }
         if (BitUtil.check(value, 29)) {
             return Position.ALARM_ACCIDENT;
         }
@@ -160,22 +163,23 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedInt()));
 
-        int flags = buf.readInt();
+        int status = buf.readInt();
 
-        position.set(Position.KEY_IGNITION, BitUtil.check(flags, 0));
+        position.set(Position.KEY_IGNITION, BitUtil.check(status, 0));
+        position.set(Position.KEY_BLOCKED, BitUtil.check(status, 10));
 
-        position.setValid(BitUtil.check(flags, 1));
+        position.setValid(BitUtil.check(status, 1));
 
         double lat = buf.readUnsignedInt() * 0.000001;
         double lon = buf.readUnsignedInt() * 0.000001;
 
-        if (BitUtil.check(flags, 2)) {
+        if (BitUtil.check(status, 2)) {
             position.setLatitude(-lat);
         } else {
             position.setLatitude(lat);
         }
 
-        if (BitUtil.check(flags, 3)) {
+        if (BitUtil.check(status, 3)) {
             position.setLongitude(-lon);
         } else {
             position.setLongitude(lon);
@@ -211,6 +215,13 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 case 0x31:
                     position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                     break;
+                case 0x33:
+                    String sentence = buf.readCharSequence(length, StandardCharsets.US_ASCII).toString();
+                    if (sentence.startsWith("*M00")) {
+                        String lockStatus = sentence.substring(8, 8 + 7);
+                        position.set(Position.KEY_BATTERY, Integer.parseInt(lockStatus.substring(2, 5)) * 0.01);
+                    }
+                    break;
                 case 0x91:
                     position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.1);
                     position.set(Position.KEY_RPM, buf.readUnsignedShort());
@@ -229,6 +240,35 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     if (length > 0) {
                         position.set(
                                 Position.KEY_VIN, buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
+                    }
+                    break;
+                case 0xD0:
+                    long userStatus = buf.readUnsignedInt();
+                    if (BitUtil.check(userStatus, 3)) {
+                        position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
+                    }
+                    break;
+                case 0xD3:
+                    position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.1);
+                    break;
+                case 0xEB:
+                    while (buf.readerIndex() < endIndex) {
+                        int tenetLength = buf.readUnsignedShort();
+                        int tenetType = buf.readUnsignedShort();
+                        switch (tenetType) {
+                            case 0x0001:
+                                position.set("fuel1", buf.readUnsignedShort() * 0.1);
+                                buf.readUnsignedByte(); // unused
+                                break;
+                            case 0x0023:
+                                buf.skipBytes(4); // unused
+                                position.set("fuel2", Double.parseDouble(
+                                        buf.readCharSequence(2, StandardCharsets.US_ASCII).toString()));
+                                break;
+                            default:
+                                buf.skipBytes(tenetLength - 2);
+                                break;
+                        }
                     }
                     break;
                 default:
@@ -257,4 +297,3 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
     }
 
 }
-

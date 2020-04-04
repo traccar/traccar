@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ public class OkoProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN = new PatternBuilder()
             .text("{")
             .number("(d{15}),").optional()       // imei
-            .number("(dd)(dd)(dd).d+,")          // time
+            .number("(dd)(dd)(dd)(?:.d+)?,")     // time
             .expression("([AV]),")               // validity
             .number("(dd)(dd.d+),")              // latitude
             .expression("([NS]),")
@@ -46,13 +46,22 @@ public class OkoProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.?d*)?,")                // course
             .number("(dd)(dd)(dd),")             // date (ddmmyy)
             .number("(d+),")                     // satellites
-            .number("(d+.d+),")                  // adc
+            .number("(d+.d+|xx),")               // adc
             .number("(xx),")                     // event
-            .number("(d+.d+),")                  // power
+            .number("(d+.d+|xx),")               // power
             .number("d,")                        // memory status
-            .number("(xx)")                      // io
+            .number("(xx)?")                     // io
             .any()
             .compile();
+
+    private double decodeVoltage(Parser parser) {
+        String value = parser.next();
+        if (value.contains(".")) {
+            return Double.parseDouble(value);
+        } else {
+            return Integer.parseInt(value, 16) * 0.1;
+        }
+    }
 
     @Override
     protected Object decode(
@@ -89,9 +98,9 @@ public class OkoProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(dateBuilder.getDate());
 
         position.set(Position.KEY_SATELLITES, parser.nextInt());
-        position.set(Position.PREFIX_ADC + 1, parser.nextDouble());
+        position.set(Position.PREFIX_ADC + 1, decodeVoltage(parser));
         position.set(Position.KEY_EVENT, parser.next());
-        position.set(Position.KEY_POWER, parser.nextDouble());
+        position.set(Position.KEY_POWER, decodeVoltage(parser));
         position.set(Position.KEY_INPUT, parser.nextHexInt());
 
         return position;

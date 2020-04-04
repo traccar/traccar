@@ -19,20 +19,24 @@ import javax.json.JsonObject;
 
 public class HereGeocoder extends JsonGeocoder {
 
-    private static String formatUrl(String id, String key, String language) {
-        String url = "https://reverse.geocoder.api.here.com/6.2/reversegeocode.json";
+    private static String formatUrl(String url, String id, String key, String language) {
+        if (url == null) {
+            url = "https://reverse.geocoder.ls.hereapi.com/6.2/reversegeocode.json";
+        }
         url += "?mode=retrieveAddresses&maxresults=1";
         url += "&prox=%f,%f,0";
         url += "&app_id=" + id;
         url += "&app_code=" + key;
+        url += "&apiKey=" + key;
         if (language != null) {
             url += "&language=" + language;
         }
         return url;
     }
 
-    public HereGeocoder(String id, String key, String language, int cacheSize, AddressFormat addressFormat) {
-        super(formatUrl(id, key, language), cacheSize, addressFormat);
+    public HereGeocoder(
+            String url, String id, String key, String language, int cacheSize, AddressFormat addressFormat) {
+        super(formatUrl(url, id, key, language), cacheSize, addressFormat);
     }
 
     @Override

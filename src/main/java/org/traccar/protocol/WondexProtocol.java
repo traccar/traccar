@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import io.netty.handler.codec.string.StringEncoder;
 public class WondexProtocol extends BaseProtocol {
 
     public WondexProtocol() {
-        setSupportedCommands(
+        setSupportedDataCommands(
                 Command.TYPE_GET_DEVICE_STATUS,
                 Command.TYPE_GET_MODEM_STATUS,
                 Command.TYPE_REBOOT_DEVICE,
@@ -33,6 +33,13 @@ public class WondexProtocol extends BaseProtocol {
                 Command.TYPE_GET_VERSION,
                 Command.TYPE_IDENTIFICATION);
         setTextCommandEncoder(new WondexProtocolEncoder(this));
+        setSupportedTextCommands(
+                Command.TYPE_GET_DEVICE_STATUS,
+                Command.TYPE_GET_MODEM_STATUS,
+                Command.TYPE_REBOOT_DEVICE,
+                Command.TYPE_POSITION_SINGLE,
+                Command.TYPE_GET_VERSION,
+                Command.TYPE_IDENTIFICATION);
         addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {

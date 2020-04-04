@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -42,16 +42,22 @@ public abstract class SimpleObjectManager<T extends BaseModel> extends BaseObjec
 
     @Override
     public final Set<Long> getUserItems(long userId) {
-        if (!userItems.containsKey(userId)) {
-            userItems.put(userId, new HashSet<Long>());
+        try {
+            readLock();
+            Set<Long> result = userItems.get(userId);
+            if (result != null) {
+                return new HashSet<>(result);
+            } else {
+                return new HashSet<>();
+            }
+        } finally {
+            readUnlock();
         }
-        return userItems.get(userId);
     }
 
     @Override
     public Set<Long> getManagedItems(long userId) {
-        Set<Long> result = new HashSet<>();
-        result.addAll(getUserItems(userId));
+        Set<Long> result = getUserItems(userId);
         for (long managedUserId : Context.getUsersManager().getUserItems(userId)) {
             result.addAll(getUserItems(managedUserId));
         }
@@ -71,16 +77,16 @@ public abstract class SimpleObjectManager<T extends BaseModel> extends BaseObjec
     public final void refreshUserItems() {
         if (getDataManager() != null) {
             try {
-                if (userItems != null) {
-                    userItems.clear();
-                } else {
-                    userItems = new ConcurrentHashMap<>();
-                }
+                writeLock();
+                userItems = new ConcurrentHashMap<>();
                 for (Permission permission : getDataManager().getPermissions(User.class, getBaseClass())) {
-                    getUserItems(permission.getOwnerId()).add(permission.getPropertyId());
+                    Set<Long> items = userItems.computeIfAbsent(permission.getOwnerId(), key -> new HashSet<>());
+                    items.add(permission.getPropertyId());
                 }
             } catch (SQLException | ClassNotFoundException error) {
                 LOGGER.warn("Error getting permissions", error);
+            } finally {
+                writeUnlock();
             }
         }
     }
