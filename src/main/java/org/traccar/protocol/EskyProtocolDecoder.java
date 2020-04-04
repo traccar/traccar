@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,12 @@
 package org.traccar.protocol;
 
 import io.netty.channel.Channel;
+import io.netty.channel.socket.DatagramChannel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -35,7 +38,7 @@ public class EskyProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN = new PatternBuilder()
             .expression("..;")                   // header
-            .number("d+;")                       // index
+            .number("d+;")
             .number("(d+);")                     // imei
             .text("R;")                          // data type
             .number("(d+)[+;]")                  // satellites
@@ -58,7 +61,8 @@ public class EskyProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        Parser parser = new Parser(PATTERN, (String) msg);
+        String sentence = (String) msg;
+        Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
             return null;
         }
@@ -81,12 +85,20 @@ public class EskyProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(parser.nextDouble());
 
         if (parser.hasNext(3)) {
-            position.set(Position.KEY_INPUT, parser.nextHexInt());
+            int input = parser.nextHexInt();
+            position.set(Position.KEY_IGNITION, !BitUtil.check(input, 0));
+            position.set(Position.PREFIX_IN + 1, !BitUtil.check(input, 1));
+            position.set(Position.PREFIX_IN + 2, !BitUtil.check(input, 2));
             position.set(Position.KEY_EVENT, parser.nextInt());
             position.set(Position.KEY_ODOMETER, parser.nextInt());
         }
 
         position.set(Position.KEY_BATTERY, parser.nextInt() * 0.001);
+
+        int index = sentence.lastIndexOf('+');
+        if (index > 0 && channel instanceof DatagramChannel) {
+            channel.writeAndFlush(new NetworkMessage("ACK," + sentence.substring(index + 1) + "#", remoteAddress));
+        }
 
         return position;
     }

@@ -11,8 +11,17 @@ public class H02ProtocolDecoderTest extends ProtocolTest {
 
         H02ProtocolDecoder decoder = new H02ProtocolDecoder(null);
 
+        verifyPosition(decoder, buffer(
+                "*HQ,9180271064,V5,091233,V,2348.8912,N,09021.3302,E,000.00,000,051219,FFFFBBFF,470,01,21019,2033,2921283#"));
+
+        verifyPosition(decoder, binary(
+                "2491802711800850240512192350143206090249758e000001ffffbbff00bdf0900000000001d60161cc4b9a35"));
+
         verifyNull(decoder, buffer(
                 "*HQ,135790246811220,HTBT#"));
+
+        verifyPosition(decoder, buffer(
+                "*HQ,865205035331981,V1,132926,A,1935.3933,N,07920.4134,E,  3.34,342,280519,FFFFFFFF#"));
 
         verifyPosition(decoder, binary(
                 "24702802061601234020031910125482600612695044000000ffffbbff000000000000000001760d04e2c9934d"));
@@ -100,6 +109,9 @@ public class H02ProtocolDecoderTest extends ProtocolTest {
 
         verifyAttributes(decoder, buffer(
                 "*HQ,4208150188,NBR,210249,260,6,0,7,1014,50675,37,1014,50633,27,1014,17933,18,1014,17231,15,1014,50632,12,1014,13211,11,1014,17031,10,281216,FFFFFBFF,2#"));
+        
+        verifyAttributes(decoder, buffer(
+                "*HQ,7401004662,NBR,160453,234,10,0,2,21580,27766,-67,21580,27766,-67,291019,FFFFFBFF,6#"));
 
         verifyAttributes(decoder, buffer(
                 "*HQ,1600068812,NBR,141335,262,02,255,6,431,17003,26,431,11101,13,431,6353,13,431,22172,13,431,11093,13,431,60861,10,151216,FFFFFBFF#"));

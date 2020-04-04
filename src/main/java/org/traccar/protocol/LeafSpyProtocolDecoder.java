@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2020 Anton Tananaev (anton@traccar.org)
  * Copyright 2019 Jesse Hills (jesserockz@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,16 +19,12 @@ package org.traccar.protocol;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.model.Position;
-import org.traccar.NetworkMessage;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -122,13 +118,8 @@ public class LeafSpyProtocolDecoder extends BaseHttpProtocolDecoder {
         }
 
         if (position.getDeviceId() != 0) {
-            if (channel != null) {
-                HttpResponse response = new DefaultFullHttpResponse(
-                    HttpVersion.HTTP_1_1,
-                    HttpResponseStatus.OK,
+            sendResponse(channel, HttpResponseStatus.OK,
                     Unpooled.copiedBuffer("\"status\":\"0\"", StandardCharsets.US_ASCII));
-                channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
-            }
             return position;
         } else {
             sendResponse(channel, HttpResponseStatus.BAD_REQUEST);

@@ -168,6 +168,14 @@ public final class Checksum {
         return checksum;
     }
 
+    public static int modulo256(ByteBuffer buf) {
+        int checksum = 0;
+        while (buf.hasRemaining()) {
+            checksum = (checksum + buf.get()) & 0xFF;
+        }
+        return checksum;
+    }
+
     public static String sum(String msg) {
         byte checksum = 0;
         for (byte b : msg.getBytes(StandardCharsets.US_ASCII)) {

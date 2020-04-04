@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class EskyProtocolDecoderTest extends ProtocolTest {
 
@@ -9,6 +10,10 @@ public class EskyProtocolDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         EskyProtocolDecoder decoder = new EskyProtocolDecoder(null);
+
+        verifyAttribute(decoder, text(
+                "ET;0;860337031078319;R;6+190317162511+41.32536+19.83144+0.14+0+0x0+0+18460312+0+1233+192"),
+                Position.KEY_IGNITION, true);
 
         verifyPosition(decoder, text(
                 "EO;0;861311006461908;R;6;180420104751;2.97896;101.65091;0.75;320;3398;1;|"));

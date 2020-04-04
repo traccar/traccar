@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,22 +27,44 @@ public class DriversManager extends ExtendedObjectManager<Driver> {
 
     public DriversManager(DataManager dataManager) {
         super(dataManager, Driver.class);
-        if (driversByUniqueId == null) {
-            driversByUniqueId = new ConcurrentHashMap<>();
+        try {
+            writeLock();
+            if (driversByUniqueId == null) {
+                driversByUniqueId = new ConcurrentHashMap<>();
+            }
+        } finally {
+            writeUnlock();
         }
     }
 
-    private void putUniqueDriverId(Driver driver) {
-        if (driversByUniqueId == null) {
-            driversByUniqueId = new ConcurrentHashMap<>(getAllItems().size());
+    private void addByUniqueId(Driver driver) {
+        try {
+            writeLock();
+            if (driversByUniqueId == null) {
+                driversByUniqueId = new ConcurrentHashMap<>();
+            }
+            driversByUniqueId.put(driver.getUniqueId(), driver);
+        } finally {
+            writeUnlock();
         }
-        driversByUniqueId.put(driver.getUniqueId(), driver);
+    }
+
+    private void removeByUniqueId(String driverUniqueId) {
+        try {
+            writeLock();
+            if (driversByUniqueId == null) {
+                driversByUniqueId = new ConcurrentHashMap<>();
+            }
+            driversByUniqueId.remove(driverUniqueId);
+        } finally {
+            writeUnlock();
+        }
     }
 
     @Override
     protected void addNewItem(Driver driver) {
         super.addNewItem(driver);
-        putUniqueDriverId(driver);
+        addByUniqueId(driver);
     }
 
     @Override
@@ -50,9 +72,9 @@ public class DriversManager extends ExtendedObjectManager<Driver> {
         Driver cachedDriver = getById(driver.getId());
         cachedDriver.setName(driver.getName());
         if (!driver.getUniqueId().equals(cachedDriver.getUniqueId())) {
-            driversByUniqueId.remove(cachedDriver.getUniqueId());
+            removeByUniqueId(cachedDriver.getUniqueId());
             cachedDriver.setUniqueId(driver.getUniqueId());
-            putUniqueDriverId(cachedDriver);
+            addByUniqueId(cachedDriver);
         }
         cachedDriver.setAttributes(driver.getAttributes());
     }
@@ -63,11 +85,16 @@ public class DriversManager extends ExtendedObjectManager<Driver> {
         if (cachedDriver != null) {
             String driverUniqueId = cachedDriver.getUniqueId();
             super.removeCachedItem(driverId);
-            driversByUniqueId.remove(driverUniqueId);
+            removeByUniqueId(driverUniqueId);
         }
     }
 
     public Driver getDriverByUniqueId(String uniqueId) {
-        return driversByUniqueId.get(uniqueId);
+        try {
+            readLock();
+            return driversByUniqueId.get(uniqueId);
+        } finally {
+            readUnlock();
+        }
     }
 }

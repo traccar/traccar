@@ -32,9 +32,9 @@ public class XexunProtocolEncoder extends StringProtocolEncoder {
 
         switch (command.getType()) {
             case Command.TYPE_ENGINE_STOP:
-                return formatCommand(command, "powercar{%s} 11", Command.KEY_DEVICE_PASSWORD);
+                return formatCommand(command, "powercar%s 11", Command.KEY_DEVICE_PASSWORD);
             case Command.TYPE_ENGINE_RESUME:
-                return formatCommand(command, "powercar{%s} 00", Command.KEY_DEVICE_PASSWORD);
+                return formatCommand(command, "powercar%s 00", Command.KEY_DEVICE_PASSWORD);
             default:
                 return null;
         }

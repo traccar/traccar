@@ -14,6 +14,7 @@
     <entry key='web.port'>8082</entry>
     <entry key='web.path'>./web</entry>
     <entry key='web.cacheControl'>max-age=3600,public</entry>
+    <entry key='web.healthCheck'>true</entry>
 
     <entry key='geocoder.enable'>false</entry>
     <entry key='geocoder.type'>google</entry>
@@ -275,5 +276,14 @@
     <entry key='rst.port'>5196</entry>
     <entry key='pt215.port'>5197</entry>
     <entry key='pacifictrack.port'>5198</entry>
+    <entry key='topin.port'>5199</entry>
+    <entry key='outsafe.port'>5200</entry>
+    <entry key='solarpowered.port'>5201</entry>
+    <entry key='motor.port'>5202</entry>
+    <entry key='omnicomm.port'>5203</entry>
+    <entry key='s168.port'>5204</entry>
+    <entry key='vnet.port'>5205</entry>
+    <entry key='blue.port'>5206</entry>
+    <entry key='pst.port'>5207</entry>
 
 </properties>

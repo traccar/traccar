@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,10 @@ import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.model.WifiAccessPoint;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -137,6 +140,8 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Position.KEY_ODOMETER, buf.readUnsignedShort() * 1000);
 
+            Network network = new Network();
+
             while (buf.readableBytes() > 4) {
                 int subtype = buf.readUnsignedShort();
                 int length = buf.readUnsignedShort() - 4;
@@ -161,10 +166,32 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
                         position.set(
                                 Position.KEY_VIN, buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
                         break;
+                    case 0x0020:
+                        String[] cells = buf.readCharSequence(
+                                length, StandardCharsets.US_ASCII).toString().split("\\+");
+                        for (String cell : cells) {
+                            String[] values = cell.split("@");
+                            network.addCellTower(CellTower.from(
+                                    Integer.parseInt(values[0]), Integer.parseInt(values[1]),
+                                    Integer.parseInt(values[2], 16), Integer.parseInt(values[3], 16)));
+                        }
+                        break;
+                    case 0x0021:
+                        String[] points = buf.readCharSequence(
+                                length, StandardCharsets.US_ASCII).toString().split("\\+");
+                        for (String point : points) {
+                            String[] values = point.split("@");
+                            network.addWifiAccessPoint(WifiAccessPoint.from(values[0], Integer.parseInt(values[1])));
+                        }
+                        break;
                     default:
                         buf.skipBytes(length);
                         break;
                 }
+            }
+
+            if (network.getCellTowers() != null || network.getWifiAccessPoints() != null) {
+                position.setNetwork(network);
             }
 
             sendResponse(channel, MSG_POSITION_RSP, index, null);

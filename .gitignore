@@ -13,6 +13,7 @@ nbactions.xml
 out
 build
 bin
+src/main/java/org/traccar/protobuf
 
 ## For frontend ignore
 

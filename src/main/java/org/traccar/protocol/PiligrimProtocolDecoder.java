@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2014 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,11 @@ package org.traccar.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.QueryStringDecoder;
-import org.traccar.BaseProtocolDecoder;
+import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.DeviceSession;
-import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
@@ -37,19 +33,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
 
-public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
+public class PiligrimProtocolDecoder extends BaseHttpProtocolDecoder {
 
     public PiligrimProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
     private void sendResponse(Channel channel, String message) {
-        if (channel != null) {
-            FullHttpResponse response = new DefaultFullHttpResponse(
-                    HttpVersion.HTTP_1_1, HttpResponseStatus.OK,
-                    Unpooled.copiedBuffer(message, StandardCharsets.US_ASCII));
-            channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
-        }
+        sendResponse(channel, HttpResponseStatus.OK, Unpooled.copiedBuffer(message, StandardCharsets.US_ASCII));
     }
 
     public static final int MSG_GPS = 0xF1;

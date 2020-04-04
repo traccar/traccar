@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -140,6 +140,11 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
                     event = Integer.parseInt(data[i]);
                     position.set(Position.KEY_ALARM, decodeAlarm(event));
                     position.set(Position.KEY_EVENT, event);
+                    if (event == 24) {
+                        position.set(Position.KEY_IGNITION, true);
+                    } else if (event == 25) {
+                        position.set(Position.KEY_IGNITION, false);
+                    }
                     break;
                 case "#PDT#":
                     position.setFixTime(dateFormat.parse(data[i]));

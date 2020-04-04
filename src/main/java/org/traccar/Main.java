@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.api.HealthCheckService;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
@@ -105,6 +106,27 @@ public final class Main {
         }
     }
 
+    private static void scheduleHealthCheck() {
+        HealthCheckService service = new HealthCheckService();
+        if (service.isEnabled()) {
+            new Timer().scheduleAtFixedRate(
+                    service.createTask(), service.getPeriod(), service.getPeriod());
+        }
+    }
+
+    private static void scheduleDatabaseCleanup() {
+        new Timer().scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    Context.getDataManager().clearHistory();
+                } catch (SQLException error) {
+                    LOGGER.warn("Clear history error", error);
+                }
+            }
+        }, 0, CLEAN_PERIOD);
+    }
+
     public static void run(String configFile) {
         try {
             Context.init(configFile);
@@ -118,35 +140,19 @@ public final class Main {
                 Context.getWebServer().start();
             }
 
-            new Timer().scheduleAtFixedRate(new TimerTask() {
-                @Override
-                public void run() {
-                    try {
-                        Context.getDataManager().clearHistory();
-                    } catch (SQLException error) {
-                        LOGGER.warn("Clear history error", error);
-                    }
-                }
-            }, 0, CLEAN_PERIOD);
+            scheduleHealthCheck();
+            scheduleDatabaseCleanup();
 
-            Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-                @Override
-                public void uncaughtException(Thread t, Throwable e) {
-                    LOGGER.error("Thread exception", e);
-                }
-            });
+            Thread.setDefaultUncaughtExceptionHandler((t, e) -> LOGGER.error("Thread exception", e));
 
-            Runtime.getRuntime().addShutdownHook(new Thread() {
-                @Override
-                public void run() {
-                    LOGGER.info("Shutting down server...");
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                LOGGER.info("Shutting down server...");
 
-                    if (Context.getWebServer() != null) {
-                        Context.getWebServer().stop();
-                    }
-                    Context.getServerManager().stop();
+                if (Context.getWebServer() != null) {
+                    Context.getWebServer().stop();
                 }
-            });
+                Context.getServerManager().stop();
+            }));
         } catch (Exception e) {
             LOGGER.error("Main method error", e);
             throw new RuntimeException(e);

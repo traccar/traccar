@@ -213,6 +213,16 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
                         }
                     }
 
+                } else if (fieldId == 26) {
+
+                    position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedIntLE());
+                    position.set("tripHours", buf.readUnsignedIntLE() * 1000);
+
+                } else if (fieldId == 27) {
+
+                    position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
+                    position.set(Position.KEY_HOURS, buf.readUnsignedIntLE() * 1000);
+
                 }
 
                 buf.readerIndex(fieldEnd);
