@@ -142,9 +142,9 @@ public class GlobalstarProtocolDecoder extends BaseHttpProtocolDecoder {
                         DataConverter.parseHex(xPath.evaluate("payload", node).substring(2)));
 
                 int flags = buf.readUnsignedByte();
-                position.set(Position.PREFIX_IN + 1, BitUtil.check(flags, 1));
-                position.set(Position.PREFIX_IN + 2, BitUtil.check(flags, 2));
-                position.set(Position.KEY_CHARGE, BitUtil.check(flags, 3));
+                position.set(Position.PREFIX_IN + 1, !BitUtil.check(flags, 1));
+                position.set(Position.PREFIX_IN + 2, !BitUtil.check(flags, 2));
+                position.set(Position.KEY_CHARGE, !BitUtil.check(flags, 3));
                 if (BitUtil.check(flags, 4)) {
                     position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
                 }
