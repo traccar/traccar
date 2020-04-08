@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -261,9 +261,8 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                                 buf.readUnsignedByte(); // unused
                                 break;
                             case 0x0023:
-                                buf.skipBytes(4); // unused
                                 position.set("fuel2", Double.parseDouble(
-                                        buf.readCharSequence(2, StandardCharsets.US_ASCII).toString()));
+                                        buf.readCharSequence(6, StandardCharsets.US_ASCII).toString()));
                                 break;
                             default:
                                 buf.skipBytes(tenetLength - 2);
