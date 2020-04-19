@@ -101,7 +101,7 @@ public class WebServer {
         handlers.addHandler(servletHandler);
         handlers.addHandler(new GzipHandler());
         server.setHandler(handlers);
-        
+      
         NCSARequestLog requestLog = new NCSARequestLog("./logs/jetty-yyyy_mm_dd.request.log");
         requestLog.setAppend(true);
         requestLog.setExtended(true);
