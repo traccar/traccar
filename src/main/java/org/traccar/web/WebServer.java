@@ -109,7 +109,6 @@ public class WebServer {
         requestLog.setLogTimeZone("GMT");
         requestLog.setLogLatency(true);
         requestLog.setRetainDays(7);
-
         server.setRequestLog(requestLog);
     }
 
