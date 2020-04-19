@@ -105,7 +105,7 @@ public class WebServer {
 
         NCSARequestLog requestLog = new NCSARequestLog("./logs/jetty-yyyy_mm_dd.request.log");
         requestLog.setAppend(true);
-        requestLog.setExtended(false);
+        requestLog.setExtended(true);
         requestLog.setLogTimeZone("GMT");
         requestLog.setLogLatency(true);
         requestLog.setRetainDays(7);
