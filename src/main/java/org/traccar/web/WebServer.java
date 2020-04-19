@@ -18,6 +18,7 @@ package org.traccar.web;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.proxy.AsyncProxyServlet;
+import org.eclipse.jetty.server.NCSARequestLog;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ErrorHandler;
@@ -100,6 +101,14 @@ public class WebServer {
         handlers.addHandler(servletHandler);
         handlers.addHandler(new GzipHandler());
         server.setHandler(handlers);
+
+        NCSARequestLog requestLog = new NCSARequestLog("./logs/jetty-yyyy_mm_dd.request.log");
+        requestLog.setAppend(true);
+        requestLog.setExtended(true);
+        requestLog.setLogTimeZone("GMT");
+        requestLog.setLogLatency(true);
+        requestLog.setRetainDays(7);
+        server.setRequestLog(requestLog);
     }
 
     private void initClientProxy(Config config, HandlerList handlers) {
