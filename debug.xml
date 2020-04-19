@@ -3,10 +3,6 @@
 <!DOCTYPE properties SYSTEM 'http://java.sun.com/dtd/properties.dtd'>
 
 <properties>
-  <entry key='database.driver'>com.mysql.cj.jdbc.Driver</entry>
-  <entry key='database.url'>jdbc:mysql://database-1.cluster-c9nqmcn6fabo.us-east-1.rds.amazonaws.com:3306/traccar?serverTimezone=UTC&amp;useSSL=false&amp;allowMultiQueries=true&amp;autoReconnect=true&amp;useUnicode=yes&amp;characterEncoding=UTF-8&amp;sessionVariables=sql_mode=''</entry>
-  <entry key='database.user'>admin</entry>
-  <entry key='database.password'>gXYdAzxS7LDpKphn</entry>
 
     <entry key='config.default'>./setup/default.xml</entry>
 
@@ -19,6 +15,10 @@
 
     <entry key='logger.console'>true</entry>
 
+    <entry key='database.driver'>org.h2.Driver</entry>
+    <entry key='database.url'>jdbc:h2:./target/database</entry>
+    <entry key='database.user'>sa</entry>
+    <entry key='database.password'></entry>
 
     <entry key='atrack.custom'>true</entry>
 
