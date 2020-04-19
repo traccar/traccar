@@ -103,7 +103,7 @@ public class WebServer {
         gzipHandler.setHandler(handlers);
         server.setHandler(gzipHandler);
 
-        NCSARequestLog requestLog = new NCSARequestLog("./logs/jetty/jetty-yyyy_mm_dd.request.log");
+        NCSARequestLog requestLog = new NCSARequestLog("./logs/jetty-yyyy_mm_dd.request.log");
         requestLog.setAppend(true);
         requestLog.setExtended(false);
         requestLog.setLogTimeZone("GMT");
