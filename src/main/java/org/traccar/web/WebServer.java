@@ -102,13 +102,15 @@ public class WebServer {
         handlers.addHandler(new GzipHandler());
         server.setHandler(handlers);
 
-        NCSARequestLog requestLog = new NCSARequestLog("./logs/jetty-yyyy_mm_dd.request.log");
-        requestLog.setAppend(true);
-        requestLog.setExtended(true);
-        requestLog.setLogTimeZone("GMT");
-        requestLog.setLogLatency(true);
-        requestLog.setRetainDays(7);
-        server.setRequestLog(requestLog);
+        if (config.getBoolean("web.logRequests")) {
+          NCSARequestLog requestLog = new NCSARequestLog("./logs/jetty-yyyy_mm_dd.request.log");
+          requestLog.setAppend(true);
+          requestLog.setExtended(true);
+          requestLog.setLogTimeZone("GMT");
+          requestLog.setLogLatency(true);
+          requestLog.setRetainDays(7);
+          server.setRequestLog(requestLog);
+        }
     }
 
     private void initClientProxy(Config config, HandlerList handlers) {
