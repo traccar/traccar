@@ -40,6 +40,7 @@ import org.traccar.api.ObjectMapperProvider;
 import org.traccar.api.ResourceErrorHandler;
 import org.traccar.api.SecurityRequestFilter;
 import org.traccar.api.resource.ServerResource;
+import org.traccar.config.Keys;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
@@ -102,12 +103,12 @@ public class WebServer {
         handlers.addHandler(new GzipHandler());
         server.setHandler(handlers);
 
-        if (config.getBoolean("web.requestLog.enable")) {
-          NCSARequestLog requestLog = new NCSARequestLog(config.getString("web.requestLog.path"));
+        if (config.getBoolean(Keys.WEB_REQUEST_LOG_ENABLE)) {
+          NCSARequestLog requestLog = new NCSARequestLog(config.getString(Keys.WEB_REQUEST_LOG_PATH));
           requestLog.setAppend(true);
           requestLog.setExtended(true);
           requestLog.setLogLatency(true);
-          requestLog.setRetainDays(config.getInteger("web.requestLog.retainDays"));
+          requestLog.setRetainDays(config.getInteger(Keys.WEB_REQUEST_LOG_RETAIN_DAYS));
           server.setRequestLog(requestLog);
         }
     }
