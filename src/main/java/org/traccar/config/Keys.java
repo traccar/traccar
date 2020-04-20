@@ -402,6 +402,24 @@ public final class Keys {
     public static final ConfigKey LOCATION_LONGITUDE_HEMISPHERE = new ConfigKey(
             "location.longitudeHemisphere", Boolean.class);
 
+    /**
+    * Enable Jetty Request Log.
+    */
+    public static final ConfigKey WEB_REQUEST_LOG_ENABLE = new ConfigKey(
+            "web.requestLog.enable", Boolean.class);
+
+    /**
+     * Jetty Request Log Path.
+     */
+    public static final ConfigKey WEB_REQUEST_LOG_PATH = new ConfigKey(
+              "web.requestLog.path", String.class);
+
+    /**
+     * Set the number of days before rotated request log files are deleted.
+     */
+    public static final ConfigKey WEB_REQUEST_LOG_RETAIN_DAYS = new ConfigKey(
+              "web.requestLog.retainDays", Integer.class);
+
     private Keys() {
     }
 

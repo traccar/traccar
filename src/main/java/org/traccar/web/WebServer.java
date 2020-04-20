@@ -102,13 +102,12 @@ public class WebServer {
         handlers.addHandler(new GzipHandler());
         server.setHandler(handlers);
 
-        if (config.getBoolean("web.logRequests")) {
-          NCSARequestLog requestLog = new NCSARequestLog("./logs/jetty-yyyy_mm_dd.request.log");
+        if (config.getBoolean("web.requestLog.enable")) {
+          NCSARequestLog requestLog = new NCSARequestLog(config.getString("web.requestLog.path"));
           requestLog.setAppend(true);
           requestLog.setExtended(true);
-          requestLog.setLogTimeZone("GMT");
           requestLog.setLogLatency(true);
-          requestLog.setRetainDays(7);
+          requestLog.setRetainDays(config.getInteger("web.requestLog.retainDays"));
           server.setRequestLog(requestLog);
         }
     }
