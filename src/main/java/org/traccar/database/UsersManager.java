@@ -16,11 +16,12 @@
  */
 package org.traccar.database;
 
+import org.traccar.model.User;
+
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.traccar.model.User;
 
 public class UsersManager extends SimpleObjectManager<User> {
 
@@ -77,8 +78,18 @@ public class UsersManager extends SimpleObjectManager<User> {
         return result;
     }
 
+    public Set<Long> getUserItemsByIds(Set<Long> ids) {
+        Set<Long> result = new HashSet<>();
+        for (Long userId : ids) {
+            User cachedUser = getById(userId);
+            if (cachedUser != null) {
+                result.add(cachedUser.getId());
+            }
+        }
+        return result;
+    }
+
     public User getUserByToken(String token) {
         return usersTokens.get(token);
     }
-
 }
