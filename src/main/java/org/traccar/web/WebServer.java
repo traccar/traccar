@@ -18,6 +18,7 @@ package org.traccar.web;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.proxy.AsyncProxyServlet;
+import org.eclipse.jetty.server.NCSARequestLog;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ErrorHandler;
@@ -39,6 +40,7 @@ import org.traccar.api.ObjectMapperProvider;
 import org.traccar.api.ResourceErrorHandler;
 import org.traccar.api.SecurityRequestFilter;
 import org.traccar.api.resource.ServerResource;
+import org.traccar.config.Keys;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
@@ -100,6 +102,15 @@ public class WebServer {
         handlers.addHandler(servletHandler);
         handlers.addHandler(new GzipHandler());
         server.setHandler(handlers);
+
+        if (config.getBoolean(Keys.WEB_REQUEST_LOG_ENABLE)) {
+            NCSARequestLog requestLog = new NCSARequestLog(config.getString(Keys.WEB_REQUEST_LOG_PATH));
+            requestLog.setAppend(true);
+            requestLog.setExtended(true);
+            requestLog.setLogLatency(true);
+            requestLog.setRetainDays(config.getInteger(Keys.WEB_REQUEST_LOG_RETAIN_DAYS));
+            server.setRequestLog(requestLog);
+        }
     }
 
     private void initClientProxy(Config config, HandlerList handlers) {
