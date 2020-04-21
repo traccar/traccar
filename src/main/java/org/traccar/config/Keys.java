@@ -403,13 +403,15 @@ public final class Keys {
             "location.longitudeHemisphere", Boolean.class);
 
     /**
-    * Enable Jetty Request Log.
-    */
+     * Enable Jetty Request Log.
+     */
     public static final ConfigKey WEB_REQUEST_LOG_ENABLE = new ConfigKey(
             "web.requestLog.enable", Boolean.class);
 
     /**
      * Jetty Request Log Path.
+     * The path must include the string "yyyy_mm_dd", which is replaced with the actual date when creating and rolling over the file.
+     * Example: ./logs/jetty-yyyy_mm_dd.request.log
      */
     public static final ConfigKey WEB_REQUEST_LOG_PATH = new ConfigKey(
             "web.requestLog.path", String.class);
