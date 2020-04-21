@@ -412,13 +412,13 @@ public final class Keys {
      * Jetty Request Log Path.
      */
     public static final ConfigKey WEB_REQUEST_LOG_PATH = new ConfigKey(
-              "web.requestLog.path", String.class);
+            "web.requestLog.path", String.class);
 
     /**
      * Set the number of days before rotated request log files are deleted.
      */
     public static final ConfigKey WEB_REQUEST_LOG_RETAIN_DAYS = new ConfigKey(
-              "web.requestLog.retainDays", Integer.class);
+            "web.requestLog.retainDays", Integer.class);
 
     private Keys() {
     }
