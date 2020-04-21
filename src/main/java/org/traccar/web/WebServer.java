@@ -104,12 +104,12 @@ public class WebServer {
         server.setHandler(handlers);
 
         if (config.getBoolean(Keys.WEB_REQUEST_LOG_ENABLE)) {
-          NCSARequestLog requestLog = new NCSARequestLog(config.getString(Keys.WEB_REQUEST_LOG_PATH));
-          requestLog.setAppend(true);
-          requestLog.setExtended(true);
-          requestLog.setLogLatency(true);
-          requestLog.setRetainDays(config.getInteger(Keys.WEB_REQUEST_LOG_RETAIN_DAYS));
-          server.setRequestLog(requestLog);
+            NCSARequestLog requestLog = new NCSARequestLog(config.getString(Keys.WEB_REQUEST_LOG_PATH));
+            requestLog.setAppend(true);
+            requestLog.setExtended(true);
+            requestLog.setLogLatency(true);
+            requestLog.setRetainDays(config.getInteger(Keys.WEB_REQUEST_LOG_RETAIN_DAYS));
+            server.setRequestLog(requestLog);
         }
     }
 
