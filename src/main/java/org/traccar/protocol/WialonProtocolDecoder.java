@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -158,7 +158,6 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
 
             case "L":
                 String[] values = data.split(";");
-
                 String imei = values[0].indexOf('.') >= 0 ? values[1] : values[0];
                 DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
                 if (deviceSession != null) {
@@ -172,11 +171,9 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
 
             case "D":
             case "SD":
-                Position position = decodePosition(
-                        channel, remoteAddress, id, data);
-
+                Position position = decodePosition(channel, remoteAddress, id, data);
                 if (position != null) {
-                    sendResponse(channel, remoteAddress, type, 1);
+                    sendResponse(channel, remoteAddress, "D", 1);
                     return position;
                 }
                 break;
