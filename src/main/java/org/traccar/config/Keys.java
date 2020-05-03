@@ -423,6 +423,13 @@ public final class Keys {
     public static final ConfigKey WEB_REQUEST_LOG_RETAIN_DAYS = new ConfigKey(
             "web.requestLog.retainDays", Integer.class);
 
+    /**
+     * Enable Jetty JMX
+     * See https://www.eclipse.org/jetty/documentation/current/jmx-chapter.html
+     */
+    public static final ConfigKey WEB_JMX_ENABLE = new ConfigKey(
+            "web.jmx.enable", Boolean.class);
+
     private Keys() {
     }
 
