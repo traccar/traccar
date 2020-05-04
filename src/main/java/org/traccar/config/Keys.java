@@ -429,6 +429,11 @@ public final class Keys {
      */
     public static final ConfigKey WEB_JMX_ENABLE = new ConfigKey(
             "web.jmx.enable", Boolean.class);
+    /**
+     * Enable Jetty Connection Statistics. Can be queried by JMX.
+     */
+    public static final ConfigKey WEB_STATS_ENABLE = new ConfigKey(
+            "web.stats.enable", Boolean.class);
 
     private Keys() {
     }

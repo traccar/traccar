@@ -22,6 +22,7 @@ import org.eclipse.jetty.proxy.AsyncProxyServlet;
 import org.eclipse.jetty.server.NCSARequestLog;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnectionStatistics;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
@@ -115,6 +116,10 @@ public class WebServer {
             requestLog.setLogLatency(true);
             requestLog.setRetainDays(config.getInteger(Keys.WEB_REQUEST_LOG_RETAIN_DAYS));
             server.setRequestLog(requestLog);
+        }
+
+        if (config.getBoolean(Keys.WEB_STATS_ENABLE)) {
+            ServerConnectionStatistics.addToAllConnectors(server);
         }
     }
 
