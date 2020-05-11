@@ -23,7 +23,6 @@ import org.traccar.model.Position;
 import org.traccar.rabbitmq.RabbitmqManager;
 
 import javax.inject.Inject;
-import javax.ws.rs.client.Entity;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;

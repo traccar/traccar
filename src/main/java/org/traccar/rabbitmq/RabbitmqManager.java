@@ -8,12 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.database.DataManager;
 
-import javax.ws.rs.client.Entity;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.TimeoutException;
 
 public class RabbitmqManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(RabbitmqManager.class);
