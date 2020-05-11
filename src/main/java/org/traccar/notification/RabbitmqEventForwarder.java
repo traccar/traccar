@@ -25,12 +25,7 @@ import java.util.Set;
 
 public abstract class RabbitmqEventForwarder {
 
-    private final String url;
-    private final String header;
-
     public RabbitmqEventForwarder() {
-        url = Context.getConfig().getString("event.forward.url", "http://localhost/");
-        header = Context.getConfig().getString("event.forward.header");
     }
 
     private static final String KEY_POSITION = "position";
