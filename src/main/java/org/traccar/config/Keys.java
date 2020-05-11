@@ -382,6 +382,9 @@ public final class Keys {
     public static final ConfigKey RABBITMQ_HOST_NAME = new ConfigKey(
             "rabbitmq.hostName", String.class);
 
+    public static final ConfigKey RABBITMQ_ENABLE = new ConfigKey(
+            "rabbitmq.enable", Boolean.class);
+
     private Keys() {
     }
 

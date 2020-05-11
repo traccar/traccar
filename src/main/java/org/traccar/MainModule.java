@@ -69,6 +69,7 @@ import org.traccar.handler.events.IgnitionEventHandler;
 import org.traccar.handler.events.MaintenanceEventHandler;
 import org.traccar.handler.events.MotionEventHandler;
 import org.traccar.handler.events.OverspeedEventHandler;
+import org.traccar.rabbitmq.RabbitmqManager;
 import org.traccar.reports.model.TripsConfig;
 
 import javax.annotation.Nullable;
@@ -89,6 +90,11 @@ public class MainModule extends AbstractModule {
     @Provides
     public static DataManager provideDataManager() {
         return Context.getDataManager();
+    }
+
+    @Provides
+    public static RabbitmqManager provideRabbitmqManager() {
+        return Context.getRabbitmqManager();
     }
 
     @Provides
@@ -240,6 +246,16 @@ public class MainModule extends AbstractModule {
             Config config, IdentityManager identityManager, ObjectMapper objectMapper, Client client) {
         if (config.getBoolean(Keys.FORWARD_ENABLE)) {
             return new WebDataHandler(config, identityManager, objectMapper, client);
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public static RabbitmqDataHandler provideRabbitmqDataHandler(
+            Config config, IdentityManager identityManager, RabbitmqManager rabbitmqManager) {
+        if (config.getBoolean(Keys.RABBITMQ_ENABLE)) {
+            return new RabbitmqDataHandler(identityManager, rabbitmqManager);
         }
         return null;
     }

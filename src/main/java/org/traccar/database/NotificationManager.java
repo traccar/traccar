@@ -75,7 +75,7 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
         long deviceId = event.getDeviceId();
         Set<Long> users = Context.getPermissionsManager().getDeviceUsers(deviceId);
         Set<Long> usersToForward = null;
-        if (Context.getEventForwarder() != null) {
+        if (Context.getEventForwarder() != null || Context.getRabbitmqEventForwarder() != null) {
             usersToForward = new HashSet<>();
         }
         for (long userId : users) {
@@ -109,6 +109,10 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
         }
         if (Context.getEventForwarder() != null) {
             Context.getEventForwarder().forwardEvent(event, position, usersToForward);
+        }
+
+        if (Context.getRabbitmqEventForwarder() != null) {
+            Context.getRabbitmqEventForwarder().forwardEvent(event, position, usersToForward, Context.getRabbitmqManager());
         }
     }
 

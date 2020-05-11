@@ -138,6 +138,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
                 EngineHoursHandler.class,
                 ComputedAttributesHandler.class,
                 WebDataHandler.class,
+                RabbitmqDataHandler.class,
                 DefaultDataHandler.class);
 
         if (eventsEnabled) {

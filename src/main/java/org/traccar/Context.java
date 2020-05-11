@@ -23,6 +23,7 @@ import org.eclipse.jetty.util.URIUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.database.AttributesManager;
 import org.traccar.database.BaseObjectManager;
 import org.traccar.database.CalendarManager;
@@ -57,7 +58,9 @@ import org.traccar.model.Notification;
 import org.traccar.model.User;
 import org.traccar.notification.EventForwarder;
 import org.traccar.notification.JsonTypeEventForwarder;
+import org.traccar.notification.JsonTypeRabbitmqEventForwarder;
 import org.traccar.notification.NotificatorManager;
+import org.traccar.rabbitmq.RabbitmqManager;
 import org.traccar.reports.model.TripsConfig;
 import org.traccar.sms.SmsManager;
 import org.traccar.sms.smpp.SmppClient;
@@ -83,6 +86,12 @@ public final class Context {
         return config;
     }
 
+    private static JsonTypeRabbitmqEventForwarder rabbitmqEventForwarder;
+
+    public static JsonTypeRabbitmqEventForwarder getRabbitmqEventForwarder() {
+        return rabbitmqEventForwarder;
+    }
+
     private static ObjectMapper objectMapper;
 
     public static ObjectMapper getObjectMapper() {
@@ -99,6 +108,12 @@ public final class Context {
 
     public static DataManager getDataManager() {
         return dataManager;
+    }
+
+    private static RabbitmqManager rabbitmqManager;
+
+    public static RabbitmqManager getRabbitmqManager() {
+        return rabbitmqManager;
     }
 
     private static LdapProvider ldapProvider;
@@ -292,6 +307,10 @@ public final class Context {
             dataManager = new DataManager(config);
         }
 
+        if (config.hasKey(Keys.RABBITMQ_HOST_NAME)) {
+            rabbitmqManager = new RabbitmqManager(config);
+        }
+
         if (config.getBoolean("ldap.enable")) {
             ldapProvider = new LdapProvider(config);
         }
@@ -335,6 +354,10 @@ public final class Context {
 
         if (config.getBoolean("event.forward.enable")) {
             eventForwarder = new JsonTypeEventForwarder();
+        }
+
+        if (config.getBoolean(Keys.RABBITMQ_ENABLE)) {
+            rabbitmqEventForwarder = new JsonTypeRabbitmqEventForwarder();
         }
 
         attributesManager = new AttributesManager(dataManager);
