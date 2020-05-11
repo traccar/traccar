@@ -364,6 +364,24 @@ public final class Keys {
     public static final ConfigKey LOCATION_LONGITUDE_HEMISPHERE = new ConfigKey(
             "location.longitudeHemisphere", Boolean.class);
 
+    /**
+     * Rabbitmq positions queue name
+     */
+    public static final ConfigKey RABBITMQ_POSITIONS_QUEUE_NAME = new ConfigKey(
+            "rabbitmq.positionsQueueName", String.class);
+
+    /**
+     *  Rabbitmq events queue name
+     */
+    public static final ConfigKey RABBITMQ_EVENTS_QUEUE_NAME = new ConfigKey(
+            "rabbitmq.eventsQueueName", String.class);
+
+    /**
+     *  Rabbitmq host name
+     */
+    public static final ConfigKey RABBITMQ_HOST_NAME = new ConfigKey(
+            "rabbitmq.hostName", String.class);
+
     private Keys() {
     }
 
