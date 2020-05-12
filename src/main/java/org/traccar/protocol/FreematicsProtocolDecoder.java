@@ -146,8 +146,23 @@ public class FreematicsProtocolDecoder extends BaseProtocolDecoder {
                 case 0x82:
                     position.set(Position.KEY_DEVICE_TEMP, Integer.parseInt(value) * 0.1);
                     break;
+                case 0x104:
+                    position.set(Position.KEY_ENGINE_LOAD, Integer.parseInt(value));
+                    break;
+                case 0x105:
+                    position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(value));
+                    break;
+                case 0x10c:
+                    position.set(Position.KEY_RPM, Integer.parseInt(value));
+                    break;
+                case 0x10d:
+                    position.set(Position.KEY_OBD_SPEED, UnitsConverter.knotsFromKph(Integer.parseInt(value)));
+                    break;
+                case 0x111:
+                    position.set(Position.KEY_THROTTLE, Integer.parseInt(value));
+                    break;
                 default:
-                    position.set(data[0], value);
+                    position.set(Position.PREFIX_IN + data[0], value);
                     break;
             }
         }
