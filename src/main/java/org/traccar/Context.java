@@ -307,7 +307,7 @@ public final class Context {
             dataManager = new DataManager(config);
         }
 
-        if (config.hasKey(Keys.RABBITMQ_HOST_NAME)) {
+        if (config.hasKey(Keys.RABBITMQ_CONNECTION_URL) && config.getBoolean(Keys.RABBITMQ_ENABLE)) {
             rabbitmqManager = new RabbitmqManager(config);
         }
 

@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 public class RabbitmqManager {
+    private static final String EXCHANGE_NAME = "traccar";
     private static final Logger LOGGER = LoggerFactory.getLogger(RabbitmqManager.class);
     private final Config config;
     private Connection connection;
@@ -26,18 +27,17 @@ public class RabbitmqManager {
 
     private void initRabbitmq() throws Exception {
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost(config.getString(Keys.RABBITMQ_HOST_NAME));
+        factory.setUri(config.getString(Keys.RABBITMQ_CONNECTION_URL));
         this.connection = factory.newConnection();
         this.channel = connection.createChannel();
-        this.channel.queueDeclare(this.config.getString(Keys.RABBITMQ_POSITIONS_QUEUE_NAME), true, false, false, null);
-        this.channel.queueDeclare(this.config.getString(Keys.RABBITMQ_EVENTS_QUEUE_NAME), true, false, false, null);
+        this.channel.exchangeDeclare(EXCHANGE_NAME, "direct", true);
     }
 
     public void sendToPositionsQueue(String message) throws IOException {
-        channel.basicPublish("", this.config.getString(Keys.RABBITMQ_POSITIONS_QUEUE_NAME), MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes(StandardCharsets.UTF_8));
+        channel.basicPublish(EXCHANGE_NAME, config.getString(Keys.RABBITMQ_ROUTING_KEY_POSITIONS), MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes(StandardCharsets.UTF_8));
     }
 
     public void sendToEventsQueue(String message) throws IOException {
-        channel.basicPublish("", this.config.getString(Keys.RABBITMQ_EVENTS_QUEUE_NAME), MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes(StandardCharsets.UTF_8));
+        channel.basicPublish(EXCHANGE_NAME, config.getString(Keys.RABBITMQ_ROUTING_KEY_EVENTS), MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes(StandardCharsets.UTF_8));
     }
 }
