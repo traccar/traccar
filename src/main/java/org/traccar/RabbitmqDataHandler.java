@@ -17,6 +17,8 @@ package org.traccar;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.channel.ChannelHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.database.IdentityManager;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
@@ -29,7 +31,7 @@ import java.util.Map;
 
 @ChannelHandler.Sharable
 public class RabbitmqDataHandler extends BaseDataHandler {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(RabbitmqDataHandler.class);
     private static final String KEY_POSITION = "position";
     private static final String KEY_DEVICE = "device";
 
@@ -47,7 +49,7 @@ public class RabbitmqDataHandler extends BaseDataHandler {
         try {
             rabbitmqManager.sendToPositionsQueue(new ObjectMapper().writeValueAsString(prepareJsonPayload(position)));
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         }
         return position;
     }
