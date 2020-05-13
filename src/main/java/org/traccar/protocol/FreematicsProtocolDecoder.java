@@ -165,7 +165,7 @@ public class FreematicsProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_THROTTLE, Integer.parseInt(value));
                     break;
                 default:
-                    position.set(Position.PREFIX_IO + data[0], value);
+                    position.set(Position.PREFIX_IO + key, value);
                     break;
             }
         }
