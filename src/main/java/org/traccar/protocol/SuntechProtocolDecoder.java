@@ -521,6 +521,31 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_OUTPUT, Integer.parseInt(values[index++]));
         }
 
+        if (BitUtil.check(mask, 19)) {
+            index += 1; // alert id
+        }
+
+        if (BitUtil.check(mask, 20)) {
+            index += 1; // alert modifier
+        }
+
+        if (BitUtil.check(mask, 21)) {
+            index += 1; // alert data
+        }
+
+        if (BitUtil.check(mask, 22)) {
+            index += 1; // reserved
+        }
+
+        if (BitUtil.check(mask, 23)) {
+            int assignMask = Integer.parseInt(values[index++], 16);
+            for (int i = 0; i <= 30; i++) {
+                if (BitUtil.check(assignMask, i)) {
+                    position.set(Position.PREFIX_IO + (i + 1), values[index++]);
+                }
+            }
+        }
+
         return position;
     }
 
