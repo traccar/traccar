@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,15 @@ import org.traccar.Protocol;
 import org.traccar.model.Position;
 
 import javax.json.Json;
+import javax.json.JsonNumber;
 import javax.json.JsonObject;
+import javax.json.JsonString;
+import javax.json.JsonValue;
 import java.io.StringReader;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.Map;
 
 public class OutsafeProtocolDecoder extends BaseHttpProtocolDecoder {
 
@@ -61,9 +65,25 @@ public class OutsafeProtocolDecoder extends BaseHttpProtocolDecoder {
         position.setCourse(json.getJsonNumber("heading").intValue());
 
         position.set(Position.KEY_RSSI, json.getJsonNumber("rssi").intValue());
+        position.set("origin", json.getString("origin"));
+
+        JsonObject data = json.getJsonObject("data");
+        for (Map.Entry<String, JsonValue> entry : data.entrySet()) {
+            decodeUnknownParam(entry.getKey(), entry.getValue(), position);
+        }
 
         sendResponse(channel, HttpResponseStatus.OK);
         return position;
+    }
+
+    private void decodeUnknownParam(String name, JsonValue value, Position position) {
+        if (value instanceof JsonNumber) {
+            position.set(name, ((JsonNumber) value).doubleValue());
+        } else if (value instanceof JsonString) {
+            position.set(name, ((JsonString) value).getString());
+        } else if (value == JsonValue.TRUE || value == JsonValue.FALSE) {
+            position.set(name, value == JsonValue.TRUE);
+        }
     }
 
 }
