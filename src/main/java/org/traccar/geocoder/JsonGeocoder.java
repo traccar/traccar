@@ -27,6 +27,7 @@ import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.traccar.config.Keys;
 
 public abstract class JsonGeocoder implements Geocoder {
 
@@ -34,12 +35,14 @@ public abstract class JsonGeocoder implements Geocoder {
 
     private final String url;
     private final AddressFormat addressFormat;
+    private final boolean requestLocationReverse;
 
     private Map<Map.Entry<Double, Double>, String> cache;
 
     public JsonGeocoder(String url, final int cacheSize, AddressFormat addressFormat) {
         this.url = url;
         this.addressFormat = addressFormat;
+        requestLocationReverse = Context.getConfig().getBoolean(Keys.GEOCODER_REQUEST_LOCATION_REVERSE);
         if (cacheSize > 0) {
             this.cache = Collections.synchronizedMap(new LinkedHashMap<Map.Entry<Double, Double>, String>() {
                 @Override
@@ -89,12 +92,9 @@ public abstract class JsonGeocoder implements Geocoder {
         }
 
         String urlFormat = String.format(url, latitude, longitude);
-        // The AutoNavi web API(V4.2.0)'s location Must Format "longitude,latitude".
-        boolean isAutoNavi = url.contains("restapi.amap.com/v3/geocode/regeo");
-        if (isAutoNavi){
+        if (requestLocationReverse){
             urlFormat = String.format(url, longitude, latitude);
-        }
-
+        } 
         Invocation.Builder request = Context.getClient().target(urlFormat).request();
 
         if (callback != null) {
