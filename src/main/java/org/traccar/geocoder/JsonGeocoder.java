@@ -88,7 +88,14 @@ public abstract class JsonGeocoder implements Geocoder {
             }
         }
 
-        Invocation.Builder request = Context.getClient().target(String.format(url, latitude, longitude)).request();
+        String urlFormat = String.format(url, latitude, longitude);
+        // The AutoNavi web API(V4.2.0)'s location Must Format "longitude,latitude".
+        boolean isAutoNavi = url.contains("restapi.amap.com/v3/geocode/regeo");
+        if (isAutoNavi){
+            urlFormat = String.format(url, longitude, latitude);
+        }
+
+        Invocation.Builder request = Context.getClient().target(urlFormat).request();
 
         if (callback != null) {
             request.async().get(new InvocationCallback<JsonObject>() {

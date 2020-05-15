@@ -85,4 +85,12 @@ public class GeocoderTest {
         String address = geocoder.getAddress(28.6129602407977, 77.2294557094574, null);
         assertEquals("New Delhi, Delhi. 1 m from India Gate pin-110001 (India)", address);
     }
+
+    @Ignore
+    @Test
+    public void testAutoNavi() {
+        Geocoder geocoder = new AutoNaviGeocoder(null, "", 0, new AddressFormat("%f, %c"));
+        String address = geocoder.getAddress(39.991957, 116.310003, null);
+        assertEquals("北京市海淀区燕园街道北京大学, 中国", address);
+    }
 }
