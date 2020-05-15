@@ -522,15 +522,15 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(mask, 19)) {
-            index += 1; // alert id
+            position.set("alertId", values[index++]);
         }
 
         if (BitUtil.check(mask, 20)) {
-            index += 1; // alert modifier
+            position.set("alertModifier", values[index++]);
         }
 
         if (BitUtil.check(mask, 21)) {
-            index += 1; // alert data
+            position.set("alertData", values[index++]);
         }
 
         if (BitUtil.check(mask, 22)) {
@@ -656,7 +656,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(mask, 20)) {
-            buf.readUnsignedShort(); // alert mod
+            buf.readUnsignedShort(); // alert modifier
         }
 
         if (BitUtil.check(mask, 21)) {
