@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -203,6 +203,10 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             case 10:
                 position.set(Position.PREFIX_ADC + 2, readValue(buf, length, false));
                 break;
+            case 16:
+            case 87:
+                position.set(Position.KEY_ODOMETER, readValue(buf, length, false));
+                break;
             case 17:
                 position.set("axisX", readValue(buf, length, true));
                 break;
@@ -214,6 +218,9 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 break;
             case 21:
                 position.set(Position.KEY_RSSI, readValue(buf, length, false));
+                break;
+            case 24:
+                readValue(buf, length, false); // speed
                 break;
             case 25:
             case 26:
@@ -244,6 +251,37 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             case 80:
                 position.set("workMode", readValue(buf, length, false));
                 break;
+            case 81:
+                position.set(Position.KEY_OBD_SPEED, readValue(buf, length, false));
+                break;
+            case 82:
+                position.set(Position.KEY_THROTTLE, readValue(buf, length, false));
+                break;
+            case 83:
+                position.set(Position.KEY_FUEL_USED, readValue(buf, length, false) * 0.1);
+                break;
+            case 85:
+                position.set(Position.KEY_RPM, readValue(buf, length, false));
+                break;
+            case 89:
+                position.set(Position.KEY_FUEL_LEVEL, readValue(buf, length, false));
+                break;
+            case 90:
+                position.set(Position.KEY_DOOR, readValue(buf, length, false));
+                break;
+            case 110:
+                position.set(Position.KEY_FUEL_CONSUMPTION, readValue(buf, length, true) * 0.1);
+                break;
+            case 113:
+                if (length == 1) {
+                    position.set(Position.KEY_BATTERY_LEVEL, readValue(buf, length, true));
+                } else {
+                    position.set(Position.PREFIX_IO + id, readValue(buf, length, false));
+                }
+                break;
+            case 115:
+                position.set(Position.KEY_COOLANT_TEMP, readValue(buf, length, true) * 0.1);
+                break;
             case 129:
             case 130:
             case 131:
@@ -265,6 +303,12 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 break;
             case 182:
                 position.set(Position.KEY_HDOP, readValue(buf, length, false) * 0.1);
+                break;
+            case 199:
+                position.set(Position.KEY_ODOMETER_TRIP, readValue(buf, length, false));
+                break;
+            case 235:
+                position.set("oilLevel", readValue(buf, length, false));
                 break;
             case 236:
                 if (readValue(buf, length, false) == 1) {
