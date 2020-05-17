@@ -102,7 +102,7 @@ public class SolarPoweredProtocolDecoder extends BaseProtocolDecoder {
                             position.set(Position.KEY_ALARM, Position.ALARM_FALL_DOWN);
                         }
                         if (BitUtil.check(alarmMask, 4)) {
-                            position.set(Position.ALARM_MOVEMENT, BitUtil.check(alarm, 4));
+                            position.set(Position.KEY_MOTION, BitUtil.check(alarm, 4));
                         }
                         break;
                     case 0x83:
