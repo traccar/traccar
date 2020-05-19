@@ -50,7 +50,7 @@ public class PstProtocolDecoder extends BaseProtocolDecoder {
         long value = buf.readUnsignedInt();
         int sign = BitUtil.check(value, 31) ? -1 : 1;
         value = BitUtil.to(value, 31);
-        return sign * (BitUtil.from(value, 16) + BitUtil.to(value, 16) * 0.00001) / 60;
+        return sign * (BitUtil.from(value, 16) + BitUtil.to(value, 16) / 10000.0) / 60;
     }
 
     @Override
