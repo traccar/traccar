@@ -184,6 +184,14 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
 
                     position.set(Position.KEY_IGNITION, BitUtil.check(input, 0));
 
+                    if (!BitUtil.check(input, 1)) {
+                        position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                    } else if (!BitUtil.check(input, 2)) {
+                        position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
+                    } if (BitUtil.check(input, 6)) {
+                        position.set(Position.KEY_ALARM, Position.ALARM_TAMPERING);
+                    }
+
                     position.set(Position.KEY_INPUT, input);
                     position.set(Position.KEY_OUTPUT, output);
                     position.set(Position.KEY_STATUS, status);
