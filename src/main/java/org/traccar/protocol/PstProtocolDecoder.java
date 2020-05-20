@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,10 +86,16 @@ public class PstProtocolDecoder extends BaseProtocolDecoder {
                 int length = buf.readUnsignedByte();
 
                 switch (tag) {
+                    case 0x09:
+                        buf.readUnsignedByte(); // sensor count
+                        buf.readUnsignedByte(); // sensor logic
+                        int status = buf.readUnsignedByte();
+                        position.set(Position.KEY_IGNITION, BitUtil.check(status, 7));
+                        break;
                     case 0x0D:
                         int battery = buf.readUnsignedByte();
                         if (battery <= 20) {
-                            position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte() * 5);
+                            position.set(Position.KEY_BATTERY_LEVEL, battery * 5);
                         }
                         break;
                     case 0x10:
