@@ -171,7 +171,7 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(buf.readLongLE()));
         }
         if (BitUtil.check(mask, 7)) {
-            buf.readUnsignedShortLE(); // dallas temperature
+            position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedShortLE() * 0.1 - 273);
         }
         if (BitUtil.check(mask, 8)) {
             buf.readUnsignedShortLE(); // dallas humidity
