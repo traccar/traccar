@@ -151,10 +151,9 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
             position.setLatitude(getJsonDouble(location, jsonContains(location, "lat") ? "lat" : "latitude"));
             position.setLongitude(getJsonDouble(location, jsonContains(location, "lng") ? "lng" : "longitude"));
 
-        } else if (jsonContains(json, "data") || jsonContains(json, "payload")) {
+        } else if (jsonContains(json, "data")) {
 
-            String data = json.getString(jsonContains(json, "data") ? "data" : "payload");
-            ByteBuf buf = Unpooled.wrappedBuffer(DataConverter.parseHex(data));
+            ByteBuf buf = Unpooled.wrappedBuffer(DataConverter.parseHex(json.getString("data")));
             try {
                 int event = buf.readUnsignedByte();
                 if (event == 0x0f || event == 0x1f) {
@@ -175,69 +174,80 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
 
                     position.set(Position.KEY_BATTERY, (int) buf.readUnsignedByte());
 
-                } else if (event >> 4 == 0) {
+                } else if (event >> 4 <= 3 && buf.writerIndex() == 12) {
 
-                    position.setValid(true);
-                    position.setLatitude(buf.readIntLE() * 0.0000001);
-                    position.setLongitude(buf.readIntLE() * 0.0000001);
-                    position.setCourse(buf.readUnsignedByte() * 2);
-                    position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
+                    if (event >> 4 == 0) {
+                        position.setValid(true);
+                        position.setLatitude(buf.readIntLE() * 0.0000001);
+                        position.setLongitude(buf.readIntLE() * 0.0000001);
+                        position.setCourse(buf.readUnsignedByte() * 2);
+                        position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
 
-                    position.set(Position.KEY_BATTERY, buf.readUnsignedByte() * 0.025);
-
-                } else {
-
-                    position.set(Position.KEY_EVENT, event);
-                    if (event == 0x22 || event == 0x62) {
-                        position.set(Position.KEY_ALARM, Position.ALARM_SOS);
-                    }
-
-                    while (buf.isReadable()) {
-                        int type = buf.readUnsignedByte();
-                        switch (type) {
-                            case 0x01:
-                                position.setValid(true);
-                                position.setLatitude(buf.readMedium());
-                                position.setLongitude(buf.readMedium());
-                                break;
-                            case 0x02:
-                                position.setValid(true);
-                                position.setLatitude(buf.readFloat());
-                                position.setLongitude(buf.readFloat());
-                                break;
-                            case 0x03:
-                                position.set(Position.PREFIX_TEMP + 1, buf.readByte() * 0.5);
-                                break;
-                            case 0x04:
-                                position.set(Position.KEY_BATTERY, buf.readUnsignedByte() * 0.1);
-                                break;
-                            case 0x05:
-                                position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
-                                break;
-                            case 0x06:
-                                String mac = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");
-                                position.setNetwork(new Network(WifiAccessPoint.from(
-                                        mac.substring(0, mac.length() - 1), buf.readUnsignedByte())));
-                                break;
-                            case 0x07:
-                                buf.skipBytes(10); // wifi extended
-                                break;
-                            case 0x08:
-                                buf.skipBytes(6); // accelerometer
-                                break;
-                            case 0x09:
-                                position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
-                                break;
-                            default:
-                                buf.readUnsignedByte(); // fence number
-                                break;
-                        }
+                        position.set(Position.KEY_BATTERY, buf.readUnsignedByte() * 0.025);
+                    } else {
+                        return null;
                     }
 
                 }
             } finally {
                 buf.release();
             }
+
+        } else if (jsonContains(json, "payload")) {
+
+            ByteBuf buf = Unpooled.wrappedBuffer(DataConverter.parseHex(json.getString("payload")));
+            try {
+                int event = buf.readUnsignedByte();
+                position.set(Position.KEY_EVENT, event);
+                if (event == 0x22 || event == 0x62) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+                }
+
+                while (buf.isReadable()) {
+                    int type = buf.readUnsignedByte();
+                    switch (type) {
+                        case 0x01:
+                            position.setValid(true);
+                            position.setLatitude(buf.readMedium());
+                            position.setLongitude(buf.readMedium());
+                            break;
+                        case 0x02:
+                            position.setValid(true);
+                            position.setLatitude(buf.readFloat());
+                            position.setLongitude(buf.readFloat());
+                            break;
+                        case 0x03:
+                            position.set(Position.PREFIX_TEMP + 1, buf.readByte() * 0.5);
+                            break;
+                        case 0x04:
+                            position.set(Position.KEY_BATTERY, buf.readUnsignedByte() * 0.1);
+                            break;
+                        case 0x05:
+                            position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+                            break;
+                        case 0x06:
+                            String mac = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");
+                            position.setNetwork(new Network(WifiAccessPoint.from(
+                                    mac.substring(0, mac.length() - 1), buf.readUnsignedByte())));
+                            break;
+                        case 0x07:
+                            buf.skipBytes(10); // wifi extended
+                            break;
+                        case 0x08:
+                            buf.skipBytes(6); // accelerometer
+                            break;
+                        case 0x09:
+                            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
+                            break;
+                        default:
+                            buf.readUnsignedByte(); // fence number
+                            break;
+                    }
+                }
+            } finally {
+                buf.release();
+            }
+
         }
 
         if (position.getLatitude() == 0 && position.getLongitude() == 0) {
