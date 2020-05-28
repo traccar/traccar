@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -885,6 +885,13 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 }
                 return decodeFuelData(position, buf.toString(
                         buf.readerIndex(), buf.readableBytes() - 4 - 2, StandardCharsets.US_ASCII));
+            } else if (subType == 0x1b) {
+                buf.readUnsignedByte(); // header
+                buf.readUnsignedByte(); // type
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, ByteBufUtil.hexDump(buf.readSlice(4)));
+                buf.readUnsignedByte(); // checksum
+                buf.readUnsignedByte(); // footer
+                return position;
             }
 
         } else if (type == MSG_X1_PHOTO_DATA) {
