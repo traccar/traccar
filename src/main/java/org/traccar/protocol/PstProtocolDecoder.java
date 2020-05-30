@@ -77,7 +77,9 @@ public class PstProtocolDecoder extends BaseProtocolDecoder {
 
             position.setDeviceTime(readDate(buf));
 
-            buf.readUnsignedByte();
+            int status = buf.readUnsignedByte();
+            position.set(Position.KEY_IGNITION, BitUtil.check(status, 7));
+            position.set(Position.KEY_STATUS, status);
 
             int count = buf.readUnsignedByte();
             for (int i = 0; i < count; i++) {
@@ -89,8 +91,7 @@ public class PstProtocolDecoder extends BaseProtocolDecoder {
                     case 0x09:
                         buf.readUnsignedByte(); // sensor count
                         buf.readUnsignedByte(); // sensor logic
-                        int status = buf.readUnsignedByte();
-                        position.set(Position.KEY_IGNITION, BitUtil.check(status, 7));
+                        buf.readUnsignedByte(); // sensor status
                         break;
                     case 0x0D:
                         int battery = buf.readUnsignedByte();
