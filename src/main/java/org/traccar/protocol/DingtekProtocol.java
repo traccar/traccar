@@ -15,7 +15,8 @@
  */
 package org.traccar.protocol;
 
-import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
@@ -26,7 +27,9 @@ public class DingtekProtocol extends BaseProtocol {
         addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 4, 1));
+                pipeline.addLast(new DingtekFrameDecoder());
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new DingtekProtocolDecoder(DingtekProtocol.this));
             }
         });
