@@ -123,7 +123,7 @@ public class WliProtocolDecoder extends BaseProtocolDecoder {
         } else if (type == '2') {
 
             String id = buf.toString(buf.readerIndex(), buf.readableBytes() - 1, StandardCharsets.US_ASCII);
-            getDeviceSession(channel, remoteAddress, id);
+            getDeviceSession(channel, remoteAddress, id.substring("wli:".length()));
             return null;
 
         }

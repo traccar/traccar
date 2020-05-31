@@ -26,7 +26,7 @@ public class WliProtocol extends BaseProtocol {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new WliFrameDecoder());
-                pipeline.addLast(new Gt02ProtocolDecoder(WliProtocol.this));
+                pipeline.addLast(new WliProtocolDecoder(WliProtocol.this));
             }
         });
     }
