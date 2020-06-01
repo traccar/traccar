@@ -312,7 +312,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 break;
             case 236:
                 if (readValue(buf, length, false) == 1) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+                    position.set(Position.KEY_ALARM, Position.ALARM_SOS);
                 }
                 break;
             case 237:
@@ -341,6 +341,11 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 break;
             case 241:
                 position.set(Position.KEY_OPERATOR, readValue(buf, length, false));
+                break;
+            case 242:
+                if (readValue(buf, length, false) == 1) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_FALL_DOWN);
+                }
                 break;
             default:
                 position.set(Position.PREFIX_IO + id, readValue(buf, length, false));
