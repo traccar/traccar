@@ -17,13 +17,16 @@ package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.Protocol;
+import org.traccar.helper.DataConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.util.Date;
 
 public class DingtekProtocolDecoder extends BaseProtocolDecoder {
 
@@ -35,23 +38,29 @@ public class DingtekProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ByteBuf buf = (ByteBuf) msg;
+        String sentence = (String) msg;
 
-        buf.readUnsignedByte(); // header
-        buf.readUnsignedByte(); // forced
-        buf.readUnsignedByte(); // device type
-        int type = buf.readUnsignedByte();
-        buf.readUnsignedByte(); // length
-
-        String imei = ByteBufUtil.hexDump(buf.slice(buf.writerIndex() - 9, 8)).substring(1);
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
-        if (deviceSession == null) {
-            return null;
-        }
+        int type = Integer.parseInt(sentence.substring(6, 8), 16);
 
         if (type == 0x01 || type == 0x02 || type == 0x04) {
+
+            ByteBuf buf = Unpooled.wrappedBuffer(DataConverter.parseHex(sentence));
+
+            buf.readUnsignedByte(); // header
+            buf.readUnsignedByte(); // forced
+            buf.readUnsignedByte(); // device type
+            buf.readUnsignedByte(); // type
+            buf.readUnsignedByte(); // length
+
+            String imei = ByteBufUtil.hexDump(buf.slice(buf.writerIndex() - 9, 8)).substring(1);
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
+            if (deviceSession == null) {
+                return null;
+            }
+
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
+            position.setTime(new Date());
 
             position.set("height", buf.readUnsignedShort());
 
