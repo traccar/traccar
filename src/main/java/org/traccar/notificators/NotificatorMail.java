@@ -17,7 +17,9 @@
 package org.traccar.notificators;
 
 import org.traccar.Context;
+import org.traccar.model.Device;
 import org.traccar.model.Event;
+import org.traccar.model.Geofence;
 import org.traccar.model.Position;
 import org.traccar.notification.FullMessage;
 import org.traccar.notification.MessageException;
@@ -31,7 +33,38 @@ public final class NotificatorMail extends Notificator {
     public void sendSync(long userId, Event event, Position position) throws MessageException {
         try {
             FullMessage message = NotificationFormatter.formatFullMessage(userId, event, position);
-            Context.getMailManager().sendMessage(userId, message.getSubject(), message.getBody());
+            //check if event is device stopped. if not send as usual
+            //if is device stopped check if is in geofence for vehicle
+            //if not in geofence, send, otherwise dont send
+            if(event.getType().equals(Event.TYPE_DEVICE_STOPPED)){
+                Position pos = Context.getDeviceManager().getLastPosition(event.getDeviceId());
+                Device dev = Context.getDeviceManager().getById(event.getDeviceId());
+                for(long geo: dev.getGeofenceIds()) {
+                    Geofence geofence = Context.getGeofenceManager().getById(geo);
+                    if (!geofence.getGeometry().containsPoint(pos.getLatitude(), pos.getLongitude())) {
+                        Thread thread = new Thread(){
+                            @Override
+                            public void run() {
+                                int count = 0;
+                                while(count <= 4) {
+                                    try {
+                                        Context.getMailManager().sendMessage(userId, message.getSubject(), message.getBody());
+                                        Thread.sleep(600000);
+                                    } catch (MessagingException | InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
+                                    count++;
+                                    if(count > 4)
+                                        this.interrupt();
+                                }
+                            }
+                        };
+                        thread.start();
+                    }
+                }
+
+            }else
+                Context.getMailManager().sendMessage(userId, message.getSubject(), message.getBody());
         } catch (MessagingException e) {
             throw new MessageException(e);
         }

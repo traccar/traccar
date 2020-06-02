@@ -16,6 +16,17 @@
  */
 package org.traccar.reports;
 
+import com.itextpdf.kernel.events.IEventHandler;
+import com.itextpdf.kernel.events.PdfDocumentEvent;
+import com.itextpdf.kernel.geom.Rectangle;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfPage;
+import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
+import com.itextpdf.kernel.pdf.xobject.PdfFormXObject;
+import com.itextpdf.layout.Canvas;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.property.TextAlignment;
 import org.apache.velocity.tools.generic.DateTool;
 import org.apache.velocity.tools.generic.NumberTool;
 import org.jxls.area.Area;
@@ -43,6 +54,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -125,6 +138,20 @@ public final class ReportUtils {
             return firstPosition.getString(Position.KEY_DRIVER_UNIQUE_ID);
         } else if (lastPosition.getAttributes().containsKey(Position.KEY_DRIVER_UNIQUE_ID)) {
             return lastPosition.getString(Position.KEY_DRIVER_UNIQUE_ID);
+        }
+        return null;
+    }
+
+    //Find driver custom
+    public static String findCustomDriver(Position firstPosition, Position lastPosition) {
+        try {
+            if (firstPosition.getDriveruniqueid() != null) {
+                return firstPosition.getDriveruniqueid();
+            } else if (lastPosition.getDriveruniqueid() != null) {
+                return lastPosition.getDriveruniqueid();
+            }
+        }catch (NullPointerException ex){
+            return null;
         }
         return null;
     }
@@ -219,7 +246,7 @@ public final class ReportUtils {
         trip.setMaxSpeed(speedMax);
         trip.setSpentFuel(calculateFuel(startTrip, endTrip));
 
-        trip.setDriverUniqueId(findDriver(startTrip, endTrip));
+        trip.setDriverUniqueId(findCustomDriver(startTrip, endTrip));
         trip.setDriverName(findDriverName(trip.getDriverUniqueId()));
 
         if (!ignoreOdometer
@@ -373,6 +400,61 @@ public final class ReportUtils {
         }
 
         return result;
+    }
+
+    protected static class TextFooterEventHandler implements IEventHandler{
+        protected PdfFormXObject placeholder;
+        protected float side = 20;
+        protected float x = 300;
+        protected float y = 25;
+        protected float space = 4.5f;
+        protected float descent = 3;
+        protected Document doc;
+        private long userId;
+        public TextFooterEventHandler(Document doc, long userId){
+            this.doc = doc;
+            this.userId = userId;
+            placeholder = new PdfFormXObject(new Rectangle(0, 0, side, side));
+        }
+
+        @Override
+        public void handleEvent(com.itextpdf.kernel.events.Event event) {
+            PdfDocumentEvent docEvent = (PdfDocumentEvent) event;
+            PdfPage page = docEvent.getPage();
+            PdfDocument pdf = docEvent.getDocument();
+            Rectangle pagesize = page.getPageSize();
+            PdfCanvas pcanvas = new PdfCanvas(docEvent.getPage());
+            Canvas canvas = new Canvas(pcanvas, pdf, pagesize);
+            int pageNum = docEvent.getDocument().getPageNumber(page);
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+            LocalDateTime now = LocalDateTime.now();
+
+            Paragraph pNo = new Paragraph()
+                    .add("Page ")
+                    .add(String.valueOf(pageNum));
+
+            Paragraph pDate = new Paragraph()
+                    .add("Date Published: ")
+                    .add(dtf.format(now));
+
+            Paragraph pUser = new Paragraph()
+                    .add("Username: ")
+                    .add(Context.getUsersManager().getById(this.userId).getName());
+
+            canvas.showTextAligned(pDate, 150, y, TextAlignment.RIGHT);
+            canvas.close();
+
+            canvas.showTextAligned(pNo, x+100, y, TextAlignment.LEFT);
+            canvas.close();
+
+            canvas.showTextAligned(pUser, x+400, y, TextAlignment.CENTER);
+            canvas.close();
+
+            pcanvas.addXObject(placeholder, x + space, y - descent);
+            pcanvas.release();
+
+        }
+
     }
 
 }

@@ -296,6 +296,12 @@ public class Position extends Message {
         this.network = network;
     }
 
+    private String driveruniqueid;
+
+    public void setDriverUniqueId(String id){ this.driveruniqueid = id;}
+
+    public String getDriveruniqueid(){ return this.driveruniqueid;}
+
     @Override
     @QueryIgnore
     public String getType() {

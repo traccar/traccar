@@ -15,12 +15,16 @@
  */
 package org.traccar.handler.events;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import io.netty.channel.ChannelHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.traccar.Context;
 import org.traccar.database.CalendarManager;
 import org.traccar.database.GeofenceManager;
 import org.traccar.database.IdentityManager;
@@ -31,6 +35,8 @@ import org.traccar.model.Position;
 
 @ChannelHandler.Sharable
 public class GeofenceEventHandler extends BaseEventHandler {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GeofenceEventHandler.class);
 
     private final IdentityManager identityManager;
     private final GeofenceManager geofenceManager;
@@ -72,6 +78,7 @@ public class GeofenceEventHandler extends BaseEventHandler {
                 Event event = new Event(Event.TYPE_GEOFENCE_EXIT, position.getDeviceId(), position.getId());
                 event.setGeofenceId(geofenceId);
                 events.put(event, position);
+                updateHomeDevice(0, position);
             }
         }
         for (long geofenceId : newGeofences) {
@@ -81,9 +88,24 @@ public class GeofenceEventHandler extends BaseEventHandler {
                 Event event = new Event(Event.TYPE_GEOFENCE_ENTER, position.getDeviceId(), position.getId());
                 event.setGeofenceId(geofenceId);
                 events.put(event, position);
+                updateHomeDevice(1, position);
             }
         }
         return events;
+    }
+
+    private void updateHomeDevice(int isHome, Position position){
+        Device device1 = Context.getDeviceManager().getById(position.getDeviceId());
+        if(!String.valueOf(Context.getDeviceManager().getById(position.getDeviceId()).getHome()).isEmpty()){
+            device1.setIsHome(isHome);
+            try {
+                Context.getDeviceManager().updateItem(device1);
+            }catch (SQLException e){
+                LOGGER.warn(e.getMessage());
+            }
+        }else{
+            LOGGER.error("No Home set for device "+device1.getName());
+        }
     }
 
 }

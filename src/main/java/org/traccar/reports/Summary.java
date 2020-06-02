@@ -21,17 +21,33 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
+import com.itextpdf.io.font.constants.StandardFonts;
+import com.itextpdf.kernel.colors.ColorConstants;
+import com.itextpdf.kernel.events.PdfDocumentEvent;
+import com.itextpdf.kernel.font.PdfFont;
+import com.itextpdf.kernel.font.PdfFontFactory;
+import com.itextpdf.kernel.geom.PageSize;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.element.Text;
 import org.jxls.util.JxlsHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.Context;
 import org.traccar.model.Position;
 import org.traccar.reports.model.SummaryReport;
 
 public final class Summary {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(Summary.class);
     private Summary() {
     }
 
@@ -113,5 +129,80 @@ public final class Summary {
             JxlsHelper.getInstance().setUseFastFormulaProcessor(false)
                     .processTemplate(inputStream, outputStream, jxlsContext);
         }
+    }
+
+    public static void getPdf(OutputStream outputStream,
+                              long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
+                              Date from, Date to) throws SQLException, IOException {
+        ReportUtils.checkPeriodLimit(from, to);
+        Collection<SummaryReport> summaries = getObjects(userId, deviceIds, groupIds, from, to);
+        PdfDocument pdf = new PdfDocument(new PdfWriter(outputStream));
+        Document document = new Document(pdf, PageSize.A4);
+        document.getPdfDocument().setDefaultPageSize(PageSize.A4.rotate());
+        pdf.addEventHandler(PdfDocumentEvent.START_PAGE,
+                new ReportUtils.TextFooterEventHandler(document, userId));
+
+        PdfFont font = PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD);
+        //title
+        SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm");
+        SimpleDateFormat repDate = new SimpleDateFormat("yyyy-MM-dd");
+        Text title =
+                new Text("Report Type: Summary").setFont(font).setFontSize(16f);
+        Text dates = new Text("Period: "+ repDate.format(from) +
+                " to " + repDate.format(to)).setFont(font).setFontSize(14f);
+        Paragraph tit = new Paragraph().add(title);
+        Paragraph date = new Paragraph().add(dates);
+        document.add(tit);
+        document.add(date);
+        //body
+        LOGGER.warn("Creating pdf...");
+        Table table = new Table(5).useAllAvailableWidth();
+        Cell deviceDate = new Cell().add(new Paragraph("Date"))
+                .setBackgroundColor(ColorConstants.BLUE)
+                .setFontColor(ColorConstants.WHITE);
+        Cell deviceDevice = new Cell().add(new Paragraph("Device"))
+                .setBackgroundColor(ColorConstants.BLUE)
+                .setFontColor(ColorConstants.WHITE);
+        Cell deviceDistance = new Cell().add(new Paragraph("Distance"))
+                .setBackgroundColor(ColorConstants.BLUE)
+                .setFontColor(ColorConstants.WHITE);
+        Cell deviceTopSpeed = new Cell().add(new Paragraph("Top Speed"))
+                .setBackgroundColor(ColorConstants.BLUE)
+                .setFontColor(ColorConstants.WHITE);
+        Cell deviceDriver = new Cell().add(new Paragraph("Driver"))
+                .setBackgroundColor(ColorConstants.BLUE)
+                .setFontColor(ColorConstants.WHITE);
+        table.addCell(deviceDate);
+        table.addCell(deviceDevice);
+        table.addCell(deviceDistance);
+        table.addCell(deviceTopSpeed);
+        table.addCell(deviceDriver);
+        for(SummaryReport report: summaries){
+            LOGGER.warn("populating table...");
+            Cell sumdate = new Cell().add(new Paragraph(repDate.format(report.getSumDate())));
+            Cell device = new Cell().add(new Paragraph(report.getDeviceName()));
+            Cell distance = new Cell().add(new Paragraph(String.format("%.2f",
+                    report.getDistance()*0.001)+"km"));
+            Cell topSpeed = new Cell().add(new Paragraph(Math.round(report
+                    .getMaxSpeed()*1.852)+"km/h"));
+            Cell driver;
+            try {
+                driver = new Cell().add(new Paragraph(report.getDriverName()));
+            }catch (Exception ex){
+                LOGGER.warn("Exception: "+ex);
+                driver = new Cell().add(new Paragraph(""));
+            }
+            //add cells to table
+            table.addCell(sumdate);
+            table.addCell(device);
+            table.addCell(distance);
+            table.addCell(topSpeed);
+            table.addCell(driver);
+
+        }
+        document.add(table);
+        LOGGER.warn("closing...");
+        //close pdf
+        document.close();
     }
 }

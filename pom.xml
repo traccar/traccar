@@ -19,6 +19,25 @@
     </properties>
 
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/com.itextpdf/itext7-core -->
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>itext7-core</artifactId>
+            <version>7.1.9</version>
+            <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>4.1.1</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>4.1.1</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.poi/poi -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

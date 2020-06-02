@@ -28,9 +28,7 @@ import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.CellTower;
-import org.traccar.model.Network;
-import org.traccar.model.Position;
+import org.traccar.model.*;
 
 import java.net.SocketAddress;
 import java.util.regex.Matcher;
@@ -267,6 +265,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             position.set("fuel2", parser.nextDouble());
             position.set(Position.PREFIX_TEMP + 1, parser.nextInt());
 
+            getDriver(position);
         }
 
         return position;
@@ -303,6 +302,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_BATTERY, parser.nextDouble(0));
         position.set(Position.KEY_DTCS, parser.next().replace(',', ' ').trim());
 
+        getDriver(position);
         return position;
     }
 
@@ -343,6 +343,8 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_CHARGE, parser.nextInt() > 0);
         position.set("error", parser.next());
 
+        getDriver(position);
+
         return position;
     }
 
@@ -364,6 +366,9 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceId(deviceSession.getDeviceId());
 
             getLastLocation(position, null);
+
+            /** Get Driver from database**/
+            getDriver(position);
 
             try {
                 position.set(Position.KEY_IMAGE, Context.getMediaManager().writeFile(imei, photo, "jpg"));
@@ -416,6 +421,17 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             return decodeAlternative(channel, remoteAddress, sentence);
         } else {
             return decodeRegular(channel, remoteAddress, sentence);
+        }
+    }
+
+    private void getDriver(Position position){
+        try {
+            long deviceId = position.getDeviceId();
+            Device device = Context.getIdentityManager().getById(deviceId);
+            Driver driver = Context.getDriversManager().getById(device.getDriveruniqueid());
+            position.setDriverUniqueId(driver.getUniqueId());
+        }catch (Exception ex){
+            ex.printStackTrace();
         }
     }
 

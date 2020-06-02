@@ -37,4 +37,32 @@ public class Driver extends ExtendedModel {
     public void setUniqueId(String uniqueId) {
         this.uniqueId = uniqueId;
     }
+
+    private byte[] photoIdFront;
+    private byte[] photoIdBack;
+    private String phone;
+
+    public byte[] getPhotoIdFront() {
+        return photoIdFront;
+    }
+
+    public void setPhotoIdFront(byte[] photoIdFront) {
+        this.photoIdFront = photoIdFront;
+    }
+
+    public byte[] getPhotoIdBack() {
+        return photoIdBack;
+    }
+
+    public void setPhotoIdBack(byte[] photoIdBack) {
+        this.photoIdBack = photoIdBack;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
 }

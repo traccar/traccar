@@ -149,4 +149,30 @@ public class Device extends GroupedModel {
         this.disabled = disabled;
     }
 
+    private long driveruniqueid;
+
+    public void setDriveruniqueid(long id){ this.driveruniqueid = id;}
+
+    public long getDriveruniqueid(){ return this.driveruniqueid;}
+
+    private long home;
+
+    public long getHome() {
+        return home;
+    }
+
+    public void setHome(long home) {
+        this.home = home;
+    }
+
+    private int isHome;
+
+    public int getIsHome() {
+        return isHome;
+    }
+
+    public void setIsHome(int ishome) {
+        this.isHome = ishome;
+    }
+
 }

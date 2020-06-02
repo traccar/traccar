@@ -16,6 +16,8 @@
  */
 package org.traccar.reports.model;
 
+import java.util.Date;
+
 public class SummaryReport extends BaseReport {
 
     private long engineHours; // milliseconds
@@ -30,5 +32,35 @@ public class SummaryReport extends BaseReport {
 
     public void addEngineHours(long engineHours) {
         this.engineHours += engineHours;
+    }
+
+    private String driverUniqueId;
+
+    public String getDriverUniqueId() {
+        return driverUniqueId;
+    }
+
+    public void setDriverUniqueId(String driverUniqueId) {
+        this.driverUniqueId = driverUniqueId;
+    }
+
+    private String driverName;
+
+    public String getDriverName() {
+        return driverName;
+    }
+
+    public void setDriverName(String driverName) {
+        this.driverName = driverName;
+    }
+
+    private Date date;
+
+    public Date getSumDate() {
+        return date;
+    }
+
+    public void setSumDate(Date date) {
+        this.date = date;
     }
 }

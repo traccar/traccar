@@ -42,14 +42,11 @@ import org.traccar.api.BaseResource;
 import org.traccar.helper.DateUtil;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
-import org.traccar.reports.Events;
-import org.traccar.reports.Summary;
-import org.traccar.reports.Trips;
+import org.traccar.reports.*;
+import org.traccar.reports.model.DriverReport;
 import org.traccar.reports.model.StopReport;
 import org.traccar.reports.model.SummaryReport;
 import org.traccar.reports.model.TripReport;
-import org.traccar.reports.Route;
-import org.traccar.reports.Stops;
 
 @Path("reports")
 @Produces(MediaType.APPLICATION_JSON)
@@ -59,7 +56,9 @@ public class ReportResource extends BaseResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReportResource.class);
 
     private static final String XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    private static final String PDF = "application/pdf";
     private static final String CONTENT_DISPOSITION_VALUE_XLSX = "attachment; filename=report.xlsx";
+    private static final String CONTENT_DISPOSITION_VALUE_PDF = "attachment; filename=report.pdf";
 
     private interface ReportExecutor {
         void execute(ByteArrayOutputStream stream) throws SQLException, IOException;
@@ -93,6 +92,34 @@ public class ReportResource extends BaseResource {
         }
     }
 
+    private Response executeReportPdf(
+            long userId, boolean mail, ReportExecutor executor) throws SQLException, IOException {
+        final ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        if (mail) {
+            new Thread(() -> {
+                try {
+                    executor.execute(stream);
+
+                    MimeBodyPart attachment = new MimeBodyPart();
+
+                    attachment.setFileName("report.pdf");
+                    attachment.setDataHandler(new DataHandler(new ByteArrayDataSource(
+                            stream.toByteArray(), "application/octet-stream")));
+
+                    Context.getMailManager().sendMessage(
+                            userId, "Report", "The report is in the attachment.", attachment);
+                } catch (SQLException | IOException | MessagingException e) {
+                    LOGGER.warn("Report failed", e);
+                }
+            }).start();
+            return Response.noContent().build();
+        } else {
+            executor.execute(stream);
+            return Response.ok(stream.toByteArray())
+                    .header(HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE_PDF).build();
+        }
+    }
+
     @Path("route")
     @GET
     public Collection<Position> getRoute(
@@ -109,8 +136,8 @@ public class ReportResource extends BaseResource {
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("from") String from, @QueryParam("to") String to, @QueryParam("mail") boolean mail)
             throws SQLException, IOException {
-        return executeReport(getUserId(), mail, stream -> {
-            Route.getExcel(stream, getUserId(), deviceIds, groupIds,
+        return executeReportPdf(getUserId(), mail, stream -> {
+            Route.getPdf(stream, getUserId(), deviceIds, groupIds,
                     DateUtil.parseDate(from), DateUtil.parseDate(to));
         });
     }
@@ -133,8 +160,8 @@ public class ReportResource extends BaseResource {
             @QueryParam("type") final List<String> types,
             @QueryParam("from") String from, @QueryParam("to") String to, @QueryParam("mail") boolean mail)
             throws SQLException, IOException {
-        return executeReport(getUserId(), mail, stream -> {
-            Events.getExcel(stream, getUserId(), deviceIds, groupIds, types,
+        return executeReportPdf(getUserId(), mail, stream -> {
+            Events.getPdf(stream, getUserId(), deviceIds, groupIds, types,
                     DateUtil.parseDate(from), DateUtil.parseDate(to));
         });
     }
@@ -155,8 +182,8 @@ public class ReportResource extends BaseResource {
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("from") String from, @QueryParam("to") String to, @QueryParam("mail") boolean mail)
             throws SQLException, IOException {
-        return executeReport(getUserId(), mail, stream -> {
-            Summary.getExcel(stream, getUserId(), deviceIds, groupIds,
+        return executeReportPdf(getUserId(), mail, stream -> {
+            Summary.getPdf(stream, getUserId(), deviceIds, groupIds,
                     DateUtil.parseDate(from), DateUtil.parseDate(to));
         });
     }
@@ -178,8 +205,8 @@ public class ReportResource extends BaseResource {
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("from") String from, @QueryParam("to") String to, @QueryParam("mail") boolean mail)
             throws SQLException, IOException {
-        return executeReport(getUserId(), mail, stream -> {
-            Trips.getExcel(stream, getUserId(), deviceIds, groupIds,
+        return executeReportPdf(getUserId(), mail, stream -> {
+            Trips.getPdf(stream, getUserId(), deviceIds, groupIds,
                     DateUtil.parseDate(from), DateUtil.parseDate(to));
         });
     }
@@ -201,8 +228,31 @@ public class ReportResource extends BaseResource {
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("from") String from, @QueryParam("to") String to, @QueryParam("mail") boolean mail)
             throws SQLException, IOException {
-        return executeReport(getUserId(), mail, stream -> {
-            Stops.getExcel(stream, getUserId(), deviceIds, groupIds,
+        return executeReportPdf(getUserId(), mail, stream -> {
+            Stops.getPdf(stream, getUserId(), deviceIds, groupIds,
+                    DateUtil.parseDate(from), DateUtil.parseDate(to));
+        });
+    }
+
+    @Path("drivers")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Collection<DriverReport> getDrivers(
+            @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
+            @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
+        return Driver.getObjects(getUserId(), deviceIds, groupIds,
+                DateUtil.parseDate(from), DateUtil.parseDate(to));
+    }
+
+    @Path("drivers")
+    @GET
+    @Produces(PDF)
+    public Response getDriversExcel(
+            @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
+            @QueryParam("from") String from, @QueryParam("to") String to, @QueryParam("mail") boolean mail)
+            throws SQLException, IOException {
+        return executeReportPdf(getUserId(), mail, stream -> {
+            Trips.getDriverPDF(stream, getUserId(), deviceIds, groupIds,
                     DateUtil.parseDate(from), DateUtil.parseDate(to));
         });
     }

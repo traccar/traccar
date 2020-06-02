@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+        logicalFilePath="changelog-4.9.1">
+
+    <changeSet author="author" id="changelog-4.9.1">
+
+        <addColumn tableName="tc_devices">
+            <column name="driveruniqueid" type="VARCHAR(11)"/>
+            <column name="home" type="INT"/>
+            <column name="ishome" type="BOOLEAN" defaultValueBoolean="false"/>
+        </addColumn>
+
+        <addColumn tableName="tc_positions">
+            <column name="driveruniqueid" type="VARCHAR(11)"/>
+        </addColumn>
+
+        <addColumn tableName="tc_drivers">
+            <column name="phone" type="VARCHAR(15)"/>
+            <column name="photoidfront" type="MEDIUMBLOB"/>
+            <column name="photoidback" type="MEDIUMBLOB"/>
+        </addColumn>
+
+        <addForeignKeyConstraint baseTableName="tc_positions" baseColumnNames="driveruniqueid"
+                                 constraintName="tc_drivers_fk" referencedTableName="tc_drivers"
+                                 referencedColumnNames="uniqueid"/>
+
+    </changeSet>
+
+</databaseChangeLog>

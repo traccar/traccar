@@ -149,4 +149,32 @@ public class TripReport extends BaseReport {
     public void setDriverName(String driverName) {
         this.driverName = driverName;
     }
+
+    private Date date;
+
+    public Date getTripDate() {
+        return date;
+    }
+
+    public void setTripDate(Date date) {
+        this.date = date;
+    }
+
+    private long idleTime;
+
+    public long getIdleTime() {
+        return idleTime;
+    }
+
+    public void setIdleTime(long idleTime) {
+        this.idleTime = idleTime;
+    }
+
+    private Date engineOn;
+    public void setEngineOnTime(Date engineOn){ this.engineOn = engineOn;}
+    public Date getEngineOnTime(){ return this.engineOn;}
+
+    private Date engineOff;
+    public void setEngineOffTime(Date engineOff){ this.engineOff = engineOff;}
+    public Date getEngineOffTime(){ return this.engineOff;}
 }
