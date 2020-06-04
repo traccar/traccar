@@ -315,10 +315,16 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
                 }
                 break;
-            case 237:
-                position.set(Position.KEY_MOTION, readValue(buf, length, false) == 0);
+            case 239:
+                position.set(Position.KEY_IGNITION, readValue(buf, length, false) == 1);
                 break;
-            case 238:
+            case 240:
+                position.set(Position.KEY_MOTION, readValue(buf, length, false) == 1);
+                break;
+            case 241:
+                position.set(Position.KEY_OPERATOR, readValue(buf, length, false));
+                break;
+            case 253:
                 switch ((int) readValue(buf, length, false)) {
                     case 1:
                         position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
@@ -332,15 +338,6 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                     default:
                         break;
                 }
-                break;
-            case 239:
-                position.set(Position.KEY_IGNITION, readValue(buf, length, false) == 1);
-                break;
-            case 240:
-                position.set(Position.KEY_MOTION, readValue(buf, length, false) == 1);
-                break;
-            case 241:
-                position.set(Position.KEY_OPERATOR, readValue(buf, length, false));
                 break;
             default:
                 position.set(Position.PREFIX_IO + id, readValue(buf, length, false));
