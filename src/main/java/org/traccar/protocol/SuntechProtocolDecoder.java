@@ -339,16 +339,19 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                 break;
             case "UEX":
                 int remaining = Integer.parseInt(values[index++]);
+                double totalFuel = 0;
                 while (remaining > 0) {
                     String attribute = values[index++];
                     if (attribute.startsWith("CabAVL")) {
                         String[] data = attribute.split(",");
                         double fuel1 = Double.parseDouble(data[2]);
                         if (fuel1 > 0) {
+                            totalFuel += fuel1;
                             position.set("fuel1", fuel1);
                         }
                         double fuel2 = Double.parseDouble(data[3]);
                         if (fuel2 > 0) {
+                            totalFuel += fuel2;
                             position.set("fuel2", fuel2);
                         }
                     } else {
@@ -363,7 +366,9 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                                     position.set(Position.PREFIX_TEMP + pair[0].charAt(2), Integer.parseInt(value, 16));
                                     break;
                                 case 'N':
-                                    position.set("fuel" + pair[0].charAt(2), Integer.parseInt(value, 16));
+                                    int fuel = Integer.parseInt(value, 16);
+                                    totalFuel += fuel;
+                                    position.set("fuel" + pair[0].charAt(2), fuel);
                                     break;
                                 case 'Q':
                                     position.set("drivingQuality", Integer.parseInt(value, 16));
@@ -374,6 +379,9 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                         }
                     }
                     remaining -= attribute.length() + 1;
+                }
+                if (totalFuel > 0) {
+                    position.set(Position.KEY_FUEL_LEVEL, totalFuel);
                 }
                 index += 1; // checksum
                 break;
