@@ -287,5 +287,6 @@
     <entry key='pst.port'>5207</entry>
     <entry key='dingtek.port'>5208</entry>
     <entry key='wli.port'>5209</entry>
+    <entry key='niot.port'>5210</entry>
 
 </properties>
