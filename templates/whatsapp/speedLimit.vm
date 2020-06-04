@@ -1,0 +1,5 @@
+#set($maxSpeed = $device.attributes["speedLimit"] * 1.852)
+ℹ️ *Velocidade máxima alterada*
+
+```Veículo...:``` *$device.name*
+```Velocidade:``` *$numberTool.format("0.0 km/h", $maxSpeed)*

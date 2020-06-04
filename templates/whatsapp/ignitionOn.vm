@@ -1,0 +1,6 @@
+▶️ *Ignição ligada*
+
+```Veículo.:``` *$device.name*
+```Data....:``` *$dateTool.format("dd/MM/yy HH:mm:ss", $event.serverTime, $locale, $timezone)*
+
+https://maps.google.com/?q=$position.latitude,$position.longitude

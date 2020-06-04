@@ -33,6 +33,7 @@ import org.traccar.notificators.NotificatorSms;
 import org.traccar.notificators.NotificatorWeb;
 import org.traccar.notificators.NotificatorTelegram;
 import org.traccar.notificators.NotificatorPushover;
+import org.traccar.notificators.NotificatorWhatsapp;
 
 public final class NotificatorManager {
 
@@ -64,6 +65,9 @@ public final class NotificatorManager {
                     break;
                 case "pushover":
                     defaultNotificator = NotificatorPushover.class.getCanonicalName();
+                    break;
+                case "whatsapp":
+                    defaultNotificator = NotificatorWhatsapp.class.getCanonicalName();
                     break;
                 default:
                     break;

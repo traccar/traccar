@@ -1,0 +1,11 @@
+#if($notify)
+ℹ️ *Notificações ativadas*
+#else
+ℹ️ *Notificações desativadas*
+#end
+
+#if($secondary)
+WhatsApp secundário
+#else
+WhatsApp primário
+#end

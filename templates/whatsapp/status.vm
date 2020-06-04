@@ -1,0 +1,13 @@
+#set($speedValue = $position.speed * 1.852)
+#set($speedString = $numberTool.format("0.0 km/h", $speedValue))
+ℹ️ *$device.name*
+
+```Data atual: ``` *$dateTool.format("dd/MM/yy HH:mm:ss", $device.lastUpdate, $locale, $timezone)*
+```Data GPS..: ``` *$dateTool.format("dd/MM/yy HH:mm:ss", $position.deviceTime, $locale, $timezone)*
+```Velocidade: ``` *$speedString*
+#if($position.attributes["totalDistance"])
+#set($distance = $position.attributes["totalDistance"] /1000)
+```Distância.: ``` *$numberTool.format("0.00 km", $distance)*
+#end
+
+https://maps.google.com/?q=$position.latitude,$position.longitude

@@ -40,7 +40,6 @@ public class SuntechFrameDecoder extends BaseFrameDecoder {
             }
 
         } else {
-
             int delimiterIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '\r');
             while (delimiterIndex > 0) {
                 if (delimiterIndex + 1 < buf.writerIndex() && buf.getByte(delimiterIndex + 1) == '\n') {

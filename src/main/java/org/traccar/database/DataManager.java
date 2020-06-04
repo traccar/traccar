@@ -474,5 +474,12 @@ public class DataManager {
                 .setLong("id", entityId)
                 .executeUpdate();
     }
+    
+    public User getUserByAttribute(String attribute, String value) throws SQLException{
+        return QueryBuilder.create(dataSource, getQuery("database.selectUserByAttribute"))
+                .setString("attribute", attribute)
+                .setString("value", value)
+                .executeQuerySingle(User.class);
+    }
 
 }

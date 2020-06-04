@@ -1,0 +1,25 @@
+#if($position.getString("alarm") == "powerCut")
+🔋 *Bateria Desconectada*
+
+*COMO FUNCIONA*
+Sempre que o rastreador ficar sem energia, irá alertar. Isso é importante pois ajuda a identificar ações suspeitas.
+
+*Seu veiculo está em manutenção?*
+Se estiver na oficina ou você mesmo tiver desconectado a bateria, está tudo bem. Reconectou, volta a funcionar. 
+
+*NÃO está em manutenção!*
+- A bateria do seu veículo pode não estar mais segurando carga ou o alternador não estar carregando como deveria. Neste caso os alertas normalmente chegam na hora que dá partida. Uma bateria dura em média 2 anos, então verifique se não é hora de trocar!
+- Se é uma moto e você desligou na chavinha, ele alerta que desconectou. É normal.
+
+*Não é nenhum destes casos?*
+Envie SUPORTE que vamos analisar!
+#elseif($position.getString("alarm") == "sos")
+🆘 *Pedido de ajuda*
+#else
+⚠️ *Alerta: $position.getString("alarm").toUpperCase()*
+#end
+
+```Veículo.: ``` *$device.name*
+```Data....: ``` *$dateTool.format("dd/MM/yy HH:mm:ss", $event.serverTime, $locale, $timezone)*
+
+https://maps.google.com/?q=$position.latitude,$position.longitude

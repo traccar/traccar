@@ -1,0 +1,2 @@
+⏹️ Desligou: $device.name
+Horário: $dateTool.format("dd/MM/yy HH:mm:ss", $event.serverTime, $locale, $timezone)

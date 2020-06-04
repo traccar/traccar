@@ -20,6 +20,7 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.Locale;
+import java.util.Map;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -29,6 +30,7 @@ import org.apache.velocity.tools.generic.NumberTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -100,6 +102,18 @@ public final class NotificationFormatter {
 
     public static String formatShortMessage(long userId, Event event, Position position) {
         return formatMessage(null, userId, event, position, "short");
+    }
+
+    public static String formatMessage(long userId, Event event, Position position, String path) {
+        return formatMessage(null, userId, event, position, path);
+    }
+
+    public static String formatMessage(Map params, String template, String path) {
+        VelocityContext velocityContext = new VelocityContext(params);
+        Template temp = getTemplate(new Event(template, 0), path);
+        StringWriter writer = new StringWriter();
+        temp.merge(velocityContext, writer);
+        return writer.toString();
     }
 
     private static String formatMessage(VelocityContext vc, Long userId, Event event, Position position,

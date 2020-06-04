@@ -18,6 +18,8 @@ ext {
 
 sourceCompatibility = "1.8"
 compileJava.options.encoding = "UTF-8"
+compileTestJava.options.encoding = 'UTF-8'
+javadoc.options.encoding = 'UTF-8'
 
 checkstyle {
     toolVersion = "8.26"
@@ -94,4 +96,11 @@ jar {
                 "Implementation-Version": "4.8",
                 "Class-Path": configurations.runtimeClasspath.files.collect { "lib/$it.name" }.join(" "))
     }
+}
+
+task(debug, dependsOn: jar, type: JavaExec) {
+    main = 'org.traccar.Main'
+    classpath = sourceSets.main.runtimeClasspath
+    args './debug.xml'
+    debug true
 }

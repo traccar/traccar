@@ -57,6 +57,14 @@ public class IgnitionEventHandler extends BaseEventHandler {
                     result = Collections.singletonMap(
                             new Event(Event.TYPE_IGNITION_OFF, position.getDeviceId(), position.getId()), position);
                 }
+            } else {
+                if (ignition) {
+                    result = Collections.singletonMap(
+                            new Event(Event.TYPE_IGNITION_ON, position.getDeviceId(), position.getId()), position);
+                } else {
+                    result = Collections.singletonMap(
+                            new Event(Event.TYPE_IGNITION_OFF, position.getDeviceId(), position.getId()), position);
+                }
             }
         }
         return result;

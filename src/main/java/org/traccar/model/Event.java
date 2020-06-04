@@ -60,6 +60,10 @@ public class Event extends Message {
     public static final String TYPE_TEXT_MESSAGE = "textMessage";
 
     public static final String TYPE_DRIVER_CHANGED = "driverChanged";
+    
+    public static final String TYPE_DEVICE_STATUS = "status";
+    
+    public static final String TYPE_DEVICE_FOLLOW = "follow";
 
     private Date serverTime;
 
