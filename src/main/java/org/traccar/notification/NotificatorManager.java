@@ -33,6 +33,7 @@ import org.traccar.notificators.NotificatorSms;
 import org.traccar.notificators.NotificatorWeb;
 import org.traccar.notificators.NotificatorTelegram;
 import org.traccar.notificators.NotificatorPushover;
+import org.traccar.notificators.NotificatorKafka;
 
 public final class NotificatorManager {
 
@@ -65,6 +66,8 @@ public final class NotificatorManager {
                 case "pushover":
                     defaultNotificator = NotificatorPushover.class.getCanonicalName();
                     break;
+                case "kafka":
+                    defaultNotificator = NotificatorKafka.class.getCanonicalName();
                 default:
                     break;
             }
