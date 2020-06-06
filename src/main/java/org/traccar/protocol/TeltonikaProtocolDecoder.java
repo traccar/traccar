@@ -78,6 +78,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
     public static final int CODEC_8 = 0x08;
     public static final int CODEC_8_EXT = 0x8E;
     public static final int CODEC_12 = 0x0C;
+    public static final int CODEC_13 = 0x0D;
     public static final int CODEC_16 = 0x10;
 
     private void sendImageRequest(Channel channel, SocketAddress remoteAddress, long id, int offset, int size) {
@@ -598,7 +599,13 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceId(deviceSession.getDeviceId());
             position.setValid(true);
 
-            if (codec == CODEC_12) {
+            if (codec == CODEC_13) {
+                buf.readUnsignedByte(); // type
+                int length = buf.readInt() - 4;
+                getLastLocation(position, new Date(buf.readUnsignedInt() * 1000));
+                position.set(Position.KEY_RESULT,
+                        buf.readCharSequence(length, StandardCharsets.US_ASCII).toString().trim());
+            } else if (codec == CODEC_12) {
                 decodeSerial(channel, remoteAddress, position, buf);
             } else {
                 decodeLocation(position, buf, codec);

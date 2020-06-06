@@ -16,6 +16,12 @@ public class TeltonikaProtocolDecoderTest extends ProtocolTest {
                 "000F313233343536373839303132333435"));
 
         verifyPositions(decoder, false, binary(
+                "000000000000001C0D01050000001056E924222347455420444154414F524445520D0A0100004990"));
+
+        verifyPositions(decoder, false, binary(
+                "00000000000000170D01050000000F0000016C0A81C320676574696E666F0100006855"));
+
+        verifyPositions(decoder, false, binary(
                 "000000000000004f0c01060000004755555555777730362e343b30342e323b30302e303b30302e303b30302e303b30302e303b30302e303b30302e303b30312e333b30302e303b31302e373b30302e303b5353530d0a010000e371"));
 
         verifyPositions(decoder, false, binary(
