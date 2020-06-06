@@ -253,6 +253,16 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         if (hasLength) {
             length = buf.readUnsignedByte();
             if (length == 0) {
+                boolean zeroedData = true;
+                for (int i = buf.readerIndex() + 9; i < buf.readerIndex() + 45 && i < buf.writerIndex(); i++) {
+                    if (buf.getByte(i) != 0) {
+                        zeroedData = false;
+                        break;
+                    }
+                }
+                if (zeroedData) {
+                    buf.skipBytes(Math.min(buf.readableBytes(), 45));
+                }
                 return false;
             }
         }
