@@ -19,11 +19,7 @@ ext {
 
 sourceCompatibility = "1.8"
 compileJava.options.encoding = "UTF-8"
-
-application {
-    mainModule = 'tracker-server.main'
-    mainClass = 'org.traccar.Main'
-}
+mainClassName = "org.traccar.Main"
 
 checkstyle {
     toolVersion = "8.26"
