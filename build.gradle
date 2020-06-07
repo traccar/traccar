@@ -2,6 +2,7 @@ plugins {
     id "java"
     id "checkstyle"
     id "com.google.protobuf" version "0.8.11"
+    id 'application'
 }
 
 repositories {
@@ -18,6 +19,11 @@ ext {
 
 sourceCompatibility = "1.8"
 compileJava.options.encoding = "UTF-8"
+
+application {
+    mainModule = 'tracker-server.main'
+    mainClass = 'org.traccar.Main'
+}
 
 checkstyle {
     toolVersion = "8.26"
