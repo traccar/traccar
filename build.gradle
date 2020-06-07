@@ -2,7 +2,7 @@ plugins {
     id "java"
     id "checkstyle"
     id "com.google.protobuf" version "0.8.11"
-    id 'application'
+    id "application"
 }
 
 repositories {
