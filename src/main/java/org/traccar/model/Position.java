@@ -50,6 +50,7 @@ public class Position extends Message {
     // The preferred units of measure are specified in the comment for each.
     public static final String KEY_POWER = "power"; // volts
     public static final String KEY_BATTERY = "battery"; // volts
+    public static final String KEY_BATTERY_CURRENT = "batteryCurrent"; // amps
     public static final String KEY_BATTERY_LEVEL = "batteryLevel"; // percentage
     public static final String KEY_FUEL_LEVEL = "fuel"; // liters
     public static final String KEY_FUEL_USED = "fuelUsed"; // liters
@@ -93,6 +94,10 @@ public class Position extends Message {
     public static final String KEY_RESULT = "result";
 
     public static final String KEY_DRIVER_UNIQUE_ID = "driverUniqueId";
+
+    public static final String KEY_CNG_STATUS = "cngStatus"; // in use
+    public static final String KEY_CNG_USED = "cngUsed"; // kilograms
+    public static final String KEY_CNG_LEVEL = "cngLevel"; // percentage
 
     // Start with 1 not 0
     public static final String PREFIX_TEMP = "temp";
@@ -141,6 +146,7 @@ public class Position extends Message {
     public static final String ALARM_FUEL_LEAK = "fuelLeak";
     public static final String ALARM_TAMPERING = "tampering";
     public static final String ALARM_REMOVING = "removing";
+
 
     public Position() {
     }
