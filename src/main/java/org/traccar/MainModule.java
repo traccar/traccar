@@ -43,6 +43,7 @@ import org.traccar.geocoder.MapQuestGeocoder;
 import org.traccar.geocoder.MapmyIndiaGeocoder;
 import org.traccar.geocoder.NominatimGeocoder;
 import org.traccar.geocoder.OpenCageGeocoder;
+import org.traccar.geocoder.AutoNaviGeocoder;
 import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.geolocation.GoogleGeolocationProvider;
 import org.traccar.geolocation.MozillaGeolocationProvider;
@@ -160,6 +161,8 @@ public class MainModule extends AbstractModule {
                     return new MapQuestGeocoder(url, key, cacheSize, addressFormat);
                 case "opencage":
                     return new OpenCageGeocoder(url, key, cacheSize, addressFormat);
+                case "autonavi":
+                    return new AutoNaviGeocoder(url, key, cacheSize, addressFormat);
                 case "bingmaps":
                     return new BingMapsGeocoder(url, key, cacheSize, addressFormat);
                 case "factual":
