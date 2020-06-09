@@ -225,7 +225,13 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
             buf.skipBytes(16);
         }
         if (BitUtil.check(mask, 8)) {
-            buf.skipBytes(40); // temperature sensors
+            for (int i = 1; i <= 4; i++) {
+                int temperature = buf.readUnsignedShortLE();
+                if (temperature > 0) {
+                    position.set(Position.PREFIX_TEMP + i, temperature * 0.1 - 273);
+                }
+                buf.skipBytes(8);
+            }
         }
         if (BitUtil.check(mask, 9)) {
             position.set("driver1", buf.readCharSequence(16, StandardCharsets.US_ASCII).toString().trim());
