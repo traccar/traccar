@@ -33,6 +33,7 @@ import org.traccar.geocoder.AddressFormat;
 import org.traccar.geocoder.BanGeocoder;
 import org.traccar.geocoder.BingMapsGeocoder;
 import org.traccar.geocoder.FactualGeocoder;
+import org.traccar.geocoder.GeoPortailGeocoder;
 import org.traccar.geocoder.GeocodeFarmGeocoder;
 import org.traccar.geocoder.GeocodeXyzGeocoder;
 import org.traccar.geocoder.Geocoder;
@@ -174,6 +175,8 @@ public class MainModule extends AbstractModule {
                     return new HereGeocoder(url, id, key, language, cacheSize, addressFormat);
                 case "mapmyindia":
                     return new MapmyIndiaGeocoder(url, key, cacheSize, addressFormat);
+                case "geoportail":
+                    return new GeoPortailGeocoder(url, cacheSize, addressFormat);
                 default:
                     return new GoogleGeocoder(key, language, cacheSize, addressFormat);
             }

@@ -1,16 +1,25 @@
 package org.traccar.geocoder;
 
-import java.util.Locale;
-
 import org.junit.Ignore;
 import org.junit.Test;
+
+import java.util.Locale;
 
 import static org.junit.Assert.assertEquals;
 
 public class GeocoderTest {
 
+
     static {
         Locale.setDefault(Locale.US);
+    }
+
+    @Ignore
+    @Test
+    public void testGeoPortail() {
+        Geocoder geocoder = new GeoPortailGeocoder(null, 0, new AddressFormat());
+        String address = geocoder.getAddress(49.546163, 5.857525, null);
+        assertEquals("10 Rue René Putzeys, 4891, Lamadelaine, LU", address);
     }
 
     @Ignore
