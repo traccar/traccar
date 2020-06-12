@@ -95,10 +95,6 @@ public class Position extends Message {
 
     public static final String KEY_DRIVER_UNIQUE_ID = "driverUniqueId";
 
-    public static final String KEY_CNG_STATUS = "cngStatus"; // in use
-    public static final String KEY_CNG_USED = "cngUsed"; // kilograms
-    public static final String KEY_CNG_LEVEL = "cngLevel"; // percentage
-
     // Start with 1 not 0
     public static final String PREFIX_TEMP = "temp";
     public static final String PREFIX_ADC = "adc";

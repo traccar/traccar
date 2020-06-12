@@ -272,15 +272,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_RPM, readValue(buf, length, false));
                 break;
             case 90:
-                long value=readValue(buf, length, false);
-                position.set(Position.KEY_DOOR, value);
-                position.set("dFrontLeft", (BitUtil.check(value, 8)));
-                position.set("dFrontRight", (BitUtil.check(value, 9)));
-                position.set("dRearLeft", (BitUtil.check(value, 10)));
-                position.set("dRearRight", (BitUtil.check(value, 11)));
-                position.set("dHoodOpen", (BitUtil.check(value, 12)));
-                position.set("dTrunkOpen", (BitUtil.check(value, 13)));
-                break;
+                position.set(Position.KEY_DOOR, readValue(buf, length, false));
             case 110:
                 position.set(Position.KEY_FUEL_CONSUMPTION, readValue(buf, length, true) * 0.1);
                 break;
@@ -319,14 +311,17 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             case 199:
                 position.set(Position.KEY_ODOMETER_TRIP, readValue(buf, length, false));
                 break;
+            case 200:
+                position.set("sleepMode", readValue(buf, length, false));
+                break;
             case 232:
-                position.set(Position.KEY_CNG_STATUS, readValue(buf,length,false) == 1); // CNG Status 1=driving on CNG
+                position.set("cngStatus", readValue(buf,length,false) == 1); // CNG Status 1=driving on CNG
                 break;
             case 233:
-                position.set(Position.KEY_CNG_USED, readValue(buf,length,false) * 0.1); // CNG Used in KG
+                position.set("cngUsed", readValue(buf,length,false) * 0.1); // CNG Used in KG
                 break;
             case 234:
-                position.set(Position.KEY_CNG_LEVEL, readValue(buf,length,false) * 0.1); // CNG Level in %
+                position.set("cngLevel", readValue(buf,length,false) * 0.1); // CNG Level in %
                 break;
             case 235:
                 position.set("oilLevel", readValue(buf, length, false));
@@ -344,6 +339,26 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 break;
             case 241:
                 position.set(Position.KEY_OPERATOR, readValue(buf, length, false));
+                break;
+            case 246:
+                if (readValue(buf, length, false) == 1) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_TOW);
+                }
+                break;
+            case 247:
+                if (readValue(buf, length, false) >= 1) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_ACCIDENT);
+                }
+                break;
+            case 249:
+                if (readValue(buf, length, false) == 1) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_JAMMING);
+                }
+                break;
+            case 252:
+                if (readValue(buf, length, false) == 1) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
+                }
                 break;
             case 253:
                 switch ((int) readValue(buf, length, false)) {
