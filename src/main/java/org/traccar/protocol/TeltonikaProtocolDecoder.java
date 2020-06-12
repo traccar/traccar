@@ -236,8 +236,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_BATTERY, readValue(buf, length, false) * 0.001);
                 break;
             case 68:
-                 //Battery current in A  * 0.001
-                position.set(Position.KEY_BATTERY_CURRENT, readValue(buf,length,false) * 0.001);
+                position.set("batteryCurrent", readValue(buf, length,false) * 0.001);
                 break;
             case 69:
                 position.set("gpsStatus", readValue(buf, length, false));
@@ -257,7 +256,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set("workMode", readValue(buf, length, false));
                 break;
             case 81:
-                position.set(Position.KEY_OBD_SPEED, UnitsConverter.knotsFromKph(readValue(buf, length, false))); //speed OBD speed in km/h, saved in KNOTS?!?>
+                position.set(Position.KEY_OBD_SPEED, UnitsConverter.knotsFromKph(readValue(buf, length, false)));
                 break;
             case 82:
                 position.set(Position.KEY_THROTTLE, readValue(buf, length, false));
@@ -273,6 +272,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 break;
             case 90:
                 position.set(Position.KEY_DOOR, readValue(buf, length, false));
+                break;
             case 110:
                 position.set(Position.KEY_FUEL_CONSUMPTION, readValue(buf, length, true) * 0.1);
                 break;
@@ -315,13 +315,13 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set("sleepMode", readValue(buf, length, false));
                 break;
             case 232:
-                position.set("cngStatus", readValue(buf,length,false) == 1); // CNG Status 1=driving on CNG
+                position.set("cngStatus", readValue(buf, length, false) == 1);
                 break;
             case 233:
-                position.set("cngUsed", readValue(buf,length,false) * 0.1); // CNG Used in KG
+                position.set("cngUsed", readValue(buf, length, false) * 0.1);
                 break;
             case 234:
-                position.set("cngLevel", readValue(buf,length,false) * 0.1); // CNG Level in %
+                position.set("cngLevel", readValue(buf, length, false) * 0.1);
                 break;
             case 235:
                 position.set("oilLevel", readValue(buf, length, false));
