@@ -150,13 +150,7 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_VERSION_FW, firmware);
 
             ByteBuf content = Unpooled.buffer();
-            content.writeByte(battery);
-            content.writeByte(firmware);
-            content.writeByte(timezone);
             content.writeByte(interval);
-            if (length >= 7) {
-                content.writeByte(signal);
-            }
             sendResponse(channel, length, type, content);
 
             return position;
