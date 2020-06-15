@@ -266,6 +266,10 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
             sendResponse(channel, id, index, "TKQ");
 
+        } else if (type.equals("TKQ2")) {
+
+            sendResponse(channel, id, index, "TKQ2");
+
         } else if (type.equalsIgnoreCase("PULSE")
                 || type.equalsIgnoreCase("HEART")
                 || type.equalsIgnoreCase("BLOOD")
