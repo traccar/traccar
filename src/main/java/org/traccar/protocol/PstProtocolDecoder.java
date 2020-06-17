@@ -78,6 +78,7 @@ public class PstProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceTime(readDate(buf));
 
             int status = buf.readUnsignedByte();
+            position.set(Position.KEY_BLOCKED, BitUtil.check(status, 4));
             position.set(Position.KEY_IGNITION, BitUtil.check(status, 7));
             position.set(Position.KEY_STATUS, status);
 
@@ -100,6 +101,7 @@ public class PstProtocolDecoder extends BaseProtocolDecoder {
                         }
                         break;
                     case 0x10:
+                        position.setValid(true);
                         position.setFixTime(readDate(buf));
                         position.setLatitude(readCoordinate(buf));
                         position.setLongitude(readCoordinate(buf));
