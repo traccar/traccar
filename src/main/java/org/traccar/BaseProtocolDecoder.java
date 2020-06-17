@@ -35,7 +35,9 @@ import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 
 public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
@@ -224,30 +226,27 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
         if (statisticsManager != null) {
             statisticsManager.registerMessageReceived();
         }
-        Position position = null;
+        Set<Long> deviceIds = new HashSet<>();
         if (decodedMessage != null) {
             if (decodedMessage instanceof Position) {
-                position = (Position) decodedMessage;
+                deviceIds.add(((Position) decodedMessage).getDeviceId());
             } else if (decodedMessage instanceof Collection) {
                 Collection<Position> positions = (Collection) decodedMessage;
-                if (!positions.isEmpty()) {
-                    position = positions.iterator().next();
+                for (Position position : positions) {
+                    deviceIds.add(position.getDeviceId());
                 }
             }
         }
-        long deviceId = 0;
-        if (position != null) {
-            deviceId = position.getDeviceId();
-        } else {
+        if (deviceIds.isEmpty()) {
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
             if (deviceSession != null) {
-                deviceId = deviceSession.getDeviceId();
+                deviceIds.add(deviceSession.getDeviceId());
             }
         }
-        if (deviceId > 0) {
+        for (long deviceId : deviceIds) {
             connectionManager.updateDevice(deviceId, Device.STATUS_ONLINE, new Date());
+            sendQueuedCommands(channel, remoteAddress, deviceId);
         }
-        sendQueuedCommands(channel, remoteAddress, deviceId);
     }
 
     protected void sendQueuedCommands(Channel channel, SocketAddress remoteAddress, long deviceId) {
