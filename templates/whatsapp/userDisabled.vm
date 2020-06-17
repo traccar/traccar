@@ -1,0 +1,7 @@
+⚠️ *Usuário desativado*
+
+```Entrar em contato com o suporte!```
+
+#if($whatsappSupport)
+https://wa.me/$whatsappSupport
+#end

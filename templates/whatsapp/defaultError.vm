@@ -1,0 +1,7 @@
+⚠️ *Erro ao processar dados*
+
+```Entrar em contato com o suporte!```
+
+#if($suport)
+https://wa.me/$support
+#end

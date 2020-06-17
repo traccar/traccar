@@ -21,7 +21,7 @@
     <entry key='database.password'>123456</entry>
 
     <entry key='atrack.custom'>true</entry>
-    <entry key='notificator.whatsapp.url'>http://192.168.0.11:8083/sendText</entry>
+    <entry key='notificator.whatsapp.url'>http://192.168.0.44:8083/sendText</entry>
     
     <entry key='notificator.types'>web,mail,whatsapp</entry>
 </properties>

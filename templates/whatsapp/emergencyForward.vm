@@ -1,0 +1,22 @@
+🆘
+*COMUNICADO DE FURTO/ROUBO*
+
+```Veículo....:``` *$device.name*
+```Cliente....:``` *$user.name*
+
+```Origem ação: ```
+https://wa.me/$from
+```Contato 1..: ```
+https://wa.me/$user.attributes.whatsapp
+#if($user.attributes.whatsappSecondary)
+```Contato 2..: ```
+https://wa.me/$user.attributes.whatsappSecondary
+#end
+
+*Última localização*
+https://maps.google.com/?q=$position.latitude,$position.longitude
+
+#if($user.token)
+*Link para rastreamento*
+https://app.protectioncargyn.com.br/simple/index.html?token=$user.token
+#end

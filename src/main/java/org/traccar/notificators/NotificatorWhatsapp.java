@@ -17,8 +17,6 @@ package org.traccar.notificators;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

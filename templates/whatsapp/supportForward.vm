@@ -1,0 +1,7 @@
+❓ *Solicitação de suporte*
+
+```Cliente: ```$user.name
+```Login..: ```$user.login
+```Email..: ```$user.email
+
+https://wa.me/$from

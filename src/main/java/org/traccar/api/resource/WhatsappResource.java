@@ -5,26 +5,33 @@
  */
 package org.traccar.api.resource;
 
+import java.text.Normalizer;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.security.PermitAll;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.InvocationCallback;
 import javax.ws.rs.core.MediaType;
 import org.apache.velocity.tools.generic.NumberTool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.Context;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+import org.traccar.model.Server;
 import org.traccar.model.User;
 import org.traccar.notification.NotificationFormatter;
 
@@ -33,7 +40,8 @@ import org.traccar.notification.NotificationFormatter;
 @Consumes(MediaType.APPLICATION_JSON)
 public class WhatsappResource {
 
-    final private List<String> commands = Arrays.asList("LOCALIZAR", "SEGUIR", "BLOQUEAR", "DESBLOQUEAR", "VELOCIDADE", "SILENCIAR", "NOTIFICAR", "SUPORTE");
+    private static final List<String> commands = Arrays.asList("LOCALIZAR", "EMERGENCIA", "SEGUIR", "BLOQUEAR", "DESBLOQUEAR", "VELOCIDADE", "SILENCIAR", "NOTIFICAR", "SUPORTE", "CANCELAR");
+    private static final Logger LOGGER = LoggerFactory.getLogger(WhatsappResource.class);
 
     @POST
     @PermitAll
@@ -41,41 +49,61 @@ public class WhatsappResource {
     public String message(Map map) {
         try {
             if (map == null || map.get("from") == null || map.get("body") == null) {
-                return "*Atenção*\nParametros incorretos de sistema. Entre em contato com o administrador.";
+                return NotificationFormatter.formatMessage(null, "defaultError", "whatsapp");
             }
 
             String from = map.get("from").toString().split("@")[0];
+            Map mapParams = new HashMap();
+            mapParams.put("from", from);
+
+            Server server = Context.getDataManager().getServer();
+            String support = server.getString("whatsappSupport");
 
             User user = Context.getDataManager().getUserByAttribute("whatsapp", from);
             if (user == null) {
-                return "*Atenção!*\nNenhum usuário cadastrado com esse número.";
+                return NotificationFormatter.formatMessage(null, "userNotFound", "whatsapp");
             }
+
+            if (user.getString("whatsappSupport") != null && !user.getString("whatsappSupport").isEmpty()) {
+                support = server.getString("whatsappSupport");
+            }
+
+            mapParams.put("whatsappSupport", support);
+
+            if (user.getDisabled()) {
+                return NotificationFormatter.formatMessage(mapParams, "userDisabled", "whatsapp");
+            }
+
+            mapParams.put("user", user);
 
             List<String> messages = Arrays.asList(map.get("body").toString()
                     .split(" ")).stream().filter(s -> !s.trim().isEmpty())
-                    .map(s -> s.toUpperCase())
+                    .map((String s) -> {
+                        String nfdNormalizedString = Normalizer.normalize(s, Normalizer.Form.NFD);
+                        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+                        return pattern.matcher(nfdNormalizedString).replaceAll("").toUpperCase();
+                    })
                     .collect(Collectors.toList());
 
             if (messages.size() <= 0) {
-                return "*Nenhum comando informado*\n Entre em contato com o administrador do sistema.";
+                return NotificationFormatter.formatMessage(null, "commandNotFound", "whatsapp");
             }
 
             if (!commands.contains(messages.get(0))) {
-                return NotificationFormatter.formatMessage(null, "menu", "whatsapp");
+                return NotificationFormatter.formatMessage(mapParams, "menu", "whatsapp");
             }
 
             Set<Long> allUserItems = Context.getDeviceManager().getAllUserItems(user.getId());
 
             Collection<Device> devices = Context.getDeviceManager().getItems(allUserItems);
             if (devices == null || devices.isEmpty()) {
-                return "Nenhum rastreador cadastrado";
+                return NotificationFormatter.formatMessage(null, "deviceNotFound", "whatsapp");
             }
-
-            Map mapParams = new HashMap();
 
             switch (messages.get(0)) {
                 case "SUPORTE":
-                    return "SUPORTE";
+                    makeRequst(support, NotificationFormatter.formatMessage(mapParams, "supportForward", "whatsapp"));
+                    return NotificationFormatter.formatMessage(mapParams, "supportResponse", "whatsapp");
                 case "SILENCIAR":
                     if (messages.size() > 1 && messages.get(1) != null && messages.get(1).contains("SECUN")) {
                         mapParams.put("secondary", true);
@@ -124,60 +152,60 @@ public class WhatsappResource {
             }
 
             if (device == null) {
-                return "Nenhum rastreador encontrado para esse usuário.";
+                return NotificationFormatter.formatMessage(mapParams, "deviceNotFound", "whatsapp");
             }
 
             Position position = Context.getDeviceManager().getLastPosition(device.getId());
 
             mapParams.put("device", device);
-            mapParams.put("user", user);
+            mapParams.put("position", position);
+            String whatsappEmergency = user.getString("whatsappEmergency");
 
             switch (messages.get(0)) {
                 case "LOCALIZAR":
                     if (position == null) {
-                        return "Nenhuma posição para esse rastreador";
+                        return NotificationFormatter.formatMessage(mapParams, "positionNotFound", "whatsapp");
                     }
                     return NotificationFormatter
                             .formatMessage(user.getId(), new Event(Event.TYPE_DEVICE_STATUS, device.getId(), position.getId()), position, "whatsapp");
                 case "SEGUIR":
                     if (position == null) {
-                        return "Nenhuma posição para esse rastreador";
+                        return NotificationFormatter.formatMessage(mapParams, "positionNotFound", "whatsapp");
                     }
                     return NotificationFormatter
                             .formatMessage(user.getId(), new Event(Event.TYPE_DEVICE_FOLLOW, device.getId(), position.getId()), position, "whatsapp");
                 case "BLOQUEAR":
+                    if (user.getLimitCommands()) {
+                        return NotificationFormatter
+                                .formatMessage(mapParams, "commandNotPermitted", "whatsapp");
+                    }
                     Command commandStop = new Command();
                     commandStop.setType(Command.TYPE_ENGINE_STOP);
                     commandStop.setDeviceId(device.getId());
-                     {
-                        try {
-                            boolean sended = Context.getCommandsManager().sendCommand(commandStop);
-                            if (sended) {
-                                return NotificationFormatter
-                                        .formatMessage(mapParams, "engineStop", "whatsapp");
-                            } else {
-                                return "Não foi possível enviar o comando no momento. \nTente mais tarde!";
-                            }
-                        } catch (Exception ex) {
-                            return "Erro ao enviar comando";
-                        }
+                    try {
+                        Context.getCommandsManager().sendCommand(commandStop);
+                        return NotificationFormatter
+                                .formatMessage(mapParams, "engineStop", "whatsapp");
+
+                    } catch (Exception ex) {
+                        return NotificationFormatter
+                                .formatMessage(mapParams, "commandNotSended", "whatsapp");
                     }
                 case "DESBLOQUEAR":
+                    if (user.getLimitCommands()) {
+                        return NotificationFormatter
+                                .formatMessage(mapParams, "commandNotPermitted", "whatsapp");
+                    }
                     Command commandResume = new Command();
                     commandResume.setType(Command.TYPE_ENGINE_RESUME);
                     commandResume.setDeviceId(device.getId());
-                     {
-                        try {
-                            boolean sended = Context.getCommandsManager().sendCommand(commandResume);
-                            if (sended) {
-                                return NotificationFormatter
-                                        .formatMessage(mapParams, "engineResume", "whatsapp");
-                            } else {
-                                return "Não foi possível enviar o comando no momento. \nTente mais tarde!";
-                            }
-                        } catch (Exception ex) {
-                            return "Erro ao enviar comando";
-                        }
+                    try {
+                        Context.getCommandsManager().sendCommand(commandResume);
+                        return NotificationFormatter
+                                .formatMessage(mapParams, "engineResume", "whatsapp");
+                    } catch (Exception ex) {
+                        return NotificationFormatter
+                                .formatMessage(mapParams, "commandNotSended", "whatsapp");
                     }
                 case "VELOCIDADE":
                     if (messages.get(1) != null && !messages.get(1).isEmpty()) {
@@ -193,12 +221,47 @@ public class WhatsappResource {
                         } catch (NumberFormatException e) {
                         }
                     }
+                case "EMERGENCIA":
+                    makeRequst(whatsappEmergency, NotificationFormatter
+                            .formatMessage(mapParams, "emergencyForward", "whatsapp"));
+
+                    return NotificationFormatter
+                            .formatMessage(mapParams, "emergencyResponse", "whatsapp");
+
+                case "CANCELAR":
+                    makeRequst(whatsappEmergency, NotificationFormatter
+                            .formatMessage(mapParams, "cancelEmergencyForward", "whatsapp"));
+
+                    return NotificationFormatter
+                            .formatMessage(mapParams, "cancelEmergencyResponse", "whatsapp");
                 default:
                     return NotificationFormatter.formatMessage(null, "menu", "whatsapp");
             }
 
         } catch (Exception ex) {
-            return "Erro ao acessar dados";
+            return NotificationFormatter
+                    .formatMessage(null, "defaultError", "whatsapp");
         }
+    }
+
+    private void makeRequst(String to, String msg) {
+        Map map = new HashMap<>();
+        to = to.concat("@c.us");
+        map.put("to", to);
+        map.put("msg", msg);
+
+        String url = Context.getConfig().getString("notificator.whatsapp.url");
+        Context.getClient().target(url).request()
+                .async().post(Entity.json(map), new InvocationCallback<Object>() {
+                    @Override
+                    public void completed(Object o) {
+                        System.out.println(o);
+                    }
+
+                    @Override
+                    public void failed(Throwable throwable) {
+                        LOGGER.warn("Whatsapp API error", throwable);
+                    }
+                });
     }
 }

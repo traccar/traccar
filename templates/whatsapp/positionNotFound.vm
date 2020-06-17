@@ -1,0 +1,9 @@
+⚠️ *Nenhuma posição para esse veículo*
+
+```O rastreador desse veículo ainda não comunicou com o nosso sistema.```
+
+#if($support)
+```Aguarde alguns instantes ou entre em contato com o nosso suporte através do link.```
+
+https://wa.me/$support
+#end

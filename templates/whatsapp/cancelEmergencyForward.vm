@@ -1,0 +1,17 @@
+🛑
+*CANCELAMENTO DO AVISO DE EMERGÊNCIA*
+
+```Veículo....:``` *$device.name*
+```Cliente....:``` *$user.name*
+
+```Origem ação: ```
+https://wa.me/$from
+```Contato 1..: ```
+https://wa.me/$user.attributes.whatsapp
+#if($user.attributes.whatsappSecondary)
+```Contato 2..: ```
+https://wa.me/$user.attributes.whatsappSecondary
+#end
+
+_Informamos que o cliente solicita o cancelamento de qualquer ação de busca no referido veículo._
+_Caso necessário, entrar em contato com o mesmo para mais esclarecimentos._

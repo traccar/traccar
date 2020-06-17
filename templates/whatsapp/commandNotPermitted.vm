@@ -1,0 +1,9 @@
+🚫  *Comando não permitido*
+
+Você não tem permissão para enviar esse tipo de comando.
+
+#if($whatsappSupport)
+_Em caso de dúvidas, entre em contato com nosso suporte._
+
+https://wa.me/$whatsappSupport
+#end

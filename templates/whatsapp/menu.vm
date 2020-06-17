@@ -5,6 +5,7 @@ _mostra a última localização registrada do veículo_
 
 *SEGUIR* 
 _disponibiliza um link para acompanhamento do veículo no mapa em tempo real_
+#if($user.limitCommands == false)
 
 *BLOQUEAR*
 _ativa o bloqueio do veículo_
@@ -14,6 +15,7 @@ _desativa o bloqueio do veículo_
 
 *VELOCIDADE 100* 
 _configura o alerta de velocidade para o valor especificado. Se o valor for "0" o alerta será desabilitado_
+#end
 
 *SILENCIAR* 
 _desliga alertas no número principal_
@@ -26,8 +28,15 @@ _desliga todos os alertas no Whatsapp secundário_
 
 *NOTIFICAR SECUNDÁRIO* 
 _liga todos os alertas no Whatsapp secundário_
+#if($whatsappSupport)
 
 *SUPORTE*
 _Para qualquer tipo de apoio técnico, administrativo ou financeiro de nossa equipe_
+#end
+#if($user.attributes.whatsappEmergency)
+
+*EMERGÊNCIA*
+_Em casos de intervenção policial, nossa equipe de pronta resposta será acionada_
+#end
 
 ❗ Caso tenha mais de um veículo os comandos deverão ser seguidos da placa ou nome do mesmo. Exemplo, LOCALIZAR AAA-1234

@@ -1,0 +1,7 @@
+⚠️ *Usuário não encontrado no sistema*
+
+```Entrar em contato com o suporte!```
+
+#if($support)
+https://wa.me/$support
+#end
