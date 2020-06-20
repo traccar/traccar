@@ -768,14 +768,14 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
 
-            if (type == MSG_GPS_LBS_1 && buf.readableBytes() == 4 + 6) {
-                position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
-            }
-
             if (type == MSG_GPS_LBS_2 && buf.readableBytes() == 3 + 6) {
                 position.set(Position.KEY_IGNITION, buf.readUnsignedByte() > 0);
                 position.set(Position.KEY_EVENT, buf.readUnsignedByte()); // reason
                 position.set(Position.KEY_ARCHIVE, buf.readUnsignedByte() > 0);
+            }
+
+            if (buf.readableBytes() == 4 + 6) {
+                position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
             }
 
         } else if (type == MSG_ALARM) {
