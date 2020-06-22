@@ -176,7 +176,7 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
 
                 } else if (event >> 4 <= 3 && buf.writerIndex() == 12) {
 
-                    if (event >> 4 == 0) {
+                    if (BitUtil.to(event, 4) == 0) {
                         position.setValid(true);
                         position.setLatitude(buf.readIntLE() * 0.0000001);
                         position.setLongitude(buf.readIntLE() * 0.0000001);

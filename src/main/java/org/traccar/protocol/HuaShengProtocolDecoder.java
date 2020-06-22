@@ -64,6 +64,27 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private String decodeAlarm(int event) {
+        switch (event) {
+            case 4:
+                return Position.ALARM_FATIGUE_DRIVING;
+            case 6:
+                return Position.ALARM_SOS;
+            case 7:
+                return Position.ALARM_BRAKING;
+            case 8:
+                return Position.ALARM_ACCELERATION;
+            case 9:
+                return Position.ALARM_CORNERING;
+            case 10:
+                return Position.ALARM_ACCIDENT;
+            case 16:
+                return Position.ALARM_REMOVING;
+            default:
+                return null;
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -118,7 +139,10 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Position.KEY_STATUS, status);
             position.set(Position.KEY_IGNITION, BitUtil.check(status, 14));
-            position.set(Position.KEY_EVENT, buf.readUnsignedShort());
+
+            int event = buf.readUnsignedShort();
+            position.set(Position.KEY_ALARM, decodeAlarm(event));
+            position.set(Position.KEY_EVENT, event);
 
             String time = buf.readCharSequence(12, StandardCharsets.US_ASCII).toString();
 
