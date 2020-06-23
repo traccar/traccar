@@ -30,7 +30,9 @@ import org.traccar.model.Network;
 import org.traccar.model.Position;
 import org.traccar.model.WifiAccessPoint;
 
+import java.math.BigInteger;
 import java.net.SocketAddress;
+import java.util.Calendar;
 import java.util.TimeZone;
 
 public class TopinProtocolDecoder extends BaseProtocolDecoder {
@@ -44,6 +46,7 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_GPS_OFFLINE = 0x11;
     public static final int MSG_STATUS = 0x13;
     public static final int MSG_WIFI_OFFLINE = 0x17;
+    public static final int MSG_TIME_UPDATE = 0x30;
     public static final int MSG_WIFI = 0x69;
 
     private void sendResponse(Channel channel, int length, int type, ByteBuf content) {
@@ -58,6 +61,21 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
             content.release();
             channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
+    }
+
+    private void updateTime(Channel channel, int type) {
+        ByteBuf dateBuffer = Unpooled.buffer();
+
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+
+        dateBuffer.writeShort(calendar.get(Calendar.YEAR));
+        dateBuffer.writeByte(calendar.get(Calendar.MONTH)+1);
+        dateBuffer.writeByte(calendar.get(Calendar.DAY_OF_MONTH));
+        dateBuffer.writeByte(calendar.get(Calendar.HOUR_OF_DAY));
+        dateBuffer.writeByte(calendar.get(Calendar.MINUTE));
+        dateBuffer.writeByte(calendar.get(Calendar.SECOND));
+
+        sendResponse(channel, dateBuffer.readableBytes(), type, dateBuffer);
     }
 
     @Override
@@ -78,6 +96,9 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
             ByteBuf content = Unpooled.buffer();
             content.writeByte(deviceSession != null ? 0x01 : 0x44);
             sendResponse(channel, length, type, content);
+
+            updateTime(channel, MSG_TIME_UPDATE);
+
             return null;
         } else {
             deviceSession = getDeviceSession(channel, remoteAddress);
@@ -101,6 +122,12 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
 
             return position;
 
+        } else if (type == MSG_TIME_UPDATE) {
+
+            updateTime(channel, type);
+
+            return null;
+
         } else if (type == MSG_STATUS) {
 
             Position position = new Position(getProtocolName());
@@ -122,13 +149,7 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_VERSION_FW, firmware);
 
             ByteBuf content = Unpooled.buffer();
-            content.writeByte(battery);
-            content.writeByte(firmware);
-            content.writeByte(timezone);
             content.writeByte(interval);
-            if (length >= 7) {
-                content.writeByte(signal);
-            }
             sendResponse(channel, length, type, content);
 
             return position;
