@@ -63,7 +63,7 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private void updateTime(Channel channel, int type){
+    private void updateTime(Channel channel, int type) {
         ByteBuf dateBuffer = Unpooled.buffer();
 
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -84,7 +84,7 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
 
         ByteBuf buf = (ByteBuf) msg;
 
-        buf.skipBytes(2); // header
+        buf.skipBytes(2);
         int length = buf.readUnsignedByte();
 
         int type = buf.readUnsignedByte();
@@ -97,7 +97,6 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
             content.writeByte(deviceSession != null ? 0x01 : 0x44);
             sendResponse(channel, length, type, content);
 
-            //update time directly after login
             updateTime(channel, MSG_TIME_UPDATE);
 
             return null;
