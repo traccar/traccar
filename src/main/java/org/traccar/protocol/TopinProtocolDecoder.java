@@ -63,19 +63,19 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private void updateTime(Channel channel, int msgType){
+    private void updateTime(Channel channel, int type){
         ByteBuf dateBuffer = Unpooled.buffer();
 
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 
-        dateBuffer.writeBytes(BigInteger.valueOf(calendar.get(Calendar.YEAR)).toByteArray());
+        dateBuffer.writeShort(calendar.get(Calendar.YEAR));
         dateBuffer.writeByte(calendar.get(Calendar.MONTH)+1);
         dateBuffer.writeByte(calendar.get(Calendar.DAY_OF_MONTH));
         dateBuffer.writeByte(calendar.get(Calendar.HOUR_OF_DAY));
         dateBuffer.writeByte(calendar.get(Calendar.MINUTE));
         dateBuffer.writeByte(calendar.get(Calendar.SECOND));
 
-        sendResponse(channel, dateBuffer.readableBytes(), msgType, dateBuffer);
+        sendResponse(channel, dateBuffer.readableBytes(), type, dateBuffer);
     }
 
     @Override
