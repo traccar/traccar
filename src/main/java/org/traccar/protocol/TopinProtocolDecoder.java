@@ -84,7 +84,7 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
 
         ByteBuf buf = (ByteBuf) msg;
 
-        buf.skipBytes(2);
+        buf.skipBytes(2); // header
         int length = buf.readUnsignedByte();
 
         int type = buf.readUnsignedByte();
