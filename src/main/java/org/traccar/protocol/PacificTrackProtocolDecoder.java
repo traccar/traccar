@@ -105,12 +105,31 @@ public class PacificTrackProtocolDecoder extends BaseProtocolDecoder {
                                 case 0b00001:
                                     position.set(Position.KEY_RPM, buf.readUnsignedByte() * 32);
                                     break;
+                                case 0b01001:
+                                    position.set("defLevel", buf.readUnsignedByte() * 0.4);
+                                    break;
+                                case 0b01010:
+                                    position.set(Position.KEY_ENGINE_LOAD, buf.readUnsignedByte());
+                                    break;
+                                case 0b01011:
+                                    position.set("barometer", buf.readUnsignedByte() * 0.5);
+                                    break;
                                 default:
                                     buf.readUnsignedByte();
                                     break;
                             }
                         } else if (fieldPrefix < 0b110) {
-                            buf.readUnsignedShort();
+                            switch (BitUtil.to(field, 5)) {
+                                case 0b00010:
+                                    position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedShort() / 512.0);
+                                    break;
+                                case 0b00011:
+                                    position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedShort() * 0.03125 - 273);
+                                    break;
+                                default:
+                                    buf.readUnsignedShort();
+                                    break;
+                            }
                         }  else if (fieldPrefix < 0b111) {
                             switch (BitUtil.to(field, 5)) {
                                 case 0b00000:
@@ -121,6 +140,12 @@ public class PacificTrackProtocolDecoder extends BaseProtocolDecoder {
                                     break;
                                 case 0b00010:
                                     position.set("idleHours", buf.readUnsignedInt() * 180);
+                                    break;
+                                case 0b00100:
+                                    position.set(Position.KEY_FUEL_USED, buf.readUnsignedInt() * 0.5);
+                                    break;
+                                case 0b00101:
+                                    position.set("fuelUsedIdle", buf.readUnsignedInt() * 0.5);
                                     break;
                                 default:
                                     buf.readUnsignedInt();
@@ -141,8 +166,15 @@ public class PacificTrackProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
+        if (deviceSession == null) {
+            deviceSession = getDeviceSession(channel, remoteAddress);
+        }
+
         if (deviceSession != null) {
             position.setDeviceId(deviceSession.getDeviceId());
+            if (position.getFixTime() == null) {
+                getLastLocation(position, null);
+            }
             return position;
         } else {
             return null;

@@ -92,7 +92,7 @@ public class WebServer {
             @Override
             protected void handleErrorPage(
                     HttpServletRequest request, Writer writer, int code, String message) throws IOException {
-                writer.write("<!DOCTYPE<html><head><title>Error</title></head><html><body>"
+                writer.write("<!DOCTYPE><html><head><title>Error</title></head><html><body>"
                         + code + " - " + HttpStatus.getMessage(code) + "</body></html>");
             }
         });

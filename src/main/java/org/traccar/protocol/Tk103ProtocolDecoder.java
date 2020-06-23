@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,14 +53,14 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d*)")
             .number("(dd)(dd)(dd),?")            // date (mmddyy if comma-delimited, otherwise yyddmm)
             .expression("([AV]),?")              // validity
-            .number("(d+)(dd.d+)")               // latitude
+            .number(" *(d+)(dd.d+)")             // latitude
             .expression("([NS]),?")
-            .number("(d+)(dd.d+)")               // longitude
+            .number(" *(d+)(dd.d+)")             // longitude
             .expression("([EW]),?")
-            .number("(d+.d)(?:d*,)?")            // speed
+            .number(" *(d+.d)(?:d*,)?")          // speed
             .number("(dd)(dd)(dd),?")            // time (hhmmss)
             .groupBegin()
-            .number("(?:([d.]{6})|(dd)),?")      // course
+            .number("(?:([ d.]{6})|(dd)),?")     // course
             .number("([01])")                    // charge
             .number("([01])")                    // ignition
             .number("(x)")                       // io
@@ -237,9 +237,9 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
         getLastLocation(position, parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
 
-        int batterylevel = parser.nextInt(0);
-        if (batterylevel != 255) {
-            position.set(Position.KEY_BATTERY_LEVEL, decodeBattery(batterylevel));
+        int batteryLevel = parser.nextInt(0);
+        if (batteryLevel != 255) {
+            position.set(Position.KEY_BATTERY_LEVEL, decodeBattery(batteryLevel));
         }
 
         int battery = parser.nextInt(0);
@@ -343,7 +343,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
     }
 
-@Override
+    @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
