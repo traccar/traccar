@@ -50,6 +50,13 @@ public abstract class JsonGeocoder implements Geocoder {
         }
     }
 
+    protected String readValue(JsonObject object, String key) {
+        if (object.containsKey(key) && !object.isNull(key)) {
+            return object.getString(key);
+        }
+        return null;
+    }
+
     private String handleResponse(
             double latitude, double longitude, JsonObject json, ReverseGeocoderCallback callback) {
 

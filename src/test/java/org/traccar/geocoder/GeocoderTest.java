@@ -85,4 +85,12 @@ public class GeocoderTest {
         String address = geocoder.getAddress(28.6129602407977, 77.2294557094574, null);
         assertEquals("New Delhi, Delhi. 1 m from India Gate pin-110001 (India)", address);
     }
+
+    @Ignore
+    @Test
+    public void testPositionStack() {
+        Geocoder geocoder = new PositionStackGeocoder("", 0, new AddressFormat("%f"));
+        String address = geocoder.getAddress(28.6129602407977, 77.2294557094574, null);
+        assertEquals("India Gate, New Delhi, India", address);
+    }
 }
