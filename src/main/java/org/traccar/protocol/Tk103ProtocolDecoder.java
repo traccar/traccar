@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
 
 public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
-    private boolean decodeLow;
+    private final boolean decodeLow;
 
     public Tk103ProtocolDecoder(Protocol protocol) {
         super(protocol);
