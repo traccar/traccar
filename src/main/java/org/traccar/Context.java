@@ -56,6 +56,7 @@ import org.traccar.model.Maintenance;
 import org.traccar.model.Notification;
 import org.traccar.model.User;
 import org.traccar.notification.EventForwarder;
+import org.traccar.notification.EventForwarderManager;
 import org.traccar.notification.JsonTypeEventForwarder;
 import org.traccar.notification.NotificatorManager;
 import org.traccar.reports.model.TripsConfig;
@@ -207,6 +208,12 @@ public final class Context {
         return eventForwarder;
     }
 
+    private static EventForwarderManager eventForwarderManager;
+
+    public static EventForwarderManager getEventForwarderManager() {
+        return eventForwarderManager;
+    }
+
     private static AttributesManager attributesManager;
 
     public static AttributesManager getAttributesManager() {
@@ -336,6 +343,8 @@ public final class Context {
         if (config.getBoolean("event.forward.enable")) {
             eventForwarder = new JsonTypeEventForwarder();
         }
+
+        eventForwarderManager = new EventForwarderManager(config.getBoolean("event.forward.enable"));
 
         attributesManager = new AttributesManager(dataManager);
 
