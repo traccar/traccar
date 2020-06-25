@@ -30,7 +30,6 @@ import org.traccar.model.Network;
 import org.traccar.model.Position;
 import org.traccar.model.WifiAccessPoint;
 
-import java.math.BigInteger;
 import java.net.SocketAddress;
 import java.util.Calendar;
 import java.util.TimeZone;
@@ -69,7 +68,7 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 
         dateBuffer.writeShort(calendar.get(Calendar.YEAR));
-        dateBuffer.writeByte(calendar.get(Calendar.MONTH)+1);
+        dateBuffer.writeByte(calendar.get(Calendar.MONTH) + 1);
         dateBuffer.writeByte(calendar.get(Calendar.DAY_OF_MONTH));
         dateBuffer.writeByte(calendar.get(Calendar.HOUR_OF_DAY));
         dateBuffer.writeByte(calendar.get(Calendar.MINUTE));
