@@ -47,10 +47,16 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .groupBegin()
             .expression("(.{12})")               // device id
             .or()
-            .expression("(.+),")                 // device id
+            .expression("([^,]+),")              // device id
             .groupEnd()
             .expression("(.{4}),?")              // command
+            .groupBegin()
             .number("(d*)")
+            .or()
+            .text(",ALARM,")
+            .number("(d),")                      // alarm type
+            .number("d+,")
+            .groupEnd()
             .number("(dd)(dd)(dd),?")            // date (mmddyy if comma-delimited, otherwise yyddmm)
             .expression("([AV]),?")              // validity
             .number(" *(d+)(dd.d+)")             // latitude
@@ -146,6 +152,30 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
     private void decodeType(Position position, String type, String data) {
         switch (type) {
+            case "BQ81":
+                switch (Integer.parseInt(data)) {
+                    case 0:
+                        position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                        break;
+                    case 1:
+                        position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+                        break;
+                    case 2:
+                        position.set(Position.KEY_ALARM, Position.ALARM_IDLE);
+                        break;
+                    case 3:
+                        position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+                        break;
+                    case 4:
+                        position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+                        break;
+                    case 5:
+                        position.set(Position.KEY_ALARM, Position.ALARM_TEMPERATURE);
+                        break;
+                    default:
+                        break;
+                }
+                break;
             case "BO01":
                 position.set(Position.KEY_ALARM, decodeAlarm(data.charAt(0) - '0'));
                 break;
@@ -393,7 +423,15 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        decodeType(position, parser.next(), parser.next());
+        String type = parser.next();
+        String data = null;
+        if (parser.hasNext()) {
+            data = parser.next();
+        }
+        if (parser.hasNext()) {
+            data = parser.next();
+        }
+        decodeType(position, type, data);
 
         DateBuilder dateBuilder = new DateBuilder();
         if (alternative) {
