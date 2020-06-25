@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,13 +107,13 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedByte(); // acceleration pedal
         }
         if (BitUtil.check(mask, 2)) {
-            position.set(Position.KEY_FUEL_USED, buf.readUnsignedIntLE());
+            position.set(Position.KEY_FUEL_USED, buf.readUnsignedIntLE() * 0.5);
         }
         if (BitUtil.check(mask, 3)) {
             position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte());
         }
         if (BitUtil.check(mask, 4)) {
-            position.set(Position.KEY_RPM, buf.readUnsignedShortLE());
+            position.set(Position.KEY_RPM, buf.readUnsignedShortLE() * 0.125);
         }
         if (BitUtil.check(mask, 5)) {
             position.set(Position.KEY_HOURS, buf.readUnsignedIntLE());
@@ -122,7 +122,7 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
         }
         if (BitUtil.check(mask, 7)) {
-            position.set(Position.KEY_COOLANT_TEMP, (int) buf.readByte());
+            position.set(Position.KEY_COOLANT_TEMP, buf.readByte() - 40);
         }
         if (BitUtil.check(mask, 8)) {
             position.set("fuel2", buf.readUnsignedByte());
@@ -171,7 +171,7 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(buf.readLongLE()));
         }
         if (BitUtil.check(mask, 7)) {
-            buf.readUnsignedShortLE(); // dallas temperature
+            position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedShortLE() * 0.1 - 273);
         }
         if (BitUtil.check(mask, 8)) {
             buf.readUnsignedShortLE(); // dallas humidity
@@ -217,15 +217,21 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedShortLE();
         }
         if (BitUtil.check(mask, 6)) {
-            buf.readUnsignedByte(); // maximum acceleration
-            buf.readUnsignedByte(); // maximum deceleration
-            buf.readUnsignedByte(); // maximum cornering
+            position.set("maxAcceleration", buf.readUnsignedByte() * 0.02);
+            position.set("maxBraking", buf.readUnsignedByte() * 0.02);
+            position.set("maxCornering", buf.readUnsignedByte() * 0.02);
         }
         if (BitUtil.check(mask, 7)) {
             buf.skipBytes(16);
         }
         if (BitUtil.check(mask, 8)) {
-            buf.skipBytes(40); // temperature sensors
+            for (int i = 1; i <= 4; i++) {
+                int temperature = buf.readUnsignedShortLE();
+                if (temperature > 0) {
+                    position.set(Position.PREFIX_TEMP + i, temperature * 0.1 - 273);
+                }
+                buf.skipBytes(8);
+            }
         }
         if (BitUtil.check(mask, 9)) {
             position.set("driver1", buf.readCharSequence(16, StandardCharsets.US_ASCII).toString().trim());

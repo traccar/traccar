@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public class PstProtocolDecoder extends BaseProtocolDecoder {
         long value = buf.readUnsignedInt();
         int sign = BitUtil.check(value, 31) ? -1 : 1;
         value = BitUtil.to(value, 31);
-        return sign * (BitUtil.from(value, 16) + BitUtil.to(value, 16) * 0.00001) / 60;
+        return sign * (BitUtil.from(value, 16) + BitUtil.to(value, 16) / 10000.0) / 60;
     }
 
     @Override
@@ -77,7 +77,10 @@ public class PstProtocolDecoder extends BaseProtocolDecoder {
 
             position.setDeviceTime(readDate(buf));
 
-            buf.readUnsignedByte();
+            int status = buf.readUnsignedByte();
+            position.set(Position.KEY_BLOCKED, BitUtil.check(status, 4));
+            position.set(Position.KEY_IGNITION, BitUtil.check(status, 7));
+            position.set(Position.KEY_STATUS, status);
 
             int count = buf.readUnsignedByte();
             for (int i = 0; i < count; i++) {
@@ -86,13 +89,19 @@ public class PstProtocolDecoder extends BaseProtocolDecoder {
                 int length = buf.readUnsignedByte();
 
                 switch (tag) {
+                    case 0x09:
+                        buf.readUnsignedByte(); // sensor count
+                        buf.readUnsignedByte(); // sensor logic
+                        buf.readUnsignedByte(); // sensor status
+                        break;
                     case 0x0D:
                         int battery = buf.readUnsignedByte();
                         if (battery <= 20) {
-                            position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte() * 5);
+                            position.set(Position.KEY_BATTERY_LEVEL, battery * 5);
                         }
                         break;
                     case 0x10:
+                        position.setValid(true);
                         position.setFixTime(readDate(buf));
                         position.setLatitude(readCoordinate(buf));
                         position.setLongitude(readCoordinate(buf));

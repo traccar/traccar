@@ -339,16 +339,19 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                 break;
             case "UEX":
                 int remaining = Integer.parseInt(values[index++]);
+                double totalFuel = 0;
                 while (remaining > 0) {
                     String attribute = values[index++];
                     if (attribute.startsWith("CabAVL")) {
                         String[] data = attribute.split(",");
                         double fuel1 = Double.parseDouble(data[2]);
                         if (fuel1 > 0) {
+                            totalFuel += fuel1;
                             position.set("fuel1", fuel1);
                         }
                         double fuel2 = Double.parseDouble(data[3]);
                         if (fuel2 > 0) {
+                            totalFuel += fuel2;
                             position.set("fuel2", fuel2);
                         }
                     } else {
@@ -363,7 +366,9 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                                     position.set(Position.PREFIX_TEMP + pair[0].charAt(2), Integer.parseInt(value, 16));
                                     break;
                                 case 'N':
-                                    position.set("fuel" + pair[0].charAt(2), Integer.parseInt(value, 16));
+                                    int fuel = Integer.parseInt(value, 16);
+                                    totalFuel += fuel;
+                                    position.set("fuel" + pair[0].charAt(2), fuel);
                                     break;
                                 case 'Q':
                                     position.set("drivingQuality", Integer.parseInt(value, 16));
@@ -374,6 +379,9 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                         }
                     }
                     remaining -= attribute.length() + 1;
+                }
+                if (totalFuel > 0) {
+                    position.set(Position.KEY_FUEL_LEVEL, totalFuel);
                 }
                 index += 1; // checksum
                 break;
@@ -397,7 +405,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
             if (isIncludeAdc(deviceSession.getDeviceId())) {
                 for (int i = 1; i <= 3; i++) {
-                    if (!values[index++].isEmpty()) {
+                    if (index < values.length && !values[index++].isEmpty()) {
                         position.set(Position.PREFIX_ADC + i, Double.parseDouble(values[index - 1]));
                     }
                 }
@@ -513,6 +521,39 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             position.setValid(values[index++].equals("1"));
         }
 
+        if (BitUtil.check(mask, 17)) {
+            position.set(Position.KEY_INPUT, Integer.parseInt(values[index++]));
+        }
+
+        if (BitUtil.check(mask, 18)) {
+            position.set(Position.KEY_OUTPUT, Integer.parseInt(values[index++]));
+        }
+
+        if (BitUtil.check(mask, 19)) {
+            position.set("alertId", values[index++]);
+        }
+
+        if (BitUtil.check(mask, 20)) {
+            position.set("alertModifier", values[index++]);
+        }
+
+        if (BitUtil.check(mask, 21)) {
+            position.set("alertData", values[index++]);
+        }
+
+        if (BitUtil.check(mask, 22)) {
+            index += 1; // reserved
+        }
+
+        if (BitUtil.check(mask, 23)) {
+            int assignMask = Integer.parseInt(values[index++], 16);
+            for (int i = 0; i <= 30; i++) {
+                if (BitUtil.check(assignMask, i)) {
+                    position.set(Position.PREFIX_IO + (i + 1), values[index++]);
+                }
+            }
+        }
+
         return position;
     }
 
@@ -623,7 +664,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(mask, 20)) {
-            buf.readUnsignedShort(); // alert mod
+            buf.readUnsignedShort(); // alert modifier
         }
 
         if (BitUtil.check(mask, 21)) {

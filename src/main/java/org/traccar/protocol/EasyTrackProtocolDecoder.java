@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,8 +122,9 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(parser.nextHexInt(0) / 100.0);
 
         long status = parser.nextHexLong();
-        position.set(Position.KEY_STATUS, status);
         position.set(Position.KEY_ALARM, decodeAlarm(status));
+        position.set(Position.KEY_IGNITION, BitUtil.check(status, 23));
+        position.set(Position.KEY_STATUS, status);
 
         position.set("signal", parser.next());
         position.set(Position.KEY_POWER, parser.nextDouble(0));

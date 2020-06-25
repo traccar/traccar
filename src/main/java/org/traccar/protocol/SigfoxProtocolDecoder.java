@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,31 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
         super(protocol);
     }
 
+    private boolean jsonContains(JsonObject json, String key) {
+        if (json.containsKey(key)) {
+            JsonValue value = json.get(key);
+            if (value.getValueType() == JsonValue.ValueType.STRING) {
+                return !((JsonString) value).getString().equals("null");
+
+            } else {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean getJsonBoolean(JsonObject json, String key) {
+        JsonValue value = json.get(key);
+        if (value != null) {
+            if (value.getValueType() == JsonValue.ValueType.STRING) {
+                return Boolean.parseBoolean(((JsonString) value).getString());
+            } else {
+                return value.getValueType() == JsonValue.ValueType.TRUE;
+            }
+        }
+        return false;
+    }
+
     private int getJsonInt(JsonObject json, String key) {
         JsonValue value = json.get(key);
         if (value != null) {
@@ -83,7 +108,14 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
         }
         JsonObject json = Json.createReader(new StringReader(content)).readObject();
 
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, json.getString("device"));
+        String deviceId;
+        if (json.containsKey("device")) {
+            deviceId = json.getString("device");
+        } else {
+            deviceId = json.getString("deviceId");
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, deviceId);
         if (deviceSession == null) {
             sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
             return null;
@@ -92,30 +124,36 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        if (json.containsKey("time")) {
+        if (jsonContains(json, "time")) {
             position.setTime(new Date(getJsonInt(json, "time") * 1000L));
+        } else if (jsonContains(json, "positionTime")) {
+            position.setTime(new Date(getJsonInt(json, "positionTime") * 1000L));
         } else {
             position.setTime(new Date());
         }
 
-        if (json.containsKey("location")
-                || json.containsKey("lat") && json.containsKey("lng") && !json.containsKey("data")) {
+        if (jsonContains(json, "lastSeen")) {
+            position.setDeviceTime(new Date(getJsonInt(json, "lastSeen") * 1000L));
+        }
+
+        if (jsonContains(json, "location")
+                || jsonContains(json, "lat") && jsonContains(json, "lng") && !jsonContains(json, "data")
+                || jsonContains(json, "latitude") && jsonContains(json, "longitude") && !jsonContains(json, "data")) {
 
             JsonObject location;
-            if (json.containsKey("location")) {
+            if (jsonContains(json, "location")) {
                 location = json.getJsonObject("location");
             } else {
                 location = json;
             }
 
             position.setValid(true);
-            position.setLatitude(getJsonDouble(location, "lat"));
-            position.setLongitude(getJsonDouble(location, "lng"));
+            position.setLatitude(getJsonDouble(location, jsonContains(location, "lat") ? "lat" : "latitude"));
+            position.setLongitude(getJsonDouble(location, jsonContains(location, "lng") ? "lng" : "longitude"));
 
-        } else {
+        } else if (jsonContains(json, "data")) {
 
-            String data = json.getString(json.containsKey("data") ? "data" : "payload");
-            ByteBuf buf = Unpooled.wrappedBuffer(DataConverter.parseHex(data));
+            ByteBuf buf = Unpooled.wrappedBuffer(DataConverter.parseHex(json.getString("data")));
             try {
                 int event = buf.readUnsignedByte();
                 if (event == 0x0f || event == 0x1f) {
@@ -136,79 +174,99 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
 
                     position.set(Position.KEY_BATTERY, (int) buf.readUnsignedByte());
 
-                } else if (event >> 4 == 0) {
+                } else if (event >> 4 <= 3 && buf.writerIndex() == 12) {
 
-                    position.setValid(true);
-                    position.setLatitude(buf.readIntLE() * 0.0000001);
-                    position.setLongitude(buf.readIntLE() * 0.0000001);
-                    position.setCourse(buf.readUnsignedByte() * 2);
-                    position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
+                    if (BitUtil.to(event, 4) == 0) {
+                        position.setValid(true);
+                        position.setLatitude(buf.readIntLE() * 0.0000001);
+                        position.setLongitude(buf.readIntLE() * 0.0000001);
+                        position.setCourse(buf.readUnsignedByte() * 2);
+                        position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
 
-                    position.set(Position.KEY_BATTERY, buf.readUnsignedByte() * 0.025);
-
-                } else {
-
-                    position.set(Position.KEY_EVENT, event);
-                    if (event == 0x22 || event == 0x62) {
-                        position.set(Position.KEY_ALARM, Position.ALARM_SOS);
-                    }
-
-                    while (buf.isReadable()) {
-                        int type = buf.readUnsignedByte();
-                        switch (type) {
-                            case 0x01:
-                                position.setValid(true);
-                                position.setLatitude(buf.readMedium());
-                                position.setLongitude(buf.readMedium());
-                                break;
-                            case 0x02:
-                                position.setValid(true);
-                                position.setLatitude(buf.readFloat());
-                                position.setLongitude(buf.readFloat());
-                                break;
-                            case 0x03:
-                                position.set(Position.PREFIX_TEMP + 1, buf.readByte() * 0.5);
-                                break;
-                            case 0x04:
-                                position.set(Position.KEY_BATTERY, buf.readUnsignedByte() * 0.1);
-                                break;
-                            case 0x05:
-                                position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
-                                break;
-                            case 0x06:
-                                String mac = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");
-                                position.setNetwork(new Network(WifiAccessPoint.from(
-                                        mac.substring(0, mac.length() - 1), buf.readUnsignedByte())));
-                                break;
-                            case 0x07:
-                                buf.skipBytes(10); // wifi extended
-                                break;
-                            case 0x08:
-                                buf.skipBytes(6); // accelerometer
-                                break;
-                            case 0x09:
-                                position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
-                                break;
-                            default:
-                                buf.readUnsignedByte(); // fence number
-                                break;
-                        }
+                        position.set(Position.KEY_BATTERY, buf.readUnsignedByte() * 0.025);
+                    } else {
+                        return null;
                     }
 
                 }
             } finally {
                 buf.release();
             }
+
+        } else if (jsonContains(json, "payload")) {
+
+            ByteBuf buf = Unpooled.wrappedBuffer(DataConverter.parseHex(json.getString("payload")));
+            try {
+                int event = buf.readUnsignedByte();
+                position.set(Position.KEY_EVENT, event);
+                if (event == 0x22 || event == 0x62) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+                }
+
+                while (buf.isReadable()) {
+                    int type = buf.readUnsignedByte();
+                    switch (type) {
+                        case 0x01:
+                            position.setValid(true);
+                            position.setLatitude(buf.readMedium());
+                            position.setLongitude(buf.readMedium());
+                            break;
+                        case 0x02:
+                            position.setValid(true);
+                            position.setLatitude(buf.readFloat());
+                            position.setLongitude(buf.readFloat());
+                            break;
+                        case 0x03:
+                            position.set(Position.PREFIX_TEMP + 1, buf.readByte() * 0.5);
+                            break;
+                        case 0x04:
+                            position.set(Position.KEY_BATTERY, buf.readUnsignedByte() * 0.1);
+                            break;
+                        case 0x05:
+                            position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+                            break;
+                        case 0x06:
+                            String mac = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");
+                            position.setNetwork(new Network(WifiAccessPoint.from(
+                                    mac.substring(0, mac.length() - 1), buf.readUnsignedByte())));
+                            break;
+                        case 0x07:
+                            buf.skipBytes(10); // wifi extended
+                            break;
+                        case 0x08:
+                            buf.skipBytes(6); // accelerometer
+                            break;
+                        case 0x09:
+                            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
+                            break;
+                        default:
+                            buf.readUnsignedByte(); // fence number
+                            break;
+                    }
+                }
+            } finally {
+                buf.release();
+            }
+
         }
 
         if (position.getLatitude() == 0 && position.getLongitude() == 0) {
             getLastLocation(position, position.getDeviceTime());
         }
 
-        if (json.containsKey("rssi")) {
+        if (jsonContains(json, "moving")) {
+            position.set(Position.KEY_MOTION, getJsonBoolean(json, "moving"));
+        }
+        if (jsonContains(json, "magStatus")) {
+            position.set(Position.KEY_BLOCKED, getJsonBoolean(json, "magStatus"));
+        }
+        if (jsonContains(json, "temperature")) {
+            position.set(Position.KEY_DEVICE_TEMP, getJsonDouble(json, "temperature"));
+        }
+        if (jsonContains(json, "rssi")) {
             position.set(Position.KEY_RSSI, getJsonDouble(json, "rssi"));
         }
-        if (json.containsKey("seqNumber")) {
+        if (jsonContains(json, "seqNumber")) {
             position.set(Position.KEY_INDEX, getJsonInt(json, "seqNumber"));
         }
 

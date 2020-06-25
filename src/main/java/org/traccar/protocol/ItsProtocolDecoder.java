@@ -51,7 +51,7 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             .groupEnd()
             .number("(d{15}),")                  // imei
             .groupBegin()
-            .expression("(..),")                 // status
+            .expression("([^,]{2}),")            // status
             .or()
             .expression("[^,]*,")                // vehicle registration
             .number("([01]),").optional()        // valid

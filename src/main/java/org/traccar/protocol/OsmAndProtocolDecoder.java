@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,19 @@
  */
 package org.traccar.protocol;
 
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import org.traccar.BaseHttpProtocolDecoder;
+import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.Protocol;
+import org.traccar.database.CommandsManager;
 import org.traccar.helper.DateUtil;
 import org.traccar.model.CellTower;
+import org.traccar.model.Command;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
 import org.traccar.model.WifiAccessPoint;
@@ -173,12 +177,27 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
         }
 
         if (position.getDeviceId() != 0) {
-            sendResponse(channel, HttpResponseStatus.OK);
+            String response = null;
+            CommandsManager commandsManager = Context.getCommandsManager();
+            if (commandsManager != null) {
+                for (Command command : commandsManager.readQueuedCommands(position.getDeviceId(), 1)) {
+                    response = command.getString(Command.KEY_DATA);
+                }
+            }
+            if (response != null) {
+                sendResponse(channel, HttpResponseStatus.OK, Unpooled.copiedBuffer(response, StandardCharsets.UTF_8));
+            } else {
+                sendResponse(channel, HttpResponseStatus.OK);
+            }
             return position;
         } else {
             sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
             return null;
         }
+    }
+
+    @Override
+    protected void sendQueuedCommands(Channel channel, SocketAddress remoteAddress, long deviceId) {
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,9 +77,42 @@ public class SolarPoweredProtocolDecoder extends BaseProtocolDecoder {
                             position.setLongitude(-position.getLongitude());
                         }
                         position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
-                        position.set(Position.KEY_DEVICE_TEMP, (int) buf.readByte());
+                        int temperature = buf.readUnsignedByte();
+                        if (BitUtil.check(temperature, 7)) {
+                            position.set(Position.KEY_DEVICE_TEMP, -BitUtil.to(temperature, 7));
+                        } else {
+                            position.set(Position.KEY_DEVICE_TEMP, BitUtil.to(temperature, 7));
+                        }
                         position.set(Position.KEY_BATTERY, buf.readUnsignedByte() * 0.02);
                         position.setCourse(buf.readUnsignedByte());
+                        break;
+                    case 0x82:
+                        int alarmMask = buf.readUnsignedByte();
+                        int alarm = buf.readUnsignedByte();
+                        if (BitUtil.check(alarmMask, 0) && BitUtil.check(alarm, 0)) {
+                            position.set(Position.KEY_ALARM, Position.ALARM_TAMPERING);
+                        }
+                        if (BitUtil.check(alarmMask, 1) && BitUtil.check(alarm, 1)) {
+                            position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
+                        }
+                        if (BitUtil.check(alarmMask, 2) && BitUtil.check(alarm, 2)) {
+                            position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+                        }
+                        if (BitUtil.check(alarmMask, 3) && BitUtil.check(alarm, 3)) {
+                            position.set(Position.KEY_ALARM, Position.ALARM_FALL_DOWN);
+                        }
+                        if (BitUtil.check(alarmMask, 4)) {
+                            position.set(Position.KEY_MOTION, BitUtil.check(alarm, 4));
+                        }
+                        break;
+                    case 0x83:
+                        buf.readUnsignedInt(); // uptime
+                        buf.readUnsignedInt(); // gps count
+                        buf.readUnsignedInt(); // gsm count
+                        buf.readUnsignedByte(); // positioning time
+                        buf.readUnsignedByte(); // registration time
+                        buf.readUnsignedByte(); // connection time
+                        position.set(Position.KEY_RSSI, buf.readUnsignedByte());
                         break;
                     default:
                         buf.skipBytes(length);

@@ -28,6 +28,7 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.model.WifiAccessPoint;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -60,6 +61,27 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
             }
             response.writeByte(0xC0);
             channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
+        }
+    }
+
+    private String decodeAlarm(int event) {
+        switch (event) {
+            case 4:
+                return Position.ALARM_FATIGUE_DRIVING;
+            case 6:
+                return Position.ALARM_SOS;
+            case 7:
+                return Position.ALARM_BRAKING;
+            case 8:
+                return Position.ALARM_ACCELERATION;
+            case 9:
+                return Position.ALARM_CORNERING;
+            case 10:
+                return Position.ALARM_ACCIDENT;
+            case 16:
+                return Position.ALARM_REMOVING;
+            default:
+                return null;
         }
     }
 
@@ -117,7 +139,10 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Position.KEY_STATUS, status);
             position.set(Position.KEY_IGNITION, BitUtil.check(status, 14));
-            position.set(Position.KEY_EVENT, buf.readUnsignedShort());
+
+            int event = buf.readUnsignedShort();
+            position.set(Position.KEY_ALARM, decodeAlarm(event));
+            position.set(Position.KEY_EVENT, event);
 
             String time = buf.readCharSequence(12, StandardCharsets.US_ASCII).toString();
 
@@ -138,6 +163,8 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
             position.setAltitude(buf.readUnsignedShort());
 
             position.set(Position.KEY_ODOMETER, buf.readUnsignedShort() * 1000);
+
+            Network network = new Network();
 
             while (buf.readableBytes() > 4) {
                 int subtype = buf.readUnsignedShort();
@@ -164,7 +191,6 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
                                 Position.KEY_VIN, buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
                         break;
                     case 0x0020:
-                        Network network = new Network();
                         String[] cells = buf.readCharSequence(
                                 length, StandardCharsets.US_ASCII).toString().split("\\+");
                         for (String cell : cells) {
@@ -173,12 +199,23 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
                                     Integer.parseInt(values[0]), Integer.parseInt(values[1]),
                                     Integer.parseInt(values[2], 16), Integer.parseInt(values[3], 16)));
                         }
-                        position.setNetwork(network);
+                        break;
+                    case 0x0021:
+                        String[] points = buf.readCharSequence(
+                                length, StandardCharsets.US_ASCII).toString().split("\\+");
+                        for (String point : points) {
+                            String[] values = point.split("@");
+                            network.addWifiAccessPoint(WifiAccessPoint.from(values[0], Integer.parseInt(values[1])));
+                        }
                         break;
                     default:
                         buf.skipBytes(length);
                         break;
                 }
+            }
+
+            if (network.getCellTowers() != null || network.getWifiAccessPoints() != null) {
+                position.setNetwork(network);
             }
 
             sendResponse(channel, MSG_POSITION_RSP, index, null);

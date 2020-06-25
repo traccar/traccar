@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@ public class LdapProvider {
         if (this.adminFilter != null) {
             try {
                 InitialDirContext context = initContext();
-                String searchString = adminFilter.replace(":login", accountName);
+                String searchString = adminFilter.replace(":login", encodeForLdap(accountName));
                 SearchControls searchControls = new SearchControls();
                 searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
                 NamingEnumeration<SearchResult> results = context.search(searchBase, searchString, searchControls);
@@ -107,7 +107,7 @@ public class LdapProvider {
     private SearchResult lookupUser(String accountName) throws NamingException {
         InitialDirContext context = initContext();
 
-        String searchString = searchFilter.replace(":login", accountName);
+        String searchString = searchFilter.replace(":login", encodeForLdap(accountName));
 
         SearchControls searchControls = new SearchControls();
         String[] attributeFilter = {idAttribute, nameAttribute, mailAttribute};
@@ -174,6 +174,36 @@ public class LdapProvider {
             return false;
         }
         return false;
+    }
+
+    public String encodeForLdap(String input) {
+        if (input == null) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            switch (c) {
+                case '\\':
+                    sb.append("\\5c");
+                    break;
+                case '*':
+                    sb.append("\\2a");
+                    break;
+                case '(':
+                    sb.append("\\28");
+                    break;
+                case ')':
+                    sb.append("\\29");
+                    break;
+                case '\0':
+                    sb.append("\\00");
+                    break;
+                default:
+                    sb.append(c);
+            }
+        }
+        return sb.toString();
     }
 
 }

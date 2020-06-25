@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -253,22 +253,25 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         if (hasLength) {
             length = buf.readUnsignedByte();
             if (length == 0) {
+                boolean zeroedData = true;
+                for (int i = buf.readerIndex() + 9; i < buf.readerIndex() + 45 && i < buf.writerIndex(); i++) {
+                    if (buf.getByte(i) != 0) {
+                        zeroedData = false;
+                        break;
+                    }
+                }
+                if (zeroedData) {
+                    buf.skipBytes(Math.min(buf.readableBytes(), 45));
+                }
                 return false;
             }
         }
 
         int mcc = buf.readUnsignedShort();
         int mnc = BitUtil.check(mcc, 15) ? buf.readUnsignedShort() : buf.readUnsignedByte();
-        int lac = buf.readUnsignedShort();
-        int cid = buf.readUnsignedMedium();
-
-        position.set("mcc", mcc);
-        position.set("mnc", mnc);
-        position.set("lac", lac);
-        position.set("cid", cid);
 
         position.setNetwork(new Network(CellTower.from(
-                BitUtil.to(mcc, 15), mnc, lac, cid)));
+                BitUtil.to(mcc, 15), mnc, buf.readUnsignedShort(), buf.readUnsignedMedium())));
 
         if (length > 9) {
             buf.skipBytes(length - 9);
@@ -765,14 +768,14 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
 
-            if (type == MSG_GPS_LBS_1 && buf.readableBytes() == 4 + 6) {
-                position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
-            }
-
             if (type == MSG_GPS_LBS_2 && buf.readableBytes() == 3 + 6) {
                 position.set(Position.KEY_IGNITION, buf.readUnsignedByte() > 0);
                 position.set(Position.KEY_EVENT, buf.readUnsignedByte()); // reason
                 position.set(Position.KEY_ARCHIVE, buf.readUnsignedByte() > 0);
+            }
+
+            if (buf.readableBytes() == 4 + 6) {
+                position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
             }
 
         } else if (type == MSG_ALARM) {
@@ -892,6 +895,13 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 }
                 return decodeFuelData(position, buf.toString(
                         buf.readerIndex(), buf.readableBytes() - 4 - 2, StandardCharsets.US_ASCII));
+            } else if (subType == 0x1b) {
+                buf.readUnsignedByte(); // header
+                buf.readUnsignedByte(); // type
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, ByteBufUtil.hexDump(buf.readSlice(4)));
+                buf.readUnsignedByte(); // checksum
+                buf.readUnsignedByte(); // footer
+                return position;
             }
 
         } else if (type == MSG_X1_PHOTO_DATA) {

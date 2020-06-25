@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -95,8 +95,7 @@ public class GroupsManager extends BaseObjectManager<Group> implements Managable
 
     @Override
     public Set<Long> getManagedItems(long userId) {
-        Set<Long> result = new HashSet<>();
-        result.addAll(getUserItems(userId));
+        Set<Long> result = getUserItems(userId);
         for (long managedUserId : Context.getUsersManager().getUserItems(userId)) {
             result.addAll(getUserItems(managedUserId));
         }

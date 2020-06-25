@@ -135,7 +135,7 @@ public class WatchProtocolEncoder extends StringProtocolEncoder implements Strin
             case Command.TYPE_CUSTOM:
                 return formatTextCommand(channel, command, command.getString(Command.KEY_DATA));
             case Command.TYPE_POSITION_SINGLE:
-                return formatTextCommand(channel, command, "RG");
+                return formatTextCommand(channel, command, "CR");
             case Command.TYPE_SOS_NUMBER:
                 return formatTextCommand(channel, command, "SOS%s,%s", Command.KEY_INDEX, Command.KEY_PHONE);
             case Command.TYPE_ALARM_SOS:

@@ -101,6 +101,44 @@ public final class Keys {
             "forward.json", Boolean.class);
 
     /**
+     * Boolean value to enable URL parameters in json mode. For example, {uniqueId} for device identifier,
+     * {latitude} and {longitude} for coordinates.
+     */
+    public static final ConfigKey FORWARD_URL_VARIABLES = new ConfigKey(
+        "forward.urlVariables", Boolean.class);
+
+    /**
+     * Position forwarding retrying enable. When enabled, additional attempts are made to deliver positions. If initial
+     * delivery fails, because of an unreachable server or an HTTP response different from '2xx', the software waits
+     * for 'forward.retry.delay' milliseconds to retry delivery. On subsequent failures, this delay is duplicated.
+     * If forwarding is retried for 'forward.retry.count', retrying is canceled and the position is dropped. Positions
+     * pending to be delivered are limited to 'forward.retry.limit'. If this limit is reached, positions get discarded.
+     */
+    public static final ConfigKey FORWARD_RETRY_ENABLE = new ConfigKey(
+            "forward.retry.enable", Boolean.class);
+
+    /**
+     * Position forwarding retry first delay in milliseconds.
+     * Can be set to anything greater than 0. Defaults to 100 milliseconds.
+     */
+    public static final ConfigKey FORWARD_RETRY_DELAY = new ConfigKey(
+            "forward.retry.delay", Integer.class);
+
+    /**
+     * Position forwarding retry maximum retries.
+     * Can be set to anything greater than 0. Defaults to 10 retries.
+     */
+    public static final ConfigKey FORWARD_RETRY_COUNT = new ConfigKey(
+            "forward.retry.count", Integer.class);
+
+    /**
+     * Position forwarding retry pending positions limit.
+     * Can be set to anything greater than 0. Defaults to 100 positions.
+     */
+    public static final ConfigKey FORWARD_RETRY_LIMIT = new ConfigKey(
+            "forward.retry.limit", Integer.class);
+
+    /**
      * Boolean flag to enable or disable position filtering.
      */
     public static final ConfigKey FILTER_ENABLE = new ConfigKey(
@@ -363,6 +401,27 @@ public final class Keys {
      */
     public static final ConfigKey LOCATION_LONGITUDE_HEMISPHERE = new ConfigKey(
             "location.longitudeHemisphere", Boolean.class);
+
+    /**
+     * Enable Jetty Request Log.
+     */
+    public static final ConfigKey WEB_REQUEST_LOG_ENABLE = new ConfigKey(
+            "web.requestLog.enable", Boolean.class);
+
+    /**
+     * Jetty Request Log Path.
+     * The path must include the string "yyyy_mm_dd", which is replaced with the actual date when creating and rolling
+     * over the file.
+     * Example: ./logs/jetty-yyyy_mm_dd.request.log
+     */
+    public static final ConfigKey WEB_REQUEST_LOG_PATH = new ConfigKey(
+            "web.requestLog.path", String.class);
+
+    /**
+     * Set the number of days before rotated request log files are deleted.
+     */
+    public static final ConfigKey WEB_REQUEST_LOG_RETAIN_DAYS = new ConfigKey(
+            "web.requestLog.retainDays", Integer.class);
 
     private Keys() {
     }

@@ -13,6 +13,11 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
 
         decoder.setHbm(true);
         decoder.setIncludeAdc(true);
+
+        verifyAttribute(decoder, buffer(
+                "ST600STT;008594432;20;492;20200212;18:58:30;060bb0e1;334;20;36bb;45;+19.337897;-099.064489;000.398;000.00;12;1;5049883;13.61;100100;2;1198;013762;4.2;1;4.68"),
+                Position.PREFIX_ADC + 1, 4.68);
+
         decoder.setIncludeTemp(true);
 
         verifyAttribute(decoder, buffer(
@@ -62,6 +67,13 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
 
         SuntechProtocolDecoder decoder = new SuntechProtocolDecoder(null);
 
+        verifyPosition(decoder, buffer(
+                "ALT;0470001109;BFFFFF;47;1.0.2;0;20200511;22:39:38;0B29790F;310;410;2C13;30;+34.928093;-83.704295;0.94;30.95;10;1;00000001;00000000;15;;;00018003;4.1;14.13;629;11905"));
+
+        verifyAttribute(decoder, buffer(
+                "STT;0560001616;BFFFFF;56;1.0.15;1;20200219;20:52:25;00008D6C;334;20;0925;24;+20.741764;-103.430364;0.00;0.00;19;1;00000001;00000000;2;1;1765;00008003;0.0;12.14;136598"),
+                Position.KEY_INPUT, 1);
+
         verifyAttribute(decoder, binary(
                 "82004d05800000553fffff360100100114020410293902ccccf102dc007b00053c00476fa18469e87f000000000b0100003b00081d00000113f3f8010000049e00000000000000001d00000113f3f801"),
                 Position.KEY_DRIVER_UNIQUE_ID, "1d00000113f3f801");
@@ -81,6 +93,10 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, buffer(
                 "ALT;0520000295;3FFFFF;52;1.0.2;0;20190703;01:03:24;00004697;732;101;0002;59;+4.682583;-74.128142;0.00;0.00;6;1;00000000;00000000;9;1;;4.1;12.92;103188"));
+
+        verifyAttribute(decoder, buffer(
+                "ST600UEX;008728327;20;568;20200602;17:10:03;0bf1a893;334;20;2f19;23;+20.514492;-100.743221;000.033;000.00;12;1;41564973;13.17;000000;44;t_0=1C;N_0=0419.0;t_1=22;N_1=0001.0;Q_D=09\n\r;76;113771;4.1;1"),
+                Position.KEY_FUEL_LEVEL, 1050.0);
 
         verifyAttribute(decoder, buffer(
                 "ST300UEX;109003241;08;1026;20190425;17:36:04;04402;+04.722553;-074.052583;000.020;000.00;10;1;0;12.04;010000;51;CabAVL\"CabMensaje,0,58.5,-1.0,,,FinMensaje\"FinAVL\r\n;B1;0000000000;4.1;1"),

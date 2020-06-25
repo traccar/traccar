@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
@@ -253,11 +254,35 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
 
                 } else if (type == MSG_AD_SENSORS_DATA) {
 
-                    buf.readUnsignedByte(); // inputs flags
+                    int inputMask = buf.readUnsignedByte();
 
                     position.set(Position.KEY_OUTPUT, buf.readUnsignedByte());
 
-                    buf.readUnsignedByte(); // adc flags
+                    int adcMask = buf.readUnsignedByte();
+
+                    for (int i = 0; i < 8; i++) {
+                        if (BitUtil.check(inputMask, i)) {
+                            buf.readUnsignedByte(); // input
+                        }
+                    }
+
+                    for (int i = 0; i < 8; i++) {
+                        if (BitUtil.check(adcMask, i)) {
+                            position.set(Position.PREFIX_ADC + (i + 1), buf.readUnsignedMediumLE());
+                        }
+                    }
+
+                } else if (type == MSG_LIQUID_LEVEL_SENSOR) {
+
+                    int flags = buf.readUnsignedByte();
+
+                    buf.readUnsignedShortLE(); // address
+
+                    if (BitUtil.check(flags, 3)) {
+                        position.set("liquidRaw", ByteBufUtil.hexDump(buf.readSlice(end - buf.readerIndex())));
+                    } else {
+                        position.set("liquid", buf.readUnsignedIntLE());
+                    }
 
                 }
 

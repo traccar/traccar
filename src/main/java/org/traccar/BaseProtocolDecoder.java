@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,12 @@ import io.netty.handler.codec.http.HttpRequestDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
+import org.traccar.database.CommandsManager;
 import org.traccar.database.ConnectionManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.database.StatisticsManager;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 
@@ -33,7 +35,9 @@ import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 
 public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
@@ -222,25 +226,34 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
         if (statisticsManager != null) {
             statisticsManager.registerMessageReceived();
         }
-        Position position = null;
+        Set<Long> deviceIds = new HashSet<>();
         if (decodedMessage != null) {
             if (decodedMessage instanceof Position) {
-                position = (Position) decodedMessage;
+                deviceIds.add(((Position) decodedMessage).getDeviceId());
             } else if (decodedMessage instanceof Collection) {
-                Collection positions = (Collection) decodedMessage;
-                if (!positions.isEmpty()) {
-                    position = (Position) positions.iterator().next();
+                Collection<Position> positions = (Collection) decodedMessage;
+                for (Position position : positions) {
+                    deviceIds.add(position.getDeviceId());
                 }
             }
         }
-        if (position != null) {
-            connectionManager.updateDevice(
-                    position.getDeviceId(), Device.STATUS_ONLINE, new Date());
-        } else {
+        if (deviceIds.isEmpty()) {
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
             if (deviceSession != null) {
-                connectionManager.updateDevice(
-                        deviceSession.getDeviceId(), Device.STATUS_ONLINE, new Date());
+                deviceIds.add(deviceSession.getDeviceId());
+            }
+        }
+        for (long deviceId : deviceIds) {
+            connectionManager.updateDevice(deviceId, Device.STATUS_ONLINE, new Date());
+            sendQueuedCommands(channel, remoteAddress, deviceId);
+        }
+    }
+
+    protected void sendQueuedCommands(Channel channel, SocketAddress remoteAddress, long deviceId) {
+        CommandsManager commandsManager = Context.getCommandsManager();
+        if (commandsManager != null) {
+            for (Command command : commandsManager.readQueuedCommands(deviceId)) {
+                protocol.sendDataCommand(channel, remoteAddress, command);
             }
         }
     }
