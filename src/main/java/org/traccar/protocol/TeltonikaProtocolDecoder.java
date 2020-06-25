@@ -227,7 +227,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             case 26:
             case 27:
             case 28:
-                position.set("bleTemp" + (id - 24), readValue(buf, length, true) * 0.1);
+                position.set(Position.PREFIX_TEMP + (id - 20), readValue(buf, length, true) * 0.1);
                 break;
             case 66:
                 position.set(Position.KEY_POWER, readValue(buf, length, false) * 0.001);
@@ -236,7 +236,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_BATTERY, readValue(buf, length, false) * 0.001);
                 break;
             case 68:
-                position.set("batteryCurrent", readValue(buf, length,false) * 0.001);
+                position.set(Position.KEY_BATTERY_CURRENT, readValue(buf, length, false) * 0.001);
                 break;
             case 69:
                 position.set("gpsStatus", readValue(buf, length, false));
@@ -244,6 +244,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             case 72:
             case 73:
             case 74:
+            case 75:
                 position.set(Position.PREFIX_TEMP + (id - 71), readValue(buf, length, true) * 0.1);
                 break;
             case 78:
@@ -256,7 +257,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set("workMode", readValue(buf, length, false));
                 break;
             case 81:
-                position.set(Position.KEY_OBD_SPEED, readValue(buf, length, false));
+                position.set(Position.KEY_OBD_SPEED, UnitsConverter.knotsFromKph(readValue(buf, length, false)));
                 break;
             case 82:
                 position.set(Position.KEY_THROTTLE, readValue(buf, length, false));
@@ -271,7 +272,14 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_RPM, readValue(buf, length, false));
                 break;
             case 90:
-                position.set(Position.KEY_DOOR, readValue(buf, length, false));
+                long value=readValue(buf, length, false);
+                position.set(Position.KEY_DOOR, value);
+                position.set("dFrontLeft", (BitUtil.check(value, 8)));
+                position.set("dFrontRight", (BitUtil.check(value, 9)));
+                position.set("dRearLeft", (BitUtil.check(value, 10)));
+                position.set("dRearRight", (BitUtil.check(value, 11)));
+                position.set("dHoodOpen", (BitUtil.check(value, 12)));
+                position.set("dTrunkOpen", (BitUtil.check(value, 13)));
                 break;
             case 110:
                 position.set(Position.KEY_FUEL_CONSUMPTION, readValue(buf, length, true) * 0.1);
@@ -318,10 +326,10 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set("cngStatus", readValue(buf, length, false) == 1);
                 break;
             case 233:
-                position.set("cngUsed", readValue(buf, length, false) * 0.1);
+                position.set(Position.KEY_CNG_USED, readValue(buf, length, false) * 0.1);
                 break;
             case 234:
-                position.set("cngLevel", readValue(buf, length, false) * 0.1);
+                position.set(Position.KEY_CNG_LEVEL, readValue(buf, length, false) * 0.1);
                 break;
             case 235:
                 position.set("oilLevel", readValue(buf, length, false));

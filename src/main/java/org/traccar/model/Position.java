@@ -51,6 +51,7 @@ public class Position extends Message {
     public static final String KEY_POWER = "power"; // volts
     public static final String KEY_BATTERY = "battery"; // volts
     public static final String KEY_BATTERY_LEVEL = "batteryLevel"; // percentage
+    public static final String KEY_BATTERY_CURRENT = "batteryCurrent"; // miliamps
     public static final String KEY_FUEL_LEVEL = "fuel"; // liters
     public static final String KEY_FUEL_USED = "fuelUsed"; // liters
     public static final String KEY_FUEL_CONSUMPTION = "fuelConsumption"; // liters/hour
@@ -93,6 +94,9 @@ public class Position extends Message {
     public static final String KEY_RESULT = "result";
 
     public static final String KEY_DRIVER_UNIQUE_ID = "driverUniqueId";
+
+    public static final String KEY_CNG_USED = "cngUsed"; // kilograms
+    public static final String KEY_CNG_LEVEL = "cngLevel"; // percentage
 
     // Start with 1 not 0
     public static final String PREFIX_TEMP = "temp";
