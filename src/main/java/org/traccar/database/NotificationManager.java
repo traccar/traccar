@@ -92,9 +92,12 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
                     if (getById(notificationId).getType().equals(event.getType())) {
                         boolean filter = false;
                         if (event.getType().equals(Event.TYPE_ALARM)) {
-                            String alarms = notification.getString("alarms");
-                            if (alarms == null || !alarms.contains(event.getString(Position.KEY_ALARM))) {
+                            String alarmsAttribute = notification.getString("alarms");
+                            if (alarmsAttribute == null) {
                                 filter = true;
+                            } else {
+                                List<String> alarms = Arrays.asList(alarmsAttribute.split(","));
+                                filter = !alarms.contains(event.getString(Position.KEY_ALARM));
                             }
                         }
                         if (!filter) {
