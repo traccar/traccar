@@ -41,7 +41,6 @@ import java.util.regex.Pattern;
 
 public class MictrackProtocolDecoder extends BaseProtocolDecoder {
 
-
     public MictrackProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
