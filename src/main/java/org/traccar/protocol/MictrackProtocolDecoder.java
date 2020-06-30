@@ -1,5 +1,6 @@
 /*
  * Copyright 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2020 Roeland Boeters (roeland@geodelta.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +20,9 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.Protocol;
+import org.traccar.helper.DateBuilder;
+import org.traccar.helper.Parser;
+import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
@@ -30,13 +34,29 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.TimeZone;
+import java.util.regex.Pattern;
 
 public class MictrackProtocolDecoder extends BaseProtocolDecoder {
 
     public MictrackProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
+
+    private static final Pattern PATTERN_LOW_ALTITUDE = new PatternBuilder()
+            .number("(dd)(dd)(dd).d+,")          // time (hhmmss.sss)
+            .expression("([AV]),")               // validity
+            .number("(d+)(dd.d+),")              // latitude
+            .expression("([NS]),")
+            .number("(d+)(dd.d+),")              // longitude
+            .expression("([EW]),")
+            .number("(d+.?d*)?,")                // speed
+            .number("(d+.?d*)?,")                // course
+            .number("(d+.?d*)?,")                // altitude
+            .number("(dd)(dd)(dd)")              // date (ddmmyy)
+            .compile();
 
     private Date decodeTime(String data) throws ParseException {
         DateFormat dateFormat = new SimpleDateFormat("yyMMddHHmmss");
@@ -142,8 +162,18 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+        String sentence = ((String) msg).trim();
 
-        String[] fragments = ((String) msg).split(";");
+        if (sentence.startsWith("MT")) {
+            return decodeStandard(channel, remoteAddress, sentence);
+        } else {
+            return decodeLowAltitude(channel, remoteAddress, sentence);
+        }
+    }
+
+    private Object decodeStandard(
+            Channel channel, SocketAddress remoteAddress, String sentence) throws Exception {
+        String[] fragments = sentence.split(";");
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, fragments[2]);
         if (deviceSession == null) {
@@ -176,6 +206,48 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
         }
 
         return position;
+    }
+
+    private Object decodeLowAltitude(
+            Channel channel, SocketAddress remoteAddress, String sentence) throws Exception {
+        String deviceId = sentence.substring(0, sentence.indexOf("$"));
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, deviceId);
+        if (deviceSession == null) {
+            return null;
+        }
+
+        String[] fragments = sentence.substring(sentence.indexOf("$")).split("\\$");
+
+        List<Position> positions = new LinkedList<>();
+
+        for (String message : fragments) {
+            Parser parser = new Parser(PATTERN_LOW_ALTITUDE, message);
+
+            if (parser.matches()) {
+
+                Position position = new Position(getProtocolName());
+                position.setDeviceId(deviceSession.getDeviceId());
+
+                DateBuilder dateBuilder = new DateBuilder()
+                        .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+
+                position.setValid(parser.next().equals("A"));
+                position.setLatitude(parser.nextCoordinate());
+                position.setLongitude(parser.nextCoordinate());
+
+                position.setSpeed(parser.nextDouble(0));
+                position.setCourse(parser.nextDouble(0));
+                position.setAltitude(parser.nextDouble(0));
+
+                dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
+                position.setTime(dateBuilder.getDate());
+
+                positions.add(position);
+            }
+        }
+
+        return positions;
     }
 
 }

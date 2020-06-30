@@ -6,7 +6,7 @@ import org.traccar.ProtocolTest;
 public class MictrackProtocolDecoderTest extends ProtocolTest {
 
     @Test
-    public void testDecode() throws Exception {
+    public void testDecodeStandard() throws Exception {
 
         MictrackProtocolDecoder decoder = new MictrackProtocolDecoder(null);
 
@@ -31,7 +31,22 @@ public class MictrackProtocolDecoderTest extends ProtocolTest {
 
         verifyAttributes(decoder, text(
                 "MT;5;866425031379169;RH;5+190116112648+0+0+0+0+11+3954+1"));
+    }
 
+    @Test
+    public void testDecodeLowAltitude() throws Exception {
+
+        MictrackProtocolDecoder decoder = new MictrackProtocolDecoder(null);
+
+        verifyPositions(decoder, text(
+                "861108032038761$062232.00,A,2238.2832,N,11401.7381,E,0.01,309.62,95.0,131117"));
+
+        verifyPositions(decoder, text(
+                "861108032038761$062232.00,A,2238.2832,N,11401.7381,E,0.01,309.62,95.0,131117$062332.00,A,2238.2836,N,11401.7386,E,0.06,209.62,95.0,131117"));
+
+        verifyPositions(decoder, text(
+                "861108032038761$062232.00,A,2238.2832,N,11401.7381,E,0.01,309.62,95.0,131117"),
+                position("2017-11-13 06:22:32.000", true, 22.63806, 114.028976));
     }
 
 }
