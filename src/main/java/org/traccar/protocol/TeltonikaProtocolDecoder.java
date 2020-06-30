@@ -103,6 +103,18 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private boolean isPrintable(ByteBuf buf, int length) {
+        boolean printable = true;
+        for (int i = 0; i < length; i++) {
+            byte b = buf.getByte(buf.readerIndex() + i);
+            if (b < 32 && b != '\r' && b != '\n') {
+                printable = false;
+                break;
+            }
+        }
+        return printable;
+    }
+
     private void decodeSerial(Channel channel, SocketAddress remoteAddress, Position position, ByteBuf buf) {
 
         getLastLocation(position, null);
@@ -148,16 +160,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_TYPE, type);
 
             int length = buf.readInt();
-            boolean readable = true;
-            for (int i = 0; i < length; i++) {
-                byte b = buf.getByte(buf.readerIndex() + i);
-                if (b < 32 && b != '\r' && b != '\n') {
-                    readable = false;
-                    break;
-                }
-            }
-
-            if (readable) {
+            if (isPrintable(buf, length)) {
                 String data = buf.readSlice(length).toString(StandardCharsets.US_ASCII).trim();
                 if (data.startsWith("UUUUww") && data.endsWith("SSS")) {
                     String[] values = data.substring(6, data.length() - 4).split(";");
@@ -646,8 +649,13 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedByte(); // type
                 int length = buf.readInt() - 4;
                 getLastLocation(position, new Date(buf.readUnsignedInt() * 1000));
-                position.set(Position.KEY_RESULT,
-                        buf.readCharSequence(length, StandardCharsets.US_ASCII).toString().trim());
+                if (isPrintable(buf, length)) {
+                    position.set(Position.KEY_RESULT,
+                            buf.readCharSequence(length, StandardCharsets.US_ASCII).toString().trim());
+                } else {
+                    position.set(Position.KEY_RESULT,
+                            ByteBufUtil.hexDump(buf.readSlice(length)));
+                }
             } else if (codec == CODEC_12) {
                 decodeSerial(channel, remoteAddress, position, buf);
             } else {
