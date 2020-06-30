@@ -43,6 +43,7 @@ import org.traccar.geocoder.MapQuestGeocoder;
 import org.traccar.geocoder.MapmyIndiaGeocoder;
 import org.traccar.geocoder.NominatimGeocoder;
 import org.traccar.geocoder.OpenCageGeocoder;
+import org.traccar.geocoder.PositionStackGeocoder;
 import org.traccar.geocoder.TomTomGeocoder;
 import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.geolocation.GoogleGeolocationProvider;
@@ -177,6 +178,8 @@ public class MainModule extends AbstractModule {
                     return new MapmyIndiaGeocoder(url, key, cacheSize, addressFormat);
                 case "tomtom":
                     return new TomTomGeocoder(url, key, cacheSize, addressFormat);
+                case "positionstack":
+                    return new PositionStackGeocoder(key, cacheSize, addressFormat);
                 default:
                     return new GoogleGeocoder(key, language, cacheSize, addressFormat);
             }

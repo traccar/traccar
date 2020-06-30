@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
 
 public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
-    private boolean decodeLow;
+    private final boolean decodeLow;
 
     public Tk103ProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -47,10 +47,16 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .groupBegin()
             .expression("(.{12})")               // device id
             .or()
-            .expression("(.+),")                 // device id
+            .expression("([^,]+),")              // device id
             .groupEnd()
             .expression("(.{4}),?")              // command
+            .groupBegin()
             .number("(d*)")
+            .or()
+            .text(",ALARM,")
+            .number("(d),")                      // alarm type
+            .number("d+,")
+            .groupEnd()
             .number("(dd)(dd)(dd),?")            // date (mmddyy if comma-delimited, otherwise yyddmm)
             .expression("([AV]),?")              // validity
             .number(" *(d+)(dd.d+)")             // latitude
@@ -125,6 +131,14 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
+    private static final Pattern PATTERN_VIN = new PatternBuilder()
+            .text("(")
+            .number("(d+)")                      // device id
+            .expression("BV00")                  // command
+            .expression("(.{17})")               // vin
+            .text(")")
+            .compile();
+
     private String decodeAlarm(int value) {
         switch (value) {
             case 1:
@@ -146,6 +160,30 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
     private void decodeType(Position position, String type, String data) {
         switch (type) {
+            case "BQ81":
+                switch (Integer.parseInt(data)) {
+                    case 0:
+                        position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                        break;
+                    case 1:
+                        position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+                        break;
+                    case 2:
+                        position.set(Position.KEY_ALARM, Position.ALARM_IDLE);
+                        break;
+                    case 3:
+                        position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+                        break;
+                    case 4:
+                        position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+                        break;
+                    case 5:
+                        position.set(Position.KEY_ALARM, Position.ALARM_TEMPERATURE);
+                        break;
+                    default:
+                        break;
+                }
+                break;
             case "BO01":
                 position.set(Position.KEY_ALARM, decodeAlarm(data.charAt(0) - '0'));
                 break;
@@ -340,7 +378,27 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_RESULT, parser.next());
 
         return position;
+    }
 
+    private Position decodeVin(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN_VIN, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, null);
+
+        position.set(Position.KEY_VIN, parser.next());
+
+        return position;
     }
 
     @Override
@@ -368,6 +426,8 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             return decodeCommandResult(channel, remoteAddress, sentence);
         } else if (sentence.contains("DW5")) {
             return decodeLbsWifi(channel, remoteAddress, sentence);
+        } else if (sentence.contains("BV00")) {
+            return decodeVin(channel, remoteAddress, sentence);
         }
 
         Parser parser = new Parser(PATTERN, sentence);
@@ -393,7 +453,15 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        decodeType(position, parser.next(), parser.next());
+        String type = parser.next();
+        String data = null;
+        if (parser.hasNext()) {
+            data = parser.next();
+        }
+        if (parser.hasNext()) {
+            data = parser.next();
+        }
+        decodeType(position, type, data);
 
         DateBuilder dateBuilder = new DateBuilder();
         if (alternative) {
