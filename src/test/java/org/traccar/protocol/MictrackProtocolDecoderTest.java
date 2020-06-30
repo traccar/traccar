@@ -6,11 +6,10 @@ import org.traccar.ProtocolTest;
 public class MictrackProtocolDecoderTest extends ProtocolTest {
 
     @Test
-    public void testDecode() throws Exception {
+    public void testDecodeStandard() throws Exception {
 
         MictrackProtocolDecoder decoder = new MictrackProtocolDecoder(null);
 
-        // Standard Mictrack protocol tests
         verifyPosition(decoder, text(
                 "MT;6;866425031361423;R0;10+190109091803+22.63827+114.02922+2.14+69+2+3744+113"),
                 position("2019-01-09 09:18:03.000", true, 22.63827, 114.02922));
@@ -32,14 +31,18 @@ public class MictrackProtocolDecoderTest extends ProtocolTest {
 
         verifyAttributes(decoder, text(
                 "MT;5;866425031379169;RH;5+190116112648+0+0+0+0+11+3954+1"));
+    }
 
-        // Mictrack Low Altitude Flight tests
+    @Test
+    public void testDecodeLowAltitude() throws Exception {
+
+        MictrackProtocolDecoder decoder = new MictrackProtocolDecoder(null);
+
         verifyPositions(decoder, text(
                 "861108032038761$062232.00,A,2238.2832,N,11401.7381,E,0.01,309.62,95.0,131117"));
 
         verifyPositions(decoder, text(
-                "861108032038761$062232.00,A,2238.2832,N,11401.7381,E,0.01,309.62,95.0,131117$" +
-                        "062332.00,A,2238.2836,N,11401.7386,E,0.06,209.62,95.0,131117"));
+                "861108032038761$062232.00,A,2238.2832,N,11401.7381,E,0.01,309.62,95.0,131117$062332.00,A,2238.2836,N,11401.7386,E,0.06,209.62,95.0,131117"));
 
         verifyPositions(decoder, text(
                 "861108032038761$062232.00,A,2238.2832,N,11401.7381,E,0.01,309.62,95.0,131117"),

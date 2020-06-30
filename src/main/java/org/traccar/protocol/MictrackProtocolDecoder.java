@@ -45,7 +45,7 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern PATTERN_POSITION_LOW_ALTITUDE_FORMAT = new PatternBuilder()
+    private static final Pattern PATTERN_LOW_ALTITUDE = new PatternBuilder()
             .number("(dd)(dd)(dd).d+,")          // time (hhmmss.sss)
             .expression("([AV]),")               // validity
             .number("(d+)(dd.d+),")              // latitude
@@ -162,17 +162,14 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
-
-        if (((String) msg).contains("$")) {
-            // This is the Mictrack Low Altitude Flight format
-            return decodeMictrackLowAltitudeFlight(channel, remoteAddress, msg);
+        if (((String) msg).startsWith("MT")) {
+            return decodeStandard(channel, remoteAddress, msg);
+        } else {
+            return decodeLowAltitude(channel, remoteAddress, msg);
         }
-
-        // Default Mictrack format
-        return decodeMictrackStandard(channel, remoteAddress, msg);
     }
 
-    private Object decodeMictrackStandard(
+    private Object decodeStandard(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
         String[] fragments = ((String) msg).split(";");
 
@@ -209,7 +206,7 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private Object decodeMictrackLowAltitudeFlight(
+    private Object decodeLowAltitude(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
         String sentence = ((String) msg).trim();
 
@@ -225,7 +222,7 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
         List<Position> positions = new LinkedList<>();
 
         for (String message : fragments) {
-            Parser parser = new Parser(PATTERN_POSITION_LOW_ALTITUDE_FORMAT, message);
+            Parser parser = new Parser(PATTERN_LOW_ALTITUDE, message);
 
             if (parser.matches()) {
 
@@ -233,7 +230,7 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
                 position.setDeviceId(deviceSession.getDeviceId());
 
                 DateBuilder dateBuilder = new DateBuilder()
-                        .setTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
+                        .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
 
                 position.setValid(parser.next().equals("A"));
                 position.setLatitude(parser.nextCoordinate());
@@ -243,7 +240,7 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
                 position.setCourse(parser.nextDouble(0));
                 position.setAltitude(parser.nextDouble(0));
 
-                dateBuilder.setDateReverse(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
+                dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
                 position.setTime(dateBuilder.getDate());
 
                 positions.add(position);
