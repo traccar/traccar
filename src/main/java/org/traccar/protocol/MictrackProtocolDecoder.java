@@ -162,16 +162,18 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
-        if (((String) msg).startsWith("MT")) {
-            return decodeStandard(channel, remoteAddress, msg);
+        String sentence = ((String) msg).trim();
+
+        if (sentence.startsWith("MT")) {
+            return decodeStandard(channel, remoteAddress, sentence);
         } else {
-            return decodeLowAltitude(channel, remoteAddress, msg);
+            return decodeLowAltitude(channel, remoteAddress, sentence);
         }
     }
 
     private Object decodeStandard(
-            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
-        String[] fragments = ((String) msg).split(";");
+            Channel channel, SocketAddress remoteAddress, String sentence) throws Exception {
+        String[] fragments = sentence.split(";");
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, fragments[2]);
         if (deviceSession == null) {
@@ -207,9 +209,7 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private Object decodeLowAltitude(
-            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
-        String sentence = ((String) msg).trim();
-
+            Channel channel, SocketAddress remoteAddress, String sentence) throws Exception {
         String deviceId = sentence.substring(0, sentence.indexOf("$"));
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, deviceId);
