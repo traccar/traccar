@@ -134,18 +134,13 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, null);
 
-            int battery = buf.readUnsignedByte();
-            int firmware = buf.readUnsignedByte();
-            int timezone = buf.readUnsignedByte();
+            position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+            position.set(Position.KEY_VERSION_FW, buf.readUnsignedByte());
+            buf.readUnsignedByte(); // timezone
             int interval = buf.readUnsignedByte();
-            int signal = 0;
             if (length >= 7) {
-                signal = buf.readUnsignedByte();
-                position.set(Position.KEY_RSSI, signal);
+                position.set(Position.KEY_RSSI, buf.readUnsignedByte());
             }
-
-            position.set(Position.KEY_BATTERY_LEVEL, battery);
-            position.set(Position.KEY_VERSION_FW, firmware);
 
             ByteBuf content = Unpooled.buffer();
             content.writeByte(interval);
