@@ -49,9 +49,18 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
             .number("(x{8}),")                   // status
             .number("(x+),")                     // signal
             .number("(d+),")                     // power
-            .number("(x{4}),")                   // oil
-            .number("(x+),?")                    // odometer
-            .number("(d+)?")                     // altitude
+            .number("(x+),")                     // fuel
+            .number("(x+)")                      // odometer
+            .groupBegin()
+            .number(",(x+)")                     // altitude
+            .groupBegin()
+            .number(",d+")                       // gps data
+            .number(",(d*)")                     // rfid
+            .number(",(x+)")                     // temperature
+            .number(",(d+.d+)")                  // adc
+            .number(",(d+)")                     // satellites
+            .groupEnd("?")
+            .groupEnd("?")
             .any()
             .compile();
 
@@ -102,36 +111,46 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         position.setValid(parser.next().equals("A"));
 
         DateBuilder dateBuilder = new DateBuilder()
-                .setDate(parser.nextHexInt(0), parser.nextHexInt(0), parser.nextHexInt(0))
-                .setTime(parser.nextHexInt(0), parser.nextHexInt(0), parser.nextHexInt(0));
+                .setDate(parser.nextHexInt(), parser.nextHexInt(), parser.nextHexInt())
+                .setTime(parser.nextHexInt(), parser.nextHexInt(), parser.nextHexInt());
         position.setTime(dateBuilder.getDate());
 
-        if (BitUtil.check(parser.nextHexInt(0), 3)) {
-            position.setLatitude(-parser.nextHexInt(0) / 600000.0);
+        if (BitUtil.check(parser.nextHexInt(), 3)) {
+            position.setLatitude(-parser.nextHexInt() / 600000.0);
         } else {
-            position.setLatitude(parser.nextHexInt(0) / 600000.0);
+            position.setLatitude(parser.nextHexInt() / 600000.0);
         }
 
-        if (BitUtil.check(parser.nextHexInt(0), 3)) {
-            position.setLongitude(-parser.nextHexInt(0) / 600000.0);
+        if (BitUtil.check(parser.nextHexInt(), 3)) {
+            position.setLongitude(-parser.nextHexInt() / 600000.0);
         } else {
-            position.setLongitude(parser.nextHexInt(0) / 600000.0);
+            position.setLongitude(parser.nextHexInt() / 600000.0);
         }
 
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextHexInt(0) / 100.0));
-        position.setCourse(parser.nextHexInt(0) / 100.0);
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextHexInt() / 100.0));
+        double course = parser.nextHexInt() * 0.01;
+        if (course < 360) {
+            position.setCourse(course);
+        }
 
         long status = parser.nextHexLong();
         position.set(Position.KEY_ALARM, decodeAlarm(status));
         position.set(Position.KEY_IGNITION, BitUtil.check(status, 23));
         position.set(Position.KEY_STATUS, status);
 
-        position.set("signal", parser.next());
-        position.set(Position.KEY_POWER, parser.nextDouble(0));
-        position.set("oil", parser.nextHexInt(0));
-        position.set(Position.KEY_ODOMETER, parser.nextHexInt(0) * 100);
+        position.set(Position.KEY_RSSI, parser.nextHexInt());
+        position.set(Position.KEY_POWER, parser.nextDouble());
+        position.set(Position.KEY_FUEL_LEVEL, parser.nextHexInt());
+        position.set(Position.KEY_ODOMETER, parser.nextHexInt() * 100);
 
         position.setAltitude(parser.nextDouble(0));
+
+        if (parser.hasNext(4)) {
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
+            position.set(Position.PREFIX_TEMP + 1, parser.nextHexInt() * 0.01);
+            position.set(Position.PREFIX_ADC + 1, parser.nextDouble());
+            position.set(Position.KEY_SATELLITES, parser.nextInt());
+        }
 
         return position;
     }
