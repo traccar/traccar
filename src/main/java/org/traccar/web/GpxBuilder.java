@@ -33,7 +33,7 @@ public class GpxBuilder {
     private static final String NAME = "<name>%1$s</name><trkseg>%n";
     private static final String POINT = "<trkpt lat=\"%1$f\" lon=\"%2$f\">"
             + "<time>%3$s</time>"
-            + "<geoidheight>%4$f</geoidheight>"
+            + "<ele>%4$f</ele>"
             + "<course>%5$f</course>"
             + "<speed>%6$f</speed>"
             + "</trkpt>%n";
