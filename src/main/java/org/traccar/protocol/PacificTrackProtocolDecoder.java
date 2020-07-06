@@ -91,6 +91,7 @@ public class PacificTrackProtocolDecoder extends BaseProtocolDecoder {
                             switch (BitUtil.between(field, 2, 5)) {
                                 case 0b000:
                                     position.set("bus", BitUtil.to(field, 2));
+                                    break;
                                 case 0b001:
                                     position.set("currentGear", BitUtil.to(field, 2));
                                     break;

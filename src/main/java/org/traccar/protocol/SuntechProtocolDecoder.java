@@ -667,10 +667,8 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedShort(); // alert modifier
         }
 
-        if (BitUtil.check(mask, 21)) {
-            if (alertId == 59) {
-                position.set(Position.KEY_DRIVER_UNIQUE_ID, ByteBufUtil.hexDump(buf.readSlice(8)));
-            }
+        if (BitUtil.check(mask, 21) && alertId == 59) {
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, ByteBufUtil.hexDump(buf.readSlice(8)));
         }
 
         return position;
