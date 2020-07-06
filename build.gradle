@@ -1,7 +1,7 @@
 plugins {
     id "java"
     id "checkstyle"
-    id "com.google.protobuf" version "0.8.11"
+    id "com.google.protobuf" version "0.8.12"
     id "application"
 }
 
@@ -10,11 +10,11 @@ repositories {
 }
 
 ext {
-    guiceVersion = "4.2.2"
-    jettyVersion = "9.4.26.v20200117"
-    jerseyVersion = "2.30"
-    jacksonVersion = "2.9.9" // same version as jersey-media-json-jackson dependency
-    protobufVersion = "3.11.1"
+    guiceVersion = "4.2.3"
+    jettyVersion = "9.4.30.v20200611"
+    jerseyVersion = "2.31"
+    jacksonVersion = "2.10.1" // same version as jersey-media-json-jackson dependency
+    protobufVersion = "3.12.2"
 }
 
 sourceCompatibility = "1.8"
@@ -35,13 +35,13 @@ protobuf {
 }
 
 dependencies {
-    implementation "commons-codec:commons-codec:1.13"
+    implementation "commons-codec:commons-codec:1.14"
     implementation "com.h2database:h2:1.4.200"
-    implementation "mysql:mysql-connector-java:8.0.18"
-    implementation "org.postgresql:postgresql:42.2.9"
-    implementation "com.microsoft.sqlserver:mssql-jdbc:7.4.1.jre8"
-    implementation "com.zaxxer:HikariCP:3.4.2"
-    implementation "io.netty:netty-all:4.1.44.Final"
+    implementation "mysql:mysql-connector-java:8.0.20"
+    implementation "org.postgresql:postgresql:42.2.14"
+    implementation "com.microsoft.sqlserver:mssql-jdbc:8.2.2.jre8"
+    implementation "com.zaxxer:HikariCP:3.4.5"
+    implementation "io.netty:netty-all:4.1.50.Final"
     implementation "org.slf4j:slf4j-jdk14:1.7.30"
     implementation "com.google.inject:guice:$guiceVersion"
     implementation "com.google.inject.extensions:guice-assistedinject:$guiceVersion"
@@ -58,7 +58,7 @@ dependencies {
     implementation "org.glassfish.jersey.inject:jersey-hk2:$jerseyVersion"
     implementation "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:$jacksonVersion"
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr353:$jacksonVersion"
-    implementation "org.liquibase:liquibase-core:3.8.5", {
+    implementation "org.liquibase:liquibase-core:3.10.1", {
         exclude group: "ch.qos.logback", module: "logback-classic"
     }
     implementation "com.sun.mail:javax.mail:1.6.2"
@@ -70,11 +70,11 @@ dependencies {
     implementation "org.mnode.ical4j:ical4j:2.0.5" // needs upgrade
     implementation "com.fizzed:ch-smpp:6.0.0-netty4-beta-3"
     implementation "net.java.dev.jna:jna-platform:5.5.0"
-    implementation "com.github.jnr:jnr-posix:3.0.51"
+    implementation "com.github.jnr:jnr-posix:3.0.57"
     implementation "com.google.protobuf:protobuf-java:$protobufVersion"
     implementation "javax.xml.bind:jaxb-api:2.3.1"
     implementation "com.sun.xml.bind:jaxb-core:2.3.0.1"
-    implementation "com.sun.xml.bind:jaxb-impl:2.3.2"
+    implementation "com.sun.xml.bind:jaxb-impl:2.3.3"
     implementation "javax.activation:activation:1.1.1"
     testImplementation "junit:junit:4.13"
 }
