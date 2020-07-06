@@ -2,8 +2,9 @@
 
 add-apt-repository ppa:openjdk-r/ppa
 curl -sL https://deb.nodesource.com/setup_4.x | sudo -E bash -
+dpkg --add-architecture i386
 apt update
-apt install -y openjdk-11-jdk zip unzip innoextract wine-stable makeself nodejs
+apt install -y openjdk-11-jdk zip unzip innoextract wine32 makeself nodejs
 
 # /usr/bin/printf '\xfe\xed\xfe\xed\x00\x00\x00\x02\x00\x00\x00\x00\xe2\x68\x6e\x45\xfb\x43\xdf\xa4\xd9\x92\xdd\x41\xce\xb6\xb2\x1c\x63\x30\xd7\x92' > /etc/ssl/certs/java/cacerts
 # /var/lib/dpkg/info/ca-certificates-java.postinst configure
