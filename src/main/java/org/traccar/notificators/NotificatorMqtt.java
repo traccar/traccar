@@ -73,9 +73,11 @@ public final class NotificatorMqtt extends Notificator {
             // Create MQTT client
             IMqttClient client = new MqttClient(mqttHost, clientId);
 
-            // Set connection options (username, password, etc.)
-            MqttConnectOptions connOpts = setUpConnectionOptions(mqttUser, mqttPass);
-            client.connect(connOpts);
+            // Set connection options (username, password), if defined
+            if ((StringUtils.isNotBlank(mqttUser)) && (StringUtils.isNotBlank(mqttPass))) {
+                MqttConnectOptions connOpts = setUpConnectionOptions(mqttUser, mqttPass);
+                client.connect(connOpts);
+            }
 
             // Create and publish message
             MqttMessage msg = new MqttMessage();
@@ -83,6 +85,9 @@ public final class NotificatorMqtt extends Notificator {
             msg.setQos(0);
             msg.setRetained(true);
             client.publish("/Traccar/Notification/" + event.getType(),msg);
+
+            // Disconnect from the broker
+            client.disconnect();
 
         } catch (MqttSecurityException e) {
             LOGGER.warn("MqttSecurityException", e);
