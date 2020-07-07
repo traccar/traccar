@@ -73,10 +73,13 @@ public final class NotificatorMqtt extends Notificator {
             // Create MQTT client
             IMqttClient client = new MqttClient(mqttHost, clientId);
 
-            // Set connection options (username, password), if defined
+            // Set connection options (username, password), if defined, and connect
             if ((StringUtils.isNotBlank(mqttUser)) && (StringUtils.isNotBlank(mqttPass))) {
                 MqttConnectOptions connOpts = setUpConnectionOptions(mqttUser, mqttPass);
                 client.connect(connOpts);
+            }
+            else {
+                client.connect();
             }
 
             // Create and publish message
