@@ -88,6 +88,7 @@ dependencies {
     }
     testImplementation "junit:junit:4.13.2"
     testImplementation "org.mockito:mockito-core:4.+"
+    implementation 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.4'
 }
 
 task copyDependencies(type: Copy) {
