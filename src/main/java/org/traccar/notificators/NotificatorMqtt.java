@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2020 Francesco Rega (francesco@francescorega.eu)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 package org.traccar.notificators;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang.text.StrSubstitutor;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.paho.client.mqttv3.*;
 import org.slf4j.Logger;
@@ -25,24 +25,29 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.notification.NotificationFormatter;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.InvocationCallback;
-import java.util.UUID;
+import java.util.HashMap;
+import java.util.Map;
 
-public class NotificatorMqtt extends Notificator {
+public final class NotificatorMqtt extends Notificator {
 
+    // Get Logger
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificatorMqtt.class);
 
+    // Initialize connection variables
     private String mqttHost;
     private String mqttUser;
     private String mqttPass;
     private String clientId;
 
     public NotificatorMqtt() {
+
+        // Read connection configuration values
         mqttHost = Context.getConfig().getString("notificator.mqtt.hostname");
         mqttUser = Context.getConfig().getString("notificator.mqtt.username");
         mqttPass = Context.getConfig().getString("notificator.mqtt.password");
-        clientId = (StringUtils.isNotBlank(Context.getConfig().getString("notificator.mqtt.clientid"))) ? Context.getConfig().getString("notificator.mqtt.clientid") : MqttClient.generateClientId();
+        clientId = (StringUtils.isNotBlank(Context.getConfig().getString("notificator.mqtt.clientid"))) ?
+                Context.getConfig().getString("notificator.mqtt.clientid") :
+                MqttClient.generateClientId();
     }
 
     @Override
@@ -50,41 +55,39 @@ public class NotificatorMqtt extends Notificator {
 
         try {
 
+            // Read configured payload to send, if any, or set default
+            String payload = (StringUtils.isNotBlank(Context.getConfig().getString("notificator.mqtt.payload"))) ?
+                    Context.getConfig().getString("notificator.mqtt.payload") :
+                    NotificationFormatter.formatShortMessage(userId, event, position);
+
+            // Replace placeholders with real values
+            Map<String, String> values = new HashMap<String, String>();
+            values.put("U", String.valueOf(userId));
+            values.put("D", String.valueOf(event.getDeviceId()));
+            values.put("G", String.valueOf(event.getGeofenceId()));
+            values.put("P", String.valueOf(event.getPositionId()));
+            values.put("M", NotificationFormatter.formatShortMessage(userId, event, position));
+            StrSubstitutor sub = new StrSubstitutor(values, "%", "%");
+            payload = sub.replace(payload);
+
+            // Create MQTT client
             IMqttClient client = new MqttClient(mqttHost, clientId);
 
+            // Set connection options (username, password, etc.)
             MqttConnectOptions connOpts = setUpConnectionOptions(mqttUser, mqttPass);
             client.connect(connOpts);
 
+            // Create and publish message
             MqttMessage msg = new MqttMessage();
-            msg.setPayload(NotificationFormatter.formatShortMessage(userId, event, position).getBytes());
+            msg.setPayload(payload.getBytes());
             msg.setQos(0);
             msg.setRetained(true);
-            client.publish("/Traccar/Notification",msg);
-
-
-            /*
-            Message message = new Message();
-            message.chatId = chatId;
-            message.text = NotificationFormatter.formatShortMessage(userId, event, position);
-
-            Context.getClient().target(url).request()
-                    .async().post(Entity.json(message), new InvocationCallback<Object>() {
-                @Override
-                public void completed(Object o) {
-                }
-
-                @Override
-                public void failed(Throwable throwable) {
-                    LOGGER.warn("Telegram API error", throwable);
-                }
-            });
-            */
-
+            client.publish("/Traccar/Notification/" + event.getType(),msg);
 
         } catch (MqttSecurityException e) {
-            e.printStackTrace();
+            LOGGER.warn("MqttSecurityException", e);
         } catch (MqttException e) {
-            e.printStackTrace();
+            LOGGER.warn("MqttException", e);
         }
     }
 
