@@ -55,19 +55,28 @@ public final class NotificatorMqtt extends Notificator {
 
         try {
 
-            // Read configured payload to send, if any, or set default
-            String payload = (StringUtils.isNotBlank(Context.getConfig().getString("notificator.mqtt.payload"))) ?
-                    Context.getConfig().getString("notificator.mqtt.payload") :
-                    NotificationFormatter.formatShortMessage(userId, event, position);
-
-            // Replace placeholders with real values
+            // Create placeholders and substitutors map
             Map<String, String> values = new HashMap<String, String>();
             values.put("U", String.valueOf(userId));
+            values.put("E", event.getType());
             values.put("D", String.valueOf(event.getDeviceId()));
             values.put("G", String.valueOf(event.getGeofenceId()));
             values.put("P", String.valueOf(event.getPositionId()));
             values.put("M", NotificationFormatter.formatShortMessage(userId, event, position));
             StrSubstitutor sub = new StrSubstitutor(values, "%", "%");
+
+            // Read configured topic to publish to, if any, or set default
+            String topic = (StringUtils.isNotBlank(Context.getConfig().getString("notificator.mqtt.topic"))) ?
+                    Context.getConfig().getString("notificator.mqtt.topic") :
+                    "/Traccar/Notification/" + event.getType();
+
+            // Read configured payload to publish, if any, or set default
+            String payload = (StringUtils.isNotBlank(Context.getConfig().getString("notificator.mqtt.payload"))) ?
+                    Context.getConfig().getString("notificator.mqtt.payload") :
+                    NotificationFormatter.formatShortMessage(userId, event, position);
+
+            // Replace placeholders with real values
+            topic = sub.replace(topic);
             payload = sub.replace(payload);
 
             // Create MQTT client
@@ -87,7 +96,7 @@ public final class NotificatorMqtt extends Notificator {
             msg.setPayload(payload.getBytes());
             msg.setQos(0);
             msg.setRetained(false);
-            client.publish("/Traccar/Notification/" + event.getType(),msg);
+            client.publish(topic,msg);
 
             // Disconnect from the broker
             client.disconnect();
