@@ -86,7 +86,7 @@ public final class NotificatorMqtt extends Notificator {
             MqttMessage msg = new MqttMessage();
             msg.setPayload(payload.getBytes());
             msg.setQos(0);
-            msg.setRetained(true);
+            msg.setRetained(false);
             client.publish("/Traccar/Notification/" + event.getType(),msg);
 
             // Disconnect from the broker
