@@ -181,12 +181,14 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_SHOCK;
             case 16:
                 return Position.ALARM_ACCIDENT;
+            case 40:
+                return Position.ALARM_POWER_RESTORED;
+            case 41:
+                return Position.ALARM_POWER_CUT;
             case 46:
                 return Position.ALARM_ACCELERATION;
             case 47:
                 return Position.ALARM_BRAKING;
-            case 48:
-                return Position.ALARM_ACCIDENT;
             case 50:
                 return Position.ALARM_JAMMING;
             default:
