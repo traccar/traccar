@@ -129,7 +129,7 @@ package_other () {
 package_windows () {
   info "Building Windows 64 installer"
   unzip -q -o java-*.windows.ojdkbuild.x86_64.zip
-  jlink --module-path java-*.windows.ojdkbuild.x86_64/jmods --add-modules java.se,jdk.charsets --output out/jre
+  jlink --module-path java-*.windows.ojdkbuild.x86_64/jmods --add-modules java.se,jdk.charsets,jdk.crypto.ec --output out/jre
   rm -rf java-*.windows.ojdkbuild.x86_64
   wine app/ISCC.exe traccar.iss >/dev/null
   rm -rf out/jre
@@ -143,7 +143,7 @@ package_linux () {
   cp traccar.service out
 
   unzip -q -o jdk-*-linux-$1.zip
-  jlink --module-path jdk-*-linux-$1/jmods --add-modules java.se,jdk.charsets --output out/jre
+  jlink --module-path jdk-*-linux-$1/jmods --add-modules java.se,jdk.charsets,jdk.crypto.ec --output out/jre
   rm -rf jdk-*-linux-$1
   makeself --quiet --notemp out traccar.run "traccar" ./setup.sh
   rm -rf out/jre
