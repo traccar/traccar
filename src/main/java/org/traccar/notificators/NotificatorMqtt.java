@@ -15,9 +15,14 @@
  */
 package org.traccar.notificators;
 
+import org.eclipse.paho.client.mqttv3.IMqttClient;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.MqttSecurityException;
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.paho.client.mqttv3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
@@ -45,9 +50,9 @@ public final class NotificatorMqtt extends Notificator {
         mqttHost = Context.getConfig().getString("notificator.mqtt.hostname");
         mqttUser = Context.getConfig().getString("notificator.mqtt.username");
         mqttPass = Context.getConfig().getString("notificator.mqtt.password");
-        clientId = (StringUtils.isNotBlank(Context.getConfig().getString("notificator.mqtt.clientid"))) ?
-                Context.getConfig().getString("notificator.mqtt.clientid") :
-                MqttClient.generateClientId();
+        clientId = (StringUtils.isNotBlank(Context.getConfig().getString("notificator.mqtt.clientid")))
+                ? Context.getConfig().getString("notificator.mqtt.clientid")
+                : MqttClient.generateClientId();
     }
 
     @Override
@@ -66,14 +71,14 @@ public final class NotificatorMqtt extends Notificator {
             StrSubstitutor sub = new StrSubstitutor(values, "%", "%");
 
             // Read configured topic to publish to, if any, or set default
-            String topic = (StringUtils.isNotBlank(Context.getConfig().getString("notificator.mqtt.topic"))) ?
-                    Context.getConfig().getString("notificator.mqtt.topic") :
-                    "/Traccar/Notification/" + event.getType();
+            String topic = (StringUtils.isNotBlank(Context.getConfig().getString("notificator.mqtt.topic")))
+                    ? Context.getConfig().getString("notificator.mqtt.topic")
+                    : "/Traccar/Notification/" + event.getType();
 
             // Read configured payload to publish, if any, or set default
-            String payload = (StringUtils.isNotBlank(Context.getConfig().getString("notificator.mqtt.payload"))) ?
-                    Context.getConfig().getString("notificator.mqtt.payload") :
-                    NotificationFormatter.formatShortMessage(userId, event, position);
+            String payload = (StringUtils.isNotBlank(Context.getConfig().getString("notificator.mqtt.payload")))
+                    ? Context.getConfig().getString("notificator.mqtt.payload")
+                    : NotificationFormatter.formatShortMessage(userId, event, position);
 
             // Replace placeholders with real values
             topic = sub.replace(topic);
@@ -86,8 +91,7 @@ public final class NotificatorMqtt extends Notificator {
             if ((StringUtils.isNotBlank(mqttUser)) && (StringUtils.isNotBlank(mqttPass))) {
                 MqttConnectOptions connOpts = setUpConnectionOptions(mqttUser, mqttPass);
                 client.connect(connOpts);
-            }
-            else {
+            } else {
                 client.connect();
             }
 
@@ -96,7 +100,7 @@ public final class NotificatorMqtt extends Notificator {
             msg.setPayload(payload.getBytes());
             msg.setQos(0);
             msg.setRetained(false);
-            client.publish(topic,msg);
+            client.publish(topic, msg);
 
             // Disconnect from the broker
             client.disconnect();
