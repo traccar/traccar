@@ -43,16 +43,30 @@ public final class NotificatorMqtt extends Notificator {
     private String mqttUser;
     private String mqttPass;
     private String clientId;
+    private String qos;
+    private String cleanSession;
+    private String retain;
 
     public NotificatorMqtt() {
 
         // Read connection configuration values
-        mqttHost = Context.getConfig().getString("notificator.mqtt.hostname");
+        mqttHost = (StringUtils.isNotBlank(Context.getConfig().getString("notificator.mqtt.uri")))
+                ? Context.getConfig().getString("notificator.mqtt.uri")
+                : "tcp://127.0.0.1:1883";
         mqttUser = Context.getConfig().getString("notificator.mqtt.username");
         mqttPass = Context.getConfig().getString("notificator.mqtt.password");
         clientId = (StringUtils.isNotBlank(Context.getConfig().getString("notificator.mqtt.clientid")))
                 ? Context.getConfig().getString("notificator.mqtt.clientid")
                 : MqttClient.generateClientId();
+        qos = (StringUtils.isNotBlank(Context.getConfig().getString("notificator.mqtt.qos")))
+                ? Context.getConfig().getString("notificator.mqtt.qos")
+                : "0";
+        cleanSession = (StringUtils.isNotBlank(Context.getConfig().getString("notificator.mqtt.cleansession")))
+                ? Context.getConfig().getString("notificator.mqtt.cleansession")
+                : "true";
+        retain = (StringUtils.isNotBlank(Context.getConfig().getString("notificator.mqtt.retain")))
+                ? Context.getConfig().getString("notificator.mqtt.retain")
+                : "false";
     }
 
     @Override
@@ -87,19 +101,20 @@ public final class NotificatorMqtt extends Notificator {
             // Create MQTT client
             IMqttClient client = new MqttClient(mqttHost, clientId);
 
-            // Set connection options (username, password), if defined, and connect
+            // Set connection options and connect
+            MqttConnectOptions connOpts = new MqttConnectOptions();
+            connOpts.setCleanSession(Boolean.parseBoolean(cleanSession));
             if ((StringUtils.isNotBlank(mqttUser)) && (StringUtils.isNotBlank(mqttPass))) {
-                MqttConnectOptions connOpts = setUpConnectionOptions(mqttUser, mqttPass);
-                client.connect(connOpts);
-            } else {
-                client.connect();
+                connOpts.setUserName(mqttUser);
+                connOpts.setPassword(mqttPass.toCharArray());
             }
+            client.connect(connOpts);
 
             // Create and publish message
             MqttMessage msg = new MqttMessage();
             msg.setPayload(payload.getBytes());
-            msg.setQos(0);
-            msg.setRetained(false);
+            msg.setQos(Integer.parseInt(qos));
+            msg.setRetained(Boolean.parseBoolean(retain));
             client.publish(topic, msg);
 
             // Disconnect from the broker
@@ -115,14 +130,6 @@ public final class NotificatorMqtt extends Notificator {
     @Override
     public void sendAsync(long userId, Event event, Position position) {
         sendSync(userId, event, position);
-    }
-
-    private static MqttConnectOptions setUpConnectionOptions(String username, String password) {
-        MqttConnectOptions connOpts = new MqttConnectOptions();
-        connOpts.setCleanSession(true);
-        connOpts.setUserName(username);
-        connOpts.setPassword(password.toCharArray());
-        return connOpts;
     }
 
 }
