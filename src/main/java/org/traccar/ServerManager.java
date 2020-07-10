@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.BindException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -39,10 +41,9 @@ public class ServerManager {
     private final List<TrackerServer> serverList = new LinkedList<>();
     private final Map<String, BaseProtocol> protocolList = new ConcurrentHashMap<>();
 
-    public ServerManager() throws Exception {
+    private void loadPackage(String packageName) throws IOException, URISyntaxException, ReflectiveOperationException {
 
         List<String> names = new LinkedList<>();
-        String packageName = "org.traccar.protocol";
         String packagePath = packageName.replace('.', '/');
         URL packageUrl = getClass().getClassLoader().getResource(packagePath);
 
@@ -77,6 +78,10 @@ public class ServerManager {
                 protocolList.put(protocol.getName(), protocol);
             }
         }
+    }
+
+    public ServerManager() throws IOException, URISyntaxException, ReflectiveOperationException {
+        loadPackage("org.traccar.protocol");
     }
 
     public BaseProtocol getProtocol(String name) {
