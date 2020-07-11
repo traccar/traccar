@@ -1523,6 +1523,9 @@
                 "email": {
                     "type": "string"
                 },
+                "phone": {
+                    "type": "string"
+                },
                 "readonly": {
                     "type": "boolean"
                 },
