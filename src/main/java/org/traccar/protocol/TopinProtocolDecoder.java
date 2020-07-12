@@ -25,6 +25,7 @@ import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BcdUtil;
 import org.traccar.helper.DateBuilder;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
@@ -41,6 +42,8 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public static final int MSG_LOGIN = 0x01;
+    public static final int MSG_GPS_2 = 0x08;
+    public static final int MSG_GPS_OFFLINE_2 = 0x09;
     public static final int MSG_GPS = 0x10;
     public static final int MSG_GPS_OFFLINE = 0x11;
     public static final int MSG_STATUS = 0x13;
@@ -77,6 +80,14 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
         sendResponse(channel, dateBuffer.readableBytes(), type, dateBuffer);
     }
 
+    private double readCoordinate(ByteBuf buf) {
+        int degrees = buf.readUnsignedByte();
+        boolean negative = (buf.getUnsignedByte(buf.readerIndex()) & 0xf0) > 0;
+        int decimal = buf.readUnsignedMedium() & 0x0fffff;
+        double result = degrees + decimal * 0.000001;
+        return negative ? -result : result;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -95,9 +106,7 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
             ByteBuf content = Unpooled.buffer();
             content.writeByte(deviceSession != null ? 0x01 : 0x44);
             sendResponse(channel, length, type, content);
-
             updateTime(channel, MSG_TIME_UPDATE);
-
             return null;
         } else {
             deviceSession = getDeviceSession(channel, remoteAddress);
@@ -106,7 +115,34 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        if (type == MSG_GPS || type == MSG_GPS_OFFLINE) {
+        if (type == MSG_GPS_2 || type == MSG_GPS_OFFLINE_2) {
+
+            if (buf.readableBytes() <= 2) {
+                return null;
+            }
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
+                    .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
+            position.setTime(dateBuilder.getDate());
+
+            position.setValid(type == MSG_GPS_2);
+            position.setLatitude(readCoordinate(buf));
+            position.setLongitude(readCoordinate(buf));
+
+            buf.skipBytes(4 + 4); // second coordinates
+
+            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
+            position.setCourse(buf.readUnsignedByte() * 2);
+
+            position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+
+            return position;
+
+        } else if (type == MSG_GPS || type == MSG_GPS_OFFLINE) {
 
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
