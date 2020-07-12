@@ -887,7 +887,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             } else if (subType == 0x0a) {
                 buf.skipBytes(8); // imei
                 buf.skipBytes(8); // imsi
-                position.set(Position.KEY_ICCID, ByteBufUtil.hexDump(buf.readSlice(8)));
+                position.set(Position.KEY_ICCID, ByteBufUtil.hexDump(buf.readSlice(10)).replaceAll("f", ""));
                 return position;
             } else if (subType == 0x0d) {
                 if (buf.getByte(buf.readerIndex()) != '!') {
