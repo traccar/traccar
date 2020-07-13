@@ -47,6 +47,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_TERMINAL_CONTROL = 0x8105;
     public static final int MSG_TERMINAL_AUTH = 0x0102;
     public static final int MSG_LOCATION_REPORT = 0x0200;
+    public static final int MSG_LOCATION_REPORT_2 = 0x5501;
     public static final int MSG_LOCATION_BATCH = 0x0704;
     public static final int MSG_OIL_CONTROL = 0XA006;
 
@@ -117,7 +118,12 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         int type = buf.readUnsignedShort();
         buf.readUnsignedShort(); // body length
         ByteBuf id = buf.readSlice(6); // phone number
-        int index = buf.readUnsignedShort();
+        int index;
+        if (type == MSG_LOCATION_REPORT_2) {
+            index = buf.readUnsignedByte();
+        } else {
+            index = buf.readUnsignedShort();
+        }
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, ByteBufUtil.hexDump(id));
         if (deviceSession == null) {
@@ -146,6 +152,10 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         } else if (type == MSG_LOCATION_REPORT) {
 
             return decodeLocation(deviceSession, buf);
+
+        } else if (type == MSG_LOCATION_REPORT_2) {
+
+            return decodeLocation2(deviceSession, buf);
 
         } else if (type == MSG_LOCATION_BATCH) {
 
@@ -275,6 +285,16 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             }
             buf.readerIndex(endIndex);
         }
+
+        return position;
+    }
+
+    private Position decodeLocation2(DeviceSession deviceSession, ByteBuf buf) {
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        Jt600ProtocolDecoder.decodeBinaryLocation(buf, position);
 
         return position;
     }
