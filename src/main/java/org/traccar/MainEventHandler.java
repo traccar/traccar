@@ -109,7 +109,8 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
             }
             LOGGER.info(builder.toString());
 
-            Main.getInjector().getInstance(StatisticsManager.class).registerMessageStored(position.getDeviceId());
+            Main.getInjector().getInstance(StatisticsManager.class)
+                    .registerMessageStored(position.getDeviceId(), position.getProtocol());
         }
     }
 

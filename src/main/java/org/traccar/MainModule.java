@@ -136,8 +136,9 @@ public class MainModule extends AbstractModule {
 
     @Singleton
     @Provides
-    public static StatisticsManager provideStatisticsManager(Config config, DataManager dataManager, Client client) {
-        return new StatisticsManager(config, dataManager, client);
+    public static StatisticsManager provideStatisticsManager(
+            Config config, DataManager dataManager, Client client, ObjectMapper objectMapper) {
+        return new StatisticsManager(config, dataManager, client, objectMapper);
     }
 
     @Singleton
