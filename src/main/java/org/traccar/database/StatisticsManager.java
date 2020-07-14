@@ -88,7 +88,7 @@ public class StatisticsManager {
                 if (!deviceProtocols.isEmpty()) {
                     Map<String, Integer> protocols = new HashMap<>();
                     for (String protocol : deviceProtocols.values()) {
-                        protocols.compute(protocol, (key, count) -> count != null ? count += 1 : 1);
+                        protocols.compute(protocol, (key, count) -> count != null ? count + 1 : 1);
                     }
                     statistics.setProtocols(protocols);
                 }
