@@ -41,7 +41,7 @@ public class StatisticsManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StatisticsManager.class);
 
-    private static final int SPLIT_MODE = Calendar.MINUTE;
+    private static final int SPLIT_MODE = Calendar.DAY_OF_MONTH;
 
     private final Config config;
     private final DataManager dataManager;
