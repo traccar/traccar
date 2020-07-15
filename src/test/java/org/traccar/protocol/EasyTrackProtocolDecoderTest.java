@@ -10,6 +10,9 @@ public class EasyTrackProtocolDecoderTest extends ProtocolTest {
 
         EasyTrackProtocolDecoder decoder = new EasyTrackProtocolDecoder(null);
 
+        verifyNull(decoder, text(
+                "*ET,354522180045564,TX,V,14070E,122336"));
+
         verifyPosition(decoder, text(
                 "*ET,135790246811221,HB,A,050915,0C2A27,00CE5954,04132263,0000,F000,01000000,20,4,0000,00F123,100,4845423835,0091564212,0B45,10.00,9"));
 
