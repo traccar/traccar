@@ -56,7 +56,7 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             .expression("[^,]*,")                // vehicle registration
             .number("([01]),").optional()        // valid
             .groupEnd()
-            .number("(dd),?(dd),?(d{2,4}),")     // date (ddmmyyyy)
+            .number("(dd),?(dd),?(d{2,4}),?")    // date (ddmmyyyy)
             .number("(dd),?(dd),?(dd),")         // time (hhmmss)
             .expression("([01AV]),").optional()  // valid
             .number("(d+.d+),([NS]),")           // latitude
@@ -203,7 +203,7 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
                 int lac = Integer.parseInt(cells[3], 16);
                 int cid = Integer.parseInt(cells[4], 16);
                 Network network = new Network(CellTower.from(mcc, mnc, lac, cid, Integer.parseInt(cells[0])));
-                if (!cells[5].startsWith("(")) {
+                if (cells.length > 5 && !cells[5].startsWith("(")) {
                     for (int i = 0; i < 4; i++) {
                         lac = Integer.parseInt(cells[5 + 3 * i + 1], 16);
                         cid = Integer.parseInt(cells[5 + 3 * i + 2], 16);
