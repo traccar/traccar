@@ -332,7 +332,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             if (BitUtil.check(alarm, 0)) {
                 position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
             }
-        } if (product == 3) {
+        } else if (product == 3) {
             position.set(Position.KEY_BLOCKED, BitUtil.check(status, 5));
             if (BitUtil.check(alarm, 1)) {
                 position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
