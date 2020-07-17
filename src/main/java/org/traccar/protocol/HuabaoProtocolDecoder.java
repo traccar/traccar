@@ -28,6 +28,8 @@ import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -48,6 +50,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_TERMINAL_AUTH = 0x0102;
     public static final int MSG_LOCATION_REPORT = 0x0200;
     public static final int MSG_LOCATION_REPORT_2 = 0x5501;
+    public static final int MSG_LOCATION_REPORT_BLIND = 0x5502;
     public static final int MSG_LOCATION_BATCH = 0x0704;
     public static final int MSG_OIL_CONTROL = 0XA006;
 
@@ -114,12 +117,16 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
         ByteBuf buf = (ByteBuf) msg;
 
+        if (buf.getByte(buf.readerIndex()) == '(') {
+            return decodeResult(channel, remoteAddress, buf.toString(StandardCharsets.US_ASCII));
+        }
+
         buf.readUnsignedByte(); // start marker
         int type = buf.readUnsignedShort();
         buf.readUnsignedShort(); // body length
         ByteBuf id = buf.readSlice(6); // phone number
         int index;
-        if (type == MSG_LOCATION_REPORT_2) {
+        if (type == MSG_LOCATION_REPORT_2 || type == MSG_LOCATION_REPORT_BLIND) {
             index = buf.readUnsignedByte();
         } else {
             index = buf.readUnsignedShort();
@@ -153,9 +160,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
             return decodeLocation(deviceSession, buf);
 
-        } else if (type == MSG_LOCATION_REPORT_2) {
+        } else if (type == MSG_LOCATION_REPORT_2 || type == MSG_LOCATION_REPORT_BLIND) {
 
-            return decodeLocation2(deviceSession, buf);
+            return decodeLocation2(deviceSession, buf, type);
 
         } else if (type == MSG_LOCATION_BATCH) {
 
@@ -163,6 +170,18 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
         }
 
+        return null;
+    }
+
+    private Position decodeResult(Channel channel, SocketAddress remoteAddress, String sentence) {
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+        if (deviceSession != null) {
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+            getLastLocation(position, null);
+            position.set(Position.KEY_RESULT, sentence);
+            return position;
+        }
         return null;
     }
 
@@ -289,12 +308,44 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private Position decodeLocation2(DeviceSession deviceSession, ByteBuf buf) {
+    private Position decodeLocation2(DeviceSession deviceSession, ByteBuf buf, int type) {
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         Jt600ProtocolDecoder.decodeBinaryLocation(buf, position);
+        position.setValid(type != MSG_LOCATION_REPORT_BLIND);
+
+        position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+        position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+        position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 1000L);
+        position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+        position.set(Position.KEY_CHARGE, buf.readUnsignedByte() == 0xAA);
+
+        position.setNetwork(new Network(CellTower.fromCidLac(buf.readUnsignedInt(), buf.readUnsignedShort())));
+
+        int product = buf.readUnsignedByte();
+        int status = buf.readUnsignedShort();
+        int alarm = buf.readUnsignedShort();
+
+        if (product == 1 || product == 2) {
+            if (BitUtil.check(alarm, 0)) {
+                position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
+            }
+        } if (product == 3) {
+            position.set(Position.KEY_BLOCKED, BitUtil.check(status, 5));
+            if (BitUtil.check(alarm, 1)) {
+                position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
+            }
+            if (BitUtil.check(alarm, 2)) {
+                position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
+            }
+            if (BitUtil.check(alarm, 3)) {
+                position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+            }
+        }
+
+        position.set(Position.KEY_STATUS, status);
 
         return position;
     }

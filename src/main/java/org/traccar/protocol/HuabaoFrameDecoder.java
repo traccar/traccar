@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,25 +31,36 @@ public class HuabaoFrameDecoder extends BaseFrameDecoder {
             return null;
         }
 
-        int index = buf.indexOf(buf.readerIndex() + 1, buf.writerIndex(), (byte) 0x7e);
-        if (index != -1) {
-            ByteBuf result = Unpooled.buffer(index + 1 - buf.readerIndex());
+        if (buf.getByte(buf.readerIndex()) == '(') {
 
-            while (buf.readerIndex() <= index) {
-                int b = buf.readUnsignedByte();
-                if (b == 0x7d) {
-                    int ext = buf.readUnsignedByte();
-                    if (ext == 0x01) {
-                        result.writeByte(0x7d);
-                    } else if (ext == 0x02) {
-                        result.writeByte(0x7e);
-                    }
-                } else {
-                    result.writeByte(b);
-                }
+            int index = buf.indexOf(buf.readerIndex() + 1, buf.writerIndex(), (byte) ')');
+            if (index >= 0) {
+                return buf.readRetainedSlice(index + 1);
             }
 
-            return result;
+        } else {
+
+            int index = buf.indexOf(buf.readerIndex() + 1, buf.writerIndex(), (byte) 0x7e);
+            if (index >= 0) {
+                ByteBuf result = Unpooled.buffer(index + 1 - buf.readerIndex());
+
+                while (buf.readerIndex() <= index) {
+                    int b = buf.readUnsignedByte();
+                    if (b == 0x7d) {
+                        int ext = buf.readUnsignedByte();
+                        if (ext == 0x01) {
+                            result.writeByte(0x7d);
+                        } else if (ext == 0x02) {
+                            result.writeByte(0x7e);
+                        }
+                    } else {
+                        result.writeByte(b);
+                    }
+                }
+
+                return result;
+            }
+
         }
 
         return null;
