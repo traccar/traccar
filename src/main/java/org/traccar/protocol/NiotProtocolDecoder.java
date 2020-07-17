@@ -24,6 +24,7 @@ import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BcdUtil;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -53,6 +54,12 @@ public class NiotProtocolDecoder extends BaseProtocolDecoder {
             response.writeByte(0x0D);
             channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
+    }
+
+    private double readCoordinate(ByteBuf buf) {
+        long value = buf.readUnsignedInt();
+        double result = BitUtil.to(value, 31) / 1800000.0;
+        return BitUtil.check(value, 31) ? -result : result;
     }
 
     @Override
@@ -88,8 +95,9 @@ public class NiotProtocolDecoder extends BaseProtocolDecoder {
                     .setSecond(BcdUtil.readInteger(buf, 2));
             position.setTime(dateBuilder.getDate());
 
-            position.setLatitude(BcdUtil.readCoordinate(buf));
-            position.setLongitude(BcdUtil.readCoordinate(buf));
+            position.setValid(true);
+            position.setLatitude(readCoordinate(buf));
+            position.setLongitude(readCoordinate(buf));
             position.setSpeed(UnitsConverter.knotsFromKph(BcdUtil.readInteger(buf, 4)));
             position.setCourse(BcdUtil.readInteger(buf, 4));
 
