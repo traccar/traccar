@@ -256,7 +256,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set("workMode", readValue(buf, length, false));
                 break;
             case 81:
-                position.set(Position.KEY_OBD_SPEED, readValue(buf, length, false));
+                position.set(Position.KEY_OBD_SPEED, readValue(buf, length, false) / 1.852);
                 break;
             case 82:
                 position.set(Position.KEY_THROTTLE, readValue(buf, length, false));
