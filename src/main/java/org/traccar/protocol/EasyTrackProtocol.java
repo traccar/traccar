@@ -34,7 +34,7 @@ public class EasyTrackProtocol extends BaseProtocol {
         addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, "#", "\r\n"));
+                pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, "#\r\n", "#", "\r\n"));
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new EasyTrackProtocolEncoder(EasyTrackProtocol.this));
