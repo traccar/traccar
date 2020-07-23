@@ -335,8 +335,13 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_RSSI, buf.readUnsignedByte());
         position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
         position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 1000L);
-        position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
-        position.set(Position.KEY_CHARGE, buf.readUnsignedByte() == 0xAA);
+
+        int battery = buf.readUnsignedByte();
+        if (battery <= 100) {
+            position.set(Position.KEY_BATTERY_LEVEL, battery);
+        } else if (battery == 0xAA) {
+            position.set(Position.KEY_CHARGE, true);
+        }
 
         position.setNetwork(new Network(CellTower.fromCidLac(buf.readUnsignedInt(), buf.readUnsignedShort())));
 
