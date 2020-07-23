@@ -44,6 +44,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public static final int MSG_GENERAL_RESPONSE = 0x8001;
+    public static final int MSG_GENERAL_RESPONSE_2 = 0x4401;
     public static final int MSG_TERMINAL_REGISTER = 0x0100;
     public static final int MSG_TERMINAL_REGISTER_RESPONSE = 0x8100;
     public static final int MSG_TERMINAL_CONTROL = 0x8105;
@@ -79,6 +80,17 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             response.writeByte(RESULT_SUCCESS);
             channel.writeAndFlush(new NetworkMessage(
                     formatMessage(MSG_GENERAL_RESPONSE, id, response), remoteAddress));
+        }
+    }
+
+    private void sendGeneralResponse2(
+            Channel channel, SocketAddress remoteAddress, ByteBuf id, int index) {
+        if (channel != null) {
+            ByteBuf response = Unpooled.buffer();
+            response.writeShort(index);
+            response.writeByte(RESULT_SUCCESS);
+            channel.writeAndFlush(new NetworkMessage(
+                    formatMessage(MSG_GENERAL_RESPONSE_2, id, response), remoteAddress));
         }
     }
 
@@ -123,7 +135,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
         buf.readUnsignedByte(); // start marker
         int type = buf.readUnsignedShort();
-        buf.readUnsignedShort(); // body length
+        int attribute = buf.readUnsignedShort();
         ByteBuf id = buf.readSlice(6); // phone number
         int index;
         if (type == MSG_LOCATION_REPORT_2 || type == MSG_LOCATION_REPORT_BLIND) {
@@ -161,6 +173,10 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             return decodeLocation(deviceSession, buf);
 
         } else if (type == MSG_LOCATION_REPORT_2 || type == MSG_LOCATION_REPORT_BLIND) {
+
+            if (BitUtil.check(attribute, 15)) {
+                sendGeneralResponse2(channel, remoteAddress, id, index);
+            }
 
             return decodeLocation2(deviceSession, buf, type);
 
