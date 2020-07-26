@@ -93,7 +93,7 @@ jar {
     manifest {
         attributes(
                 "Main-Class": "org.traccar.Main",
-                "Implementation-Version": "4.9",
+                "Implementation-Version": "4.10",
                 "Class-Path": configurations.runtimeClasspath.files.collect { "lib/$it.name" }.join(" "))
     }
 }
