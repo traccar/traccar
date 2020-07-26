@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 add-apt-repository ppa:openjdk-r/ppa
-curl -sL https://deb.nodesource.com/setup_4.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
 dpkg --add-architecture i386
 apt update
 apt install -y openjdk-11-jdk zip unzip innoextract wine32 makeself nodejs
