@@ -624,7 +624,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        if (channel != null) {
+        if (channel != null && codec != CODEC_12 && codec != CODEC_13) {
             if (connectionless) {
                 ByteBuf response = Unpooled.buffer();
                 response.writeShort(5);

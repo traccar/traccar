@@ -90,6 +90,35 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         return buf.getUnsignedByte(flagIndex) >> 4 == 0x7;
     }
 
+    static void decodeBinaryLocation(ByteBuf buf, Position position) {
+
+        DateBuilder dateBuilder = new DateBuilder()
+                .setDay(BcdUtil.readInteger(buf, 2))
+                .setMonth(BcdUtil.readInteger(buf, 2))
+                .setYear(BcdUtil.readInteger(buf, 2))
+                .setHour(BcdUtil.readInteger(buf, 2))
+                .setMinute(BcdUtil.readInteger(buf, 2))
+                .setSecond(BcdUtil.readInteger(buf, 2));
+        position.setTime(dateBuilder.getDate());
+
+        double latitude = convertCoordinate(BcdUtil.readInteger(buf, 8));
+        double longitude = convertCoordinate(BcdUtil.readInteger(buf, 9));
+
+        byte flags = buf.readByte();
+        position.setValid((flags & 0x1) == 0x1);
+        if ((flags & 0x2) == 0) {
+            latitude = -latitude;
+        }
+        position.setLatitude(latitude);
+        if ((flags & 0x4) == 0) {
+            longitude = -longitude;
+        }
+        position.setLongitude(longitude);
+
+        position.setSpeed(BcdUtil.readInteger(buf, 2));
+        position.setCourse(buf.readUnsignedByte() * 2.0);
+    }
+
     private List<Position> decodeBinary(ByteBuf buf, Channel channel, SocketAddress remoteAddress) {
 
         List<Position> positions = new LinkedList<>();
@@ -117,31 +146,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
-            DateBuilder dateBuilder = new DateBuilder()
-                    .setDay(BcdUtil.readInteger(buf, 2))
-                    .setMonth(BcdUtil.readInteger(buf, 2))
-                    .setYear(BcdUtil.readInteger(buf, 2))
-                    .setHour(BcdUtil.readInteger(buf, 2))
-                    .setMinute(BcdUtil.readInteger(buf, 2))
-                    .setSecond(BcdUtil.readInteger(buf, 2));
-            position.setTime(dateBuilder.getDate());
-
-            double latitude = convertCoordinate(BcdUtil.readInteger(buf, 8));
-            double longitude = convertCoordinate(BcdUtil.readInteger(buf, 9));
-
-            byte flags = buf.readByte();
-            position.setValid((flags & 0x1) == 0x1);
-            if ((flags & 0x2) == 0) {
-                latitude = -latitude;
-            }
-            position.setLatitude(latitude);
-            if ((flags & 0x4) == 0) {
-                longitude = -longitude;
-            }
-            position.setLongitude(longitude);
-
-            position.setSpeed(BcdUtil.readInteger(buf, 2));
-            position.setCourse(buf.readUnsignedByte() * 2.0);
+            decodeBinaryLocation(buf, position);
 
             if (longFormat) {
 

@@ -11,7 +11,16 @@ public class TopinProtocolDecoderTest extends ProtocolTest {
         TopinProtocolDecoder decoder = new TopinProtocolDecoder(null);
 
         verifyNull(decoder, binary(
+                "787801080D0A"));
+
+        verifyNull(decoder, binary(
                 "78780d0103593390754169634d0d0a"));
+
+        verifyPosition(decoder, binary(
+                "7878200813081A0733211608C8D1710DED1D1608DFFB710E06D51039050100286489000D0A"));
+
+        verifyPosition(decoder, binary(
+                "78782008140709121f36300d769f02058cfd300d771202058c6f0000000300005c99000d0a"));
 
         verifyPosition(decoder, binary(
                 "787812100A03170F32179C026B3F3E0C22AD651F34600D0A"));

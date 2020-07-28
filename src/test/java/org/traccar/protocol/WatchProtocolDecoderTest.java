@@ -16,6 +16,9 @@ public class WatchProtocolDecoderTest extends ProtocolTest {
         WatchProtocolDecoder decoder = new WatchProtocolDecoder(null);
 
         verifyPosition(decoder, buffer(
+                "[3G*0304187088*0100*UD_WCDMA,100720,094202,V,0.0,N,0.0,E,22.0,0,-1,21,75,92,0,0,00000000,1,1,425,01,10192,1282125,75,5,Inet,04:f0:21:46:1f:57,-54,iNetSecurity,00:1e:42:25:2f:3e,-71,Gilad,58:d5:6e:9d:1b:af,-80,weekend,14:ae:db:cb:99:25,-82,advancemed1,04:f0:21:4c:c8:3e,-89,0.0]"));
+
+        verifyPosition(decoder, buffer(
                 "[3G*8809008845*00C0*AL,271219,094744,V,00.000000,N, 0.0000000,E,0.00,0.0,0.0,0,100,81,0,0,00010000,7,0,460,0,9336,3981,141,9336,3912,141,9336,3982,140,9765,4233,134,9765,4071,134,9765,4321,134,9336,4353,132,0,0.0]"));
 
         verifyPosition(decoder, buffer(
