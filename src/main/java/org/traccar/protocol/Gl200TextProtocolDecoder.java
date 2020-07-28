@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -789,8 +789,14 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             } else if (BitUtil.check(ignition, 5)) {
                 position.set(Position.KEY_IGNITION, true);
             }
-            position.set(Position.KEY_INPUT, parser.nextHexInt());
-            position.set(Position.KEY_OUTPUT, parser.nextHexInt());
+            int input = parser.nextHexInt();
+            int output = parser.nextHexInt();
+            position.set(Position.KEY_INPUT, input);
+            position.set(Position.PREFIX_IN + 1, BitUtil.check(input, 1));
+            position.set(Position.PREFIX_IN + 2, BitUtil.check(input, 2));
+            position.set(Position.KEY_OUTPUT, output);
+            position.set(Position.PREFIX_OUT + 1, BitUtil.check(output, 0));
+            position.set(Position.PREFIX_OUT + 2, BitUtil.check(output, 1));
         }
     }
 
