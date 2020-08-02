@@ -35,7 +35,5 @@ public class PstFrameEncoder extends MessageToByteEncoder<ByteBuf> {
             }
         }
         out.writeByte(')');
-
-        msg.release();
     }
 }
