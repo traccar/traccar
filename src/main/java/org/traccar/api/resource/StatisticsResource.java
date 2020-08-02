@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@ package org.traccar.api.resource;
 
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
-import org.traccar.helper.DateUtil;
 import org.traccar.model.Statistics;
 
 import javax.ws.rs.Consumes;
@@ -28,6 +27,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Date;
 
 @Path("statistics")
 @Produces(MediaType.APPLICATION_JSON)
@@ -36,9 +36,9 @@ public class StatisticsResource extends BaseResource {
 
     @GET
     public Collection<Statistics> get(
-            @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
+            @QueryParam("from") Date from, @QueryParam("to") Date to) throws SQLException {
         Context.getPermissionsManager().checkAdmin(getUserId());
-        return Context.getDataManager().getStatistics(DateUtil.parseDate(from), DateUtil.parseDate(to));
+        return Context.getDataManager().getStatistics(from, to);
     }
 
 }
