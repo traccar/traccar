@@ -423,6 +423,12 @@ public final class Keys {
     public static final ConfigKey WEB_REQUEST_LOG_RETAIN_DAYS = new ConfigKey(
             "web.requestLog.retainDays", Integer.class);
 
+    /**
+     * Disable systemd health checks.
+     */
+    public static final ConfigKey WEB_DISABLE_HEALTH_CHECK = new ConfigKey(
+            "web.disableHealthCheck", Boolean.class);
+
     private Keys() {
     }
 
