@@ -31,6 +31,7 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
 
 public class NiotProtocolDecoder extends BaseProtocolDecoder {
 
@@ -95,11 +96,64 @@ public class NiotProtocolDecoder extends BaseProtocolDecoder {
                     .setSecond(BcdUtil.readInteger(buf, 2));
             position.setTime(dateBuilder.getDate());
 
-            position.setValid(true);
             position.setLatitude(readCoordinate(buf));
             position.setLongitude(readCoordinate(buf));
-            position.setSpeed(UnitsConverter.knotsFromKph(BcdUtil.readInteger(buf, 4)));
+            BcdUtil.readInteger(buf, 4); // reserved
             position.setCourse(BcdUtil.readInteger(buf, 4));
+
+            int statusX = buf.readUnsignedByte();
+            position.setValid(BitUtil.check(statusX, 7));
+            switch (BitUtil.between(statusX, 3, 5)) {
+                case 0b10:
+                    position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
+                    break;
+                case 0b01:
+                    position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
+                    break;
+                default:
+                    break;
+            }
+
+            position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+
+            int statusA = buf.readUnsignedByte();
+            position.set(Position.KEY_IGNITION, !BitUtil.check(statusA, 7));
+            if (!BitUtil.check(statusA, 6)) {
+                position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+            }
+
+            buf.readUnsignedByte(); // statusB
+            buf.readUnsignedByte(); // statusC
+            position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+            position.set(Position.KEY_BATTERY, buf.readUnsignedByte() * 0.1);
+            position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.1);
+            buf.readUnsignedByte(); // speed limit
+            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
+            buf.readUnsignedByte(); // sensor speed
+            buf.readUnsignedByte(); // reserved
+            buf.readUnsignedByte(); // reserved
+
+            while (buf.readableBytes() > 4) {
+                int extendedLength = buf.readUnsignedShort();
+                int extendedType = buf.readUnsignedShort();
+                switch (extendedType) {
+                    case 0x0001:
+                        position.set(Position.KEY_ICCID,
+                                buf.readCharSequence(20, StandardCharsets.US_ASCII).toString());
+                        break;
+                    case 0x0002:
+                        int statusD = buf.readUnsignedByte();
+                        position.set(Position.KEY_ALARM, BitUtil.check(statusD, 5) ? Position.ALARM_REMOVING : null);
+                        position.set(Position.KEY_ALARM, BitUtil.check(statusD, 4) ? Position.ALARM_TAMPERING : null);
+                        buf.readUnsignedByte(); // run mode
+                        buf.readUnsignedByte(); // reserved
+                        break;
+                    default:
+                        buf.skipBytes(extendedLength - 2);
+                        break;
+                }
+
+            }
 
             return position;
         }
