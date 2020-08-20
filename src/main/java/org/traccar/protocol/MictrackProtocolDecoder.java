@@ -209,8 +209,12 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private Object decodeLowAltitude(
-            Channel channel, SocketAddress remoteAddress, String sentence) throws Exception {
-        String deviceId = sentence.substring(0, sentence.indexOf("$"));
+            Channel channel, SocketAddress remoteAddress, String sentence) {
+        int separator = sentence.indexOf("$");
+        if (separator < 0) {
+            return null;
+        }
+        String deviceId = sentence.substring(0, separator);
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, deviceId);
         if (deviceSession == null) {

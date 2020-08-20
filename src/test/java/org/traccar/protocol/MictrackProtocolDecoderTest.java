@@ -10,6 +10,9 @@ public class MictrackProtocolDecoderTest extends ProtocolTest {
 
         MictrackProtocolDecoder decoder = new MictrackProtocolDecoder(null);
 
+        verifyNull(decoder, text(
+                "mode=Success!"));
+
         verifyPosition(decoder, text(
                 "MT;6;866425031361423;R0;10+190109091803+22.63827+114.02922+2.14+69+2+3744+113"),
                 position("2019-01-09 09:18:03.000", true, 22.63827, 114.02922));
