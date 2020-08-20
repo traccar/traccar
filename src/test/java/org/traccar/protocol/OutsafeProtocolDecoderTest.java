@@ -10,6 +10,12 @@ public class OutsafeProtocolDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         OutsafeProtocolDecoder decoder = new OutsafeProtocolDecoder(null);
+		
+		verifyPosition(decoder, request(HttpMethod.POST, "/",
+				buffer("{\"device\":\"\",\"owner\":\"\",\"data\":{\"cmd\":\"\",\"\":\"\",\"content\":null},\"time\":null,\"origin\":\"\",\"latitude\":52.489471,\"longitude\":32.96215,\"altitude\":233.48,\"heading\":30.5,\"rssi\":0}")));
+        
+        verifyPosition(decoder, request(HttpMethod.POST, "/",
+                buffer("{\"device\":\"654372652991347\",\"owner\":\"\",\"data\":{\"cmd\":\"\",\"observation\":\"\",\"content\":null},\"time\":\"1595220688\",\"origin\":\"\",\"latitude\":52.489471,\"longitude\":-32.96215,\"altitude\":233.48,\"heading\":0,\"rssi\":25}")));
 
         verifyPosition(decoder, request(HttpMethod.POST, "/",
                 buffer("{\"device\":\"865303040103725\",\"owner\":\"\",\"data\":{\"cmd\":\"\",\"ms1\":-1,\"ms2\":-1,\"ms3\":0,\"ms4\":0,\"observation\":\"\",\"content\":null},\"time\":1589277568,\"origin\":\"mqgatte\",\"latitude\":19.346855,\"longitude\":-99.29587,\"altitude\":2757,\"heading\":0,\"rssi\":0}")));

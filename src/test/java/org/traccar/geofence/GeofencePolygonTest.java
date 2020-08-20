@@ -48,5 +48,27 @@ public class GeofencePolygonTest {
         assertTrue(!geofenceGeometry.containsPoint(50.9477, 0.5836));
 
     }
+	
+	@Test
+    public void testPolygonShapeCross() throws ParseException{
+    	String test = "POLYGON ((50.0000 50.000, -50.0000 50.0000, 0.0000 100.0000, 0.0000 0.0000))";
+        GeofenceGeometry geofenceGeometry = new GeofencePolygon();
+        geofenceGeometry.fromWkt(test);
+        assertTrue(geofenceGeometry.containsPoint(-20.0000, 70.0000));
+        assertTrue(geofenceGeometry.containsPoint(20.0000, 20.0000));
+        assertTrue(!geofenceGeometry.containsPoint(20.0000, 70.0000));
+        assertTrue(!geofenceGeometry.containsPoint(-20.0000, 20.0000));
+    }
+	
+	@Test
+    public void testPolygonShapeCross2() throws ParseException{
+    	String test = "POLYGON ((10.00 10.00, 0.00 20.00, -10.00 10.00, 00.00 0.000))";
+        GeofenceGeometry geofenceGeometry = new GeofencePolygon();
+        geofenceGeometry.fromWkt(test);
+        assertTrue(geofenceGeometry.containsPoint(5.00, 5.00));
+        assertTrue(!geofenceGeometry.containsPoint(-5.00, 5.00));
+        assertTrue(geofenceGeometry.containsPoint(5.00, 15.00));
+        assertTrue(!geofenceGeometry.containsPoint(-5.00, 15.00));
+    }
 
 }
