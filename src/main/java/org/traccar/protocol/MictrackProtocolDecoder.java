@@ -66,6 +66,8 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
 
     private String decodeAlarm(int event) {
         switch (event) {
+            case 0:
+                return Position.ALARM_POWER_ON;
             case 5:
                 return Position.ALARM_SOS;
             case 8:
