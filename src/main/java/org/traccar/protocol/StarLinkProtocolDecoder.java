@@ -20,11 +20,13 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.Protocol;
+import org.traccar.helper.DataConverter;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.protobuf.StarLinkMessage;
 
 import java.net.SocketAddress;
 import java.text.DateFormat;
@@ -200,6 +202,20 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case "#ENG#":
                     position.set("engine", data[i].equals("1"));
+                    break;
+                case "#TD1#":
+                case "#TD2#":
+                    StarLinkMessage.mEventReport_TDx message =
+                            StarLinkMessage.mEventReport_TDx.parseFrom(DataConverter.parseBase64(data[i]));
+                    position.set(
+                            "sensor" + message.getSensorNumber() + "Temp",
+                            message.getTemperature() * 0.1);
+                    position.set(
+                            "sensor" + message.getSensorNumber() + "Humidity",
+                            message.getTemperature() * 0.1);
+                    position.set(
+                            "sensor" + message.getSensorNumber() + "Voltage",
+                            message.getVoltage() * 0.001);
                     break;
                 default:
                     break;
