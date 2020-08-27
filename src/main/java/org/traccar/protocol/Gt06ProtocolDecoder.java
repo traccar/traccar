@@ -1039,25 +1039,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             return position;
 
-        } else if (type == MSG_SERIAL) {
-
-            getLastLocation(position, null);
-
-            buf.readUnsignedByte(); // external device type code
-            int length = buf.readableBytes() - 9; // line break + checksum + index + checksum + footer
-            if (length < 8) {
-                position.set(
-                        Position.PREFIX_TEMP + 1,
-                        Double.parseDouble(buf.readCharSequence(length - 1, StandardCharsets.US_ASCII).toString()));
-            } else {
-                buf.readUnsignedByte(); // card type
-                position.set(
-                        Position.KEY_DRIVER_UNIQUE_ID,
-                        buf.readCharSequence(length - 1, StandardCharsets.US_ASCII).toString());
-            }
-
-            return position;
-
         } else if (type == MSG_GPS_MODULAR) {
 
             return decodeExtendedModular(buf, deviceSession);
@@ -1222,6 +1203,27 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             }
 
             sendResponse(channel, true, type, buf.getShort(buf.writerIndex() - 6), null);
+
+            return position;
+
+        } else if (type == MSG_SERIAL) {
+
+            position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+            getLastLocation(position, null);
+
+            buf.readUnsignedByte(); // external device type code
+            int length = buf.readableBytes() - 9; // line break + checksum + index + checksum + footer
+            if (length < 8) {
+                position.set(
+                        Position.PREFIX_TEMP + 1,
+                        Double.parseDouble(buf.readCharSequence(length - 1, StandardCharsets.US_ASCII).toString()));
+            } else {
+                buf.readUnsignedByte(); // card type
+                position.set(
+                        Position.KEY_DRIVER_UNIQUE_ID,
+                        buf.readCharSequence(length - 1, StandardCharsets.US_ASCII).toString());
+            }
 
             return position;
 
