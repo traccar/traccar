@@ -88,7 +88,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_COMMAND_2 = 0x82;
     public static final int MSG_TIME_REQUEST = 0x8A;
     public static final int MSG_INFO = 0x94;
-    public static final int MSG_RFID = 0x9B;
+    public static final int MSG_SERIAL = 0x9B;
     public static final int MSG_STRING_INFO = 0x21;
     public static final int MSG_GPS_2 = 0xA0;
     public static final int MSG_LBS_2 = 0xA1;
@@ -1039,15 +1039,22 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             return position;
 
-        } else if (type == MSG_RFID) {
+        } else if (type == MSG_SERIAL) {
 
             getLastLocation(position, null);
 
             buf.readUnsignedByte(); // external device type code
-            buf.readUnsignedByte(); // card type
-            position.set(
-                    Position.KEY_DRIVER_UNIQUE_ID,
-                    buf.readCharSequence(buf.readableBytes() - 9, StandardCharsets.US_ASCII).toString());
+            int length = buf.readableBytes() - 9; // line break + checksum + index + checksum + footer
+            if (length < 8) {
+                position.set(
+                        Position.PREFIX_TEMP + 1,
+                        Double.parseDouble(buf.readCharSequence(length - 1, StandardCharsets.US_ASCII).toString()));
+            } else {
+                buf.readUnsignedByte(); // card type
+                position.set(
+                        Position.KEY_DRIVER_UNIQUE_ID,
+                        buf.readCharSequence(length - 1, StandardCharsets.US_ASCII).toString());
+            }
 
             return position;
 
