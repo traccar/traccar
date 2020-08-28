@@ -53,6 +53,7 @@ public class EskyProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)[+;]")                  // message type
             .number("(d+)[+;]")                  // odometer
             .groupEnd("?")
+            .number("(d+)[+;]")                  // adc 1
             .number("(d+)")                      // voltage
             .any()
             .compile();
@@ -93,7 +94,8 @@ public class EskyProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_ODOMETER, parser.nextInt());
         }
 
-        position.set(Position.KEY_BATTERY, parser.nextInt() * 0.001);
+        position.set(Position.PREFIX_ADC + 1, parser.nextInt());
+        position.set(Position.KEY_BATTERY, parser.nextInt() * 0.01);
 
         int index = sentence.lastIndexOf('+');
         if (index > 0 && channel instanceof DatagramChannel) {

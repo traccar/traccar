@@ -16,11 +16,14 @@
 package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.model.Position;
 
@@ -33,7 +36,9 @@ public class PstProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
+    public static final int MSG_ACK = 0x00;
     public static final int MSG_STATUS = 0x05;
+    public static final int MSG_COMMAND = 0x06;
 
     private Date readDate(ByteBuf buf) {
         long value = buf.readUnsignedInt();
@@ -53,22 +58,41 @@ public class PstProtocolDecoder extends BaseProtocolDecoder {
         return sign * (BitUtil.from(value, 16) + BitUtil.to(value, 16) / 10000.0) / 60;
     }
 
+    private void sendResponse(
+            Channel channel, SocketAddress remoteAddress, long id, int version, long index, int type) {
+        if (channel != null) {
+
+            ByteBuf response = Unpooled.buffer();
+            response.writeInt((int) id);
+            response.writeByte(version);
+            response.writeInt((int) index);
+            response.writeByte(MSG_ACK);
+            response.writeByte(type);
+            response.writeShort(Checksum.crc16(Checksum.CRC16_XMODEM, response.nioBuffer()));
+
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ByteBuf buf = (ByteBuf) msg;
 
-        String id = String.valueOf(buf.readUnsignedInt());
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
+        long id = buf.readUnsignedInt();
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, String.valueOf(id));
         if (deviceSession == null) {
             return null;
         }
 
-        buf.readUnsignedByte(); // version
-        buf.readUnsignedInt(); // index
+        int version = buf.readUnsignedByte();
+        long index = buf.readUnsignedInt();
 
         int type = buf.readUnsignedByte();
+
+        sendResponse(channel, remoteAddress, id, version, index, type);
 
         if (type == MSG_STATUS) {
 

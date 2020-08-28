@@ -131,6 +131,14 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
+    private static final Pattern PATTERN_VIN = new PatternBuilder()
+            .text("(")
+            .number("(d+)")                      // device id
+            .expression("BV00")                  // command
+            .expression("(.{17})")               // vin
+            .text(")")
+            .compile();
+
     private String decodeAlarm(int value) {
         switch (value) {
             case 1:
@@ -370,7 +378,27 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_RESULT, parser.next());
 
         return position;
+    }
 
+    private Position decodeVin(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN_VIN, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, null);
+
+        position.set(Position.KEY_VIN, parser.next());
+
+        return position;
     }
 
     @Override
@@ -398,6 +426,8 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             return decodeCommandResult(channel, remoteAddress, sentence);
         } else if (sentence.contains("DW5")) {
             return decodeLbsWifi(channel, remoteAddress, sentence);
+        } else if (sentence.contains("BV00")) {
+            return decodeVin(channel, remoteAddress, sentence);
         }
 
         Parser parser = new Parser(PATTERN, sentence);

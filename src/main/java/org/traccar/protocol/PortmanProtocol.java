@@ -21,16 +21,21 @@ import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.model.Command;
 
 public class PortmanProtocol extends BaseProtocol {
 
     public PortmanProtocol() {
+        setSupportedDataCommands(
+                Command.TYPE_ENGINE_STOP,
+                Command.TYPE_ENGINE_RESUME);
         addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new LineBasedFrameDecoder(1024));
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new PortmanProtocolEncoder(PortmanProtocol.this));
                 pipeline.addLast(new PortmanProtocolDecoder(PortmanProtocol.this));
             }
         });

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.api.DateParameterConverterProvider;
 import org.traccar.config.Config;
 import org.traccar.api.AsyncSocketServlet;
 import org.traccar.api.CorsResponseFilter;
@@ -161,8 +162,9 @@ public class WebServer {
         }
 
         ResourceConfig resourceConfig = new ResourceConfig();
-        resourceConfig.registerClasses(JacksonFeature.class, ObjectMapperProvider.class, ResourceErrorHandler.class);
-        resourceConfig.registerClasses(SecurityRequestFilter.class, CorsResponseFilter.class);
+        resourceConfig.registerClasses(
+                JacksonFeature.class, ObjectMapperProvider.class, ResourceErrorHandler.class,
+                SecurityRequestFilter.class, CorsResponseFilter.class, DateParameterConverterProvider.class);
         resourceConfig.packages(ServerResource.class.getPackage().getName());
         servletHandler.addServlet(new ServletHolder(new ServletContainer(resourceConfig)), "/api/*");
     }

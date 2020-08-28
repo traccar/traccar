@@ -12,7 +12,8 @@ public class SigfoxProtocolDecoderTest extends ProtocolTest {
 
         SigfoxProtocolDecoder decoder = new SigfoxProtocolDecoder(null);
 
-        verifyPosition(decoder, request(HttpMethod.POST, "/", buffer("{ \"device\":\"BFE47E\", \"time\":1590497040, \"data\":\"10297eb01e621122070000be\", \"seqNumber\":8, \"deviceTypeId\":\"5ecb8bfac563d620cc9e6798\", \"ack\":false }")));
+        verifyPosition(decoder, request(HttpMethod.POST, "/",
+                buffer("{ \"device\":\"BFE47E\", \"time\":1590497040, \"data\":\"10297eb01e621122070000be\", \"seqNumber\":8, \"deviceTypeId\":\"5ecb8bfac563d620cc9e6798\", \"ack\":false }")));
 
         verifyAttributes(decoder, request(HttpMethod.POST, "/",
                 buffer("{\"messageType\":\"accelerometer\",\"deviceId\":\"testdev001\",\"snr\":\"1234\",\"rssi\":\"-120.00\",\"station\":\"5678\",\"seqNum\":\"9123\",\"newPosition\":false,\"latitude\":\"null\",\"longitude\":\"null\",\"positionTime\":\"null\",\"moving\":true,\"magChange\":\"true\",\"magStatus\":\"true\",\"temperature\":\"7.5\",\"battery\":\"null\",\"batteryPercentage\":\"null\",\"lastSeen\":\"1582560425\",\"fwVersion\":\"null\",\"dlConfig\":\"null\",\"recievedPayload\":\"cb020051\"}")));

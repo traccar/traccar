@@ -29,12 +29,14 @@ public class ActiveDevice {
     private final Protocol protocol;
     private final Channel channel;
     private final SocketAddress remoteAddress;
+    private final boolean supportsLiveCommands;
 
     public ActiveDevice(long deviceId, Protocol protocol, Channel channel, SocketAddress remoteAddress) {
         this.deviceId = deviceId;
         this.protocol = protocol;
         this.channel = channel;
         this.remoteAddress = remoteAddress;
+        supportsLiveCommands = BasePipelineFactory.getHandler(channel.pipeline(), HttpRequestDecoder.class) == null;
     }
 
     public Channel getChannel() {
@@ -46,7 +48,7 @@ public class ActiveDevice {
     }
 
     public boolean supportsLiveCommands() {
-        return BasePipelineFactory.getHandler(channel.pipeline(), HttpRequestDecoder.class) == null;
+        return supportsLiveCommands;
     }
 
     public void sendCommand(Command command) {

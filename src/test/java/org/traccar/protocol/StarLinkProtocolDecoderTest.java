@@ -11,6 +11,12 @@ public class StarLinkProtocolDecoderTest extends ProtocolTest {
 
         StarLinkProtocolDecoder decoder = new StarLinkProtocolDecoder(null);
 
+        decoder.setFormat("#EDT#,#EID#,#PDT#,#LAT#,#LONG#,#SPD#,#HEAD#,#ODO#,#LAC#,#CID#,#VIN#,#VBAT#,#TI1#,#TS1#,#TV1#,#TH1#,#TD1#,#EDSC#,#TI2#,#TS2#,#TV2#,#TH2#,#TD2#");
+
+        verifyAttribute(decoder, text(
+                "$SLU351580050356894,06,1192,200811104100,01,200811104058,+4121.8168,+00205.1158,000.0,069,000069,2080,15139043,12.221,03.533,D469062D44D6,1,29.7,56.9,CAEaBtRpBi1E1jhLSJoYKLkEINIEWABgAmgAcAJ4AIABAIgBAA==,Location,D2567108639E,1,30.2,55.3,CAIaBtJWcQhjnjhPSPIXKKkEINwEWEpgA2gAcAJ4AIABAIgBAA==,1,99*5A"),
+                "sensor2Voltage", 3058 * 0.001);
+
         decoder.setFormat("#IMEI#,#EDT#,#PDT#,#LAT#,#LONG#,#SPD#,#IGN#,#ODO#,#DUR#,#TDUR#,#LAC#,#CID#,#VIN#,#VBAT#,#EID#,#EDSC#,#DRV#,#SATU#,#CSS#,#OUT1#,#OUT2#");
 
         verifyAttribute(decoder, text(
