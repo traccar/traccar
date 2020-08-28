@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ public class Event extends Message {
     public static final String TYPE_DEVICE_ONLINE = "deviceOnline";
     public static final String TYPE_DEVICE_UNKNOWN = "deviceUnknown";
     public static final String TYPE_DEVICE_OFFLINE = "deviceOffline";
+    public static final String TYPE_DEVICE_INACTIVE = "deviceInactive";
 
     public static final String TYPE_DEVICE_MOVING = "deviceMoving";
     public static final String TYPE_DEVICE_STOPPED = "deviceStopped";

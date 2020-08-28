@@ -144,6 +144,7 @@ public final class Main {
             if (Context.getWebServer() != null) {
                 Context.getWebServer().start();
             }
+            Context.getScheduleManager().start();
 
             scheduleHealthCheck();
             scheduleDatabaseCleanup();
@@ -153,6 +154,7 @@ public final class Main {
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 LOGGER.info("Shutting down server...");
 
+                Context.getScheduleManager().stop();
                 if (Context.getWebServer() != null) {
                     Context.getWebServer().stop();
                 }
