@@ -166,7 +166,7 @@ public final class Context {
         return serverManager;
     }
 
-    public static ScheduleManager scheduleManager;
+    private static ScheduleManager scheduleManager;
 
     public static ScheduleManager getScheduleManager() {
         return scheduleManager;
