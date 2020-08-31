@@ -12,6 +12,10 @@ public class Gl200TextProtocolDecoderTest extends ProtocolTest {
         Gl200TextProtocolDecoder decoder = new Gl200TextProtocolDecoder(null);
 
         verifyAttribute(decoder, buffer(
+                "+RESP:GTFRI,DE0114,865284041308986,,0,0,1,0,0.0,0,245.6,-117.678624,34.032081,20200825030332,0311,0480,3304,00C7F601,24,0,,85,1,1,,20200825030738,03B1$"),
+                Position.KEY_BATTERY_LEVEL, 85);
+
+        verifyAttribute(decoder, buffer(
                 "+RESP:GTFRI,380903,869606020188383,,,40,1,2,43.4,80,252.4,8.606297,50.700200,20200721090109,0262,0001,1932,1BA4,00,0.0,,,,0,220100,,,,20200721090110,00B9$"),
                 Position.PREFIX_IN + 1, false);
 

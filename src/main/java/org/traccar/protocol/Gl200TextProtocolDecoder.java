@@ -190,6 +190,12 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .expression(PATTERN_LOCATION.pattern())
             .expression(")+)")
             .groupBegin()
+            .number("d{1,2},,")
+            .number("(d{1,3}),")                 // battery
+            .number("[01],")                     // mode
+            .number("[01],")                     // motion
+            .number("(?:-?d{1,2}.d)?,")          // temperature
+            .or()
             .number("(d{1,7}.d)?,")              // odometer
             .number("(d{5}:dd:dd)?,")            // hour meter
             .number("(x+)?,")                    // adc 1
@@ -213,6 +219,15 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("(xxxx)")                    // count number
             .text("$").optional()
             .compile();
+
+    /*
+    CSQ BER <=2 0 - 7|99
+Reserved 0
+Battery Percentage <=3 0 - 100
+Mode Selection 1 0|1
+Movement Status 1 0|1
+Temperature <=5 (-)XX.X
+     */
 
     private static final Pattern PATTERN_ERI = new PatternBuilder()
             .text("+").expression("(?:RESP|BUFF):GTERI,")
@@ -838,6 +853,10 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
         if (battery != null) {
             position.set(Position.KEY_BATTERY_LEVEL, battery);
+        }
+
+        if (parser.hasNext()) {
+            position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
         }
 
         if (parser.hasNext()) {
