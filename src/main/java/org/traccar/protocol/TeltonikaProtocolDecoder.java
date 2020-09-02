@@ -198,30 +198,65 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             case 1:
             case 2:
             case 3:
+                position.set("DIN" + id, readValue(buf, length, false));
+                break;
             case 4:
-                position.set("di" + id, readValue(buf, length, false));
+            case 5:
+                position.set("Pulse Counter DIN" + (id - 3), readValue(buf, length, false));
+                break;
+            case 6:
+                position.set("AIN" + 2, readValue(buf, length, false) * 0.001);
+                break;
+            case 7:
+                position.set("Records In Flash", readValue(buf, length, false));
+                break;
+            case 8:
+                position.set("Authorized iButton", readValue(buf, length, false));
                 break;
             case 9:
-                position.set(Position.PREFIX_ADC + 1, readValue(buf, length, false));
+                position.set("AIN" + 1, readValue(buf, length, false) * 0.001);
                 break;
             case 10:
-                position.set(Position.PREFIX_ADC + 2, readValue(buf, length, false));
+                position.set("SD Status", readValue(buf, length, false));
+                break;
+            case 11:
+                position.set("ICCID1", readValue(buf, length, false));
+                break;
+            case 12:
+                position.set("Fuel Used GNSS (l)", readValue(buf, length, false) * 0.001);
+                break;
+            case 13:
+                position.set("Fuel Rate GNSS (l/100km)", readValue(buf, length, false) * 0.01);
+                break;
+            case 14:
+                position.set("ICCID2", readValue(buf, length, false));
+                break;
+            case 15:
+                position.set("Eco Score", readValue(buf, length, false) * 0.01);
                 break;
             case 16:
-            case 87:
-                position.set(Position.KEY_ODOMETER, readValue(buf, length, false));
+                position.set("Total Odometer (m)", readValue(buf, length, false));
                 break;
             case 17:
-                position.set("axisX", readValue(buf, length, true));
+                position.set("Axis X (mG)", readValue(buf, length, true));
                 break;
             case 18:
-                position.set("axisY", readValue(buf, length, true));
+                position.set("Axis Y (mG)", readValue(buf, length, true));
                 break;
             case 19:
-                position.set("axisZ", readValue(buf, length, true));
+                position.set("Axis Z (mG)", readValue(buf, length, true));
+                break;
+            case 20:
+                position.set("BLE 2 Battery Voltage", readValue(buf, length, false));
                 break;
             case 21:
                 position.set(Position.KEY_RSSI, readValue(buf, length, false));
+                break;
+            case 22:
+                position.set("BLE 3 Battery Voltage", readValue(buf, length, false));
+                break;
+            case 23:
+                position.set("BLE 4 Battery Voltage", readValue(buf, length, false));
                 break;
             case 24:
                 readValue(buf, length, false); // speed
@@ -230,77 +265,422 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             case 26:
             case 27:
             case 28:
-                position.set(Position.PREFIX_TEMP + (id - 24), readValue(buf, length, true) * 0.1);
+                position.set("BLE Temperature #" + (id - 24), readValue(buf, length, true) * 0.01);
+                break;
+            case 29:
+                position.set("BLE 1 Battery Voltage", readValue(buf, length, false));
+                break;
+            case 31:
+                position.set("Engine Load (%)", readValue(buf, length, false));
+                break;
+            case 32:
+                position.set("Coolant Temperature (C)", readValue(buf, length, true));
+                break;
+            case 33:
+                position.set("Short Fuel Trim (%)", readValue(buf, length, true));
+                break;
+            case 34:
+                position.set("Fuel Pressure (kPa)", readValue(buf, length, false));
+                break;
+            case 35:
+                position.set("Intake MAP (kPa)", readValue(buf, length, false));
+                break;
+            case 36:
+                position.set("Engine RPM", readValue(buf, length, false));
+                break;
+            case 37:
+                position.set("Vehicle Speed (km/h) (OBD)", readValue(buf, length, false));
+                break;
+            case 38:
+                position.set("Timing Advance (deg)", readValue(buf, length, true));
+                break;
+            case 39:
+                position.set("Intake Air Temperature (C)", readValue(buf, length, true));
+                break;
+            case 40:
+                position.set("MAF (g/sec)", readValue(buf, length, false) * 0.01);
+                break;
+            case 41:
+                position.set("Throttle Position (%)", readValue(buf, length, false));
+                break;
+            case 42:
+                position.set("Runtime Since Engine Start (s)", readValue(buf, length, false));
+                break;
+            case 43:
+                position.set("Distance Traveled MIL On (km)", readValue(buf, length, false));
+                break;
+            case 44:
+                position.set("Relative Fuel Rail Pressure (kPa)", readValue(buf, length, false) * 0.1);
+                break;
+            case 45:
+                position.set("Direct Fuel Rail Pressure (kPa)", readValue(buf, length, false) * 10);
+                break;
+            case 46:
+                position.set("Commanded EGR (%)", readValue(buf, length, false));
+                break;
+            case 47:
+                position.set("EGR Error (%)", readValue(buf, length, true));
+                break;
+            case 48:
+                position.set("Fuel Level (%)", readValue(buf, length, false));
+                break;
+            case 49:
+                position.set("Distance Since Codes Clear (km)", readValue(buf, length, false));
+                break;
+            case 50:
+                position.set("Barometric Pressure (kPa)", readValue(buf, length, false));
+                break;
+            case 51:
+                position.set("Control Module Voltage (V)", readValue(buf, length, false) * 0.001);
+                break;
+            case 52:
+                position.set("Absolute Load Value (%)", readValue(buf, length, false));
+                break;
+            case 53:
+                position.set("Ambient Air Temperature (C)", readValue(buf, length, true));
+                break;
+            case 54:
+                position.set("Time Run With MIL On (min)", readValue(buf, length, false));
+                break;
+            case 55:
+                position.set("Time Since Codes Cleared (min)", readValue(buf, length, false));
+                break;
+            case 56:
+                position.set("Absolute Fuel Rail Pressure (kPa)", readValue(buf, length, false) * 0.1);
+                break;
+            case 57:
+                position.set("Hybrid battery pack life (%)", readValue(buf, length, false));
+                break;
+            case 58:
+                position.set("Engine Oil Temperature (C)", readValue(buf, length, false));
+                break;
+            case 59:
+                position.set("Fuel Injection Timing (deg)", readValue(buf, length, true) * 0.01);
+                break;
+            case 60:
+                position.set("Fuel Rate (l/100km)", readValue(buf, length, false) * 0.01);
+                break;
+            case 61:
+            case 62:
+            case 63:
+            case 64:
+            case 65:
+                position.set("Geofence zone " + (id - 60 + 5), readValue(buf, length, false));
                 break;
             case 66:
-                position.set(Position.KEY_POWER, readValue(buf, length, false) * 0.001);
+                position.set("External voltage", readValue(buf, length, false) * 0.001);
                 break;
             case 67:
-                position.set(Position.KEY_BATTERY, readValue(buf, length, false) * 0.001);
+                position.set("Battery voltage", readValue(buf, length, false) * 0.001);
+                break;
+            case 68:
+                position.set("Battery Current", readValue(buf, length, false) * 0.001);
                 break;
             case 69:
-                position.set("gpsStatus", readValue(buf, length, false));
+                position.set("GNSS Status", readValue(buf, length, false));
+                break;
+            case 70:
+                position.set("Geofence zone 11", readValue(buf, length, false));
+                break;
+            case 71:
+                position.set("Temperature ID 4", readValue(buf, length, false));
                 break;
             case 72:
             case 73:
             case 74:
-                position.set(Position.PREFIX_TEMP + (id - 71), readValue(buf, length, true) * 0.1);
+            case 75:
+                position.set("Dallas temperature " + (id - 71), readValue(buf, length, true) * 0.1);
+                break;
+            case 76:
+            case 77:
+                position.set("Temperature ID " + (id - 75), readValue(buf, length, false));
                 break;
             case 78:
                 long driverUniqueId = readValue(buf, length, false);
                 if (driverUniqueId != 0) {
-                    position.set(Position.KEY_DRIVER_UNIQUE_ID, String.format("%016X", driverUniqueId));
+                    position.set("iButton", String.format("%016X", driverUniqueId));
                 }
                 break;
+            case 79:
+                position.set("Temperature ID 3", readValue(buf, length, false));
+                break;
             case 80:
-                position.set("workMode", readValue(buf, length, false));
+                position.set("Data Mode", readValue(buf, length, false));
                 break;
             case 81:
-                position.set(Position.KEY_OBD_SPEED, readValue(buf, length, false));
+                position.set("Vehicle Speed (km/h) (CAN)", readValue(buf, length, false));
                 break;
             case 82:
-                position.set(Position.KEY_THROTTLE, readValue(buf, length, false));
+                position.set("Accelerator Pedal Position (%) (CAN)", readValue(buf, length, false));
                 break;
             case 83:
-                position.set(Position.KEY_FUEL_USED, readValue(buf, length, false) * 0.1);
+                position.set("Fuel Consumed (l) (CAN)", readValue(buf, length, false) * 0.1);
                 break;
             case 84:
-                position.set(Position.KEY_FUEL_LEVEL, readValue(buf, length, false) * 0.1);
+                position.set("Fuel level (l) (CAN)", readValue(buf, length, false) * 0.1);
                 break;
             case 85:
-                position.set(Position.KEY_RPM, readValue(buf, length, false));
+                position.set("Engine RPM (CAN)", readValue(buf, length, false));
+                break;
+            case 86:
+                position.set("BLE 1 Humidity (%RH)", readValue(buf, length, false) * 0.1);
+                break;
+            case 87:
+                position.set("Total Mileage (m) (CAN)", readValue(buf, length, false));
+                break;
+            case 88:
+                position.set("Geofence zone 12", readValue(buf, length, false));
+                break;
+            case 89:
+                position.set("Fuel Level (%) (CAN)", readValue(buf, length, false));
                 break;
             case 90:
-                position.set(Position.KEY_DOOR, readValue(buf, length, false));
+                position.set("Door Status (CAN)", readValue(buf, length, false));
+                break;
+            case 91:
+            case 92:
+            case 93:
+            case 94:
+            case 95:
+            case 96:
+            case 97:
+            case 98:
+            case 99:
+                position.set("Geofence zone " + (id - 90 + 12), readValue(buf, length, false));
+                break;
+            case 100:
+                position.set("Program Number (CAN)", readValue(buf, length, false));
+                break;
+            case 101:
+                position.set("Module ID (CAN)", readValue(buf, length, false));
+                break;
+            case 102:
+                position.set("Engine Worktime (min) (CAN)", readValue(buf, length, false));
+                break;
+            case 103:
+                position.set("Engine Worktime (counted, min) (CAN)", readValue(buf, length, false));
+                break;
+            case 104:
+                position.set("BLE 2 Humidity (%RH)", readValue(buf, length, false) * 0.1);
+                break;
+            case 105:
+                position.set("Total Mileage (counted, m) (CAN)", readValue(buf, length, false));
+                break;
+            case 106:
+                position.set("BLE 3 Humidity (%RH)", readValue(buf, length, false) * 0.1);
+                break;
+            case 107:
+                position.set("Fuel Consumed (counted, ml) (CAN)", readValue(buf, length, false));
+                break;
+            case 108:
+                position.set("BLE 4 Humidity (%RH)", readValue(buf, length, false) * 0.1);
                 break;
             case 110:
-                position.set(Position.KEY_FUEL_CONSUMPTION, readValue(buf, length, true) * 0.1);
+                position.set("Fuel Rate (l/h) (CAN)", readValue(buf, length, false) * 0.1);
+                break;
+            case 111:
+                position.set("AdBlue Level (%) (CAN)", readValue(buf, length, false));
+                break;
+            case 112:
+                position.set("AdBlue Level (l) (CAN)", readValue(buf, length, false) * 0.1);
                 break;
             case 113:
                 if (length == 1) {
-                    position.set(Position.KEY_BATTERY_LEVEL, readValue(buf, length, true));
+                    position.set("Battery level", readValue(buf, length, false));
                 } else {
                     position.set(Position.PREFIX_IO + id, readValue(buf, length, false));
                 }
                 break;
+            case 114:
+                position.set("Engine Load (%) (CAN)", readValue(buf, length, false));
+                break;
             case 115:
-                position.set(Position.KEY_COOLANT_TEMP, readValue(buf, length, true) * 0.1);
+                position.set("Engine Temperature (C) (CAN)", readValue(buf, length, true) * 0.1);
+                break;
+            case 116:
+                position.set("Charger Connected", readValue(buf, length, false));
+                break;
+            case 117:
+                position.set("Driving Direction", readValue(buf, length, false));
+                break;
+            case 118:
+                position.set("Axle 1 Load (kg) (CAN)", readValue(buf, length, false));
+                break;
+            case 119:
+                position.set("Axle 2 Load (kg) (CAN)", readValue(buf, length, false));
+                break;
+            case 120:
+                position.set("Axle 3 Load (kg) (CAN)", readValue(buf, length, false));
+                break;
+            case 121:
+                position.set("Axle 4 Load (kg) (CAN)", readValue(buf, length, false));
+                break;
+            case 122:
+                position.set("Axle 5 Load (kg) (CAN)", readValue(buf, length, false));
+                break;
+            case 123:
+                position.set("Control State Flags (CAN)", readValue(buf, length, false));
+                break;
+            case 124:
+                position.set("Agricultural Machinery Flags (CAN)", readValue(buf, length, false));
+                break;
+            case 125:
+                position.set("Harvesting Time (min) (CAN)", readValue(buf, length, false));
+                break;
+            case 126:
+                position.set("Area of Harvest (m2) (CAN)", readValue(buf, length, false));
+                break;
+            case 127:
+                position.set("LVC of Harvest (m2/h) (CAN)", readValue(buf, length, false));
+                break;
+            case 128:
+                position.set("Grain Mow Volume (kg) (CAN)", readValue(buf, length, false));
                 break;
             case 129:
+                position.set("Grain Moisture (%) (CAN)", readValue(buf, length, false));
+                break;
             case 130:
+                position.set("Harvesting Drum RPM (CAN)", readValue(buf, length, false));
+                break;
             case 131:
+                position.set("Gap Under Harvesting Drum (mm) (CAN)", readValue(buf, length, false));
+                break;
             case 132:
+                position.set("Security State Flags (CAN)", readValue(buf, length, false));
+                break;
             case 133:
+                position.set("Tacho Total Distance (m) (CAN)", readValue(buf, length, false));
+                break;
             case 134:
-                String driver = id == 129 || id == 132 ? "" : position.getString("driver1");
-                position.set("driver" + (id >= 132 ? 2 : 1),
-                        driver + buf.readSlice(length).toString(StandardCharsets.US_ASCII).trim());
+                position.set("Trip Distance (m) (CAN)", readValue(buf, length, false));
+                break;
+            case 135:
+                position.set("Tacho Vehicle Speed (km/h) (CAN)", readValue(buf, length, false));
+                break;
+            case 136:
+                position.set("Tacho Driver Card Presence (CAN)", readValue(buf, length, false));
+                break;
+            case 137:
+                position.set("Driver 1 States (CAN)", readValue(buf, length, false));
+                break;
+            case 138:
+                position.set("Driver 2 States (CAN)", readValue(buf, length, false));
+                break;
+            case 139:
+                position.set("Driver 1 Driving Time (min) (CAN)", readValue(buf, length, false));
+                break;
+            case 140:
+                position.set("Driver 2 Driving Time (min) (CAN)", readValue(buf, length, false));
+                break;
+            case 141:
+                position.set("Driver 1 Break Time (min) (CAN)", readValue(buf, length, false));
+                break;
+            case 142:
+                position.set("Driver 2 Break Time (min) (CAN)", readValue(buf, length, false));
+                break;
+            case 143:
+                position.set("Driver 1 Activity Duration (min) (CAN)", readValue(buf, length, false));
+                break;
+            case 144:
+                position.set("Driver 2 Activity Duration (min) (CAN)", readValue(buf, length, false));
+                break;
+            case 145:
+                position.set("Driver 1 Driving Time (min) (CAN)", readValue(buf, length, false));
+                break;
+            case 146:
+                position.set("Driver 2 Driving Time (min) (CAN)", readValue(buf, length, false));
+                break;
+            case 147:
+                position.set("Driver 1 ID High (CAN)", readValue(buf, length, false));
+                break;
+            case 148:
+                position.set("Driver 1 ID Low (CAN)", readValue(buf, length, false));
+                break;
+            case 149:
+                position.set("Driver 2 ID High (CAN)", readValue(buf, length, false));
+                break;
+            case 150:
+                position.set("Driver 2 ID Low (CAN)", readValue(buf, length, false));
+                break;
+            case 151:
+                position.set("Battery Temperature (C) (CAN)", readValue(buf, length, true) * 0.1);
+                break;
+            case 152:
+                position.set("Battery Level (%) (CAN)", readValue(buf, length, false));
+                break;
+            case 153:
+            case 154:
+                position.set("Geofence zone " + (id - 152 + 21), readValue(buf, length, false));
+                break;
+            case 155:
+            case 156:
+            case 157:
+            case 158:
+            case 159:
+                position.set("Geofence zone " + (id - 154), readValue(buf, length, false));
+                break;
+            case 160:
+                position.set("DTC Faults Count (CAN)", readValue(buf, length, false));
+                break;
+            case 161:
+                position.set("Slope of Arm (deg) (CAN)", readValue(buf, length, true));
+                break;
+            case 162:
+                position.set("Rotation of Arm (deg) (CAN)", readValue(buf, length, true));
+                break;
+            case 163:
+                position.set("Eject of Arm (m) (CAN)", readValue(buf, length, false));
+                break;
+            case 164:
+                position.set("Horizontal Distance Arm (m) (CAN)", readValue(buf, length, false));
+                break;
+            case 165:
+                position.set("Height Arm Above Ground (m) (CAN)", readValue(buf, length, false));
+                break;
+            case 166:
+                position.set("Drill RPM (CAN)", readValue(buf, length, false));
+                break;
+            case 167:
+                position.set("Spread Salt (g/m2) (CAN)", readValue(buf, length, false));
+                break;
+            case 168:
+                position.set("Battery Voltage (V) (CAN)", readValue(buf, length, false));
+                break;
+            case 169:
+                position.set("Spread Fine Grained Salt (T) (CAN)", readValue(buf, length, false));
+                break;
+            case 170:
+                position.set("Coarse Grained Salt (T) (CAN)", readValue(buf, length, false));
+                break;
+            case 171:
+                position.set("Spread DiMix (T) (CAN)", readValue(buf, length, false));
+                break;
+            case 172:
+                position.set("Spread Course Grained Calcium (m3) (CAN)", readValue(buf, length, false));
+                break;
+            case 173:
+                position.set("Spread Calcium Chloride (m3) (CAN)", readValue(buf, length, false));
+                break;
+            case 174:
+                position.set("Spread Sodium Chloride (m3) (CAN)", readValue(buf, length, false));
+                break;
+            case 175:
+                position.set("AUTO GEOFENCE", readValue(buf, length, false));
+                break;
+            case 176:
+                position.set("Spread Magnesium Chloride (m3) (CAN)", readValue(buf, length, false));
+                break;
+            case 177:
+                position.set("Amount Of Spread Gravel (T) (CAN)", readValue(buf, length, false));
+                break;
+            case 178:
+                position.set("Amount of Spread Sand (T) (CAN)", readValue(buf, length, false));
                 break;
             case 179:
-                position.set(Position.PREFIX_OUT + 1, readValue(buf, length, false) == 1);
+                position.set("DOUT" + 1, readValue(buf, length, false) == 1);
                 break;
             case 180:
-                position.set(Position.PREFIX_OUT + 2, readValue(buf, length, false) == 1);
+                position.set("DOUT" + 2, readValue(buf, length, false) == 1);
                 break;
             case 181:
                 position.set(Position.KEY_PDOP, readValue(buf, length, false) * 0.1);
@@ -308,16 +688,127 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             case 182:
                 position.set(Position.KEY_HDOP, readValue(buf, length, false) * 0.1);
                 break;
+            case 183:
+                position.set("Width Pouring Left (m) (CAN)", readValue(buf, length, false));
+                break;
+            case 184:
+                position.set("Width Pouring Right (m) (CAN)", readValue(buf, length, false));
+                break;
+            case 185:
+                position.set("Salt Spreader Working Hours (h) (CAN)", readValue(buf, length, false));
+                break;
+            case 186:
+                position.set("Distance During Salting (km) (CAN)", readValue(buf, length, false));
+                break;
+            case 187:
+                position.set("Load Weight (kg) (CAN)", readValue(buf, length, false));
+                break;
+            case 188:
+                position.set("Retarder Load (%) (CAN)", readValue(buf, length, false));
+                break;
+            case 189:
+                position.set("Cruise Time (min) (CAN)", readValue(buf, length, false));
+                break;
+            case 190:
+            case 191:
+            case 192:
+            case 193:
+            case 194:
+            case 195:
+            case 196:
+            case 197:
+            case 198:
+                position.set("Geofence zone " + (id - 189 + 23), readValue(buf, length, false));
+                break;
             case 199:
-                position.set(Position.KEY_ODOMETER_TRIP, readValue(buf, length, false));
+                position.set("Trip Odometer", readValue(buf, length, false));
+                break;
+            case 200:
+                position.set("Sleep Mode", readValue(buf, length, false));
+                break;
+            case 201:
+                position.set("LLS 1 Fuel Level", readValue(buf, length, true));
+                break;
+            case 202:
+                position.set("LLS 1 Temperature", readValue(buf, length, true));
+                break;
+            case 203:
+                position.set("LLS 2 Fuel Level", readValue(buf, length, true));
+                break;
+            case 204:
+                position.set("LLS 2 Temperature", readValue(buf, length, true));
+                break;
+            case 205:
+                position.set("GSM Cell ID", readValue(buf, length, false));
+                break;
+            case 206:
+                position.set("GSM Area Code", readValue(buf, length, false));
+                break;
+            case 207:
+                position.set("RFID", readValue(buf, length, false));
+                break;
+            case 208:
+            case 209:
+                position.set("Geofence zone " + (id - 207 + 32), readValue(buf, length, false));
+                break;
+            case 210:
+                position.set("LLS 3 Fuel Level", readValue(buf, length, true));
+                break;
+            case 211:
+                position.set("LLS 3 Temperature", readValue(buf, length, true));
+                break;
+            case 212:
+                position.set("LLS 4 Fuel Level", readValue(buf, length, true));
+                break;
+            case 213:
+                position.set("LLS 4 Temperature", readValue(buf, length, true));
+                break;
+            case 214:
+                position.set("LLS 5 Fuel Level", readValue(buf, length, true));
+                break;
+            case 215:
+                position.set("LLS 5 Temperature", readValue(buf, length, true));
+                break;
+            case 216:
+            case 217:
+            case 218:
+            case 219:
+            case 220:
+            case 221:
+            case 222:
+            case 223:
+            case 224:
+            case 225:
+            case 226:
+            case 227:
+            case 228:
+            case 229:
+            case 230:
+            case 231:
+                position.set("Geofence zone " + (id - 215 + 34), readValue(buf, length, false));
+                break;
+            case 232:
+                position.set("CNG status (CAN)", readValue(buf, length, false));
+                break;
+            case 233:
+                position.set("CNG used (kg) (CAN)", readValue(buf, length, false));
+                break;
+            case 234:
+                position.set("CNG level (%) (CAN)", readValue(buf, length, false));
                 break;
             case 235:
-                position.set("oilLevel", readValue(buf, length, false));
+                position.set("Engine Oil Level (CAN)", readValue(buf, length, false));
                 break;
             case 236:
                 if (readValue(buf, length, false) == 1) {
                     position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
                 }
+                break;
+            case 237:
+                position.set("Network Type", readValue(buf, length, false));
+                break;
+            case 238:
+                position.set("User ID", readValue(buf, length, false));
                 break;
             case 239:
                 position.set(Position.KEY_IGNITION, readValue(buf, length, false) == 1);
@@ -327,6 +818,36 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 break;
             case 241:
                 position.set(Position.KEY_OPERATOR, readValue(buf, length, false));
+                break;
+            case 242:
+                position.set("MANDOWN", readValue(buf, length, false));
+                break;
+            case 243:
+                position.set("GREEN DRIVING EVENT DURATION (ms)", readValue(buf, length, false));
+                break;
+            case 244:
+                position.set("DIN2/AIN2 spec event", readValue(buf, length, false));
+                break;
+            case 246:
+                position.set("TOWING", readValue(buf, length, false));
+                break;
+            case 247:
+                position.set("CRASH DETECTION", readValue(buf, length, false));
+                break;
+            case 248:
+                position.set("IMMOBILIZER", readValue(buf, length, false));
+                break;
+            case 249:
+                position.set("JAMMING", readValue(buf, length, false));
+                break;
+            case 250:
+                position.set("TRIP", readValue(buf, length, false));
+                break;
+            case 251:
+                position.set("IDLING", readValue(buf, length, false));
+                break;
+            case 252:
+                position.set("UNPLUG", readValue(buf, length, false));
                 break;
             case 253:
                 switch ((int) readValue(buf, length, false)) {
@@ -342,6 +863,152 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                     default:
                         break;
                 }
+                break;
+            case 254: 
+                position.set("GREEN DRIVING VALUE", readValue(buf, length, false));
+                break;
+            case 255:
+                position.set("OVER SPEEDING", readValue(buf, length, false));
+                break;
+            case 257:
+                position.set("Crash trace data", readValue(buf, length, false));
+                break;
+            case 258:
+                position.set("EcoMaximum", readValue(buf, length, false));
+                break;
+            case 259:
+                position.set("EcoAverage", readValue(buf, length, false));
+                break;
+            case 260:
+                position.set("EcoDuration", readValue(buf, length, false));
+                break;
+            case 263:
+                position.set("BT Status", readValue(buf, length, false));
+                break;
+            case 269:
+                position.set("Escort LLS Temperature #1", readValue(buf, length, true));
+                break;
+            case 270:
+                position.set("Escort LLS Fuel Level #1", readValue(buf, length, false));
+                break;
+            case 271:
+                position.set("Escort LLS Battery Voltage #1", readValue(buf, length, false) * 0.01);
+                break;
+            case 272:
+                position.set("Escort LLS Temperature #2", readValue(buf, length, true));
+                break;
+            case 273:
+                position.set("Escort LLS Fuel Level #2", readValue(buf, length, false));
+                break;
+            case 274:
+                position.set("Escort LLS Battery Voltage #2", readValue(buf, length, false) * 0.01);
+                break;
+            case 275:
+                position.set("Escort LLS Temperature #3", readValue(buf, length, true));
+                break;
+            case 276:
+                position.set("Escort LLS Fuel Level #3", readValue(buf, length, false));
+                break;
+            case 277:
+                position.set("Escort LLS Battery Voltage #3", readValue(buf, length, false) * 0.01);
+                break;
+            case 278:
+                position.set("Escort LLS Temperature #4", readValue(buf, length, true));
+                break;
+            case 279:
+                position.set("Escort LLS Fuel Level #4", readValue(buf, length, false));
+                break;
+            case 280:
+                position.set("Escort LLS Battery Voltage #4", readValue(buf, length, false) * 0.01);
+                break;
+            case 282:
+                position.set("DTC Faults code (CAN)", readValue(buf, length, false));
+                break;
+            case 283:
+                position.set("Driving State", readValue(buf, length, false));
+                break;
+            case 284:
+                position.set("Driving Records", readValue(buf, length, false));
+                break;
+            case 285:
+                position.set("Blood alcohol content", readValue(buf, length, false));
+                break;
+            case 303:
+                position.set("Instant Movement", readValue(buf, length, false));
+                break;
+            case 304:
+                position.set("Vehicle Range on Battery (m) (CAN)", readValue(buf, length, false));
+                break;
+            case 306:
+            case 307:
+            case 308:
+            case 309:
+                position.set("BLE Fuel Frequency #" + (id - 305), readValue(buf, length, false));
+            case 310:
+                position.set("Movement Event", readValue(buf, length, false));
+                break;
+            case 314:
+                position.set("Beacon", readValue(buf, length, false));
+                break;
+            case 315:
+                position.set("Dead Man", readValue(buf, length, false));
+                break;
+            case 317:
+                position.set("Crash event counter", readValue(buf, length, false));
+                break;
+            case 325:
+                position.set("VIN (CAN)", readValue(buf, length, false));
+                break;
+            case 327:
+                position.set("UL202-02 Sensor Fuel level (mm)", readValue(buf, length, true) * 0.1);
+                break;
+            case 328:
+                position.set("UL202-02 Sensor Status", readValue(buf, length, false));
+                break;
+            case 330:
+                position.set("Trip trace event", readValue(buf, length, false));
+                break;
+            case 335:
+            case 336:
+            case 337:
+            case 338:
+                position.set("BLE Luminosity (lx) " + (id - 334), readValue(buf, length, false));
+                break;
+            case 380:
+                position.set("DOUT" + 3, readValue(buf, length, false) == 1);
+                break;
+            case 381:
+                position.set("Ground sense", readValue(buf, length, false));
+                break;
+            case 389:
+                position.set("OBD OEM Total Mileage (km)", readValue(buf, length, false));
+                break;
+            case 390:
+                position.set("OBD OEM Fuel Level (l)", readValue(buf, length, false) * 0.1);
+                break;
+            case 391:
+                position.set("Private mode", readValue(buf, length, false));
+                break;
+            case 483:
+                position.set("UL202-02 Sensor Status", readValue(buf, length, false));
+                break;
+            case 517:
+                position.set("SecurityStateFlags_P4", readValue(buf, length, false));
+                break;
+            case 518:
+                position.set("ControlStateFlags_P4", readValue(buf, length, false));
+                break;
+            case 519:
+                position.set("IndicatorStateFlags_P4", readValue(buf, length, false));
+                break;
+            case 520:
+                position.set("AgriculturalStateFlags_P4", readValue(buf, length, false));
+                break;
+            case 521:
+                position.set("UtilityStateFlags_P4", readValue(buf, length, false));
+                break;
+            case 522:
+                position.set("CisternStateFlags_P4", readValue(buf, length, false));
                 break;
             default:
                 position.set(Position.PREFIX_IO + id, readValue(buf, length, false));
@@ -569,6 +1236,14 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 int length = buf.readUnsignedShort();
                 if (id == 256) {
                     position.set(Position.KEY_VIN, buf.readSlice(length).toString(StandardCharsets.US_ASCII));
+                } else if (id == 387) {
+                    position.set("ISO6709 Coordinates", buf.readSlice(length).toString(StandardCharsets.US_ASCII));
+                } else if (id == 264) {
+                    position.set("Barcode ID", buf.readSlice(length).toString(StandardCharsets.US_ASCII));
+                } else if (id == 30) {
+                    position.set("Number of DTC", buf.readSlice(length).toString(StandardCharsets.US_ASCII));
+                } else if (id == 281) {
+                    position.set("Fault Codes", buf.readSlice(length).toString(StandardCharsets.US_ASCII));
                 } else {
                     position.set(Position.PREFIX_IO + id, ByteBufUtil.hexDump(buf.readSlice(length)));
                 }
