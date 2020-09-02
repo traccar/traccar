@@ -45,7 +45,7 @@ import java.util.regex.Pattern;
 
 public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
-    private boolean ignoreFixTime;
+    private final boolean ignoreFixTime;
 
     public Gl200TextProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -190,6 +190,12 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .expression(PATTERN_LOCATION.pattern())
             .expression(")+)")
             .groupBegin()
+            .number("d{1,2},,")
+            .number("(d{1,3}),")                 // battery
+            .number("[01],")                     // mode
+            .number("(?:[01])?,")                // motion
+            .number("(?:-?d{1,2}.d)?,")          // temperature
+            .or()
             .number("(d{1,7}.d)?,")              // odometer
             .number("(d{5}:dd:dd)?,")            // hour meter
             .number("(x+)?,")                    // adc 1
@@ -838,6 +844,10 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
         if (battery != null) {
             position.set(Position.KEY_BATTERY_LEVEL, battery);
+        }
+
+        if (parser.hasNext()) {
+            position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
         }
 
         if (parser.hasNext()) {
