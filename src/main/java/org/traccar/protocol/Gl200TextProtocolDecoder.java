@@ -45,7 +45,7 @@ import java.util.regex.Pattern;
 
 public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
-    private boolean ignoreFixTime;
+    private final boolean ignoreFixTime;
 
     public Gl200TextProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -193,7 +193,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("d{1,2},,")
             .number("(d{1,3}),")                 // battery
             .number("[01],")                     // mode
-            .number("[01],")                     // motion
+            .number("(?:[01])?,")                // motion
             .number("(?:-?d{1,2}.d)?,")          // temperature
             .or()
             .number("(d{1,7}.d)?,")              // odometer
@@ -219,15 +219,6 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("(xxxx)")                    // count number
             .text("$").optional()
             .compile();
-
-    /*
-    CSQ BER <=2 0 - 7|99
-Reserved 0
-Battery Percentage <=3 0 - 100
-Mode Selection 1 0|1
-Movement Status 1 0|1
-Temperature <=5 (-)XX.X
-     */
 
     private static final Pattern PATTERN_ERI = new PatternBuilder()
             .text("+").expression("(?:RESP|BUFF):GTERI,")
