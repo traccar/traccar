@@ -211,7 +211,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set("Records In Flash", readValue(buf, length, false));
                 break;
             case 8:
-                position.set("Authorized iButton", readValue(buf, length, false));
+                position.set("Authorized iButton", String.format("%X", readValue(buf, length, false)));
                 break;
             case 9:
                 position.set("AIN" + 1, readValue(buf, length, false) * 0.001);
@@ -271,94 +271,94 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set("BLE 1 Battery Voltage", readValue(buf, length, false));
                 break;
             case 31:
-                position.set("Engine Load (%)", readValue(buf, length, false));
+                position.set("Engine Load (%) (OBD)", readValue(buf, length, false));
                 break;
             case 32:
-                position.set("Coolant Temperature (C)", readValue(buf, length, true));
+                position.set("Coolant Temperature (C) (OBD)", readValue(buf, length, true));
                 break;
             case 33:
-                position.set("Short Fuel Trim (%)", readValue(buf, length, true));
+                position.set("Short Fuel Trim (%) (OBD)", readValue(buf, length, true));
                 break;
             case 34:
-                position.set("Fuel Pressure (kPa)", readValue(buf, length, false));
+                position.set("Fuel Pressure (kPa) (OBD)", readValue(buf, length, false));
                 break;
             case 35:
-                position.set("Intake MAP (kPa)", readValue(buf, length, false));
+                position.set("Intake MAP (kPa) (OBD)", readValue(buf, length, false));
                 break;
             case 36:
-                position.set("Engine RPM", readValue(buf, length, false));
+                position.set("Engine RPM (OBD)", readValue(buf, length, false));
                 break;
             case 37:
                 position.set("Vehicle Speed (km/h) (OBD)", readValue(buf, length, false));
                 break;
             case 38:
-                position.set("Timing Advance (deg)", readValue(buf, length, true));
+                position.set("Timing Advance (deg) (OBD)", readValue(buf, length, true));
                 break;
             case 39:
-                position.set("Intake Air Temperature (C)", readValue(buf, length, true));
+                position.set("Intake Air Temperature (C) (OBD)", readValue(buf, length, true));
                 break;
             case 40:
-                position.set("MAF (g/sec)", readValue(buf, length, false) * 0.01);
+                position.set("MAF (g/sec) (OBD)", readValue(buf, length, false) * 0.01);
                 break;
             case 41:
-                position.set("Throttle Position (%)", readValue(buf, length, false));
+                position.set("Throttle Position (%) (OBD)", readValue(buf, length, false));
                 break;
             case 42:
-                position.set("Runtime Since Engine Start (s)", readValue(buf, length, false));
+                position.set("Runtime Since Engine Start (s) (OBD)", readValue(buf, length, false));
                 break;
             case 43:
-                position.set("Distance Traveled MIL On (km)", readValue(buf, length, false));
+                position.set("Distance Traveled MIL On (km) (OBD)", readValue(buf, length, false));
                 break;
             case 44:
-                position.set("Relative Fuel Rail Pressure (kPa)", readValue(buf, length, false) * 0.1);
+                position.set("Relative Fuel Rail Pressure (kPa) (OBD)", readValue(buf, length, false) * 0.1);
                 break;
             case 45:
-                position.set("Direct Fuel Rail Pressure (kPa)", readValue(buf, length, false) * 10);
+                position.set("Direct Fuel Rail Pressure (kPa) (OBD)", readValue(buf, length, false) * 10);
                 break;
             case 46:
-                position.set("Commanded EGR (%)", readValue(buf, length, false));
+                position.set("Commanded EGR (%) (OBD)", readValue(buf, length, false));
                 break;
             case 47:
-                position.set("EGR Error (%)", readValue(buf, length, true));
+                position.set("EGR Error (%) (OBD)", readValue(buf, length, true));
                 break;
             case 48:
-                position.set("Fuel Level (%)", readValue(buf, length, false));
+                position.set("Fuel Level (%) (OBD)", readValue(buf, length, false));
                 break;
             case 49:
-                position.set("Distance Since Codes Clear (km)", readValue(buf, length, false));
+                position.set("Distance Since Codes Clear (km) (OBD)", readValue(buf, length, false));
                 break;
             case 50:
-                position.set("Barometric Pressure (kPa)", readValue(buf, length, false));
+                position.set("Barometric Pressure (kPa) (OBD)", readValue(buf, length, false));
                 break;
             case 51:
-                position.set("Control Module Voltage (V)", readValue(buf, length, false) * 0.001);
+                position.set("Control Module Voltage (V) (OBD)", readValue(buf, length, false) * 0.001);
                 break;
             case 52:
-                position.set("Absolute Load Value (%)", readValue(buf, length, false));
+                position.set("Absolute Load Value (%) (OBD)", readValue(buf, length, false));
                 break;
             case 53:
-                position.set("Ambient Air Temperature (C)", readValue(buf, length, true));
+                position.set("Ambient Air Temperature (C) (OBD)", readValue(buf, length, true));
                 break;
             case 54:
-                position.set("Time Run With MIL On (min)", readValue(buf, length, false));
+                position.set("Time Run With MIL On (min) (OBD)", readValue(buf, length, false));
                 break;
             case 55:
-                position.set("Time Since Codes Cleared (min)", readValue(buf, length, false));
+                position.set("Time Since Codes Cleared (min) (OBD)", readValue(buf, length, false));
                 break;
             case 56:
-                position.set("Absolute Fuel Rail Pressure (kPa)", readValue(buf, length, false) * 0.1);
+                position.set("Absolute Fuel Rail Pressure (kPa) (OBD)", readValue(buf, length, false) * 0.1);
                 break;
             case 57:
-                position.set("Hybrid battery pack life (%)", readValue(buf, length, false));
+                position.set("Hybrid battery pack life (%) (OBD)", readValue(buf, length, false));
                 break;
             case 58:
-                position.set("Engine Oil Temperature (C)", readValue(buf, length, false));
+                position.set("Engine Oil Temperature (C) (OBD)", readValue(buf, length, false));
                 break;
             case 59:
-                position.set("Fuel Injection Timing (deg)", readValue(buf, length, true) * 0.01);
+                position.set("Fuel Injection Timing (deg) (OBD)", readValue(buf, length, true) * 0.01);
                 break;
             case 60:
-                position.set("Fuel Rate (l/100km)", readValue(buf, length, false) * 0.01);
+                position.set("Fuel Rate (l/100km) (OBD)", readValue(buf, length, false) * 0.01);
                 break;
             case 61:
             case 62:
@@ -383,7 +383,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set("Geofence zone 11", readValue(buf, length, false));
                 break;
             case 71:
-                position.set("Temperature ID 4", readValue(buf, length, false));
+                position.set("Temperature ID 4", String.format("%X", readValue(buf, length, false)));
                 break;
             case 72:
             case 73:
@@ -393,7 +393,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 break;
             case 76:
             case 77:
-                position.set("Temperature ID " + (id - 75), readValue(buf, length, false));
+                position.set("Temperature ID " + (id - 75), String.format("%X", readValue(buf, length, false)));
                 break;
             case 78:
                 long driverUniqueId = readValue(buf, length, false);
@@ -402,7 +402,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 }
                 break;
             case 79:
-                position.set("Temperature ID 3", readValue(buf, length, false));
+                position.set("Temperature ID 3", String.format("%X", readValue(buf, length, false)));
                 break;
             case 80:
                 position.set("Data Mode", readValue(buf, length, false));
@@ -452,7 +452,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set("Program Number (CAN)", readValue(buf, length, false));
                 break;
             case 101:
-                position.set("Module ID (CAN)", readValue(buf, length, false));
+                position.set("Module ID (CAN)", String.format("%X", readValue(buf, length, false)));
                 break;
             case 102:
                 position.set("Engine Worktime (min) (CAN)", readValue(buf, length, false));
@@ -522,7 +522,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set("Control State Flags (CAN)", readValue(buf, length, false));
                 break;
             case 124:
-                position.set("Agricultural Machinery Flags (CAN)", readValue(buf, length, false));
+                position.set("Agricultural Machinery Flags (CAN)", String.format("%X", readValue(buf, length, false)));
                 break;
             case 125:
                 position.set("Harvesting Time (min) (CAN)", readValue(buf, length, false));
@@ -546,7 +546,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set("Gap Under Harvesting Drum (mm) (CAN)", readValue(buf, length, false));
                 break;
             case 132:
-                position.set("Security State Flags (CAN)", readValue(buf, length, false));
+                position.set("Security State Flags (CAN)", String.format("%X", readValue(buf, length, false)));
                 break;
             case 133:
                 position.set("Tacho Total Distance (m) (CAN)", readValue(buf, length, false));
@@ -591,16 +591,16 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set("Driver 2 Driving Time (min) (CAN)", readValue(buf, length, false));
                 break;
             case 147:
-                position.set("Driver 1 ID High (CAN)", readValue(buf, length, false));
+                position.set("Driver 1 ID High (CAN)", String.format("%X", readValue(buf, length, false)));
                 break;
             case 148:
-                position.set("Driver 1 ID Low (CAN)", readValue(buf, length, false));
+                position.set("Driver 1 ID Low (CAN)", String.format("%X", readValue(buf, length, false)));
                 break;
             case 149:
-                position.set("Driver 2 ID High (CAN)", readValue(buf, length, false));
+                position.set("Driver 2 ID High (CAN)", String.format("%X", readValue(buf, length, false)));
                 break;
             case 150:
-                position.set("Driver 2 ID Low (CAN)", readValue(buf, length, false));
+                position.set("Driver 2 ID Low (CAN)", String.format("%X", readValue(buf, length, false)));
                 break;
             case 151:
                 position.set("Battery Temperature (C) (CAN)", readValue(buf, length, true) * 0.1);
@@ -745,7 +745,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set("GSM Area Code", readValue(buf, length, false));
                 break;
             case 207:
-                position.set("RFID", readValue(buf, length, false));
+                position.set("RFID", String.format("%X", readValue(buf, length, false)));
                 break;
             case 208:
             case 209:
@@ -808,7 +808,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set("Network Type", readValue(buf, length, false));
                 break;
             case 238:
-                position.set("User ID", readValue(buf, length, false));
+                position.set("User ID", String.format("%X", readValue(buf, length, false)));
                 break;
             case 239:
                 position.set(Position.KEY_IGNITION, readValue(buf, length, false) == 1);
@@ -874,13 +874,13 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set("Crash trace data", readValue(buf, length, false));
                 break;
             case 258:
-                position.set("EcoMaximum", readValue(buf, length, false));
+                position.set("EcoMaximum", String.format("%X", readValue(buf, length, false)));
                 break;
             case 259:
-                position.set("EcoAverage", readValue(buf, length, false));
+                position.set("EcoAverage", String.format("%X", readValue(buf, length, false)));
                 break;
             case 260:
-                position.set("EcoDuration", readValue(buf, length, false));
+                position.set("EcoDuration (ms)", readValue(buf, length, false));
                 break;
             case 263:
                 position.set("BT Status", readValue(buf, length, false));
@@ -993,22 +993,22 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set("UL202-02 Sensor Status", readValue(buf, length, false));
                 break;
             case 517:
-                position.set("SecurityStateFlags_P4", readValue(buf, length, false));
+                position.set("SecurityStateFlags_P4", String.format("%X", readValue(buf, length, false)));
                 break;
             case 518:
-                position.set("ControlStateFlags_P4", readValue(buf, length, false));
+                position.set("ControlStateFlags_P4", String.format("%X", readValue(buf, length, false)));
                 break;
             case 519:
-                position.set("IndicatorStateFlags_P4", readValue(buf, length, false));
+                position.set("IndicatorStateFlags_P4", String.format("%X", readValue(buf, length, false)));
                 break;
             case 520:
-                position.set("AgriculturalStateFlags_P4", readValue(buf, length, false));
+                position.set("AgriculturalStateFlags_P4", String.format("%X", readValue(buf, length, false)));
                 break;
             case 521:
-                position.set("UtilityStateFlags_P4", readValue(buf, length, false));
+                position.set("UtilityStateFlags_P4", String.format("%X", readValue(buf, length, false)));
                 break;
             case 522:
-                position.set("CisternStateFlags_P4", readValue(buf, length, false));
+                position.set("CisternStateFlags_P4", String.format("%X", readValue(buf, length, false)));
                 break;
             default:
                 position.set(Position.PREFIX_IO + id, readValue(buf, length, false));
@@ -1234,41 +1234,49 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             for (int j = 0; j < cnt; j++) {
                 int id = buf.readUnsignedShort();
                 int length = buf.readUnsignedShort();
-                if (id == 256) {
-                    position.set(Position.KEY_VIN, buf.readSlice(length).toString(StandardCharsets.US_ASCII));
-                } else if (id == 387) {
-                    position.set("ISO6709 Coordinates", buf.readSlice(length).toString(StandardCharsets.US_ASCII));
-                } else if (id == 264) {
-                    position.set("Barcode ID", buf.readSlice(length).toString(StandardCharsets.US_ASCII));
-                } else if (id == 30) {
-                    position.set("Number of DTC", buf.readSlice(length).toString(StandardCharsets.US_ASCII));
-                } else if (id == 281) {
-                    position.set("Fault Codes", buf.readSlice(length).toString(StandardCharsets.US_ASCII));
-                } else if (id == 385) {
-                    ByteBuf data = buf.readSlice(length);
-                    data.readUnsignedByte(); // data part
-                    int index = 1;
-                    while (data.isReadable()) {
-                        int flags = data.readUnsignedByte();
-                        if (BitUtil.from(flags, 4) > 0) {
-                            position.set("beacon" + index + "Uuid", ByteBufUtil.hexDump(data.readSlice(16)));
-                            position.set("beacon" + index + "Major", data.readUnsignedShort());
-                            position.set("beacon" + index + "Minor", data.readUnsignedShort());
-                        } else {
-                            position.set("beacon" + index + "Namespace", ByteBufUtil.hexDump(data.readSlice(10)));
-                            position.set("beacon" + index + "Instance", ByteBufUtil.hexDump(data.readSlice(6)));
+                switch (id) {
+                    case 30:
+                        position.set("Number of DTC (OBD)", buf.readSlice(length).toString(StandardCharsets.US_ASCII));
+                        break;
+                    case 256:
+                        position.set(Position.KEY_VIN, buf.readSlice(length).toString(StandardCharsets.US_ASCII));
+                        break;
+                    case 264:
+                        position.set("Barcode ID", buf.readSlice(length).toString(StandardCharsets.US_ASCII));
+                        break;
+                    case 281:
+                        position.set("Fault Codes (OBD)", buf.readSlice(length).toString(StandardCharsets.US_ASCII));
+                        break;
+                    case 385:
+                        ByteBuf data = buf.readSlice(length);
+                        data.readUnsignedByte(); // data part
+                        int index = 1;
+                        while (data.isReadable()) {
+                            int flags = data.readUnsignedByte();
+                            if (BitUtil.from(flags, 4) > 0) {
+                                position.set("beacon" + index + "Uuid", ByteBufUtil.hexDump(data.readSlice(16)));
+                                position.set("beacon" + index + "Major", data.readUnsignedShort());
+                                position.set("beacon" + index + "Minor", data.readUnsignedShort());
+                            } else {
+                                position.set("beacon" + index + "Namespace", ByteBufUtil.hexDump(data.readSlice(10)));
+                                position.set("beacon" + index + "Instance", ByteBufUtil.hexDump(data.readSlice(6)));
+                            }
+                            position.set("beacon" + index + "Rssi", (int) data.readByte());
+                            if (BitUtil.check(flags, 1)) {
+                                position.set("beacon" + index + "Battery", data.readUnsignedShort() * 0.01);
+                            }
+                            if (BitUtil.check(flags, 2)) {
+                                position.set("beacon" + index + "Temp", data.readUnsignedShort());
+                            }
+                            index += 1;
                         }
-                        position.set("beacon" + index + "Rssi", (int) data.readByte());
-                        if (BitUtil.check(flags, 1)) {
-                            position.set("beacon" + index + "Battery", data.readUnsignedShort() * 0.01);
-                        }
-                        if (BitUtil.check(flags, 2)) {
-                            position.set("beacon" + index + "Temp", data.readUnsignedShort());
-                        }
-                        index += 1;
-                    }
-                } else {
-                    position.set(Position.PREFIX_IO + id, ByteBufUtil.hexDump(buf.readSlice(length)));
+                        break;
+                    case 387:
+                        position.set("ISO6709 Coordinates", buf.readSlice(length).toString(StandardCharsets.US_ASCII));
+                        break;
+                    default:
+                        position.set(Position.PREFIX_IO + id, ByteBufUtil.hexDump(buf.readSlice(length)));
+                        break;
                 }
             }
         }
