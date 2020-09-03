@@ -864,7 +864,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                         break;
                 }
                 break;
-            case 254: 
+            case 254:
                 position.set("GREEN DRIVING VALUE", readValue(buf, length, false));
                 break;
             case 255:
