@@ -8,7 +8,7 @@
 
   <changeSet author="author" id="changelog-4.11">
 
-    <addColumn tableName="tc_server">
+    <addColumn tableName="tc_servers">
       <column name="announcement" type="VARCHAR(4000)" />
     </addColumn>
 
