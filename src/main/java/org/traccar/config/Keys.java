@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -430,11 +430,11 @@ public final class Keys {
             "web.disableHealthCheck", Boolean.class);
 
     /**
-     * Fixes Chrome SameSite Cookie problem, only works on https
-     * More info here https://wiki.shibboleth.net/confluence/display/DEV/Tomcat+and+Jetty+SameSite+Workarounds
+     * Sets SameSite cookie attribute value.
+     * Supported options: Lax, Strict, None.
      */
-    public static final ConfigKey WEB_SAME_SITE_COOKIE_NONE = new ConfigKey(
-            "web.sameSiteCookie.enable", Boolean.class);
+    public static final ConfigKey WEB_SAME_SITE_COOKIE = new ConfigKey(
+            "web.sameSiteCookie", String.class);
 
     private Keys() {
     }
