@@ -203,10 +203,19 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
                 case "#ENG#":
                     position.set("engine", data[i].equals("1"));
                     break;
+                case "#TS1#":
+                    position.set("sensor1State", Integer.parseInt(data[i]));
+                    break;
+                case "#TS2#":
+                    position.set("sensor2State", Integer.parseInt(data[i]));
+                    break;
                 case "#TD1#":
                 case "#TD2#":
                     StarLinkMessage.mEventReport_TDx message =
                             StarLinkMessage.mEventReport_TDx.parseFrom(DataConverter.parseBase64(data[i]));
+                    position.set(
+                            "sensor" + message.getSensorNumber() + "Id",
+                            message.getSensorID());
                     position.set(
                             "sensor" + message.getSensorNumber() + "Temp",
                             message.getTemperature() * 0.1);
