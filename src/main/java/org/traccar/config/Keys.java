@@ -402,6 +402,13 @@ public final class Keys {
     public static final ConfigKey LOCATION_LONGITUDE_HEMISPHERE = new ConfigKey(
             "location.longitudeHemisphere", Boolean.class);
 
+    /**
+     * Fixes Chrome SameSite Cookie problem, only works on https
+     * More info here https://wiki.shibboleth.net/confluence/display/DEV/Tomcat+and+Jetty+SameSite+Workarounds
+     */
+    public static final ConfigKey WEB_SAME_SITE_COOKIE_NONE = new ConfigKey(
+            "web.sameSiteCookie.enable", Boolean.class);
+
     private Keys() {
     }
 

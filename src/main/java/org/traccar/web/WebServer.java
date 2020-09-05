@@ -39,6 +39,7 @@ import org.traccar.api.ObjectMapperProvider;
 import org.traccar.api.ResourceErrorHandler;
 import org.traccar.api.SecurityRequestFilter;
 import org.traccar.api.resource.ServerResource;
+import org.traccar.config.Keys;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
@@ -154,6 +155,11 @@ public class WebServer {
         resourceConfig.registerClasses(SecurityRequestFilter.class, CorsResponseFilter.class);
         resourceConfig.packages(ServerResource.class.getPackage().getName());
         servletHandler.addServlet(new ServletHolder(new ServletContainer(resourceConfig)), "/api/*");
+
+        if (config.getBoolean(Keys.WEB_SAME_SITE_COOKIE_NONE)) {
+            servletHandler.getServletContext().getSessionCookieConfig().setSecure(true);
+            servletHandler.getServletContext().getSessionCookieConfig().setComment("__SAME_SITE_NONE__");
+        }
     }
 
     public void start() {
