@@ -105,7 +105,7 @@ public final class Keys {
      * {latitude} and {longitude} for coordinates.
      */
     public static final ConfigKey FORWARD_URL_VARIABLES = new ConfigKey(
-            "forward.urlVariables", Boolean.class);
+        "forward.urlVariables", Boolean.class);
 
     /**
      * Position forwarding retrying enable. When enabled, additional attempts are made to deliver positions. If initial
