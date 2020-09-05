@@ -105,7 +105,7 @@ public final class Keys {
      * {latitude} and {longitude} for coordinates.
      */
     public static final ConfigKey FORWARD_URL_VARIABLES = new ConfigKey(
-        "forward.urlVariables", Boolean.class);
+            "forward.urlVariables", Boolean.class);
 
     /**
      * Position forwarding retrying enable. When enabled, additional attempts are made to deliver positions. If initial
@@ -403,11 +403,31 @@ public final class Keys {
             "location.longitudeHemisphere", Boolean.class);
 
     /**
-     * Fixes Chrome SameSite Cookie problem, only works on https
-     * More info here https://wiki.shibboleth.net/confluence/display/DEV/Tomcat+and+Jetty+SameSite+Workarounds
+     * Enable Jetty Request Log.
      */
-    public static final ConfigKey WEB_SAME_SITE_COOKIE_NONE = new ConfigKey(
-            "web.sameSiteCookie.enable", Boolean.class);
+    public static final ConfigKey WEB_REQUEST_LOG_ENABLE = new ConfigKey(
+            "web.requestLog.enable", Boolean.class);
+
+    /**
+     * Jetty Request Log Path.
+     * The path must include the string "yyyy_mm_dd", which is replaced with the actual date when creating and rolling
+     * over the file.
+     * Example: ./logs/jetty-yyyy_mm_dd.request.log
+     */
+    public static final ConfigKey WEB_REQUEST_LOG_PATH = new ConfigKey(
+            "web.requestLog.path", String.class);
+
+    /**
+     * Set the number of days before rotated request log files are deleted.
+     */
+    public static final ConfigKey WEB_REQUEST_LOG_RETAIN_DAYS = new ConfigKey(
+            "web.requestLog.retainDays", Integer.class);
+
+    /**
+     * Disable systemd health checks.
+     */
+    public static final ConfigKey WEB_DISABLE_HEALTH_CHECK = new ConfigKey(
+            "web.disableHealthCheck", Boolean.class);
 
     private Keys() {
     }
