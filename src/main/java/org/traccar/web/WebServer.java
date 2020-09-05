@@ -167,6 +167,11 @@ public class WebServer {
                 SecurityRequestFilter.class, CorsResponseFilter.class, DateParameterConverterProvider.class);
         resourceConfig.packages(ServerResource.class.getPackage().getName());
         servletHandler.addServlet(new ServletHolder(new ServletContainer(resourceConfig)), "/api/*");
+
+        if (config.getBoolean(Keys.WEB_SAME_SITE_COOKIE_NONE)) {
+            servletHandler.getServletContext().getSessionCookieConfig().setSecure(true);
+            servletHandler.getServletContext().getSessionCookieConfig().setComment("__SAME_SITE_NONE__");
+        }
     }
 
     public void start() {
