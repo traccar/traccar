@@ -158,7 +158,10 @@ public class BaseObjectManager<T extends BaseModel> {
     public final Collection<T> getItems(Set<Long> itemIds) {
         Collection<T> result = new LinkedList<>();
         for (long itemId : itemIds) {
-            result.add(getById(itemId));
+            T item = getById(itemId);
+            if (item != null) {
+                result.add(item);
+            }
         }
         return result;
     }

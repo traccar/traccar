@@ -1,0 +1,330 @@
+syntax = "proto2";
+
+package org.traccar.protobuf;
+
+// StarLink Message
+message StarLink_Message {
+  optional uint32 FID     = 1;				// Unit factory serial
+  optional string IMEI    = 2;				// IMEI
+  optional uint32 UID     = 3;  			// Unit serial
+  optional uint32 AckRef  = 4;				// Ack reference number
+
+  repeated mMessage Message = 5;
+}
+
+// Message body
+message mMessage {
+  optional uint64 ReferenceNumber     = 100;
+  optional uint32 ReferenceNumberDiff = 101;
+  optional uint32 MessageType         = 102;
+
+  optional mWakeUp        WakeUp          = 1;
+  optional mConfirmation  Confirmation    = 2;
+  optional mParamResponse ParamResponse   = 3;
+  optional mEventReport   EventReport     = 6;
+  optional mGeoZone       GeoZone         = 10;
+  optional mOutputs       Outputs         = 12;
+  optional mEventConfig   EventConfig     = 14;
+  optional mInputs        Inputs          = 16;
+  optional mInputConfig   InputConfig     = 17;
+  optional mSpeedLimit    SpeedLimit      = 27;
+  optional mUnitIDChanged UnitIDChanged   = 29;
+  optional mGenDeviceMsg  GenericDeviceMsg= 30;
+  optional mGenDeviceFW   GenericDeviceFW = 35;
+  optional mReadIButton   ReadIButton     = 42;
+  optional mGetPattern    GetPattern      = 43;
+  optional mMultiParam    MultiParameter  = 45;
+  optional mTempConfig    TempConfig      = 52;
+  optional mDeviceList    DeviceList      = 56;
+  optional mTeachRemote   TeachRemote     = 58;
+  optional mAuthenticate  Authenticate    = 95;
+  optional mEventReport   CurrentLocation = 96;
+  optional mConfigServer  ConfigServer    = 98;
+}
+
+// Wake-Up event
+message mWakeUp {
+  required string UnitVersion = 1;
+  required string ProtocolVersion = 2;
+}
+
+// Confirmation message
+message mConfirmation {
+  // standard response
+  required uint32 ResultCode = 1;
+  optional uint32 ReferenceNumber = 2;		// confirmation by reference number
+  optional uint32 MessageType = 3;		// confirmation by message type
+
+  // parameter ack (response to command #4)
+  optional uint32 ParameterAck = 4;
+
+  // multi-parameter ack (response to command #46)
+  optional uint32 ParametersChanged = 5;
+  optional uint32 ParametersFailed = 6;
+  repeated uint32 ParameterFailedList = 9;
+
+  // modify list of allowed drivers (response to command #50)
+  optional uint32 CodesInList = 7;
+  optional uint32 EmptySlots = 8;
+}
+
+// Parameter response
+message mParamResponse {
+  required uint32 ParameterNumber = 1;
+  required string Value = 2;
+}
+
+// Event report
+message mEventReport {
+  optional uint32 EID              =   1; 	// https://sweb.erm.co.il/protocol/?i=D12
+  optional string EDESC            =   2; 	// https://sweb.erm.co.il/protocol/?i=D13
+  optional uint32 EDT              =   3;	// https://sweb.erm.co.il/protocol/?i=D27 (seconds since 1/1/2000)
+  optional sint32 EDT_Diff         =   4; 	// seconds since previous message's EDT
+  optional uint32 NXT              =   5;	// https://sweb.erm.co.il/protocol/?i=D111
+  optional uint32 NXTS             =  81;	// https://sweb.erm.co.il/protocol/?i=D178
+  optional string ExtraData        = 254;
+
+  optional uint32 PDT              =   6;	// https://sweb.erm.co.il/protocol/?i=D35 (seconds since 1/1/2000)
+  optional sint32 PDT_Diff         =   7;	// seconds since previous message's PDT
+  optional sint32 LAT              =   8;	// https://sweb.erm.co.il/protocol/?i=D49 (multiplied by 1000000)
+  optional sint32 LAT_Diff         =   9; 	// difference between previous latitude (add this value to previous value)
+  optional sint32 LONG             =  10;	// https://sweb.erm.co.il/protocol/?i=D57 (multiplied by 1000000)
+  optional sint32 LONG_Diff        =  11;	// difference between previous longitude (add this value to previous value)
+  optional sint32 ALT              =  12;	// https://sweb.erm.co.il/protocol/?i=D69 (multiplied by 10)
+  optional sint32 ALT_Diff         =  13; 	// difference between previous altitude (add this value to previous value)
+  optional uint32 SPD              =  14;	// https://sweb.erm.co.il/protocol/?i=D61 (multiplied by 10, in knots)
+  optional uint32 SPDK             =  15;	// https://sweb.erm.co.il/protocol/?i=D62
+  optional uint32 HEAD             =  16;	// https://sweb.erm.co.il/protocol/?i=D63
+  optional uint32 HDOP             =  17;	// https://sweb.erm.co.il/protocol/?i=D71 (multiplied by 10)
+  optional uint32 VDOP             =  18;	// https://sweb.erm.co.il/protocol/?i=D72 (multiplied by 10)
+  optional uint32 PDOP             =  19;	// https://sweb.erm.co.il/protocol/?i=D70 (multiplied by 10)
+  optional uint32 SAT              =  20;	// https://sweb.erm.co.il/protocol/?i=D73
+  optional uint32 SATN             =  21;	// https://sweb.erm.co.il/protocol/?i=D99
+  optional uint32 SATU             =  22;	// https://sweb.erm.co.il/protocol/?i=D74
+  optional uint32 GSS              =  23;	// https://sweb.erm.co.il/protocol/?i=D98
+  optional uint32 GSSN             =  24;	// https://sweb.erm.co.il/protocol/?i=D100
+  optional uint32 FIX              =  25;	// https://sweb.erm.co.il/protocol/?i=D75
+  optional uint32 LOCA             =  26;	// https://sweb.erm.co.il/protocol/?i=D126
+  optional uint32 LOCS             =  79;	// https://sweb.erm.co.il/protocol/?i=D167
+
+  optional uint32 ODO              =  27;	// https://sweb.erm.co.il/protocol/?i=D14
+  optional sint32 ODO_Diff         =  28;	// difference between previous odometer (add this value to previous value)
+  optional uint32 ODOD             =  29;	// https://sweb.erm.co.il/protocol/?i=D15 (multiplied by 1000)
+  optional sint32 ODOD_Diff        =  30;	// difference between previous odometer (add this value to previous value)
+
+  optional uint32 CID              =  31;	// https://sweb.erm.co.il/protocol/?i=D5
+  optional uint32 LAC              =  32;	// https://sweb.erm.co.il/protocol/?i=D4
+  optional uint32 CSS              =  33;	// https://sweb.erm.co.il/protocol/?i=D89
+  optional sint32 CSS_Diff         =  34;	// difference between previous rx power (add this value to previous value)
+  optional uint32 CTA              =  35;	// https://sweb.erm.co.il/protocol/?i=D95
+  optional uint32 CCN              =  36;	// https://sweb.erm.co.il/protocol/?i=D89
+  optional bool   JAM              =  37;	// https://sweb.erm.co.il/protocol/?i=D66
+  optional uint32 NC               =  38;	// https://sweb.erm.co.il/protocol/?i=D94
+  optional uint32 NM               =  39;	// https://sweb.erm.co.il/protocol/?i=D125
+  optional uint32 NT               =  76;	// https://sweb.erm.co.il/protocol/?i=D153
+  optional uint32 CU               =  77;	// https://sweb.erm.co.il/protocol/?i=D154
+
+  optional uint32 VIN              =  40;	// https://sweb.erm.co.il/protocol/?i=D64 (multiplied by 100)
+  optional sint32 VIN_Diff         =  41;	// difference between previous VIN (add this value to previous value)
+  optional uint32 VBAT             =  42;	// https://sweb.erm.co.il/protocol/?i=D65 (multiplied by 100)
+  optional sint32 VBAT_Diff        =  43;	// difference between previous VBAT (add this value to previous value)
+  optional uint32 V3               =  44;	// https://sweb.erm.co.il/protocol/?i=D92 (multiplied by 100)
+  optional sint32 V3_Diff          =  45;	// difference between previous V3 (add this value to previous value)
+  optional uint32 V4               =  46;	// https://sweb.erm.co.il/protocol/?i=D93 (multiplied by 100)
+  optional sint32 V4_Diff          =  47;	// difference between previous V4 (add this value to previous value)
+  optional uint32 BATH             =  48;
+  optional uint32 BATC             =  49;
+  optional uint32 STRT             =  50;	// (multiplied by 100)
+  optional sint32 TVI              =  51;	// https://sweb.erm.co.il/protocol/?i=D110 (multiplied by 10)
+
+  optional uint32 Inputs           =  52;	// b0 = IN1/INC, b1 = IN2/IND, b2 = IN3/INE, b3 = IN4/INF
+  optional uint32 DInputs          =  53;	// b0 = DI1, b1 = DI2, b2 = DI3, b3 = DI4, b4 = DI5, b5 = DI6, b6 = DI7, b7 = DI8
+  optional uint32 IgnitionEngine   =  54;	// b0 = IGN, b1 = ENG, b2 = DRV
+  optional uint32 Outputs          =  55;	// b0 = OUT1/OUTA, b1 = OUT2/OUTB, b2 = OUT3/OUTC, b3 = OUT4/OUTD, b4 = OUT5, b5 = OUT6, b6 = OUT7, b7 = OUT8
+
+  optional string USER             =  56;	// https://sweb.erm.co.il/protocol/?i=D97
+  optional string EDV1             =  57;	// https://sweb.erm.co.il/protocol/?i=D179
+  optional string EDV2             =  58;	// https://sweb.erm.co.il/protocol/?i=D180
+  optional string EDV3             =  59;	// https://sweb.erm.co.il/protocol/?i=D181
+  optional string EDV4             =  60;	// https://sweb.erm.co.il/protocol/?i=D182
+
+  optional sint32 CV1              =  61;	// https://sweb.erm.co.il/protocol/?i=D121
+  optional sint32 CV2              =  62;	// https://sweb.erm.co.il/protocol/?i=D122
+  optional sint32 CV3              =  63;	// https://sweb.erm.co.il/protocol/?i=D123
+  optional sint32 CV4              =  64;	// https://sweb.erm.co.il/protocol/?i=D124
+  optional sint32 CV5              =  82;	// https://sweb.erm.co.il/protocol/?i=D174
+  optional sint32 CV6              =  83;	// https://sweb.erm.co.il/protocol/?i=D175
+  optional sint32 CV7              =  84;	// https://sweb.erm.co.il/protocol/?i=D176
+  optional sint32 CV8              =  85;	// https://sweb.erm.co.il/protocol/?i=D177
+  optional sint32 CV9              =  86;	// https://sweb.erm.co.il/protocol/?i=D188
+  optional sint32 CV10             =  87;	// https://sweb.erm.co.il/protocol/?i=D189
+  optional sint32 CV11             =  88;	// https://sweb.erm.co.il/protocol/?i=D190
+  optional sint32 CV12             =  89;	// https://sweb.erm.co.il/protocol/?i=D191
+
+  optional bool   IARM             =  65;	// https://sweb.erm.co.il/protocol/?i=D7
+  optional string DID              =  66;	// https://sweb.erm.co.il/protocol/?i=D101
+  optional string DAL              =  67;	// https://sweb.erm.co.il/protocol/?i=D76
+  optional uint32 DEST             =  68;	// https://sweb.erm.co.il/protocol/?i=D8
+  optional bool   OVM              =  73;	// https://sweb.erm.co.il/protocol/?i=D150
+
+  optional uint32 CFL              =  69;	// https://sweb.erm.co.il/protocol/?i=D26
+  optional uint32 CFL2             =  80;	// https://sweb.erm.co.il/protocol/?i=D26
+  optional uint32 RPM              =  70;	// https://sweb.erm.co.il/protocol/?i=D144
+
+  optional uint32 DUR              =  71;	// https://sweb.erm.co.il/protocol/?i=D145
+  optional uint32 TDUR             =  72;	// https://sweb.erm.co.il/protocol/?i=D146
+  optional uint32 IDL              =  74;	// https://sweb.erm.co.il/protocol/?i=D151
+  optional uint32 STP              =  75;	// https://sweb.erm.co.il/protocol/?i=D152
+
+  repeated mEventReport_TDx TDx    =  78;	// https://sweb.erm.co.il/protocol/?i=D168
+}
+
+// Sensor data
+message mEventReport_TDx {
+  required uint32 SensorNumber		= 1;	// Sensor #
+  optional string SensorID		= 3;	// TIx (binary)
+
+  optional sint32 Temperature		= 4;	// TVx (multiplied by 10)
+  optional uint32 Temperature_State	= 2;	// TSx
+
+  optional uint32 Humidity		= 5;	// THx (multiplied by 10)
+  optional uint32 Humidity_State	= 6;
+
+  optional uint32 RSSI			= 7;
+  optional uint32 RSSI_State		= 8;
+
+  optional uint32 Voltage		= 9;	// mV (multiplied by 1000)
+  optional uint32 Voltage_State		= 10;
+
+  optional uint32 Light			= 11;	// percent
+  optional uint32 Light_State		= 12;
+
+  optional uint32 MagnetSwitch		= 13;
+  optional uint32 MagnetSwitch_State	= 14;
+
+  optional uint32 Accident		= 15;
+  optional uint32 Button		= 16;
+  optional uint32 Movement		= 17; 
+}
+
+// Geozone reqsponse
+message mGeoZone {
+  required uint32   ZoneNumber = 1;
+  repeated mLatLong Point = 2;				// single point for radius geozone, multiple points for polygon
+  optional uint32   Radius = 3;
+}
+
+// Outputs response
+message mOutputs {
+  required uint32 OutputBitmask = 1;
+}
+
+// Event configuration response
+message mEventConfig {
+  required uint32 EventID = 1;
+  required uint32 Configuration = 2;		// bitmask
+}
+
+// Inputs response
+message mInputs {
+  required uint32 InputBitmask = 1;
+}
+
+// Inputs configuration
+message mInputConfig {
+  required uint32 InputID = 1;
+  required uint32 DebounceLow = 2;
+  required uint32 DebounceHigh = 3;
+}
+
+// Speed limit configuration
+message mSpeedLimit {
+  required uint32 Number = 1;
+  required bool   Active = 2;
+  optional uint32 MinSpeed = 3;       // when using speed limit with minimum speed
+  optional uint32 MaxSpeed = 4;       // when using speed limit with maximum speed
+  required uint32 Duration = 5;
+  required bool   ReportDuration = 6;
+  optional bool   StartAndEnd = 7;
+  optional bool   AutoTrack = 8;
+  optional bool   OutputPattern = 9;
+  optional uint32 Step = 10;
+}
+
+// Unit ID changed
+message mUnitIDChanged {
+  required uint32 FID = 1;
+  required string IMEI = 2;
+  required sint32 PreviousSetting = 3;
+  required sint32 NewSetting = 4;
+}
+
+// Generic device message
+message mGenDeviceMsg {
+  required uint32 DeviceID = 1;
+  required uint32 DataType = 2;
+  optional string Data = 3;
+}
+
+// Generic device FW update
+message mGenDeviceFW {
+  optional uint32 BlockRequest = 1;
+  optional uint32 Status = 2;
+  optional uint32 MaxBlocks = 3;
+}
+
+// Configuration server message
+message mConfigServer {
+  required bool Success = 1;
+}
+
+// Read iButton
+message mReadIButton {
+  required string iButtonID = 1;
+  optional string Data = 2;
+}
+
+// Read pattern configuration
+message mGetPattern {
+  required uint32 PatternID = 1;
+  required string Pattern = 2;
+}
+
+// Multiple parameters response
+message mMultiParam {
+  repeated uint32 ParameterNumbers = 1;
+  repeated string Values = 2;
+}
+
+// Temperature sensor configuration
+message mTempConfig {
+  required uint32 SensorCount = 1;
+  repeated string SensorID = 2;
+}
+
+// Device list
+message mDeviceList {
+  repeated uint32 DeviceID = 1;
+  repeated uint32 Version = 2;
+}
+
+// Teach remote
+message mTeachRemote {
+  required uint32 RuleID = 1;
+  optional uint32 RemoteID = 2;
+}
+
+// Authentication message
+message mAuthenticate {
+  required uint32 Version = 1;
+  optional string Token = 2;
+  optional uint32 Key = 3;
+  optional uint32 Step = 4;
+  optional string Digest = 5;
+}
+
+// Point (Lat / Long)
+message mLatLong {
+  required sint32 Latitude  = 1;
+  required sint32 Longitude = 2;
+}

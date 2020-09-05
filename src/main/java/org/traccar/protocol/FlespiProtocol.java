@@ -29,7 +29,7 @@ public class FlespiProtocol extends BaseProtocol {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new HttpResponseEncoder());
-                pipeline.addLast(new HttpRequestDecoder());
+                pipeline.addLast(new HttpRequestDecoder(4096, 8192, 128 * 1024));
                 pipeline.addLast(new HttpObjectAggregator(Integer.MAX_VALUE));
                 pipeline.addLast(new FlespiProtocolDecoder(FlespiProtocol.this));
             }

@@ -91,7 +91,7 @@ public class Xt2400ProtocolDecoder extends BaseProtocolDecoder {
         return length;
     }
 
-    private Map<Short, byte[]> formats = new HashMap<>();
+    private final Map<Short, byte[]> formats = new HashMap<>();
 
     public void setConfig(String configString) {
         Pattern pattern = Pattern.compile(":wycfg pcr\\[\\d+] ([0-9a-fA-F]{2})[0-9a-fA-F]{2}([0-9a-fA-F]+)");

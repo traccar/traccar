@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2020 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,6 +30,7 @@ import org.traccar.notificators.NotificatorMail;
 import org.traccar.notificators.NotificatorNull;
 import org.traccar.notificators.Notificator;
 import org.traccar.notificators.NotificatorSms;
+import org.traccar.notificators.NotificatorTraccar;
 import org.traccar.notificators.NotificatorWeb;
 import org.traccar.notificators.NotificatorTelegram;
 import org.traccar.notificators.NotificatorPushover;
@@ -58,6 +59,9 @@ public final class NotificatorManager {
                     break;
                 case "firebase":
                     defaultNotificator = NotificatorFirebase.class.getCanonicalName();
+                    break;
+                case "traccar":
+                    defaultNotificator = NotificatorTraccar.class.getCanonicalName();
                     break;
                 case "telegram":
                     defaultNotificator = NotificatorTelegram.class.getCanonicalName();

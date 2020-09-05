@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.traccar.web;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.proxy.AsyncProxyServlet;
+import org.eclipse.jetty.server.NCSARequestLog;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ErrorHandler;
@@ -31,6 +32,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.api.DateParameterConverterProvider;
 import org.traccar.config.Config;
 import org.traccar.api.AsyncSocketServlet;
 import org.traccar.api.CorsResponseFilter;
@@ -91,7 +93,7 @@ public class WebServer {
             @Override
             protected void handleErrorPage(
                     HttpServletRequest request, Writer writer, int code, String message) throws IOException {
-                writer.write("<!DOCTYPE<html><head><title>Error</title></head><html><body>"
+                writer.write("<!DOCTYPE><html><head><title>Error</title></head><html><body>"
                         + code + " - " + HttpStatus.getMessage(code) + "</body></html>");
             }
         });
@@ -101,6 +103,15 @@ public class WebServer {
         handlers.addHandler(servletHandler);
         handlers.addHandler(new GzipHandler());
         server.setHandler(handlers);
+
+        if (config.getBoolean(Keys.WEB_REQUEST_LOG_ENABLE)) {
+            NCSARequestLog requestLog = new NCSARequestLog(config.getString(Keys.WEB_REQUEST_LOG_PATH));
+            requestLog.setAppend(true);
+            requestLog.setExtended(true);
+            requestLog.setLogLatency(true);
+            requestLog.setRetainDays(config.getInteger(Keys.WEB_REQUEST_LOG_RETAIN_DAYS));
+            server.setRequestLog(requestLog);
+        }
     }
 
     private void initClientProxy(Config config, HandlerList handlers) {
@@ -151,8 +162,9 @@ public class WebServer {
         }
 
         ResourceConfig resourceConfig = new ResourceConfig();
-        resourceConfig.registerClasses(JacksonFeature.class, ObjectMapperProvider.class, ResourceErrorHandler.class);
-        resourceConfig.registerClasses(SecurityRequestFilter.class, CorsResponseFilter.class);
+        resourceConfig.registerClasses(
+                JacksonFeature.class, ObjectMapperProvider.class, ResourceErrorHandler.class,
+                SecurityRequestFilter.class, CorsResponseFilter.class, DateParameterConverterProvider.class);
         resourceConfig.packages(ServerResource.class.getPackage().getName());
         servletHandler.addServlet(new ServletHolder(new ServletContainer(resourceConfig)), "/api/*");
 

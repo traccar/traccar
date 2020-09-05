@@ -230,10 +230,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
 
             int battery = BcdUtil.readInteger(buf, 2);
-            if (battery == 0) {
-                battery = 100;
-            }
-            position.set(Position.KEY_BATTERY, battery);
+            position.set(Position.KEY_BATTERY_LEVEL, battery > 0 ? battery : 100);
 
         }
 
@@ -284,7 +281,8 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             }
             position.set(Position.KEY_G_SENSOR, "[" + accelerationX + "," + accelerationY + "," + accelerationZ + "]");
 
-            position.set(Position.KEY_BATTERY_LEVEL, BcdUtil.readInteger(buf, 2));
+            int battery = BcdUtil.readInteger(buf, 2);
+            position.set(Position.KEY_BATTERY_LEVEL, battery > 0 ? battery : 100);
             position.set(Position.KEY_DEVICE_TEMP, (int) buf.readByte());
             position.set("lightSensor", BcdUtil.readInteger(buf, 2) * 0.1);
             position.set(Position.KEY_BATTERY, BcdUtil.readInteger(buf, 2) * 0.1);

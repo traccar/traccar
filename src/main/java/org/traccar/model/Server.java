@@ -166,4 +166,14 @@ public class Server extends ExtendedModel {
     public void setPoiLayer(String poiLayer) {
         this.poiLayer = poiLayer;
     }
+
+    private String announcement;
+
+    public String getAnnouncement() {
+        return announcement;
+    }
+
+    public void setAnnouncement(String announcement) {
+        this.announcement = announcement;
+    }
 }

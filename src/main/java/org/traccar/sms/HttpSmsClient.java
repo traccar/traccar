@@ -52,8 +52,10 @@ public class HttpSmsClient implements SmsManager {
         if (authorization == null) {
             String user = Context.getConfig().getString("sms.http.user");
             String password = Context.getConfig().getString("sms.http.password");
-            authorization = "Basic "
-                    + DataConverter.printBase64((user + ":" + password).getBytes(StandardCharsets.UTF_8));
+            if (user != null && password != null) {
+                authorization = "Basic "
+                        + DataConverter.printBase64((user + ":" + password).getBytes(StandardCharsets.UTF_8));
+            }
         }
         template = Context.getConfig().getString("sms.http.template").trim();
         if (template.charAt(0) == '{' || template.charAt(0) == '[') {
@@ -80,8 +82,11 @@ public class HttpSmsClient implements SmsManager {
     }
 
     private Invocation.Builder getRequestBuilder() {
-        return Context.getClient().target(url).request()
-                .header(authorizationHeader, authorization);
+        Invocation.Builder builder = Context.getClient().target(url).request();
+        if (authorization != null) {
+            builder = builder.header(authorizationHeader, authorization);
+        }
+        return builder;
     }
 
     @Override

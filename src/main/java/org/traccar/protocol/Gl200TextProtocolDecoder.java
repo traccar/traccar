@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ import java.util.regex.Pattern;
 
 public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
-    private boolean ignoreFixTime;
+    private final boolean ignoreFixTime;
 
     public Gl200TextProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -190,6 +190,12 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .expression(PATTERN_LOCATION.pattern())
             .expression(")+)")
             .groupBegin()
+            .number("d{1,2},,")
+            .number("(d{1,3}),")                 // battery
+            .number("[01],")                     // mode
+            .number("(?:[01])?,")                // motion
+            .number("(?:-?d{1,2}.d)?,")          // temperature
+            .or()
             .number("(d{1,7}.d)?,")              // odometer
             .number("(d{5}:dd:dd)?,")            // hour meter
             .number("(x+)?,")                    // adc 1
@@ -789,8 +795,14 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             } else if (BitUtil.check(ignition, 5)) {
                 position.set(Position.KEY_IGNITION, true);
             }
-            position.set(Position.KEY_INPUT, parser.nextHexInt());
-            position.set(Position.KEY_OUTPUT, parser.nextHexInt());
+            int input = parser.nextHexInt();
+            int output = parser.nextHexInt();
+            position.set(Position.KEY_INPUT, input);
+            position.set(Position.PREFIX_IN + 1, BitUtil.check(input, 1));
+            position.set(Position.PREFIX_IN + 2, BitUtil.check(input, 2));
+            position.set(Position.KEY_OUTPUT, output);
+            position.set(Position.PREFIX_OUT + 1, BitUtil.check(output, 0));
+            position.set(Position.PREFIX_OUT + 2, BitUtil.check(output, 1));
         }
     }
 
@@ -832,6 +844,10 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
         if (battery != null) {
             position.set(Position.KEY_BATTERY_LEVEL, battery);
+        }
+
+        if (parser.hasNext()) {
+            position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
         }
 
         if (parser.hasNext()) {

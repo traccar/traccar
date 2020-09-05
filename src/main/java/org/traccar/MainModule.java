@@ -43,6 +43,8 @@ import org.traccar.geocoder.MapQuestGeocoder;
 import org.traccar.geocoder.MapmyIndiaGeocoder;
 import org.traccar.geocoder.NominatimGeocoder;
 import org.traccar.geocoder.OpenCageGeocoder;
+import org.traccar.geocoder.PositionStackGeocoder;
+import org.traccar.geocoder.TomTomGeocoder;
 import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.geolocation.GoogleGeolocationProvider;
 import org.traccar.geolocation.MozillaGeolocationProvider;
@@ -134,8 +136,9 @@ public class MainModule extends AbstractModule {
 
     @Singleton
     @Provides
-    public static StatisticsManager provideStatisticsManager(Config config, DataManager dataManager, Client client) {
-        return new StatisticsManager(config, dataManager, client);
+    public static StatisticsManager provideStatisticsManager(
+            Config config, DataManager dataManager, Client client, ObjectMapper objectMapper) {
+        return new StatisticsManager(config, dataManager, client, objectMapper);
     }
 
     @Singleton
@@ -174,6 +177,10 @@ public class MainModule extends AbstractModule {
                     return new HereGeocoder(url, id, key, language, cacheSize, addressFormat);
                 case "mapmyindia":
                     return new MapmyIndiaGeocoder(url, key, cacheSize, addressFormat);
+                case "tomtom":
+                    return new TomTomGeocoder(url, key, cacheSize, addressFormat);
+                case "positionstack":
+                    return new PositionStackGeocoder(key, cacheSize, addressFormat);
                 default:
                     return new GoogleGeocoder(key, language, cacheSize, addressFormat);
             }

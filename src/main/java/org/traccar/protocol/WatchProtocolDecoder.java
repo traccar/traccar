@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             .expression("([EW])?,")
             .number("(d+.?d*),")                 // speed
             .number("(d+.?d*),")                 // course
-            .number("(d+.?d*),")                 // altitude
+            .number("(-?d+.?d*),")               // altitude
             .number("(d+),")                     // satellites
             .number("(d+),")                     // rssi
             .number("(d+),")                     // battery
@@ -262,9 +262,9 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
             return position;
 
-        } else if (type.equals("TKQ")) {
+        } else if (type.equals("TKQ") || type.equals("TKQ2")) {
 
-            sendResponse(channel, id, index, "TKQ");
+            sendResponse(channel, id, index, type);
 
         } else if (type.equalsIgnoreCase("PULSE")
                 || type.equalsIgnoreCase("HEART")

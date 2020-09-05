@@ -187,14 +187,14 @@ public class WebDataHandler extends BaseDataHandler {
 
         private int retries = 0;
         private Map<String, Object> payload;
-        private Invocation.Builder requestBuilder;
+        private final Invocation.Builder requestBuilder;
         private MediaType mediaType = MediaType.APPLICATION_JSON_TYPE;
 
         AsyncRequestAndCallback(Position position) {
 
             String formattedUrl;
             try {
-                formattedUrl = (json && !urlVariables) ? url : formatRequest(position);
+                formattedUrl = json && !urlVariables ? url : formatRequest(position);
             } catch (UnsupportedEncodingException | JsonProcessingException e) {
                 throw new RuntimeException("Forwarding formatting error", e);
             }

@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.api.HealthCheckService;
 
+import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.OperatingSystemMXBean;
@@ -76,13 +77,17 @@ public final class Main {
     public static void main(String[] args) throws Exception {
         Locale.setDefault(Locale.ENGLISH);
 
+        final String configFile;
         if (args.length <= 0) {
-            throw new RuntimeException("Configuration file is not provided");
+            configFile = "./debug.xml";
+            if (!new File(configFile).exists()) {
+                throw new RuntimeException("Configuration file is not provided");
+            }
+        } else {
+            configFile = args[args.length - 1];
         }
 
-        final String configFile = args[args.length - 1];
-
-        if (args[0].startsWith("--")) {
+        if (args.length > 0 && args[0].startsWith("--")) {
             WindowsService windowsService = new WindowsService("traccar") {
                 @Override
                 public void run() {
@@ -139,6 +144,7 @@ public final class Main {
             if (Context.getWebServer() != null) {
                 Context.getWebServer().start();
             }
+            Context.getScheduleManager().start();
 
             scheduleHealthCheck();
             scheduleDatabaseCleanup();
@@ -148,6 +154,7 @@ public final class Main {
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 LOGGER.info("Shutting down server...");
 
+                Context.getScheduleManager().stop();
                 if (Context.getWebServer() != null) {
                     Context.getWebServer().stop();
                 }

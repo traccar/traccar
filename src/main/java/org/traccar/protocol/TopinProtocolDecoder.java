@@ -25,12 +25,14 @@ import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BcdUtil;
 import org.traccar.helper.DateBuilder;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
 import org.traccar.model.WifiAccessPoint;
 
 import java.net.SocketAddress;
+import java.util.Calendar;
 import java.util.TimeZone;
 
 public class TopinProtocolDecoder extends BaseProtocolDecoder {
@@ -40,10 +42,13 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public static final int MSG_LOGIN = 0x01;
+    public static final int MSG_GPS_2 = 0x08;
+    public static final int MSG_GPS_OFFLINE_2 = 0x09;
     public static final int MSG_GPS = 0x10;
     public static final int MSG_GPS_OFFLINE = 0x11;
     public static final int MSG_STATUS = 0x13;
     public static final int MSG_WIFI_OFFLINE = 0x17;
+    public static final int MSG_TIME_UPDATE = 0x30;
     public static final int MSG_WIFI = 0x69;
 
     private void sendResponse(Channel channel, int length, int type, ByteBuf content) {
@@ -58,6 +63,29 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
             content.release();
             channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
+    }
+
+    private void updateTime(Channel channel, int type) {
+        ByteBuf dateBuffer = Unpooled.buffer();
+
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+
+        dateBuffer.writeShort(calendar.get(Calendar.YEAR));
+        dateBuffer.writeByte(calendar.get(Calendar.MONTH) + 1);
+        dateBuffer.writeByte(calendar.get(Calendar.DAY_OF_MONTH));
+        dateBuffer.writeByte(calendar.get(Calendar.HOUR_OF_DAY));
+        dateBuffer.writeByte(calendar.get(Calendar.MINUTE));
+        dateBuffer.writeByte(calendar.get(Calendar.SECOND));
+
+        sendResponse(channel, dateBuffer.readableBytes(), type, dateBuffer);
+    }
+
+    private double readCoordinate(ByteBuf buf) {
+        int degrees = buf.readUnsignedByte();
+        boolean negative = (buf.getUnsignedByte(buf.readerIndex()) & 0xf0) > 0;
+        int decimal = buf.readUnsignedMedium() & 0x0fffff;
+        double result = degrees + decimal * 0.000001;
+        return negative ? -result : result;
     }
 
     @Override
@@ -78,6 +106,7 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
             ByteBuf content = Unpooled.buffer();
             content.writeByte(deviceSession != null ? 0x01 : 0x44);
             sendResponse(channel, length, type, content);
+            updateTime(channel, MSG_TIME_UPDATE);
             return null;
         } else {
             deviceSession = getDeviceSession(channel, remoteAddress);
@@ -86,7 +115,34 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        if (type == MSG_GPS || type == MSG_GPS_OFFLINE) {
+        if (type == MSG_GPS_2 || type == MSG_GPS_OFFLINE_2) {
+
+            if (buf.readableBytes() <= 2) {
+                return null;
+            }
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
+                    .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
+            position.setTime(dateBuilder.getDate());
+
+            position.setValid(type == MSG_GPS_2);
+            position.setLatitude(readCoordinate(buf));
+            position.setLongitude(readCoordinate(buf));
+
+            buf.skipBytes(4 + 4); // second coordinates
+
+            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
+            position.setCourse(buf.readUnsignedByte() * 2);
+
+            position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+
+            return position;
+
+        } else if (type == MSG_GPS || type == MSG_GPS_OFFLINE) {
 
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
@@ -101,6 +157,12 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
 
             return position;
 
+        } else if (type == MSG_TIME_UPDATE) {
+
+            updateTime(channel, type);
+
+            return null;
+
         } else if (type == MSG_STATUS) {
 
             Position position = new Position(getProtocolName());
@@ -108,27 +170,16 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, null);
 
-            int battery = buf.readUnsignedByte();
-            int firmware = buf.readUnsignedByte();
-            int timezone = buf.readUnsignedByte();
+            position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+            position.set(Position.KEY_VERSION_FW, buf.readUnsignedByte());
+            buf.readUnsignedByte(); // timezone
             int interval = buf.readUnsignedByte();
-            int signal = 0;
             if (length >= 7) {
-                signal = buf.readUnsignedByte();
-                position.set(Position.KEY_RSSI, signal);
+                position.set(Position.KEY_RSSI, buf.readUnsignedByte());
             }
-
-            position.set(Position.KEY_BATTERY_LEVEL, battery);
-            position.set(Position.KEY_VERSION_FW, firmware);
 
             ByteBuf content = Unpooled.buffer();
-            content.writeByte(battery);
-            content.writeByte(firmware);
-            content.writeByte(timezone);
             content.writeByte(interval);
-            if (length >= 7) {
-                content.writeByte(signal);
-            }
             sendResponse(channel, length, type, content);
 
             return position;
