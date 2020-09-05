@@ -427,7 +427,9 @@ public final class Keys {
      * Disable systemd health checks.
      */
     public static final ConfigKey WEB_DISABLE_HEALTH_CHECK = new ConfigKey(
-            "web.disableHealthCheck", Boolean.class);/**
+            "web.disableHealthCheck", Boolean.class);
+
+    /**
      * Fixes Chrome SameSite Cookie problem, only works on https
      * More info here https://wiki.shibboleth.net/confluence/display/DEV/Tomcat+and+Jetty+SameSite+Workarounds
      */
