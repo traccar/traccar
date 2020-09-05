@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -168,6 +168,10 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         long status = buf.readUnsignedIntLE();
                         position.set(Position.KEY_BATTERY_LEVEL, BitUtil.from(status, 24));
                         position.set(Position.KEY_STATUS, status);
+                        break;
+                    case 0x30:
+                        buf.readUnsignedInt(); // timestamp
+                        position.set(Position.KEY_STEPS, buf.readUnsignedInt());
                         break;
                     case 0x40:
                         buf.readUnsignedIntLE(); // timestamp
