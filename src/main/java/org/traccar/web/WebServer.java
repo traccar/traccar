@@ -18,10 +18,12 @@ package org.traccar.web;
 import org.eclipse.jetty.http.HttpCookie;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
+import org.eclipse.jetty.jmx.MBeanContainer;
 import org.eclipse.jetty.proxy.AsyncProxyServlet;
 import org.eclipse.jetty.server.NCSARequestLog;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnectionStatistics;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
@@ -52,6 +54,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
+import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
 import java.util.EnumSet;
 
@@ -70,6 +73,7 @@ public class WebServer {
         } else {
             server = new Server(new InetSocketAddress(address, port));
         }
+        server.addBean(new MBeanContainer(ManagementFactory.getPlatformMBeanServer()));
     }
 
     public WebServer(Config config) {
@@ -110,6 +114,7 @@ public class WebServer {
             requestLog.setRetainDays(config.getInteger(Keys.WEB_REQUEST_LOG_RETAIN_DAYS));
             server.setRequestLog(requestLog);
         }
+        ServerConnectionStatistics.addToAllConnectors(server);
     }
 
     private void initClientProxy(Config config, HandlerList handlers) {

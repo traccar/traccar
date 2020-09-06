@@ -50,6 +50,7 @@ dependencies {
     implementation "org.eclipse.jetty:jetty-server:$jettyVersion"
     implementation "org.eclipse.jetty:jetty-servlet:$jettyVersion"
     implementation "org.eclipse.jetty:jetty-webapp:$jettyVersion"
+    implementation "org.eclipse.jetty:jetty-jmx:$jettyVersion"
     implementation "org.eclipse.jetty:jetty-jndi:$jettyVersion"
     implementation "org.eclipse.jetty:jetty-proxy:$jettyVersion"
     implementation "org.eclipse.jetty.websocket:websocket-server:$jettyVersion"
