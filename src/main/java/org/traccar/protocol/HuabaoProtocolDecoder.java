@@ -298,19 +298,22 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case 0xEB:
                     while (buf.readerIndex() < endIndex) {
-                        int tenetLength = buf.readUnsignedShort();
-                        int tenetType = buf.readUnsignedShort();
-                        switch (tenetType) {
+                        int extendedLength = buf.readUnsignedShort();
+                        int extendedType = buf.readUnsignedShort();
+                        switch (extendedType) {
                             case 0x0001:
                                 position.set("fuel1", buf.readUnsignedShort() * 0.1);
                                 buf.readUnsignedByte(); // unused
+                                break;
+                            case 0x0004:
+                                position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
                                 break;
                             case 0x0023:
                                 position.set("fuel2", Double.parseDouble(
                                         buf.readCharSequence(6, StandardCharsets.US_ASCII).toString()));
                                 break;
                             default:
-                                buf.skipBytes(tenetLength - 2);
+                                buf.skipBytes(extendedLength - 2);
                                 break;
                         }
                     }
