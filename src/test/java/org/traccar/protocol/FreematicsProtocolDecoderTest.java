@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class FreematicsProtocolDecoderTest extends ProtocolTest {
 
@@ -30,6 +31,9 @@ public class FreematicsProtocolDecoderTest extends ProtocolTest {
 
         verifyPositions(decoder, text(
                 "1#0=68338,10D=79,30=1010,105=199,10C=4375,104=56,111=62,20=0;-1;95,10=6454200,A=-32.727482,B=150.150301,C=159,D=0,F=5,24=1250*7A"));
+
+        verifyAttribute(decoder, text(
+                "1#0=68338,82:55.000000*7A"), Position.KEY_DEVICE_TEMP, 55.0);
 
     }
 

@@ -132,37 +132,37 @@ public class FreematicsProtocolDecoder extends BaseProtocolDecoder {
                     position.setCourse(Integer.parseInt(value));
                     break;
                 case 0xF:
-                    position.set(Position.KEY_SATELLITES, Integer.parseInt(value));
+                    position.set(Position.KEY_SATELLITES, Double.parseDouble(value));
                     break;
                 case 0x12:
-                    position.set(Position.KEY_HDOP, Integer.parseInt(value));
+                    position.set(Position.KEY_HDOP, Double.parseDouble(value));
                     break;
                 case 0x20:
                     position.set(Position.KEY_ACCELERATION, value);
                     break;
                 case 0x24:
-                    position.set(Position.KEY_BATTERY, Integer.parseInt(value) * 0.01);
+                    position.set(Position.KEY_BATTERY, Double.parseDouble(value));
                     break;
                 case 0x81:
-                    position.set(Position.KEY_RSSI, Integer.parseInt(value));
+                    position.set(Position.KEY_RSSI, Double.parseDouble(value));
                     break;
                 case 0x82:
-                    position.set(Position.KEY_DEVICE_TEMP, Integer.parseInt(value) * 0.1);
+                    position.set(Position.KEY_DEVICE_TEMP, Double.parseDouble(value));
                     break;
                 case 0x104:
-                    position.set(Position.KEY_ENGINE_LOAD, Integer.parseInt(value));
+                    position.set(Position.KEY_ENGINE_LOAD, Double.parseDouble(value));
                     break;
                 case 0x105:
-                    position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(value));
+                    position.set(Position.KEY_COOLANT_TEMP, Double.parseDouble(value));
                     break;
                 case 0x10c:
-                    position.set(Position.KEY_RPM, Integer.parseInt(value));
+                    position.set(Position.KEY_RPM, Double.parseDouble(value));
                     break;
                 case 0x10d:
                     position.set(Position.KEY_OBD_SPEED, UnitsConverter.knotsFromKph(Integer.parseInt(value)));
                     break;
                 case 0x111:
-                    position.set(Position.KEY_THROTTLE, Integer.parseInt(value));
+                    position.set(Position.KEY_THROTTLE, Double.parseDouble(value));
                     break;
                 default:
                     position.set(Position.PREFIX_IO + key, value);
