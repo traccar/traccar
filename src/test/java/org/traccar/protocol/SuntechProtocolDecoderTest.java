@@ -63,6 +63,21 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
     }
 
     @Test
+    public void testDecodeDriver() throws Exception {
+
+        SuntechProtocolDecoder decoder = new SuntechProtocolDecoder(null);
+
+        verifyAttribute(decoder, buffer(
+                "ST300HTE;511050566;45;308;20200909;13:38:38;0;12.50;001354;0.0;1;0;1;1;0;-27.636632;-052.277933;-27.636675;-052.277947;000.000;002.296;0;00000000000000"),
+                Position.KEY_DRIVER_UNIQUE_ID, "00000000000000");
+
+        verifyAttribute(decoder, buffer(
+                "ST300HTE;100850001;04;248;20110101;00:13:52;167559;12.28;004005;0.0;1;0;3;3;0;-22.881018;-047.070831;-22.881018;-047.070831;000.000;000.000;0;0;3;0;0;0;01E04D44160000"),
+                Position.KEY_DRIVER_UNIQUE_ID, "01E04D44160000");
+
+    }
+
+    @Test
     public void testDecode() throws Exception {
 
         SuntechProtocolDecoder decoder = new SuntechProtocolDecoder(null);
