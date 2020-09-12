@@ -355,6 +355,30 @@ public final class Keys {
             "geocoder.reuseDistance", Integer.class);
 
     /**
+     * Boolean flag to enable or disable time-distance matrix.
+     */
+    public static final ConfigKey TIMEDISTANCEMATRIX_ENABLE = new ConfigKey(
+            "timedistancematrix.enable", Boolean.class);
+
+    /**
+     * Time-distance matrix type.
+     */
+    public static final ConfigKey TIMEDISTANCEMATRIX_TYPE = new ConfigKey(
+            "timedistancematrix.type", String.class);
+
+    /**
+     * Time-distance matrix server URL.
+     */
+    public static final ConfigKey TIMEDISTANCEMATRIX_URL = new ConfigKey(
+            "timedistancematrix.url", String.class);
+
+    /**
+     * Provider API key. Most providers require API keys.
+     */
+    public static final ConfigKey TIMEDISTANCEMATRIX_KEY = new ConfigKey(
+            "timedistancematrix.key", String.class);
+
+    /**
      * Boolean flag to enable LBS location resolution. Some devices send cell towers information and WiFi point when GPS
      * location is not available. Traccar can determine coordinates based on that information using third party
      * services. Default value is false.

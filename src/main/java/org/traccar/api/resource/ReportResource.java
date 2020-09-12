@@ -46,8 +46,10 @@ import org.traccar.model.Position;
 import org.traccar.reports.Events;
 import org.traccar.reports.Summary;
 import org.traccar.reports.Trips;
+import org.traccar.reports.TimeDistance;
 import org.traccar.reports.model.StopReport;
 import org.traccar.reports.model.SummaryReport;
+import org.traccar.reports.model.TimeDistanceReport;
 import org.traccar.reports.model.TripReport;
 import org.traccar.reports.Route;
 import org.traccar.reports.Stops;
@@ -138,6 +140,15 @@ public class ReportResource extends BaseResource {
             LogAction.logReport(getUserId(), "events", from, to, deviceIds, groupIds);
             Events.getExcel(stream, getUserId(), deviceIds, groupIds, types, from, to);
         });
+    }
+
+    @Path("time-distance")
+    @GET
+    public Collection<TimeDistanceReport> getTimeDistanceMatrix(
+            @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
+            @QueryParam("latitude") Double latitude, @QueryParam("longitude") Double longitude) throws SQLException {
+        return TimeDistance.getObjects(getUserId(), deviceIds, groupIds,
+                latitude, longitude);
     }
 
     @Path("summary")
