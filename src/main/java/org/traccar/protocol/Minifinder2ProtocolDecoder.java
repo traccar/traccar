@@ -109,6 +109,8 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
             boolean hasLocation = false;
             Position position = new Position(getProtocolName());
 
+            DeviceSession deviceSession = null;
+
             while (buf.isReadable()) {
                 int endIndex = buf.readUnsignedByte() + buf.readerIndex();
                 int key = buf.readUnsignedByte();
@@ -126,11 +128,9 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
 
                 switch (key) {
                     case 0x01:
-                        DeviceSession deviceSession = getDeviceSession(
+                        deviceSession = getDeviceSession(
                                 channel, remoteAddress, buf.readCharSequence(15, StandardCharsets.US_ASCII).toString());
-                        if (deviceSession == null) {
-                            return null;
-                        }
+
                         position.setDeviceId(deviceSession.getDeviceId());
                         break;
                     case 0x02:
@@ -210,6 +210,14 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                 getLastLocation(position, null);
             }
             positions.add(position);
+
+            if (deviceSession != null) {
+                for (Position p : positions) {
+                    p.setDeviceId(deviceSession.getDeviceId());
+                }
+            } else {
+                return null;
+            }
 
             return positions;
 
