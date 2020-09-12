@@ -34,6 +34,10 @@ import org.traccar.model.WifiAccessPoint;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
 
@@ -100,11 +104,26 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
 
         if (type == MSG_DATA) {
 
+            List<Position> positions = new LinkedList<>();
+            Set<Integer> keys = new HashSet<>();
+            boolean hasLocation = false;
             Position position = new Position(getProtocolName());
 
             while (buf.isReadable()) {
                 int endIndex = buf.readUnsignedByte() + buf.readerIndex();
                 int key = buf.readUnsignedByte();
+
+                if (keys.contains(key)) {
+                    if (!hasLocation) {
+                        getLastLocation(position, null);
+                    }
+                    positions.add(position);
+                    keys.clear();
+                    hasLocation = false;
+                    position = new Position(getProtocolName());
+                }
+                keys.add(key);
+
                 switch (key) {
                     case 0x01:
                         DeviceSession deviceSession = getDeviceSession(
@@ -122,6 +141,7 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.001);
                         break;
                     case 0x20:
+                        hasLocation = true;
                         position.setLatitude(buf.readIntLE() * 0.0000001);
                         position.setLongitude(buf.readIntLE() * 0.0000001);
                         position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShortLE()));
@@ -186,11 +206,12 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                 buf.readerIndex(endIndex);
             }
 
-            if (!position.getAttributes().containsKey(Position.KEY_SATELLITES)) {
+            if (!hasLocation) {
                 getLastLocation(position, null);
             }
+            positions.add(position);
 
-            return position.getDeviceId() > 0 ? position : null;
+            return positions;
 
         }
 
