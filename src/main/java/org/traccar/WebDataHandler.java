@@ -117,7 +117,7 @@ public class WebDataHandler extends BaseDataHandler {
             f.format("%1$td%1$tm%1$ty,,", calendar);
         }
 
-        s.append(Checksum.nmea(s.toString()));
+        s.append(Checksum.nmea(s.substring(1)));
 
         return s.toString();
     }

@@ -151,13 +151,8 @@ public final class Checksum {
         return checksum;
     }
 
-    public static String nmea(String msg) {
-        int checksum = 0;
-        byte[] bytes = msg.getBytes(StandardCharsets.US_ASCII);
-        for (int i = 1; i < bytes.length; i++) {
-            checksum ^= bytes[i];
-        }
-        return String.format("*%02x", checksum).toUpperCase();
+    public static String nmea(String string) {
+        return String.format("*%02X", xor(string));
     }
 
     public static int sum(ByteBuffer buf) {
