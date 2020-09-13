@@ -73,7 +73,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
             content.writeByte(packetNumber);
             content.writeZero(11);
 
-            ByteBuf reply = encodeContent(MSG_SERVER_ACKNOWLEDGE, (int) deviceId, packetNumber, content);
+            ByteBuf reply = encodeContent(MSG_SERVER_ACKNOWLEDGE, (int) deviceId, 0, content);
             channel.writeAndFlush(new NetworkMessage(reply, remoteAddress));
         }
     }
