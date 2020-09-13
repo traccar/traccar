@@ -289,5 +289,6 @@
     <entry key='niot.port'>5210</entry>
     <entry key='portman.port'>5211</entry>
     <entry key='moovbox.port'>5212</entry>
+    <entry key='futureway.port'>5213</entry>
 
 </properties>
