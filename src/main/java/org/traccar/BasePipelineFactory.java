@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Keys;
 import org.traccar.handler.DefaultDataHandler;
+import org.traccar.handler.SpeedLimitHandler;
 import org.traccar.handler.TimeHandler;
 import org.traccar.handler.events.AlertEventHandler;
 import org.traccar.handler.events.CommandResultEventHandler;
@@ -133,6 +134,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
                 pipeline,
                 FilterHandler.class,
                 GeocoderHandler.class,
+                SpeedLimitHandler.class,
                 MotionHandler.class,
                 CopyAttributesHandler.class,
                 EngineHoursHandler.class,

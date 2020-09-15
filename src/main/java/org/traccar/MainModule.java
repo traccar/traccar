@@ -61,6 +61,7 @@ import org.traccar.handler.GeolocationHandler;
 import org.traccar.handler.HemisphereHandler;
 import org.traccar.handler.MotionHandler;
 import org.traccar.handler.RemoteAddressHandler;
+import org.traccar.handler.SpeedLimitHandler;
 import org.traccar.handler.TimeHandler;
 import org.traccar.handler.events.AlertEventHandler;
 import org.traccar.handler.events.CommandResultEventHandler;
@@ -76,6 +77,8 @@ import org.traccar.reports.model.TripsConfig;
 import javax.annotation.Nullable;
 import javax.ws.rs.client.Client;
 import io.netty.util.Timer;
+import org.traccar.speedlimit.OverpassSpeedLimitProvider;
+import org.traccar.speedlimit.SpeedLimitProvider;
 
 public class MainModule extends AbstractModule {
 
@@ -211,6 +214,21 @@ public class MainModule extends AbstractModule {
 
     @Singleton
     @Provides
+    public static SpeedLimitProvider provideSpeedLimitProvider(Config config) {
+        if (config.getBoolean(Keys.SPEED_LIMIT_ENABLE)) {
+            String type = config.getString(Keys.SPEED_LIMIT_TYPE, "overpass");
+            String url = config.getString(Keys.SPEED_LIMIT_URL);
+            switch (type) {
+                case "overpass":
+                default:
+                    return new OverpassSpeedLimitProvider(url);
+            }
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
     public static DistanceHandler provideDistanceHandler(Config config, IdentityManager identityManager) {
         return new DistanceHandler(config, identityManager);
     }
@@ -269,6 +287,15 @@ public class MainModule extends AbstractModule {
             StatisticsManager statisticsManager) {
         if (geocoder != null) {
             return new GeocoderHandler(config, geocoder, identityManager, statisticsManager);
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public static SpeedLimitHandler provideSpeedLimitHandler(@Nullable SpeedLimitProvider speedLimitProvider) {
+        if (speedLimitProvider != null) {
+            return new SpeedLimitHandler(speedLimitProvider);
         }
         return null;
     }

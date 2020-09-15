@@ -389,6 +389,24 @@ public final class Keys {
             "geolocation.processInvalidPositions", Boolean.class);
 
     /**
+     * Boolean flag to enable speed limit API to get speed limit values depending on location. Default value is false.
+     */
+    public static final ConfigKey SPEED_LIMIT_ENABLE = new ConfigKey(
+            "speedLimit.enable", Boolean.class);
+
+    /**
+     * Provider to use for speed limit. Available options: overpass. By default overpass is used.
+     */
+    public static final ConfigKey SPEED_LIMIT_TYPE = new ConfigKey(
+            "speedLimit.type", String.class);
+
+    /**
+     * Speed limit provider API URL address.
+     */
+    public static final ConfigKey SPEED_LIMIT_URL = new ConfigKey(
+            "speedLimit.url", String.class);
+
+    /**
      * Override latitude sign / hemisphere. Useful in cases where value is incorrect because of device bug. Value can be
      * N for North or S for South.
      */
