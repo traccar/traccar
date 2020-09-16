@@ -305,12 +305,12 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                                 position.set("fuel1", buf.readUnsignedShort() * 0.1);
                                 buf.readUnsignedByte(); // unused
                                 break;
-                            case 0x0004:
-                                position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
-                                break;
                             case 0x0023:
                                 position.set("fuel2", Double.parseDouble(
                                         buf.readCharSequence(6, StandardCharsets.US_ASCII).toString()));
+                                break;
+                            case 0x00CE:
+                                position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
                                 break;
                             default:
                                 buf.skipBytes(extendedLength - 2);
