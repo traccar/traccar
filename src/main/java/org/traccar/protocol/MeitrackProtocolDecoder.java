@@ -177,8 +177,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         position.setNetwork(new Network(CellTower.from(
                 parser.nextInt(), parser.nextInt(), parser.nextHexInt(), parser.nextHexInt(), rssi)));
 
-        position.set(Position.KEY_OUTPUT, parser.nextHexInt());
         position.set(Position.KEY_INPUT, parser.nextHexInt());
+        position.set(Position.KEY_OUTPUT, parser.nextHexInt());
 
         for (int i = 1; i <= 3; i++) {
             position.set(Position.PREFIX_ADC + i, parser.nextHexInt());
