@@ -14,6 +14,10 @@ public class ItsProtocolDecoderTest extends ProtocolTest {
         verifyNull(decoder, text(
                 "$LGN,,869867037009679,3.2AIH,9.99546000,N,76.35886167,E"));
 
+        verifyAttribute(decoder, text(
+                "$,C,CTPL,4.0.0,NR,01,L,869247045166383,NA00000000,1,12032020,144453,30.452524,N,077.610351,E,1.4,34.8,14,384.19,1.8,0.8,IDEA P,1,1,14.2,4.17,0,C,22,404,82,0FB1,3B26,516B,0FB1,18,3B25,0FB1,15,5169,0FB1,14,3B27,0FB1,13,0000,00,8083,194.9,0B,*,IP=106.67.5.173"),
+                Position.KEY_ODOMETER, 194900.0);
+
         verifyPosition(decoder, text(
                 "$,EPB,SEM,868997031721531,NM,14072020112020,A,28.359959,N,076.927566,E,260.93,0.1,0.0,G,NA00000000,N.A0000000,*"));
 
