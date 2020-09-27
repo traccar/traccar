@@ -484,6 +484,9 @@ public final class QueryBuilder {
                         return resultSet.getLong(1);
                     }
                 }
+            } catch (SQLException e) {
+              LOGGER.warn("executeUpdate error, query: %s", query);
+              throw e;
             } finally {
                 statement.close();
                 connection.close();
