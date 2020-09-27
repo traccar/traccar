@@ -256,12 +256,15 @@ public class WebDataHandler extends BaseDataHandler {
             if (response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL) {
                 deliveryPending.decrementAndGet();
             } else {
+                LOGGER.warn(response.toString());
+                LOGGER.warn(payload.toString());
                 retry();
             }
         }
 
         @Override
         public void failed(Throwable throwable) {
+            LOGGER.warn("Position forwarding failed:", throwable);
             retry();
         }
 
