@@ -15,17 +15,16 @@
  */
 package org.traccar.api;
 
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
-import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
-import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
-import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
+import org.eclipse.jetty.websocket.servlet.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.Context;
 import org.traccar.api.resource.SessionResource;
 
 public class AsyncSocketServlet extends WebSocketServlet {
 
     private static final long ASYNC_TIMEOUT = 10 * 60 * 1000;
+    private static final Logger LOGGER = LoggerFactory.getLogger(AsyncSocketServlet.class);
 
     @Override
     public void configure(WebSocketServletFactory factory) {
@@ -34,11 +33,12 @@ public class AsyncSocketServlet extends WebSocketServlet {
             @Override
             public Object createWebSocket(ServletUpgradeRequest req, ServletUpgradeResponse resp) {
                 if (req.getSession() != null) {
-                    long userId = (Long) req.getSession().getAttribute(SessionResource.USER_ID_KEY);
-                    return new AsyncSocket(userId);
-                } else {
-                    return null;
+                    Object userId = req.getSession().getAttribute(SessionResource.USER_ID_KEY);
+                    if (userId != null)
+                        return new AsyncSocket((Long) userId);
                 }
+                LOGGER.warn("Invalid session: {}", req.getHeaders());
+                return null;
             }
         });
     }
