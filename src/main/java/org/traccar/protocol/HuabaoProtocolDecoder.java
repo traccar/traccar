@@ -57,13 +57,17 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
     public static final int RESULT_SUCCESS = 0;
 
-    public static ByteBuf formatMessage(int type, ByteBuf id, ByteBuf data) {
+    public static ByteBuf formatMessage(int type, ByteBuf id, boolean shortIndex, ByteBuf data) {
         ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0x7e);
         buf.writeShort(type);
         buf.writeShort(data.readableBytes());
         buf.writeBytes(id);
-        buf.writeShort(0); // index
+        if (shortIndex) {
+            buf.writeByte(1);
+        } else {
+            buf.writeShort(1);
+        }
         buf.writeBytes(data);
         data.release();
         buf.writeByte(Checksum.xor(buf.nioBuffer(1, buf.readableBytes() - 1)));
@@ -79,18 +83,18 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             response.writeShort(type);
             response.writeByte(RESULT_SUCCESS);
             channel.writeAndFlush(new NetworkMessage(
-                    formatMessage(MSG_GENERAL_RESPONSE, id, response), remoteAddress));
+                    formatMessage(MSG_GENERAL_RESPONSE, id, false, response), remoteAddress));
         }
     }
 
     private void sendGeneralResponse2(
-            Channel channel, SocketAddress remoteAddress, ByteBuf id, int index) {
+            Channel channel, SocketAddress remoteAddress, ByteBuf id, int type) {
         if (channel != null) {
             ByteBuf response = Unpooled.buffer();
-            response.writeShort(index);
+            response.writeShort(type);
             response.writeByte(RESULT_SUCCESS);
             channel.writeAndFlush(new NetworkMessage(
-                    formatMessage(MSG_GENERAL_RESPONSE_2, id, response), remoteAddress));
+                    formatMessage(MSG_GENERAL_RESPONSE_2, id, true, response), remoteAddress));
         }
     }
 
@@ -161,7 +165,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 response.writeByte(RESULT_SUCCESS);
                 response.writeBytes(ByteBufUtil.hexDump(id).getBytes(StandardCharsets.US_ASCII));
                 channel.writeAndFlush(new NetworkMessage(
-                        formatMessage(MSG_TERMINAL_REGISTER_RESPONSE, id, response), remoteAddress));
+                        formatMessage(MSG_TERMINAL_REGISTER_RESPONSE, id, false, response), remoteAddress));
             }
 
         } else if (type == MSG_TERMINAL_AUTH) {
@@ -175,7 +179,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         } else if (type == MSG_LOCATION_REPORT_2 || type == MSG_LOCATION_REPORT_BLIND) {
 
             if (BitUtil.check(attribute, 15)) {
-                sendGeneralResponse2(channel, remoteAddress, id, index);
+                sendGeneralResponse2(channel, remoteAddress, id, type);
             }
 
             return decodeLocation2(deviceSession, buf, type);
