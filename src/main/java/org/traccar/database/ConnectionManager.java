@@ -135,7 +135,7 @@ public class ConnectionManager {
         try {
             Context.getDeviceManager().updateDeviceStatus(device);
         } catch (SQLException error) {
-            LOGGER.warn("Update device status error", error);
+            LOGGER.warn("Update device status error, device id: " + deviceId, error);
         }
 
         updateDevice(device);
