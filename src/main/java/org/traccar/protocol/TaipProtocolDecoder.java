@@ -16,6 +16,8 @@
 package org.traccar.protocol;
 
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
@@ -35,6 +37,8 @@ import java.util.regex.Pattern;
 
 public class TaipProtocolDecoder extends BaseProtocolDecoder {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(TaipProtocolDecoder.class);
+
     public TaipProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
@@ -49,7 +53,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             .groupEnd("?")
             .number("(d{5})")                    // seconds
             .or()
-            .expression("(?:RGP|RCQ|RCV|RBR)")   // type
+            .expression("(?:RGP|RCQ|RCV|RBR|RPI)")   // type
             .number("(dd)?")                     // event
             .number("(dd)(dd)(dd)")              // date (mmddyy)
             .number("(dd)(dd)(dd)")              // time (hhmmss)
@@ -69,6 +73,17 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             .number("(xx)")                      // input
             .number("(dd)")                      // event
             .number("(dd)")                      // hdop
+            .or()
+            .number("[01]")                      // gps power
+            .number("(xx)")                      // satellites
+            .number("xxxx")                      // data age
+            .number("[01]")                      // modem power
+            .number("(ddd)")                      // hdop
+            .number("[01]")                      // gsm power
+            .number("[0-5]")                     // gsm status
+            .number("(dd)")                      // gsm signal
+            .number("(d{10})")                    // odometer
+            .number("(xx)")
             .or()
             .groupBegin()
             .number("(xx)")                      // input
@@ -120,6 +135,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         }
 
         Parser parser = new Parser(PATTERN, sentence);
+        LOGGER.warn(sentence);
         if (!parser.matches()) {
             return null;
         }
@@ -153,8 +169,8 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN));
         }
 
-        position.setSpeed(UnitsConverter.knotsFromMph(parser.nextDouble(0)));
         position.setCourse(parser.nextDouble(0));
+        position.setSpeed(UnitsConverter.knotsFromMph(parser.nextDouble(0)));
 
         if (parser.hasNext(4)) {
             valid = parser.nextInt() > 0;
@@ -173,11 +189,11 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (parser.hasNext(4)) {
-            valid = parser.nextInt() > 0;
-            position.set(Position.KEY_PDOP, parser.nextInt());
+            valid = parser.nextHexInt() > 0;
+            /*position.set(Position.KEY_PDOP, parser.nextInt());
             position.set(Position.KEY_RSSI, parser.nextInt());
             position.set(Position.PREFIX_TEMP + 1, parser.nextInt() * 0.01);
-            position.set(Position.PREFIX_TEMP + 2, parser.nextInt() * 0.01);
+            position.set(Position.PREFIX_TEMP + 2, parser.nextInt() * 0.01);*/
         }
 
         position.setValid(valid == null || valid);
@@ -271,10 +287,12 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         if (deviceSession != null) {
             if (channel != null) {
                 if (messageIndex != null) {
-                    String response = ">ACK;ID=" + uniqueId + ";" + messageIndex + ";*";
+                    String response = ">SAK;ID=" + uniqueId + ";" + messageIndex + ";*";
                     response += String.format("%02X", Checksum.xor(response)) + "<";
+                    LOGGER.warn("sending " + response);
                     channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
                 } else {
+                    LOGGER.warn("sending " + uniqueId);
                     channel.writeAndFlush(new NetworkMessage(uniqueId, remoteAddress));
                 }
             }
