@@ -81,8 +81,7 @@ public final class ReportUtils {
     }
 
     public static Collection<Long> getDeviceList(Collection<Long> deviceIds, Collection<Long> groupIds) {
-        Collection<Long> result = new ArrayList<>();
-        result.addAll(deviceIds);
+        Collection<Long> result = new ArrayList<>(deviceIds);
         for (long groupId : groupIds) {
             result.addAll(Context.getPermissionsManager().getGroupDevices(groupId));
         }

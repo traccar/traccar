@@ -59,7 +59,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
 
     private final TrackerServer server;
     private final String protocol;
-    private boolean eventsEnabled;
+    private final boolean eventsEnabled;
     private int timeout;
 
     public BasePipelineFactory(TrackerServer server, String protocol) {

@@ -74,7 +74,7 @@ public class WebDataHandler extends BaseDataHandler {
     private final int retryCount;
     private final int retryLimit;
 
-    private AtomicInteger deliveryPending;
+    private final AtomicInteger deliveryPending;
 
     @Inject
     public WebDataHandler(

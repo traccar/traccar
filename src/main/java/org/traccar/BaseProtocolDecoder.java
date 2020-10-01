@@ -104,7 +104,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     }
 
     private DeviceSession channelDeviceSession; // connection-based protocols
-    private Map<SocketAddress, DeviceSession> addressDeviceSessions = new HashMap<>(); // connectionless protocols
+    private final Map<SocketAddress, DeviceSession> addressDeviceSessions = new HashMap<>(); // connectionless protocols
 
     private long findDeviceId(SocketAddress remoteAddress, String... uniqueIds) {
         if (uniqueIds.length > 0) {

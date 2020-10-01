@@ -45,11 +45,11 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
 
     private final Config config;
     private final long dataRefreshDelay;
-    private boolean lookupGroupsAttribute;
+    private final boolean lookupGroupsAttribute;
 
     private Map<String, Device> devicesByUniqueId;
     private Map<String, Device> devicesByPhone;
-    private AtomicLong devicesLastUpdate = new AtomicLong();
+    private final AtomicLong devicesLastUpdate = new AtomicLong();
 
     private final Map<Long, Position> positions = new ConcurrentHashMap<>();
 

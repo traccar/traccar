@@ -41,7 +41,7 @@ public class CommandsManager  extends ExtendedObjectManager<Command> {
 
     private final Map<Long, Queue<Command>> deviceQueues = new ConcurrentHashMap<>();
 
-    private boolean queueing;
+    private final boolean queueing;
 
     public CommandsManager(DataManager dataManager, boolean queueing) {
         super(dataManager, Command.class);
