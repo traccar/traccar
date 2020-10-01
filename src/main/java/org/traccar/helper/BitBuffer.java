@@ -93,7 +93,7 @@ public class BitBuffer {
             return result;
         } else {
             result &= signBit - 1;
-            result += ~(signBit - 1);
+            result += -signBit;
             return result;
         }
     }

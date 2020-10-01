@@ -26,12 +26,12 @@ public final class Checksum {
 
     public static class Algorithm {
 
-        private int poly;
-        private int init;
-        private boolean refIn;
-        private boolean refOut;
-        private int xorOut;
-        private int[] table;
+        private final int poly;
+        private final int init;
+        private final boolean refIn;
+        private final boolean refOut;
+        private final int xorOut;
+        private final int[] table;
 
         public Algorithm(int bits, int poly, int init, boolean refIn, boolean refOut, int xorOut) {
             this.poly = poly;

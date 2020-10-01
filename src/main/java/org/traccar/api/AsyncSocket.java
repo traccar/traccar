@@ -39,7 +39,7 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
     private static final String KEY_POSITIONS = "positions";
     private static final String KEY_EVENTS = "events";
 
-    private long userId;
+    private final long userId;
 
     public AsyncSocket(long userId) {
         this.userId = userId;

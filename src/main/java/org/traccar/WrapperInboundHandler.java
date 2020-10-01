@@ -20,7 +20,7 @@ import io.netty.channel.ChannelInboundHandler;
 
 public class WrapperInboundHandler implements ChannelInboundHandler {
 
-    private ChannelInboundHandler handler;
+    private final ChannelInboundHandler handler;
 
     public ChannelInboundHandler getWrappedHandler() {
         return handler;

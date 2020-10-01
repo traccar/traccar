@@ -23,7 +23,7 @@ import java.net.SocketAddress;
 
 public class WrapperOutboundHandler implements ChannelOutboundHandler {
 
-    private ChannelOutboundHandler handler;
+    private final ChannelOutboundHandler handler;
 
     public ChannelOutboundHandler getWrappedHandler() {
         return handler;
