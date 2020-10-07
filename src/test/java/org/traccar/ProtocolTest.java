@@ -101,7 +101,7 @@ public class ProtocolTest extends BaseTest {
         assertNull(decoder.decode(null, null, object));
     }
 
-    protected void verifyAttribute(BaseProtocolDecoder decoder, Object object, String key, Object expected) throws Exception {
+    protected void verifyAttribute(BaseProtocolDecoder decoder, Object object, String key, Object expected, Object... moreAttributes) throws Exception {
         Object decodedObject = decoder.decode(null, null, object);
         Position position;
         if (decodedObject instanceof Collection) {
@@ -109,37 +109,108 @@ public class ProtocolTest extends BaseTest {
         } else {
             position = (Position) decodedObject;
         }
+        verifyAttributeValues(position, key, expected, moreAttributes);
+    }
+    
+    private void verifyAttributeValues(Object decodedObject, String key, Object expected, Object... moreAttributes) {
+        if (decodedObject instanceof Collection) {
+            for (Object item: (Collection) decodedObject) {
+                verifyAttributeValues(item, key, expected, moreAttributes);
+            }
+            return;
+        }
+        
+        Position position = (Position) decodedObject;
+        if (key != null) {
+            verifyAttributeValue(position, key, expected);
+        }
+        if (moreAttributes == null || moreAttributes.length == 0) {
+            return;
+        } else if (moreAttributes.length % 2 != 0) {
+            throw new IllegalArgumentException("moreAttributes must be a sequence of pairs (String name, Object value)");
+        }
+        for (int i = 0; i < moreAttributes.length; i += 2) {
+            String attributeName;
+            try {
+                attributeName = (String) moreAttributes[i];
+            } catch (ClassCastException e) {
+                throw new IllegalArgumentException("moreAttributes must be a sequence of pairs (String name, Object value)", e);
+            }
+            verifyAttributeValue(position, attributeName, moreAttributes[i + 1]);
+        }
+    }
+
+    private void verifyAttributeValue(Position position, String key, Object expected) {
         switch (key) {
             case "speed":
-                assertEquals(expected, position.getSpeed());
+                assertEquals(key, expected, position.getSpeed());
                 break;
             case "course":
-                assertEquals(expected, position.getCourse());
+                assertEquals(key, expected, position.getCourse());
+                break;
+            case "deviceTime":
+                assertEquals(key, expected, position.getDeviceTime());
                 break;
             default:
-                assertEquals(expected, position.getAttributes().get(key));
+                assertEquals(key, expected, position.getAttributes().get(key));
                 break;
         }
     }
 
+    protected void verifyAttributes(BaseProtocolDecoder decoder, Object object, String key, Object expected, Object... moreAttributes) throws Exception {
+        Object decodedObject = decoder.decode(null, null, object);
+        verifyDecodedPosition(decodedObject, false, true, null);
+        verifyAttributeValues(decodedObject, key, expected, moreAttributes);
+    }
+    
     protected void verifyAttributes(BaseProtocolDecoder decoder, Object object) throws Exception {
         verifyDecodedPosition(decoder.decode(null, null, object), false, true, null);
+    }
+
+    protected void verifyPosition(BaseProtocolDecoder decoder, Object object, String key, Object expected, Object... moreAttributes) throws Exception {
+        Object decodedObject = decoder.decode(null, null, object);
+        verifyDecodedPosition(decodedObject, true, false, null);
+        verifyAttributeValues(decodedObject, key, expected, moreAttributes);
     }
 
     protected void verifyPosition(BaseProtocolDecoder decoder, Object object) throws Exception {
         verifyDecodedPosition(decoder.decode(null, null, object), true, false, null);
     }
 
+    protected void verifyPosition(BaseProtocolDecoder decoder, Object object, Position position, String key, Object expected, Object... moreAttributes) throws Exception {
+        Object decodedObject = decoder.decode(null, null, object);
+        verifyDecodedPosition(decodedObject, true, false, position);
+        verifyAttributeValues(decodedObject, key, expected, moreAttributes);
+    }
+
     protected void verifyPosition(BaseProtocolDecoder decoder, Object object, Position position) throws Exception {
         verifyDecodedPosition(decoder.decode(null, null, object), true, false, position);
+    }
+
+    protected void verifyPositions(BaseProtocolDecoder decoder, Object object, String key, Object expected, Object... moreAttributes) throws Exception {
+        Object decodedObject = decoder.decode(null, null, object);
+        verifyDecodedList(decodedObject, true, null);
+        verifyAttributeValues(decodedObject, key, expected, moreAttributes);
     }
 
     protected void verifyPositions(BaseProtocolDecoder decoder, Object object) throws Exception {
         verifyDecodedList(decoder.decode(null, null, object), true, null);
     }
 
+    protected void verifyPositions(BaseProtocolDecoder decoder, boolean checkLocation, Object object, String key, Object expected, Object... moreAttributes) throws Exception {
+        Object decodedObject = decoder.decode(null, null, object);
+        verifyDecodedList(decodedObject, checkLocation, null);
+        verifyAttributeValues(decodedObject, key, expected, moreAttributes);
+    }
+
     protected void verifyPositions(BaseProtocolDecoder decoder, boolean checkLocation, Object object) throws Exception {
         verifyDecodedList(decoder.decode(null, null, object), checkLocation, null);
+    }
+
+    protected void verifyPositions(BaseProtocolDecoder decoder, Object object, Position position, String key, Object expected, Object... moreAttributes) throws Exception {
+        Object decodedObject = decoder.decode(null, null, object);
+        verifyDecodedList(decodedObject, true, position);
+        verifyAttributeValues(decodedObject, key, expected, moreAttributes);
     }
 
     protected void verifyPositions(BaseProtocolDecoder decoder, Object object, Position position) throws Exception {

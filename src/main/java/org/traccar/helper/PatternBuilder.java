@@ -60,6 +60,24 @@ public class PatternBuilder {
         return this;
     }
 
+    public PatternBuilder skipDelimited(String characterClass, String delimiter) {
+        fragments.add("(?:" + characterClass + "*?" + Pattern.quote(delimiter) + ")?");
+        return this;
+    }
+
+    public PatternBuilder skipDelimited(String delimiter) {
+        return this.skipDelimited(".", delimiter);
+    }
+
+    public PatternBuilder readDelimited(String characterClass, String delimiter) {
+        fragments.add("(" + characterClass + "*?)" + Pattern.quote(delimiter));
+        return this;
+    }
+
+    public PatternBuilder readDelimited(String delimiter) {
+        return this.readDelimited(".", delimiter);
+    }
+
     public PatternBuilder binary(String s) {
         fragments.add(s.replaceAll("(\\p{XDigit}{2})", "\\\\$1"));
         return this;

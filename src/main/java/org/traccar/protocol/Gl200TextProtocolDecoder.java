@@ -37,8 +37,10 @@ import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -108,8 +110,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .text("+").expression("(?:RESP|BUFF):GTVER,")
             .number("[0-9A-Z]{2}xxxx,")          // protocol version
             .number("(d{15}|x{14}),")            // imei
-            .expression("[^,]*,")                // device name
-            .expression("([^,]*),")              // device type
+            .skipDelimited("[^,]", ",")          // device name
+            .readDelimited("[^,]", ",")          // device type
             .number("(xxxx),")                   // firmware version
             .number("(xxxx),")                   // hardware version
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
@@ -180,7 +182,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
             .number("(d{15}|x{14}),")            // imei
             .expression("(?:([0-9A-Z]{17}),)?")  // vin
-            .expression("[^,]*,")                // device name
+            .skipDelimited("[^,]", ",")          // device name
             .number("(d+)?,")                    // power
             .number("d{1,2},").optional()        // report type
             .number("d{1,2},").optional()        // count
@@ -212,7 +214,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("(-?d),")                    // rssi
             .number("(d{1,3}),")                 // battery
             .groupEnd()
-            .any()
+            .skipDelimited(",")
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
             .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
             .text(",")
@@ -224,7 +226,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .text("+").expression("(?:RESP|BUFF):GTERI,")
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
             .number("(d{15}|x{14}),")            // imei
-            .expression("[^,]*,")                // device name
+            .skipDelimited("[^,]", ",")          // device name
             .number("(x{8}),")                   // mask
             .number("(d+)?,")                    // power
             .number("d{1,2},")                   // report type
@@ -238,7 +240,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("(x+)?,").optional()         // adc 2
             .number("(d{1,3})?,")                // battery
             .number("(?:(xx)(xx)(xx))?,")        // device status
-            .expression("(.*)")                  // additional data
+            .readDelimited(",").optional()        // additional data
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
             .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
             .text(",")
@@ -250,7 +252,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .text("+").expression("(?:RESP|BUFF):GTIG[NF],")
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
             .number("(d{15}|x{14}),")            // imei
-            .expression("[^,]*,")                // device name
+            .skipDelimited("[^,]", ",")          // device name
             .number("d+,")                       // ignition off duration
             .expression(PATTERN_LOCATION.pattern())
             .number("(d{5}:dd:dd)?,")            // hour meter
@@ -266,7 +268,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .text("+RESP:").expression("GT[LT]SW,")
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
             .number("(d{15}|x{14}),")            // imei
-            .expression("[^,]*,")                // device name
+            .skipDelimited("[^,]", ",")          // device name
             .number("[01],")                     // type
             .number("([01]),")                   // state
             .expression(PATTERN_LOCATION.pattern())
@@ -281,7 +283,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .text("+RESP:GTIDA,")
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
             .number("(d{15}|x{14}),")            // imei
-            .expression("[^,]*,,")               // device name
+            .skipDelimited("[^,]", ",")          // device name
+            .text(",")
             .number("([^,]+),")                  // rfid
             .expression("[01],")                 // report type
             .number("1,")                        // count
@@ -299,7 +302,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .text("+RESP:GTWIF,")
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
             .number("(d{15}|x{14}),")            // imei
-            .expression("[^,]*,")                // device name
+            .skipDelimited("[^,]", ",")          // device name
             .number("(d+),")                     // count
             .number("((?:x{12},-?d+,,,,)+),,,,") // wifi
             .number("(d{1,3}),")                 // battery
@@ -315,7 +318,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
             .number("(d{15}|x{14}),")            // imei
             .expression("(?:STR|CTN|NMR|RTL),")  // fix type
-            .expression("(.*)")                  // cells
+            .readDelimited(",")                   // cells
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
             .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
             .text(",")
@@ -327,7 +330,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .text("+RESP:GT").expression("P[NF]A,")
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
             .number("(d{15}|x{14}),")            // imei
-            .expression("[^,]*,")                // device name
+            .skipDelimited("[^,]", ",")          // device name
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
             .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
             .text(",")
@@ -339,7 +342,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .text("+").expression("(?:RESP|BUFF):GT...,")
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
             .number("(d{15}|x{14}),")            // imei
-            .expression("[^,]*,")                // device name
+            .skipDelimited("[^,]", ",")          // device name
             .number("d*,")
             .number("(x{1,2}),")                 // report type
             .number("d{1,2},")                   // count
@@ -362,7 +365,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .expression("GT...,")
             .number("(?:[0-9A-Z]{2}xxxx)?,").optional() // protocol version
             .number("(d{15}|x{14}),")            // imei
-            .any()
+            .skipDelimited(",")
             .number("(d{1,2})?,")                // hdop
             .number("(d{1,3}.d)?,")              // speed
             .number("(d{1,3})?,")                // course
@@ -376,7 +379,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // mnc
             .number("(x+),")                     // lac
             .number("(x+),").optional(4)         // cell
-            .any()
+            .skipDelimited(",")
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
             .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
             .text(",")
@@ -428,6 +431,19 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                 position.setTime(parser.nextDateTime());
             } else {
                 position.setDeviceTime(parser.nextDateTime());
+            }
+        }
+    }
+
+    private void decodeDeviceTime(List<Position> positions, Parser parser) {
+        if (parser.hasNext(6)) {
+            Date deviceTime = parser.nextDateTime();
+            for (Position pos : positions) {
+                if (ignoreFixTime) {
+                    pos.setTime(deviceTime);
+                } else {
+                    pos.setDeviceTime(deviceTime);
+                }
             }
         }
     }
@@ -870,7 +886,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_RSSI, parser.nextInt());
         position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
 
-        decodeDeviceTime(position, parser);
+        decodeDeviceTime(positions, parser);
+        
         if (ignoreFixTime) {
             positions.clear();
             positions.add(position);
@@ -922,7 +939,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         decodeStatus(position, parser);
 
         int index = 0;
-        String[] data = parser.next().split(",");
+        String[] data = Optional.ofNullable(parser.next()).orElse("").split(",", -1);
 
         index += 1; // device type
 
@@ -958,7 +975,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        decodeDeviceTime(position, parser);
+        decodeDeviceTime(positions, parser);
+        
         if (ignoreFixTime) {
             positions.clear();
             positions.add(position);
@@ -1042,6 +1060,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
 
+        decodeDeviceTime(position, parser);
+        
         return position;
     }
 
@@ -1056,7 +1076,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         Network network = new Network();
 
-        String[] data = parser.next().split(",");
+        String[] data = Optional.ofNullable(parser.next()).orElse("").split(",", -1);
         for (int i = 0; i < 6; i++) {
             if (!data[i * 6].isEmpty()) {
                 network.addCellTower(CellTower.from(
@@ -1068,6 +1088,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         position.setNetwork(network);
 
+        decodeDeviceTime(position, parser);
+
         return position;
     }
 
@@ -1078,7 +1100,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        getLastLocation(position, null);
+        getLastLocation(position, parser.nextDateTime());
 
         position.set(Position.KEY_ALARM, sentence.contains("PNA") ? Position.ALARM_POWER_ON : Position.ALARM_POWER_OFF);
 

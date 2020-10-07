@@ -10,4 +10,5 @@ nbactions.xml
 .gradle
 out
 build
+bin
 src/main/java/org/traccar/protobuf
