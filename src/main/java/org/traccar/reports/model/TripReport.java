@@ -80,16 +80,6 @@ public class TripReport extends BaseReport {
         this.endLon = endLon;
     }
 
-    private Date startTime;
-
-    public Date getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(Date startTime) {
-        this.startTime = startTime;
-    }
-
     private String startAddress;
 
     public String getStartAddress() {
@@ -98,16 +88,6 @@ public class TripReport extends BaseReport {
 
     public void setStartAddress(String address) {
         this.startAddress = address;
-    }
-
-    private Date endTime;
-
-    public Date getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(Date endTime) {
-        this.endTime = endTime;
     }
 
     private String endAddress;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 
@@ -35,11 +36,10 @@ public final class Summary {
     private Summary() {
     }
 
-    private static SummaryReport calculateSummaryResult(long deviceId, Date from, Date to) throws SQLException {
+    private static SummaryReport calculateSummaryResult(long deviceId, Collection<Position> positions) {
         SummaryReport result = new SummaryReport();
         result.setDeviceId(deviceId);
         result.setDeviceName(Context.getIdentityManager().getById(deviceId).getName());
-        Collection<Position> positions = Context.getDataManager().getPositions(deviceId, from, to);
         if (positions != null && !positions.isEmpty()) {
             Position firstPosition = null;
             Position previousPosition = null;
@@ -74,26 +74,59 @@ public final class Summary {
                 result.setEndOdometer(previousPosition.getDouble(Position.KEY_TOTAL_DISTANCE));
             }
 
+            result.setStartTime(firstPosition.getFixTime());
+            result.setEndTime(previousPosition.getServerTime());
         }
         return result;
     }
 
+    private static int getDay(long userId, Date date) {
+        Calendar calendar = Calendar.getInstance(ReportUtils.getTimezone(userId));
+        calendar.setTime(date);
+        return calendar.get(Calendar.DAY_OF_MONTH);
+    }
+
+    private static Collection<SummaryReport> calculateSummaryResults(
+            long userId, long deviceId, Date from, Date to, boolean daily) throws SQLException {
+
+        ArrayList<Position> positions = new ArrayList<>(Context.getDataManager().getPositions(deviceId, from, to));
+
+        ArrayList<SummaryReport> results = new ArrayList<>();
+        if (daily && !positions.isEmpty()) {
+            int startIndex = 0;
+            int startDay = getDay(userId, positions.iterator().next().getFixTime());
+            for (int i = 0; i < positions.size(); i++) {
+                int currentDay = getDay(userId, positions.get(i).getFixTime());
+                if (currentDay != startDay) {
+                    results.add(calculateSummaryResult(deviceId, positions.subList(startIndex, i)));
+                    startIndex = i;
+                    startDay = currentDay;
+                }
+            }
+            results.add(calculateSummaryResult(deviceId, positions.subList(startIndex, positions.size())));
+        } else {
+            results.add(calculateSummaryResult(deviceId, positions));
+        }
+
+        return results;
+    }
+
     public static Collection<SummaryReport> getObjects(long userId, Collection<Long> deviceIds,
-            Collection<Long> groupIds, Date from, Date to) throws SQLException {
+            Collection<Long> groupIds, Date from, Date to, boolean daily) throws SQLException {
         ReportUtils.checkPeriodLimit(from, to);
         ArrayList<SummaryReport> result = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            result.add(calculateSummaryResult(deviceId, from, to));
+            result.addAll(calculateSummaryResults(userId, deviceId, from, to, daily));
         }
         return result;
     }
 
     public static void getExcel(OutputStream outputStream,
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
-            Date from, Date to) throws SQLException, IOException {
+            Date from, Date to, boolean daily) throws SQLException, IOException {
         ReportUtils.checkPeriodLimit(from, to);
-        Collection<SummaryReport> summaries = getObjects(userId, deviceIds, groupIds, from, to);
+        Collection<SummaryReport> summaries = getObjects(userId, deviceIds, groupIds, from, to, daily);
         String templatePath = Context.getConfig().getString("report.templatesPath",
                 "templates/export/");
         try (InputStream inputStream = new FileInputStream(templatePath + "/summary.xlsx")) {
