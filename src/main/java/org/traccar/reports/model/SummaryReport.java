@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 - 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,9 +26,5 @@ public class SummaryReport extends BaseReport {
 
     public void setEngineHours(long engineHours) {
         this.engineHours = engineHours;
-    }
-
-    public void addEngineHours(long engineHours) {
-        this.engineHours += engineHours;
     }
 }

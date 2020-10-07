@@ -144,9 +144,10 @@ public class ReportResource extends BaseResource {
     @GET
     public Collection<SummaryReport> getSummary(
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
-            @QueryParam("from") Date from, @QueryParam("to") Date to) throws SQLException {
+            @QueryParam("from") Date from, @QueryParam("to") Date to, @QueryParam("daily") boolean daily)
+            throws SQLException {
         LogAction.logReport(getUserId(), "summary", from, to, deviceIds, groupIds);
-        return Summary.getObjects(getUserId(), deviceIds, groupIds, from, to);
+        return Summary.getObjects(getUserId(), deviceIds, groupIds, from, to, daily);
     }
 
     @Path("summary")
@@ -154,11 +155,12 @@ public class ReportResource extends BaseResource {
     @Produces(XLSX)
     public Response getSummaryExcel(
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
-            @QueryParam("from") Date from, @QueryParam("to") Date to, @QueryParam("mail") boolean mail)
+            @QueryParam("from") Date from, @QueryParam("to") Date to, @QueryParam("daily") boolean daily,
+            @QueryParam("mail") boolean mail)
             throws SQLException, IOException {
         return executeReport(getUserId(), mail, stream -> {
             LogAction.logReport(getUserId(), "summary", from, to, deviceIds, groupIds);
-            Summary.getExcel(stream, getUserId(), deviceIds, groupIds, from, to);
+            Summary.getExcel(stream, getUserId(), deviceIds, groupIds, from, to, daily);
         });
     }
 
