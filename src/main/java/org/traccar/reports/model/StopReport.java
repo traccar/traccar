@@ -16,8 +16,6 @@
  */
 package org.traccar.reports.model;
 
-import java.util.Date;
-
 public class StopReport extends BaseReport  {
 
     private long positionId;
