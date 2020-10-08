@@ -490,6 +490,60 @@
                         }
                     }
                 }
+            },
+            "delete": {
+                "summary": "Deletes Positions from the database based on ID or timestamp",
+                "description" : "Without any params, it deletes and returns a list of last known positions for all the user's Devices. _from_ and _to_ fields are not required with _id_",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "deviceId",
+                        "in": "query",
+                        "description": "_deviceId_ is optional, but requires the _from_ and _to_ parameters when used",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "from",
+                        "in": "query",
+                        "description": "in IS0 8601 format. eg. `1963-11-22T18:30:00Z`",
+                        "required": false,
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    {
+                        "name": "to",
+                        "in": "query",
+                        "description": "in IS0 8601 format. eg. `1963-11-22T18:30:00Z`",
+                        "required": false,
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    {
+                        "name" : "id",
+                        "in" : "query",
+                        "description" : "To delete one or more positions. Multiple params can be passed like `id=31&id=42`",
+                        "required" : false,
+                        "type" : "integer",
+                        "collectionFormat" : "multi"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Position"
+                            }
+                        }
+                    }
+                }
             }
         },
         "/server": {
