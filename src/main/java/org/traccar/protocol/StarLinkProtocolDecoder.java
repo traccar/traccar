@@ -188,6 +188,9 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
                         cid = Integer.parseInt(data[i]);
                     }
                     break;
+                case "#CSS#":
+                    position.set(Position.KEY_RSSI, Integer.parseInt(data[i]));
+                    break;
                 case "#VIN#":
                     position.set(Position.KEY_POWER, Double.parseDouble(data[i]));
                     break;
@@ -202,6 +205,9 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case "#ENG#":
                     position.set("engine", data[i].equals("1"));
+                    break;
+                case "#SATU#":
+                    position.set(Position.KEY_SATELLITES, Integer.parseInt(data[i]));
                     break;
                 case "#TS1#":
                     position.set("sensor1State", Integer.parseInt(data[i]));
