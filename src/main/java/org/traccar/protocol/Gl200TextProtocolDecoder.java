@@ -232,6 +232,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .expression("((?:")
             .expression(PATTERN_LOCATION.pattern())
             .expression(")+)")
+            .groupBegin()
             .number("(d{1,7}.d)?,")              // odometer
             .number("(d{5}:dd:dd)?,")            // hour meter
             .number("(x+)?,")                    // adc 1
@@ -239,6 +240,11 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("(d{1,3})?,")                // battery
             .number("(?:(xx)(xx)(xx))?,")        // device status
             .expression("(.*)")                  // additional data
+            .or()
+            .number("d*,,")
+            .number("(d+),")                     // battery
+            .any()
+            .groupEnd()
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
             .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
             .text(",")
@@ -913,49 +919,58 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (power != null) {
             position.set(Position.KEY_POWER, power * 0.001);
         }
-        position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
-        position.set(Position.KEY_HOURS, parseHours(parser.next()));
-        position.set(Position.PREFIX_ADC + 1, parser.next());
-        position.set(Position.PREFIX_ADC + 2, parser.next());
-        position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
 
-        decodeStatus(position, parser);
+        if (parser.hasNext(9)) {
 
-        int index = 0;
-        String[] data = parser.next().split(",");
+            position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
+            position.set(Position.KEY_HOURS, parseHours(parser.next()));
+            position.set(Position.PREFIX_ADC + 1, parser.next());
+            position.set(Position.PREFIX_ADC + 2, parser.next());
+            position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
 
-        index += 1; // device type
+            decodeStatus(position, parser);
 
-        if (BitUtil.check(mask, 0)) {
-            index += 1; // digital fuel sensor data
-        }
+            int index = 0;
+            String[] data = parser.next().split(",");
 
-        if (BitUtil.check(mask, 1)) {
-            int deviceCount = Integer.parseInt(data[index++]);
-            for (int i = 1; i <= deviceCount; i++) {
-                index += 1; // id
-                index += 1; // type
-                if (!data[index++].isEmpty()) {
-                    position.set(Position.PREFIX_TEMP + i, (short) Integer.parseInt(data[index - 1], 16) * 0.0625);
+            index += 1; // device type
+
+            if (BitUtil.check(mask, 0)) {
+                index += 1; // digital fuel sensor data
+            }
+
+            if (BitUtil.check(mask, 1)) {
+                int deviceCount = Integer.parseInt(data[index++]);
+                for (int i = 1; i <= deviceCount; i++) {
+                    index += 1; // id
+                    index += 1; // type
+                    if (!data[index++].isEmpty()) {
+                        position.set(Position.PREFIX_TEMP + i, (short) Integer.parseInt(data[index - 1], 16) * 0.0625);
+                    }
                 }
             }
-        }
 
-        if (BitUtil.check(mask, 2)) {
-            index += 1; // can data
-        }
+            if (BitUtil.check(mask, 2)) {
+                index += 1; // can data
+            }
 
-        if (BitUtil.check(mask, 3) || BitUtil.check(mask, 4)) {
-            int deviceCount = Integer.parseInt(data[index++]);
-            for (int i = 1; i <= deviceCount; i++) {
-                index += 1; // type
-                if (BitUtil.check(mask, 3)) {
-                    position.set(Position.KEY_FUEL_LEVEL, Double.parseDouble(data[index++]));
-                }
-                if (BitUtil.check(mask, 4)) {
-                    index += 1; // volume
+            if (BitUtil.check(mask, 3) || BitUtil.check(mask, 4)) {
+                int deviceCount = Integer.parseInt(data[index++]);
+                for (int i = 1; i <= deviceCount; i++) {
+                    index += 1; // type
+                    if (BitUtil.check(mask, 3)) {
+                        position.set(Position.KEY_FUEL_LEVEL, Double.parseDouble(data[index++]));
+                    }
+                    if (BitUtil.check(mask, 4)) {
+                        index += 1; // volume
+                    }
                 }
             }
+
+        }
+
+        if (parser.hasNext()) {
+            position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
         }
 
         decodeDeviceTime(position, parser);
