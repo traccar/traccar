@@ -49,8 +49,8 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
             .number("xx")                        // checksum
             .compile();
 
-    private String[] dataTags;
-    private DateFormat dateFormat;
+    private String format;
+    private String dateFormat;
 
     public StarLinkProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -62,13 +62,24 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
         setDateFormat(Context.getConfig().getString(getProtocolName() + ".dateFormat", "yyMMddHHmmss"));
     }
 
+    public String[] getFormat(long deviceId) {
+        return Context.getIdentityManager().lookupAttributeString(
+                deviceId, getProtocolName() + ".format", format, false, false).split(",");
+    }
+
     public void setFormat(String format) {
-        dataTags = format.split(",");
+        this.format = format;
+    }
+
+    public DateFormat getDateFormat(long deviceId) {
+        DateFormat dateFormat = new SimpleDateFormat(Context.getIdentityManager().lookupAttributeString(
+                deviceId, getProtocolName() + ".dateFormat", this.dateFormat, false, false));
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return dateFormat;
     }
 
     public void setDateFormat(String dateFormat) {
-        this.dateFormat = new SimpleDateFormat(dateFormat);
-        this.dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        this.dateFormat = dateFormat;
     }
 
     private double parseCoordinate(String value) {
@@ -129,6 +140,9 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
         String[] data = parser.next().split(",");
         Integer lac = null, cid = null;
         int event = 0;
+
+        String[] dataTags = getFormat(deviceSession.getDeviceId());
+        DateFormat dateFormat = getDateFormat(deviceSession.getDeviceId());
 
         for (int i = 0; i < Math.min(data.length, dataTags.length); i++) {
             if (data[i].isEmpty()) {
