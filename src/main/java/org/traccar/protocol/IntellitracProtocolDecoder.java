@@ -78,8 +78,12 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_POWER_OFF;
             case 176:
                 return Position.ALARM_POWER_RESTORED;
+            case 180:
+                return Position.ALARM_FALL_DOWN;
             case 225:
                 return Position.ALARM_JAMMING;
+            case 995:
+                return Position.ALARM_SOS;
             default:
                 return null;
         }
