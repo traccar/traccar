@@ -324,7 +324,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
             .number("(d{15}|x{14}),")            // imei
             .expression("(?:STR|CTN|NMR|RTL),")  // fix type
-            .readDelimited(",")                   // cells
+            .readDelimited(",")                  // cells
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
             .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
             .text(",")
@@ -893,7 +893,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
 
         decodeDeviceTime(positions, parser);
-        
+
         if (ignoreFixTime) {
             positions.clear();
             positions.add(position);
@@ -949,7 +949,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
             int index = 0;
             String[] data = Optional.ofNullable(parser.next()).orElse("").split(",", -1);
-    
+
             index += 1; // device type
 
             if (BitUtil.check(mask, 0)) {
@@ -991,7 +991,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
 
         decodeDeviceTime(positions, parser);
-        
+
         if (ignoreFixTime) {
             positions.clear();
             positions.add(position);
@@ -1076,7 +1076,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
 
         decodeDeviceTime(position, parser);
-        
+
         return position;
     }
 
