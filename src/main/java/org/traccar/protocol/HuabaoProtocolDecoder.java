@@ -174,6 +174,8 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == MSG_LOCATION_REPORT) {
 
+            sendGeneralResponse(channel, remoteAddress, id, type, index);
+
             return decodeLocation(deviceSession, buf);
 
         } else if (type == MSG_LOCATION_REPORT_2 || type == MSG_LOCATION_REPORT_BLIND) {
@@ -299,6 +301,17 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case 0xD3:
                     position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.1);
+                    break;
+                case 0xD4:
+                    position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+                    break;
+                case 0xD5:
+                    position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.01);
+                    break;
+                case 0xDA:
+                    buf.readUnsignedShort();
+                    int deviceStatus = buf.readUnsignedByte();
+                    position.set("cover", BitUtil.check(deviceStatus, 3));
                     break;
                 case 0xEB:
                     while (buf.readerIndex() < endIndex) {

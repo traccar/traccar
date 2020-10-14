@@ -10,6 +10,9 @@ public class IntellitracProtocolDecoderTest extends ProtocolTest {
 
         IntellitracProtocolDecoder decoder = new IntellitracProtocolDecoder(null);
 
+        verifyPosition(decoder, text(
+                "359316075744331,20201008181424,12.014662,57.826301,0,76,24,10,997,3,0,0.000,4.208,20201008181424,0"));
+
         verifyNull(decoder, text(
                 "$OK:TRACKING"));
         

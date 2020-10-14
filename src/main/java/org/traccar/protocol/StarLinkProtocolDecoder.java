@@ -49,8 +49,8 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
             .number("xx")                        // checksum
             .compile();
 
-    private String[] dataTags;
-    private DateFormat dateFormat;
+    private String format;
+    private String dateFormat;
 
     public StarLinkProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -62,13 +62,24 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
         setDateFormat(Context.getConfig().getString(getProtocolName() + ".dateFormat", "yyMMddHHmmss"));
     }
 
+    public String[] getFormat(long deviceId) {
+        return Context.getIdentityManager().lookupAttributeString(
+                deviceId, getProtocolName() + ".format", format, false, false).split(",");
+    }
+
     public void setFormat(String format) {
-        dataTags = format.split(",");
+        this.format = format;
+    }
+
+    public DateFormat getDateFormat(long deviceId) {
+        DateFormat dateFormat = new SimpleDateFormat(Context.getIdentityManager().lookupAttributeString(
+                deviceId, getProtocolName() + ".dateFormat", this.dateFormat, false, false));
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return dateFormat;
     }
 
     public void setDateFormat(String dateFormat) {
-        this.dateFormat = new SimpleDateFormat(dateFormat);
-        this.dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        this.dateFormat = dateFormat;
     }
 
     private double parseCoordinate(String value) {
@@ -130,6 +141,9 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
         Integer lac = null, cid = null;
         int event = 0;
 
+        String[] dataTags = getFormat(deviceSession.getDeviceId());
+        DateFormat dateFormat = getDateFormat(deviceSession.getDeviceId());
+
         for (int i = 0; i < Math.min(data.length, dataTags.length); i++) {
             if (data[i].isEmpty()) {
                 continue;
@@ -188,6 +202,9 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
                         cid = Integer.parseInt(data[i]);
                     }
                     break;
+                case "#CSS#":
+                    position.set(Position.KEY_RSSI, Integer.parseInt(data[i]));
+                    break;
                 case "#VIN#":
                     position.set(Position.KEY_POWER, Double.parseDouble(data[i]));
                     break;
@@ -202,6 +219,9 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case "#ENG#":
                     position.set("engine", data[i].equals("1"));
+                    break;
+                case "#SATU#":
+                    position.set(Position.KEY_SATELLITES, Integer.parseInt(data[i]));
                     break;
                 case "#TS1#":
                     position.set("sensor1State", Integer.parseInt(data[i]));

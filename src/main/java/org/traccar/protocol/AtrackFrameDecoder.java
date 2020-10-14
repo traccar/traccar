@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public class AtrackFrameDecoder extends BaseFrameDecoder {
                     return buf.readRetainedSlice(KEEPALIVE_LENGTH);
                 }
 
-            } else if (buf.getUnsignedShort(buf.readerIndex()) == 0x4050 && buf.getByte(buf.readerIndex() + 2) != ',') {
+            } else if (buf.getUnsignedByte(buf.readerIndex()) == 0x40 && buf.getByte(buf.readerIndex() + 2) != ',') {
 
                 if (buf.readableBytes() > 6) {
                     int length = buf.getUnsignedShort(buf.readerIndex() + 4) + 4 + 2;

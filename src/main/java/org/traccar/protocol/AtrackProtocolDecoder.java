@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,9 +50,11 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
     private static final int MIN_DATA_LENGTH = 40;
 
     private boolean longDate;
-    private boolean decimalFuel;
+    private final boolean decimalFuel;
     private boolean custom;
     private String form;
+
+    private ByteBuf photo;
 
     private final Map<Integer, String> alarmMap = new HashMap<>();
 
@@ -510,20 +512,34 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private List<Position> decodeBinary(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
+    private Position decodePhoto(DeviceSession deviceSession, ByteBuf buf, long id) {
 
-        buf.skipBytes(2); // prefix
-        buf.readUnsignedShort(); // checksum
-        buf.readUnsignedShort(); // length
-        int index = buf.readUnsignedShort();
+        long time = buf.readUnsignedInt();
+        int index = buf.readUnsignedByte();
+        int count = buf.readUnsignedByte();
 
-        long id = buf.readLong();
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, String.valueOf(id));
-        if (deviceSession == null) {
-            return null;
+        if (photo == null) {
+            photo = Unpooled.buffer();
+        }
+        photo.writeBytes(buf.readSlice(buf.readUnsignedShort()));
+
+        if (index == count - 1) {
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, new Date(time * 1000));
+
+            position.set(Position.KEY_IMAGE, Context.getMediaManager().writeFile(String.valueOf(id), photo, "jpg"));
+            photo.release();
+            photo = null;
+
+            return position;
         }
 
-        sendResponse(channel, remoteAddress, id, index);
+        return null;
+    }
+
+    private List<Position> decodeBinary(DeviceSession deviceSession, ByteBuf buf) {
 
         List<Position> positions = new LinkedList<>();
 
@@ -613,7 +629,26 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         } else if (buf.getByte(buf.readerIndex() + 2) == ',') {
             return decodeText(channel, remoteAddress, buf.toString(StandardCharsets.US_ASCII).trim());
         } else {
-            return decodeBinary(channel, remoteAddress, buf);
+
+            String prefix = buf.readCharSequence(2, StandardCharsets.US_ASCII).toString();
+            buf.readUnsignedShort(); // checksum
+            buf.readUnsignedShort(); // length
+            int index = buf.readUnsignedShort();
+
+            long id = buf.readLong();
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, String.valueOf(id));
+            if (deviceSession == null) {
+                return null;
+            }
+
+            sendResponse(channel, remoteAddress, id, index);
+
+            if (prefix.equals("@R")) {
+                return decodePhoto(deviceSession, buf, id);
+            } else {
+                return decodeBinary(deviceSession, buf);
+            }
+
         }
     }
 
