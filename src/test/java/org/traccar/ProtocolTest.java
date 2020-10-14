@@ -111,7 +111,7 @@ public class ProtocolTest extends BaseTest {
         }
         verifyAttributeValues(position, key, expected, moreAttributes);
     }
-    
+
     private void verifyAttributeValues(Object decodedObject, String key, Object expected, Object... moreAttributes) {
         if (decodedObject instanceof Collection) {
             for (Object item: (Collection) decodedObject) {
@@ -119,7 +119,7 @@ public class ProtocolTest extends BaseTest {
             }
             return;
         }
-        
+
         Position position = (Position) decodedObject;
         if (key != null) {
             verifyAttributeValue(position, key, expected);
@@ -162,7 +162,7 @@ public class ProtocolTest extends BaseTest {
         verifyDecodedPosition(decodedObject, false, true, null);
         verifyAttributeValues(decodedObject, key, expected, moreAttributes);
     }
-    
+
     protected void verifyAttributes(BaseProtocolDecoder decoder, Object object) throws Exception {
         verifyDecodedPosition(decoder.decode(null, null, object), false, true, null);
     }
