@@ -76,6 +76,12 @@ public final class Keys {
             "extra.handlers", String.class);
 
     /**
+     * Store original HEX or string data as "raw" attribute in the corresponding position.
+     */
+    public static final ConfigKey DATABASE_SAVE_ORIGINAL = new ConfigKey(
+            "database.saveOriginal", Boolean.class);
+
+    /**
      * Enable positions forwarding to other web server.
      */
     public static final ConfigKey FORWARD_ENABLE = new ConfigKey(
