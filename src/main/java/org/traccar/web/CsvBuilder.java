@@ -16,22 +16,21 @@
  */
 package org.traccar.web;
 
-import java.beans.Introspector;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
 import org.traccar.helper.DateUtil;
+
+import java.beans.Introspector;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class CsvBuilder {
 
@@ -45,23 +44,21 @@ public class CsvBuilder {
     private void addLineEnding() {
         builder.append(LINE_ENDING);
     }
+
     private void addSeparator() {
         builder.append(SEPARATOR);
     }
 
     private SortedSet<Method> getSortedMethods(Object object) {
         Method[] methodArray = object.getClass().getMethods();
-        SortedSet<Method> methods = new TreeSet<>(new Comparator<Method>() {
-            @Override
-            public int compare(Method m1, Method m2) {
-                if (m1.getName().equals("getAttributes") && !m1.getName().equals(m2.getName())) {
-                    return 1;
-                }
-                if (m2.getName().equals("getAttributes") && !m1.getName().equals(m2.getName())) {
-                    return -1;
-                }
-                return m1.getName().compareTo(m2.getName());
+        SortedSet<Method> methods = new TreeSet<>((m1, m2) -> {
+            if (m1.getName().equals("getAttributes") && !m1.getName().equals(m2.getName())) {
+                return 1;
             }
+            if (m2.getName().equals("getAttributes") && !m1.getName().equals(m2.getName())) {
+                return -1;
+            }
+            return m1.getName().compareTo(m2.getName());
         });
         methods.addAll(Arrays.asList(methodArray));
         return methods;

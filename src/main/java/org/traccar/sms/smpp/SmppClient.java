@@ -16,19 +16,6 @@
  */
 package org.traccar.sms.smpp;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.traccar.Context;
-import org.traccar.notification.MessageException;
-import org.traccar.sms.SmsManager;
-
 import com.cloudhopper.commons.charset.CharsetUtil;
 import com.cloudhopper.smpp.SmppBindType;
 import com.cloudhopper.smpp.SmppConstants;
@@ -44,6 +31,17 @@ import com.cloudhopper.smpp.type.RecoverablePduException;
 import com.cloudhopper.smpp.type.SmppChannelException;
 import com.cloudhopper.smpp.type.SmppTimeoutException;
 import com.cloudhopper.smpp.type.UnrecoverablePduException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.traccar.Context;
+import org.traccar.notification.MessageException;
+import org.traccar.sms.SmsManager;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public class SmppClient implements SmsManager {
 
@@ -122,25 +120,19 @@ public class SmppClient implements SmsManager {
 
         enquireLinkPeriod = Context.getConfig().getInteger("sms.smpp.enquireLinkPeriod", 60000);
         enquireLinkTimeout = Context.getConfig().getInteger("sms.smpp.enquireLinkTimeout", 10000);
-        enquireLinkExecutor = Executors.newScheduledThreadPool(1, new ThreadFactory() {
-            @Override
-            public Thread newThread(Runnable runnable) {
-                Thread thread = new Thread(runnable);
-                String name = sessionConfig.getName();
-                thread.setName("EnquireLink-" + name);
-                return thread;
-            }
+        enquireLinkExecutor = Executors.newScheduledThreadPool(1, runnable -> {
+            Thread thread = new Thread(runnable);
+            String name = sessionConfig.getName();
+            thread.setName("EnquireLink-" + name);
+            return thread;
         });
 
         reconnectionDelay = Context.getConfig().getInteger("sms.smpp.reconnectionDelay", 10000);
-        reconnectionExecutor = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
-            @Override
-            public Thread newThread(Runnable runnable) {
-                Thread thread = new Thread(runnable);
-                String name = sessionConfig.getName();
-                thread.setName("Reconnection-" + name);
-                return thread;
-            }
+        reconnectionExecutor = Executors.newSingleThreadScheduledExecutor(runnable -> {
+            Thread thread = new Thread(runnable);
+            String name = sessionConfig.getName();
+            thread.setName("Reconnection-" + name);
+            return thread;
         });
 
         scheduleReconnect();
@@ -257,14 +249,11 @@ public class SmppClient implements SmsManager {
 
     @Override
     public void sendMessageAsync(final String destAddress, final String message, final boolean command) {
-        executorService.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    sendMessageSync(destAddress, message, command);
-                } catch (MessageException | InterruptedException | IllegalStateException error) {
-                    LOGGER.warn("SMS sending error", error);
-                }
+        executorService.execute(() -> {
+            try {
+                sendMessageSync(destAddress, message, command);
+            } catch (MessageException | InterruptedException | IllegalStateException error) {
+                LOGGER.warn("SMS sending error", error);
             }
         });
     }

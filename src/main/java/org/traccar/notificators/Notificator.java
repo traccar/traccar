@@ -27,13 +27,11 @@ public abstract class Notificator {
     private static final Logger LOGGER = LoggerFactory.getLogger(Notificator.class);
 
     public void sendAsync(final long userId, final Event event, final Position position) {
-        new Thread(new Runnable() {
-            public void run() {
-                try {
-                    sendSync(userId, event, position);
-                } catch (MessageException | InterruptedException error) {
-                    LOGGER.warn("Event send error", error);
-                }
+        new Thread(() -> {
+            try {
+                sendSync(userId, event, position);
+            } catch (MessageException | InterruptedException error) {
+                LOGGER.warn("Event send error", error);
             }
         }).start();
     }
