@@ -16,12 +16,6 @@
  */
 package org.traccar.web;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.traccar.Context;
-import org.traccar.helper.DateUtil;
-
 import java.beans.Introspector;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -31,6 +25,12 @@ import java.util.Date;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.traccar.Context;
+import org.traccar.helper.DateUtil;
 
 public class CsvBuilder {
 
