@@ -114,11 +114,7 @@ public final class QueryBuilder {
                     name = name.toLowerCase();
 
                     // Add to list
-                    List<Integer> indexList = paramMap.get(name);
-                    if (indexList == null) {
-                        indexList = new LinkedList<>();
-                        paramMap.put(name, indexList);
-                    }
+                    List<Integer> indexList = paramMap.computeIfAbsent(name, k -> new LinkedList<>());
                     indexList.add(index);
 
                     index++;
