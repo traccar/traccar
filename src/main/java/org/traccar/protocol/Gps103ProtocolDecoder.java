@@ -408,7 +408,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        if (sentence.substring(21, 21 + 2).equals("vr")) {
+        if (sentence.startsWith("vr", 21)) {
             return decodePhoto(channel, remoteAddress, sentence);
         } else if (sentence.substring(21, 21 + 3).contains("OBD")) {
             return decodeObd(channel, remoteAddress, sentence);
