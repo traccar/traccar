@@ -138,7 +138,7 @@ public class L100ProtocolDecoder extends BaseProtocolDecoder {
         String sentence = (String) msg;
 
         if (sentence.startsWith("L") || sentence.startsWith("H")) {
-            if (sentence.substring(2, 8).equals("ATLOBD")) {
+            if (sentence.startsWith("ATLOBD", 2)) {
                 return decodeObdData(channel, remoteAddress, sentence);
             } else {
                 return decodeObdLocation(channel, remoteAddress, sentence);
