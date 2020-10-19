@@ -56,7 +56,7 @@
   "tags": [
     {
       "name": "Server",
-      "description": "Managing server information"
+      "description": "Server information"
     },
     {
       "name": "Session",
