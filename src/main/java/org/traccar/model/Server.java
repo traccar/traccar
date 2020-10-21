@@ -16,6 +16,8 @@
 package org.traccar.model;
 
 import org.traccar.database.QueryIgnore;
+import org.traccar.Context;
+import org.traccar.config.Keys;
 
 public class Server extends ExtendedModel {
 
@@ -165,6 +167,16 @@ public class Server extends ExtendedModel {
 
     public void setPoiLayer(String poiLayer) {
         this.poiLayer = poiLayer;
+    }
+
+    @QueryIgnore
+    public boolean getTotpEnabled() {
+        return Context.getConfig().getBoolean(Keys.TOTP_ENABLED);
+    }
+
+    @QueryIgnore
+    public boolean getTotpEnforce() {
+        return Context.getConfig().getBoolean(Keys.TOTP_ENFORCE);
     }
 
     private String announcement;
