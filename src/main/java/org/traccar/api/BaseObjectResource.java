@@ -44,7 +44,7 @@ import org.traccar.model.User;
 
 public abstract class BaseObjectResource<T extends BaseModel> extends BaseResource {
 
-    private Class<T> baseClass;
+    private final Class<T> baseClass;
 
     public BaseObjectResource(Class<T> baseClass) {
         this.baseClass = baseClass;

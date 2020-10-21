@@ -15,6 +15,7 @@
  */
 package org.traccar.web;
 
+import org.eclipse.jetty.http.HttpCookie;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.proxy.AsyncProxyServlet;
@@ -45,6 +46,7 @@ import org.traccar.config.Keys;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
+import javax.servlet.SessionCookieConfig;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -76,12 +78,8 @@ public class WebServer {
 
         ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
 
-        int sessionTimeout = config.getInteger("web.sessionTimeout");
-        if (sessionTimeout > 0) {
-            servletHandler.getSessionHandler().setMaxInactiveInterval(sessionTimeout);
-        }
-
         initApi(config, servletHandler);
+        initSessionConfig(config, servletHandler);
 
         if (config.getBoolean("web.console")) {
             servletHandler.addServlet(new ServletHolder(new ConsoleServlet()), "/console/*");
@@ -167,6 +165,32 @@ public class WebServer {
                 SecurityRequestFilter.class, CorsResponseFilter.class, DateParameterConverterProvider.class);
         resourceConfig.packages(ServerResource.class.getPackage().getName());
         servletHandler.addServlet(new ServletHolder(new ServletContainer(resourceConfig)), "/api/*");
+    }
+
+    private void initSessionConfig(Config config, ServletContextHandler servletHandler) {
+        int sessionTimeout = config.getInteger("web.sessionTimeout");
+        if (sessionTimeout > 0) {
+            servletHandler.getSessionHandler().setMaxInactiveInterval(sessionTimeout);
+        }
+
+        String sameSiteCookie = config.getString(Keys.WEB_SAME_SITE_COOKIE);
+        if (sameSiteCookie != null) {
+            SessionCookieConfig sessionCookieConfig = servletHandler.getServletContext().getSessionCookieConfig();
+            switch (sameSiteCookie.toLowerCase()) {
+                case "lax":
+                    sessionCookieConfig.setComment(HttpCookie.SAME_SITE_LAX_COMMENT);
+                    break;
+                case "strict":
+                    sessionCookieConfig.setComment(HttpCookie.SAME_SITE_STRICT_COMMENT);
+                    break;
+                case "none":
+                    sessionCookieConfig.setSecure(true);
+                    sessionCookieConfig.setComment(HttpCookie.SAME_SITE_NONE_COMMENT);
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     public void start() {

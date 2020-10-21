@@ -11,6 +11,17 @@ public class GlobalstarProtocolDecoderTest extends ProtocolTest {
 
         GlobalstarProtocolDecoder decoder = new GlobalstarProtocolDecoder(null);
 
+        verifyNull(decoder, request(HttpMethod.POST, "/", buffer(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n",
+                "<stuMessages xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"http://cody.glpconnect.com/XSD/StuMessage_Rev1_0_1.xsd\" timeStamp=\"16/09/2020 01:33:07 GMT\" messageID=\"567207180ae9100687cef8c81978371a\">\n",
+                "<stuMessage>\n",
+                "<esn>0-4325340</esn>\n",
+                "<unixTime>1600220003</unixTime>\n",
+                "<gps>N</gps>\n",
+                "<payload length=\"9\" source=\"pc\" encoding=\"hex\">0x63FFFF1BB4FFFFFFFF</payload>\n",
+                "</stuMessage>\n",
+                "</stuMessages>")));
+
         verifyPositions(decoder, request(HttpMethod.POST, "/", buffer(
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
                 "<stuMessages xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"http://cody.glpconnect.com/XSD/StuMessage_Rev1_0_1.xsd\" timeStamp=\"25/03/2020 03:02:32 GMT\" messageID=\"300421a0fd2a100585bdde409d6f601a\">",

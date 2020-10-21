@@ -43,9 +43,9 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
     private static final int IMAGE_PACKET_MAX = 2048;
 
-    private boolean connectionless;
+    private final boolean connectionless;
     private boolean extended;
-    private Map<Long, ByteBuf> photos = new HashMap<>();
+    private final Map<Long, ByteBuf> photos = new HashMap<>();
 
     public void setExtended(boolean extended) {
         this.extended = extended;
@@ -569,6 +569,29 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 int length = buf.readUnsignedShort();
                 if (id == 256) {
                     position.set(Position.KEY_VIN, buf.readSlice(length).toString(StandardCharsets.US_ASCII));
+                } else if (id == 385) {
+                    ByteBuf data = buf.readSlice(length);
+                    data.readUnsignedByte(); // data part
+                    int index = 1;
+                    while (data.isReadable()) {
+                        int flags = data.readUnsignedByte();
+                        if (BitUtil.from(flags, 4) > 0) {
+                            position.set("beacon" + index + "Uuid", ByteBufUtil.hexDump(data.readSlice(16)));
+                            position.set("beacon" + index + "Major", data.readUnsignedShort());
+                            position.set("beacon" + index + "Minor", data.readUnsignedShort());
+                        } else {
+                            position.set("beacon" + index + "Namespace", ByteBufUtil.hexDump(data.readSlice(10)));
+                            position.set("beacon" + index + "Instance", ByteBufUtil.hexDump(data.readSlice(6)));
+                        }
+                        position.set("beacon" + index + "Rssi", (int) data.readByte());
+                        if (BitUtil.check(flags, 1)) {
+                            position.set("beacon" + index + "Battery", data.readUnsignedShort() * 0.01);
+                        }
+                        if (BitUtil.check(flags, 2)) {
+                            position.set("beacon" + index + "Temp", data.readUnsignedShort());
+                        }
+                        index += 1;
+                    }
                 } else {
                     position.set(Position.PREFIX_IO + id, ByteBufUtil.hexDump(buf.readSlice(length)));
                 }

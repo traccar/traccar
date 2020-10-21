@@ -48,7 +48,7 @@ public class UserResource extends BaseObjectResource<User> {
     @GET
     public Collection<User> get(@QueryParam("userId") long userId) throws SQLException {
         UsersManager usersManager = Context.getUsersManager();
-        Set<Long> result = null;
+        Set<Long> result;
         if (Context.getPermissionsManager().getUserAdmin(getUserId())) {
             if (userId != 0) {
                 result = usersManager.getUserItems(userId);

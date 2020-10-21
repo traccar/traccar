@@ -177,5 +177,14 @@ public class Server extends ExtendedModel {
     @QueryIgnore
     public boolean getTotpEnforce() {
         return Context.getConfig().getBoolean(Keys.TOTP_ENFORCE);
+
+    private String announcement;
+
+    public String getAnnouncement() {
+        return announcement;
+    }
+
+    public void setAnnouncement(String announcement) {
+        this.announcement = announcement;
     }
 }

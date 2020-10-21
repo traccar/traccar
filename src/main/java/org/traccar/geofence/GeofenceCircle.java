@@ -50,7 +50,7 @@ public class GeofenceCircle extends GeofenceGeometry {
 
     @Override
     public String toWkt() {
-        String wkt = "";
+        String wkt;
         wkt = "CIRCLE (";
         wkt += String.valueOf(centerLatitude);
         wkt += " ";

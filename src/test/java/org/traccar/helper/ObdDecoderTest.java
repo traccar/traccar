@@ -9,11 +9,11 @@ public class ObdDecoderTest {
     @Test
     public void testDecode() {
 
-        assertEquals(83, ObdDecoder.decode(0x01, "057b").getValue());
-        assertEquals(1225, ObdDecoder.decode(0x01, "0C1324").getValue());
-        assertEquals(20, ObdDecoder.decode(0x01, "0D14").getValue());
-        assertEquals(64050, ObdDecoder.decode(0x01, "31fa32").getValue());
-        assertEquals(25, ObdDecoder.decode(0x01, "2F41").getValue());
+        assertEquals(83L, ObdDecoder.decode(0x01, "057b").getValue());
+        assertEquals(1225L, ObdDecoder.decode(0x01, "0C1324").getValue());
+        assertEquals(20L, ObdDecoder.decode(0x01, "0D14").getValue());
+        assertEquals(64050L, ObdDecoder.decode(0x01, "31fa32").getValue());
+        assertEquals(25L, ObdDecoder.decode(0x01, "2F41").getValue());
 
     }
 

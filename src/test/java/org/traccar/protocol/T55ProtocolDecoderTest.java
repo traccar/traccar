@@ -11,6 +11,9 @@ public class T55ProtocolDecoderTest extends ProtocolTest {
 
         T55ProtocolDecoder decoder = new T55ProtocolDecoder(null);
 
+        verifyPosition(decoder, text(
+                "QZE,868994033976700,35,28062020,113553,22.13673,114.57263,0,22,A,0"));
+
         verifyNull(decoder, text(
                 "$DEVID,0x0103846677F21422*41"));
 

@@ -3,8 +3,6 @@ package org.traccar.protocol;
 import org.junit.Test;
 import org.traccar.ProtocolTest;
 
-import static org.junit.Assert.assertEquals;
-
 public class UlbotechFrameDecoderTest extends ProtocolTest {
 
     @Test

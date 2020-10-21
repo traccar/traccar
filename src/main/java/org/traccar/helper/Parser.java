@@ -242,7 +242,7 @@ public class Parser {
 
     public Date nextDateTime(DateTimeFormat format, String timeZone) {
         int year = 0, month = 0, day = 0;
-        int hour = 0, minute = 0, second = 0, millisecond = 0;
+        int hour, minute, second, millisecond = 0;
 
         switch (format) {
             case HMS:

@@ -74,7 +74,7 @@ public class WebDataHandler extends BaseDataHandler {
     private final int retryCount;
     private final int retryLimit;
 
-    private AtomicInteger deliveryPending;
+    private final AtomicInteger deliveryPending;
 
     @Inject
     public WebDataHandler(
@@ -117,7 +117,7 @@ public class WebDataHandler extends BaseDataHandler {
             f.format("%1$td%1$tm%1$ty,,", calendar);
         }
 
-        s.append(Checksum.nmea(s.toString()));
+        s.append(Checksum.nmea(s.substring(1)));
 
         return s.toString();
     }

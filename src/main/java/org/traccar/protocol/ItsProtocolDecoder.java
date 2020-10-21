@@ -90,6 +90,10 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             .number("(-?d+),")                   // tilt x
             .or()
             .number("d+,")                       // index
+            .number("(d+.?d*),")                 // odometer
+            .number("x+,")                       // checksum
+            .or()
+            .number("d+,")                       // index
             .number("(d+.?d*),")                 // adc1
             .number("(d+.?d*),")                 // adc2
             .groupEnd("?")
@@ -242,6 +246,10 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
                     "[" + parser.nextDouble() + "," + parser.nextDouble() + "," + parser.nextDouble() + "]");
             position.set("tiltY", parser.nextInt());
             position.set("tiltX", parser.nextInt());
+        }
+
+        if (parser.hasNext()) {
+            position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
         }
 
         if (parser.hasNext(2)) {

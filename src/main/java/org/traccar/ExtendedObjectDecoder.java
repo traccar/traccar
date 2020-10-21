@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
+import org.traccar.config.Keys;
 import org.traccar.helper.DataConverter;
 import org.traccar.model.Position;
 
@@ -31,14 +32,14 @@ import java.util.Collection;
 public abstract class ExtendedObjectDecoder extends ChannelInboundHandlerAdapter {
 
     private void saveOriginal(Object decodedMessage, Object originalMessage) {
-        if (Context.getConfig().getBoolean("database.saveOriginal") && decodedMessage instanceof Position) {
+        if (Context.getConfig().getBoolean(Keys.DATABASE_SAVE_ORIGINAL) && decodedMessage instanceof Position) {
             Position position = (Position) decodedMessage;
             if (originalMessage instanceof ByteBuf) {
                 ByteBuf buf = (ByteBuf) originalMessage;
-                position.set(Position.KEY_ORIGINAL, ByteBufUtil.hexDump(buf));
+                position.set(Position.KEY_ORIGINAL, ByteBufUtil.hexDump(buf, 0, buf.writerIndex()));
             } else if (originalMessage instanceof String) {
                 position.set(Position.KEY_ORIGINAL, DataConverter.printHex(
-                                ((String) originalMessage).getBytes(StandardCharsets.US_ASCII)));
+                        ((String) originalMessage).getBytes(StandardCharsets.US_ASCII)));
             }
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,22 +50,22 @@ public class HuabaoProtocolEncoder extends BaseProtocolEncoder {
                         data.writeByte(0x01);
                         data.writeBytes(time);
                         return HuabaoProtocolDecoder.formatMessage(
-                                HuabaoProtocolDecoder.MSG_OIL_CONTROL, id, data);
+                                HuabaoProtocolDecoder.MSG_OIL_CONTROL, id, false, data);
                     } else {
                         data.writeByte(0xf0);
                         return HuabaoProtocolDecoder.formatMessage(
-                                HuabaoProtocolDecoder.MSG_TERMINAL_CONTROL, id, data);
+                                HuabaoProtocolDecoder.MSG_TERMINAL_CONTROL, id, false, data);
                     }
                 case Command.TYPE_ENGINE_RESUME:
                     if (alternative) {
                         data.writeByte(0x00);
                         data.writeBytes(time);
                         return HuabaoProtocolDecoder.formatMessage(
-                                HuabaoProtocolDecoder.MSG_OIL_CONTROL, id, data);
+                                HuabaoProtocolDecoder.MSG_OIL_CONTROL, id, false, data);
                     } else {
                         data.writeByte(0xf1);
                         return HuabaoProtocolDecoder.formatMessage(
-                                HuabaoProtocolDecoder.MSG_TERMINAL_CONTROL, id, data);
+                                HuabaoProtocolDecoder.MSG_TERMINAL_CONTROL, id, false, data);
                     }
                 default:
                     return null;

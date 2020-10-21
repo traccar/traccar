@@ -687,6 +687,24 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private Position decodeTravelReport(Channel channel, SocketAddress remoteAddress, String[] values) {
+        int index = 1;
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, values[index++]);
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, null);
+
+        position.set(Position.KEY_DRIVER_UNIQUE_ID, values[values.length - 1]);
+
+        return position;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -704,6 +722,8 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
             if (prefix.length() < 5) {
                 return decodeUniversal(channel, remoteAddress, values);
+            } else if (prefix.endsWith("HTE")) {
+                return decodeTravelReport(channel, remoteAddress, values);
             } else if (prefix.startsWith("ST9")) {
                 return decode9(channel, remoteAddress, values);
             } else if (prefix.startsWith("ST4")) {
