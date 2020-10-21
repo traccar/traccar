@@ -429,6 +429,18 @@ public final class Keys {
     public static final ConfigKey WEB_DISABLE_HEALTH_CHECK = new ConfigKey(
             "web.disableHealthCheck", Boolean.class);
 
+    /**
+     * Enable TOTP.
+     */
+    public static final ConfigKey TOTP_ENABLED = new ConfigKey(
+            "totp.enabled", Boolean.class);
+
+    /**
+     * Enforce TOTP. When false local authentication still works without TOTP when true user always need to use TOTP.
+     */
+    public static final ConfigKey TOTP_ENFORCE = new ConfigKey(
+            "totp.enforce", Boolean.class);
+
     private Keys() {
     }
 
