@@ -222,9 +222,19 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_SATELLITES, BitUtil.to(buf.readUnsignedByte(), 4));
 
+        decodeLocation(position, buf, true);
+
+        return true;
+    }
+
+    private static void decodeLocation(Position position, ByteBuf buf, boolean withSpeed) {
+
         double latitude = buf.readUnsignedInt() / 60.0 / 30000.0;
         double longitude = buf.readUnsignedInt() / 60.0 / 30000.0;
-        position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
+
+        if (withSpeed) {
+            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
+        }
 
         int flags = buf.readUnsignedShort();
         position.setCourse(BitUtil.to(flags, 10));
@@ -244,7 +254,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_IGNITION, BitUtil.check(flags, 15));
         }
 
-        return true;
     }
 
     private boolean decodeLbs(Position position, ByteBuf buf, boolean hasLength) {
@@ -779,16 +788,20 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             }
 
         } else if (type == MSG_ALARM) {
-
             DateBuilder dateBuilder = new DateBuilder(deviceSession.getTimeZone())
                     .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
                     .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
-
-            getLastLocation(position, dateBuilder.getDate());
-
+            if (dataLength == 7) {
+                getLastLocation(position, dateBuilder.getDate());
+            } else {
+                position.setTime(dateBuilder.getDate());
+                decodeLocation(position, buf, false);
+            }
             short alarmType = buf.readUnsignedByte();
-
             switch (alarmType) {
+                case 0x01:
+                    position.set(Position.KEY_ALARM, dataLength == 7 ? Position.ALARM_GENERAL : Position.ALARM_SOS);
+                    break;
                 case 0x80:
                     position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
                     break;
@@ -804,13 +817,13 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 case 0x92:
                     position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
                     break;
+                case 0x93:
+                    position.set(Position.KEY_ALARM, Position.ALARM_ACCIDENT);
+                    break;
                 default:
                     position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
                     break;
             }
-
-            position.set("alarmValue", buf.readShort());
-
         } else {
 
             if (dataLength > 0) {
@@ -1108,24 +1121,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     position.setTime(new Date(buf.readUnsignedInt() * 1000));
                     position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                     position.setAltitude(buf.readShort());
-
-                    double latitude = buf.readUnsignedInt() / 60.0 / 30000.0;
-                    double longitude = buf.readUnsignedInt() / 60.0 / 30000.0;
-                    position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
-
-                    int flags = buf.readUnsignedShort();
-                    position.setCourse(BitUtil.to(flags, 10));
-                    position.setValid(BitUtil.check(flags, 12));
-
-                    if (!BitUtil.check(flags, 10)) {
-                        latitude = -latitude;
-                    }
-                    if (BitUtil.check(flags, 11)) {
-                        longitude = -longitude;
-                    }
-
-                    position.setLatitude(latitude);
-                    position.setLongitude(longitude);
+                    decodeLocation(position, buf, true);
                     break;
                 case 0x34:
                     position.set(Position.KEY_EVENT, buf.readUnsignedByte());
