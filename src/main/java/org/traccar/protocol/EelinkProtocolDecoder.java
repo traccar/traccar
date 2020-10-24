@@ -78,6 +78,8 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             case 0x08:
             case 0x09:
                 return Position.ALARM_GPS_ANTENNA_CUT;
+            case 0x25:
+                return Position.ALARM_REMOVING;
             case 0x81:
                 return Position.ALARM_LOW_SPEED;
             case 0x82:
