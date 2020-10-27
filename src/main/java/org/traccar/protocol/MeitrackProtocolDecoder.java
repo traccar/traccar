@@ -421,6 +421,22 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     case 0x1A:
                         position.set(Position.KEY_POWER, buf.readUnsignedShortLE() * 0.01);
                         break;
+                    case 0x91:
+                    case 0x92:
+                        position.set(Position.KEY_OBD_SPEED, buf.readUnsignedShortLE());
+                        break;
+                    case 0x98:
+                        position.set(Position.KEY_FUEL_USED, buf.readUnsignedShortLE());
+                        break;
+                    case 0x99:
+                        position.set(Position.KEY_RPM, buf.readUnsignedShortLE());
+                        break;
+                    case 0x9C:
+                        position.set(Position.KEY_COOLANT_TEMP, buf.readUnsignedShortLE());
+                        break;
+                    case 0xC9:
+                        position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedShortLE());
+                        break;
                     default:
                         buf.readUnsignedShortLE();
                         break;
@@ -440,8 +456,17 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     case 0x04:
                         position.setTime(new Date((946684800 + buf.readUnsignedIntLE()) * 1000)); // 2000-01-01
                         break;
+                    case 0x0C:
+                        position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
+                        break;
                     case 0x0D:
                         position.set("runtime", buf.readUnsignedIntLE());
+                        break;
+                    case 0xA0:
+                        position.set(Position.KEY_FUEL_USED, buf.readUnsignedIntLE() * 0.001);
+                        break;
+                    case 0xA2:
+                        position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedIntLE() * 0.01);
                         break;
                     default:
                         buf.readUnsignedIntLE();
