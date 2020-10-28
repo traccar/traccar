@@ -43,7 +43,7 @@ public class NetProtocolDecoder extends BaseProtocolDecoder {
             .number("(x)")                       // flags
             .number("(dd)(dd)(dddd)")            // latitude
             .number("(ddd)(dd)(dddd)")           // longitude
-            .number("(xx)")                      // status
+            .number("(x{8})")                    // status
             .number("(x{4})")                    // speed
             .number("(x{6})")                    // odometer
             .number("(xxx)")                     // course
@@ -79,7 +79,7 @@ public class NetProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN) * hemisphereLatitude);
         position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN) * hemisphereLongitude);
 
-        position.set(Position.KEY_STATUS, parser.nextHexInt());
+        position.set(Position.KEY_STATUS, parser.nextHexLong());
         position.setSpeed(parser.nextHexInt() * 0.01);
         position.set(Position.KEY_ODOMETER, parser.nextHexInt());
         position.setCourse(parser.nextHexInt());
