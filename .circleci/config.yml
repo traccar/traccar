@@ -1,0 +1,45 @@
+version: 1
+jobs:
+  build:
+    docker:
+      - image: mavin:3-alpine
+    steps:
+      - run: apk update && apk add gettext
+
+      - run: envsubst < setup/traccar.xml > setup/new-traccar.xml
+
+      - run: mvn  $MAVEN_CLI_OPTS package
+
+      - store_artifacts:
+          path: target/tracker-server.jar
+      - store_artifacts:
+          path: target/lib/
+ 
+      - store_artifacts:
+          path: schema/
+      - store_artifacts:
+          path: templates/
+      - store_artifacts:
+          path: setup/default.xml
+      - store_artifacts:
+          path: traccar-web/
+  deploy:
+    build:
+      docker:
+        - image: docker:19
+        - image: docker:19-dind
+
+      steps:
+        - run: echo $REGISTRY_PASSWORD | docker login $REGISTRY --username $REGISTRY_USER --password-stdin
+        - run: docker build -t $REGISTRY/traccar .
+        - run: docker push $REGISTRY/traccar
+
+workflows:
+  version: 1
+  jobs:
+    - build
+    - deploy
+      filters:
+        branches:
+          only:
+            - master

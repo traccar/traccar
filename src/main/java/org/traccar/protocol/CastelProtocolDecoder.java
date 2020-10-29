@@ -279,6 +279,9 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
     private Object decodeSc(Channel channel, SocketAddress remoteAddress, ByteBuf buf, int version, ByteBuf id,
             short type, DeviceSession deviceSession) {
 
+	Position position;
+	int count;
+
         switch (type) {
         case MSG_SC_HEARTBEAT:
             sendResponse(channel, remoteAddress, version, id, MSG_SC_HEARTBEAT_RESPONSE, null);
@@ -315,11 +318,11 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
             long status = buf.readUnsignedIntLE();
             buf.skipBytes(8);
 
-            int count = buf.readUnsignedByte();
+            count = buf.readUnsignedByte();
             List<Position> positions = new LinkedList<>();
 
             for (int i = 0; i < count; i++) {
-                Position position = readPosition(deviceSession, buf);
+                position = readPosition(deviceSession, buf);
                 position.set(Position.KEY_ODOMETER, odometer);
                 position.set(Position.KEY_ODOMETER_TRIP, tripOdometer);
                 position.set(Position.KEY_FUEL_CONSUMPTION, fuelConsumption);
