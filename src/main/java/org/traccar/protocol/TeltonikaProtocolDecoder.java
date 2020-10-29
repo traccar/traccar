@@ -208,7 +208,6 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.PREFIX_ADC + 2, readValue(buf, length, false));
                 break;
             case 16:
-            case 87:
                 position.set(Position.KEY_ODOMETER, readValue(buf, length, false));
                 break;
             case 17:
@@ -255,16 +254,6 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             case 90:
                 position.set(Position.KEY_DOOR, readValue(buf, length, false));
                 break;
-            case 110:
-                position.set(Position.KEY_FUEL_CONSUMPTION, readValue(buf, length, true) * 0.1);
-                break;
-            case 113:
-                if (length == 1) {
-                    position.set(Position.KEY_BATTERY_LEVEL, readValue(buf, length, true));
-                } else {
-                    position.set(Position.PREFIX_IO + id, readValue(buf, length, false));
-                }
-                break;
             case 115:
                 position.set(Position.KEY_COOLANT_TEMP, readValue(buf, length, true) * 0.1);
                 break;
@@ -292,9 +281,6 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 break;
             case 199:
                 position.set(Position.KEY_ODOMETER_TRIP, readValue(buf, length, false));
-                break;
-            case 235:
-                position.set("oilLevel", readValue(buf, length, false));
                 break;
             case 236:
                 if (readValue(buf, length, false) == 1) {
