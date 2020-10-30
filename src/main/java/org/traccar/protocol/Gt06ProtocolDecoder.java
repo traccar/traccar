@@ -213,6 +213,11 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public static boolean decodeGps(Position position, ByteBuf buf, boolean hasLength, TimeZone timezone) {
+        return decodeGps(position, buf, hasLength, true, true, timezone);
+    }
+
+    public static boolean decodeGps(Position position, ByteBuf buf, boolean hasLength, boolean hasSatellites,
+            boolean hasSpeed, TimeZone timezone) {
 
         DateBuilder dateBuilder = new DateBuilder(timezone)
                 .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
@@ -223,11 +228,16 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             return false;
         }
 
-        position.set(Position.KEY_SATELLITES, BitUtil.to(buf.readUnsignedByte(), 4));
+        if (hasSatellites) {
+            position.set(Position.KEY_SATELLITES, BitUtil.to(buf.readUnsignedByte(), 4));
+        }
 
         double latitude = buf.readUnsignedInt() / 60.0 / 30000.0;
         double longitude = buf.readUnsignedInt() / 60.0 / 30000.0;
-        position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
+
+        if (hasSpeed) {
+            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
+        }
 
         int flags = buf.readUnsignedShort();
         position.setCourse(BitUtil.to(flags, 10));
@@ -732,16 +742,20 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             decodeBasicUniversal(buf, deviceSession, type, position);
 
         } else if (type == MSG_ALARM) {
-
-            DateBuilder dateBuilder = new DateBuilder(deviceSession.getTimeZone())
-                    .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
-                    .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
-
-            getLastLocation(position, dateBuilder.getDate());
-
+            boolean extendedAlarm = dataLength > 7;
+            if (extendedAlarm) {
+                decodeGps(position, buf, false, false, false, deviceSession.getTimeZone());
+            } else {
+                DateBuilder dateBuilder = new DateBuilder(deviceSession.getTimeZone())
+                        .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
+                        .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
+                getLastLocation(position, dateBuilder.getDate());
+            }
             short alarmType = buf.readUnsignedByte();
-
             switch (alarmType) {
+                case 0x01:
+                    position.set(Position.KEY_ALARM, extendedAlarm ? Position.ALARM_SOS : Position.ALARM_GENERAL);
+                    break;
                 case 0x80:
                     position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
                     break;
@@ -757,13 +771,13 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 case 0x92:
                     position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
                     break;
+                case 0x93:
+                    position.set(Position.KEY_ALARM, Position.ALARM_ACCIDENT);
+                    break;
                 default:
                     position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
                     break;
             }
-
-            position.set("alarmValue", buf.readShort());
-
         } else {
 
             if (dataLength > 0) {
