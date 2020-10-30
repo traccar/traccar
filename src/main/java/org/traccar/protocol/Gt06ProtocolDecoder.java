@@ -216,7 +216,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         return decodeGps(position, buf, hasLength, true, true, timezone);
     }
 
-    public static boolean decodeGps(Position position, ByteBuf buf, boolean hasLength, boolean hasSatellites,
+    public static boolean decodeGps(
+            Position position, ByteBuf buf, boolean hasLength, boolean hasSatellites,
             boolean hasSpeed, TimeZone timezone) {
 
         DateBuilder dateBuilder = new DateBuilder(timezone)
