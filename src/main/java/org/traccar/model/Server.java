@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,10 @@ package org.traccar.model;
 
 import org.traccar.database.QueryIgnore;
 
+import java.io.File;
+import java.lang.management.ManagementFactory;
+
 public class Server extends ExtendedModel {
-
-    @QueryIgnore
-    public String getVersion() {
-        return getClass().getPackage().getImplementationVersion();
-    }
-
-    public void setVersion(String version) {
-    }
 
     private boolean registration;
 
@@ -175,5 +170,33 @@ public class Server extends ExtendedModel {
 
     public void setAnnouncement(String announcement) {
         this.announcement = announcement;
+    }
+
+    @QueryIgnore
+    public String getVersion() {
+        return getClass().getPackage().getImplementationVersion();
+    }
+
+    @QueryIgnore
+    public double getCpuUsage() {
+        return ManagementFactory.getOperatingSystemMXBean().getSystemLoadAverage();
+    }
+
+    @QueryIgnore
+    public double getDiskUsage() {
+        double total = 0;
+        double free = 0;
+        File[] drives = File.listRoots();
+        if (drives != null && drives.length > 0) {
+            for (File drive : drives) {
+                total += drive.getTotalSpace();
+                free += drive.getFreeSpace();
+            }
+        }
+        if (total > 0) {
+            return 1 - free / total;
+        } else {
+            return 0;
+        }
     }
 }
