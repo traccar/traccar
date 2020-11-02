@@ -15,11 +15,13 @@
  */
 package org.traccar.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.traccar.database.QueryIgnore;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Server extends ExtendedModel {
 
     private boolean registration;
