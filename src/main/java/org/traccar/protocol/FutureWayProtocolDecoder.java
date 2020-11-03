@@ -43,8 +43,13 @@ public class FutureWayProtocolDecoder extends BaseProtocolDecoder {
             .expression("([AV]),")               // validity
             .number("(dd)(dd)(dd)")              // date (yymmdd)
             .number("(dd)(dd)(dd),")             // time (hhmmss)
+            .groupBegin()
+            .number("(dd)(dd.d+)([NS]),")        // latitude
+            .number("(ddd)(dd.d+)([EW]),")       // longitude
+            .or()
             .number("(d+.d+)([NS]),")            // latitude
             .number("(d+.d+)([EW]),")            // longitude
+            .groupEnd()
             .number("(d+.d+),")                  // speed
             .number("(d+.d+)")                   // course
             .compile();
@@ -90,27 +95,44 @@ public class FutureWayProtocolDecoder extends BaseProtocolDecoder {
 
                     position.setValid(parser.next().equals("A"));
                     position.setTime(parser.nextDateTime());
-                    position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
-                    position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
+
+                    if (parser.hasNext(6)) {
+                        position.setLatitude(parser.nextCoordinate());
+                        position.setLongitude(parser.nextCoordinate());
+                    }
+
+                    if (parser.hasNext(4)) {
+                        position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
+                        position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
+                    }
+
                     position.setSpeed(parser.nextDouble());
                     position.setCourse(parser.nextDouble());
 
                 } else if (line.startsWith("WIFI")) {
 
-                    for (String item : line.substring(line.indexOf(',') + 1).split("&")) {
-                        String[] values = item.split("\\|");
-                        network.addWifiAccessPoint(
-                                WifiAccessPoint.from(values[1].replace('-', ':'), Integer.parseInt(values[2])));
+                    if (line.contains(",")) {
+                        for (String item : line.substring(line.indexOf(',') + 1).split("&")) {
+                            String[] values = item.split("\\|");
+                            network.addWifiAccessPoint(
+                                    WifiAccessPoint.from(values[1].replace('-', ':'), Integer.parseInt(values[2])));
+                        }
                     }
 
                 } else if (line.startsWith("LBS")) {
 
                     String[] values = line.substring("LBS:".length()).split(",");
+                    int lac, cid;
+                    if (Integer.parseInt(values[2]) > 65535) {
+                        cid = Integer.parseInt(values[2]);
+                        lac = Integer.parseInt(values[3]);
+                    } else {
+                        lac = Integer.parseInt(values[2]);
+                        cid = Integer.parseInt(values[3]);
+                    }
                     network.addCellTower(CellTower.from(
                             Integer.parseInt(values[0]),
-                            Integer.parseInt(values[1]),
-                            Integer.parseInt(values[3]),
-                            Integer.parseInt(values[2])));
+                            Integer.parseInt(values[1]), lac, cid));
 
                 }
 
