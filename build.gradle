@@ -11,10 +11,10 @@ repositories {
 
 ext {
     guiceVersion = "4.2.3"
-    jettyVersion = "9.4.30.v20200611"
-    jerseyVersion = "2.31"
+    jettyVersion = "9.4.33.v20201020"
+    jerseyVersion = "2.32"
     jacksonVersion = "2.10.1" // same version as jersey-media-json-jackson dependency
-    protobufVersion = "3.12.2"
+    protobufVersion = "3.13.0"
 }
 
 sourceCompatibility = "1.8"
@@ -35,13 +35,13 @@ protobuf {
 }
 
 dependencies {
-    implementation "commons-codec:commons-codec:1.14"
+    implementation "commons-codec:commons-codec:1.15"
     implementation "com.h2database:h2:1.4.200"
-    implementation "mysql:mysql-connector-java:8.0.20"
-    implementation "org.postgresql:postgresql:42.2.14"
-    implementation "com.microsoft.sqlserver:mssql-jdbc:8.2.2.jre8"
+    implementation "mysql:mysql-connector-java:8.0.22"
+    implementation "org.postgresql:postgresql:42.2.18"
+    implementation "com.microsoft.sqlserver:mssql-jdbc:8.4.1.jre8"
     implementation "com.zaxxer:HikariCP:3.4.5"
-    implementation "io.netty:netty-all:4.1.50.Final"
+    implementation "io.netty:netty-all:4.1.53.Final"
     implementation "org.slf4j:slf4j-jdk14:1.7.30"
     implementation "com.google.inject:guice:$guiceVersion"
     implementation "com.google.inject.extensions:guice-assistedinject:$guiceVersion"
@@ -58,7 +58,7 @@ dependencies {
     implementation "org.glassfish.jersey.inject:jersey-hk2:$jerseyVersion"
     implementation "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:$jacksonVersion"
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr353:$jacksonVersion"
-    implementation "org.liquibase:liquibase-core:3.10.1", {
+    implementation "org.liquibase:liquibase-core:3.10.3", {
         exclude group: "ch.qos.logback", module: "logback-classic"
     }
     implementation "com.sun.mail:javax.mail:1.6.2"
@@ -69,8 +69,8 @@ dependencies {
     implementation "org.apache.commons:commons-collections4:4.4"
     implementation "org.mnode.ical4j:ical4j:2.0.5" // needs upgrade
     implementation "com.fizzed:ch-smpp:6.0.0-netty4-beta-3"
-    implementation "net.java.dev.jna:jna-platform:5.5.0"
-    implementation "com.github.jnr:jnr-posix:3.0.57"
+    implementation "net.java.dev.jna:jna-platform:5.6.0"
+    implementation "com.github.jnr:jnr-posix:3.1.2"
     implementation "com.google.protobuf:protobuf-java:$protobufVersion"
     implementation "javax.xml.bind:jaxb-api:2.3.1"
     implementation "com.sun.xml.bind:jaxb-core:2.3.0.1"
