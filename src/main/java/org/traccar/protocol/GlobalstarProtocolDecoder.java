@@ -60,9 +60,9 @@ import java.util.List;
 
 public class GlobalstarProtocolDecoder extends BaseHttpProtocolDecoder {
 
-    private DocumentBuilder documentBuilder;
-    private XPath xPath;
-    private XPathExpression messageExpression;
+    private final DocumentBuilder documentBuilder;
+    private final XPath xPath;
+    private final XPathExpression messageExpression;
 
     public GlobalstarProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -161,17 +161,20 @@ public class GlobalstarProtocolDecoder extends BaseHttpProtocolDecoder {
                     position.setLongitude(position.getLongitude() - 360);
                 }
 
-                position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
+                int speed = buf.readUnsignedByte();
+                position.setSpeed(UnitsConverter.knotsFromKph(speed));
 
                 position.set("batteryReplace", BitUtil.check(buf.readUnsignedByte(), 7));
 
-                positions.add(position);
+                if (speed != 0xff) {
+                    positions.add(position);
+                }
 
             }
         }
 
         sendResponse(channel, document.getFirstChild().getAttributes().getNamedItem("messageID").getNodeValue());
-        return positions;
+        return !positions.isEmpty() ? positions : null;
     }
 
 }

@@ -52,7 +52,7 @@ public class DeviceResource extends BaseObjectResource<Device> {
             @QueryParam("uniqueId") List<String> uniqueIds,
             @QueryParam("id") List<Long> deviceIds) throws SQLException {
         DeviceManager deviceManager = Context.getDeviceManager();
-        Set<Long> result = null;
+        Set<Long> result;
         if (all) {
             if (Context.getPermissionsManager().getUserAdmin(getUserId())) {
                 result = deviceManager.getAllItems();

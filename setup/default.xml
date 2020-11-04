@@ -14,7 +14,6 @@
     <entry key='web.port'>8082</entry>
     <entry key='web.path'>./web</entry>
     <entry key='web.cacheControl'>max-age=3600,public</entry>
-    <entry key='web.healthCheck'>true</entry>
 
     <entry key='geocoder.enable'>false</entry>
     <entry key='geocoder.type'>google</entry>
@@ -289,5 +288,9 @@
     <entry key='wli.port'>5209</entry>
     <entry key='niot.port'>5210</entry>
     <entry key='portman.port'>5211</entry>
+    <entry key='moovbox.port'>5212</entry>
+    <entry key='futureway.port'>5213</entry>
+    <entry key='polte.port'>5214</entry>
+    <entry key='net.port'>5215</entry>
 
 </properties>

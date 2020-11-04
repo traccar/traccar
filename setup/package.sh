@@ -145,7 +145,7 @@ package_linux () {
   unzip -q -o jdk-*-linux-$1.zip
   jlink --module-path jdk-*-linux-$1/jmods --add-modules java.se,jdk.charsets,jdk.crypto.ec --output out/jre
   rm -rf jdk-*-linux-$1
-  makeself --quiet --notemp out traccar.run "traccar" ./setup.sh
+  makeself --needroot --quiet --notemp out traccar.run "traccar" ./setup.sh
   rm -rf out/jre
 
   zip -q -j traccar-linux-$2-$VERSION.zip traccar.run README.txt

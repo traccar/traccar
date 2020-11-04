@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Keys;
 import org.traccar.handler.DefaultDataHandler;
+import org.traccar.handler.SpeedLimitHandler;
 import org.traccar.handler.TimeHandler;
 import org.traccar.handler.events.AlertEventHandler;
 import org.traccar.handler.events.CommandResultEventHandler;
@@ -58,7 +59,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
 
     private final TrackerServer server;
     private final String protocol;
-    private boolean eventsEnabled;
+    private final boolean eventsEnabled;
     private int timeout;
 
     public BasePipelineFactory(TrackerServer server, String protocol) {
@@ -133,6 +134,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
                 pipeline,
                 FilterHandler.class,
                 GeocoderHandler.class,
+                SpeedLimitHandler.class,
                 MotionHandler.class,
                 CopyAttributesHandler.class,
                 EngineHoursHandler.class,

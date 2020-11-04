@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,6 +70,7 @@ public class RadarProtocolDecoder extends BaseProtocolDecoder {
             for (int index = 0; index < count; index++) {
 
                 Position position = new Position(getProtocolName());
+                position.setDeviceId(deviceSession.getDeviceId());
 
                 position.set(Position.KEY_EVENT, buf.readUnsignedShort());
 

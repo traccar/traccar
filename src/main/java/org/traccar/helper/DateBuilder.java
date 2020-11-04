@@ -21,7 +21,7 @@ import java.util.TimeZone;
 
 public class DateBuilder {
 
-    private Calendar calendar;
+    private final Calendar calendar;
 
     public DateBuilder() {
         this(TimeZone.getTimeZone("UTC"));

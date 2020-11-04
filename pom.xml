@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.traccar</groupId>
     <artifactId>traccar</artifactId>
-    <version>4.10-SNAPSHOT</version>
+    <version>4.11-SNAPSHOT</version>
 
     <name>traccar</name>
     <url>https://www.traccar.org</url>
@@ -12,23 +12,23 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <guice.version>4.2.3</guice.version>
-        <jetty.version>9.4.30.v20200611</jetty.version>
-        <jersey.version>2.31</jersey.version>
+        <jetty.version>9.4.33.v20201020</jetty.version>
+        <jersey.version>2.32</jersey.version>
         <jackson.version>2.10.1</jackson.version> <!-- same version as jersey-media-json-jackson dependency -->
-        <protobuf.version>3.12.2</protobuf.version>
+        <protobuf.version>3.13.0</protobuf.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.13</version>
+            <version>4.13.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
-            <version>1.14</version>
+            <version>1.15</version>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
@@ -38,17 +38,17 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.20</version>
+            <version>8.0.22</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.2.14</version>
+            <version>42.2.18</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
-            <version>8.2.2.jre8</version>
+            <version>8.4.1.jre8</version>
         </dependency>
         <dependency>
             <groupId>com.zaxxer</groupId>
@@ -58,7 +58,7 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
-            <version>4.1.50.Final</version>
+            <version>4.1.53.Final</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -143,7 +143,7 @@
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
-            <version>3.10.1</version>
+            <version>3.10.3</version>
             <exclusions>
                 <exclusion>
                     <groupId>ch.qos.logback</groupId>
@@ -194,12 +194,12 @@
         <dependency>
             <groupId>net.java.dev.jna</groupId>
             <artifactId>jna-platform</artifactId>
-            <version>5.5.0</version>
+            <version>5.6.0</version>
         </dependency>
         <dependency>
             <groupId>com.github.jnr</groupId>
             <artifactId>jnr-posix</artifactId>
-            <version>3.0.57</version>
+            <version>3.1.2</version>
         </dependency>
         <dependency>
             <groupId>com.google.protobuf</groupId>

@@ -38,6 +38,7 @@ public class PstProtocolDecoder extends BaseProtocolDecoder {
 
     public static final int MSG_ACK = 0x00;
     public static final int MSG_STATUS = 0x05;
+    public static final int MSG_COMMAND = 0x06;
 
     private Date readDate(ByteBuf buf) {
         long value = buf.readUnsignedInt();
@@ -61,21 +62,13 @@ public class PstProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, long id, int version, long index, int type) {
         if (channel != null) {
 
-            ByteBuf content = Unpooled.buffer();
-            content.writeInt((int) id);
-            content.writeByte(version);
-            content.writeInt((int) index);
-            content.writeByte(MSG_ACK);
-            content.writeByte(type);
-
-            int checksum = Checksum.crc16(Checksum.CRC16_XMODEM, content.nioBuffer());
-
             ByteBuf response = Unpooled.buffer();
-            response.writeByte('(');
-            response.writeBytes(content);
-            content.release();
-            response.writeShort(checksum);
-            response.writeByte(')');
+            response.writeInt((int) id);
+            response.writeByte(version);
+            response.writeInt((int) index);
+            response.writeByte(MSG_ACK);
+            response.writeByte(type);
+            response.writeShort(Checksum.crc16(Checksum.CRC16_XMODEM, response.nioBuffer()));
 
             channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
 

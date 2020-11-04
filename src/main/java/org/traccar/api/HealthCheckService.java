@@ -20,6 +20,7 @@ import com.sun.jna.Native;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
+import org.traccar.config.Keys;
 
 import java.util.TimerTask;
 
@@ -33,7 +34,7 @@ public class HealthCheckService {
     private long period;
 
     public HealthCheckService() {
-        if (Context.getConfig().getBoolean("web.healthCheck")
+        if (!Context.getConfig().getBoolean(Keys.WEB_DISABLE_HEALTH_CHECK)
                 && System.getProperty("os.name").toLowerCase().startsWith("linux")) {
             try {
                 systemD = Native.load("systemd", SystemD.class);

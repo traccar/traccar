@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,8 +15,6 @@
  * limitations under the License.
  */
 package org.traccar.reports.model;
-
-import java.util.Date;
 
 public class StopReport extends BaseReport  {
 
@@ -50,26 +48,6 @@ public class StopReport extends BaseReport  {
         this.longitude = longitude;
     }
 
-    private Date startTime;
-
-    public Date getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(Date startTime) {
-        this.startTime = startTime;
-    }
-
-    private Date endTime;
-
-    public Date getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(Date endTime) {
-        this.endTime = endTime;
-    }
-
     private String address;
 
     public String getAddress() {
@@ -98,9 +76,5 @@ public class StopReport extends BaseReport  {
 
     public void setEngineHours(long engineHours) {
         this.engineHours = engineHours;
-    }
-
-    public void addEngineHours(long engineHours) {
-        this.engineHours += engineHours;
     }
 }

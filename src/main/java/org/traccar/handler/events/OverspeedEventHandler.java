@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -121,6 +121,11 @@ public class OverspeedEventHandler extends BaseEventHandler {
         }
 
         double speedLimit = deviceManager.lookupAttributeDouble(deviceId, ATTRIBUTE_SPEED_LIMIT, 0, true, false);
+
+        double positionSpeedLimit = position.getDouble(Position.KEY_SPEED_LIMIT);
+        if (positionSpeedLimit > 0) {
+            speedLimit = positionSpeedLimit;
+        }
 
         double geofenceSpeedLimit = 0;
         long overspeedGeofenceId = 0;

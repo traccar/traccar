@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,6 +74,12 @@ public final class Keys {
      */
     public static final ConfigKey EXTRA_HANDLERS = new ConfigKey(
             "extra.handlers", String.class);
+
+    /**
+     * Store original HEX or string data as "raw" attribute in the corresponding position.
+     */
+    public static final ConfigKey DATABASE_SAVE_ORIGINAL = new ConfigKey(
+            "database.saveOriginal", Boolean.class);
 
     /**
      * Enable positions forwarding to other web server.
@@ -389,6 +395,24 @@ public final class Keys {
             "geolocation.processInvalidPositions", Boolean.class);
 
     /**
+     * Boolean flag to enable speed limit API to get speed limit values depending on location. Default value is false.
+     */
+    public static final ConfigKey SPEED_LIMIT_ENABLE = new ConfigKey(
+            "speedLimit.enable", Boolean.class);
+
+    /**
+     * Provider to use for speed limit. Available options: overpass. By default overpass is used.
+     */
+    public static final ConfigKey SPEED_LIMIT_TYPE = new ConfigKey(
+            "speedLimit.type", String.class);
+
+    /**
+     * Speed limit provider API URL address.
+     */
+    public static final ConfigKey SPEED_LIMIT_URL = new ConfigKey(
+            "speedLimit.url", String.class);
+
+    /**
      * Override latitude sign / hemisphere. Useful in cases where value is incorrect because of device bug. Value can be
      * N for North or S for South.
      */
@@ -422,6 +446,19 @@ public final class Keys {
      */
     public static final ConfigKey WEB_REQUEST_LOG_RETAIN_DAYS = new ConfigKey(
             "web.requestLog.retainDays", Integer.class);
+
+    /**
+     * Disable systemd health checks.
+     */
+    public static final ConfigKey WEB_DISABLE_HEALTH_CHECK = new ConfigKey(
+            "web.disableHealthCheck", Boolean.class);
+
+    /**
+     * Sets SameSite cookie attribute value.
+     * Supported options: Lax, Strict, None.
+     */
+    public static final ConfigKey WEB_SAME_SITE_COOKIE = new ConfigKey(
+            "web.sameSiteCookie", String.class);
 
     private Keys() {
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ public class Command extends Message implements Cloneable {
     public static final String TYPE_ENGINE_RESUME = "engineResume";
     public static final String TYPE_ALARM_ARM = "alarmArm";
     public static final String TYPE_ALARM_DISARM = "alarmDisarm";
+    public static final String TYPE_ALARM_DISMISS = "alarmDismiss";
     public static final String TYPE_SET_TIMEZONE = "setTimezone";
     public static final String TYPE_REQUEST_PHOTO = "requestPhoto";
     public static final String TYPE_POWER_OFF = "powerOff";

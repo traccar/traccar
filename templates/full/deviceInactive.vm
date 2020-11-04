@@ -1,0 +1,12 @@
+#set($subject = "$device.name: inactive")
+#set($lastUpdate = $dateTool.getDate())
+#set($ignore = $lastUpdate.setTime($event.getLong("lastUpdate")))
+<!DOCTYPE html>
+<html>
+<body>
+Device: $device.name<br>
+Inactive<br>
+Last Update: $dateTool.format("YYYY-MM-dd HH:mm:ss", $lastUpdate, $locale, $timezone)<br>
+Link: <a href="$webUrl?eventId=$event.id">$webUrl?eventId=$event.id</a>
+</body>
+</html>  

@@ -62,7 +62,7 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
 
         if (sentence.length() == 16) {
 
-            getDeviceSession(channel, remoteAddress, sentence.substring(1, sentence.length()));
+            getDeviceSession(channel, remoteAddress, sentence.substring(1));
 
         } else {
 

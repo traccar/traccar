@@ -479,20 +479,21 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(dateFormat.parse(values[index++] + values[index++]));
         }
 
+        CellTower cellTower = new CellTower();
         if (BitUtil.check(mask, 6)) {
-            index += 1; // cell
+            cellTower.setCellId(Long.parseLong(values[index++], 16));
         }
-
         if (BitUtil.check(mask, 7)) {
-            index += 1; // mcc
+            cellTower.setMobileCountryCode(Integer.parseInt(values[index++]));
         }
-
         if (BitUtil.check(mask, 8)) {
-            index += 1; // mnc
+            cellTower.setMobileNetworkCode(Integer.parseInt(values[index++]));
         }
-
         if (BitUtil.check(mask, 9)) {
-            index += 1; // lac
+            cellTower.setLocationAreaCode(Integer.parseInt(values[index++], 16));
+        }
+        if (cellTower.getCellId() != null) {
+            position.setNetwork(new Network(cellTower));
         }
 
         if (BitUtil.check(mask, 10)) {
@@ -531,16 +532,26 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_OUTPUT, Integer.parseInt(values[index++]));
         }
 
-        if (BitUtil.check(mask, 19)) {
-            position.set("alertId", values[index++]);
-        }
-
-        if (BitUtil.check(mask, 20)) {
-            position.set("alertModifier", values[index++]);
-        }
-
-        if (BitUtil.check(mask, 21)) {
-            position.set("alertData", values[index++]);
+        if (type.equals("ALT")) {
+            if (BitUtil.check(mask, 19)) {
+                position.set("alertId", values[index++]);
+            }
+            if (BitUtil.check(mask, 20)) {
+                position.set("alertModifier", values[index++]);
+            }
+            if (BitUtil.check(mask, 21)) {
+                position.set("alertData", values[index++]);
+            }
+        } else {
+            if (BitUtil.check(mask, 19)) {
+                position.set("mode", Integer.parseInt(values[index++]));
+            }
+            if (BitUtil.check(mask, 20)) {
+                position.set("reason", Integer.parseInt(values[index++]));
+            }
+            if (BitUtil.check(mask, 21)) {
+                position.set(Position.KEY_INDEX, Integer.parseInt(values[index++]));
+            }
         }
 
         if (BitUtil.check(mask, 22)) {
@@ -676,6 +687,24 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private Position decodeTravelReport(Channel channel, SocketAddress remoteAddress, String[] values) {
+        int index = 1;
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, values[index++]);
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, null);
+
+        position.set(Position.KEY_DRIVER_UNIQUE_ID, values[values.length - 1]);
+
+        return position;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -693,6 +722,8 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
             if (prefix.length() < 5) {
                 return decodeUniversal(channel, remoteAddress, values);
+            } else if (prefix.endsWith("HTE")) {
+                return decodeTravelReport(channel, remoteAddress, values);
             } else if (prefix.startsWith("ST9")) {
                 return decode9(channel, remoteAddress, values);
             } else if (prefix.startsWith("ST4")) {

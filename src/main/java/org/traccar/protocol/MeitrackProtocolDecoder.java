@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -177,8 +177,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         position.setNetwork(new Network(CellTower.from(
                 parser.nextInt(), parser.nextInt(), parser.nextHexInt(), parser.nextHexInt(), rssi)));
 
-        position.set(Position.KEY_OUTPUT, parser.nextHexInt());
         position.set(Position.KEY_INPUT, parser.nextHexInt());
+        position.set(Position.KEY_OUTPUT, parser.nextHexInt());
 
         for (int i = 1; i <= 3; i++) {
             position.set(Position.PREFIX_ADC + i, parser.nextHexInt());
@@ -396,6 +396,12 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     case 0x07:
                         position.set(Position.KEY_RSSI, buf.readUnsignedByte());
                         break;
+                    case 0x97:
+                        position.set(Position.KEY_THROTTLE, buf.readUnsignedByte());
+                        break;
+                    case 0x9D:
+                        position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte());
+                        break;
                     default:
                         buf.readUnsignedByte();
                         break;
@@ -412,6 +418,9 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     case 0x09:
                         position.setCourse(buf.readUnsignedShortLE());
                         break;
+                    case 0x0A:
+                        position.set(Position.KEY_HDOP, buf.readUnsignedShortLE());
+                        break;
                     case 0x0B:
                         position.setAltitude(buf.readShortLE());
                         break;
@@ -420,6 +429,28 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                         break;
                     case 0x1A:
                         position.set(Position.KEY_POWER, buf.readUnsignedShortLE() * 0.01);
+                        break;
+                    case 0x40:
+                        position.set(Position.KEY_EVENT, buf.readUnsignedShortLE());
+                        break;
+                    case 0x91:
+                    case 0x92:
+                        position.set(Position.KEY_OBD_SPEED, buf.readUnsignedShortLE());
+                        break;
+                    case 0x98:
+                        position.set(Position.KEY_FUEL_USED, buf.readUnsignedShortLE());
+                        break;
+                    case 0x99:
+                        position.set(Position.KEY_RPM, buf.readUnsignedShortLE());
+                        break;
+                    case 0x9C:
+                        position.set(Position.KEY_COOLANT_TEMP, buf.readUnsignedShortLE());
+                        break;
+                    case 0x9F:
+                        position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedShortLE());
+                        break;
+                    case 0xC9:
+                        position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedShortLE());
                         break;
                     default:
                         buf.readUnsignedShortLE();
@@ -440,8 +471,18 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     case 0x04:
                         position.setTime(new Date((946684800 + buf.readUnsignedIntLE()) * 1000)); // 2000-01-01
                         break;
+                    case 0x0C:
+                    case 0x9B:
+                        position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
+                        break;
                     case 0x0D:
                         position.set("runtime", buf.readUnsignedIntLE());
+                        break;
+                    case 0xA0:
+                        position.set(Position.KEY_FUEL_USED, buf.readUnsignedIntLE() * 0.001);
+                        break;
+                    case 0xA2:
+                        position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedIntLE() * 0.01);
                         break;
                     default:
                         buf.readUnsignedIntLE();

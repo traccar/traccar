@@ -8,7 +8,7 @@ WorkingDirectory=/opt/traccar
 ExecStart=/opt/traccar/jre/bin/java -jar tracker-server.jar conf/traccar.xml
 SyslogIdentifier=traccar
 SuccessExitStatus=143
-WatchdogSec=300
+WatchdogSec=600
 Restart=on-failure
 RestartSec=10
 

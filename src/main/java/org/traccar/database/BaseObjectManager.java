@@ -38,8 +38,8 @@ public class BaseObjectManager<T extends BaseModel> {
 
     private final DataManager dataManager;
 
+    private final Class<T> baseClass;
     private Map<Long, T> items;
-    private Class<T> baseClass;
 
     protected BaseObjectManager(DataManager dataManager, Class<T> baseClass) {
         this.dataManager = dataManager;

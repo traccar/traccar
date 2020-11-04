@@ -190,6 +190,9 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
                         position.set(
                                 Position.KEY_VIN, buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
                         break;
+                    case 0x0011:
+                        position.set(Position.KEY_HOURS, buf.readUnsignedInt() * 0.05);
+                        break;
                     case 0x0020:
                         String[] cells = buf.readCharSequence(
                                 length, StandardCharsets.US_ASCII).toString().split("\\+");

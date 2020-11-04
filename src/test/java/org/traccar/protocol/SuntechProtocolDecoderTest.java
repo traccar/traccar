@@ -63,12 +63,28 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
     }
 
     @Test
+    public void testDecodeDriver() throws Exception {
+
+        SuntechProtocolDecoder decoder = new SuntechProtocolDecoder(null);
+
+        verifyAttribute(decoder, buffer(
+                "ST300HTE;511050566;45;308;20200909;13:38:38;0;12.50;001354;0.0;1;0;1;1;0;-27.636632;-052.277933;-27.636675;-052.277947;000.000;002.296;0;00000000000000"),
+                Position.KEY_DRIVER_UNIQUE_ID, "00000000000000");
+
+        verifyAttribute(decoder, buffer(
+                "ST300HTE;100850001;04;248;20110101;00:13:52;167559;12.28;004005;0.0;1;0;3;3;0;-22.881018;-047.070831;-22.881018;-047.070831;000.000;000.000;0;0;3;0;0;0;01E04D44160000"),
+                Position.KEY_DRIVER_UNIQUE_ID, "01E04D44160000");
+
+    }
+
+    @Test
     public void testDecode() throws Exception {
 
         SuntechProtocolDecoder decoder = new SuntechProtocolDecoder(null);
 
-        verifyPosition(decoder, buffer(
-                "ALT;0470001109;BFFFFF;47;1.0.2;0;20200511;22:39:38;0B29790F;310;410;2C13;30;+34.928093;-83.704295;0.94;30.95;10;1;00000001;00000000;15;;;00018003;4.1;14.13;629;11905"));
+        verifyAttribute(decoder, buffer(
+                "STT;0560001616;BFFFFF;56;1.0.15;1;20200219;20:52:25;00008D6C;334;20;0925;24;+20.741764;-103.430364;0.00;0.00;19;1;00000001;00000000;2;1;1765;00008003;0.0;12.14;136598"),
+                Position.KEY_INDEX, 1765);
 
         verifyAttribute(decoder, buffer(
                 "STT;0560001616;BFFFFF;56;1.0.15;1;20200219;20:52:25;00008D6C;334;20;0925;24;+20.741764;-103.430364;0.00;0.00;19;1;00000001;00000000;2;1;1765;00008003;0.0;12.14;136598"),

@@ -42,9 +42,9 @@ import java.util.List;
 
 public class SpotProtocolDecoder extends BaseHttpProtocolDecoder {
 
-    private DocumentBuilder documentBuilder;
-    private XPath xPath;
-    private XPathExpression messageExpression;
+    private final DocumentBuilder documentBuilder;
+    private final XPath xPath;
+    private final XPathExpression messageExpression;
 
     public SpotProtocolDecoder(Protocol protocol) {
         super(protocol);
