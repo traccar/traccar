@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -286,6 +286,14 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
+    private static final Pattern PATTERN_HTBT = new PatternBuilder()
+            .text("*HQ,")
+            .number("(d{15}),")                  // imei
+            .text("HTBT,")
+            .number("(d+)")                      // battery
+            .any()
+            .compile();
+
     private void sendResponse(Channel channel, SocketAddress remoteAddress, String id, String type) {
         if (channel != null && id != null) {
             String response;
@@ -551,6 +559,28 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private Position decodeHeartbeat(String sentence, Channel channel, SocketAddress remoteAddress) {
+
+        Parser parser = new Parser(PATTERN_HTBT, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, null);
+
+        position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
+
+        return position;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -572,9 +602,10 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
                         case "V0":
                         case "HTBT":
                             if (channel != null) {
-                                channel.writeAndFlush(new NetworkMessage(sentence, remoteAddress));
+                                String response = sentence.substring(0, typeEnd) + "#";
+                                channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
                             }
-                            return null;
+                            return decodeHeartbeat(sentence, channel, remoteAddress);
                         case "NBR":
                             return decodeLbs(sentence, channel, remoteAddress);
                         case "LINK":
