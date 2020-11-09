@@ -1229,7 +1229,10 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             buf.readUnsignedByte(); // external device type code
             int length = buf.readableBytes() - 9; // line break + checksum + index + checksum + footer
-            if (length < 8) {
+
+            if (length <= 0) {
+                return null;
+            } else if (length < 8) {
                 position.set(
                         Position.PREFIX_TEMP + 1,
                         Double.parseDouble(buf.readCharSequence(length - 1, StandardCharsets.US_ASCII).toString()));
