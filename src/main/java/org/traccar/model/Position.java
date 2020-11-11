@@ -95,6 +95,11 @@ public class Position extends Message {
 
     public static final String KEY_DRIVER_UNIQUE_ID = "driverUniqueId";
 
+    public static final String KEY_LBS = "locatedByLBS";
+    public static final String KEY_STEEL_STRING_STATUS = "steelStringStatus";
+    public static final String KEY_MOTOR_LOCK_STATUS = "motorLockStatus";
+    public static final String KEY_BACK_CAP_STATUS = "backCapStatus";
+
     // Start with 1 not 0
     public static final String PREFIX_TEMP = "temp";
     public static final String PREFIX_ADC = "adc";
@@ -142,6 +147,11 @@ public class Position extends Message {
     public static final String ALARM_FUEL_LEAK = "fuelLeak";
     public static final String ALARM_TAMPERING = "tampering";
     public static final String ALARM_REMOVING = "removing";
+    public static final String ALARM_STEEL_STRING_CUT = "steelStringCut";
+    public static final String ALARM_WRONG_PASSWORD = "wrongPassword";
+    public static final String ALARM_SWIPE_UNAUTHORIZED_CARD = "swipeUnathorizedCard";
+    public static final String ALARM_OPEN_BACK_CAP = "openBackCap";
+    public static final String ALARM_MOTOR_FAULT = "motorFault";
 
     public Position() {
     }
