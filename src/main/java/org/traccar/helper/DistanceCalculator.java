@@ -50,4 +50,19 @@ public final class DistanceCalculator {
         return 2 * area / d1;
     }
 
+    public static boolean lineCrossesLine(
+            double aLat1, double aLon1, double aLat2, double aLon2,
+            double bLat1, double bLon1, double bLat2, double bLon2) {
+
+        double det, gamma, lambda;
+        det = (aLat2 - aLat1) * (bLon2 - bLon1) - (bLat2 - bLat1) * (aLon2 - aLon1);
+
+        if (det == 0) {
+            return false;
+        } else {
+            lambda = ((bLon2 - bLon1) * (bLat2 - aLat1) + (bLat1 - bLat2) * (bLon2 - aLon1)) / det;
+            gamma = ((aLon1 - aLon2) * (bLat2 - aLat1) + (aLat2 - aLat1) * (bLon2 - aLon1)) / det;
+            return (0 < lambda && lambda < 1) && (0 < gamma && gamma < 1);
+        }
+    }
 }

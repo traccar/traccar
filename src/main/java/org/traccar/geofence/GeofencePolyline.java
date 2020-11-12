@@ -47,6 +47,19 @@ public class GeofencePolyline extends GeofenceGeometry {
     }
 
     @Override
+    public boolean crossesGeofence(double latitude1, double longitude1, double latitude2, double longitude2) {
+        for (int i = 1; i < coordinates.size(); i++) {
+            if (DistanceCalculator.lineCrossesLine(
+                    latitude1, longitude1, latitude2, longitude2,
+                    coordinates.get(i - 1).getLat(), coordinates.get(i - 1).getLon(),
+                    coordinates.get(i).getLat(), coordinates.get(i).getLon())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
     public String toWkt() {
         StringBuilder buf = new StringBuilder();
         buf.append("LINESTRING (");

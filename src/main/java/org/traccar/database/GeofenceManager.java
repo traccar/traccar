@@ -47,6 +47,21 @@ public class GeofenceManager extends ExtendedObjectManager<Geofence> {
         return result;
     }
 
+    public List<Long> getCurrentDeviceCrossedGeofences(Position position) {
+        Position prevPosition = Context.getDeviceManager().getPreviousPosition(position);
+
+        List<Long> result = new ArrayList<>();
+        for (long geofenceId : getAllDeviceItems(position.getDeviceId())) {
+            Geofence geofence = getById(geofenceId);
+            if (geofence != null && prevPosition != null && geofence.getGeometry()
+                    .crossesGeofence(position.getLatitude(), position.getLongitude(),
+                    prevPosition.getLatitude(), prevPosition.getLongitude())) {
+                result.add(geofenceId);
+            }
+        }
+        return result;
+    }
+
     public void recalculateDevicesGeofences() {
         for (Device device : Context.getDeviceManager().getAllDevices()) {
             List<Long> deviceGeofenceIds = device.getGeofenceIds();

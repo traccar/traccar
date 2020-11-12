@@ -337,6 +337,15 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         return lastPosition == null || position.getFixTime().compareTo(lastPosition.getFixTime()) >= 0;
     }
 
+    public Position getPreviousPosition(Position position) {
+        try {
+            return getDataManager().getPreviousPosition(position);
+        } catch (SQLException error) {
+            LOGGER.warn("Load previous position error", error);
+            return null;
+        }
+    }
+
     public void updateLatestPosition(Position position) throws SQLException {
 
         if (isLatestPosition(position)) {
