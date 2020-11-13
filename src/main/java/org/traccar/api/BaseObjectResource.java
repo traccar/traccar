@@ -75,7 +75,7 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
 
     @Path("{id}")
     @GET
-    public Response add(@PathParam("id") long id) throws SQLException {
+    public Response get(@PathParam("id") long id) throws SQLException {
         Context.getPermissionsManager().checkPermission(baseClass, getUserId(), id);
         BaseObjectManager<T> manager = Context.getManager(baseClass);
         T entity = manager.getById(id);
