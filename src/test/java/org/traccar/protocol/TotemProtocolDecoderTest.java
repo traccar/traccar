@@ -11,6 +11,9 @@ public class TotemProtocolDecoderTest extends ProtocolTest {
         TotemProtocolDecoder decoder = new TotemProtocolDecoder(null);
 
         verifyPosition(decoder, text(
+                "$$0112E5864606045334223|201112223514,-68.923106,-22.455926,$Cloud,1738,621,730,12100,0,0,255,0,40,40,0,0,255,|13"));
+
+        verifyPosition(decoder, text(
                 "$$0113AA862010037348253|588040001901220851494212000000753AE901655121700100000.800000002632.6084S02803.3289E29497E"),
                 position("2019-01-22 08:51:49.000", true, -26.54347, 28.05548));
 
