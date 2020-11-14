@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             .groupEnd("?")
             .number("(d{5})")                    // seconds
             .or()
-            .expression("(?:RGP|RCQ|RCV|RBR)")   // type
+            .expression("(?:RGP|RCQ|RCV|RBR|RUS00),?") // type
             .number("(dd)?")                     // event
             .number("(dd)(dd)(dd)")              // date (mmddyy)
             .number("(dd)(dd)(dd)")              // time (hhmmss)
@@ -67,8 +67,20 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             .number("([023])")                   // fix mode
             .number("xx")                        // data age
             .number("(xx)")                      // input
+            .groupBegin()
+            .number(",d+")                       // flow meter
+            .number(",(d+)")                     // odometer
+            .number(",(d{4})(d{4})")             // power / battery
+            .number(",(d+)")                     // rpm
+            .groupBegin()
+            .number(",(-?d+)")                   // temperature 1
+            .number(",(-?d+)")                   // temperature 2
+            .groupEnd("?")
+            .number(",(xx)")                     // alarm
+            .or()
             .number("(dd)")                      // event
             .number("(dd)")                      // hdop
+            .groupEnd()
             .or()
             .groupBegin()
             .number("(xx)")                      // input
@@ -106,6 +118,17 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
                 .setTime(0, 0, 0, 0)
                 .addMillis(seconds * 1000);
         return DateUtil.correctDay(dateBuilder.getDate());
+    }
+
+    private String decodeAlarm(int value) {
+        switch (value) {
+            case 0x01:
+                return Position.ALARM_SOS;
+            case 0x02:
+                return Position.ALARM_POWER_CUT;
+            default:
+                return null;
+        }
     }
 
     @Override
@@ -156,11 +179,24 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(UnitsConverter.knotsFromMph(parser.nextDouble(0)));
         position.setCourse(parser.nextDouble(0));
 
-        if (parser.hasNext(4)) {
+        if (parser.hasNext(2)) {
             valid = parser.nextInt() > 0;
             int input = parser.nextHexInt();
             position.set(Position.KEY_IGNITION, BitUtil.check(input, 7));
             position.set(Position.KEY_INPUT, input);
+        }
+
+        if (parser.hasNext(7)) {
+            position.set(Position.KEY_ODOMETER, parser.nextInt());
+            position.set(Position.KEY_POWER, parser.nextInt() * 0.01);
+            position.set(Position.KEY_BATTERY, parser.nextInt() * 0.01);
+            position.set(Position.KEY_RPM, parser.nextInt());
+            position.set(Position.PREFIX_TEMP + 1, parser.nextInt());
+            position.set(Position.PREFIX_TEMP + 2, parser.nextInt());
+            position.set(Position.KEY_ALARM, decodeAlarm(parser.nextHexInt()));
+        }
+
+        if (parser.hasNext(2)) {
             event = parser.nextInt();
             position.set(Position.KEY_HDOP, parser.nextInt());
         }
