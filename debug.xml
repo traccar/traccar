@@ -2,29 +2,4 @@
 
 <!DOCTYPE properties SYSTEM 'http://java.sun.com/dtd/properties.dtd'>
 
-<properties>
 
-    <entry key='config.default'>./setup/default.xml</entry>
-
-    <entry key='web.path'>./traccar-web/web</entry>
-    <entry key='web.debug'>true</entry>
-    <entry key='web.console'>true</entry>
-
-    <entry key='geocoder.enable'>false</entry>
-    <entry key='geocoder.type'>ban</entry>
-
-    <entry key='logger.console'>true</entry>
-
-    <entry key='database.driver'>org.h2.Driver</entry>
-    <entry key='database.url'>jdbc:h2:./target/database</entry>
-    <entry key='database.user'>sa</entry>
-    <entry key='database.password'></entry>
-
-    <entry key='database.driver'>org.postgresql.Driver</entry>
-    <entry key='database.url'>jdbc:postgresql://127.0.0.1:5432/traccardb</entry>
-    <entry key='database.user'>traccar</entry>
-    <entry key='database.password'>traccar01</entry>
-
-    <entry key='atrack.custom'>true</entry>
-
-</properties>
