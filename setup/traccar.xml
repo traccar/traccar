@@ -4,6 +4,7 @@
 
 <properties>
 
+    <entry key='config.default'>./conf/default.xml</entry>
 
     <!--
 
@@ -17,12 +18,9 @@
 
     -->
 
-    <entry key='config.default'>./conf/default.xml</entry>
-    <entry key='web.path'>./web</entry>
-    <entry key='web.port'>80</entry>
-<entry key='database.driver'>org.postgresql.Driver</entry>
-    <entry key='database.url'>jdbc:postgresql://${POSTGRES_URL}</entry>
-    <entry key='database.user'>${POSTGRES_USER}</entry>
-    <entry key='database.password'>${POSTGRES_PASSWORD}</entry>
+    <entry key='database.driver'>org.h2.Driver</entry>
+    <entry key='database.url'>jdbc:h2:./data/database</entry>
+    <entry key='database.user'>sa</entry>
+    <entry key='database.password'></entry>
 
 </properties>
