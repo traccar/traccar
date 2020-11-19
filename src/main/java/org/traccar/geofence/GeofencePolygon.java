@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ public class GeofencePolygon extends GeofenceGeometry {
 
     private boolean needNormalize = false;
 
-    private void precalc() {
+    private void preCalculate() {
         if (coordinates == null) {
             return;
         }
@@ -107,14 +107,47 @@ public class GeofencePolygon extends GeofenceGeometry {
         return oddNodes;
     }
 
+    private double toRadians(double input) {
+        return input / 180.0 * Math.PI;
+    }
+
+    private double polarTriangleArea(double tan1, double lng1, double tan2, double lng2) {
+        double deltaLng = lng1 - lng2;
+        double t = tan1 * tan2;
+        return 2 * Math.atan2(t * Math.sin(deltaLng), 1 + t * Math.sin(deltaLng));
+    }
+
+    @Override
+    public double calculateArea() {
+        if (coordinates.size() < 3) {
+            return 0;
+        }
+
+        double total = 0;
+        Coordinate prev = coordinates.get(coordinates.size() - 1);
+        double prevTanLat = Math.tan((Math.PI / 2 - toRadians(prev.getLat())) / 2);
+        double prevLng = toRadians(prev.getLon());
+
+        for (Coordinate point : coordinates) {
+            double tanLat = Math.tan((Math.PI / 2 - toRadians(point.getLat())) / 2);
+            double lng = toRadians(point.getLon());
+            total += polarTriangleArea(tanLat, lng, prevTanLat, prevLng);
+            prevTanLat = tanLat;
+            prevLng = lng;
+        }
+
+        double earthRadius = 6371009;
+        return total * (earthRadius * earthRadius);
+    }
+
     @Override
     public String toWkt() {
         StringBuilder buf = new StringBuilder();
         buf.append("POLYGON ((");
         for (Coordinate coordinate : coordinates) {
-            buf.append(String.valueOf(coordinate.getLat()));
+            buf.append(coordinate.getLat());
             buf.append(" ");
-            buf.append(String.valueOf(coordinate.getLon()));
+            buf.append(coordinate.getLon());
             buf.append(", ");
         }
         return buf.substring(0, buf.length() - 2) + "))";
@@ -158,7 +191,8 @@ public class GeofencePolygon extends GeofenceGeometry {
             }
             coordinates.add(coordinate);
         }
-        precalc();
+
+        preCalculate();
     }
 
 }
