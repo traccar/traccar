@@ -22,6 +22,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -72,7 +73,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
             content.writeByte(packetNumber);
             content.writeZero(11);
 
-            ByteBuf reply = encodeContent(MSG_SERVER_ACKNOWLEDGE, (int) deviceId, packetNumber, content);
+            ByteBuf reply = encodeContent(MSG_SERVER_ACKNOWLEDGE, (int) deviceId, 0, content);
             channel.writeAndFlush(new NetworkMessage(reply, remoteAddress));
         }
     }
@@ -122,7 +123,12 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
 
         position.set("mode", buf.readUnsignedByte());
-        position.set(Position.KEY_INPUT, buf.readUnsignedIntLE());
+
+        long input = buf.readUnsignedIntLE();
+        position.set(Position.KEY_DOOR, BitUtil.check(input, 3 * 8));
+        position.set(Position.KEY_IGNITION, BitUtil.check(input, 2 * 8 + 7));
+        position.set(Position.KEY_CHARGE, BitUtil.check(input, 7));
+        position.set(Position.KEY_INPUT, input);
 
         if (alternative) {
             buf.readUnsignedByte(); // input
@@ -130,7 +136,10 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShortLE());
         } else {
             buf.readUnsignedByte(); // operator
-            position.set(Position.PREFIX_ADC + 1, buf.readUnsignedIntLE());
+            position.set(Position.PREFIX_ADC + 1, buf.readUnsignedByte());
+            position.set(Position.PREFIX_ADC + 2, buf.readUnsignedByte());
+            position.set(Position.PREFIX_ADC + 3, buf.readUnsignedByte());
+            position.set(Position.PREFIX_ADC + 4, buf.readUnsignedByte());
         }
 
         position.set(Position.KEY_ODOMETER, buf.readUnsignedMediumLE());

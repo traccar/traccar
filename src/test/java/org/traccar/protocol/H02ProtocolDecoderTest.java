@@ -11,6 +11,10 @@ public class H02ProtocolDecoderTest extends ProtocolTest {
 
         H02ProtocolDecoder decoder = new H02ProtocolDecoder(null);
 
+        verifyAttribute(decoder, buffer(
+                "*HQ,135790246811220,HTBT,100#"),
+                Position.KEY_BATTERY_LEVEL, 100);
+
         verifyPosition(decoder, buffer(
                 "*HQ,9180271064,V5,091233,V,2348.8912,N,09021.3302,E,000.00,000,051219,FFFFBBFF,470,01,21019,2033,2921283#"));
 

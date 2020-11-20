@@ -152,7 +152,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
         if (responseCode != null) {
             String response = "$AVCFG," + devicePassword + "," + responseCode;
-            response += Checksum.nmea(response) + "\r\n";
+            response += Checksum.nmea(response.substring(1)) + "\r\n";
             channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
 
@@ -163,7 +163,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
         if (Character.isLowerCase(status.charAt(0))) {
             String response = "$EAVACK," + event + "," + checksum;
-            response += Checksum.nmea(response) + "\r\n";
+            response += Checksum.nmea(response.substring(1)) + "\r\n";
             channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
 

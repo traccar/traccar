@@ -4,31 +4,31 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.traccar</groupId>
     <artifactId>traccar</artifactId>
-    <version>4.8-SNAPSHOT</version>
+    <version>4.11-SNAPSHOT</version>
 
     <name>traccar</name>
     <url>https://www.traccar.org</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <guice.version>4.2.2</guice.version>
-        <jetty.version>9.4.26.v20200117</jetty.version>
-        <jersey.version>2.30</jersey.version>
-        <jackson.version>2.9.9</jackson.version> <!-- same version as jersey-media-json-jackson dependency -->
-        <protobuf.version>3.11.1</protobuf.version>
+        <guice.version>4.2.3</guice.version>
+        <jetty.version>9.4.33.v20201020</jetty.version>
+        <jersey.version>2.32</jersey.version>
+        <jackson.version>2.10.1</jackson.version> <!-- same version as jersey-media-json-jackson dependency -->
+        <protobuf.version>3.13.0</protobuf.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.13</version>
+            <version>4.13.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
-            <version>1.13</version>
+            <version>1.15</version>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
@@ -38,27 +38,27 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.18</version>
+            <version>8.0.22</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.2.9</version>
+            <version>42.2.18</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
-            <version>7.4.1.jre8</version>
+            <version>8.4.1.jre8</version>
         </dependency>
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
-            <version>3.4.2</version>
+            <version>3.4.5</version>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
-            <version>4.1.44.Final</version>
+            <version>4.1.53.Final</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -153,7 +153,7 @@
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
-            <version>3.8.5</version>
+            <version>3.10.3</version>
             <exclusions>
                 <exclusion>
                     <groupId>ch.qos.logback</groupId>
@@ -197,6 +197,16 @@
             <version>2.0.5</version> <!-- TODO UPGRADE -->
         </dependency>
         <dependency>
+            <groupId>org.locationtech.spatial4j</groupId>
+            <artifactId>spatial4j</artifactId>
+            <version>0.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.locationtech.jts</groupId>
+            <artifactId>jts-core</artifactId>
+            <version>1.17.1</version>
+        </dependency>
+        <dependency>
             <groupId>com.fizzed</groupId>
             <artifactId>ch-smpp</artifactId>
             <version>6.0.0-netty4-beta-3</version>
@@ -204,12 +214,12 @@
         <dependency>
             <groupId>net.java.dev.jna</groupId>
             <artifactId>jna-platform</artifactId>
-            <version>5.5.0</version>
+            <version>5.6.0</version>
         </dependency>
         <dependency>
             <groupId>com.github.jnr</groupId>
             <artifactId>jnr-posix</artifactId>
-            <version>3.0.51</version>
+            <version>3.1.2</version>
         </dependency>
         <dependency>
             <groupId>com.google.protobuf</groupId>
@@ -229,7 +239,7 @@
         <dependency>
             <groupId>com.sun.xml.bind</groupId>
             <artifactId>jaxb-impl</artifactId>
-            <version>2.3.2</version>
+            <version>2.3.3</version>
         </dependency>
         <dependency>
             <groupId>javax.activation</groupId>
@@ -248,6 +258,12 @@
             <artifactId>slf4j-api</artifactId>
             <version>1.7.30</version>
         </dependency>
+        <dependency>
+            <groupId>jakarta.activation</groupId>
+            <artifactId>jakarta.activation-api</artifactId>
+            <version>1.2.2</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -299,6 +315,17 @@
                 <artifactId>maven-enforcer-plugin</artifactId>
                 <version>1.4.1</version>
                 <executions>
+                    <!--<execution>
+                        <id>enforce</id>
+                        <configuration>
+                            <rules>
+                                <requireUpperBoundDeps />
+                            </rules>
+                        </configuration>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                    </execution>-->
                     <execution>
                         <id>enforce</id>
                         <configuration>

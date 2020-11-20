@@ -26,12 +26,12 @@ public final class Checksum {
 
     public static class Algorithm {
 
-        private int poly;
-        private int init;
-        private boolean refIn;
-        private boolean refOut;
-        private int xorOut;
-        private int[] table;
+        private final int poly;
+        private final int init;
+        private final boolean refIn;
+        private final boolean refOut;
+        private final int xorOut;
+        private final int[] table;
 
         public Algorithm(int bits, int poly, int init, boolean refIn, boolean refOut, int xorOut) {
             this.poly = poly;
@@ -151,13 +151,8 @@ public final class Checksum {
         return checksum;
     }
 
-    public static String nmea(String msg) {
-        int checksum = 0;
-        byte[] bytes = msg.getBytes(StandardCharsets.US_ASCII);
-        for (int i = 1; i < bytes.length; i++) {
-            checksum ^= bytes[i];
-        }
-        return String.format("*%02x", checksum).toUpperCase();
+    public static String nmea(String string) {
+        return String.format("*%02X", xor(string));
     }
 
     public static int sum(ByteBuffer buf) {

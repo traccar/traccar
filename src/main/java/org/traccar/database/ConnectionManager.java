@@ -18,7 +18,6 @@ package org.traccar.database;
 
 import io.netty.channel.Channel;
 import io.netty.util.Timeout;
-import io.netty.util.TimerTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
@@ -143,12 +142,9 @@ public class ConnectionManager {
         }
 
         if (status.equals(Device.STATUS_ONLINE)) {
-            timeouts.put(deviceId, GlobalTimer.getTimer().newTimeout(new TimerTask() {
-                @Override
-                public void run(Timeout timeout) {
-                    if (!timeout.isCancelled()) {
-                        updateDevice(deviceId, Device.STATUS_UNKNOWN, null);
-                    }
+            timeouts.put(deviceId, GlobalTimer.getTimer().newTimeout(timeout1 -> {
+                if (!timeout1.isCancelled()) {
+                    updateDevice(deviceId, Device.STATUS_UNKNOWN, null);
                 }
             }, deviceTimeout, TimeUnit.MILLISECONDS));
         }

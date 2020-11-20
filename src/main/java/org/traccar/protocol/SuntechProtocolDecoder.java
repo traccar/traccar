@@ -181,12 +181,14 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_SHOCK;
             case 16:
                 return Position.ALARM_ACCIDENT;
+            case 40:
+                return Position.ALARM_POWER_RESTORED;
+            case 41:
+                return Position.ALARM_POWER_CUT;
             case 46:
                 return Position.ALARM_ACCELERATION;
             case 47:
                 return Position.ALARM_BRAKING;
-            case 48:
-                return Position.ALARM_ACCIDENT;
             case 50:
                 return Position.ALARM_JAMMING;
             default:
@@ -339,16 +341,19 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                 break;
             case "UEX":
                 int remaining = Integer.parseInt(values[index++]);
+                double totalFuel = 0;
                 while (remaining > 0) {
                     String attribute = values[index++];
                     if (attribute.startsWith("CabAVL")) {
                         String[] data = attribute.split(",");
                         double fuel1 = Double.parseDouble(data[2]);
                         if (fuel1 > 0) {
+                            totalFuel += fuel1;
                             position.set("fuel1", fuel1);
                         }
                         double fuel2 = Double.parseDouble(data[3]);
                         if (fuel2 > 0) {
+                            totalFuel += fuel2;
                             position.set("fuel2", fuel2);
                         }
                     } else {
@@ -363,7 +368,9 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                                     position.set(Position.PREFIX_TEMP + pair[0].charAt(2), Integer.parseInt(value, 16));
                                     break;
                                 case 'N':
-                                    position.set("fuel" + pair[0].charAt(2), Integer.parseInt(value, 16));
+                                    int fuel = Integer.parseInt(value, 16);
+                                    totalFuel += fuel;
+                                    position.set("fuel" + pair[0].charAt(2), fuel);
                                     break;
                                 case 'Q':
                                     position.set("drivingQuality", Integer.parseInt(value, 16));
@@ -374,6 +381,9 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                         }
                     }
                     remaining -= attribute.length() + 1;
+                }
+                if (totalFuel > 0) {
+                    position.set(Position.KEY_FUEL_LEVEL, totalFuel);
                 }
                 index += 1; // checksum
                 break;
@@ -469,20 +479,21 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(dateFormat.parse(values[index++] + values[index++]));
         }
 
+        CellTower cellTower = new CellTower();
         if (BitUtil.check(mask, 6)) {
-            index += 1; // cell
+            cellTower.setCellId(Long.parseLong(values[index++], 16));
         }
-
         if (BitUtil.check(mask, 7)) {
-            index += 1; // mcc
+            cellTower.setMobileCountryCode(Integer.parseInt(values[index++]));
         }
-
         if (BitUtil.check(mask, 8)) {
-            index += 1; // mnc
+            cellTower.setMobileNetworkCode(Integer.parseInt(values[index++]));
         }
-
         if (BitUtil.check(mask, 9)) {
-            index += 1; // lac
+            cellTower.setLocationAreaCode(Integer.parseInt(values[index++], 16));
+        }
+        if (cellTower.getCellId() != null) {
+            position.setNetwork(new Network(cellTower));
         }
 
         if (BitUtil.check(mask, 10)) {
@@ -519,6 +530,41 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
         if (BitUtil.check(mask, 18)) {
             position.set(Position.KEY_OUTPUT, Integer.parseInt(values[index++]));
+        }
+
+        if (type.equals("ALT")) {
+            if (BitUtil.check(mask, 19)) {
+                position.set("alertId", values[index++]);
+            }
+            if (BitUtil.check(mask, 20)) {
+                position.set("alertModifier", values[index++]);
+            }
+            if (BitUtil.check(mask, 21)) {
+                position.set("alertData", values[index++]);
+            }
+        } else {
+            if (BitUtil.check(mask, 19)) {
+                position.set("mode", Integer.parseInt(values[index++]));
+            }
+            if (BitUtil.check(mask, 20)) {
+                position.set("reason", Integer.parseInt(values[index++]));
+            }
+            if (BitUtil.check(mask, 21)) {
+                position.set(Position.KEY_INDEX, Integer.parseInt(values[index++]));
+            }
+        }
+
+        if (BitUtil.check(mask, 22)) {
+            index += 1; // reserved
+        }
+
+        if (BitUtil.check(mask, 23)) {
+            int assignMask = Integer.parseInt(values[index++], 16);
+            for (int i = 0; i <= 30; i++) {
+                if (BitUtil.check(assignMask, i)) {
+                    position.set(Position.PREFIX_IO + (i + 1), values[index++]);
+                }
+            }
         }
 
         return position;
@@ -631,14 +677,30 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(mask, 20)) {
-            buf.readUnsignedShort(); // alert mod
+            buf.readUnsignedShort(); // alert modifier
         }
 
-        if (BitUtil.check(mask, 21)) {
-            if (alertId == 59) {
-                position.set(Position.KEY_DRIVER_UNIQUE_ID, ByteBufUtil.hexDump(buf.readSlice(8)));
-            }
+        if (BitUtil.check(mask, 21) && alertId == 59) {
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, ByteBufUtil.hexDump(buf.readSlice(8)));
         }
+
+        return position;
+    }
+
+    private Position decodeTravelReport(Channel channel, SocketAddress remoteAddress, String[] values) {
+        int index = 1;
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, values[index++]);
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, null);
+
+        position.set(Position.KEY_DRIVER_UNIQUE_ID, values[values.length - 1]);
 
         return position;
     }
@@ -660,6 +722,8 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
             if (prefix.length() < 5) {
                 return decodeUniversal(channel, remoteAddress, values);
+            } else if (prefix.endsWith("HTE")) {
+                return decodeTravelReport(channel, remoteAddress, values);
             } else if (prefix.startsWith("ST9")) {
                 return decode9(channel, remoteAddress, values);
             } else if (prefix.startsWith("ST4")) {

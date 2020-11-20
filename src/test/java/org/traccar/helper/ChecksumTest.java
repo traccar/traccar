@@ -42,8 +42,11 @@ public class ChecksumTest {
         assertEquals(0x00, Checksum.modulo256(ByteBuffer.wrap(new byte[] {0x00})));
         assertEquals(0x00, Checksum.modulo256(ByteBuffer.wrap(new byte[] {0x00, 0x00, 0x00})));
         assertEquals(0xca, Checksum.modulo256(ByteBuffer.wrap(new byte[] {0x77, 0x77, 0x77, 0x77, 0x77, 0x77})));
+    }
 
-
+    @Test
+    public void testNmea() {
+        assertEquals("*2A", Checksum.nmea("GSC,011412000010789,M4(Ro=500)"));
     }
 
 }

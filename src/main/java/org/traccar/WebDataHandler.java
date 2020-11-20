@@ -74,7 +74,7 @@ public class WebDataHandler extends BaseDataHandler {
     private final int retryCount;
     private final int retryLimit;
 
-    private AtomicInteger deliveryPending;
+    private final AtomicInteger deliveryPending;
 
     @Inject
     public WebDataHandler(
@@ -117,7 +117,7 @@ public class WebDataHandler extends BaseDataHandler {
             f.format("%1$td%1$tm%1$ty,,", calendar);
         }
 
-        s.append(Checksum.nmea(s.toString()));
+        s.append(Checksum.nmea(s.substring(1)));
 
         return s.toString();
     }
@@ -187,14 +187,14 @@ public class WebDataHandler extends BaseDataHandler {
 
         private int retries = 0;
         private Map<String, Object> payload;
-        private Invocation.Builder requestBuilder;
+        private final Invocation.Builder requestBuilder;
         private MediaType mediaType = MediaType.APPLICATION_JSON_TYPE;
 
         AsyncRequestAndCallback(Position position) {
 
             String formattedUrl;
             try {
-                formattedUrl = (json && !urlVariables) ? url : formatRequest(position);
+                formattedUrl = json && !urlVariables ? url : formatRequest(position);
             } catch (UnsupportedEncodingException | JsonProcessingException e) {
                 throw new RuntimeException("Forwarding formatting error", e);
             }

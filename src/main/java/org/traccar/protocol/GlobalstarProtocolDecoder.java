@@ -60,9 +60,9 @@ import java.util.List;
 
 public class GlobalstarProtocolDecoder extends BaseHttpProtocolDecoder {
 
-    private DocumentBuilder documentBuilder;
-    private XPath xPath;
-    private XPathExpression messageExpression;
+    private final DocumentBuilder documentBuilder;
+    private final XPath xPath;
+    private final XPathExpression messageExpression;
 
     public GlobalstarProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -142,9 +142,9 @@ public class GlobalstarProtocolDecoder extends BaseHttpProtocolDecoder {
                         DataConverter.parseHex(xPath.evaluate("payload", node).substring(2)));
 
                 int flags = buf.readUnsignedByte();
-                position.set(Position.PREFIX_IN + 1, BitUtil.check(flags, 1));
-                position.set(Position.PREFIX_IN + 2, BitUtil.check(flags, 2));
-                position.set(Position.KEY_CHARGE, BitUtil.check(flags, 3));
+                position.set(Position.PREFIX_IN + 1, !BitUtil.check(flags, 1));
+                position.set(Position.PREFIX_IN + 2, !BitUtil.check(flags, 2));
+                position.set(Position.KEY_CHARGE, !BitUtil.check(flags, 3));
                 if (BitUtil.check(flags, 4)) {
                     position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
                 }
@@ -161,17 +161,20 @@ public class GlobalstarProtocolDecoder extends BaseHttpProtocolDecoder {
                     position.setLongitude(position.getLongitude() - 360);
                 }
 
-                position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
+                int speed = buf.readUnsignedByte();
+                position.setSpeed(UnitsConverter.knotsFromKph(speed));
 
                 position.set("batteryReplace", BitUtil.check(buf.readUnsignedByte(), 7));
 
-                positions.add(position);
+                if (speed != 0xff) {
+                    positions.add(position);
+                }
 
             }
         }
 
         sendResponse(channel, document.getFirstChild().getAttributes().getNamedItem("messageID").getNodeValue());
-        return positions;
+        return !positions.isEmpty() ? positions : null;
     }
 
 }

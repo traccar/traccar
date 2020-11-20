@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,10 @@ import org.traccar.model.WifiAccessPoint;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
 
@@ -100,18 +104,33 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
 
         if (type == MSG_DATA) {
 
+            List<Position> positions = new LinkedList<>();
+            Set<Integer> keys = new HashSet<>();
+            boolean hasLocation = false;
             Position position = new Position(getProtocolName());
+
+            DeviceSession deviceSession = null;
 
             while (buf.isReadable()) {
                 int endIndex = buf.readUnsignedByte() + buf.readerIndex();
                 int key = buf.readUnsignedByte();
+
+                if (keys.contains(key)) {
+                    if (!hasLocation) {
+                        getLastLocation(position, null);
+                    }
+                    positions.add(position);
+                    keys.clear();
+                    hasLocation = false;
+                    position = new Position(getProtocolName());
+                }
+                keys.add(key);
+
                 switch (key) {
                     case 0x01:
-                        DeviceSession deviceSession = getDeviceSession(
+                        deviceSession = getDeviceSession(
                                 channel, remoteAddress, buf.readCharSequence(15, StandardCharsets.US_ASCII).toString());
-                        if (deviceSession == null) {
-                            return null;
-                        }
+
                         position.setDeviceId(deviceSession.getDeviceId());
                         break;
                     case 0x02:
@@ -122,6 +141,7 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.001);
                         break;
                     case 0x20:
+                        hasLocation = true;
                         position.setLatitude(buf.readIntLE() * 0.0000001);
                         position.setLongitude(buf.readIntLE() * 0.0000001);
                         position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShortLE()));
@@ -169,6 +189,10 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.KEY_BATTERY_LEVEL, BitUtil.from(status, 24));
                         position.set(Position.KEY_STATUS, status);
                         break;
+                    case 0x30:
+                        buf.readUnsignedInt(); // timestamp
+                        position.set(Position.KEY_STEPS, buf.readUnsignedInt());
+                        break;
                     case 0x40:
                         buf.readUnsignedIntLE(); // timestamp
                         int heartRate = buf.readUnsignedByte();
@@ -182,11 +206,20 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                 buf.readerIndex(endIndex);
             }
 
-            if (!position.getAttributes().containsKey(Position.KEY_SATELLITES)) {
+            if (!hasLocation) {
                 getLastLocation(position, null);
             }
+            positions.add(position);
 
-            return position.getDeviceId() > 0 ? position : null;
+            if (deviceSession != null) {
+                for (Position p : positions) {
+                    p.setDeviceId(deviceSession.getDeviceId());
+                }
+            } else {
+                return null;
+            }
+
+            return positions;
 
         }
 

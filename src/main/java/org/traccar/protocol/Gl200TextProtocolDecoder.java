@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ import java.util.regex.Pattern;
 
 public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
-    private boolean ignoreFixTime;
+    private final boolean ignoreFixTime;
 
     public Gl200TextProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -190,6 +190,12 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .expression(PATTERN_LOCATION.pattern())
             .expression(")+)")
             .groupBegin()
+            .number("d{1,2},,")
+            .number("(d{1,3}),")                 // battery
+            .number("[01],")                     // mode
+            .number("(?:[01])?,")                // motion
+            .number("(?:-?d{1,2}.d)?,")          // temperature
+            .or()
             .number("(d{1,7}.d)?,")              // odometer
             .number("(d{5}:dd:dd)?,")            // hour meter
             .number("(x+)?,")                    // adc 1
@@ -226,6 +232,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .expression("((?:")
             .expression(PATTERN_LOCATION.pattern())
             .expression(")+)")
+            .groupBegin()
             .number("(d{1,7}.d)?,")              // odometer
             .number("(d{5}:dd:dd)?,")            // hour meter
             .number("(x+)?,")                    // adc 1
@@ -233,6 +240,11 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("(d{1,3})?,")                // battery
             .number("(?:(xx)(xx)(xx))?,")        // device status
             .expression("(.*)")                  // additional data
+            .or()
+            .number("d*,,")
+            .number("(d+),")                     // battery
+            .any()
+            .groupEnd()
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
             .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
             .text(",")
@@ -789,8 +801,14 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             } else if (BitUtil.check(ignition, 5)) {
                 position.set(Position.KEY_IGNITION, true);
             }
-            position.set(Position.KEY_INPUT, parser.nextHexInt());
-            position.set(Position.KEY_OUTPUT, parser.nextHexInt());
+            int input = parser.nextHexInt();
+            int output = parser.nextHexInt();
+            position.set(Position.KEY_INPUT, input);
+            position.set(Position.PREFIX_IN + 1, BitUtil.check(input, 1));
+            position.set(Position.PREFIX_IN + 2, BitUtil.check(input, 2));
+            position.set(Position.KEY_OUTPUT, output);
+            position.set(Position.PREFIX_OUT + 1, BitUtil.check(output, 0));
+            position.set(Position.PREFIX_OUT + 2, BitUtil.check(output, 1));
         }
     }
 
@@ -832,6 +850,10 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
         if (battery != null) {
             position.set(Position.KEY_BATTERY_LEVEL, battery);
+        }
+
+        if (parser.hasNext()) {
+            position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
         }
 
         if (parser.hasNext()) {
@@ -897,49 +919,58 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (power != null) {
             position.set(Position.KEY_POWER, power * 0.001);
         }
-        position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
-        position.set(Position.KEY_HOURS, parseHours(parser.next()));
-        position.set(Position.PREFIX_ADC + 1, parser.next());
-        position.set(Position.PREFIX_ADC + 2, parser.next());
-        position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
 
-        decodeStatus(position, parser);
+        if (parser.hasNext(9)) {
 
-        int index = 0;
-        String[] data = parser.next().split(",");
+            position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
+            position.set(Position.KEY_HOURS, parseHours(parser.next()));
+            position.set(Position.PREFIX_ADC + 1, parser.next());
+            position.set(Position.PREFIX_ADC + 2, parser.next());
+            position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
 
-        index += 1; // device type
+            decodeStatus(position, parser);
 
-        if (BitUtil.check(mask, 0)) {
-            index += 1; // digital fuel sensor data
-        }
+            int index = 0;
+            String[] data = parser.next().split(",");
 
-        if (BitUtil.check(mask, 1)) {
-            int deviceCount = Integer.parseInt(data[index++]);
-            for (int i = 1; i <= deviceCount; i++) {
-                index += 1; // id
-                index += 1; // type
-                if (!data[index++].isEmpty()) {
-                    position.set(Position.PREFIX_TEMP + i, (short) Integer.parseInt(data[index - 1], 16) * 0.0625);
+            index += 1; // device type
+
+            if (BitUtil.check(mask, 0)) {
+                index += 1; // digital fuel sensor data
+            }
+
+            if (BitUtil.check(mask, 1)) {
+                int deviceCount = Integer.parseInt(data[index++]);
+                for (int i = 1; i <= deviceCount; i++) {
+                    index += 1; // id
+                    index += 1; // type
+                    if (!data[index++].isEmpty()) {
+                        position.set(Position.PREFIX_TEMP + i, (short) Integer.parseInt(data[index - 1], 16) * 0.0625);
+                    }
                 }
             }
-        }
 
-        if (BitUtil.check(mask, 2)) {
-            index += 1; // can data
-        }
+            if (BitUtil.check(mask, 2)) {
+                index += 1; // can data
+            }
 
-        if (BitUtil.check(mask, 3) || BitUtil.check(mask, 4)) {
-            int deviceCount = Integer.parseInt(data[index++]);
-            for (int i = 1; i <= deviceCount; i++) {
-                index += 1; // type
-                if (BitUtil.check(mask, 3)) {
-                    position.set(Position.KEY_FUEL_LEVEL, Double.parseDouble(data[index++]));
-                }
-                if (BitUtil.check(mask, 4)) {
-                    index += 1; // volume
+            if (BitUtil.check(mask, 3) || BitUtil.check(mask, 4)) {
+                int deviceCount = Integer.parseInt(data[index++]);
+                for (int i = 1; i <= deviceCount; i++) {
+                    index += 1; // type
+                    if (BitUtil.check(mask, 3)) {
+                        position.set(Position.KEY_FUEL_LEVEL, Double.parseDouble(data[index++]));
+                    }
+                    if (BitUtil.check(mask, 4)) {
+                        index += 1; // volume
+                    }
                 }
             }
+
+        }
+
+        if (parser.hasNext()) {
+            position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
         }
 
         decodeDeviceTime(position, parser);

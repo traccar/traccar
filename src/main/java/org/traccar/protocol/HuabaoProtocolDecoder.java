@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -42,23 +44,30 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public static final int MSG_GENERAL_RESPONSE = 0x8001;
+    public static final int MSG_GENERAL_RESPONSE_2 = 0x4401;
     public static final int MSG_TERMINAL_REGISTER = 0x0100;
     public static final int MSG_TERMINAL_REGISTER_RESPONSE = 0x8100;
     public static final int MSG_TERMINAL_CONTROL = 0x8105;
     public static final int MSG_TERMINAL_AUTH = 0x0102;
     public static final int MSG_LOCATION_REPORT = 0x0200;
+    public static final int MSG_LOCATION_REPORT_2 = 0x5501;
+    public static final int MSG_LOCATION_REPORT_BLIND = 0x5502;
     public static final int MSG_LOCATION_BATCH = 0x0704;
     public static final int MSG_OIL_CONTROL = 0XA006;
 
     public static final int RESULT_SUCCESS = 0;
 
-    public static ByteBuf formatMessage(int type, ByteBuf id, ByteBuf data) {
+    public static ByteBuf formatMessage(int type, ByteBuf id, boolean shortIndex, ByteBuf data) {
         ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0x7e);
         buf.writeShort(type);
         buf.writeShort(data.readableBytes());
         buf.writeBytes(id);
-        buf.writeShort(0); // index
+        if (shortIndex) {
+            buf.writeByte(1);
+        } else {
+            buf.writeShort(1);
+        }
         buf.writeBytes(data);
         data.release();
         buf.writeByte(Checksum.xor(buf.nioBuffer(1, buf.readableBytes() - 1)));
@@ -74,7 +83,18 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             response.writeShort(type);
             response.writeByte(RESULT_SUCCESS);
             channel.writeAndFlush(new NetworkMessage(
-                    formatMessage(MSG_GENERAL_RESPONSE, id, response), remoteAddress));
+                    formatMessage(MSG_GENERAL_RESPONSE, id, false, response), remoteAddress));
+        }
+    }
+
+    private void sendGeneralResponse2(
+            Channel channel, SocketAddress remoteAddress, ByteBuf id, int type) {
+        if (channel != null) {
+            ByteBuf response = Unpooled.buffer();
+            response.writeShort(type);
+            response.writeByte(RESULT_SUCCESS);
+            channel.writeAndFlush(new NetworkMessage(
+                    formatMessage(MSG_GENERAL_RESPONSE_2, id, true, response), remoteAddress));
         }
     }
 
@@ -113,11 +133,20 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
         ByteBuf buf = (ByteBuf) msg;
 
+        if (buf.getByte(buf.readerIndex()) == '(') {
+            return decodeResult(channel, remoteAddress, buf.toString(StandardCharsets.US_ASCII));
+        }
+
         buf.readUnsignedByte(); // start marker
         int type = buf.readUnsignedShort();
-        buf.readUnsignedShort(); // body length
+        int attribute = buf.readUnsignedShort();
         ByteBuf id = buf.readSlice(6); // phone number
-        int index = buf.readUnsignedShort();
+        int index;
+        if (type == MSG_LOCATION_REPORT_2 || type == MSG_LOCATION_REPORT_BLIND) {
+            index = buf.readUnsignedByte();
+        } else {
+            index = buf.readUnsignedShort();
+        }
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, ByteBufUtil.hexDump(id));
         if (deviceSession == null) {
@@ -136,7 +165,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 response.writeByte(RESULT_SUCCESS);
                 response.writeBytes(ByteBufUtil.hexDump(id).getBytes(StandardCharsets.US_ASCII));
                 channel.writeAndFlush(new NetworkMessage(
-                        formatMessage(MSG_TERMINAL_REGISTER_RESPONSE, id, response), remoteAddress));
+                        formatMessage(MSG_TERMINAL_REGISTER_RESPONSE, id, false, response), remoteAddress));
             }
 
         } else if (type == MSG_TERMINAL_AUTH) {
@@ -145,7 +174,17 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == MSG_LOCATION_REPORT) {
 
+            sendGeneralResponse(channel, remoteAddress, id, type, index);
+
             return decodeLocation(deviceSession, buf);
+
+        } else if (type == MSG_LOCATION_REPORT_2 || type == MSG_LOCATION_REPORT_BLIND) {
+
+            if (BitUtil.check(attribute, 15)) {
+                sendGeneralResponse2(channel, remoteAddress, id, type);
+            }
+
+            return decodeLocation2(deviceSession, buf, type);
 
         } else if (type == MSG_LOCATION_BATCH) {
 
@@ -153,6 +192,18 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
         }
 
+        return null;
+    }
+
+    private Position decodeResult(Channel channel, SocketAddress remoteAddress, String sentence) {
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+        if (deviceSession != null) {
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+            getLastLocation(position, null);
+            position.set(Position.KEY_RESULT, sentence);
+            return position;
+        }
         return null;
     }
 
@@ -198,7 +249,21 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 .setSecond(BcdUtil.readInteger(buf, 2));
         position.setTime(dateBuilder.getDate());
 
+        if (buf.readableBytes() == 20) {
+
+            buf.skipBytes(4); // remaining battery and mileage
+            position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 1000);
+            position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.1);
+            buf.readUnsignedInt(); // area id
+            position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+            buf.skipBytes(3); // reserved
+
+            return position;
+
+        }
+
         while (buf.readableBytes() > 2) {
+
             int subtype = buf.readUnsignedByte();
             int length = buf.readUnsignedByte();
             int endIndex = buf.readerIndex() + length;
@@ -251,22 +316,37 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 case 0xD3:
                     position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.1);
                     break;
+                case 0xD4:
+                    position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+                    break;
+                case 0xD5:
+                    position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.01);
+                    break;
+                case 0xDA:
+                    buf.readUnsignedShort(); // string cut count
+                    int deviceStatus = buf.readUnsignedByte();
+                    position.set("string", BitUtil.check(deviceStatus, 0));
+                    position.set(Position.KEY_MOTION, BitUtil.check(deviceStatus, 2));
+                    position.set("cover", BitUtil.check(deviceStatus, 3));
+                    break;
                 case 0xEB:
                     while (buf.readerIndex() < endIndex) {
-                        int tenetLength = buf.readUnsignedShort();
-                        int tenetType = buf.readUnsignedShort();
-                        switch (tenetType) {
+                        int extendedLength = buf.readUnsignedShort();
+                        int extendedType = buf.readUnsignedShort();
+                        switch (extendedType) {
                             case 0x0001:
                                 position.set("fuel1", buf.readUnsignedShort() * 0.1);
                                 buf.readUnsignedByte(); // unused
                                 break;
                             case 0x0023:
-                                buf.skipBytes(4); // unused
                                 position.set("fuel2", Double.parseDouble(
-                                        buf.readCharSequence(2, StandardCharsets.US_ASCII).toString()));
+                                        buf.readCharSequence(6, StandardCharsets.US_ASCII).toString()));
+                                break;
+                            case 0x00CE:
+                                position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
                                 break;
                             default:
-                                buf.skipBytes(tenetLength - 2);
+                                buf.skipBytes(extendedLength - 2);
                                 break;
                         }
                     }
@@ -276,6 +356,53 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             }
             buf.readerIndex(endIndex);
         }
+
+        return position;
+    }
+
+    private Position decodeLocation2(DeviceSession deviceSession, ByteBuf buf, int type) {
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        Jt600ProtocolDecoder.decodeBinaryLocation(buf, position);
+        position.setValid(type != MSG_LOCATION_REPORT_BLIND);
+
+        position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+        position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+        position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 1000L);
+
+        int battery = buf.readUnsignedByte();
+        if (battery <= 100) {
+            position.set(Position.KEY_BATTERY_LEVEL, battery);
+        } else if (battery == 0xAA) {
+            position.set(Position.KEY_CHARGE, true);
+        }
+
+        position.setNetwork(new Network(CellTower.fromCidLac(buf.readUnsignedInt(), buf.readUnsignedShort())));
+
+        int product = buf.readUnsignedByte();
+        int status = buf.readUnsignedShort();
+        int alarm = buf.readUnsignedShort();
+
+        if (product == 1 || product == 2) {
+            if (BitUtil.check(alarm, 0)) {
+                position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
+            }
+        } else if (product == 3) {
+            position.set(Position.KEY_BLOCKED, BitUtil.check(status, 5));
+            if (BitUtil.check(alarm, 1)) {
+                position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
+            }
+            if (BitUtil.check(alarm, 2)) {
+                position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
+            }
+            if (BitUtil.check(alarm, 3)) {
+                position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+            }
+        }
+
+        position.set(Position.KEY_STATUS, status);
 
         return position;
     }

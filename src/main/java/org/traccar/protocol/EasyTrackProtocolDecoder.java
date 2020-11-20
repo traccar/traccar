@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
@@ -49,9 +50,18 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
             .number("(x{8}),")                   // status
             .number("(x+),")                     // signal
             .number("(d+),")                     // power
-            .number("(x{4}),")                   // oil
-            .number("(x+),?")                    // odometer
-            .number("(d+)?")                     // altitude
+            .number("(x+),")                     // fuel
+            .number("(x+)")                      // odometer
+            .groupBegin()
+            .number(",(x+)")                     // altitude
+            .groupBegin()
+            .number(",d+")                       // gps data
+            .number(",(d*)")                     // rfid
+            .number(",(x+)")                     // temperature
+            .number(",(d+.d+)")                  // adc
+            .number(",(d+)")                     // satellites
+            .groupEnd("?")
+            .groupEnd("?")
             .any()
             .compile();
 
@@ -84,7 +94,14 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        Parser parser = new Parser(PATTERN, (String) msg);
+        String sentence = (String) msg;
+        String type = sentence.substring(20, 22);
+
+        if ((type.equals("TX") || type.equals("MQ")) && channel != null) {
+            channel.writeAndFlush(new NetworkMessage(sentence + "#", remoteAddress));
+        }
+
+        Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
             return null;
         }
@@ -102,35 +119,47 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         position.setValid(parser.next().equals("A"));
 
         DateBuilder dateBuilder = new DateBuilder()
-                .setDate(parser.nextHexInt(0), parser.nextHexInt(0), parser.nextHexInt(0))
-                .setTime(parser.nextHexInt(0), parser.nextHexInt(0), parser.nextHexInt(0));
+                .setDate(parser.nextHexInt(), parser.nextHexInt(), parser.nextHexInt())
+                .setTime(parser.nextHexInt(), parser.nextHexInt(), parser.nextHexInt());
         position.setTime(dateBuilder.getDate());
 
-        if (BitUtil.check(parser.nextHexInt(0), 3)) {
-            position.setLatitude(-parser.nextHexInt(0) / 600000.0);
+        if (BitUtil.check(parser.nextHexInt(), 3)) {
+            position.setLatitude(-parser.nextHexInt() / 600000.0);
         } else {
-            position.setLatitude(parser.nextHexInt(0) / 600000.0);
+            position.setLatitude(parser.nextHexInt() / 600000.0);
         }
 
-        if (BitUtil.check(parser.nextHexInt(0), 3)) {
-            position.setLongitude(-parser.nextHexInt(0) / 600000.0);
+        if (BitUtil.check(parser.nextHexInt(), 3)) {
+            position.setLongitude(-parser.nextHexInt() / 600000.0);
         } else {
-            position.setLongitude(parser.nextHexInt(0) / 600000.0);
+            position.setLongitude(parser.nextHexInt() / 600000.0);
         }
 
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextHexInt(0) / 100.0));
-        position.setCourse(parser.nextHexInt(0) / 100.0);
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextHexInt() / 100.0));
+        double course = parser.nextHexInt() * 0.01;
+        if (course < 360) {
+            position.setCourse(course);
+        }
 
         long status = parser.nextHexLong();
-        position.set(Position.KEY_STATUS, status);
         position.set(Position.KEY_ALARM, decodeAlarm(status));
+        position.set(Position.KEY_BLOCKED, (status & 0x00080000) > 0);
+        position.set(Position.KEY_IGNITION, (status & 0x00800000) > 0);
+        position.set(Position.KEY_STATUS, status);
 
-        position.set("signal", parser.next());
-        position.set(Position.KEY_POWER, parser.nextDouble(0));
-        position.set("oil", parser.nextHexInt(0));
-        position.set(Position.KEY_ODOMETER, parser.nextHexInt(0) * 100);
+        position.set(Position.KEY_RSSI, parser.nextHexInt());
+        position.set(Position.KEY_POWER, parser.nextDouble());
+        position.set(Position.KEY_FUEL_LEVEL, parser.nextHexInt());
+        position.set(Position.KEY_ODOMETER, parser.nextHexInt() * 100);
 
         position.setAltitude(parser.nextDouble(0));
+
+        if (parser.hasNext(4)) {
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
+            position.set(Position.PREFIX_TEMP + 1, parser.nextHexInt() * 0.01);
+            position.set(Position.PREFIX_ADC + 1, parser.nextDouble());
+            position.set(Position.KEY_SATELLITES, parser.nextInt());
+        }
 
         return position;
     }

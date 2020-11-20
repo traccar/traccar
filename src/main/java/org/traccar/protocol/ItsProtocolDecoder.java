@@ -56,7 +56,7 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             .expression("[^,]*,")                // vehicle registration
             .number("([01]),").optional()        // valid
             .groupEnd()
-            .number("(dd),?(dd),?(d{2,4}),")     // date (ddmmyyyy)
+            .number("(dd),?(dd),?(d{2,4}),?")    // date (ddmmyyyy)
             .number("(dd),?(dd),?(dd),")         // time (hhmmss)
             .expression("([01AV]),").optional()  // valid
             .number("(d+.d+),([NS]),")           // latitude
@@ -67,9 +67,9 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // satellites
             .groupBegin()
             .number("(d+.?d*),")                 // altitude
-            .number("d+.?d*,")                   // pdop
-            .number("d+.?d*,")                   // hdop
-            .expression("[^,]*,")                // operator
+            .number("(d+.?d*),")                 // pdop
+            .number("(d+.?d*),")                 // hdop
+            .expression("([^,]+)?,")             // operator
             .number("([01]),")                   // ignition
             .number("([01]),")                   // charging
             .number("(d+.?d*),")                 // power
@@ -80,6 +80,19 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             .number("([012]{4}),")               // inputs
             .number("([01]{2}),")                // outputs
             .groupBegin()
+            .number("d+,")                       // index
+            .number("(d+.?d*),")                 // odometer
+            .number("(d+.?d*),")                 // adc1
+            .number("(-?d+.?d*),")               // acceleration x
+            .number("(-?d+.?d*),")               // acceleration y
+            .number("(-?d+.?d*),")               // acceleration z
+            .number("(-?d+),")                   // tilt y
+            .number("(-?d+),")                   // tilt x
+            .or()
+            .number("d+,")                       // index
+            .number("(d+.?d*),")                 // odometer
+            .number("x+,")                       // checksum
+            .or()
             .number("d+,")                       // index
             .number("(d+.?d*),")                 // adc1
             .number("(d+.?d*),")                 // adc2
@@ -188,6 +201,9 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext(8)) {
             position.setAltitude(parser.nextDouble());
+            position.set(Position.KEY_PDOP, parser.nextDouble());
+            position.set(Position.KEY_HDOP, parser.nextDouble());
+            position.set(Position.KEY_OPERATOR, parser.next());
             position.set(Position.KEY_IGNITION, parser.nextInt() > 0);
             position.set(Position.KEY_CHARGE, parser.nextInt() > 0);
             position.set(Position.KEY_POWER, parser.nextDouble());
@@ -203,7 +219,7 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
                 int lac = Integer.parseInt(cells[3], 16);
                 int cid = Integer.parseInt(cells[4], 16);
                 Network network = new Network(CellTower.from(mcc, mnc, lac, cid, Integer.parseInt(cells[0])));
-                if (!cells[5].startsWith("(")) {
+                if (cells.length > 5 && !cells[5].startsWith("(")) {
                     for (int i = 0; i < 4; i++) {
                         lac = Integer.parseInt(cells[5 + 3 * i + 1], 16);
                         cid = Integer.parseInt(cells[5 + 3 * i + 2], 16);
@@ -221,6 +237,19 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             }
             position.set(Position.KEY_INPUT, Integer.parseInt(input, 2));
             position.set(Position.KEY_OUTPUT, parser.nextBinInt());
+        }
+
+        if (parser.hasNext(7)) {
+            position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
+            position.set(Position.PREFIX_ADC + 1, parser.nextDouble());
+            position.set(Position.KEY_G_SENSOR,
+                    "[" + parser.nextDouble() + "," + parser.nextDouble() + "," + parser.nextDouble() + "]");
+            position.set("tiltY", parser.nextInt());
+            position.set("tiltX", parser.nextInt());
+        }
+
+        if (parser.hasNext()) {
+            position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
         }
 
         if (parser.hasNext(2)) {

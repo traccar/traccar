@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,8 +38,12 @@ public class ServerResource extends BaseResource {
 
     @PermitAll
     @GET
-    public Server get() throws SQLException {
-        return Context.getPermissionsManager().getServer();
+    public Server get(@QueryParam("force") boolean force) throws SQLException {
+        if (force) {
+            return Context.getDataManager().getServer();
+        } else {
+            return Context.getPermissionsManager().getServer();
+        }
     }
 
     @PUT

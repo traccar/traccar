@@ -10,6 +10,9 @@ public class EskyFrameDecoderTest extends ProtocolTest {
 
         EskyFrameDecoder decoder = new EskyFrameDecoder();
 
+        verifyNull(
+                decoder.decode(null, null, binary("00")));
+
         verifyFrame(
                 binary("454f3b303b3836313331313030363436313930383b523b363b3138303432303130343735313b322e39373839363b3130312e36353039313b302e37353b3332303b333339383b313b7c"),
                 decoder.decode(null, null, binary("454f3b303b3836313331313030363436313930383b523b363b3138303432303130343735313b322e39373839363b3130312e36353039313b302e37353b3332303b333339383b313b7c")));

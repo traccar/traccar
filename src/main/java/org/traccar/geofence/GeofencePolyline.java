@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,6 +44,11 @@ public class GeofencePolyline extends GeofenceGeometry {
             }
         }
         return false;
+    }
+
+    @Override
+    public double calculateArea() {
+        return 0;
     }
 
     @Override

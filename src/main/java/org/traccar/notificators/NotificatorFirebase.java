@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2020 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,9 +32,8 @@ public class NotificatorFirebase extends Notificator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificatorFirebase.class);
 
-    private static final String URL = "https://fcm.googleapis.com/fcm/send";
-
-    private String key;
+    private final String url;
+    private final String key;
 
     public static class Notification {
         @JsonProperty("body")
@@ -49,7 +48,14 @@ public class NotificatorFirebase extends Notificator {
     }
 
     public NotificatorFirebase() {
-        key = Context.getConfig().getString("notificator.firebase.key");
+        this(
+                "https://fcm.googleapis.com/fcm/send",
+                Context.getConfig().getString("notificator.firebase.key"));
+    }
+
+    protected NotificatorFirebase(String url, String key) {
+        this.url = url;
+        this.key = key;
     }
 
     @Override
@@ -64,7 +70,7 @@ public class NotificatorFirebase extends Notificator {
             message.tokens = user.getString("notificationTokens").split("[, ]");
             message.notification = notification;
 
-            Context.getClient().target(URL).request()
+            Context.getClient().target(url).request()
                     .header("Authorization", "key=" + key)
                     .async().post(Entity.json(message), new InvocationCallback<Object>() {
                 @Override

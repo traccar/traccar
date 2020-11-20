@@ -110,7 +110,7 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
         if (root.containsKey("t")) {
             String trigger = root.getString("t");
             position.set("t", trigger);
-            Integer reportType = -1;
+            int reportType = -1;
             if (root.containsKey("rty")) {
                  reportType = root.getInt("rty");
             }
@@ -148,8 +148,8 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
         }
 
         if (root.containsKey("anum")) {
-            Integer numberOfAnalogueInputs = root.getInt("anum");
-            for (Integer i = 0; i < numberOfAnalogueInputs; i++) {
+            int numberOfAnalogueInputs = root.getInt("anum");
+            for (int i = 0; i < numberOfAnalogueInputs; i++) {
                 String indexString = String.format("%02d", i);
                 if (root.containsKey("adda-" + indexString)) {
                     position.set(Position.PREFIX_ADC + (i + 1), root.getString("adda-" + indexString));

@@ -5,9 +5,16 @@ import java.text.ParseException;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class GeofencePolygonTest {
+
+    @Test
+    public void testCalculateArea() throws ParseException {
+        String test = "POLYGON((-23.559204099194772 148.8653145299711, -23.6000443437826 148.85956016213583, -23.600411843430095 148.89462111436828, -23.5626384786532 148.90278297873897, -23.5574863232753 148.88137329347367, -23.559204099194772 148.8653145299711))";
+        assertEquals(17, new GeofencePolygon(test).calculateArea(), 1);
+    }
 
     @Test
     public void testPolygonWkt() throws ParseException {
@@ -23,7 +30,7 @@ public class GeofencePolygonTest {
         GeofenceGeometry geofenceGeometry = new GeofencePolygon();
         geofenceGeometry.fromWkt(test);
         assertTrue(geofenceGeometry.containsPoint(55.75476, 37.61915));
-        assertTrue(!geofenceGeometry.containsPoint(55.75545, 37.61921));
+        assertFalse(geofenceGeometry.containsPoint(55.75545, 37.61921));
 
     }
     
@@ -34,7 +41,7 @@ public class GeofencePolygonTest {
         geofenceGeometry.fromWkt(test);
         assertTrue(geofenceGeometry.containsPoint(66.9015, -180.0096));
         assertTrue(geofenceGeometry.containsPoint(66.9015, 179.991));
-        assertTrue(!geofenceGeometry.containsPoint(66.8368, -179.8792));
+        assertFalse(geofenceGeometry.containsPoint(66.8368, -179.8792));
 
     }
     
@@ -45,7 +52,7 @@ public class GeofencePolygonTest {
         geofenceGeometry.fromWkt(test);
         assertTrue(geofenceGeometry.containsPoint(51.0466, -0.0165));
         assertTrue(geofenceGeometry.containsPoint(51.0466, 0.018));
-        assertTrue(!geofenceGeometry.containsPoint(50.9477, 0.5836));
+        assertFalse(geofenceGeometry.containsPoint(50.9477, 0.5836));
 
     }
 

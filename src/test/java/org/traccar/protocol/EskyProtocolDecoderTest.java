@@ -12,6 +12,10 @@ public class EskyProtocolDecoderTest extends ProtocolTest {
         EskyProtocolDecoder decoder = new EskyProtocolDecoder(null);
 
         verifyAttribute(decoder, text(
+                "ET;0;860337031066546;R;9+200717114059+41.32053+19.80761+0.30+0+0x2+8+40381744+0+1409+11"),
+                Position.KEY_BATTERY, 14.09);
+
+        verifyAttribute(decoder, text(
                 "ET;0;860337031078319;R;6+190317162511+41.32536+19.83144+0.14+0+0x0+0+18460312+0+1233+192"),
                 Position.KEY_IGNITION, true);
 

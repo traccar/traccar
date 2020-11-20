@@ -205,6 +205,8 @@ public class ProtocolTest extends BaseTest {
 
             assertNotNull("protocol is null", position.getProtocol());
 
+            assertTrue("deviceId > 0", position.getDeviceId() > 0);
+
         }
 
         Map<String, Object> attributes = position.getAttributes();

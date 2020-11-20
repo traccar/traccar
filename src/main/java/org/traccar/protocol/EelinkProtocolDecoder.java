@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2014 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ import org.traccar.model.Position;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 public class EelinkProtocolDecoder extends BaseProtocolDecoder {
@@ -76,6 +78,8 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             case 0x08:
             case 0x09:
                 return Position.ALARM_GPS_ANTENNA_CUT;
+            case 0x25:
+                return Position.ALARM_REMOVING;
             case 0x81:
                 return Position.ALARM_LOW_SPEED;
             case 0x82:
@@ -271,6 +275,22 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.PREFIX_TEMP + 2, buf.readShort() / 16.0);
             }
 
+            if (buf.readableBytes() >= 2) {
+                int count = buf.readUnsignedByte();
+                buf.readUnsignedByte(); // id
+                for (int i = 1; i <= count; i++) {
+                    position.set("tag" + i + "Id", ByteBufUtil.hexDump(buf.readSlice(6)));
+                    buf.readUnsignedByte(); // signal level
+                    buf.readUnsignedByte(); // reserved
+                    buf.readUnsignedByte(); // model
+                    buf.readUnsignedByte(); // version
+                    position.set("tag" + i + "Battery", buf.readUnsignedShort() * 0.001);
+                    position.set("tag" + i + "Temp", buf.readShort() / 256.0);
+                    position.set("tag" + i + "Data", buf.readUnsignedShort());
+                }
+
+            }
+
         }
 
         return position;
@@ -372,9 +392,29 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             deviceSession = getDeviceSession(channel, remoteAddress);
         }
 
+        List<Position> positions = new LinkedList<>();
+
+        while (buf.isReadable()) {
+            Position position = decodePackage(channel, remoteAddress, buf, uniqueId, deviceSession);
+            if (position != null) {
+                positions.add(position);
+            }
+        }
+
+        if (!positions.isEmpty()) {
+            return positions.size() > 1 ? positions : positions.iterator().next();
+        } else {
+            return null;
+        }
+    }
+
+    protected Position decodePackage(
+            Channel channel, SocketAddress remoteAddress, ByteBuf buf,
+            String uniqueId, DeviceSession deviceSession) throws Exception {
+
         buf.skipBytes(2); // header
         int type = buf.readUnsignedByte();
-        buf.readShort(); // length
+        buf = buf.readSlice(buf.readUnsignedShort());
         int index = buf.readUnsignedShort();
 
         if (type != MSG_GPS && type != MSG_DATA) {

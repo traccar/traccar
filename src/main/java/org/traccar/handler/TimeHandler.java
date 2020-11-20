@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,8 +53,10 @@ public class TimeHandler extends ChannelInboundHandlerAdapter {
             Position position = (Position) msg;
             if (useServerTime) {
                 position.setDeviceTime(position.getServerTime());
+                position.setFixTime(position.getServerTime());
+            } else {
+                position.setFixTime(position.getDeviceTime());
             }
-            position.setFixTime(position.getDeviceTime());
 
         }
         ctx.fireChannelRead(msg);

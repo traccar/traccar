@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ public final class ObdDecoder {
             case MODE_FREEZE_FRAME:
                 return decodeData(
                         Integer.parseInt(value.substring(0, 2), 16),
-                        Integer.parseInt(value.substring(2), 16), true);
+                        Long.parseLong(value.substring(2), 16), true);
             case MODE_CODES:
                 return decodeCodes(value);
             default:
@@ -75,7 +75,7 @@ public final class ObdDecoder {
         }
     }
 
-    public static Map.Entry<String, Object> decodeData(int pid, int value, boolean convert) {
+    public static Map.Entry<String, Object> decodeData(int pid, long value, boolean convert) {
         switch (pid) {
             case 0x04:
                 return createEntry(Position.KEY_ENGINE_LOAD, convert ? value * 100 / 255 : value);

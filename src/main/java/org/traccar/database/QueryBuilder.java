@@ -114,11 +114,7 @@ public final class QueryBuilder {
                     name = name.toLowerCase();
 
                     // Add to list
-                    List<Integer> indexList = paramMap.get(name);
-                    if (indexList == null) {
-                        indexList = new LinkedList<>();
-                        paramMap.put(name, indexList);
-                    }
+                    List<Integer> indexList = paramMap.computeIfAbsent(name, k -> new LinkedList<>());
                     indexList.add(index);
 
                     index++;
@@ -318,96 +314,72 @@ public final class QueryBuilder {
             final Class<?> parameterType, final Method method, final String name) {
 
         if (parameterType.equals(boolean.class)) {
-            processors.add(new ResultSetProcessor<T>() {
-                @Override
-                public void process(T object, ResultSet resultSet) throws SQLException {
-                    try {
-                        method.invoke(object, resultSet.getBoolean(name));
-                    } catch (IllegalAccessException | InvocationTargetException error) {
-                        LOGGER.warn("Set property error", error);
-                    }
+            processors.add((object, resultSet) -> {
+                try {
+                    method.invoke(object, resultSet.getBoolean(name));
+                } catch (IllegalAccessException | InvocationTargetException error) {
+                    LOGGER.warn("Set property error", error);
                 }
             });
         } else if (parameterType.equals(int.class)) {
-            processors.add(new ResultSetProcessor<T>() {
-                @Override
-                public void process(T object, ResultSet resultSet) throws SQLException {
-                    try {
-                        method.invoke(object, resultSet.getInt(name));
-                    } catch (IllegalAccessException | InvocationTargetException error) {
-                        LOGGER.warn("Set property error", error);
-                    }
+            processors.add((object, resultSet) -> {
+                try {
+                    method.invoke(object, resultSet.getInt(name));
+                } catch (IllegalAccessException | InvocationTargetException error) {
+                    LOGGER.warn("Set property error", error);
                 }
             });
         } else if (parameterType.equals(long.class)) {
-            processors.add(new ResultSetProcessor<T>() {
-                @Override
-                public void process(T object, ResultSet resultSet) throws SQLException {
-                    try {
-                        method.invoke(object, resultSet.getLong(name));
-                    } catch (IllegalAccessException | InvocationTargetException error) {
-                        LOGGER.warn("Set property error", error);
-                    }
+            processors.add((object, resultSet) -> {
+                try {
+                    method.invoke(object, resultSet.getLong(name));
+                } catch (IllegalAccessException | InvocationTargetException error) {
+                    LOGGER.warn("Set property error", error);
                 }
             });
         } else if (parameterType.equals(double.class)) {
-            processors.add(new ResultSetProcessor<T>() {
-                @Override
-                public void process(T object, ResultSet resultSet) throws SQLException {
-                    try {
-                        method.invoke(object, resultSet.getDouble(name));
-                    } catch (IllegalAccessException | InvocationTargetException error) {
-                        LOGGER.warn("Set property error", error);
-                    }
+            processors.add((object, resultSet) -> {
+                try {
+                    method.invoke(object, resultSet.getDouble(name));
+                } catch (IllegalAccessException | InvocationTargetException error) {
+                    LOGGER.warn("Set property error", error);
                 }
             });
         } else if (parameterType.equals(String.class)) {
-            processors.add(new ResultSetProcessor<T>() {
-                @Override
-                public void process(T object, ResultSet resultSet) throws SQLException {
-                    try {
-                        method.invoke(object, resultSet.getString(name));
-                    } catch (IllegalAccessException | InvocationTargetException error) {
-                        LOGGER.warn("Set property error", error);
-                    }
+            processors.add((object, resultSet) -> {
+                try {
+                    method.invoke(object, resultSet.getString(name));
+                } catch (IllegalAccessException | InvocationTargetException error) {
+                    LOGGER.warn("Set property error", error);
                 }
             });
         } else if (parameterType.equals(Date.class)) {
-            processors.add(new ResultSetProcessor<T>() {
-                @Override
-                public void process(T object, ResultSet resultSet) throws SQLException {
-                    try {
-                        Timestamp timestamp = resultSet.getTimestamp(name);
-                        if (timestamp != null) {
-                            method.invoke(object, new Date(timestamp.getTime()));
-                        }
-                    } catch (IllegalAccessException | InvocationTargetException error) {
-                        LOGGER.warn("Set property error", error);
+            processors.add((object, resultSet) -> {
+                try {
+                    Timestamp timestamp = resultSet.getTimestamp(name);
+                    if (timestamp != null) {
+                        method.invoke(object, new Date(timestamp.getTime()));
                     }
+                } catch (IllegalAccessException | InvocationTargetException error) {
+                    LOGGER.warn("Set property error", error);
                 }
             });
         } else if (parameterType.equals(byte[].class)) {
-            processors.add(new ResultSetProcessor<T>() {
-                @Override
-                public void process(T object, ResultSet resultSet) throws SQLException {
-                    try {
-                        method.invoke(object, resultSet.getBytes(name));
-                    } catch (IllegalAccessException | InvocationTargetException error) {
-                        LOGGER.warn("Set property error", error);
-                    }
+            processors.add((object, resultSet) -> {
+                try {
+                    method.invoke(object, resultSet.getBytes(name));
+                } catch (IllegalAccessException | InvocationTargetException error) {
+                    LOGGER.warn("Set property error", error);
                 }
             });
         } else {
-            processors.add(new ResultSetProcessor<T>() {
-                @Override
-                public void process(T object, ResultSet resultSet) throws SQLException {
-                    String value = resultSet.getString(name);
-                    if (value != null && !value.isEmpty()) {
-                        try {
-                            method.invoke(object, Context.getObjectMapper().readValue(value, parameterType));
-                        } catch (InvocationTargetException | IllegalAccessException | IOException error) {
-                            LOGGER.warn("Set property error", error);
-                        }
+            processors.add((object, resultSet) -> {
+                String value = resultSet.getString(name);
+                if (value != null && !value.isEmpty()) {
+                    try {
+                        method.invoke(object, Context.getObjectMapper().readValue(value, parameterType));
+                    } catch (InvocationTargetException | IllegalAccessException | IOException error) {
+                        LOGGER.warn("Set property error", error);
                     }
                 }
             });
@@ -453,12 +425,12 @@ public final class QueryBuilder {
 
                     while (resultSet.next()) {
                         try {
-                            T object = clazz.newInstance();
+                            T object = clazz.getDeclaredConstructor().newInstance();
                             for (ResultSetProcessor<T> processor : processors) {
                                 processor.process(object, resultSet);
                             }
                             result.add(object);
-                        } catch (InstantiationException | IllegalAccessException e) {
+                        } catch (ReflectiveOperationException e) {
                             throw new IllegalArgumentException();
                         }
                     }

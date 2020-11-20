@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,15 @@
  */
 package org.traccar.geofence;
 
+import org.locationtech.spatial4j.context.SpatialContext;
+import org.locationtech.spatial4j.context.jts.JtsSpatialContextFactory;
+import org.locationtech.spatial4j.shape.ShapeFactory;
+import org.locationtech.spatial4j.shape.jts.JtsShapeFactory;
+
 import java.text.ParseException;
 import java.util.ArrayList;
+
+import static org.locationtech.spatial4j.distance.DistanceUtils.DEG_TO_KM;
 
 public class GeofencePolygon extends GeofenceGeometry {
 
@@ -34,7 +41,7 @@ public class GeofencePolygon extends GeofenceGeometry {
 
     private boolean needNormalize = false;
 
-    private void precalc() {
+    private void preCalculate() {
         if (coordinates == null) {
             return;
         }
@@ -108,13 +115,23 @@ public class GeofencePolygon extends GeofenceGeometry {
     }
 
     @Override
+    public double calculateArea() {
+        JtsShapeFactory jtsShapeFactory = new JtsSpatialContextFactory().newSpatialContext().getShapeFactory();
+        ShapeFactory.PolygonBuilder polygonBuilder = jtsShapeFactory.polygon();
+        for (Coordinate coordinate : coordinates) {
+            polygonBuilder.pointXY(coordinate.getLon(), coordinate.getLat());
+        }
+        return polygonBuilder.build().getArea(SpatialContext.GEO) * DEG_TO_KM * DEG_TO_KM;
+    }
+
+    @Override
     public String toWkt() {
         StringBuilder buf = new StringBuilder();
         buf.append("POLYGON ((");
         for (Coordinate coordinate : coordinates) {
-            buf.append(String.valueOf(coordinate.getLat()));
+            buf.append(coordinate.getLat());
             buf.append(" ");
-            buf.append(String.valueOf(coordinate.getLon()));
+            buf.append(coordinate.getLon());
             buf.append(", ");
         }
         return buf.substring(0, buf.length() - 2) + "))";
@@ -158,7 +175,8 @@ public class GeofencePolygon extends GeofenceGeometry {
             }
             coordinates.add(coordinate);
         }
-        precalc();
+
+        preCalculate();
     }
 
 }

@@ -196,7 +196,7 @@ public class PermissionsManager {
     public void checkDeviceLimit(long userId) throws SecurityException {
         int deviceLimit = getUser(userId).getDeviceLimit();
         if (deviceLimit != -1) {
-            int deviceCount = 0;
+            int deviceCount;
             if (getUserManager(userId)) {
                 deviceCount = Context.getDeviceManager().getAllManagedItems(userId).size();
             } else {
