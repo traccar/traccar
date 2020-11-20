@@ -200,7 +200,7 @@ public final class OmnicommMessageOuterClass {
   /**
    * Protobuf type {@code org.traccar.protobuf.OmnicommMessage}
    */
-  public  static final class OmnicommMessage extends
+  public static final class OmnicommMessage extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.traccar.protobuf.OmnicommMessage)
       OmnicommMessageOrBuilder {
@@ -884,7 +884,7 @@ public final class OmnicommMessageOuterClass {
      *
      * Protobuf type {@code org.traccar.protobuf.OmnicommMessage.General}
      */
-    public  static final class General extends
+    public static final class General extends
         com.google.protobuf.GeneratedMessageV3 implements
         // @@protoc_insertion_point(message_implements:org.traccar.protobuf.OmnicommMessage.General)
         GeneralOrBuilder {
@@ -1068,6 +1068,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 Time = 1;</code>
        * @return Whether the time field is set.
        */
+      @java.lang.Override
       public boolean hasTime() {
         return ((bitField0_ & 0x00000001) != 0);
       }
@@ -1079,6 +1080,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 Time = 1;</code>
        * @return The time.
        */
+      @java.lang.Override
       public int getTime() {
         return time_;
       }
@@ -1093,6 +1095,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 IDFAS = 2;</code>
        * @return Whether the iDFAS field is set.
        */
+      @java.lang.Override
       public boolean hasIDFAS() {
         return ((bitField0_ & 0x00000002) != 0);
       }
@@ -1104,6 +1107,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 IDFAS = 2;</code>
        * @return The iDFAS.
        */
+      @java.lang.Override
       public int getIDFAS() {
         return iDFAS_;
       }
@@ -1118,6 +1122,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional bytes IDDrv = 3;</code>
        * @return Whether the iDDrv field is set.
        */
+      @java.lang.Override
       public boolean hasIDDrv() {
         return ((bitField0_ & 0x00000004) != 0);
       }
@@ -1129,6 +1134,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional bytes IDDrv = 3;</code>
        * @return The iDDrv.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString getIDDrv() {
         return iDDrv_;
       }
@@ -1143,6 +1149,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 FLG = 4;</code>
        * @return Whether the fLG field is set.
        */
+      @java.lang.Override
       public boolean hasFLG() {
         return ((bitField0_ & 0x00000008) != 0);
       }
@@ -1154,6 +1161,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 FLG = 4;</code>
        * @return The fLG.
        */
+      @java.lang.Override
       public int getFLG() {
         return fLG_;
       }
@@ -1204,6 +1212,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 Mileage = 5;</code>
        * @return Whether the mileage field is set.
        */
+      @java.lang.Override
       public boolean hasMileage() {
         return ((bitField0_ & 0x00000010) != 0);
       }
@@ -1251,6 +1260,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 Mileage = 5;</code>
        * @return The mileage.
        */
+      @java.lang.Override
       public int getMileage() {
         return mileage_;
       }
@@ -1265,6 +1275,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 VImp = 6;</code>
        * @return Whether the vImp field is set.
        */
+      @java.lang.Override
       public boolean hasVImp() {
         return ((bitField0_ & 0x00000020) != 0);
       }
@@ -1276,6 +1287,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 VImp = 6;</code>
        * @return The vImp.
        */
+      @java.lang.Override
       public int getVImp() {
         return vImp_;
       }
@@ -1290,6 +1302,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 TImp = 7;</code>
        * @return Whether the tImp field is set.
        */
+      @java.lang.Override
       public boolean hasTImp() {
         return ((bitField0_ & 0x00000040) != 0);
       }
@@ -1301,6 +1314,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 TImp = 7;</code>
        * @return The tImp.
        */
+      @java.lang.Override
       public int getTImp() {
         return tImp_;
       }
@@ -1315,6 +1329,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 Uboard = 8;</code>
        * @return Whether the uboard field is set.
        */
+      @java.lang.Override
       public boolean hasUboard() {
         return ((bitField0_ & 0x00000080) != 0);
       }
@@ -1326,6 +1341,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 Uboard = 8;</code>
        * @return The uboard.
        */
+      @java.lang.Override
       public int getUboard() {
         return uboard_;
       }
@@ -1340,6 +1356,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 BatLife = 9;</code>
        * @return Whether the batLife field is set.
        */
+      @java.lang.Override
       public boolean hasBatLife() {
         return ((bitField0_ & 0x00000100) != 0);
       }
@@ -1351,6 +1368,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 BatLife = 9;</code>
        * @return The batLife.
        */
+      @java.lang.Override
       public int getBatLife() {
         return batLife_;
       }
@@ -1365,6 +1383,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 SumAcc = 10;</code>
        * @return Whether the sumAcc field is set.
        */
+      @java.lang.Override
       public boolean hasSumAcc() {
         return ((bitField0_ & 0x00000200) != 0);
       }
@@ -1376,6 +1395,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 SumAcc = 10;</code>
        * @return The sumAcc.
        */
+      @java.lang.Override
       public int getSumAcc() {
         return sumAcc_;
       }
@@ -1390,6 +1410,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional bytes Phone = 11;</code>
        * @return Whether the phone field is set.
        */
+      @java.lang.Override
       public boolean hasPhone() {
         return ((bitField0_ & 0x00000400) != 0);
       }
@@ -1401,6 +1422,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional bytes Phone = 11;</code>
        * @return The phone.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString getPhone() {
         return phone_;
       }
@@ -1415,6 +1437,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 AmtrX = 12;</code>
        * @return Whether the amtrX field is set.
        */
+      @java.lang.Override
       public boolean hasAmtrX() {
         return ((bitField0_ & 0x00000800) != 0);
       }
@@ -1426,6 +1449,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 AmtrX = 12;</code>
        * @return The amtrX.
        */
+      @java.lang.Override
       public int getAmtrX() {
         return amtrX_;
       }
@@ -1440,6 +1464,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 AmtrY = 13;</code>
        * @return Whether the amtrY field is set.
        */
+      @java.lang.Override
       public boolean hasAmtrY() {
         return ((bitField0_ & 0x00001000) != 0);
       }
@@ -1451,6 +1476,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 AmtrY = 13;</code>
        * @return The amtrY.
        */
+      @java.lang.Override
       public int getAmtrY() {
         return amtrY_;
       }
@@ -1465,6 +1491,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 AmtrZ = 14;</code>
        * @return Whether the amtrZ field is set.
        */
+      @java.lang.Override
       public boolean hasAmtrZ() {
         return ((bitField0_ & 0x00002000) != 0);
       }
@@ -1476,6 +1503,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 AmtrZ = 14;</code>
        * @return The amtrZ.
        */
+      @java.lang.Override
       public int getAmtrZ() {
         return amtrZ_;
       }
@@ -1490,6 +1518,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional bytes TachoCardID = 15;</code>
        * @return Whether the tachoCardID field is set.
        */
+      @java.lang.Override
       public boolean hasTachoCardID() {
         return ((bitField0_ & 0x00004000) != 0);
       }
@@ -1501,6 +1530,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional bytes TachoCardID = 15;</code>
        * @return The tachoCardID.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString getTachoCardID() {
         return tachoCardID_;
       }
@@ -1515,6 +1545,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 AccelStatus = 16;</code>
        * @return Whether the accelStatus field is set.
        */
+      @java.lang.Override
       public boolean hasAccelStatus() {
         return ((bitField0_ & 0x00008000) != 0);
       }
@@ -1526,6 +1557,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 AccelStatus = 16;</code>
        * @return The accelStatus.
        */
+      @java.lang.Override
       public int getAccelStatus() {
         return accelStatus_;
       }
@@ -1540,6 +1572,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 HoursKoef = 17;</code>
        * @return Whether the hoursKoef field is set.
        */
+      @java.lang.Override
       public boolean hasHoursKoef() {
         return ((bitField0_ & 0x00010000) != 0);
       }
@@ -1551,6 +1584,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 HoursKoef = 17;</code>
        * @return The hoursKoef.
        */
+      @java.lang.Override
       public int getHoursKoef() {
         return hoursKoef_;
       }
@@ -1565,6 +1599,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 GsmSignalQuality = 18;</code>
        * @return Whether the gsmSignalQuality field is set.
        */
+      @java.lang.Override
       public boolean hasGsmSignalQuality() {
         return ((bitField0_ & 0x00020000) != 0);
       }
@@ -1576,6 +1611,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 GsmSignalQuality = 18;</code>
        * @return The gsmSignalQuality.
        */
+      @java.lang.Override
       public int getGsmSignalQuality() {
         return gsmSignalQuality_;
       }
@@ -1590,6 +1626,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 WifiSignalQuality = 19;</code>
        * @return Whether the wifiSignalQuality field is set.
        */
+      @java.lang.Override
       public boolean hasWifiSignalQuality() {
         return ((bitField0_ & 0x00040000) != 0);
       }
@@ -1601,6 +1638,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 WifiSignalQuality = 19;</code>
        * @return The wifiSignalQuality.
        */
+      @java.lang.Override
       public int getWifiSignalQuality() {
         return wifiSignalQuality_;
       }
@@ -2382,6 +2420,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 Time = 1;</code>
          * @return Whether the time field is set.
          */
+        @java.lang.Override
         public boolean hasTime() {
           return ((bitField0_ & 0x00000001) != 0);
         }
@@ -2393,6 +2432,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 Time = 1;</code>
          * @return The time.
          */
+        @java.lang.Override
         public int getTime() {
           return time_;
         }
@@ -2435,6 +2475,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 IDFAS = 2;</code>
          * @return Whether the iDFAS field is set.
          */
+        @java.lang.Override
         public boolean hasIDFAS() {
           return ((bitField0_ & 0x00000002) != 0);
         }
@@ -2446,6 +2487,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 IDFAS = 2;</code>
          * @return The iDFAS.
          */
+        @java.lang.Override
         public int getIDFAS() {
           return iDFAS_;
         }
@@ -2488,6 +2530,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional bytes IDDrv = 3;</code>
          * @return Whether the iDDrv field is set.
          */
+        @java.lang.Override
         public boolean hasIDDrv() {
           return ((bitField0_ & 0x00000004) != 0);
         }
@@ -2499,6 +2542,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional bytes IDDrv = 3;</code>
          * @return The iDDrv.
          */
+        @java.lang.Override
         public com.google.protobuf.ByteString getIDDrv() {
           return iDDrv_;
         }
@@ -2544,6 +2588,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 FLG = 4;</code>
          * @return Whether the fLG field is set.
          */
+        @java.lang.Override
         public boolean hasFLG() {
           return ((bitField0_ & 0x00000008) != 0);
         }
@@ -2555,6 +2600,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 FLG = 4;</code>
          * @return The fLG.
          */
+        @java.lang.Override
         public int getFLG() {
           return fLG_;
         }
@@ -2633,6 +2679,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 Mileage = 5;</code>
          * @return Whether the mileage field is set.
          */
+        @java.lang.Override
         public boolean hasMileage() {
           return ((bitField0_ & 0x00000010) != 0);
         }
@@ -2680,6 +2727,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 Mileage = 5;</code>
          * @return The mileage.
          */
+        @java.lang.Override
         public int getMileage() {
           return mileage_;
         }
@@ -2794,6 +2842,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 VImp = 6;</code>
          * @return Whether the vImp field is set.
          */
+        @java.lang.Override
         public boolean hasVImp() {
           return ((bitField0_ & 0x00000020) != 0);
         }
@@ -2805,6 +2854,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 VImp = 6;</code>
          * @return The vImp.
          */
+        @java.lang.Override
         public int getVImp() {
           return vImp_;
         }
@@ -2847,6 +2897,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 TImp = 7;</code>
          * @return Whether the tImp field is set.
          */
+        @java.lang.Override
         public boolean hasTImp() {
           return ((bitField0_ & 0x00000040) != 0);
         }
@@ -2858,6 +2909,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 TImp = 7;</code>
          * @return The tImp.
          */
+        @java.lang.Override
         public int getTImp() {
           return tImp_;
         }
@@ -2900,6 +2952,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 Uboard = 8;</code>
          * @return Whether the uboard field is set.
          */
+        @java.lang.Override
         public boolean hasUboard() {
           return ((bitField0_ & 0x00000080) != 0);
         }
@@ -2911,6 +2964,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 Uboard = 8;</code>
          * @return The uboard.
          */
+        @java.lang.Override
         public int getUboard() {
           return uboard_;
         }
@@ -2953,6 +3007,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 BatLife = 9;</code>
          * @return Whether the batLife field is set.
          */
+        @java.lang.Override
         public boolean hasBatLife() {
           return ((bitField0_ & 0x00000100) != 0);
         }
@@ -2964,6 +3019,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 BatLife = 9;</code>
          * @return The batLife.
          */
+        @java.lang.Override
         public int getBatLife() {
           return batLife_;
         }
@@ -3006,6 +3062,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 SumAcc = 10;</code>
          * @return Whether the sumAcc field is set.
          */
+        @java.lang.Override
         public boolean hasSumAcc() {
           return ((bitField0_ & 0x00000200) != 0);
         }
@@ -3017,6 +3074,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 SumAcc = 10;</code>
          * @return The sumAcc.
          */
+        @java.lang.Override
         public int getSumAcc() {
           return sumAcc_;
         }
@@ -3059,6 +3117,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional bytes Phone = 11;</code>
          * @return Whether the phone field is set.
          */
+        @java.lang.Override
         public boolean hasPhone() {
           return ((bitField0_ & 0x00000400) != 0);
         }
@@ -3070,6 +3129,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional bytes Phone = 11;</code>
          * @return The phone.
          */
+        @java.lang.Override
         public com.google.protobuf.ByteString getPhone() {
           return phone_;
         }
@@ -3115,6 +3175,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 AmtrX = 12;</code>
          * @return Whether the amtrX field is set.
          */
+        @java.lang.Override
         public boolean hasAmtrX() {
           return ((bitField0_ & 0x00000800) != 0);
         }
@@ -3126,6 +3187,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 AmtrX = 12;</code>
          * @return The amtrX.
          */
+        @java.lang.Override
         public int getAmtrX() {
           return amtrX_;
         }
@@ -3168,6 +3230,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 AmtrY = 13;</code>
          * @return Whether the amtrY field is set.
          */
+        @java.lang.Override
         public boolean hasAmtrY() {
           return ((bitField0_ & 0x00001000) != 0);
         }
@@ -3179,6 +3242,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 AmtrY = 13;</code>
          * @return The amtrY.
          */
+        @java.lang.Override
         public int getAmtrY() {
           return amtrY_;
         }
@@ -3221,6 +3285,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 AmtrZ = 14;</code>
          * @return Whether the amtrZ field is set.
          */
+        @java.lang.Override
         public boolean hasAmtrZ() {
           return ((bitField0_ & 0x00002000) != 0);
         }
@@ -3232,6 +3297,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 AmtrZ = 14;</code>
          * @return The amtrZ.
          */
+        @java.lang.Override
         public int getAmtrZ() {
           return amtrZ_;
         }
@@ -3274,6 +3340,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional bytes TachoCardID = 15;</code>
          * @return Whether the tachoCardID field is set.
          */
+        @java.lang.Override
         public boolean hasTachoCardID() {
           return ((bitField0_ & 0x00004000) != 0);
         }
@@ -3285,6 +3352,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional bytes TachoCardID = 15;</code>
          * @return The tachoCardID.
          */
+        @java.lang.Override
         public com.google.protobuf.ByteString getTachoCardID() {
           return tachoCardID_;
         }
@@ -3330,6 +3398,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 AccelStatus = 16;</code>
          * @return Whether the accelStatus field is set.
          */
+        @java.lang.Override
         public boolean hasAccelStatus() {
           return ((bitField0_ & 0x00008000) != 0);
         }
@@ -3341,6 +3410,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 AccelStatus = 16;</code>
          * @return The accelStatus.
          */
+        @java.lang.Override
         public int getAccelStatus() {
           return accelStatus_;
         }
@@ -3383,6 +3453,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 HoursKoef = 17;</code>
          * @return Whether the hoursKoef field is set.
          */
+        @java.lang.Override
         public boolean hasHoursKoef() {
           return ((bitField0_ & 0x00010000) != 0);
         }
@@ -3394,6 +3465,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 HoursKoef = 17;</code>
          * @return The hoursKoef.
          */
+        @java.lang.Override
         public int getHoursKoef() {
           return hoursKoef_;
         }
@@ -3436,6 +3508,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 GsmSignalQuality = 18;</code>
          * @return Whether the gsmSignalQuality field is set.
          */
+        @java.lang.Override
         public boolean hasGsmSignalQuality() {
           return ((bitField0_ & 0x00020000) != 0);
         }
@@ -3447,6 +3520,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 GsmSignalQuality = 18;</code>
          * @return The gsmSignalQuality.
          */
+        @java.lang.Override
         public int getGsmSignalQuality() {
           return gsmSignalQuality_;
         }
@@ -3489,6 +3563,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 WifiSignalQuality = 19;</code>
          * @return Whether the wifiSignalQuality field is set.
          */
+        @java.lang.Override
         public boolean hasWifiSignalQuality() {
           return ((bitField0_ & 0x00040000) != 0);
         }
@@ -3500,6 +3575,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 WifiSignalQuality = 19;</code>
          * @return The wifiSignalQuality.
          */
+        @java.lang.Override
         public int getWifiSignalQuality() {
           return wifiSignalQuality_;
         }
@@ -3710,7 +3786,7 @@ public final class OmnicommMessageOuterClass {
      *
      * Protobuf type {@code org.traccar.protobuf.OmnicommMessage.Photo}
      */
-    public  static final class Photo extends
+    public static final class Photo extends
         com.google.protobuf.GeneratedMessageV3 implements
         // @@protoc_insertion_point(message_implements:org.traccar.protobuf.OmnicommMessage.Photo)
         PhotoOrBuilder {
@@ -3827,6 +3903,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 POSBLK = 1;</code>
        * @return Whether the pOSBLK field is set.
        */
+      @java.lang.Override
       public boolean hasPOSBLK() {
         return ((bitField0_ & 0x00000001) != 0);
       }
@@ -3838,6 +3915,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 POSBLK = 1;</code>
        * @return The pOSBLK.
        */
+      @java.lang.Override
       public int getPOSBLK() {
         return pOSBLK_;
       }
@@ -3852,6 +3930,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SZPHOTO = 2;</code>
        * @return Whether the sZPHOTO field is set.
        */
+      @java.lang.Override
       public boolean hasSZPHOTO() {
         return ((bitField0_ & 0x00000002) != 0);
       }
@@ -3863,6 +3942,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SZPHOTO = 2;</code>
        * @return The sZPHOTO.
        */
+      @java.lang.Override
       public int getSZPHOTO() {
         return sZPHOTO_;
       }
@@ -3877,6 +3957,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SIZEBLK = 3;</code>
        * @return Whether the sIZEBLK field is set.
        */
+      @java.lang.Override
       public boolean hasSIZEBLK() {
         return ((bitField0_ & 0x00000004) != 0);
       }
@@ -3888,6 +3969,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SIZEBLK = 3;</code>
        * @return The sIZEBLK.
        */
+      @java.lang.Override
       public int getSIZEBLK() {
         return sIZEBLK_;
       }
@@ -3902,6 +3984,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional bytes IMGDAT = 4;</code>
        * @return Whether the iMGDAT field is set.
        */
+      @java.lang.Override
       public boolean hasIMGDAT() {
         return ((bitField0_ & 0x00000008) != 0);
       }
@@ -3913,6 +3996,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional bytes IMGDAT = 4;</code>
        * @return The iMGDAT.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString getIMGDAT() {
         return iMGDAT_;
       }
@@ -3927,6 +4011,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 IDPH = 5;</code>
        * @return Whether the iDPH field is set.
        */
+      @java.lang.Override
       public boolean hasIDPH() {
         return ((bitField0_ & 0x00000010) != 0);
       }
@@ -3938,6 +4023,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 IDPH = 5;</code>
        * @return The iDPH.
        */
+      @java.lang.Override
       public int getIDPH() {
         return iDPH_;
       }
@@ -3952,6 +4038,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 IMGSTAT = 6;</code>
        * @return Whether the iMGSTAT field is set.
        */
+      @java.lang.Override
       public boolean hasIMGSTAT() {
         return ((bitField0_ & 0x00000020) != 0);
       }
@@ -3963,6 +4050,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 IMGSTAT = 6;</code>
        * @return The iMGSTAT.
        */
+      @java.lang.Override
       public int getIMGSTAT() {
         return iMGSTAT_;
       }
@@ -4419,6 +4507,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 POSBLK = 1;</code>
          * @return Whether the pOSBLK field is set.
          */
+        @java.lang.Override
         public boolean hasPOSBLK() {
           return ((bitField0_ & 0x00000001) != 0);
         }
@@ -4430,6 +4519,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 POSBLK = 1;</code>
          * @return The pOSBLK.
          */
+        @java.lang.Override
         public int getPOSBLK() {
           return pOSBLK_;
         }
@@ -4472,6 +4562,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SZPHOTO = 2;</code>
          * @return Whether the sZPHOTO field is set.
          */
+        @java.lang.Override
         public boolean hasSZPHOTO() {
           return ((bitField0_ & 0x00000002) != 0);
         }
@@ -4483,6 +4574,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SZPHOTO = 2;</code>
          * @return The sZPHOTO.
          */
+        @java.lang.Override
         public int getSZPHOTO() {
           return sZPHOTO_;
         }
@@ -4525,6 +4617,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SIZEBLK = 3;</code>
          * @return Whether the sIZEBLK field is set.
          */
+        @java.lang.Override
         public boolean hasSIZEBLK() {
           return ((bitField0_ & 0x00000004) != 0);
         }
@@ -4536,6 +4629,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SIZEBLK = 3;</code>
          * @return The sIZEBLK.
          */
+        @java.lang.Override
         public int getSIZEBLK() {
           return sIZEBLK_;
         }
@@ -4578,6 +4672,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional bytes IMGDAT = 4;</code>
          * @return Whether the iMGDAT field is set.
          */
+        @java.lang.Override
         public boolean hasIMGDAT() {
           return ((bitField0_ & 0x00000008) != 0);
         }
@@ -4589,6 +4684,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional bytes IMGDAT = 4;</code>
          * @return The iMGDAT.
          */
+        @java.lang.Override
         public com.google.protobuf.ByteString getIMGDAT() {
           return iMGDAT_;
         }
@@ -4634,6 +4730,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 IDPH = 5;</code>
          * @return Whether the iDPH field is set.
          */
+        @java.lang.Override
         public boolean hasIDPH() {
           return ((bitField0_ & 0x00000010) != 0);
         }
@@ -4645,6 +4742,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 IDPH = 5;</code>
          * @return The iDPH.
          */
+        @java.lang.Override
         public int getIDPH() {
           return iDPH_;
         }
@@ -4687,6 +4785,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 IMGSTAT = 6;</code>
          * @return Whether the iMGSTAT field is set.
          */
+        @java.lang.Override
         public boolean hasIMGSTAT() {
           return ((bitField0_ & 0x00000020) != 0);
         }
@@ -4698,6 +4797,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 IMGSTAT = 6;</code>
          * @return The iMGSTAT.
          */
+        @java.lang.Override
         public int getIMGSTAT() {
           return iMGSTAT_;
         }
@@ -4927,7 +5027,7 @@ public final class OmnicommMessageOuterClass {
      *
      * Protobuf type {@code org.traccar.protobuf.OmnicommMessage.NAV}
      */
-    public  static final class NAV extends
+    public static final class NAV extends
         com.google.protobuf.GeneratedMessageV3 implements
         // @@protoc_insertion_point(message_implements:org.traccar.protobuf.OmnicommMessage.NAV)
         NAVOrBuilder {
@@ -5048,6 +5148,7 @@ public final class OmnicommMessageOuterClass {
        * <code>required sint32 LAT = 1;</code>
        * @return Whether the lAT field is set.
        */
+      @java.lang.Override
       public boolean hasLAT() {
         return ((bitField0_ & 0x00000001) != 0);
       }
@@ -5059,6 +5160,7 @@ public final class OmnicommMessageOuterClass {
        * <code>required sint32 LAT = 1;</code>
        * @return The lAT.
        */
+      @java.lang.Override
       public int getLAT() {
         return lAT_;
       }
@@ -5073,6 +5175,7 @@ public final class OmnicommMessageOuterClass {
        * <code>required sint32 LON = 2;</code>
        * @return Whether the lON field is set.
        */
+      @java.lang.Override
       public boolean hasLON() {
         return ((bitField0_ & 0x00000002) != 0);
       }
@@ -5084,6 +5187,7 @@ public final class OmnicommMessageOuterClass {
        * <code>required sint32 LON = 2;</code>
        * @return The lON.
        */
+      @java.lang.Override
       public int getLON() {
         return lON_;
       }
@@ -5098,6 +5202,7 @@ public final class OmnicommMessageOuterClass {
        * <code>required uint32 GPSVel = 3;</code>
        * @return Whether the gPSVel field is set.
        */
+      @java.lang.Override
       public boolean hasGPSVel() {
         return ((bitField0_ & 0x00000004) != 0);
       }
@@ -5109,6 +5214,7 @@ public final class OmnicommMessageOuterClass {
        * <code>required uint32 GPSVel = 3;</code>
        * @return The gPSVel.
        */
+      @java.lang.Override
       public int getGPSVel() {
         return gPSVel_;
       }
@@ -5123,6 +5229,7 @@ public final class OmnicommMessageOuterClass {
        * <code>required uint32 GPSDir = 4;</code>
        * @return Whether the gPSDir field is set.
        */
+      @java.lang.Override
       public boolean hasGPSDir() {
         return ((bitField0_ & 0x00000008) != 0);
       }
@@ -5134,6 +5241,7 @@ public final class OmnicommMessageOuterClass {
        * <code>required uint32 GPSDir = 4;</code>
        * @return The gPSDir.
        */
+      @java.lang.Override
       public int getGPSDir() {
         return gPSDir_;
       }
@@ -5148,6 +5256,7 @@ public final class OmnicommMessageOuterClass {
        * <code>required uint32 GPSNSat = 5;</code>
        * @return Whether the gPSNSat field is set.
        */
+      @java.lang.Override
       public boolean hasGPSNSat() {
         return ((bitField0_ & 0x00000010) != 0);
       }
@@ -5159,6 +5268,7 @@ public final class OmnicommMessageOuterClass {
        * <code>required uint32 GPSNSat = 5;</code>
        * @return The gPSNSat.
        */
+      @java.lang.Override
       public int getGPSNSat() {
         return gPSNSat_;
       }
@@ -5173,6 +5283,7 @@ public final class OmnicommMessageOuterClass {
        * <code>required sint32 GPSAlt = 6;</code>
        * @return Whether the gPSAlt field is set.
        */
+      @java.lang.Override
       public boolean hasGPSAlt() {
         return ((bitField0_ & 0x00000020) != 0);
       }
@@ -5184,6 +5295,7 @@ public final class OmnicommMessageOuterClass {
        * <code>required sint32 GPSAlt = 6;</code>
        * @return The gPSAlt.
        */
+      @java.lang.Override
       public int getGPSAlt() {
         return gPSAlt_;
       }
@@ -5198,6 +5310,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 GPSTime = 7;</code>
        * @return Whether the gPSTime field is set.
        */
+      @java.lang.Override
       public boolean hasGPSTime() {
         return ((bitField0_ & 0x00000040) != 0);
       }
@@ -5209,6 +5322,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 GPSTime = 7;</code>
        * @return The gPSTime.
        */
+      @java.lang.Override
       public int getGPSTime() {
         return gPSTime_;
       }
@@ -5732,6 +5846,7 @@ public final class OmnicommMessageOuterClass {
          * <code>required sint32 LAT = 1;</code>
          * @return Whether the lAT field is set.
          */
+        @java.lang.Override
         public boolean hasLAT() {
           return ((bitField0_ & 0x00000001) != 0);
         }
@@ -5743,6 +5858,7 @@ public final class OmnicommMessageOuterClass {
          * <code>required sint32 LAT = 1;</code>
          * @return The lAT.
          */
+        @java.lang.Override
         public int getLAT() {
           return lAT_;
         }
@@ -5785,6 +5901,7 @@ public final class OmnicommMessageOuterClass {
          * <code>required sint32 LON = 2;</code>
          * @return Whether the lON field is set.
          */
+        @java.lang.Override
         public boolean hasLON() {
           return ((bitField0_ & 0x00000002) != 0);
         }
@@ -5796,6 +5913,7 @@ public final class OmnicommMessageOuterClass {
          * <code>required sint32 LON = 2;</code>
          * @return The lON.
          */
+        @java.lang.Override
         public int getLON() {
           return lON_;
         }
@@ -5838,6 +5956,7 @@ public final class OmnicommMessageOuterClass {
          * <code>required uint32 GPSVel = 3;</code>
          * @return Whether the gPSVel field is set.
          */
+        @java.lang.Override
         public boolean hasGPSVel() {
           return ((bitField0_ & 0x00000004) != 0);
         }
@@ -5849,6 +5968,7 @@ public final class OmnicommMessageOuterClass {
          * <code>required uint32 GPSVel = 3;</code>
          * @return The gPSVel.
          */
+        @java.lang.Override
         public int getGPSVel() {
           return gPSVel_;
         }
@@ -5891,6 +6011,7 @@ public final class OmnicommMessageOuterClass {
          * <code>required uint32 GPSDir = 4;</code>
          * @return Whether the gPSDir field is set.
          */
+        @java.lang.Override
         public boolean hasGPSDir() {
           return ((bitField0_ & 0x00000008) != 0);
         }
@@ -5902,6 +6023,7 @@ public final class OmnicommMessageOuterClass {
          * <code>required uint32 GPSDir = 4;</code>
          * @return The gPSDir.
          */
+        @java.lang.Override
         public int getGPSDir() {
           return gPSDir_;
         }
@@ -5944,6 +6066,7 @@ public final class OmnicommMessageOuterClass {
          * <code>required uint32 GPSNSat = 5;</code>
          * @return Whether the gPSNSat field is set.
          */
+        @java.lang.Override
         public boolean hasGPSNSat() {
           return ((bitField0_ & 0x00000010) != 0);
         }
@@ -5955,6 +6078,7 @@ public final class OmnicommMessageOuterClass {
          * <code>required uint32 GPSNSat = 5;</code>
          * @return The gPSNSat.
          */
+        @java.lang.Override
         public int getGPSNSat() {
           return gPSNSat_;
         }
@@ -5997,6 +6121,7 @@ public final class OmnicommMessageOuterClass {
          * <code>required sint32 GPSAlt = 6;</code>
          * @return Whether the gPSAlt field is set.
          */
+        @java.lang.Override
         public boolean hasGPSAlt() {
           return ((bitField0_ & 0x00000020) != 0);
         }
@@ -6008,6 +6133,7 @@ public final class OmnicommMessageOuterClass {
          * <code>required sint32 GPSAlt = 6;</code>
          * @return The gPSAlt.
          */
+        @java.lang.Override
         public int getGPSAlt() {
           return gPSAlt_;
         }
@@ -6050,6 +6176,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 GPSTime = 7;</code>
          * @return Whether the gPSTime field is set.
          */
+        @java.lang.Override
         public boolean hasGPSTime() {
           return ((bitField0_ & 0x00000040) != 0);
         }
@@ -6061,6 +6188,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 GPSTime = 7;</code>
          * @return The gPSTime.
          */
+        @java.lang.Override
         public int getGPSTime() {
           return gPSTime_;
         }
@@ -6271,7 +6399,7 @@ public final class OmnicommMessageOuterClass {
      *
      * Protobuf type {@code org.traccar.protobuf.OmnicommMessage.UniDt}
      */
-    public  static final class UniDt extends
+    public static final class UniDt extends
         com.google.protobuf.GeneratedMessageV3 implements
         // @@protoc_insertion_point(message_implements:org.traccar.protobuf.OmnicommMessage.UniDt)
         UniDtOrBuilder {
@@ -6387,6 +6515,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 UniVal0 = 1;</code>
        * @return Whether the uniVal0 field is set.
        */
+      @java.lang.Override
       public boolean hasUniVal0() {
         return ((bitField0_ & 0x00000001) != 0);
       }
@@ -6398,6 +6527,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 UniVal0 = 1;</code>
        * @return The uniVal0.
        */
+      @java.lang.Override
       public int getUniVal0() {
         return uniVal0_;
       }
@@ -6412,6 +6542,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 UniVal1 = 2;</code>
        * @return Whether the uniVal1 field is set.
        */
+      @java.lang.Override
       public boolean hasUniVal1() {
         return ((bitField0_ & 0x00000002) != 0);
       }
@@ -6423,6 +6554,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 UniVal1 = 2;</code>
        * @return The uniVal1.
        */
+      @java.lang.Override
       public int getUniVal1() {
         return uniVal1_;
       }
@@ -6437,6 +6569,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 UniVal2 = 3;</code>
        * @return Whether the uniVal2 field is set.
        */
+      @java.lang.Override
       public boolean hasUniVal2() {
         return ((bitField0_ & 0x00000004) != 0);
       }
@@ -6448,6 +6581,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 UniVal2 = 3;</code>
        * @return The uniVal2.
        */
+      @java.lang.Override
       public int getUniVal2() {
         return uniVal2_;
       }
@@ -6462,6 +6596,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 UniVal3 = 4;</code>
        * @return Whether the uniVal3 field is set.
        */
+      @java.lang.Override
       public boolean hasUniVal3() {
         return ((bitField0_ & 0x00000008) != 0);
       }
@@ -6473,6 +6608,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 UniVal3 = 4;</code>
        * @return The uniVal3.
        */
+      @java.lang.Override
       public int getUniVal3() {
         return uniVal3_;
       }
@@ -6487,6 +6623,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 UniVal4 = 5;</code>
        * @return Whether the uniVal4 field is set.
        */
+      @java.lang.Override
       public boolean hasUniVal4() {
         return ((bitField0_ & 0x00000010) != 0);
       }
@@ -6498,6 +6635,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 UniVal4 = 5;</code>
        * @return The uniVal4.
        */
+      @java.lang.Override
       public int getUniVal4() {
         return uniVal4_;
       }
@@ -6512,6 +6650,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 UniVal5 = 6;</code>
        * @return Whether the uniVal5 field is set.
        */
+      @java.lang.Override
       public boolean hasUniVal5() {
         return ((bitField0_ & 0x00000020) != 0);
       }
@@ -6523,6 +6662,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 UniVal5 = 6;</code>
        * @return The uniVal5.
        */
+      @java.lang.Override
       public int getUniVal5() {
         return uniVal5_;
       }
@@ -6979,6 +7119,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 UniVal0 = 1;</code>
          * @return Whether the uniVal0 field is set.
          */
+        @java.lang.Override
         public boolean hasUniVal0() {
           return ((bitField0_ & 0x00000001) != 0);
         }
@@ -6990,6 +7131,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 UniVal0 = 1;</code>
          * @return The uniVal0.
          */
+        @java.lang.Override
         public int getUniVal0() {
           return uniVal0_;
         }
@@ -7032,6 +7174,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 UniVal1 = 2;</code>
          * @return Whether the uniVal1 field is set.
          */
+        @java.lang.Override
         public boolean hasUniVal1() {
           return ((bitField0_ & 0x00000002) != 0);
         }
@@ -7043,6 +7186,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 UniVal1 = 2;</code>
          * @return The uniVal1.
          */
+        @java.lang.Override
         public int getUniVal1() {
           return uniVal1_;
         }
@@ -7085,6 +7229,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 UniVal2 = 3;</code>
          * @return Whether the uniVal2 field is set.
          */
+        @java.lang.Override
         public boolean hasUniVal2() {
           return ((bitField0_ & 0x00000004) != 0);
         }
@@ -7096,6 +7241,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 UniVal2 = 3;</code>
          * @return The uniVal2.
          */
+        @java.lang.Override
         public int getUniVal2() {
           return uniVal2_;
         }
@@ -7138,6 +7284,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 UniVal3 = 4;</code>
          * @return Whether the uniVal3 field is set.
          */
+        @java.lang.Override
         public boolean hasUniVal3() {
           return ((bitField0_ & 0x00000008) != 0);
         }
@@ -7149,6 +7296,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 UniVal3 = 4;</code>
          * @return The uniVal3.
          */
+        @java.lang.Override
         public int getUniVal3() {
           return uniVal3_;
         }
@@ -7191,6 +7339,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 UniVal4 = 5;</code>
          * @return Whether the uniVal4 field is set.
          */
+        @java.lang.Override
         public boolean hasUniVal4() {
           return ((bitField0_ & 0x00000010) != 0);
         }
@@ -7202,6 +7351,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 UniVal4 = 5;</code>
          * @return The uniVal4.
          */
+        @java.lang.Override
         public int getUniVal4() {
           return uniVal4_;
         }
@@ -7244,6 +7394,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 UniVal5 = 6;</code>
          * @return Whether the uniVal5 field is set.
          */
+        @java.lang.Override
         public boolean hasUniVal5() {
           return ((bitField0_ & 0x00000020) != 0);
         }
@@ -7255,6 +7406,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 UniVal5 = 6;</code>
          * @return The uniVal5.
          */
+        @java.lang.Override
         public int getUniVal5() {
           return uniVal5_;
         }
@@ -7991,7 +8143,7 @@ public final class OmnicommMessageOuterClass {
      *
      * Protobuf type {@code org.traccar.protobuf.OmnicommMessage.CanDt_J1939}
      */
-    public  static final class CanDt_J1939 extends
+    public static final class CanDt_J1939 extends
         com.google.protobuf.GeneratedMessageV3 implements
         // @@protoc_insertion_point(message_implements:org.traccar.protobuf.OmnicommMessage.CanDt_J1939)
         CanDt_J1939OrBuilder {
@@ -8247,6 +8399,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN70 = 70;</code>
        * @return Whether the sPN70 field is set.
        */
+      @java.lang.Override
       public boolean hasSPN70() {
         return ((bitField0_ & 0x00000001) != 0);
       }
@@ -8258,6 +8411,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN70 = 70;</code>
        * @return The sPN70.
        */
+      @java.lang.Override
       public int getSPN70() {
         return sPN70_;
       }
@@ -8276,6 +8430,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN91 = 91;</code>
        * @return Whether the sPN91 field is set.
        */
+      @java.lang.Override
       public boolean hasSPN91() {
         return ((bitField0_ & 0x00000002) != 0);
       }
@@ -8291,6 +8446,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN91 = 91;</code>
        * @return The sPN91.
        */
+      @java.lang.Override
       public int getSPN91() {
         return sPN91_;
       }
@@ -8307,6 +8463,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN96 = 96;</code>
        * @return Whether the sPN96 field is set.
        */
+      @java.lang.Override
       public boolean hasSPN96() {
         return ((bitField0_ & 0x00000004) != 0);
       }
@@ -8320,6 +8477,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN96 = 96;</code>
        * @return The sPN96.
        */
+      @java.lang.Override
       public int getSPN96() {
         return sPN96_;
       }
@@ -8334,6 +8492,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN100 = 100;</code>
        * @return Whether the sPN100 field is set.
        */
+      @java.lang.Override
       public boolean hasSPN100() {
         return ((bitField0_ & 0x00000008) != 0);
       }
@@ -8345,6 +8504,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN100 = 100;</code>
        * @return The sPN100.
        */
+      @java.lang.Override
       public int getSPN100() {
         return sPN100_;
       }
@@ -8361,6 +8521,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN110 = 110;</code>
        * @return Whether the sPN110 field is set.
        */
+      @java.lang.Override
       public boolean hasSPN110() {
         return ((bitField0_ & 0x00000010) != 0);
       }
@@ -8374,6 +8535,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN110 = 110;</code>
        * @return The sPN110.
        */
+      @java.lang.Override
       public int getSPN110() {
         return sPN110_;
       }
@@ -8390,6 +8552,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN174 = 174;</code>
        * @return Whether the sPN174 field is set.
        */
+      @java.lang.Override
       public boolean hasSPN174() {
         return ((bitField0_ & 0x00000020) != 0);
       }
@@ -8403,6 +8566,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN174 = 174;</code>
        * @return The sPN174.
        */
+      @java.lang.Override
       public int getSPN174() {
         return sPN174_;
       }
@@ -8419,6 +8583,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN175 = 175;</code>
        * @return Whether the sPN175 field is set.
        */
+      @java.lang.Override
       public boolean hasSPN175() {
         return ((bitField0_ & 0x00000040) != 0);
       }
@@ -8432,6 +8597,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN175 = 175;</code>
        * @return The sPN175.
        */
+      @java.lang.Override
       public int getSPN175() {
         return sPN175_;
       }
@@ -8446,6 +8612,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN182 = 182;</code>
        * @return Whether the sPN182 field is set.
        */
+      @java.lang.Override
       public boolean hasSPN182() {
         return ((bitField0_ & 0x00000080) != 0);
       }
@@ -8457,6 +8624,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN182 = 182;</code>
        * @return The sPN182.
        */
+      @java.lang.Override
       public int getSPN182() {
         return sPN182_;
       }
@@ -8473,6 +8641,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN184 = 184;</code>
        * @return Whether the sPN184 field is set.
        */
+      @java.lang.Override
       public boolean hasSPN184() {
         return ((bitField0_ & 0x00000100) != 0);
       }
@@ -8486,6 +8655,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN184 = 184;</code>
        * @return The sPN184.
        */
+      @java.lang.Override
       public int getSPN184() {
         return sPN184_;
       }
@@ -8502,6 +8672,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN190 = 190;</code>
        * @return Whether the sPN190 field is set.
        */
+      @java.lang.Override
       public boolean hasSPN190() {
         return ((bitField0_ & 0x00000200) != 0);
       }
@@ -8515,6 +8686,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN190 = 190;</code>
        * @return The sPN190.
        */
+      @java.lang.Override
       public int getSPN190() {
         return sPN190_;
       }
@@ -8531,6 +8703,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN244 = 244;</code>
        * @return Whether the sPN244 field is set.
        */
+      @java.lang.Override
       public boolean hasSPN244() {
         return ((bitField0_ & 0x00000400) != 0);
       }
@@ -8544,6 +8717,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN244 = 244;</code>
        * @return The sPN244.
        */
+      @java.lang.Override
       public int getSPN244() {
         return sPN244_;
       }
@@ -8560,6 +8734,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN245 = 245;</code>
        * @return Whether the sPN245 field is set.
        */
+      @java.lang.Override
       public boolean hasSPN245() {
         return ((bitField0_ & 0x00000800) != 0);
       }
@@ -8573,6 +8748,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN245 = 245;</code>
        * @return The sPN245.
        */
+      @java.lang.Override
       public int getSPN245() {
         return sPN245_;
       }
@@ -8589,6 +8765,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN247 = 247;</code>
        * @return Whether the sPN247 field is set.
        */
+      @java.lang.Override
       public boolean hasSPN247() {
         return ((bitField0_ & 0x00001000) != 0);
       }
@@ -8602,6 +8779,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN247 = 247;</code>
        * @return The sPN247.
        */
+      @java.lang.Override
       public int getSPN247() {
         return sPN247_;
       }
@@ -8618,6 +8796,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN250 = 250;</code>
        * @return Whether the sPN250 field is set.
        */
+      @java.lang.Override
       public boolean hasSPN250() {
         return ((bitField0_ & 0x00002000) != 0);
       }
@@ -8631,6 +8810,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN250 = 250;</code>
        * @return The sPN250.
        */
+      @java.lang.Override
       public int getSPN250() {
         return sPN250_;
       }
@@ -8647,6 +8827,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN521 = 521;</code>
        * @return Whether the sPN521 field is set.
        */
+      @java.lang.Override
       public boolean hasSPN521() {
         return ((bitField0_ & 0x00004000) != 0);
       }
@@ -8660,6 +8841,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN521 = 521;</code>
        * @return The sPN521.
        */
+      @java.lang.Override
       public int getSPN521() {
         return sPN521_;
       }
@@ -8676,6 +8858,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN522 = 522;</code>
        * @return Whether the sPN522 field is set.
        */
+      @java.lang.Override
       public boolean hasSPN522() {
         return ((bitField0_ & 0x00008000) != 0);
       }
@@ -8689,6 +8872,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN522 = 522;</code>
        * @return The sPN522.
        */
+      @java.lang.Override
       public int getSPN522() {
         return sPN522_;
       }
@@ -8705,6 +8889,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN527 = 527;</code>
        * @return Whether the sPN527 field is set.
        */
+      @java.lang.Override
       public boolean hasSPN527() {
         return ((bitField0_ & 0x00010000) != 0);
       }
@@ -8718,6 +8903,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN527 = 527;</code>
        * @return The sPN527.
        */
+      @java.lang.Override
       public int getSPN527() {
         return sPN527_;
       }
@@ -8740,6 +8926,7 @@ public final class OmnicommMessageOuterClass {
        * <code>repeated uint32 SPN582 = 582 [packed = true];</code>
        * @return A list containing the sPN582.
        */
+      @java.lang.Override
       public java.util.List<java.lang.Integer>
           getSPN582List() {
         return sPN582_;
@@ -8795,6 +8982,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN597 = 597;</code>
        * @return Whether the sPN597 field is set.
        */
+      @java.lang.Override
       public boolean hasSPN597() {
         return ((bitField0_ & 0x00020000) != 0);
       }
@@ -8806,6 +8994,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN597 = 597;</code>
        * @return The sPN597.
        */
+      @java.lang.Override
       public int getSPN597() {
         return sPN597_;
       }
@@ -8824,6 +9013,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN598 = 598;</code>
        * @return Whether the sPN598 field is set.
        */
+      @java.lang.Override
       public boolean hasSPN598() {
         return ((bitField0_ & 0x00040000) != 0);
       }
@@ -8839,6 +9029,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN598 = 598;</code>
        * @return The sPN598.
        */
+      @java.lang.Override
       public int getSPN598() {
         return sPN598_;
       }
@@ -8857,6 +9048,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN914 = 914;</code>
        * @return Whether the sPN914 field is set.
        */
+      @java.lang.Override
       public boolean hasSPN914() {
         return ((bitField0_ & 0x00080000) != 0);
       }
@@ -8872,6 +9064,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN914 = 914;</code>
        * @return The sPN914.
        */
+      @java.lang.Override
       public int getSPN914() {
         return sPN914_;
       }
@@ -8888,6 +9081,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN916 = 916;</code>
        * @return Whether the sPN916 field is set.
        */
+      @java.lang.Override
       public boolean hasSPN916() {
         return ((bitField0_ & 0x00100000) != 0);
       }
@@ -8901,6 +9095,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN916 = 916;</code>
        * @return The sPN916.
        */
+      @java.lang.Override
       public int getSPN916() {
         return sPN916_;
       }
@@ -8917,6 +9112,7 @@ public final class OmnicommMessageOuterClass {
        * <code>repeated uint32 SPN928 = 928 [packed = true];</code>
        * @return A list containing the sPN928.
        */
+      @java.lang.Override
       public java.util.List<java.lang.Integer>
           getSPN928List() {
         return sPN928_;
@@ -8960,6 +9156,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN1624 = 1624;</code>
        * @return Whether the sPN1624 field is set.
        */
+      @java.lang.Override
       public boolean hasSPN1624() {
         return ((bitField0_ & 0x00200000) != 0);
       }
@@ -8971,6 +9168,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN1624 = 1624;</code>
        * @return The sPN1624.
        */
+      @java.lang.Override
       public int getSPN1624() {
         return sPN1624_;
       }
@@ -8987,6 +9185,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN1821 = 1821;</code>
        * @return Whether the sPN1821 field is set.
        */
+      @java.lang.Override
       public boolean hasSPN1821() {
         return ((bitField0_ & 0x00400000) != 0);
       }
@@ -9000,6 +9199,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN1821 = 1821;</code>
        * @return The sPN1821.
        */
+      @java.lang.Override
       public int getSPN1821() {
         return sPN1821_;
       }
@@ -9020,6 +9220,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN1856 = 1856;</code>
        * @return Whether the sPN1856 field is set.
        */
+      @java.lang.Override
       public boolean hasSPN1856() {
         return ((bitField0_ & 0x00800000) != 0);
       }
@@ -9037,6 +9238,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SPN1856 = 1856;</code>
        * @return The sPN1856.
        */
+      @java.lang.Override
       public int getSPN1856() {
         return sPN1856_;
       }
@@ -10032,6 +10234,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN70 = 70;</code>
          * @return Whether the sPN70 field is set.
          */
+        @java.lang.Override
         public boolean hasSPN70() {
           return ((bitField0_ & 0x00000001) != 0);
         }
@@ -10043,6 +10246,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN70 = 70;</code>
          * @return The sPN70.
          */
+        @java.lang.Override
         public int getSPN70() {
           return sPN70_;
         }
@@ -10089,6 +10293,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN91 = 91;</code>
          * @return Whether the sPN91 field is set.
          */
+        @java.lang.Override
         public boolean hasSPN91() {
           return ((bitField0_ & 0x00000002) != 0);
         }
@@ -10104,6 +10309,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN91 = 91;</code>
          * @return The sPN91.
          */
+        @java.lang.Override
         public int getSPN91() {
           return sPN91_;
         }
@@ -10156,6 +10362,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN96 = 96;</code>
          * @return Whether the sPN96 field is set.
          */
+        @java.lang.Override
         public boolean hasSPN96() {
           return ((bitField0_ & 0x00000004) != 0);
         }
@@ -10169,6 +10376,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN96 = 96;</code>
          * @return The sPN96.
          */
+        @java.lang.Override
         public int getSPN96() {
           return sPN96_;
         }
@@ -10215,6 +10423,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN100 = 100;</code>
          * @return Whether the sPN100 field is set.
          */
+        @java.lang.Override
         public boolean hasSPN100() {
           return ((bitField0_ & 0x00000008) != 0);
         }
@@ -10226,6 +10435,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN100 = 100;</code>
          * @return The sPN100.
          */
+        @java.lang.Override
         public int getSPN100() {
           return sPN100_;
         }
@@ -10270,6 +10480,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN110 = 110;</code>
          * @return Whether the sPN110 field is set.
          */
+        @java.lang.Override
         public boolean hasSPN110() {
           return ((bitField0_ & 0x00000010) != 0);
         }
@@ -10283,6 +10494,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN110 = 110;</code>
          * @return The sPN110.
          */
+        @java.lang.Override
         public int getSPN110() {
           return sPN110_;
         }
@@ -10331,6 +10543,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN174 = 174;</code>
          * @return Whether the sPN174 field is set.
          */
+        @java.lang.Override
         public boolean hasSPN174() {
           return ((bitField0_ & 0x00000020) != 0);
         }
@@ -10344,6 +10557,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN174 = 174;</code>
          * @return The sPN174.
          */
+        @java.lang.Override
         public int getSPN174() {
           return sPN174_;
         }
@@ -10392,6 +10606,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN175 = 175;</code>
          * @return Whether the sPN175 field is set.
          */
+        @java.lang.Override
         public boolean hasSPN175() {
           return ((bitField0_ & 0x00000040) != 0);
         }
@@ -10405,6 +10620,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN175 = 175;</code>
          * @return The sPN175.
          */
+        @java.lang.Override
         public int getSPN175() {
           return sPN175_;
         }
@@ -10451,6 +10667,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN182 = 182;</code>
          * @return Whether the sPN182 field is set.
          */
+        @java.lang.Override
         public boolean hasSPN182() {
           return ((bitField0_ & 0x00000080) != 0);
         }
@@ -10462,6 +10679,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN182 = 182;</code>
          * @return The sPN182.
          */
+        @java.lang.Override
         public int getSPN182() {
           return sPN182_;
         }
@@ -10506,6 +10724,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN184 = 184;</code>
          * @return Whether the sPN184 field is set.
          */
+        @java.lang.Override
         public boolean hasSPN184() {
           return ((bitField0_ & 0x00000100) != 0);
         }
@@ -10519,6 +10738,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN184 = 184;</code>
          * @return The sPN184.
          */
+        @java.lang.Override
         public int getSPN184() {
           return sPN184_;
         }
@@ -10567,6 +10787,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN190 = 190;</code>
          * @return Whether the sPN190 field is set.
          */
+        @java.lang.Override
         public boolean hasSPN190() {
           return ((bitField0_ & 0x00000200) != 0);
         }
@@ -10580,6 +10801,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN190 = 190;</code>
          * @return The sPN190.
          */
+        @java.lang.Override
         public int getSPN190() {
           return sPN190_;
         }
@@ -10628,6 +10850,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN244 = 244;</code>
          * @return Whether the sPN244 field is set.
          */
+        @java.lang.Override
         public boolean hasSPN244() {
           return ((bitField0_ & 0x00000400) != 0);
         }
@@ -10641,6 +10864,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN244 = 244;</code>
          * @return The sPN244.
          */
+        @java.lang.Override
         public int getSPN244() {
           return sPN244_;
         }
@@ -10689,6 +10913,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN245 = 245;</code>
          * @return Whether the sPN245 field is set.
          */
+        @java.lang.Override
         public boolean hasSPN245() {
           return ((bitField0_ & 0x00000800) != 0);
         }
@@ -10702,6 +10927,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN245 = 245;</code>
          * @return The sPN245.
          */
+        @java.lang.Override
         public int getSPN245() {
           return sPN245_;
         }
@@ -10750,6 +10976,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN247 = 247;</code>
          * @return Whether the sPN247 field is set.
          */
+        @java.lang.Override
         public boolean hasSPN247() {
           return ((bitField0_ & 0x00001000) != 0);
         }
@@ -10763,6 +10990,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN247 = 247;</code>
          * @return The sPN247.
          */
+        @java.lang.Override
         public int getSPN247() {
           return sPN247_;
         }
@@ -10811,6 +11039,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN250 = 250;</code>
          * @return Whether the sPN250 field is set.
          */
+        @java.lang.Override
         public boolean hasSPN250() {
           return ((bitField0_ & 0x00002000) != 0);
         }
@@ -10824,6 +11053,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN250 = 250;</code>
          * @return The sPN250.
          */
+        @java.lang.Override
         public int getSPN250() {
           return sPN250_;
         }
@@ -10872,6 +11102,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN521 = 521;</code>
          * @return Whether the sPN521 field is set.
          */
+        @java.lang.Override
         public boolean hasSPN521() {
           return ((bitField0_ & 0x00004000) != 0);
         }
@@ -10885,6 +11116,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN521 = 521;</code>
          * @return The sPN521.
          */
+        @java.lang.Override
         public int getSPN521() {
           return sPN521_;
         }
@@ -10933,6 +11165,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN522 = 522;</code>
          * @return Whether the sPN522 field is set.
          */
+        @java.lang.Override
         public boolean hasSPN522() {
           return ((bitField0_ & 0x00008000) != 0);
         }
@@ -10946,6 +11179,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN522 = 522;</code>
          * @return The sPN522.
          */
+        @java.lang.Override
         public int getSPN522() {
           return sPN522_;
         }
@@ -10994,6 +11228,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN527 = 527;</code>
          * @return Whether the sPN527 field is set.
          */
+        @java.lang.Override
         public boolean hasSPN527() {
           return ((bitField0_ & 0x00010000) != 0);
         }
@@ -11007,6 +11242,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN527 = 527;</code>
          * @return The sPN527.
          */
+        @java.lang.Override
         public int getSPN527() {
           return sPN527_;
         }
@@ -11216,6 +11452,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN597 = 597;</code>
          * @return Whether the sPN597 field is set.
          */
+        @java.lang.Override
         public boolean hasSPN597() {
           return ((bitField0_ & 0x00040000) != 0);
         }
@@ -11227,6 +11464,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN597 = 597;</code>
          * @return The sPN597.
          */
+        @java.lang.Override
         public int getSPN597() {
           return sPN597_;
         }
@@ -11273,6 +11511,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN598 = 598;</code>
          * @return Whether the sPN598 field is set.
          */
+        @java.lang.Override
         public boolean hasSPN598() {
           return ((bitField0_ & 0x00080000) != 0);
         }
@@ -11288,6 +11527,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN598 = 598;</code>
          * @return The sPN598.
          */
+        @java.lang.Override
         public int getSPN598() {
           return sPN598_;
         }
@@ -11342,6 +11582,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN914 = 914;</code>
          * @return Whether the sPN914 field is set.
          */
+        @java.lang.Override
         public boolean hasSPN914() {
           return ((bitField0_ & 0x00100000) != 0);
         }
@@ -11357,6 +11598,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN914 = 914;</code>
          * @return The sPN914.
          */
+        @java.lang.Override
         public int getSPN914() {
           return sPN914_;
         }
@@ -11409,6 +11651,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN916 = 916;</code>
          * @return Whether the sPN916 field is set.
          */
+        @java.lang.Override
         public boolean hasSPN916() {
           return ((bitField0_ & 0x00200000) != 0);
         }
@@ -11422,6 +11665,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN916 = 916;</code>
          * @return The sPN916.
          */
+        @java.lang.Override
         public int getSPN916() {
           return sPN916_;
         }
@@ -11589,6 +11833,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN1624 = 1624;</code>
          * @return Whether the sPN1624 field is set.
          */
+        @java.lang.Override
         public boolean hasSPN1624() {
           return ((bitField0_ & 0x00800000) != 0);
         }
@@ -11600,6 +11845,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN1624 = 1624;</code>
          * @return The sPN1624.
          */
+        @java.lang.Override
         public int getSPN1624() {
           return sPN1624_;
         }
@@ -11644,6 +11890,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN1821 = 1821;</code>
          * @return Whether the sPN1821 field is set.
          */
+        @java.lang.Override
         public boolean hasSPN1821() {
           return ((bitField0_ & 0x01000000) != 0);
         }
@@ -11657,6 +11904,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN1821 = 1821;</code>
          * @return The sPN1821.
          */
+        @java.lang.Override
         public int getSPN1821() {
           return sPN1821_;
         }
@@ -11709,6 +11957,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN1856 = 1856;</code>
          * @return Whether the sPN1856 field is set.
          */
+        @java.lang.Override
         public boolean hasSPN1856() {
           return ((bitField0_ & 0x02000000) != 0);
         }
@@ -11726,6 +11975,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SPN1856 = 1856;</code>
          * @return The sPN1856.
          */
+        @java.lang.Override
         public int getSPN1856() {
           return sPN1856_;
         }
@@ -12319,7 +12569,7 @@ public final class OmnicommMessageOuterClass {
      *
      * Protobuf type {@code org.traccar.protobuf.OmnicommMessage.LLSDt}
      */
-    public  static final class LLSDt extends
+    public static final class LLSDt extends
         com.google.protobuf.GeneratedMessageV3 implements
         // @@protoc_insertion_point(message_implements:org.traccar.protobuf.OmnicommMessage.LLSDt)
         LLSDtOrBuilder {
@@ -12550,6 +12800,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 TLLS1 = 1;</code>
        * @return Whether the tLLS1 field is set.
        */
+      @java.lang.Override
       public boolean hasTLLS1() {
         return ((bitField0_ & 0x00000001) != 0);
       }
@@ -12561,6 +12812,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 TLLS1 = 1;</code>
        * @return The tLLS1.
        */
+      @java.lang.Override
       public int getTLLS1() {
         return tLLS1_;
       }
@@ -12575,6 +12827,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 CLLS1 = 2;</code>
        * @return Whether the cLLS1 field is set.
        */
+      @java.lang.Override
       public boolean hasCLLS1() {
         return ((bitField0_ & 0x00000002) != 0);
       }
@@ -12586,6 +12839,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 CLLS1 = 2;</code>
        * @return The cLLS1.
        */
+      @java.lang.Override
       public int getCLLS1() {
         return cLLS1_;
       }
@@ -12600,6 +12854,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 FLLS1 = 3;</code>
        * @return Whether the fLLS1 field is set.
        */
+      @java.lang.Override
       public boolean hasFLLS1() {
         return ((bitField0_ & 0x00000004) != 0);
       }
@@ -12611,6 +12866,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 FLLS1 = 3;</code>
        * @return The fLLS1.
        */
+      @java.lang.Override
       public int getFLLS1() {
         return fLLS1_;
       }
@@ -12625,6 +12881,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 TLLS2 = 4;</code>
        * @return Whether the tLLS2 field is set.
        */
+      @java.lang.Override
       public boolean hasTLLS2() {
         return ((bitField0_ & 0x00000008) != 0);
       }
@@ -12636,6 +12893,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 TLLS2 = 4;</code>
        * @return The tLLS2.
        */
+      @java.lang.Override
       public int getTLLS2() {
         return tLLS2_;
       }
@@ -12650,6 +12908,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 CLLS2 = 5;</code>
        * @return Whether the cLLS2 field is set.
        */
+      @java.lang.Override
       public boolean hasCLLS2() {
         return ((bitField0_ & 0x00000010) != 0);
       }
@@ -12661,6 +12920,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 CLLS2 = 5;</code>
        * @return The cLLS2.
        */
+      @java.lang.Override
       public int getCLLS2() {
         return cLLS2_;
       }
@@ -12675,6 +12935,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 FLLS2 = 6;</code>
        * @return Whether the fLLS2 field is set.
        */
+      @java.lang.Override
       public boolean hasFLLS2() {
         return ((bitField0_ & 0x00000020) != 0);
       }
@@ -12686,6 +12947,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 FLLS2 = 6;</code>
        * @return The fLLS2.
        */
+      @java.lang.Override
       public int getFLLS2() {
         return fLLS2_;
       }
@@ -12700,6 +12962,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 TLLS3 = 7;</code>
        * @return Whether the tLLS3 field is set.
        */
+      @java.lang.Override
       public boolean hasTLLS3() {
         return ((bitField0_ & 0x00000040) != 0);
       }
@@ -12711,6 +12974,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 TLLS3 = 7;</code>
        * @return The tLLS3.
        */
+      @java.lang.Override
       public int getTLLS3() {
         return tLLS3_;
       }
@@ -12725,6 +12989,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 CLLS3 = 8;</code>
        * @return Whether the cLLS3 field is set.
        */
+      @java.lang.Override
       public boolean hasCLLS3() {
         return ((bitField0_ & 0x00000080) != 0);
       }
@@ -12736,6 +13001,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 CLLS3 = 8;</code>
        * @return The cLLS3.
        */
+      @java.lang.Override
       public int getCLLS3() {
         return cLLS3_;
       }
@@ -12750,6 +13016,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 FLLS3 = 9;</code>
        * @return Whether the fLLS3 field is set.
        */
+      @java.lang.Override
       public boolean hasFLLS3() {
         return ((bitField0_ & 0x00000100) != 0);
       }
@@ -12761,6 +13028,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 FLLS3 = 9;</code>
        * @return The fLLS3.
        */
+      @java.lang.Override
       public int getFLLS3() {
         return fLLS3_;
       }
@@ -12775,6 +13043,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 TLLS4 = 10;</code>
        * @return Whether the tLLS4 field is set.
        */
+      @java.lang.Override
       public boolean hasTLLS4() {
         return ((bitField0_ & 0x00000200) != 0);
       }
@@ -12786,6 +13055,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 TLLS4 = 10;</code>
        * @return The tLLS4.
        */
+      @java.lang.Override
       public int getTLLS4() {
         return tLLS4_;
       }
@@ -12800,6 +13070,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 CLLS4 = 11;</code>
        * @return Whether the cLLS4 field is set.
        */
+      @java.lang.Override
       public boolean hasCLLS4() {
         return ((bitField0_ & 0x00000400) != 0);
       }
@@ -12811,6 +13082,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 CLLS4 = 11;</code>
        * @return The cLLS4.
        */
+      @java.lang.Override
       public int getCLLS4() {
         return cLLS4_;
       }
@@ -12825,6 +13097,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 FLLS4 = 12;</code>
        * @return Whether the fLLS4 field is set.
        */
+      @java.lang.Override
       public boolean hasFLLS4() {
         return ((bitField0_ & 0x00000800) != 0);
       }
@@ -12836,6 +13109,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 FLLS4 = 12;</code>
        * @return The fLLS4.
        */
+      @java.lang.Override
       public int getFLLS4() {
         return fLLS4_;
       }
@@ -12850,6 +13124,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 TLLS5 = 13;</code>
        * @return Whether the tLLS5 field is set.
        */
+      @java.lang.Override
       public boolean hasTLLS5() {
         return ((bitField0_ & 0x00001000) != 0);
       }
@@ -12861,6 +13136,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 TLLS5 = 13;</code>
        * @return The tLLS5.
        */
+      @java.lang.Override
       public int getTLLS5() {
         return tLLS5_;
       }
@@ -12875,6 +13151,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 CLLS5 = 14;</code>
        * @return Whether the cLLS5 field is set.
        */
+      @java.lang.Override
       public boolean hasCLLS5() {
         return ((bitField0_ & 0x00002000) != 0);
       }
@@ -12886,6 +13163,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 CLLS5 = 14;</code>
        * @return The cLLS5.
        */
+      @java.lang.Override
       public int getCLLS5() {
         return cLLS5_;
       }
@@ -12900,6 +13178,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 FLLS5 = 15;</code>
        * @return Whether the fLLS5 field is set.
        */
+      @java.lang.Override
       public boolean hasFLLS5() {
         return ((bitField0_ & 0x00004000) != 0);
       }
@@ -12911,6 +13190,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 FLLS5 = 15;</code>
        * @return The fLLS5.
        */
+      @java.lang.Override
       public int getFLLS5() {
         return fLLS5_;
       }
@@ -12925,6 +13205,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 TLLS6 = 16;</code>
        * @return Whether the tLLS6 field is set.
        */
+      @java.lang.Override
       public boolean hasTLLS6() {
         return ((bitField0_ & 0x00008000) != 0);
       }
@@ -12936,6 +13217,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 TLLS6 = 16;</code>
        * @return The tLLS6.
        */
+      @java.lang.Override
       public int getTLLS6() {
         return tLLS6_;
       }
@@ -12950,6 +13232,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 CLLS6 = 17;</code>
        * @return Whether the cLLS6 field is set.
        */
+      @java.lang.Override
       public boolean hasCLLS6() {
         return ((bitField0_ & 0x00010000) != 0);
       }
@@ -12961,6 +13244,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 CLLS6 = 17;</code>
        * @return The cLLS6.
        */
+      @java.lang.Override
       public int getCLLS6() {
         return cLLS6_;
       }
@@ -12975,6 +13259,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 FLLS6 = 18;</code>
        * @return Whether the fLLS6 field is set.
        */
+      @java.lang.Override
       public boolean hasFLLS6() {
         return ((bitField0_ & 0x00020000) != 0);
       }
@@ -12986,6 +13271,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 FLLS6 = 18;</code>
        * @return The fLLS6.
        */
+      @java.lang.Override
       public int getFLLS6() {
         return fLLS6_;
       }
@@ -13000,6 +13286,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 TLLS7 = 19;</code>
        * @return Whether the tLLS7 field is set.
        */
+      @java.lang.Override
       public boolean hasTLLS7() {
         return ((bitField0_ & 0x00040000) != 0);
       }
@@ -13011,6 +13298,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 TLLS7 = 19;</code>
        * @return The tLLS7.
        */
+      @java.lang.Override
       public int getTLLS7() {
         return tLLS7_;
       }
@@ -13025,6 +13313,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 CLLS7 = 20;</code>
        * @return Whether the cLLS7 field is set.
        */
+      @java.lang.Override
       public boolean hasCLLS7() {
         return ((bitField0_ & 0x00080000) != 0);
       }
@@ -13036,6 +13325,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 CLLS7 = 20;</code>
        * @return The cLLS7.
        */
+      @java.lang.Override
       public int getCLLS7() {
         return cLLS7_;
       }
@@ -13050,6 +13340,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 FLLS7 = 21;</code>
        * @return Whether the fLLS7 field is set.
        */
+      @java.lang.Override
       public boolean hasFLLS7() {
         return ((bitField0_ & 0x00100000) != 0);
       }
@@ -13061,6 +13352,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 FLLS7 = 21;</code>
        * @return The fLLS7.
        */
+      @java.lang.Override
       public int getFLLS7() {
         return fLLS7_;
       }
@@ -13075,6 +13367,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 TLLS8 = 22;</code>
        * @return Whether the tLLS8 field is set.
        */
+      @java.lang.Override
       public boolean hasTLLS8() {
         return ((bitField0_ & 0x00200000) != 0);
       }
@@ -13086,6 +13379,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 TLLS8 = 22;</code>
        * @return The tLLS8.
        */
+      @java.lang.Override
       public int getTLLS8() {
         return tLLS8_;
       }
@@ -13100,6 +13394,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 CLLS8 = 23;</code>
        * @return Whether the cLLS8 field is set.
        */
+      @java.lang.Override
       public boolean hasCLLS8() {
         return ((bitField0_ & 0x00400000) != 0);
       }
@@ -13111,6 +13406,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 CLLS8 = 23;</code>
        * @return The cLLS8.
        */
+      @java.lang.Override
       public int getCLLS8() {
         return cLLS8_;
       }
@@ -13125,6 +13421,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 FLLS8 = 24;</code>
        * @return Whether the fLLS8 field is set.
        */
+      @java.lang.Override
       public boolean hasFLLS8() {
         return ((bitField0_ & 0x00800000) != 0);
       }
@@ -13136,6 +13433,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional sint32 FLLS8 = 24;</code>
        * @return The fLLS8.
        */
+      @java.lang.Override
       public int getFLLS8() {
         return fLLS8_;
       }
@@ -13150,6 +13448,7 @@ public final class OmnicommMessageOuterClass {
        * <code>repeated uint32 LLSRefKoef = 25 [packed = true];</code>
        * @return A list containing the lLSRefKoef.
        */
+      @java.lang.Override
       public java.util.List<java.lang.Integer>
           getLLSRefKoefList() {
         return lLSRefKoef_;
@@ -14126,6 +14425,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 TLLS1 = 1;</code>
          * @return Whether the tLLS1 field is set.
          */
+        @java.lang.Override
         public boolean hasTLLS1() {
           return ((bitField0_ & 0x00000001) != 0);
         }
@@ -14137,6 +14437,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 TLLS1 = 1;</code>
          * @return The tLLS1.
          */
+        @java.lang.Override
         public int getTLLS1() {
           return tLLS1_;
         }
@@ -14179,6 +14480,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 CLLS1 = 2;</code>
          * @return Whether the cLLS1 field is set.
          */
+        @java.lang.Override
         public boolean hasCLLS1() {
           return ((bitField0_ & 0x00000002) != 0);
         }
@@ -14190,6 +14492,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 CLLS1 = 2;</code>
          * @return The cLLS1.
          */
+        @java.lang.Override
         public int getCLLS1() {
           return cLLS1_;
         }
@@ -14232,6 +14535,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 FLLS1 = 3;</code>
          * @return Whether the fLLS1 field is set.
          */
+        @java.lang.Override
         public boolean hasFLLS1() {
           return ((bitField0_ & 0x00000004) != 0);
         }
@@ -14243,6 +14547,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 FLLS1 = 3;</code>
          * @return The fLLS1.
          */
+        @java.lang.Override
         public int getFLLS1() {
           return fLLS1_;
         }
@@ -14285,6 +14590,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 TLLS2 = 4;</code>
          * @return Whether the tLLS2 field is set.
          */
+        @java.lang.Override
         public boolean hasTLLS2() {
           return ((bitField0_ & 0x00000008) != 0);
         }
@@ -14296,6 +14602,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 TLLS2 = 4;</code>
          * @return The tLLS2.
          */
+        @java.lang.Override
         public int getTLLS2() {
           return tLLS2_;
         }
@@ -14338,6 +14645,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 CLLS2 = 5;</code>
          * @return Whether the cLLS2 field is set.
          */
+        @java.lang.Override
         public boolean hasCLLS2() {
           return ((bitField0_ & 0x00000010) != 0);
         }
@@ -14349,6 +14657,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 CLLS2 = 5;</code>
          * @return The cLLS2.
          */
+        @java.lang.Override
         public int getCLLS2() {
           return cLLS2_;
         }
@@ -14391,6 +14700,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 FLLS2 = 6;</code>
          * @return Whether the fLLS2 field is set.
          */
+        @java.lang.Override
         public boolean hasFLLS2() {
           return ((bitField0_ & 0x00000020) != 0);
         }
@@ -14402,6 +14712,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 FLLS2 = 6;</code>
          * @return The fLLS2.
          */
+        @java.lang.Override
         public int getFLLS2() {
           return fLLS2_;
         }
@@ -14444,6 +14755,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 TLLS3 = 7;</code>
          * @return Whether the tLLS3 field is set.
          */
+        @java.lang.Override
         public boolean hasTLLS3() {
           return ((bitField0_ & 0x00000040) != 0);
         }
@@ -14455,6 +14767,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 TLLS3 = 7;</code>
          * @return The tLLS3.
          */
+        @java.lang.Override
         public int getTLLS3() {
           return tLLS3_;
         }
@@ -14497,6 +14810,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 CLLS3 = 8;</code>
          * @return Whether the cLLS3 field is set.
          */
+        @java.lang.Override
         public boolean hasCLLS3() {
           return ((bitField0_ & 0x00000080) != 0);
         }
@@ -14508,6 +14822,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 CLLS3 = 8;</code>
          * @return The cLLS3.
          */
+        @java.lang.Override
         public int getCLLS3() {
           return cLLS3_;
         }
@@ -14550,6 +14865,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 FLLS3 = 9;</code>
          * @return Whether the fLLS3 field is set.
          */
+        @java.lang.Override
         public boolean hasFLLS3() {
           return ((bitField0_ & 0x00000100) != 0);
         }
@@ -14561,6 +14877,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 FLLS3 = 9;</code>
          * @return The fLLS3.
          */
+        @java.lang.Override
         public int getFLLS3() {
           return fLLS3_;
         }
@@ -14603,6 +14920,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 TLLS4 = 10;</code>
          * @return Whether the tLLS4 field is set.
          */
+        @java.lang.Override
         public boolean hasTLLS4() {
           return ((bitField0_ & 0x00000200) != 0);
         }
@@ -14614,6 +14932,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 TLLS4 = 10;</code>
          * @return The tLLS4.
          */
+        @java.lang.Override
         public int getTLLS4() {
           return tLLS4_;
         }
@@ -14656,6 +14975,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 CLLS4 = 11;</code>
          * @return Whether the cLLS4 field is set.
          */
+        @java.lang.Override
         public boolean hasCLLS4() {
           return ((bitField0_ & 0x00000400) != 0);
         }
@@ -14667,6 +14987,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 CLLS4 = 11;</code>
          * @return The cLLS4.
          */
+        @java.lang.Override
         public int getCLLS4() {
           return cLLS4_;
         }
@@ -14709,6 +15030,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 FLLS4 = 12;</code>
          * @return Whether the fLLS4 field is set.
          */
+        @java.lang.Override
         public boolean hasFLLS4() {
           return ((bitField0_ & 0x00000800) != 0);
         }
@@ -14720,6 +15042,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 FLLS4 = 12;</code>
          * @return The fLLS4.
          */
+        @java.lang.Override
         public int getFLLS4() {
           return fLLS4_;
         }
@@ -14762,6 +15085,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 TLLS5 = 13;</code>
          * @return Whether the tLLS5 field is set.
          */
+        @java.lang.Override
         public boolean hasTLLS5() {
           return ((bitField0_ & 0x00001000) != 0);
         }
@@ -14773,6 +15097,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 TLLS5 = 13;</code>
          * @return The tLLS5.
          */
+        @java.lang.Override
         public int getTLLS5() {
           return tLLS5_;
         }
@@ -14815,6 +15140,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 CLLS5 = 14;</code>
          * @return Whether the cLLS5 field is set.
          */
+        @java.lang.Override
         public boolean hasCLLS5() {
           return ((bitField0_ & 0x00002000) != 0);
         }
@@ -14826,6 +15152,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 CLLS5 = 14;</code>
          * @return The cLLS5.
          */
+        @java.lang.Override
         public int getCLLS5() {
           return cLLS5_;
         }
@@ -14868,6 +15195,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 FLLS5 = 15;</code>
          * @return Whether the fLLS5 field is set.
          */
+        @java.lang.Override
         public boolean hasFLLS5() {
           return ((bitField0_ & 0x00004000) != 0);
         }
@@ -14879,6 +15207,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 FLLS5 = 15;</code>
          * @return The fLLS5.
          */
+        @java.lang.Override
         public int getFLLS5() {
           return fLLS5_;
         }
@@ -14921,6 +15250,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 TLLS6 = 16;</code>
          * @return Whether the tLLS6 field is set.
          */
+        @java.lang.Override
         public boolean hasTLLS6() {
           return ((bitField0_ & 0x00008000) != 0);
         }
@@ -14932,6 +15262,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 TLLS6 = 16;</code>
          * @return The tLLS6.
          */
+        @java.lang.Override
         public int getTLLS6() {
           return tLLS6_;
         }
@@ -14974,6 +15305,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 CLLS6 = 17;</code>
          * @return Whether the cLLS6 field is set.
          */
+        @java.lang.Override
         public boolean hasCLLS6() {
           return ((bitField0_ & 0x00010000) != 0);
         }
@@ -14985,6 +15317,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 CLLS6 = 17;</code>
          * @return The cLLS6.
          */
+        @java.lang.Override
         public int getCLLS6() {
           return cLLS6_;
         }
@@ -15027,6 +15360,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 FLLS6 = 18;</code>
          * @return Whether the fLLS6 field is set.
          */
+        @java.lang.Override
         public boolean hasFLLS6() {
           return ((bitField0_ & 0x00020000) != 0);
         }
@@ -15038,6 +15372,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 FLLS6 = 18;</code>
          * @return The fLLS6.
          */
+        @java.lang.Override
         public int getFLLS6() {
           return fLLS6_;
         }
@@ -15080,6 +15415,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 TLLS7 = 19;</code>
          * @return Whether the tLLS7 field is set.
          */
+        @java.lang.Override
         public boolean hasTLLS7() {
           return ((bitField0_ & 0x00040000) != 0);
         }
@@ -15091,6 +15427,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 TLLS7 = 19;</code>
          * @return The tLLS7.
          */
+        @java.lang.Override
         public int getTLLS7() {
           return tLLS7_;
         }
@@ -15133,6 +15470,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 CLLS7 = 20;</code>
          * @return Whether the cLLS7 field is set.
          */
+        @java.lang.Override
         public boolean hasCLLS7() {
           return ((bitField0_ & 0x00080000) != 0);
         }
@@ -15144,6 +15482,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 CLLS7 = 20;</code>
          * @return The cLLS7.
          */
+        @java.lang.Override
         public int getCLLS7() {
           return cLLS7_;
         }
@@ -15186,6 +15525,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 FLLS7 = 21;</code>
          * @return Whether the fLLS7 field is set.
          */
+        @java.lang.Override
         public boolean hasFLLS7() {
           return ((bitField0_ & 0x00100000) != 0);
         }
@@ -15197,6 +15537,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 FLLS7 = 21;</code>
          * @return The fLLS7.
          */
+        @java.lang.Override
         public int getFLLS7() {
           return fLLS7_;
         }
@@ -15239,6 +15580,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 TLLS8 = 22;</code>
          * @return Whether the tLLS8 field is set.
          */
+        @java.lang.Override
         public boolean hasTLLS8() {
           return ((bitField0_ & 0x00200000) != 0);
         }
@@ -15250,6 +15592,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 TLLS8 = 22;</code>
          * @return The tLLS8.
          */
+        @java.lang.Override
         public int getTLLS8() {
           return tLLS8_;
         }
@@ -15292,6 +15635,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 CLLS8 = 23;</code>
          * @return Whether the cLLS8 field is set.
          */
+        @java.lang.Override
         public boolean hasCLLS8() {
           return ((bitField0_ & 0x00400000) != 0);
         }
@@ -15303,6 +15647,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 CLLS8 = 23;</code>
          * @return The cLLS8.
          */
+        @java.lang.Override
         public int getCLLS8() {
           return cLLS8_;
         }
@@ -15345,6 +15690,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 FLLS8 = 24;</code>
          * @return Whether the fLLS8 field is set.
          */
+        @java.lang.Override
         public boolean hasFLLS8() {
           return ((bitField0_ & 0x00800000) != 0);
         }
@@ -15356,6 +15702,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 FLLS8 = 24;</code>
          * @return The fLLS8.
          */
+        @java.lang.Override
         public int getFLLS8() {
           return fLLS8_;
         }
@@ -15709,7 +16056,7 @@ public final class OmnicommMessageOuterClass {
      *
      * Protobuf type {@code org.traccar.protobuf.OmnicommMessage.Other}
      */
-    public  static final class Other extends
+    public static final class Other extends
         com.google.protobuf.GeneratedMessageV3 implements
         // @@protoc_insertion_point(message_implements:org.traccar.protobuf.OmnicommMessage.Other)
         OtherOrBuilder {
@@ -16083,7 +16430,7 @@ public final class OmnicommMessageOuterClass {
       /**
        * Protobuf type {@code org.traccar.protobuf.OmnicommMessage.Other.OneWire}
        */
-      public  static final class OneWire extends
+      public static final class OneWire extends
           com.google.protobuf.GeneratedMessageV3 implements
           // @@protoc_insertion_point(message_implements:org.traccar.protobuf.OmnicommMessage.Other.OneWire)
           OneWireOrBuilder {
@@ -16209,6 +16556,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 OneWire1 = 1;</code>
          * @return Whether the oneWire1 field is set.
          */
+        @java.lang.Override
         public boolean hasOneWire1() {
           return ((bitField0_ & 0x00000001) != 0);
         }
@@ -16220,6 +16568,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 OneWire1 = 1;</code>
          * @return The oneWire1.
          */
+        @java.lang.Override
         public int getOneWire1() {
           return oneWire1_;
         }
@@ -16234,6 +16583,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 OneWire2 = 2;</code>
          * @return Whether the oneWire2 field is set.
          */
+        @java.lang.Override
         public boolean hasOneWire2() {
           return ((bitField0_ & 0x00000002) != 0);
         }
@@ -16245,6 +16595,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 OneWire2 = 2;</code>
          * @return The oneWire2.
          */
+        @java.lang.Override
         public int getOneWire2() {
           return oneWire2_;
         }
@@ -16259,6 +16610,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 OneWire3 = 3;</code>
          * @return Whether the oneWire3 field is set.
          */
+        @java.lang.Override
         public boolean hasOneWire3() {
           return ((bitField0_ & 0x00000004) != 0);
         }
@@ -16270,6 +16622,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 OneWire3 = 3;</code>
          * @return The oneWire3.
          */
+        @java.lang.Override
         public int getOneWire3() {
           return oneWire3_;
         }
@@ -16284,6 +16637,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 OneWire4 = 4;</code>
          * @return Whether the oneWire4 field is set.
          */
+        @java.lang.Override
         public boolean hasOneWire4() {
           return ((bitField0_ & 0x00000008) != 0);
         }
@@ -16295,6 +16649,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 OneWire4 = 4;</code>
          * @return The oneWire4.
          */
+        @java.lang.Override
         public int getOneWire4() {
           return oneWire4_;
         }
@@ -16309,6 +16664,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 OneWire5 = 5;</code>
          * @return Whether the oneWire5 field is set.
          */
+        @java.lang.Override
         public boolean hasOneWire5() {
           return ((bitField0_ & 0x00000010) != 0);
         }
@@ -16320,6 +16676,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 OneWire5 = 5;</code>
          * @return The oneWire5.
          */
+        @java.lang.Override
         public int getOneWire5() {
           return oneWire5_;
         }
@@ -16334,6 +16691,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 OneWire6 = 6;</code>
          * @return Whether the oneWire6 field is set.
          */
+        @java.lang.Override
         public boolean hasOneWire6() {
           return ((bitField0_ & 0x00000020) != 0);
         }
@@ -16345,6 +16703,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 OneWire6 = 6;</code>
          * @return The oneWire6.
          */
+        @java.lang.Override
         public int getOneWire6() {
           return oneWire6_;
         }
@@ -16359,6 +16718,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 OneWire7 = 7;</code>
          * @return Whether the oneWire7 field is set.
          */
+        @java.lang.Override
         public boolean hasOneWire7() {
           return ((bitField0_ & 0x00000040) != 0);
         }
@@ -16370,6 +16730,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 OneWire7 = 7;</code>
          * @return The oneWire7.
          */
+        @java.lang.Override
         public int getOneWire7() {
           return oneWire7_;
         }
@@ -16384,6 +16745,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 OneWire8 = 8;</code>
          * @return Whether the oneWire8 field is set.
          */
+        @java.lang.Override
         public boolean hasOneWire8() {
           return ((bitField0_ & 0x00000080) != 0);
         }
@@ -16395,6 +16757,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 OneWire8 = 8;</code>
          * @return The oneWire8.
          */
+        @java.lang.Override
         public int getOneWire8() {
           return oneWire8_;
         }
@@ -16897,6 +17260,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional sint32 OneWire1 = 1;</code>
            * @return Whether the oneWire1 field is set.
            */
+          @java.lang.Override
           public boolean hasOneWire1() {
             return ((bitField0_ & 0x00000001) != 0);
           }
@@ -16908,6 +17272,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional sint32 OneWire1 = 1;</code>
            * @return The oneWire1.
            */
+          @java.lang.Override
           public int getOneWire1() {
             return oneWire1_;
           }
@@ -16950,6 +17315,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional sint32 OneWire2 = 2;</code>
            * @return Whether the oneWire2 field is set.
            */
+          @java.lang.Override
           public boolean hasOneWire2() {
             return ((bitField0_ & 0x00000002) != 0);
           }
@@ -16961,6 +17327,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional sint32 OneWire2 = 2;</code>
            * @return The oneWire2.
            */
+          @java.lang.Override
           public int getOneWire2() {
             return oneWire2_;
           }
@@ -17003,6 +17370,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional sint32 OneWire3 = 3;</code>
            * @return Whether the oneWire3 field is set.
            */
+          @java.lang.Override
           public boolean hasOneWire3() {
             return ((bitField0_ & 0x00000004) != 0);
           }
@@ -17014,6 +17382,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional sint32 OneWire3 = 3;</code>
            * @return The oneWire3.
            */
+          @java.lang.Override
           public int getOneWire3() {
             return oneWire3_;
           }
@@ -17056,6 +17425,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional sint32 OneWire4 = 4;</code>
            * @return Whether the oneWire4 field is set.
            */
+          @java.lang.Override
           public boolean hasOneWire4() {
             return ((bitField0_ & 0x00000008) != 0);
           }
@@ -17067,6 +17437,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional sint32 OneWire4 = 4;</code>
            * @return The oneWire4.
            */
+          @java.lang.Override
           public int getOneWire4() {
             return oneWire4_;
           }
@@ -17109,6 +17480,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional sint32 OneWire5 = 5;</code>
            * @return Whether the oneWire5 field is set.
            */
+          @java.lang.Override
           public boolean hasOneWire5() {
             return ((bitField0_ & 0x00000010) != 0);
           }
@@ -17120,6 +17492,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional sint32 OneWire5 = 5;</code>
            * @return The oneWire5.
            */
+          @java.lang.Override
           public int getOneWire5() {
             return oneWire5_;
           }
@@ -17162,6 +17535,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional sint32 OneWire6 = 6;</code>
            * @return Whether the oneWire6 field is set.
            */
+          @java.lang.Override
           public boolean hasOneWire6() {
             return ((bitField0_ & 0x00000020) != 0);
           }
@@ -17173,6 +17547,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional sint32 OneWire6 = 6;</code>
            * @return The oneWire6.
            */
+          @java.lang.Override
           public int getOneWire6() {
             return oneWire6_;
           }
@@ -17215,6 +17590,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional sint32 OneWire7 = 7;</code>
            * @return Whether the oneWire7 field is set.
            */
+          @java.lang.Override
           public boolean hasOneWire7() {
             return ((bitField0_ & 0x00000040) != 0);
           }
@@ -17226,6 +17602,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional sint32 OneWire7 = 7;</code>
            * @return The oneWire7.
            */
+          @java.lang.Override
           public int getOneWire7() {
             return oneWire7_;
           }
@@ -17268,6 +17645,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional sint32 OneWire8 = 8;</code>
            * @return Whether the oneWire8 field is set.
            */
+          @java.lang.Override
           public boolean hasOneWire8() {
             return ((bitField0_ & 0x00000080) != 0);
           }
@@ -17279,6 +17657,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional sint32 OneWire8 = 8;</code>
            * @return The oneWire8.
            */
+          @java.lang.Override
           public int getOneWire8() {
             return oneWire8_;
           }
@@ -17489,7 +17868,7 @@ public final class OmnicommMessageOuterClass {
        *
        * Protobuf type {@code org.traccar.protobuf.OmnicommMessage.Other.Pherip}
        */
-      public  static final class Pherip extends
+      public static final class Pherip extends
           com.google.protobuf.GeneratedMessageV3 implements
           // @@protoc_insertion_point(message_implements:org.traccar.protobuf.OmnicommMessage.Other.Pherip)
           PheripOrBuilder {
@@ -17607,6 +17986,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 PassengerIn = 1;</code>
          * @return Whether the passengerIn field is set.
          */
+        @java.lang.Override
         public boolean hasPassengerIn() {
           return ((bitField0_ & 0x00000001) != 0);
         }
@@ -17618,6 +17998,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 PassengerIn = 1;</code>
          * @return The passengerIn.
          */
+        @java.lang.Override
         public int getPassengerIn() {
           return passengerIn_;
         }
@@ -17632,6 +18013,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 PassengerOut = 2;</code>
          * @return Whether the passengerOut field is set.
          */
+        @java.lang.Override
         public boolean hasPassengerOut() {
           return ((bitField0_ & 0x00000002) != 0);
         }
@@ -17643,6 +18025,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 PassengerOut = 2;</code>
          * @return The passengerOut.
          */
+        @java.lang.Override
         public int getPassengerOut() {
           return passengerOut_;
         }
@@ -17657,6 +18040,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 DoorMask = 3;</code>
          * @return Whether the doorMask field is set.
          */
+        @java.lang.Override
         public boolean hasDoorMask() {
           return ((bitField0_ & 0x00000004) != 0);
         }
@@ -17668,6 +18052,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 DoorMask = 3;</code>
          * @return The doorMask.
          */
+        @java.lang.Override
         public int getDoorMask() {
           return doorMask_;
         }
@@ -17682,6 +18067,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 DriverStatus = 4;</code>
          * @return Whether the driverStatus field is set.
          */
+        @java.lang.Override
         public boolean hasDriverStatus() {
           return ((bitField0_ & 0x00000008) != 0);
         }
@@ -17693,6 +18079,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 DriverStatus = 4;</code>
          * @return The driverStatus.
          */
+        @java.lang.Override
         public int getDriverStatus() {
           return driverStatus_;
         }
@@ -17707,6 +18094,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional bytes TPMS = 5;</code>
          * @return Whether the tPMS field is set.
          */
+        @java.lang.Override
         public boolean hasTPMS() {
           return ((bitField0_ & 0x00000010) != 0);
         }
@@ -17718,6 +18106,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional bytes TPMS = 5;</code>
          * @return The tPMS.
          */
+        @java.lang.Override
         public com.google.protobuf.ByteString getTPMS() {
           return tPMS_;
         }
@@ -17732,6 +18121,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional bytes iQFreeze = 6;</code>
          * @return Whether the iQFreeze field is set.
          */
+        @java.lang.Override
         public boolean hasIQFreeze() {
           return ((bitField0_ & 0x00000020) != 0);
         }
@@ -17743,6 +18133,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional bytes iQFreeze = 6;</code>
          * @return The iQFreeze.
          */
+        @java.lang.Override
         public com.google.protobuf.ByteString getIQFreeze() {
           return iQFreeze_;
         }
@@ -18199,6 +18590,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 PassengerIn = 1;</code>
            * @return Whether the passengerIn field is set.
            */
+          @java.lang.Override
           public boolean hasPassengerIn() {
             return ((bitField0_ & 0x00000001) != 0);
           }
@@ -18210,6 +18602,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 PassengerIn = 1;</code>
            * @return The passengerIn.
            */
+          @java.lang.Override
           public int getPassengerIn() {
             return passengerIn_;
           }
@@ -18252,6 +18645,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 PassengerOut = 2;</code>
            * @return Whether the passengerOut field is set.
            */
+          @java.lang.Override
           public boolean hasPassengerOut() {
             return ((bitField0_ & 0x00000002) != 0);
           }
@@ -18263,6 +18657,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 PassengerOut = 2;</code>
            * @return The passengerOut.
            */
+          @java.lang.Override
           public int getPassengerOut() {
             return passengerOut_;
           }
@@ -18305,6 +18700,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 DoorMask = 3;</code>
            * @return Whether the doorMask field is set.
            */
+          @java.lang.Override
           public boolean hasDoorMask() {
             return ((bitField0_ & 0x00000004) != 0);
           }
@@ -18316,6 +18712,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 DoorMask = 3;</code>
            * @return The doorMask.
            */
+          @java.lang.Override
           public int getDoorMask() {
             return doorMask_;
           }
@@ -18358,6 +18755,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 DriverStatus = 4;</code>
            * @return Whether the driverStatus field is set.
            */
+          @java.lang.Override
           public boolean hasDriverStatus() {
             return ((bitField0_ & 0x00000008) != 0);
           }
@@ -18369,6 +18767,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 DriverStatus = 4;</code>
            * @return The driverStatus.
            */
+          @java.lang.Override
           public int getDriverStatus() {
             return driverStatus_;
           }
@@ -18411,6 +18810,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional bytes TPMS = 5;</code>
            * @return Whether the tPMS field is set.
            */
+          @java.lang.Override
           public boolean hasTPMS() {
             return ((bitField0_ & 0x00000010) != 0);
           }
@@ -18422,6 +18822,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional bytes TPMS = 5;</code>
            * @return The tPMS.
            */
+          @java.lang.Override
           public com.google.protobuf.ByteString getTPMS() {
             return tPMS_;
           }
@@ -18467,6 +18868,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional bytes iQFreeze = 6;</code>
            * @return Whether the iQFreeze field is set.
            */
+          @java.lang.Override
           public boolean hasIQFreeze() {
             return ((bitField0_ & 0x00000020) != 0);
           }
@@ -18478,6 +18880,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional bytes iQFreeze = 6;</code>
            * @return The iQFreeze.
            */
+          @java.lang.Override
           public com.google.protobuf.ByteString getIQFreeze() {
             return iQFreeze_;
           }
@@ -18719,7 +19122,7 @@ public final class OmnicommMessageOuterClass {
        *
        * Protobuf type {@code org.traccar.protobuf.OmnicommMessage.Other.ExCAN}
        */
-      public  static final class ExCAN extends
+      public static final class ExCAN extends
           com.google.protobuf.GeneratedMessageV3 implements
           // @@protoc_insertion_point(message_implements:org.traccar.protobuf.OmnicommMessage.Other.ExCAN)
           ExCANOrBuilder {
@@ -18905,6 +19308,7 @@ public final class OmnicommMessageOuterClass {
          * <code>repeated uint32 SPNid = 1;</code>
          * @return A list containing the sPNid.
          */
+        @java.lang.Override
         public java.util.List<java.lang.Integer>
             getSPNidList() {
           return sPNid_;
@@ -18943,6 +19347,7 @@ public final class OmnicommMessageOuterClass {
          * <code>repeated uint32 SPNval = 2;</code>
          * @return A list containing the sPNval.
          */
+        @java.lang.Override
         public java.util.List<java.lang.Integer>
             getSPNvalList() {
           return sPNval_;
@@ -18977,6 +19382,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint64 Adr64TEREX = 10;</code>
          * @return Whether the adr64TEREX field is set.
          */
+        @java.lang.Override
         public boolean hasAdr64TEREX() {
           return ((bitField0_ & 0x00000001) != 0);
         }
@@ -18984,6 +19390,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint64 Adr64TEREX = 10;</code>
          * @return The adr64TEREX.
          */
+        @java.lang.Override
         public long getAdr64TEREX() {
           return adr64TEREX_;
         }
@@ -18994,6 +19401,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint64 Adr65TEREX = 11;</code>
          * @return Whether the adr65TEREX field is set.
          */
+        @java.lang.Override
         public boolean hasAdr65TEREX() {
           return ((bitField0_ & 0x00000002) != 0);
         }
@@ -19001,6 +19409,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint64 Adr65TEREX = 11;</code>
          * @return The adr65TEREX.
          */
+        @java.lang.Override
         public long getAdr65TEREX() {
           return adr65TEREX_;
         }
@@ -19011,6 +19420,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint64 Adr66TEREX = 12;</code>
          * @return Whether the adr66TEREX field is set.
          */
+        @java.lang.Override
         public boolean hasAdr66TEREX() {
           return ((bitField0_ & 0x00000004) != 0);
         }
@@ -19018,6 +19428,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint64 Adr66TEREX = 12;</code>
          * @return The adr66TEREX.
          */
+        @java.lang.Override
         public long getAdr66TEREX() {
           return adr66TEREX_;
         }
@@ -19028,6 +19439,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint64 Adr67TEREX = 13;</code>
          * @return Whether the adr67TEREX field is set.
          */
+        @java.lang.Override
         public boolean hasAdr67TEREX() {
           return ((bitField0_ & 0x00000008) != 0);
         }
@@ -19035,6 +19447,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint64 Adr67TEREX = 13;</code>
          * @return The adr67TEREX.
          */
+        @java.lang.Override
         public long getAdr67TEREX() {
           return adr67TEREX_;
         }
@@ -19049,6 +19462,7 @@ public final class OmnicommMessageOuterClass {
          * <code>repeated uint64 Adr11TEREX = 14;</code>
          * @return A list containing the adr11TEREX.
          */
+        @java.lang.Override
         public java.util.List<java.lang.Long>
             getAdr11TEREXList() {
           return adr11TEREX_;
@@ -19083,6 +19497,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint64 Adr69TEREX = 15;</code>
          * @return Whether the adr69TEREX field is set.
          */
+        @java.lang.Override
         public boolean hasAdr69TEREX() {
           return ((bitField0_ & 0x00000010) != 0);
         }
@@ -19090,6 +19505,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint64 Adr69TEREX = 15;</code>
          * @return The adr69TEREX.
          */
+        @java.lang.Override
         public long getAdr69TEREX() {
           return adr69TEREX_;
         }
@@ -19841,6 +20257,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint64 Adr64TEREX = 10;</code>
            * @return Whether the adr64TEREX field is set.
            */
+          @java.lang.Override
           public boolean hasAdr64TEREX() {
             return ((bitField0_ & 0x00000004) != 0);
           }
@@ -19848,6 +20265,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint64 Adr64TEREX = 10;</code>
            * @return The adr64TEREX.
            */
+          @java.lang.Override
           public long getAdr64TEREX() {
             return adr64TEREX_;
           }
@@ -19878,6 +20296,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint64 Adr65TEREX = 11;</code>
            * @return Whether the adr65TEREX field is set.
            */
+          @java.lang.Override
           public boolean hasAdr65TEREX() {
             return ((bitField0_ & 0x00000008) != 0);
           }
@@ -19885,6 +20304,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint64 Adr65TEREX = 11;</code>
            * @return The adr65TEREX.
            */
+          @java.lang.Override
           public long getAdr65TEREX() {
             return adr65TEREX_;
           }
@@ -19915,6 +20335,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint64 Adr66TEREX = 12;</code>
            * @return Whether the adr66TEREX field is set.
            */
+          @java.lang.Override
           public boolean hasAdr66TEREX() {
             return ((bitField0_ & 0x00000010) != 0);
           }
@@ -19922,6 +20343,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint64 Adr66TEREX = 12;</code>
            * @return The adr66TEREX.
            */
+          @java.lang.Override
           public long getAdr66TEREX() {
             return adr66TEREX_;
           }
@@ -19952,6 +20374,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint64 Adr67TEREX = 13;</code>
            * @return Whether the adr67TEREX field is set.
            */
+          @java.lang.Override
           public boolean hasAdr67TEREX() {
             return ((bitField0_ & 0x00000020) != 0);
           }
@@ -19959,6 +20382,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint64 Adr67TEREX = 13;</code>
            * @return The adr67TEREX.
            */
+          @java.lang.Override
           public long getAdr67TEREX() {
             return adr67TEREX_;
           }
@@ -20096,6 +20520,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint64 Adr69TEREX = 15;</code>
            * @return Whether the adr69TEREX field is set.
            */
+          @java.lang.Override
           public boolean hasAdr69TEREX() {
             return ((bitField0_ & 0x00000080) != 0);
           }
@@ -20103,6 +20528,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint64 Adr69TEREX = 15;</code>
            * @return The adr69TEREX.
            */
+          @java.lang.Override
           public long getAdr69TEREX() {
             return adr69TEREX_;
           }
@@ -20267,7 +20693,7 @@ public final class OmnicommMessageOuterClass {
        *
        * Protobuf type {@code org.traccar.protobuf.OmnicommMessage.Other.Taho_DDD}
        */
-      public  static final class Taho_DDD extends
+      public static final class Taho_DDD extends
           com.google.protobuf.GeneratedMessageV3 implements
           // @@protoc_insertion_point(message_implements:org.traccar.protobuf.OmnicommMessage.Other.Taho_DDD)
           Taho_DDDOrBuilder {
@@ -20375,6 +20801,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 BLKPOS = 1;</code>
          * @return Whether the bLKPOS field is set.
          */
+        @java.lang.Override
         public boolean hasBLKPOS() {
           return ((bitField0_ & 0x00000001) != 0);
         }
@@ -20386,6 +20813,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 BLKPOS = 1;</code>
          * @return The bLKPOS.
          */
+        @java.lang.Override
         public int getBLKPOS() {
           return bLKPOS_;
         }
@@ -20400,6 +20828,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional bytes FILEDATA = 2;</code>
          * @return Whether the fILEDATA field is set.
          */
+        @java.lang.Override
         public boolean hasFILEDATA() {
           return ((bitField0_ & 0x00000002) != 0);
         }
@@ -20411,6 +20840,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional bytes FILEDATA = 2;</code>
          * @return The fILEDATA.
          */
+        @java.lang.Override
         public com.google.protobuf.ByteString getFILEDATA() {
           return fILEDATA_;
         }
@@ -20425,6 +20855,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional bytes CARDID = 3;</code>
          * @return Whether the cARDID field is set.
          */
+        @java.lang.Override
         public boolean hasCARDID() {
           return ((bitField0_ & 0x00000004) != 0);
         }
@@ -20436,6 +20867,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional bytes CARDID = 3;</code>
          * @return The cARDID.
          */
+        @java.lang.Override
         public com.google.protobuf.ByteString getCARDID() {
           return cARDID_;
         }
@@ -20450,6 +20882,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 STATUS_DATA = 4;</code>
          * @return Whether the sTATUSDATA field is set.
          */
+        @java.lang.Override
         public boolean hasSTATUSDATA() {
           return ((bitField0_ & 0x00000008) != 0);
         }
@@ -20461,6 +20894,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 STATUS_DATA = 4;</code>
          * @return The sTATUSDATA.
          */
+        @java.lang.Override
         public int getSTATUSDATA() {
           return sTATUSDATA_;
         }
@@ -20867,6 +21301,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 BLKPOS = 1;</code>
            * @return Whether the bLKPOS field is set.
            */
+          @java.lang.Override
           public boolean hasBLKPOS() {
             return ((bitField0_ & 0x00000001) != 0);
           }
@@ -20878,6 +21313,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 BLKPOS = 1;</code>
            * @return The bLKPOS.
            */
+          @java.lang.Override
           public int getBLKPOS() {
             return bLKPOS_;
           }
@@ -20920,6 +21356,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional bytes FILEDATA = 2;</code>
            * @return Whether the fILEDATA field is set.
            */
+          @java.lang.Override
           public boolean hasFILEDATA() {
             return ((bitField0_ & 0x00000002) != 0);
           }
@@ -20931,6 +21368,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional bytes FILEDATA = 2;</code>
            * @return The fILEDATA.
            */
+          @java.lang.Override
           public com.google.protobuf.ByteString getFILEDATA() {
             return fILEDATA_;
           }
@@ -20976,6 +21414,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional bytes CARDID = 3;</code>
            * @return Whether the cARDID field is set.
            */
+          @java.lang.Override
           public boolean hasCARDID() {
             return ((bitField0_ & 0x00000004) != 0);
           }
@@ -20987,6 +21426,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional bytes CARDID = 3;</code>
            * @return The cARDID.
            */
+          @java.lang.Override
           public com.google.protobuf.ByteString getCARDID() {
             return cARDID_;
           }
@@ -21032,6 +21472,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 STATUS_DATA = 4;</code>
            * @return Whether the sTATUSDATA field is set.
            */
+          @java.lang.Override
           public boolean hasSTATUSDATA() {
             return ((bitField0_ & 0x00000008) != 0);
           }
@@ -21043,6 +21484,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 STATUS_DATA = 4;</code>
            * @return The sTATUSDATA.
            */
+          @java.lang.Override
           public int getSTATUSDATA() {
             return sTATUSDATA_;
           }
@@ -21367,7 +21809,7 @@ public final class OmnicommMessageOuterClass {
        *
        * Protobuf type {@code org.traccar.protobuf.OmnicommMessage.Other.APC}
        */
-      public  static final class APC extends
+      public static final class APC extends
           com.google.protobuf.GeneratedMessageV3 implements
           // @@protoc_insertion_point(message_implements:org.traccar.protobuf.OmnicommMessage.Other.APC)
           APCOrBuilder {
@@ -21513,6 +21955,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 APCStatus1 = 1;</code>
          * @return Whether the aPCStatus1 field is set.
          */
+        @java.lang.Override
         public boolean hasAPCStatus1() {
           return ((bitField0_ & 0x00000001) != 0);
         }
@@ -21524,6 +21967,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 APCStatus1 = 1;</code>
          * @return The aPCStatus1.
          */
+        @java.lang.Override
         public int getAPCStatus1() {
           return aPCStatus1_;
         }
@@ -21538,6 +21982,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 APCStatus2 = 2;</code>
          * @return Whether the aPCStatus2 field is set.
          */
+        @java.lang.Override
         public boolean hasAPCStatus2() {
           return ((bitField0_ & 0x00000002) != 0);
         }
@@ -21549,6 +21994,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 APCStatus2 = 2;</code>
          * @return The aPCStatus2.
          */
+        @java.lang.Override
         public int getAPCStatus2() {
           return aPCStatus2_;
         }
@@ -21563,6 +22009,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 APCStatus3 = 3;</code>
          * @return Whether the aPCStatus3 field is set.
          */
+        @java.lang.Override
         public boolean hasAPCStatus3() {
           return ((bitField0_ & 0x00000004) != 0);
         }
@@ -21574,6 +22021,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 APCStatus3 = 3;</code>
          * @return The aPCStatus3.
          */
+        @java.lang.Override
         public int getAPCStatus3() {
           return aPCStatus3_;
         }
@@ -21588,6 +22036,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 APCStatus4 = 4;</code>
          * @return Whether the aPCStatus4 field is set.
          */
+        @java.lang.Override
         public boolean hasAPCStatus4() {
           return ((bitField0_ & 0x00000008) != 0);
         }
@@ -21599,6 +22048,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 APCStatus4 = 4;</code>
          * @return The aPCStatus4.
          */
+        @java.lang.Override
         public int getAPCStatus4() {
           return aPCStatus4_;
         }
@@ -21613,6 +22063,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 APCNumberIn1 = 5;</code>
          * @return Whether the aPCNumberIn1 field is set.
          */
+        @java.lang.Override
         public boolean hasAPCNumberIn1() {
           return ((bitField0_ & 0x00000010) != 0);
         }
@@ -21624,6 +22075,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 APCNumberIn1 = 5;</code>
          * @return The aPCNumberIn1.
          */
+        @java.lang.Override
         public int getAPCNumberIn1() {
           return aPCNumberIn1_;
         }
@@ -21638,6 +22090,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 APCNumberOut1 = 6;</code>
          * @return Whether the aPCNumberOut1 field is set.
          */
+        @java.lang.Override
         public boolean hasAPCNumberOut1() {
           return ((bitField0_ & 0x00000020) != 0);
         }
@@ -21649,6 +22102,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 APCNumberOut1 = 6;</code>
          * @return The aPCNumberOut1.
          */
+        @java.lang.Override
         public int getAPCNumberOut1() {
           return aPCNumberOut1_;
         }
@@ -21663,6 +22117,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 APCNumberIn2 = 7;</code>
          * @return Whether the aPCNumberIn2 field is set.
          */
+        @java.lang.Override
         public boolean hasAPCNumberIn2() {
           return ((bitField0_ & 0x00000040) != 0);
         }
@@ -21674,6 +22129,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 APCNumberIn2 = 7;</code>
          * @return The aPCNumberIn2.
          */
+        @java.lang.Override
         public int getAPCNumberIn2() {
           return aPCNumberIn2_;
         }
@@ -21688,6 +22144,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 APCNumberOut2 = 8;</code>
          * @return Whether the aPCNumberOut2 field is set.
          */
+        @java.lang.Override
         public boolean hasAPCNumberOut2() {
           return ((bitField0_ & 0x00000080) != 0);
         }
@@ -21699,6 +22156,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 APCNumberOut2 = 8;</code>
          * @return The aPCNumberOut2.
          */
+        @java.lang.Override
         public int getAPCNumberOut2() {
           return aPCNumberOut2_;
         }
@@ -21713,6 +22171,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 APCNumberIn3 = 9;</code>
          * @return Whether the aPCNumberIn3 field is set.
          */
+        @java.lang.Override
         public boolean hasAPCNumberIn3() {
           return ((bitField0_ & 0x00000100) != 0);
         }
@@ -21724,6 +22183,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 APCNumberIn3 = 9;</code>
          * @return The aPCNumberIn3.
          */
+        @java.lang.Override
         public int getAPCNumberIn3() {
           return aPCNumberIn3_;
         }
@@ -21738,6 +22198,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 APCNumberOut31 = 10;</code>
          * @return Whether the aPCNumberOut31 field is set.
          */
+        @java.lang.Override
         public boolean hasAPCNumberOut31() {
           return ((bitField0_ & 0x00000200) != 0);
         }
@@ -21749,6 +22210,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 APCNumberOut31 = 10;</code>
          * @return The aPCNumberOut31.
          */
+        @java.lang.Override
         public int getAPCNumberOut31() {
           return aPCNumberOut31_;
         }
@@ -21763,6 +22225,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 APCNumberIn4 = 11;</code>
          * @return Whether the aPCNumberIn4 field is set.
          */
+        @java.lang.Override
         public boolean hasAPCNumberIn4() {
           return ((bitField0_ & 0x00000400) != 0);
         }
@@ -21774,6 +22237,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 APCNumberIn4 = 11;</code>
          * @return The aPCNumberIn4.
          */
+        @java.lang.Override
         public int getAPCNumberIn4() {
           return aPCNumberIn4_;
         }
@@ -21788,6 +22252,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 APCNumberOut4 = 12;</code>
          * @return Whether the aPCNumberOut4 field is set.
          */
+        @java.lang.Override
         public boolean hasAPCNumberOut4() {
           return ((bitField0_ & 0x00000800) != 0);
         }
@@ -21799,6 +22264,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 APCNumberOut4 = 12;</code>
          * @return The aPCNumberOut4.
          */
+        @java.lang.Override
         public int getAPCNumberOut4() {
           return aPCNumberOut4_;
         }
@@ -22405,6 +22871,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 APCStatus1 = 1;</code>
            * @return Whether the aPCStatus1 field is set.
            */
+          @java.lang.Override
           public boolean hasAPCStatus1() {
             return ((bitField0_ & 0x00000001) != 0);
           }
@@ -22416,6 +22883,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 APCStatus1 = 1;</code>
            * @return The aPCStatus1.
            */
+          @java.lang.Override
           public int getAPCStatus1() {
             return aPCStatus1_;
           }
@@ -22458,6 +22926,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 APCStatus2 = 2;</code>
            * @return Whether the aPCStatus2 field is set.
            */
+          @java.lang.Override
           public boolean hasAPCStatus2() {
             return ((bitField0_ & 0x00000002) != 0);
           }
@@ -22469,6 +22938,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 APCStatus2 = 2;</code>
            * @return The aPCStatus2.
            */
+          @java.lang.Override
           public int getAPCStatus2() {
             return aPCStatus2_;
           }
@@ -22511,6 +22981,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 APCStatus3 = 3;</code>
            * @return Whether the aPCStatus3 field is set.
            */
+          @java.lang.Override
           public boolean hasAPCStatus3() {
             return ((bitField0_ & 0x00000004) != 0);
           }
@@ -22522,6 +22993,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 APCStatus3 = 3;</code>
            * @return The aPCStatus3.
            */
+          @java.lang.Override
           public int getAPCStatus3() {
             return aPCStatus3_;
           }
@@ -22564,6 +23036,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 APCStatus4 = 4;</code>
            * @return Whether the aPCStatus4 field is set.
            */
+          @java.lang.Override
           public boolean hasAPCStatus4() {
             return ((bitField0_ & 0x00000008) != 0);
           }
@@ -22575,6 +23048,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 APCStatus4 = 4;</code>
            * @return The aPCStatus4.
            */
+          @java.lang.Override
           public int getAPCStatus4() {
             return aPCStatus4_;
           }
@@ -22617,6 +23091,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 APCNumberIn1 = 5;</code>
            * @return Whether the aPCNumberIn1 field is set.
            */
+          @java.lang.Override
           public boolean hasAPCNumberIn1() {
             return ((bitField0_ & 0x00000010) != 0);
           }
@@ -22628,6 +23103,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 APCNumberIn1 = 5;</code>
            * @return The aPCNumberIn1.
            */
+          @java.lang.Override
           public int getAPCNumberIn1() {
             return aPCNumberIn1_;
           }
@@ -22670,6 +23146,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 APCNumberOut1 = 6;</code>
            * @return Whether the aPCNumberOut1 field is set.
            */
+          @java.lang.Override
           public boolean hasAPCNumberOut1() {
             return ((bitField0_ & 0x00000020) != 0);
           }
@@ -22681,6 +23158,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 APCNumberOut1 = 6;</code>
            * @return The aPCNumberOut1.
            */
+          @java.lang.Override
           public int getAPCNumberOut1() {
             return aPCNumberOut1_;
           }
@@ -22723,6 +23201,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 APCNumberIn2 = 7;</code>
            * @return Whether the aPCNumberIn2 field is set.
            */
+          @java.lang.Override
           public boolean hasAPCNumberIn2() {
             return ((bitField0_ & 0x00000040) != 0);
           }
@@ -22734,6 +23213,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 APCNumberIn2 = 7;</code>
            * @return The aPCNumberIn2.
            */
+          @java.lang.Override
           public int getAPCNumberIn2() {
             return aPCNumberIn2_;
           }
@@ -22776,6 +23256,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 APCNumberOut2 = 8;</code>
            * @return Whether the aPCNumberOut2 field is set.
            */
+          @java.lang.Override
           public boolean hasAPCNumberOut2() {
             return ((bitField0_ & 0x00000080) != 0);
           }
@@ -22787,6 +23268,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 APCNumberOut2 = 8;</code>
            * @return The aPCNumberOut2.
            */
+          @java.lang.Override
           public int getAPCNumberOut2() {
             return aPCNumberOut2_;
           }
@@ -22829,6 +23311,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 APCNumberIn3 = 9;</code>
            * @return Whether the aPCNumberIn3 field is set.
            */
+          @java.lang.Override
           public boolean hasAPCNumberIn3() {
             return ((bitField0_ & 0x00000100) != 0);
           }
@@ -22840,6 +23323,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 APCNumberIn3 = 9;</code>
            * @return The aPCNumberIn3.
            */
+          @java.lang.Override
           public int getAPCNumberIn3() {
             return aPCNumberIn3_;
           }
@@ -22882,6 +23366,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 APCNumberOut31 = 10;</code>
            * @return Whether the aPCNumberOut31 field is set.
            */
+          @java.lang.Override
           public boolean hasAPCNumberOut31() {
             return ((bitField0_ & 0x00000200) != 0);
           }
@@ -22893,6 +23378,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 APCNumberOut31 = 10;</code>
            * @return The aPCNumberOut31.
            */
+          @java.lang.Override
           public int getAPCNumberOut31() {
             return aPCNumberOut31_;
           }
@@ -22935,6 +23421,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 APCNumberIn4 = 11;</code>
            * @return Whether the aPCNumberIn4 field is set.
            */
+          @java.lang.Override
           public boolean hasAPCNumberIn4() {
             return ((bitField0_ & 0x00000400) != 0);
           }
@@ -22946,6 +23433,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 APCNumberIn4 = 11;</code>
            * @return The aPCNumberIn4.
            */
+          @java.lang.Override
           public int getAPCNumberIn4() {
             return aPCNumberIn4_;
           }
@@ -22988,6 +23476,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 APCNumberOut4 = 12;</code>
            * @return Whether the aPCNumberOut4 field is set.
            */
+          @java.lang.Override
           public boolean hasAPCNumberOut4() {
             return ((bitField0_ & 0x00000800) != 0);
           }
@@ -22999,6 +23488,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 APCNumberOut4 = 12;</code>
            * @return The aPCNumberOut4.
            */
+          @java.lang.Override
           public int getAPCNumberOut4() {
             return aPCNumberOut4_;
           }
@@ -23201,7 +23691,7 @@ public final class OmnicommMessageOuterClass {
        *
        * Protobuf type {@code org.traccar.protobuf.OmnicommMessage.Other.MobileEye}
        */
-      public  static final class MobileEye extends
+      public static final class MobileEye extends
           com.google.protobuf.GeneratedMessageV3 implements
           // @@protoc_insertion_point(message_implements:org.traccar.protobuf.OmnicommMessage.Other.MobileEye)
           MobileEyeOrBuilder {
@@ -23328,6 +23818,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 MobileEyeStatus = 1;</code>
          * @return Whether the mobileEyeStatus field is set.
          */
+        @java.lang.Override
         public boolean hasMobileEyeStatus() {
           return ((bitField0_ & 0x00000001) != 0);
         }
@@ -23339,6 +23830,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 MobileEyeStatus = 1;</code>
          * @return The mobileEyeStatus.
          */
+        @java.lang.Override
         public int getMobileEyeStatus() {
           return mobileEyeStatus_;
         }
@@ -23353,6 +23845,7 @@ public final class OmnicommMessageOuterClass {
          * <code>repeated bytes CAN700 = 2;</code>
          * @return A list containing the cAN700.
          */
+        @java.lang.Override
         public java.util.List<com.google.protobuf.ByteString>
             getCAN700List() {
           return cAN700_;
@@ -23391,6 +23884,7 @@ public final class OmnicommMessageOuterClass {
          * <code>repeated bytes CAN727 = 3;</code>
          * @return A list containing the cAN727.
          */
+        @java.lang.Override
         public java.util.List<com.google.protobuf.ByteString>
             getCAN727List() {
           return cAN727_;
@@ -23429,6 +23923,7 @@ public final class OmnicommMessageOuterClass {
          * <code>repeated bytes CAN760 = 4;</code>
          * @return A list containing the cAN760.
          */
+        @java.lang.Override
         public java.util.List<com.google.protobuf.ByteString>
             getCAN760List() {
           return cAN760_;
@@ -23889,6 +24384,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 MobileEyeStatus = 1;</code>
            * @return Whether the mobileEyeStatus field is set.
            */
+          @java.lang.Override
           public boolean hasMobileEyeStatus() {
             return ((bitField0_ & 0x00000001) != 0);
           }
@@ -23900,6 +24396,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 MobileEyeStatus = 1;</code>
            * @return The mobileEyeStatus.
            */
+          @java.lang.Override
           public int getMobileEyeStatus() {
             return mobileEyeStatus_;
           }
@@ -24421,7 +24918,7 @@ public final class OmnicommMessageOuterClass {
        *
        * Protobuf type {@code org.traccar.protobuf.OmnicommMessage.Other.SafeDriving}
        */
-      public  static final class SafeDriving extends
+      public static final class SafeDriving extends
           com.google.protobuf.GeneratedMessageV3 implements
           // @@protoc_insertion_point(message_implements:org.traccar.protobuf.OmnicommMessage.Other.SafeDriving)
           SafeDrivingOrBuilder {
@@ -24547,6 +25044,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 EventMask = 1;</code>
          * @return Whether the eventMask field is set.
          */
+        @java.lang.Override
         public boolean hasEventMask() {
           return ((bitField0_ & 0x00000001) != 0);
         }
@@ -24558,6 +25056,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 EventMask = 1;</code>
          * @return The eventMask.
          */
+        @java.lang.Override
         public int getEventMask() {
           return eventMask_;
         }
@@ -24572,6 +25071,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SpeedThreshold = 2;</code>
          * @return Whether the speedThreshold field is set.
          */
+        @java.lang.Override
         public boolean hasSpeedThreshold() {
           return ((bitField0_ & 0x00000002) != 0);
         }
@@ -24583,6 +25083,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SpeedThreshold = 2;</code>
          * @return The speedThreshold.
          */
+        @java.lang.Override
         public int getSpeedThreshold() {
           return speedThreshold_;
         }
@@ -24597,6 +25098,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 RPMThreshold = 3;</code>
          * @return Whether the rPMThreshold field is set.
          */
+        @java.lang.Override
         public boolean hasRPMThreshold() {
           return ((bitField0_ & 0x00000004) != 0);
         }
@@ -24608,6 +25110,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 RPMThreshold = 3;</code>
          * @return The rPMThreshold.
          */
+        @java.lang.Override
         public int getRPMThreshold() {
           return rPMThreshold_;
         }
@@ -24622,6 +25125,7 @@ public final class OmnicommMessageOuterClass {
          * <code>repeated float AccelDangThs = 4 [packed = true];</code>
          * @return A list containing the accelDangThs.
          */
+        @java.lang.Override
         public java.util.List<java.lang.Float>
             getAccelDangThsList() {
           return accelDangThs_;
@@ -25070,6 +25574,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 EventMask = 1;</code>
            * @return Whether the eventMask field is set.
            */
+          @java.lang.Override
           public boolean hasEventMask() {
             return ((bitField0_ & 0x00000001) != 0);
           }
@@ -25081,6 +25586,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 EventMask = 1;</code>
            * @return The eventMask.
            */
+          @java.lang.Override
           public int getEventMask() {
             return eventMask_;
           }
@@ -25123,6 +25629,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 SpeedThreshold = 2;</code>
            * @return Whether the speedThreshold field is set.
            */
+          @java.lang.Override
           public boolean hasSpeedThreshold() {
             return ((bitField0_ & 0x00000002) != 0);
           }
@@ -25134,6 +25641,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 SpeedThreshold = 2;</code>
            * @return The speedThreshold.
            */
+          @java.lang.Override
           public int getSpeedThreshold() {
             return speedThreshold_;
           }
@@ -25176,6 +25684,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 RPMThreshold = 3;</code>
            * @return Whether the rPMThreshold field is set.
            */
+          @java.lang.Override
           public boolean hasRPMThreshold() {
             return ((bitField0_ & 0x00000004) != 0);
           }
@@ -25187,6 +25696,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 RPMThreshold = 3;</code>
            * @return The rPMThreshold.
            */
+          @java.lang.Override
           public int getRPMThreshold() {
             return rPMThreshold_;
           }
@@ -26310,7 +26820,7 @@ public final class OmnicommMessageOuterClass {
        *
        * Protobuf type {@code org.traccar.protobuf.OmnicommMessage.Other.GenComm}
        */
-      public  static final class GenComm extends
+      public static final class GenComm extends
           com.google.protobuf.GeneratedMessageV3 implements
           // @@protoc_insertion_point(message_implements:org.traccar.protobuf.OmnicommMessage.Other.GenComm)
           GenCommOrBuilder {
@@ -26725,6 +27235,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 GEN_OILPRESS1 = 1;</code>
          * @return Whether the gENOILPRESS1 field is set.
          */
+        @java.lang.Override
         public boolean hasGENOILPRESS1() {
           return ((bitField0_ & 0x00000001) != 0);
         }
@@ -26732,6 +27243,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 GEN_OILPRESS1 = 1;</code>
          * @return The gENOILPRESS1.
          */
+        @java.lang.Override
         public int getGENOILPRESS1() {
           return gENOILPRESS1_;
         }
@@ -26742,6 +27254,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 GEN_TEMP1 = 2;</code>
          * @return Whether the gENTEMP1 field is set.
          */
+        @java.lang.Override
         public boolean hasGENTEMP1() {
           return ((bitField0_ & 0x00000002) != 0);
         }
@@ -26749,6 +27262,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 GEN_TEMP1 = 2;</code>
          * @return The gENTEMP1.
          */
+        @java.lang.Override
         public int getGENTEMP1() {
           return gENTEMP1_;
         }
@@ -26759,6 +27273,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_VOLT1 = 3;</code>
          * @return Whether the gENVOLT1 field is set.
          */
+        @java.lang.Override
         public boolean hasGENVOLT1() {
           return ((bitField0_ & 0x00000004) != 0);
         }
@@ -26766,6 +27281,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_VOLT1 = 3;</code>
          * @return The gENVOLT1.
          */
+        @java.lang.Override
         public float getGENVOLT1() {
           return gENVOLT1_;
         }
@@ -26776,6 +27292,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 GEN_RPM1 = 4;</code>
          * @return Whether the gENRPM1 field is set.
          */
+        @java.lang.Override
         public boolean hasGENRPM1() {
           return ((bitField0_ & 0x00000008) != 0);
         }
@@ -26783,6 +27300,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 GEN_RPM1 = 4;</code>
          * @return The gENRPM1.
          */
+        @java.lang.Override
         public int getGENRPM1() {
           return gENRPM1_;
         }
@@ -26793,6 +27311,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_UL1_1 = 5;</code>
          * @return Whether the gENUL11 field is set.
          */
+        @java.lang.Override
         public boolean hasGENUL11() {
           return ((bitField0_ & 0x00000010) != 0);
         }
@@ -26800,6 +27319,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_UL1_1 = 5;</code>
          * @return The gENUL11.
          */
+        @java.lang.Override
         public float getGENUL11() {
           return gENUL11_;
         }
@@ -26810,6 +27330,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_UL2_1 = 6;</code>
          * @return Whether the gENUL21 field is set.
          */
+        @java.lang.Override
         public boolean hasGENUL21() {
           return ((bitField0_ & 0x00000020) != 0);
         }
@@ -26817,6 +27338,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_UL2_1 = 6;</code>
          * @return The gENUL21.
          */
+        @java.lang.Override
         public float getGENUL21() {
           return gENUL21_;
         }
@@ -26827,6 +27349,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_UL3_1 = 7;</code>
          * @return Whether the gENUL31 field is set.
          */
+        @java.lang.Override
         public boolean hasGENUL31() {
           return ((bitField0_ & 0x00000040) != 0);
         }
@@ -26834,6 +27357,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_UL3_1 = 7;</code>
          * @return The gENUL31.
          */
+        @java.lang.Override
         public float getGENUL31() {
           return gENUL31_;
         }
@@ -26844,6 +27368,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_IL1_1 = 8;</code>
          * @return Whether the gENIL11 field is set.
          */
+        @java.lang.Override
         public boolean hasGENIL11() {
           return ((bitField0_ & 0x00000080) != 0);
         }
@@ -26851,6 +27376,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_IL1_1 = 8;</code>
          * @return The gENIL11.
          */
+        @java.lang.Override
         public float getGENIL11() {
           return gENIL11_;
         }
@@ -26861,6 +27387,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_IL2_1 = 9;</code>
          * @return Whether the gENIL21 field is set.
          */
+        @java.lang.Override
         public boolean hasGENIL21() {
           return ((bitField0_ & 0x00000100) != 0);
         }
@@ -26868,6 +27395,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_IL2_1 = 9;</code>
          * @return The gENIL21.
          */
+        @java.lang.Override
         public float getGENIL21() {
           return gENIL21_;
         }
@@ -26878,6 +27406,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_IL3_1 = 10;</code>
          * @return Whether the gENIL31 field is set.
          */
+        @java.lang.Override
         public boolean hasGENIL31() {
           return ((bitField0_ & 0x00000200) != 0);
         }
@@ -26885,6 +27414,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_IL3_1 = 10;</code>
          * @return The gENIL31.
          */
+        @java.lang.Override
         public float getGENIL31() {
           return gENIL31_;
         }
@@ -26895,6 +27425,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 GEN_STATUS1 = 11;</code>
          * @return Whether the gENSTATUS1 field is set.
          */
+        @java.lang.Override
         public boolean hasGENSTATUS1() {
           return ((bitField0_ & 0x00000400) != 0);
         }
@@ -26902,6 +27433,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 GEN_STATUS1 = 11;</code>
          * @return The gENSTATUS1.
          */
+        @java.lang.Override
         public int getGENSTATUS1() {
           return gENSTATUS1_;
         }
@@ -26912,6 +27444,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 GEN_HOURS1 = 12;</code>
          * @return Whether the gENHOURS1 field is set.
          */
+        @java.lang.Override
         public boolean hasGENHOURS1() {
           return ((bitField0_ & 0x00000800) != 0);
         }
@@ -26919,6 +27452,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 GEN_HOURS1 = 12;</code>
          * @return The gENHOURS1.
          */
+        @java.lang.Override
         public int getGENHOURS1() {
           return gENHOURS1_;
         }
@@ -26933,6 +27467,7 @@ public final class OmnicommMessageOuterClass {
          * <code>repeated bytes GEN_ALARM1 = 13;</code>
          * @return A list containing the gENALARM1.
          */
+        @java.lang.Override
         public java.util.List<com.google.protobuf.ByteString>
             getGENALARM1List() {
           return gENALARM1_;
@@ -26967,6 +27502,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 GEN_OILPRESS2 = 14;</code>
          * @return Whether the gENOILPRESS2 field is set.
          */
+        @java.lang.Override
         public boolean hasGENOILPRESS2() {
           return ((bitField0_ & 0x00001000) != 0);
         }
@@ -26974,6 +27510,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 GEN_OILPRESS2 = 14;</code>
          * @return The gENOILPRESS2.
          */
+        @java.lang.Override
         public int getGENOILPRESS2() {
           return gENOILPRESS2_;
         }
@@ -26984,6 +27521,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 GEN_TEMP2 = 15;</code>
          * @return Whether the gENTEMP2 field is set.
          */
+        @java.lang.Override
         public boolean hasGENTEMP2() {
           return ((bitField0_ & 0x00002000) != 0);
         }
@@ -26991,6 +27529,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 GEN_TEMP2 = 15;</code>
          * @return The gENTEMP2.
          */
+        @java.lang.Override
         public int getGENTEMP2() {
           return gENTEMP2_;
         }
@@ -27001,6 +27540,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_VOLT2 = 16;</code>
          * @return Whether the gENVOLT2 field is set.
          */
+        @java.lang.Override
         public boolean hasGENVOLT2() {
           return ((bitField0_ & 0x00004000) != 0);
         }
@@ -27008,6 +27548,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_VOLT2 = 16;</code>
          * @return The gENVOLT2.
          */
+        @java.lang.Override
         public float getGENVOLT2() {
           return gENVOLT2_;
         }
@@ -27018,6 +27559,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 GEN_RPM2 = 17;</code>
          * @return Whether the gENRPM2 field is set.
          */
+        @java.lang.Override
         public boolean hasGENRPM2() {
           return ((bitField0_ & 0x00008000) != 0);
         }
@@ -27025,6 +27567,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 GEN_RPM2 = 17;</code>
          * @return The gENRPM2.
          */
+        @java.lang.Override
         public int getGENRPM2() {
           return gENRPM2_;
         }
@@ -27035,6 +27578,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_UL1_2 = 18;</code>
          * @return Whether the gENUL12 field is set.
          */
+        @java.lang.Override
         public boolean hasGENUL12() {
           return ((bitField0_ & 0x00010000) != 0);
         }
@@ -27042,6 +27586,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_UL1_2 = 18;</code>
          * @return The gENUL12.
          */
+        @java.lang.Override
         public float getGENUL12() {
           return gENUL12_;
         }
@@ -27052,6 +27597,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_UL2_2 = 19;</code>
          * @return Whether the gENUL22 field is set.
          */
+        @java.lang.Override
         public boolean hasGENUL22() {
           return ((bitField0_ & 0x00020000) != 0);
         }
@@ -27059,6 +27605,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_UL2_2 = 19;</code>
          * @return The gENUL22.
          */
+        @java.lang.Override
         public float getGENUL22() {
           return gENUL22_;
         }
@@ -27069,6 +27616,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_UL3_2 = 20;</code>
          * @return Whether the gENUL32 field is set.
          */
+        @java.lang.Override
         public boolean hasGENUL32() {
           return ((bitField0_ & 0x00040000) != 0);
         }
@@ -27076,6 +27624,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_UL3_2 = 20;</code>
          * @return The gENUL32.
          */
+        @java.lang.Override
         public float getGENUL32() {
           return gENUL32_;
         }
@@ -27086,6 +27635,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_IL1_2 = 21;</code>
          * @return Whether the gENIL12 field is set.
          */
+        @java.lang.Override
         public boolean hasGENIL12() {
           return ((bitField0_ & 0x00080000) != 0);
         }
@@ -27093,6 +27643,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_IL1_2 = 21;</code>
          * @return The gENIL12.
          */
+        @java.lang.Override
         public float getGENIL12() {
           return gENIL12_;
         }
@@ -27103,6 +27654,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_IL2_2 = 22;</code>
          * @return Whether the gENIL22 field is set.
          */
+        @java.lang.Override
         public boolean hasGENIL22() {
           return ((bitField0_ & 0x00100000) != 0);
         }
@@ -27110,6 +27662,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_IL2_2 = 22;</code>
          * @return The gENIL22.
          */
+        @java.lang.Override
         public float getGENIL22() {
           return gENIL22_;
         }
@@ -27120,6 +27673,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_IL3_2 = 23;</code>
          * @return Whether the gENIL32 field is set.
          */
+        @java.lang.Override
         public boolean hasGENIL32() {
           return ((bitField0_ & 0x00200000) != 0);
         }
@@ -27127,6 +27681,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_IL3_2 = 23;</code>
          * @return The gENIL32.
          */
+        @java.lang.Override
         public float getGENIL32() {
           return gENIL32_;
         }
@@ -27137,6 +27692,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 GEN_STATUS2 = 24;</code>
          * @return Whether the gENSTATUS2 field is set.
          */
+        @java.lang.Override
         public boolean hasGENSTATUS2() {
           return ((bitField0_ & 0x00400000) != 0);
         }
@@ -27144,6 +27700,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 GEN_STATUS2 = 24;</code>
          * @return The gENSTATUS2.
          */
+        @java.lang.Override
         public int getGENSTATUS2() {
           return gENSTATUS2_;
         }
@@ -27154,6 +27711,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 GEN_HOURS2 = 25;</code>
          * @return Whether the gENHOURS2 field is set.
          */
+        @java.lang.Override
         public boolean hasGENHOURS2() {
           return ((bitField0_ & 0x00800000) != 0);
         }
@@ -27161,6 +27719,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 GEN_HOURS2 = 25;</code>
          * @return The gENHOURS2.
          */
+        @java.lang.Override
         public int getGENHOURS2() {
           return gENHOURS2_;
         }
@@ -27175,6 +27734,7 @@ public final class OmnicommMessageOuterClass {
          * <code>repeated bytes GEN_ALARM2 = 26;</code>
          * @return A list containing the gENALARM2.
          */
+        @java.lang.Override
         public java.util.List<com.google.protobuf.ByteString>
             getGENALARM2List() {
           return gENALARM2_;
@@ -27209,6 +27769,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 GEN_OILPRESS3 = 27;</code>
          * @return Whether the gENOILPRESS3 field is set.
          */
+        @java.lang.Override
         public boolean hasGENOILPRESS3() {
           return ((bitField0_ & 0x01000000) != 0);
         }
@@ -27216,6 +27777,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 GEN_OILPRESS3 = 27;</code>
          * @return The gENOILPRESS3.
          */
+        @java.lang.Override
         public int getGENOILPRESS3() {
           return gENOILPRESS3_;
         }
@@ -27226,6 +27788,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 GEN_TEMP3 = 28;</code>
          * @return Whether the gENTEMP3 field is set.
          */
+        @java.lang.Override
         public boolean hasGENTEMP3() {
           return ((bitField0_ & 0x02000000) != 0);
         }
@@ -27233,6 +27796,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 GEN_TEMP3 = 28;</code>
          * @return The gENTEMP3.
          */
+        @java.lang.Override
         public int getGENTEMP3() {
           return gENTEMP3_;
         }
@@ -27243,6 +27807,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_VOLT3 = 29;</code>
          * @return Whether the gENVOLT3 field is set.
          */
+        @java.lang.Override
         public boolean hasGENVOLT3() {
           return ((bitField0_ & 0x04000000) != 0);
         }
@@ -27250,6 +27815,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_VOLT3 = 29;</code>
          * @return The gENVOLT3.
          */
+        @java.lang.Override
         public float getGENVOLT3() {
           return gENVOLT3_;
         }
@@ -27260,6 +27826,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 GEN_RPM3 = 30;</code>
          * @return Whether the gENRPM3 field is set.
          */
+        @java.lang.Override
         public boolean hasGENRPM3() {
           return ((bitField0_ & 0x08000000) != 0);
         }
@@ -27267,6 +27834,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 GEN_RPM3 = 30;</code>
          * @return The gENRPM3.
          */
+        @java.lang.Override
         public int getGENRPM3() {
           return gENRPM3_;
         }
@@ -27277,6 +27845,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_UL1_3 = 31;</code>
          * @return Whether the gENUL13 field is set.
          */
+        @java.lang.Override
         public boolean hasGENUL13() {
           return ((bitField0_ & 0x10000000) != 0);
         }
@@ -27284,6 +27853,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_UL1_3 = 31;</code>
          * @return The gENUL13.
          */
+        @java.lang.Override
         public float getGENUL13() {
           return gENUL13_;
         }
@@ -27294,6 +27864,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_UL2_3 = 32;</code>
          * @return Whether the gENUL23 field is set.
          */
+        @java.lang.Override
         public boolean hasGENUL23() {
           return ((bitField0_ & 0x20000000) != 0);
         }
@@ -27301,6 +27872,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_UL2_3 = 32;</code>
          * @return The gENUL23.
          */
+        @java.lang.Override
         public float getGENUL23() {
           return gENUL23_;
         }
@@ -27311,6 +27883,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_UL3_3 = 33;</code>
          * @return Whether the gENUL33 field is set.
          */
+        @java.lang.Override
         public boolean hasGENUL33() {
           return ((bitField0_ & 0x40000000) != 0);
         }
@@ -27318,6 +27891,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_UL3_3 = 33;</code>
          * @return The gENUL33.
          */
+        @java.lang.Override
         public float getGENUL33() {
           return gENUL33_;
         }
@@ -27328,6 +27902,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_IL1_3 = 34;</code>
          * @return Whether the gENIL13 field is set.
          */
+        @java.lang.Override
         public boolean hasGENIL13() {
           return ((bitField0_ & 0x80000000) != 0);
         }
@@ -27335,6 +27910,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_IL1_3 = 34;</code>
          * @return The gENIL13.
          */
+        @java.lang.Override
         public float getGENIL13() {
           return gENIL13_;
         }
@@ -27345,6 +27921,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_IL2_3 = 35;</code>
          * @return Whether the gENIL23 field is set.
          */
+        @java.lang.Override
         public boolean hasGENIL23() {
           return ((bitField1_ & 0x00000001) != 0);
         }
@@ -27352,6 +27929,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_IL2_3 = 35;</code>
          * @return The gENIL23.
          */
+        @java.lang.Override
         public float getGENIL23() {
           return gENIL23_;
         }
@@ -27362,6 +27940,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_IL3_3 = 36;</code>
          * @return Whether the gENIL33 field is set.
          */
+        @java.lang.Override
         public boolean hasGENIL33() {
           return ((bitField1_ & 0x00000002) != 0);
         }
@@ -27369,6 +27948,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_IL3_3 = 36;</code>
          * @return The gENIL33.
          */
+        @java.lang.Override
         public float getGENIL33() {
           return gENIL33_;
         }
@@ -27379,6 +27959,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 GEN_STATUS3 = 37;</code>
          * @return Whether the gENSTATUS3 field is set.
          */
+        @java.lang.Override
         public boolean hasGENSTATUS3() {
           return ((bitField1_ & 0x00000004) != 0);
         }
@@ -27386,6 +27967,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 GEN_STATUS3 = 37;</code>
          * @return The gENSTATUS3.
          */
+        @java.lang.Override
         public int getGENSTATUS3() {
           return gENSTATUS3_;
         }
@@ -27396,6 +27978,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 GEN_HOURS3 = 38;</code>
          * @return Whether the gENHOURS3 field is set.
          */
+        @java.lang.Override
         public boolean hasGENHOURS3() {
           return ((bitField1_ & 0x00000008) != 0);
         }
@@ -27403,6 +27986,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 GEN_HOURS3 = 38;</code>
          * @return The gENHOURS3.
          */
+        @java.lang.Override
         public int getGENHOURS3() {
           return gENHOURS3_;
         }
@@ -27417,6 +28001,7 @@ public final class OmnicommMessageOuterClass {
          * <code>repeated bytes GEN_ALARM3 = 39;</code>
          * @return A list containing the gENALARM3.
          */
+        @java.lang.Override
         public java.util.List<com.google.protobuf.ByteString>
             getGENALARM3List() {
           return gENALARM3_;
@@ -27455,6 +28040,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_UC = 40;</code>
          * @return Whether the gENUC field is set.
          */
+        @java.lang.Override
         public boolean hasGENUC() {
           return ((bitField1_ & 0x00000010) != 0);
         }
@@ -27466,6 +28052,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_UC = 40;</code>
          * @return The gENUC.
          */
+        @java.lang.Override
         public float getGENUC() {
           return gENUC_;
         }
@@ -27480,6 +28067,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 GEN_IC = 41;</code>
          * @return Whether the gENIC field is set.
          */
+        @java.lang.Override
         public boolean hasGENIC() {
           return ((bitField1_ & 0x00000020) != 0);
         }
@@ -27491,6 +28079,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 GEN_IC = 41;</code>
          * @return The gENIC.
          */
+        @java.lang.Override
         public int getGENIC() {
           return gENIC_;
         }
@@ -27505,6 +28094,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_FREQ = 42;</code>
          * @return Whether the gENFREQ field is set.
          */
+        @java.lang.Override
         public boolean hasGENFREQ() {
           return ((bitField1_ & 0x00000040) != 0);
         }
@@ -27516,6 +28106,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_FREQ = 42;</code>
          * @return The gENFREQ.
          */
+        @java.lang.Override
         public float getGENFREQ() {
           return gENFREQ_;
         }
@@ -27530,6 +28121,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_UL1L2 = 43;</code>
          * @return Whether the gENUL1L2 field is set.
          */
+        @java.lang.Override
         public boolean hasGENUL1L2() {
           return ((bitField1_ & 0x00000080) != 0);
         }
@@ -27541,6 +28133,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_UL1L2 = 43;</code>
          * @return The gENUL1L2.
          */
+        @java.lang.Override
         public float getGENUL1L2() {
           return gENUL1L2_;
         }
@@ -27555,6 +28148,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_UL2L3 = 44;</code>
          * @return Whether the gENUL2L3 field is set.
          */
+        @java.lang.Override
         public boolean hasGENUL2L3() {
           return ((bitField1_ & 0x00000100) != 0);
         }
@@ -27566,6 +28160,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_UL2L3 = 44;</code>
          * @return The gENUL2L3.
          */
+        @java.lang.Override
         public float getGENUL2L3() {
           return gENUL2L3_;
         }
@@ -27580,6 +28175,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_UL1L3 = 45;</code>
          * @return Whether the gENUL1L3 field is set.
          */
+        @java.lang.Override
         public boolean hasGENUL1L3() {
           return ((bitField1_ & 0x00000200) != 0);
         }
@@ -27591,6 +28187,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float GEN_UL1L3 = 45;</code>
          * @return The gENUL1L3.
          */
+        @java.lang.Override
         public float getGENUL1L3() {
           return gENUL1L3_;
         }
@@ -27605,6 +28202,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 POW_ACT_L1 = 46;</code>
          * @return Whether the pOWACTL1 field is set.
          */
+        @java.lang.Override
         public boolean hasPOWACTL1() {
           return ((bitField1_ & 0x00000400) != 0);
         }
@@ -27616,6 +28214,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 POW_ACT_L1 = 46;</code>
          * @return The pOWACTL1.
          */
+        @java.lang.Override
         public int getPOWACTL1() {
           return pOWACTL1_;
         }
@@ -27630,6 +28229,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 POW_ACT_L2 = 47;</code>
          * @return Whether the pOWACTL2 field is set.
          */
+        @java.lang.Override
         public boolean hasPOWACTL2() {
           return ((bitField1_ & 0x00000800) != 0);
         }
@@ -27641,6 +28241,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 POW_ACT_L2 = 47;</code>
          * @return The pOWACTL2.
          */
+        @java.lang.Override
         public int getPOWACTL2() {
           return pOWACTL2_;
         }
@@ -27655,6 +28256,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 POW_ACT_L3 = 48;</code>
          * @return Whether the pOWACTL3 field is set.
          */
+        @java.lang.Override
         public boolean hasPOWACTL3() {
           return ((bitField1_ & 0x00001000) != 0);
         }
@@ -27666,6 +28268,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 POW_ACT_L3 = 48;</code>
          * @return The pOWACTL3.
          */
+        @java.lang.Override
         public int getPOWACTL3() {
           return pOWACTL3_;
         }
@@ -27680,6 +28283,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 POW_FULL_L1 = 49;</code>
          * @return Whether the pOWFULLL1 field is set.
          */
+        @java.lang.Override
         public boolean hasPOWFULLL1() {
           return ((bitField1_ & 0x00002000) != 0);
         }
@@ -27691,6 +28295,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 POW_FULL_L1 = 49;</code>
          * @return The pOWFULLL1.
          */
+        @java.lang.Override
         public int getPOWFULLL1() {
           return pOWFULLL1_;
         }
@@ -27705,6 +28310,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 POW_FULL_L2 = 50;</code>
          * @return Whether the pOWFULLL2 field is set.
          */
+        @java.lang.Override
         public boolean hasPOWFULLL2() {
           return ((bitField1_ & 0x00004000) != 0);
         }
@@ -27716,6 +28322,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 POW_FULL_L2 = 50;</code>
          * @return The pOWFULLL2.
          */
+        @java.lang.Override
         public int getPOWFULLL2() {
           return pOWFULLL2_;
         }
@@ -27730,6 +28337,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 POW_FULL_L3 = 51;</code>
          * @return Whether the pOWFULLL3 field is set.
          */
+        @java.lang.Override
         public boolean hasPOWFULLL3() {
           return ((bitField1_ & 0x00008000) != 0);
         }
@@ -27741,6 +28349,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 POW_FULL_L3 = 51;</code>
          * @return The pOWFULLL3.
          */
+        @java.lang.Override
         public int getPOWFULLL3() {
           return pOWFULLL3_;
         }
@@ -27755,6 +28364,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 POW_REACT_L1 = 52;</code>
          * @return Whether the pOWREACTL1 field is set.
          */
+        @java.lang.Override
         public boolean hasPOWREACTL1() {
           return ((bitField1_ & 0x00010000) != 0);
         }
@@ -27766,6 +28376,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 POW_REACT_L1 = 52;</code>
          * @return The pOWREACTL1.
          */
+        @java.lang.Override
         public int getPOWREACTL1() {
           return pOWREACTL1_;
         }
@@ -27780,6 +28391,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 POW_REACT_L2 = 53;</code>
          * @return Whether the pOWREACTL2 field is set.
          */
+        @java.lang.Override
         public boolean hasPOWREACTL2() {
           return ((bitField1_ & 0x00020000) != 0);
         }
@@ -27791,6 +28403,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 POW_REACT_L2 = 53;</code>
          * @return The pOWREACTL2.
          */
+        @java.lang.Override
         public int getPOWREACTL2() {
           return pOWREACTL2_;
         }
@@ -27805,6 +28418,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 POW_REACT_L3 = 54;</code>
          * @return Whether the pOWREACTL3 field is set.
          */
+        @java.lang.Override
         public boolean hasPOWREACTL3() {
           return ((bitField1_ & 0x00040000) != 0);
         }
@@ -27816,6 +28430,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 POW_REACT_L3 = 54;</code>
          * @return The pOWREACTL3.
          */
+        @java.lang.Override
         public int getPOWREACTL3() {
           return pOWREACTL3_;
         }
@@ -27830,6 +28445,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float POW_KOEF = 55;</code>
          * @return Whether the pOWKOEF field is set.
          */
+        @java.lang.Override
         public boolean hasPOWKOEF() {
           return ((bitField1_ & 0x00080000) != 0);
         }
@@ -27841,6 +28457,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float POW_KOEF = 55;</code>
          * @return The pOWKOEF.
          */
+        @java.lang.Override
         public float getPOWKOEF() {
           return pOWKOEF_;
         }
@@ -27855,6 +28472,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 POW_GEN_TOTAL = 56;</code>
          * @return Whether the pOWGENTOTAL field is set.
          */
+        @java.lang.Override
         public boolean hasPOWGENTOTAL() {
           return ((bitField1_ & 0x00100000) != 0);
         }
@@ -27866,6 +28484,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 POW_GEN_TOTAL = 56;</code>
          * @return The pOWGENTOTAL.
          */
+        @java.lang.Override
         public int getPOWGENTOTAL() {
           return pOWGENTOTAL_;
         }
@@ -27880,6 +28499,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 FUEL_LEVEL = 57;</code>
          * @return Whether the fUELLEVEL field is set.
          */
+        @java.lang.Override
         public boolean hasFUELLEVEL() {
           return ((bitField1_ & 0x00200000) != 0);
         }
@@ -27891,6 +28511,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 FUEL_LEVEL = 57;</code>
          * @return The fUELLEVEL.
          */
+        @java.lang.Override
         public int getFUELLEVEL() {
           return fUELLEVEL_;
         }
@@ -27905,6 +28526,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SMS_REGS_0 = 60;</code>
          * @return Whether the sMSREGS0 field is set.
          */
+        @java.lang.Override
         public boolean hasSMSREGS0() {
           return ((bitField1_ & 0x00400000) != 0);
         }
@@ -27916,6 +28538,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SMS_REGS_0 = 60;</code>
          * @return The sMSREGS0.
          */
+        @java.lang.Override
         public int getSMSREGS0() {
           return sMSREGS0_;
         }
@@ -27930,6 +28553,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SMS_REGS_1 = 61;</code>
          * @return Whether the sMSREGS1 field is set.
          */
+        @java.lang.Override
         public boolean hasSMSREGS1() {
           return ((bitField1_ & 0x00800000) != 0);
         }
@@ -27941,6 +28565,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SMS_REGS_1 = 61;</code>
          * @return The sMSREGS1.
          */
+        @java.lang.Override
         public int getSMSREGS1() {
           return sMSREGS1_;
         }
@@ -27955,6 +28580,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SMS_REGS_2 = 62;</code>
          * @return Whether the sMSREGS2 field is set.
          */
+        @java.lang.Override
         public boolean hasSMSREGS2() {
           return ((bitField1_ & 0x01000000) != 0);
         }
@@ -27966,6 +28592,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SMS_REGS_2 = 62;</code>
          * @return The sMSREGS2.
          */
+        @java.lang.Override
         public int getSMSREGS2() {
           return sMSREGS2_;
         }
@@ -27980,6 +28607,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SMS_REGS_3 = 63;</code>
          * @return Whether the sMSREGS3 field is set.
          */
+        @java.lang.Override
         public boolean hasSMSREGS3() {
           return ((bitField1_ & 0x02000000) != 0);
         }
@@ -27991,6 +28619,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SMS_REGS_3 = 63;</code>
          * @return The sMSREGS3.
          */
+        @java.lang.Override
         public int getSMSREGS3() {
           return sMSREGS3_;
         }
@@ -28005,6 +28634,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SMS_REGS_4 = 64;</code>
          * @return Whether the sMSREGS4 field is set.
          */
+        @java.lang.Override
         public boolean hasSMSREGS4() {
           return ((bitField1_ & 0x04000000) != 0);
         }
@@ -28016,6 +28646,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SMS_REGS_4 = 64;</code>
          * @return The sMSREGS4.
          */
+        @java.lang.Override
         public int getSMSREGS4() {
           return sMSREGS4_;
         }
@@ -29956,6 +30587,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 GEN_OILPRESS1 = 1;</code>
            * @return Whether the gENOILPRESS1 field is set.
            */
+          @java.lang.Override
           public boolean hasGENOILPRESS1() {
             return ((bitField0_ & 0x00000001) != 0);
           }
@@ -29963,6 +30595,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 GEN_OILPRESS1 = 1;</code>
            * @return The gENOILPRESS1.
            */
+          @java.lang.Override
           public int getGENOILPRESS1() {
             return gENOILPRESS1_;
           }
@@ -29993,6 +30626,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional sint32 GEN_TEMP1 = 2;</code>
            * @return Whether the gENTEMP1 field is set.
            */
+          @java.lang.Override
           public boolean hasGENTEMP1() {
             return ((bitField0_ & 0x00000002) != 0);
           }
@@ -30000,6 +30634,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional sint32 GEN_TEMP1 = 2;</code>
            * @return The gENTEMP1.
            */
+          @java.lang.Override
           public int getGENTEMP1() {
             return gENTEMP1_;
           }
@@ -30030,6 +30665,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_VOLT1 = 3;</code>
            * @return Whether the gENVOLT1 field is set.
            */
+          @java.lang.Override
           public boolean hasGENVOLT1() {
             return ((bitField0_ & 0x00000004) != 0);
           }
@@ -30037,6 +30673,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_VOLT1 = 3;</code>
            * @return The gENVOLT1.
            */
+          @java.lang.Override
           public float getGENVOLT1() {
             return gENVOLT1_;
           }
@@ -30067,6 +30704,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 GEN_RPM1 = 4;</code>
            * @return Whether the gENRPM1 field is set.
            */
+          @java.lang.Override
           public boolean hasGENRPM1() {
             return ((bitField0_ & 0x00000008) != 0);
           }
@@ -30074,6 +30712,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 GEN_RPM1 = 4;</code>
            * @return The gENRPM1.
            */
+          @java.lang.Override
           public int getGENRPM1() {
             return gENRPM1_;
           }
@@ -30104,6 +30743,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_UL1_1 = 5;</code>
            * @return Whether the gENUL11 field is set.
            */
+          @java.lang.Override
           public boolean hasGENUL11() {
             return ((bitField0_ & 0x00000010) != 0);
           }
@@ -30111,6 +30751,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_UL1_1 = 5;</code>
            * @return The gENUL11.
            */
+          @java.lang.Override
           public float getGENUL11() {
             return gENUL11_;
           }
@@ -30141,6 +30782,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_UL2_1 = 6;</code>
            * @return Whether the gENUL21 field is set.
            */
+          @java.lang.Override
           public boolean hasGENUL21() {
             return ((bitField0_ & 0x00000020) != 0);
           }
@@ -30148,6 +30790,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_UL2_1 = 6;</code>
            * @return The gENUL21.
            */
+          @java.lang.Override
           public float getGENUL21() {
             return gENUL21_;
           }
@@ -30178,6 +30821,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_UL3_1 = 7;</code>
            * @return Whether the gENUL31 field is set.
            */
+          @java.lang.Override
           public boolean hasGENUL31() {
             return ((bitField0_ & 0x00000040) != 0);
           }
@@ -30185,6 +30829,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_UL3_1 = 7;</code>
            * @return The gENUL31.
            */
+          @java.lang.Override
           public float getGENUL31() {
             return gENUL31_;
           }
@@ -30215,6 +30860,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_IL1_1 = 8;</code>
            * @return Whether the gENIL11 field is set.
            */
+          @java.lang.Override
           public boolean hasGENIL11() {
             return ((bitField0_ & 0x00000080) != 0);
           }
@@ -30222,6 +30868,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_IL1_1 = 8;</code>
            * @return The gENIL11.
            */
+          @java.lang.Override
           public float getGENIL11() {
             return gENIL11_;
           }
@@ -30252,6 +30899,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_IL2_1 = 9;</code>
            * @return Whether the gENIL21 field is set.
            */
+          @java.lang.Override
           public boolean hasGENIL21() {
             return ((bitField0_ & 0x00000100) != 0);
           }
@@ -30259,6 +30907,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_IL2_1 = 9;</code>
            * @return The gENIL21.
            */
+          @java.lang.Override
           public float getGENIL21() {
             return gENIL21_;
           }
@@ -30289,6 +30938,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_IL3_1 = 10;</code>
            * @return Whether the gENIL31 field is set.
            */
+          @java.lang.Override
           public boolean hasGENIL31() {
             return ((bitField0_ & 0x00000200) != 0);
           }
@@ -30296,6 +30946,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_IL3_1 = 10;</code>
            * @return The gENIL31.
            */
+          @java.lang.Override
           public float getGENIL31() {
             return gENIL31_;
           }
@@ -30326,6 +30977,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 GEN_STATUS1 = 11;</code>
            * @return Whether the gENSTATUS1 field is set.
            */
+          @java.lang.Override
           public boolean hasGENSTATUS1() {
             return ((bitField0_ & 0x00000400) != 0);
           }
@@ -30333,6 +30985,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 GEN_STATUS1 = 11;</code>
            * @return The gENSTATUS1.
            */
+          @java.lang.Override
           public int getGENSTATUS1() {
             return gENSTATUS1_;
           }
@@ -30363,6 +31016,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 GEN_HOURS1 = 12;</code>
            * @return Whether the gENHOURS1 field is set.
            */
+          @java.lang.Override
           public boolean hasGENHOURS1() {
             return ((bitField0_ & 0x00000800) != 0);
           }
@@ -30370,6 +31024,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 GEN_HOURS1 = 12;</code>
            * @return The gENHOURS1.
            */
+          @java.lang.Override
           public int getGENHOURS1() {
             return gENHOURS1_;
           }
@@ -30513,6 +31168,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 GEN_OILPRESS2 = 14;</code>
            * @return Whether the gENOILPRESS2 field is set.
            */
+          @java.lang.Override
           public boolean hasGENOILPRESS2() {
             return ((bitField0_ & 0x00002000) != 0);
           }
@@ -30520,6 +31176,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 GEN_OILPRESS2 = 14;</code>
            * @return The gENOILPRESS2.
            */
+          @java.lang.Override
           public int getGENOILPRESS2() {
             return gENOILPRESS2_;
           }
@@ -30550,6 +31207,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional sint32 GEN_TEMP2 = 15;</code>
            * @return Whether the gENTEMP2 field is set.
            */
+          @java.lang.Override
           public boolean hasGENTEMP2() {
             return ((bitField0_ & 0x00004000) != 0);
           }
@@ -30557,6 +31215,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional sint32 GEN_TEMP2 = 15;</code>
            * @return The gENTEMP2.
            */
+          @java.lang.Override
           public int getGENTEMP2() {
             return gENTEMP2_;
           }
@@ -30587,6 +31246,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_VOLT2 = 16;</code>
            * @return Whether the gENVOLT2 field is set.
            */
+          @java.lang.Override
           public boolean hasGENVOLT2() {
             return ((bitField0_ & 0x00008000) != 0);
           }
@@ -30594,6 +31254,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_VOLT2 = 16;</code>
            * @return The gENVOLT2.
            */
+          @java.lang.Override
           public float getGENVOLT2() {
             return gENVOLT2_;
           }
@@ -30624,6 +31285,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 GEN_RPM2 = 17;</code>
            * @return Whether the gENRPM2 field is set.
            */
+          @java.lang.Override
           public boolean hasGENRPM2() {
             return ((bitField0_ & 0x00010000) != 0);
           }
@@ -30631,6 +31293,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 GEN_RPM2 = 17;</code>
            * @return The gENRPM2.
            */
+          @java.lang.Override
           public int getGENRPM2() {
             return gENRPM2_;
           }
@@ -30661,6 +31324,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_UL1_2 = 18;</code>
            * @return Whether the gENUL12 field is set.
            */
+          @java.lang.Override
           public boolean hasGENUL12() {
             return ((bitField0_ & 0x00020000) != 0);
           }
@@ -30668,6 +31332,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_UL1_2 = 18;</code>
            * @return The gENUL12.
            */
+          @java.lang.Override
           public float getGENUL12() {
             return gENUL12_;
           }
@@ -30698,6 +31363,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_UL2_2 = 19;</code>
            * @return Whether the gENUL22 field is set.
            */
+          @java.lang.Override
           public boolean hasGENUL22() {
             return ((bitField0_ & 0x00040000) != 0);
           }
@@ -30705,6 +31371,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_UL2_2 = 19;</code>
            * @return The gENUL22.
            */
+          @java.lang.Override
           public float getGENUL22() {
             return gENUL22_;
           }
@@ -30735,6 +31402,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_UL3_2 = 20;</code>
            * @return Whether the gENUL32 field is set.
            */
+          @java.lang.Override
           public boolean hasGENUL32() {
             return ((bitField0_ & 0x00080000) != 0);
           }
@@ -30742,6 +31410,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_UL3_2 = 20;</code>
            * @return The gENUL32.
            */
+          @java.lang.Override
           public float getGENUL32() {
             return gENUL32_;
           }
@@ -30772,6 +31441,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_IL1_2 = 21;</code>
            * @return Whether the gENIL12 field is set.
            */
+          @java.lang.Override
           public boolean hasGENIL12() {
             return ((bitField0_ & 0x00100000) != 0);
           }
@@ -30779,6 +31449,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_IL1_2 = 21;</code>
            * @return The gENIL12.
            */
+          @java.lang.Override
           public float getGENIL12() {
             return gENIL12_;
           }
@@ -30809,6 +31480,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_IL2_2 = 22;</code>
            * @return Whether the gENIL22 field is set.
            */
+          @java.lang.Override
           public boolean hasGENIL22() {
             return ((bitField0_ & 0x00200000) != 0);
           }
@@ -30816,6 +31488,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_IL2_2 = 22;</code>
            * @return The gENIL22.
            */
+          @java.lang.Override
           public float getGENIL22() {
             return gENIL22_;
           }
@@ -30846,6 +31519,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_IL3_2 = 23;</code>
            * @return Whether the gENIL32 field is set.
            */
+          @java.lang.Override
           public boolean hasGENIL32() {
             return ((bitField0_ & 0x00400000) != 0);
           }
@@ -30853,6 +31527,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_IL3_2 = 23;</code>
            * @return The gENIL32.
            */
+          @java.lang.Override
           public float getGENIL32() {
             return gENIL32_;
           }
@@ -30883,6 +31558,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 GEN_STATUS2 = 24;</code>
            * @return Whether the gENSTATUS2 field is set.
            */
+          @java.lang.Override
           public boolean hasGENSTATUS2() {
             return ((bitField0_ & 0x00800000) != 0);
           }
@@ -30890,6 +31566,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 GEN_STATUS2 = 24;</code>
            * @return The gENSTATUS2.
            */
+          @java.lang.Override
           public int getGENSTATUS2() {
             return gENSTATUS2_;
           }
@@ -30920,6 +31597,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 GEN_HOURS2 = 25;</code>
            * @return Whether the gENHOURS2 field is set.
            */
+          @java.lang.Override
           public boolean hasGENHOURS2() {
             return ((bitField0_ & 0x01000000) != 0);
           }
@@ -30927,6 +31605,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 GEN_HOURS2 = 25;</code>
            * @return The gENHOURS2.
            */
+          @java.lang.Override
           public int getGENHOURS2() {
             return gENHOURS2_;
           }
@@ -31070,6 +31749,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 GEN_OILPRESS3 = 27;</code>
            * @return Whether the gENOILPRESS3 field is set.
            */
+          @java.lang.Override
           public boolean hasGENOILPRESS3() {
             return ((bitField0_ & 0x04000000) != 0);
           }
@@ -31077,6 +31757,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 GEN_OILPRESS3 = 27;</code>
            * @return The gENOILPRESS3.
            */
+          @java.lang.Override
           public int getGENOILPRESS3() {
             return gENOILPRESS3_;
           }
@@ -31107,6 +31788,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional sint32 GEN_TEMP3 = 28;</code>
            * @return Whether the gENTEMP3 field is set.
            */
+          @java.lang.Override
           public boolean hasGENTEMP3() {
             return ((bitField0_ & 0x08000000) != 0);
           }
@@ -31114,6 +31796,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional sint32 GEN_TEMP3 = 28;</code>
            * @return The gENTEMP3.
            */
+          @java.lang.Override
           public int getGENTEMP3() {
             return gENTEMP3_;
           }
@@ -31144,6 +31827,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_VOLT3 = 29;</code>
            * @return Whether the gENVOLT3 field is set.
            */
+          @java.lang.Override
           public boolean hasGENVOLT3() {
             return ((bitField0_ & 0x10000000) != 0);
           }
@@ -31151,6 +31835,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_VOLT3 = 29;</code>
            * @return The gENVOLT3.
            */
+          @java.lang.Override
           public float getGENVOLT3() {
             return gENVOLT3_;
           }
@@ -31181,6 +31866,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 GEN_RPM3 = 30;</code>
            * @return Whether the gENRPM3 field is set.
            */
+          @java.lang.Override
           public boolean hasGENRPM3() {
             return ((bitField0_ & 0x20000000) != 0);
           }
@@ -31188,6 +31874,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 GEN_RPM3 = 30;</code>
            * @return The gENRPM3.
            */
+          @java.lang.Override
           public int getGENRPM3() {
             return gENRPM3_;
           }
@@ -31218,6 +31905,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_UL1_3 = 31;</code>
            * @return Whether the gENUL13 field is set.
            */
+          @java.lang.Override
           public boolean hasGENUL13() {
             return ((bitField0_ & 0x40000000) != 0);
           }
@@ -31225,6 +31913,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_UL1_3 = 31;</code>
            * @return The gENUL13.
            */
+          @java.lang.Override
           public float getGENUL13() {
             return gENUL13_;
           }
@@ -31255,6 +31944,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_UL2_3 = 32;</code>
            * @return Whether the gENUL23 field is set.
            */
+          @java.lang.Override
           public boolean hasGENUL23() {
             return ((bitField0_ & 0x80000000) != 0);
           }
@@ -31262,6 +31952,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_UL2_3 = 32;</code>
            * @return The gENUL23.
            */
+          @java.lang.Override
           public float getGENUL23() {
             return gENUL23_;
           }
@@ -31292,6 +31983,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_UL3_3 = 33;</code>
            * @return Whether the gENUL33 field is set.
            */
+          @java.lang.Override
           public boolean hasGENUL33() {
             return ((bitField1_ & 0x00000001) != 0);
           }
@@ -31299,6 +31991,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_UL3_3 = 33;</code>
            * @return The gENUL33.
            */
+          @java.lang.Override
           public float getGENUL33() {
             return gENUL33_;
           }
@@ -31329,6 +32022,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_IL1_3 = 34;</code>
            * @return Whether the gENIL13 field is set.
            */
+          @java.lang.Override
           public boolean hasGENIL13() {
             return ((bitField1_ & 0x00000002) != 0);
           }
@@ -31336,6 +32030,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_IL1_3 = 34;</code>
            * @return The gENIL13.
            */
+          @java.lang.Override
           public float getGENIL13() {
             return gENIL13_;
           }
@@ -31366,6 +32061,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_IL2_3 = 35;</code>
            * @return Whether the gENIL23 field is set.
            */
+          @java.lang.Override
           public boolean hasGENIL23() {
             return ((bitField1_ & 0x00000004) != 0);
           }
@@ -31373,6 +32069,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_IL2_3 = 35;</code>
            * @return The gENIL23.
            */
+          @java.lang.Override
           public float getGENIL23() {
             return gENIL23_;
           }
@@ -31403,6 +32100,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_IL3_3 = 36;</code>
            * @return Whether the gENIL33 field is set.
            */
+          @java.lang.Override
           public boolean hasGENIL33() {
             return ((bitField1_ & 0x00000008) != 0);
           }
@@ -31410,6 +32108,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_IL3_3 = 36;</code>
            * @return The gENIL33.
            */
+          @java.lang.Override
           public float getGENIL33() {
             return gENIL33_;
           }
@@ -31440,6 +32139,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 GEN_STATUS3 = 37;</code>
            * @return Whether the gENSTATUS3 field is set.
            */
+          @java.lang.Override
           public boolean hasGENSTATUS3() {
             return ((bitField1_ & 0x00000010) != 0);
           }
@@ -31447,6 +32147,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 GEN_STATUS3 = 37;</code>
            * @return The gENSTATUS3.
            */
+          @java.lang.Override
           public int getGENSTATUS3() {
             return gENSTATUS3_;
           }
@@ -31477,6 +32178,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 GEN_HOURS3 = 38;</code>
            * @return Whether the gENHOURS3 field is set.
            */
+          @java.lang.Override
           public boolean hasGENHOURS3() {
             return ((bitField1_ & 0x00000020) != 0);
           }
@@ -31484,6 +32186,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 GEN_HOURS3 = 38;</code>
            * @return The gENHOURS3.
            */
+          @java.lang.Override
           public int getGENHOURS3() {
             return gENHOURS3_;
           }
@@ -31631,6 +32334,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_UC = 40;</code>
            * @return Whether the gENUC field is set.
            */
+          @java.lang.Override
           public boolean hasGENUC() {
             return ((bitField1_ & 0x00000080) != 0);
           }
@@ -31642,6 +32346,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_UC = 40;</code>
            * @return The gENUC.
            */
+          @java.lang.Override
           public float getGENUC() {
             return gENUC_;
           }
@@ -31684,6 +32389,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 GEN_IC = 41;</code>
            * @return Whether the gENIC field is set.
            */
+          @java.lang.Override
           public boolean hasGENIC() {
             return ((bitField1_ & 0x00000100) != 0);
           }
@@ -31695,6 +32401,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 GEN_IC = 41;</code>
            * @return The gENIC.
            */
+          @java.lang.Override
           public int getGENIC() {
             return gENIC_;
           }
@@ -31737,6 +32444,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_FREQ = 42;</code>
            * @return Whether the gENFREQ field is set.
            */
+          @java.lang.Override
           public boolean hasGENFREQ() {
             return ((bitField1_ & 0x00000200) != 0);
           }
@@ -31748,6 +32456,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_FREQ = 42;</code>
            * @return The gENFREQ.
            */
+          @java.lang.Override
           public float getGENFREQ() {
             return gENFREQ_;
           }
@@ -31790,6 +32499,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_UL1L2 = 43;</code>
            * @return Whether the gENUL1L2 field is set.
            */
+          @java.lang.Override
           public boolean hasGENUL1L2() {
             return ((bitField1_ & 0x00000400) != 0);
           }
@@ -31801,6 +32511,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_UL1L2 = 43;</code>
            * @return The gENUL1L2.
            */
+          @java.lang.Override
           public float getGENUL1L2() {
             return gENUL1L2_;
           }
@@ -31843,6 +32554,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_UL2L3 = 44;</code>
            * @return Whether the gENUL2L3 field is set.
            */
+          @java.lang.Override
           public boolean hasGENUL2L3() {
             return ((bitField1_ & 0x00000800) != 0);
           }
@@ -31854,6 +32566,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_UL2L3 = 44;</code>
            * @return The gENUL2L3.
            */
+          @java.lang.Override
           public float getGENUL2L3() {
             return gENUL2L3_;
           }
@@ -31896,6 +32609,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_UL1L3 = 45;</code>
            * @return Whether the gENUL1L3 field is set.
            */
+          @java.lang.Override
           public boolean hasGENUL1L3() {
             return ((bitField1_ & 0x00001000) != 0);
           }
@@ -31907,6 +32621,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float GEN_UL1L3 = 45;</code>
            * @return The gENUL1L3.
            */
+          @java.lang.Override
           public float getGENUL1L3() {
             return gENUL1L3_;
           }
@@ -31949,6 +32664,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 POW_ACT_L1 = 46;</code>
            * @return Whether the pOWACTL1 field is set.
            */
+          @java.lang.Override
           public boolean hasPOWACTL1() {
             return ((bitField1_ & 0x00002000) != 0);
           }
@@ -31960,6 +32676,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 POW_ACT_L1 = 46;</code>
            * @return The pOWACTL1.
            */
+          @java.lang.Override
           public int getPOWACTL1() {
             return pOWACTL1_;
           }
@@ -32002,6 +32719,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 POW_ACT_L2 = 47;</code>
            * @return Whether the pOWACTL2 field is set.
            */
+          @java.lang.Override
           public boolean hasPOWACTL2() {
             return ((bitField1_ & 0x00004000) != 0);
           }
@@ -32013,6 +32731,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 POW_ACT_L2 = 47;</code>
            * @return The pOWACTL2.
            */
+          @java.lang.Override
           public int getPOWACTL2() {
             return pOWACTL2_;
           }
@@ -32055,6 +32774,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 POW_ACT_L3 = 48;</code>
            * @return Whether the pOWACTL3 field is set.
            */
+          @java.lang.Override
           public boolean hasPOWACTL3() {
             return ((bitField1_ & 0x00008000) != 0);
           }
@@ -32066,6 +32786,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 POW_ACT_L3 = 48;</code>
            * @return The pOWACTL3.
            */
+          @java.lang.Override
           public int getPOWACTL3() {
             return pOWACTL3_;
           }
@@ -32108,6 +32829,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 POW_FULL_L1 = 49;</code>
            * @return Whether the pOWFULLL1 field is set.
            */
+          @java.lang.Override
           public boolean hasPOWFULLL1() {
             return ((bitField1_ & 0x00010000) != 0);
           }
@@ -32119,6 +32841,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 POW_FULL_L1 = 49;</code>
            * @return The pOWFULLL1.
            */
+          @java.lang.Override
           public int getPOWFULLL1() {
             return pOWFULLL1_;
           }
@@ -32161,6 +32884,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 POW_FULL_L2 = 50;</code>
            * @return Whether the pOWFULLL2 field is set.
            */
+          @java.lang.Override
           public boolean hasPOWFULLL2() {
             return ((bitField1_ & 0x00020000) != 0);
           }
@@ -32172,6 +32896,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 POW_FULL_L2 = 50;</code>
            * @return The pOWFULLL2.
            */
+          @java.lang.Override
           public int getPOWFULLL2() {
             return pOWFULLL2_;
           }
@@ -32214,6 +32939,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 POW_FULL_L3 = 51;</code>
            * @return Whether the pOWFULLL3 field is set.
            */
+          @java.lang.Override
           public boolean hasPOWFULLL3() {
             return ((bitField1_ & 0x00040000) != 0);
           }
@@ -32225,6 +32951,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 POW_FULL_L3 = 51;</code>
            * @return The pOWFULLL3.
            */
+          @java.lang.Override
           public int getPOWFULLL3() {
             return pOWFULLL3_;
           }
@@ -32267,6 +32994,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 POW_REACT_L1 = 52;</code>
            * @return Whether the pOWREACTL1 field is set.
            */
+          @java.lang.Override
           public boolean hasPOWREACTL1() {
             return ((bitField1_ & 0x00080000) != 0);
           }
@@ -32278,6 +33006,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 POW_REACT_L1 = 52;</code>
            * @return The pOWREACTL1.
            */
+          @java.lang.Override
           public int getPOWREACTL1() {
             return pOWREACTL1_;
           }
@@ -32320,6 +33049,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 POW_REACT_L2 = 53;</code>
            * @return Whether the pOWREACTL2 field is set.
            */
+          @java.lang.Override
           public boolean hasPOWREACTL2() {
             return ((bitField1_ & 0x00100000) != 0);
           }
@@ -32331,6 +33061,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 POW_REACT_L2 = 53;</code>
            * @return The pOWREACTL2.
            */
+          @java.lang.Override
           public int getPOWREACTL2() {
             return pOWREACTL2_;
           }
@@ -32373,6 +33104,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 POW_REACT_L3 = 54;</code>
            * @return Whether the pOWREACTL3 field is set.
            */
+          @java.lang.Override
           public boolean hasPOWREACTL3() {
             return ((bitField1_ & 0x00200000) != 0);
           }
@@ -32384,6 +33116,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 POW_REACT_L3 = 54;</code>
            * @return The pOWREACTL3.
            */
+          @java.lang.Override
           public int getPOWREACTL3() {
             return pOWREACTL3_;
           }
@@ -32426,6 +33159,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float POW_KOEF = 55;</code>
            * @return Whether the pOWKOEF field is set.
            */
+          @java.lang.Override
           public boolean hasPOWKOEF() {
             return ((bitField1_ & 0x00400000) != 0);
           }
@@ -32437,6 +33171,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float POW_KOEF = 55;</code>
            * @return The pOWKOEF.
            */
+          @java.lang.Override
           public float getPOWKOEF() {
             return pOWKOEF_;
           }
@@ -32479,6 +33214,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 POW_GEN_TOTAL = 56;</code>
            * @return Whether the pOWGENTOTAL field is set.
            */
+          @java.lang.Override
           public boolean hasPOWGENTOTAL() {
             return ((bitField1_ & 0x00800000) != 0);
           }
@@ -32490,6 +33226,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 POW_GEN_TOTAL = 56;</code>
            * @return The pOWGENTOTAL.
            */
+          @java.lang.Override
           public int getPOWGENTOTAL() {
             return pOWGENTOTAL_;
           }
@@ -32532,6 +33269,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 FUEL_LEVEL = 57;</code>
            * @return Whether the fUELLEVEL field is set.
            */
+          @java.lang.Override
           public boolean hasFUELLEVEL() {
             return ((bitField1_ & 0x01000000) != 0);
           }
@@ -32543,6 +33281,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 FUEL_LEVEL = 57;</code>
            * @return The fUELLEVEL.
            */
+          @java.lang.Override
           public int getFUELLEVEL() {
             return fUELLEVEL_;
           }
@@ -32585,6 +33324,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 SMS_REGS_0 = 60;</code>
            * @return Whether the sMSREGS0 field is set.
            */
+          @java.lang.Override
           public boolean hasSMSREGS0() {
             return ((bitField1_ & 0x02000000) != 0);
           }
@@ -32596,6 +33336,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 SMS_REGS_0 = 60;</code>
            * @return The sMSREGS0.
            */
+          @java.lang.Override
           public int getSMSREGS0() {
             return sMSREGS0_;
           }
@@ -32638,6 +33379,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 SMS_REGS_1 = 61;</code>
            * @return Whether the sMSREGS1 field is set.
            */
+          @java.lang.Override
           public boolean hasSMSREGS1() {
             return ((bitField1_ & 0x04000000) != 0);
           }
@@ -32649,6 +33391,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 SMS_REGS_1 = 61;</code>
            * @return The sMSREGS1.
            */
+          @java.lang.Override
           public int getSMSREGS1() {
             return sMSREGS1_;
           }
@@ -32691,6 +33434,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 SMS_REGS_2 = 62;</code>
            * @return Whether the sMSREGS2 field is set.
            */
+          @java.lang.Override
           public boolean hasSMSREGS2() {
             return ((bitField1_ & 0x08000000) != 0);
           }
@@ -32702,6 +33446,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 SMS_REGS_2 = 62;</code>
            * @return The sMSREGS2.
            */
+          @java.lang.Override
           public int getSMSREGS2() {
             return sMSREGS2_;
           }
@@ -32744,6 +33489,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 SMS_REGS_3 = 63;</code>
            * @return Whether the sMSREGS3 field is set.
            */
+          @java.lang.Override
           public boolean hasSMSREGS3() {
             return ((bitField1_ & 0x10000000) != 0);
           }
@@ -32755,6 +33501,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 SMS_REGS_3 = 63;</code>
            * @return The sMSREGS3.
            */
+          @java.lang.Override
           public int getSMSREGS3() {
             return sMSREGS3_;
           }
@@ -32797,6 +33544,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 SMS_REGS_4 = 64;</code>
            * @return Whether the sMSREGS4 field is set.
            */
+          @java.lang.Override
           public boolean hasSMSREGS4() {
             return ((bitField1_ & 0x20000000) != 0);
           }
@@ -32808,6 +33556,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 SMS_REGS_4 = 64;</code>
            * @return The sMSREGS4.
            */
+          @java.lang.Override
           public int getSMSREGS4() {
             return sMSREGS4_;
           }
@@ -33031,7 +33780,7 @@ public final class OmnicommMessageOuterClass {
        *
        * Protobuf type {@code org.traccar.protobuf.OmnicommMessage.Other.FuelSensorModbus}
        */
-      public  static final class FuelSensorModbus extends
+      public static final class FuelSensorModbus extends
           com.google.protobuf.GeneratedMessageV3 implements
           // @@protoc_insertion_point(message_implements:org.traccar.protobuf.OmnicommMessage.Other.FuelSensorModbus)
           FuelSensorModbusOrBuilder {
@@ -33188,6 +33937,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float FuelLevel = 1;</code>
          * @return Whether the fuelLevel field is set.
          */
+        @java.lang.Override
         public boolean hasFuelLevel() {
           return ((bitField0_ & 0x00000001) != 0);
         }
@@ -33195,6 +33945,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float FuelLevel = 1;</code>
          * @return The fuelLevel.
          */
+        @java.lang.Override
         public float getFuelLevel() {
           return fuelLevel_;
         }
@@ -33205,6 +33956,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float MedianLevel = 2;</code>
          * @return Whether the medianLevel field is set.
          */
+        @java.lang.Override
         public boolean hasMedianLevel() {
           return ((bitField0_ & 0x00000002) != 0);
         }
@@ -33212,6 +33964,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float MedianLevel = 2;</code>
          * @return The medianLevel.
          */
+        @java.lang.Override
         public float getMedianLevel() {
           return medianLevel_;
         }
@@ -33222,6 +33975,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 LevelPercent = 3;</code>
          * @return Whether the levelPercent field is set.
          */
+        @java.lang.Override
         public boolean hasLevelPercent() {
           return ((bitField0_ & 0x00000004) != 0);
         }
@@ -33229,6 +33983,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 LevelPercent = 3;</code>
          * @return The levelPercent.
          */
+        @java.lang.Override
         public int getLevelPercent() {
           return levelPercent_;
         }
@@ -33239,6 +33994,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float FuelVolume = 4;</code>
          * @return Whether the fuelVolume field is set.
          */
+        @java.lang.Override
         public boolean hasFuelVolume() {
           return ((bitField0_ & 0x00000008) != 0);
         }
@@ -33246,6 +34002,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float FuelVolume = 4;</code>
          * @return The fuelVolume.
          */
+        @java.lang.Override
         public float getFuelVolume() {
           return fuelVolume_;
         }
@@ -33256,6 +34013,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 FuelTemp = 5;</code>
          * @return Whether the fuelTemp field is set.
          */
+        @java.lang.Override
         public boolean hasFuelTemp() {
           return ((bitField0_ & 0x00000010) != 0);
         }
@@ -33263,6 +34021,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 FuelTemp = 5;</code>
          * @return The fuelTemp.
          */
+        @java.lang.Override
         public int getFuelTemp() {
           return fuelTemp_;
         }
@@ -33273,6 +34032,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float FuelWeight = 6;</code>
          * @return Whether the fuelWeight field is set.
          */
+        @java.lang.Override
         public boolean hasFuelWeight() {
           return ((bitField0_ & 0x00000020) != 0);
         }
@@ -33280,6 +34040,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float FuelWeight = 6;</code>
          * @return The fuelWeight.
          */
+        @java.lang.Override
         public float getFuelWeight() {
           return fuelWeight_;
         }
@@ -33290,6 +34051,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float FuelDensity = 7;</code>
          * @return Whether the fuelDensity field is set.
          */
+        @java.lang.Override
         public boolean hasFuelDensity() {
           return ((bitField0_ & 0x00000040) != 0);
         }
@@ -33297,6 +34059,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float FuelDensity = 7;</code>
          * @return The fuelDensity.
          */
+        @java.lang.Override
         public float getFuelDensity() {
           return fuelDensity_;
         }
@@ -33307,6 +34070,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 VaporTemp = 8;</code>
          * @return Whether the vaporTemp field is set.
          */
+        @java.lang.Override
         public boolean hasVaporTemp() {
           return ((bitField0_ & 0x00000080) != 0);
         }
@@ -33314,6 +34078,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional sint32 VaporTemp = 8;</code>
          * @return The vaporTemp.
          */
+        @java.lang.Override
         public int getVaporTemp() {
           return vaporTemp_;
         }
@@ -33324,6 +34089,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float VaporWeight = 9;</code>
          * @return Whether the vaporWeight field is set.
          */
+        @java.lang.Override
         public boolean hasVaporWeight() {
           return ((bitField0_ & 0x00000100) != 0);
         }
@@ -33331,6 +34097,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float VaporWeight = 9;</code>
          * @return The vaporWeight.
          */
+        @java.lang.Override
         public float getVaporWeight() {
           return vaporWeight_;
         }
@@ -33341,6 +34108,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float LiquidWeight = 10;</code>
          * @return Whether the liquidWeight field is set.
          */
+        @java.lang.Override
         public boolean hasLiquidWeight() {
           return ((bitField0_ & 0x00000200) != 0);
         }
@@ -33348,6 +34116,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float LiquidWeight = 10;</code>
          * @return The liquidWeight.
          */
+        @java.lang.Override
         public float getLiquidWeight() {
           return liquidWeight_;
         }
@@ -33358,6 +34127,7 @@ public final class OmnicommMessageOuterClass {
          * <code>repeated sint32 PointTemp = 11;</code>
          * @return A list containing the pointTemp.
          */
+        @java.lang.Override
         public java.util.List<java.lang.Integer>
             getPointTempList() {
           return pointTemp_;
@@ -33975,6 +34745,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float FuelLevel = 1;</code>
            * @return Whether the fuelLevel field is set.
            */
+          @java.lang.Override
           public boolean hasFuelLevel() {
             return ((bitField0_ & 0x00000001) != 0);
           }
@@ -33982,6 +34753,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float FuelLevel = 1;</code>
            * @return The fuelLevel.
            */
+          @java.lang.Override
           public float getFuelLevel() {
             return fuelLevel_;
           }
@@ -34012,6 +34784,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float MedianLevel = 2;</code>
            * @return Whether the medianLevel field is set.
            */
+          @java.lang.Override
           public boolean hasMedianLevel() {
             return ((bitField0_ & 0x00000002) != 0);
           }
@@ -34019,6 +34792,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float MedianLevel = 2;</code>
            * @return The medianLevel.
            */
+          @java.lang.Override
           public float getMedianLevel() {
             return medianLevel_;
           }
@@ -34049,6 +34823,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 LevelPercent = 3;</code>
            * @return Whether the levelPercent field is set.
            */
+          @java.lang.Override
           public boolean hasLevelPercent() {
             return ((bitField0_ & 0x00000004) != 0);
           }
@@ -34056,6 +34831,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional uint32 LevelPercent = 3;</code>
            * @return The levelPercent.
            */
+          @java.lang.Override
           public int getLevelPercent() {
             return levelPercent_;
           }
@@ -34086,6 +34862,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float FuelVolume = 4;</code>
            * @return Whether the fuelVolume field is set.
            */
+          @java.lang.Override
           public boolean hasFuelVolume() {
             return ((bitField0_ & 0x00000008) != 0);
           }
@@ -34093,6 +34870,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float FuelVolume = 4;</code>
            * @return The fuelVolume.
            */
+          @java.lang.Override
           public float getFuelVolume() {
             return fuelVolume_;
           }
@@ -34123,6 +34901,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional sint32 FuelTemp = 5;</code>
            * @return Whether the fuelTemp field is set.
            */
+          @java.lang.Override
           public boolean hasFuelTemp() {
             return ((bitField0_ & 0x00000010) != 0);
           }
@@ -34130,6 +34909,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional sint32 FuelTemp = 5;</code>
            * @return The fuelTemp.
            */
+          @java.lang.Override
           public int getFuelTemp() {
             return fuelTemp_;
           }
@@ -34160,6 +34940,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float FuelWeight = 6;</code>
            * @return Whether the fuelWeight field is set.
            */
+          @java.lang.Override
           public boolean hasFuelWeight() {
             return ((bitField0_ & 0x00000020) != 0);
           }
@@ -34167,6 +34948,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float FuelWeight = 6;</code>
            * @return The fuelWeight.
            */
+          @java.lang.Override
           public float getFuelWeight() {
             return fuelWeight_;
           }
@@ -34197,6 +34979,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float FuelDensity = 7;</code>
            * @return Whether the fuelDensity field is set.
            */
+          @java.lang.Override
           public boolean hasFuelDensity() {
             return ((bitField0_ & 0x00000040) != 0);
           }
@@ -34204,6 +34987,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float FuelDensity = 7;</code>
            * @return The fuelDensity.
            */
+          @java.lang.Override
           public float getFuelDensity() {
             return fuelDensity_;
           }
@@ -34234,6 +35018,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional sint32 VaporTemp = 8;</code>
            * @return Whether the vaporTemp field is set.
            */
+          @java.lang.Override
           public boolean hasVaporTemp() {
             return ((bitField0_ & 0x00000080) != 0);
           }
@@ -34241,6 +35026,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional sint32 VaporTemp = 8;</code>
            * @return The vaporTemp.
            */
+          @java.lang.Override
           public int getVaporTemp() {
             return vaporTemp_;
           }
@@ -34271,6 +35057,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float VaporWeight = 9;</code>
            * @return Whether the vaporWeight field is set.
            */
+          @java.lang.Override
           public boolean hasVaporWeight() {
             return ((bitField0_ & 0x00000100) != 0);
           }
@@ -34278,6 +35065,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float VaporWeight = 9;</code>
            * @return The vaporWeight.
            */
+          @java.lang.Override
           public float getVaporWeight() {
             return vaporWeight_;
           }
@@ -34308,6 +35096,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float LiquidWeight = 10;</code>
            * @return Whether the liquidWeight field is set.
            */
+          @java.lang.Override
           public boolean hasLiquidWeight() {
             return ((bitField0_ & 0x00000200) != 0);
           }
@@ -34315,6 +35104,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float LiquidWeight = 10;</code>
            * @return The liquidWeight.
            */
+          @java.lang.Override
           public float getLiquidWeight() {
             return liquidWeight_;
           }
@@ -34538,7 +35328,7 @@ public final class OmnicommMessageOuterClass {
        *
        * Protobuf type {@code org.traccar.protobuf.OmnicommMessage.Other.WeightControl}
        */
-      public  static final class WeightControl extends
+      public static final class WeightControl extends
           com.google.protobuf.GeneratedMessageV3 implements
           // @@protoc_insertion_point(message_implements:org.traccar.protobuf.OmnicommMessage.Other.WeightControl)
           WeightControlOrBuilder {
@@ -34680,6 +35470,7 @@ public final class OmnicommMessageOuterClass {
          * <code>repeated float AxelWeight = 1;</code>
          * @return A list containing the axelWeight.
          */
+        @java.lang.Override
         public java.util.List<java.lang.Float>
             getAxelWeightList() {
           return axelWeight_;
@@ -34706,6 +35497,7 @@ public final class OmnicommMessageOuterClass {
          * <code>repeated float AxelLimit = 2;</code>
          * @return A list containing the axelLimit.
          */
+        @java.lang.Override
         public java.util.List<java.lang.Float>
             getAxelLimitList() {
           return axelLimit_;
@@ -34732,6 +35524,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float TotalWeight = 3;</code>
          * @return Whether the totalWeight field is set.
          */
+        @java.lang.Override
         public boolean hasTotalWeight() {
           return ((bitField0_ & 0x00000001) != 0);
         }
@@ -34739,6 +35532,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float TotalWeight = 3;</code>
          * @return The totalWeight.
          */
+        @java.lang.Override
         public float getTotalWeight() {
           return totalWeight_;
         }
@@ -34749,6 +35543,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float TotalWeightLimit = 4;</code>
          * @return Whether the totalWeightLimit field is set.
          */
+        @java.lang.Override
         public boolean hasTotalWeightLimit() {
           return ((bitField0_ & 0x00000002) != 0);
         }
@@ -34756,6 +35551,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional float TotalWeightLimit = 4;</code>
          * @return The totalWeightLimit.
          */
+        @java.lang.Override
         public float getTotalWeightLimit() {
           return totalWeightLimit_;
         }
@@ -35334,6 +36130,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float TotalWeight = 3;</code>
            * @return Whether the totalWeight field is set.
            */
+          @java.lang.Override
           public boolean hasTotalWeight() {
             return ((bitField0_ & 0x00000004) != 0);
           }
@@ -35341,6 +36138,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float TotalWeight = 3;</code>
            * @return The totalWeight.
            */
+          @java.lang.Override
           public float getTotalWeight() {
             return totalWeight_;
           }
@@ -35371,6 +36169,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float TotalWeightLimit = 4;</code>
            * @return Whether the totalWeightLimit field is set.
            */
+          @java.lang.Override
           public boolean hasTotalWeightLimit() {
             return ((bitField0_ & 0x00000008) != 0);
           }
@@ -35378,6 +36177,7 @@ public final class OmnicommMessageOuterClass {
            * <code>optional float TotalWeightLimit = 4;</code>
            * @return The totalWeightLimit.
            */
+          @java.lang.Override
           public float getTotalWeightLimit() {
             return totalWeightLimit_;
           }
@@ -35462,6 +36262,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional group OneWire = 1 { ... }</code>
        * @return Whether the onewire field is set.
        */
+      @java.lang.Override
       public boolean hasOneWire() {
         return ((bitField0_ & 0x00000001) != 0);
       }
@@ -35469,12 +36270,14 @@ public final class OmnicommMessageOuterClass {
        * <code>optional group OneWire = 1 { ... }</code>
        * @return The onewire.
        */
+      @java.lang.Override
       public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.OneWire getOneWire() {
         return oneWire_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.OneWire.getDefaultInstance() : oneWire_;
       }
       /**
        * <code>optional group OneWire = 1 { ... }</code>
        */
+      @java.lang.Override
       public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.OneWireOrBuilder getOneWireOrBuilder() {
         return oneWire_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.OneWire.getDefaultInstance() : oneWire_;
       }
@@ -35485,6 +36288,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional group Pherip = 2 { ... }</code>
        * @return Whether the pherip field is set.
        */
+      @java.lang.Override
       public boolean hasPherip() {
         return ((bitField0_ & 0x00000002) != 0);
       }
@@ -35492,12 +36296,14 @@ public final class OmnicommMessageOuterClass {
        * <code>optional group Pherip = 2 { ... }</code>
        * @return The pherip.
        */
+      @java.lang.Override
       public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.Pherip getPherip() {
         return pherip_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.Pherip.getDefaultInstance() : pherip_;
       }
       /**
        * <code>optional group Pherip = 2 { ... }</code>
        */
+      @java.lang.Override
       public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.PheripOrBuilder getPheripOrBuilder() {
         return pherip_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.Pherip.getDefaultInstance() : pherip_;
       }
@@ -35508,6 +36314,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional group ExCAN = 3 { ... }</code>
        * @return Whether the excan field is set.
        */
+      @java.lang.Override
       public boolean hasExCAN() {
         return ((bitField0_ & 0x00000004) != 0);
       }
@@ -35515,12 +36322,14 @@ public final class OmnicommMessageOuterClass {
        * <code>optional group ExCAN = 3 { ... }</code>
        * @return The excan.
        */
+      @java.lang.Override
       public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.ExCAN getExCAN() {
         return exCAN_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.ExCAN.getDefaultInstance() : exCAN_;
       }
       /**
        * <code>optional group ExCAN = 3 { ... }</code>
        */
+      @java.lang.Override
       public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.ExCANOrBuilder getExCANOrBuilder() {
         return exCAN_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.ExCAN.getDefaultInstance() : exCAN_;
       }
@@ -35531,6 +36340,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional group Taho_DDD = 4 { ... }</code>
        * @return Whether the tahoDdd field is set.
        */
+      @java.lang.Override
       public boolean hasTahoDDD() {
         return ((bitField0_ & 0x00000008) != 0);
       }
@@ -35538,12 +36348,14 @@ public final class OmnicommMessageOuterClass {
        * <code>optional group Taho_DDD = 4 { ... }</code>
        * @return The tahoDdd.
        */
+      @java.lang.Override
       public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.Taho_DDD getTahoDDD() {
         return tahoDDD_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.Taho_DDD.getDefaultInstance() : tahoDDD_;
       }
       /**
        * <code>optional group Taho_DDD = 4 { ... }</code>
        */
+      @java.lang.Override
       public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.Taho_DDDOrBuilder getTahoDDDOrBuilder() {
         return tahoDDD_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.Taho_DDD.getDefaultInstance() : tahoDDD_;
       }
@@ -35554,6 +36366,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional group APC = 5 { ... }</code>
        * @return Whether the apc field is set.
        */
+      @java.lang.Override
       public boolean hasAPC() {
         return ((bitField0_ & 0x00000010) != 0);
       }
@@ -35561,12 +36374,14 @@ public final class OmnicommMessageOuterClass {
        * <code>optional group APC = 5 { ... }</code>
        * @return The apc.
        */
+      @java.lang.Override
       public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.APC getAPC() {
         return aPC_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.APC.getDefaultInstance() : aPC_;
       }
       /**
        * <code>optional group APC = 5 { ... }</code>
        */
+      @java.lang.Override
       public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.APCOrBuilder getAPCOrBuilder() {
         return aPC_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.APC.getDefaultInstance() : aPC_;
       }
@@ -35577,6 +36392,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional group MobileEye = 6 { ... }</code>
        * @return Whether the mobileeye field is set.
        */
+      @java.lang.Override
       public boolean hasMobileEye() {
         return ((bitField0_ & 0x00000020) != 0);
       }
@@ -35584,12 +36400,14 @@ public final class OmnicommMessageOuterClass {
        * <code>optional group MobileEye = 6 { ... }</code>
        * @return The mobileeye.
        */
+      @java.lang.Override
       public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.MobileEye getMobileEye() {
         return mobileEye_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.MobileEye.getDefaultInstance() : mobileEye_;
       }
       /**
        * <code>optional group MobileEye = 6 { ... }</code>
        */
+      @java.lang.Override
       public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.MobileEyeOrBuilder getMobileEyeOrBuilder() {
         return mobileEye_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.MobileEye.getDefaultInstance() : mobileEye_;
       }
@@ -35600,6 +36418,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional group SafeDriving = 7 { ... }</code>
        * @return Whether the safedriving field is set.
        */
+      @java.lang.Override
       public boolean hasSafeDriving() {
         return ((bitField0_ & 0x00000040) != 0);
       }
@@ -35607,12 +36426,14 @@ public final class OmnicommMessageOuterClass {
        * <code>optional group SafeDriving = 7 { ... }</code>
        * @return The safedriving.
        */
+      @java.lang.Override
       public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.SafeDriving getSafeDriving() {
         return safeDriving_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.SafeDriving.getDefaultInstance() : safeDriving_;
       }
       /**
        * <code>optional group SafeDriving = 7 { ... }</code>
        */
+      @java.lang.Override
       public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.SafeDrivingOrBuilder getSafeDrivingOrBuilder() {
         return safeDriving_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.SafeDriving.getDefaultInstance() : safeDriving_;
       }
@@ -35623,6 +36444,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional group GenComm = 8 { ... }</code>
        * @return Whether the gencomm field is set.
        */
+      @java.lang.Override
       public boolean hasGenComm() {
         return ((bitField0_ & 0x00000080) != 0);
       }
@@ -35630,12 +36452,14 @@ public final class OmnicommMessageOuterClass {
        * <code>optional group GenComm = 8 { ... }</code>
        * @return The gencomm.
        */
+      @java.lang.Override
       public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.GenComm getGenComm() {
         return genComm_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.GenComm.getDefaultInstance() : genComm_;
       }
       /**
        * <code>optional group GenComm = 8 { ... }</code>
        */
+      @java.lang.Override
       public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.GenCommOrBuilder getGenCommOrBuilder() {
         return genComm_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.GenComm.getDefaultInstance() : genComm_;
       }
@@ -35646,6 +36470,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional group FuelSensorModbus = 9 { ... }</code>
        * @return Whether the fuelsensormodbus field is set.
        */
+      @java.lang.Override
       public boolean hasFuelSensorModbus() {
         return ((bitField0_ & 0x00000100) != 0);
       }
@@ -35653,12 +36478,14 @@ public final class OmnicommMessageOuterClass {
        * <code>optional group FuelSensorModbus = 9 { ... }</code>
        * @return The fuelsensormodbus.
        */
+      @java.lang.Override
       public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.FuelSensorModbus getFuelSensorModbus() {
         return fuelSensorModbus_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.FuelSensorModbus.getDefaultInstance() : fuelSensorModbus_;
       }
       /**
        * <code>optional group FuelSensorModbus = 9 { ... }</code>
        */
+      @java.lang.Override
       public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.FuelSensorModbusOrBuilder getFuelSensorModbusOrBuilder() {
         return fuelSensorModbus_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.FuelSensorModbus.getDefaultInstance() : fuelSensorModbus_;
       }
@@ -35669,6 +36496,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional group WeightControl = 10 { ... }</code>
        * @return Whether the weightcontrol field is set.
        */
+      @java.lang.Override
       public boolean hasWeightControl() {
         return ((bitField0_ & 0x00000200) != 0);
       }
@@ -35676,12 +36504,14 @@ public final class OmnicommMessageOuterClass {
        * <code>optional group WeightControl = 10 { ... }</code>
        * @return The weightcontrol.
        */
+      @java.lang.Override
       public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.WeightControl getWeightControl() {
         return weightControl_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.WeightControl.getDefaultInstance() : weightControl_;
       }
       /**
        * <code>optional group WeightControl = 10 { ... }</code>
        */
+      @java.lang.Override
       public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.WeightControlOrBuilder getWeightControlOrBuilder() {
         return weightControl_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.WeightControl.getDefaultInstance() : weightControl_;
       }
@@ -37734,7 +38564,7 @@ public final class OmnicommMessageOuterClass {
      *
      * Protobuf type {@code org.traccar.protobuf.OmnicommMessage.ICONDt}
      */
-    public  static final class ICONDt extends
+    public static final class ICONDt extends
         com.google.protobuf.GeneratedMessageV3 implements
         // @@protoc_insertion_point(message_implements:org.traccar.protobuf.OmnicommMessage.ICONDt)
         ICONDtOrBuilder {
@@ -37862,6 +38692,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional bytes VehicleStatus = 1;</code>
        * @return Whether the vehicleStatus field is set.
        */
+      @java.lang.Override
       public boolean hasVehicleStatus() {
         return ((bitField0_ & 0x00000001) != 0);
       }
@@ -37873,6 +38704,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional bytes VehicleStatus = 1;</code>
        * @return The vehicleStatus.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString getVehicleStatus() {
         return vehicleStatus_;
       }
@@ -37887,6 +38719,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 VehicleStatusID = 2;</code>
        * @return Whether the vehicleStatusID field is set.
        */
+      @java.lang.Override
       public boolean hasVehicleStatusID() {
         return ((bitField0_ & 0x00000002) != 0);
       }
@@ -37898,6 +38731,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 VehicleStatusID = 2;</code>
        * @return The vehicleStatusID.
        */
+      @java.lang.Override
       public int getVehicleStatusID() {
         return vehicleStatusID_;
       }
@@ -37912,6 +38746,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 VehicleStatusGroupID = 3;</code>
        * @return Whether the vehicleStatusGroupID field is set.
        */
+      @java.lang.Override
       public boolean hasVehicleStatusGroupID() {
         return ((bitField0_ & 0x00000004) != 0);
       }
@@ -37923,6 +38758,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 VehicleStatusGroupID = 3;</code>
        * @return The vehicleStatusGroupID.
        */
+      @java.lang.Override
       public int getVehicleStatusGroupID() {
         return vehicleStatusGroupID_;
       }
@@ -37937,6 +38773,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint64 MsgID = 4;</code>
        * @return Whether the msgID field is set.
        */
+      @java.lang.Override
       public boolean hasMsgID() {
         return ((bitField0_ & 0x00000008) != 0);
       }
@@ -37948,6 +38785,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint64 MsgID = 4;</code>
        * @return The msgID.
        */
+      @java.lang.Override
       public long getMsgID() {
         return msgID_;
       }
@@ -37962,6 +38800,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 MsgStatus = 5;</code>
        * @return Whether the msgStatus field is set.
        */
+      @java.lang.Override
       public boolean hasMsgStatus() {
         return ((bitField0_ & 0x00000010) != 0);
       }
@@ -37973,6 +38812,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 MsgStatus = 5;</code>
        * @return The msgStatus.
        */
+      @java.lang.Override
       public int getMsgStatus() {
         return msgStatus_;
       }
@@ -37987,6 +38827,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 StatDate = 6;</code>
        * @return Whether the statDate field is set.
        */
+      @java.lang.Override
       public boolean hasStatDate() {
         return ((bitField0_ & 0x00000020) != 0);
       }
@@ -37998,6 +38839,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 StatDate = 6;</code>
        * @return The statDate.
        */
+      @java.lang.Override
       public int getStatDate() {
         return statDate_;
       }
@@ -38012,6 +38854,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional bytes VehicleStatusPrev = 7;</code>
        * @return Whether the vehicleStatusPrev field is set.
        */
+      @java.lang.Override
       public boolean hasVehicleStatusPrev() {
         return ((bitField0_ & 0x00000040) != 0);
       }
@@ -38023,6 +38866,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional bytes VehicleStatusPrev = 7;</code>
        * @return The vehicleStatusPrev.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString getVehicleStatusPrev() {
         return vehicleStatusPrev_;
       }
@@ -38037,6 +38881,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 VehicleStatusFlags = 8;</code>
        * @return Whether the vehicleStatusFlags field is set.
        */
+      @java.lang.Override
       public boolean hasVehicleStatusFlags() {
         return ((bitField0_ & 0x00000080) != 0);
       }
@@ -38048,6 +38893,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 VehicleStatusFlags = 8;</code>
        * @return The vehicleStatusFlags.
        */
+      @java.lang.Override
       public int getVehicleStatusFlags() {
         return vehicleStatusFlags_;
       }
@@ -38555,6 +39401,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional bytes VehicleStatus = 1;</code>
          * @return Whether the vehicleStatus field is set.
          */
+        @java.lang.Override
         public boolean hasVehicleStatus() {
           return ((bitField0_ & 0x00000001) != 0);
         }
@@ -38566,6 +39413,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional bytes VehicleStatus = 1;</code>
          * @return The vehicleStatus.
          */
+        @java.lang.Override
         public com.google.protobuf.ByteString getVehicleStatus() {
           return vehicleStatus_;
         }
@@ -38611,6 +39459,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 VehicleStatusID = 2;</code>
          * @return Whether the vehicleStatusID field is set.
          */
+        @java.lang.Override
         public boolean hasVehicleStatusID() {
           return ((bitField0_ & 0x00000002) != 0);
         }
@@ -38622,6 +39471,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 VehicleStatusID = 2;</code>
          * @return The vehicleStatusID.
          */
+        @java.lang.Override
         public int getVehicleStatusID() {
           return vehicleStatusID_;
         }
@@ -38664,6 +39514,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 VehicleStatusGroupID = 3;</code>
          * @return Whether the vehicleStatusGroupID field is set.
          */
+        @java.lang.Override
         public boolean hasVehicleStatusGroupID() {
           return ((bitField0_ & 0x00000004) != 0);
         }
@@ -38675,6 +39526,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 VehicleStatusGroupID = 3;</code>
          * @return The vehicleStatusGroupID.
          */
+        @java.lang.Override
         public int getVehicleStatusGroupID() {
           return vehicleStatusGroupID_;
         }
@@ -38717,6 +39569,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint64 MsgID = 4;</code>
          * @return Whether the msgID field is set.
          */
+        @java.lang.Override
         public boolean hasMsgID() {
           return ((bitField0_ & 0x00000008) != 0);
         }
@@ -38728,6 +39581,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint64 MsgID = 4;</code>
          * @return The msgID.
          */
+        @java.lang.Override
         public long getMsgID() {
           return msgID_;
         }
@@ -38770,6 +39624,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 MsgStatus = 5;</code>
          * @return Whether the msgStatus field is set.
          */
+        @java.lang.Override
         public boolean hasMsgStatus() {
           return ((bitField0_ & 0x00000010) != 0);
         }
@@ -38781,6 +39636,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 MsgStatus = 5;</code>
          * @return The msgStatus.
          */
+        @java.lang.Override
         public int getMsgStatus() {
           return msgStatus_;
         }
@@ -38823,6 +39679,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 StatDate = 6;</code>
          * @return Whether the statDate field is set.
          */
+        @java.lang.Override
         public boolean hasStatDate() {
           return ((bitField0_ & 0x00000020) != 0);
         }
@@ -38834,6 +39691,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 StatDate = 6;</code>
          * @return The statDate.
          */
+        @java.lang.Override
         public int getStatDate() {
           return statDate_;
         }
@@ -38876,6 +39734,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional bytes VehicleStatusPrev = 7;</code>
          * @return Whether the vehicleStatusPrev field is set.
          */
+        @java.lang.Override
         public boolean hasVehicleStatusPrev() {
           return ((bitField0_ & 0x00000040) != 0);
         }
@@ -38887,6 +39746,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional bytes VehicleStatusPrev = 7;</code>
          * @return The vehicleStatusPrev.
          */
+        @java.lang.Override
         public com.google.protobuf.ByteString getVehicleStatusPrev() {
           return vehicleStatusPrev_;
         }
@@ -38932,6 +39792,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 VehicleStatusFlags = 8;</code>
          * @return Whether the vehicleStatusFlags field is set.
          */
+        @java.lang.Override
         public boolean hasVehicleStatusFlags() {
           return ((bitField0_ & 0x00000080) != 0);
         }
@@ -38943,6 +39804,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 VehicleStatusFlags = 8;</code>
          * @return The vehicleStatusFlags.
          */
+        @java.lang.Override
         public int getVehicleStatusFlags() {
           return vehicleStatusFlags_;
         }
@@ -39273,7 +40135,7 @@ public final class OmnicommMessageOuterClass {
      *
      * Protobuf type {@code org.traccar.protobuf.OmnicommMessage.OBDDt_J1979}
      */
-    public  static final class OBDDt_J1979 extends
+    public static final class OBDDt_J1979 extends
         com.google.protobuf.GeneratedMessageV3 implements
         // @@protoc_insertion_point(message_implements:org.traccar.protobuf.OmnicommMessage.OBDDt_J1979)
         OBDDt_J1979OrBuilder {
@@ -39421,6 +40283,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SID_0x01_PID_0x0D = 1;</code>
        * @return Whether the sID0x01PID0x0D field is set.
        */
+      @java.lang.Override
       public boolean hasSID0X01PID0X0D() {
         return ((bitField0_ & 0x00000001) != 0);
       }
@@ -39433,6 +40296,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SID_0x01_PID_0x0D = 1;</code>
        * @return The sID0x01PID0x0D.
        */
+      @java.lang.Override
       public int getSID0X01PID0X0D() {
         return sID0X01PID0X0D_;
       }
@@ -39447,6 +40311,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SID_0x01_PID_0x31 = 2;</code>
        * @return Whether the sID0x01PID0x31 field is set.
        */
+      @java.lang.Override
       public boolean hasSID0X01PID0X31() {
         return ((bitField0_ & 0x00000002) != 0);
       }
@@ -39458,6 +40323,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SID_0x01_PID_0x31 = 2;</code>
        * @return The sID0x01PID0x31.
        */
+      @java.lang.Override
       public int getSID0X01PID0X31() {
         return sID0X01PID0X31_;
       }
@@ -39472,6 +40338,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SID_0x01_PID_0x4E = 3;</code>
        * @return Whether the sID0x01PID0x4E field is set.
        */
+      @java.lang.Override
       public boolean hasSID0X01PID0X4E() {
         return ((bitField0_ & 0x00000004) != 0);
       }
@@ -39483,6 +40350,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SID_0x01_PID_0x4E = 3;</code>
        * @return The sID0x01PID0x4E.
        */
+      @java.lang.Override
       public int getSID0X01PID0X4E() {
         return sID0X01PID0X4E_;
       }
@@ -39497,6 +40365,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SID_0x01_PID_0x42 = 4;</code>
        * @return Whether the sID0x01PID0x42 field is set.
        */
+      @java.lang.Override
       public boolean hasSID0X01PID0X42() {
         return ((bitField0_ & 0x00000008) != 0);
       }
@@ -39508,6 +40377,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SID_0x01_PID_0x42 = 4;</code>
        * @return The sID0x01PID0x42.
        */
+      @java.lang.Override
       public int getSID0X01PID0X42() {
         return sID0X01PID0X42_;
       }
@@ -39522,6 +40392,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SID_0x01_PID_0x0C = 5;</code>
        * @return Whether the sID0x01PID0x0C field is set.
        */
+      @java.lang.Override
       public boolean hasSID0X01PID0X0C() {
         return ((bitField0_ & 0x00000010) != 0);
       }
@@ -39533,6 +40404,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SID_0x01_PID_0x0C = 5;</code>
        * @return The sID0x01PID0x0C.
        */
+      @java.lang.Override
       public int getSID0X01PID0X0C() {
         return sID0X01PID0X0C_;
       }
@@ -39547,6 +40419,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SID_0x01_PID_0x2F = 6;</code>
        * @return Whether the sID0x01PID0x2F field is set.
        */
+      @java.lang.Override
       public boolean hasSID0X01PID0X2F() {
         return ((bitField0_ & 0x00000020) != 0);
       }
@@ -39558,6 +40431,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SID_0x01_PID_0x2F = 6;</code>
        * @return The sID0x01PID0x2F.
        */
+      @java.lang.Override
       public int getSID0X01PID0X2F() {
         return sID0X01PID0X2F_;
       }
@@ -39572,6 +40446,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SID_0x01_PID_0x5E = 7;</code>
        * @return Whether the sID0x01PID0x5E field is set.
        */
+      @java.lang.Override
       public boolean hasSID0X01PID0X5E() {
         return ((bitField0_ & 0x00000040) != 0);
       }
@@ -39583,6 +40458,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SID_0x01_PID_0x5E = 7;</code>
        * @return The sID0x01PID0x5E.
        */
+      @java.lang.Override
       public int getSID0X01PID0X5E() {
         return sID0X01PID0X5E_;
       }
@@ -39597,6 +40473,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SID_0x01_PID_0x5C = 8;</code>
        * @return Whether the sID0x01PID0x5C field is set.
        */
+      @java.lang.Override
       public boolean hasSID0X01PID0X5C() {
         return ((bitField0_ & 0x00000080) != 0);
       }
@@ -39608,6 +40485,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SID_0x01_PID_0x5C = 8;</code>
        * @return The sID0x01PID0x5C.
        */
+      @java.lang.Override
       public int getSID0X01PID0X5C() {
         return sID0X01PID0X5C_;
       }
@@ -39622,6 +40500,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SID_0x01_PID_0x05 = 9;</code>
        * @return Whether the sID0x01PID0x05 field is set.
        */
+      @java.lang.Override
       public boolean hasSID0X01PID0X05() {
         return ((bitField0_ & 0x00000100) != 0);
       }
@@ -39633,6 +40512,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SID_0x01_PID_0x05 = 9;</code>
        * @return The sID0x01PID0x05.
        */
+      @java.lang.Override
       public int getSID0X01PID0X05() {
         return sID0X01PID0X05_;
       }
@@ -39647,6 +40527,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SID_0x01_PID_0x01 = 10;</code>
        * @return Whether the sID0x01PID0x01 field is set.
        */
+      @java.lang.Override
       public boolean hasSID0X01PID0X01() {
         return ((bitField0_ & 0x00000200) != 0);
       }
@@ -39658,6 +40539,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SID_0x01_PID_0x01 = 10;</code>
        * @return The sID0x01PID0x01.
        */
+      @java.lang.Override
       public int getSID0X01PID0X01() {
         return sID0X01PID0X01_;
       }
@@ -39674,6 +40556,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional bytes SID_0x09_PID_0x02 = 11;</code>
        * @return Whether the sID0x09PID0x02 field is set.
        */
+      @java.lang.Override
       public boolean hasSID0X09PID0X02() {
         return ((bitField0_ & 0x00000400) != 0);
       }
@@ -39687,6 +40570,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional bytes SID_0x09_PID_0x02 = 11;</code>
        * @return The sID0x09PID0x02.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString getSID0X09PID0X02() {
         return sID0X09PID0X02_;
       }
@@ -39701,6 +40585,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SID_0x01_PID_0x5E_quantity = 12;</code>
        * @return Whether the sID0x01PID0x5EQuantity field is set.
        */
+      @java.lang.Override
       public boolean hasSID0X01PID0X5EQuantity() {
         return ((bitField0_ & 0x00000800) != 0);
       }
@@ -39712,6 +40597,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 SID_0x01_PID_0x5E_quantity = 12;</code>
        * @return The sID0x01PID0x5EQuantity.
        */
+      @java.lang.Override
       public int getSID0X01PID0X5EQuantity() {
         return sID0X01PID0X5EQuantity_;
       }
@@ -40319,6 +41205,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SID_0x01_PID_0x0D = 1;</code>
          * @return Whether the sID0x01PID0x0D field is set.
          */
+        @java.lang.Override
         public boolean hasSID0X01PID0X0D() {
           return ((bitField0_ & 0x00000001) != 0);
         }
@@ -40331,6 +41218,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SID_0x01_PID_0x0D = 1;</code>
          * @return The sID0x01PID0x0D.
          */
+        @java.lang.Override
         public int getSID0X01PID0X0D() {
           return sID0X01PID0X0D_;
         }
@@ -40375,6 +41263,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SID_0x01_PID_0x31 = 2;</code>
          * @return Whether the sID0x01PID0x31 field is set.
          */
+        @java.lang.Override
         public boolean hasSID0X01PID0X31() {
           return ((bitField0_ & 0x00000002) != 0);
         }
@@ -40386,6 +41275,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SID_0x01_PID_0x31 = 2;</code>
          * @return The sID0x01PID0x31.
          */
+        @java.lang.Override
         public int getSID0X01PID0X31() {
           return sID0X01PID0X31_;
         }
@@ -40428,6 +41318,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SID_0x01_PID_0x4E = 3;</code>
          * @return Whether the sID0x01PID0x4E field is set.
          */
+        @java.lang.Override
         public boolean hasSID0X01PID0X4E() {
           return ((bitField0_ & 0x00000004) != 0);
         }
@@ -40439,6 +41330,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SID_0x01_PID_0x4E = 3;</code>
          * @return The sID0x01PID0x4E.
          */
+        @java.lang.Override
         public int getSID0X01PID0X4E() {
           return sID0X01PID0X4E_;
         }
@@ -40481,6 +41373,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SID_0x01_PID_0x42 = 4;</code>
          * @return Whether the sID0x01PID0x42 field is set.
          */
+        @java.lang.Override
         public boolean hasSID0X01PID0X42() {
           return ((bitField0_ & 0x00000008) != 0);
         }
@@ -40492,6 +41385,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SID_0x01_PID_0x42 = 4;</code>
          * @return The sID0x01PID0x42.
          */
+        @java.lang.Override
         public int getSID0X01PID0X42() {
           return sID0X01PID0X42_;
         }
@@ -40534,6 +41428,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SID_0x01_PID_0x0C = 5;</code>
          * @return Whether the sID0x01PID0x0C field is set.
          */
+        @java.lang.Override
         public boolean hasSID0X01PID0X0C() {
           return ((bitField0_ & 0x00000010) != 0);
         }
@@ -40545,6 +41440,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SID_0x01_PID_0x0C = 5;</code>
          * @return The sID0x01PID0x0C.
          */
+        @java.lang.Override
         public int getSID0X01PID0X0C() {
           return sID0X01PID0X0C_;
         }
@@ -40587,6 +41483,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SID_0x01_PID_0x2F = 6;</code>
          * @return Whether the sID0x01PID0x2F field is set.
          */
+        @java.lang.Override
         public boolean hasSID0X01PID0X2F() {
           return ((bitField0_ & 0x00000020) != 0);
         }
@@ -40598,6 +41495,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SID_0x01_PID_0x2F = 6;</code>
          * @return The sID0x01PID0x2F.
          */
+        @java.lang.Override
         public int getSID0X01PID0X2F() {
           return sID0X01PID0X2F_;
         }
@@ -40640,6 +41538,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SID_0x01_PID_0x5E = 7;</code>
          * @return Whether the sID0x01PID0x5E field is set.
          */
+        @java.lang.Override
         public boolean hasSID0X01PID0X5E() {
           return ((bitField0_ & 0x00000040) != 0);
         }
@@ -40651,6 +41550,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SID_0x01_PID_0x5E = 7;</code>
          * @return The sID0x01PID0x5E.
          */
+        @java.lang.Override
         public int getSID0X01PID0X5E() {
           return sID0X01PID0X5E_;
         }
@@ -40693,6 +41593,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SID_0x01_PID_0x5C = 8;</code>
          * @return Whether the sID0x01PID0x5C field is set.
          */
+        @java.lang.Override
         public boolean hasSID0X01PID0X5C() {
           return ((bitField0_ & 0x00000080) != 0);
         }
@@ -40704,6 +41605,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SID_0x01_PID_0x5C = 8;</code>
          * @return The sID0x01PID0x5C.
          */
+        @java.lang.Override
         public int getSID0X01PID0X5C() {
           return sID0X01PID0X5C_;
         }
@@ -40746,6 +41648,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SID_0x01_PID_0x05 = 9;</code>
          * @return Whether the sID0x01PID0x05 field is set.
          */
+        @java.lang.Override
         public boolean hasSID0X01PID0X05() {
           return ((bitField0_ & 0x00000100) != 0);
         }
@@ -40757,6 +41660,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SID_0x01_PID_0x05 = 9;</code>
          * @return The sID0x01PID0x05.
          */
+        @java.lang.Override
         public int getSID0X01PID0X05() {
           return sID0X01PID0X05_;
         }
@@ -40799,6 +41703,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SID_0x01_PID_0x01 = 10;</code>
          * @return Whether the sID0x01PID0x01 field is set.
          */
+        @java.lang.Override
         public boolean hasSID0X01PID0X01() {
           return ((bitField0_ & 0x00000200) != 0);
         }
@@ -40810,6 +41715,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SID_0x01_PID_0x01 = 10;</code>
          * @return The sID0x01PID0x01.
          */
+        @java.lang.Override
         public int getSID0X01PID0X01() {
           return sID0X01PID0X01_;
         }
@@ -40854,6 +41760,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional bytes SID_0x09_PID_0x02 = 11;</code>
          * @return Whether the sID0x09PID0x02 field is set.
          */
+        @java.lang.Override
         public boolean hasSID0X09PID0X02() {
           return ((bitField0_ & 0x00000400) != 0);
         }
@@ -40867,6 +41774,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional bytes SID_0x09_PID_0x02 = 11;</code>
          * @return The sID0x09PID0x02.
          */
+        @java.lang.Override
         public com.google.protobuf.ByteString getSID0X09PID0X02() {
           return sID0X09PID0X02_;
         }
@@ -40916,6 +41824,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SID_0x01_PID_0x5E_quantity = 12;</code>
          * @return Whether the sID0x01PID0x5EQuantity field is set.
          */
+        @java.lang.Override
         public boolean hasSID0X01PID0X5EQuantity() {
           return ((bitField0_ & 0x00000800) != 0);
         }
@@ -40927,6 +41836,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 SID_0x01_PID_0x5E_quantity = 12;</code>
          * @return The sID0x01PID0x5EQuantity.
          */
+        @java.lang.Override
         public int getSID0X01PID0X5EQuantity() {
           return sID0X01PID0X5EQuantity_;
         }
@@ -41164,7 +42074,7 @@ public final class OmnicommMessageOuterClass {
     /**
      * Protobuf type {@code org.traccar.protobuf.OmnicommMessage.LOG}
      */
-    public  static final class LOG extends
+    public static final class LOG extends
         com.google.protobuf.GeneratedMessageV3 implements
         // @@protoc_insertion_point(message_implements:org.traccar.protobuf.OmnicommMessage.LOG)
         LOGOrBuilder {
@@ -41444,6 +42354,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 LLSRefNum = 2;</code>
        * @return Whether the lLSRefNum field is set.
        */
+      @java.lang.Override
       public boolean hasLLSRefNum() {
         return ((bitField0_ & 0x00000001) != 0);
       }
@@ -41455,6 +42366,7 @@ public final class OmnicommMessageOuterClass {
        * <code>optional uint32 LLSRefNum = 2;</code>
        * @return The lLSRefNum.
        */
+      @java.lang.Override
       public int getLLSRefNum() {
         return lLSRefNum_;
       }
@@ -41465,6 +42377,7 @@ public final class OmnicommMessageOuterClass {
        * <code>repeated uint32 LLSRefLevelBef = 3 [packed = true];</code>
        * @return A list containing the lLSRefLevelBef.
        */
+      @java.lang.Override
       public java.util.List<java.lang.Integer>
           getLLSRefLevelBefList() {
         return lLSRefLevelBef_;
@@ -41492,6 +42405,7 @@ public final class OmnicommMessageOuterClass {
        * <code>repeated uint32 LLSRefLevelAfter = 4 [packed = true];</code>
        * @return A list containing the lLSRefLevelAfter.
        */
+      @java.lang.Override
       public java.util.List<java.lang.Integer>
           getLLSRefLevelAfterList() {
         return lLSRefLevelAfter_;
@@ -41519,6 +42433,7 @@ public final class OmnicommMessageOuterClass {
        * <code>repeated uint32 LLSRefKoef = 5 [packed = true];</code>
        * @return A list containing the lLSRefKoef.
        */
+      @java.lang.Override
       public java.util.List<java.lang.Integer>
           getLLSRefKoefList() {
         return lLSRefKoef_;
@@ -41546,6 +42461,7 @@ public final class OmnicommMessageOuterClass {
        * <code>repeated uint32 LLSRefSens = 6 [packed = true];</code>
        * @return A list containing the lLSRefSens.
        */
+      @java.lang.Override
       public java.util.List<java.lang.Integer>
           getLLSRefSensList() {
         return lLSRefSens_;
@@ -41573,6 +42489,7 @@ public final class OmnicommMessageOuterClass {
        * <code>repeated uint32 LLSRefTemp = 7 [packed = true];</code>
        * @return A list containing the lLSRefTemp.
        */
+      @java.lang.Override
       public java.util.List<java.lang.Integer>
           getLLSRefTempList() {
         return lLSRefTemp_;
@@ -42317,6 +43234,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 LLSRefNum = 2;</code>
          * @return Whether the lLSRefNum field is set.
          */
+        @java.lang.Override
         public boolean hasLLSRefNum() {
           return ((bitField0_ & 0x00000002) != 0);
         }
@@ -42328,6 +43246,7 @@ public final class OmnicommMessageOuterClass {
          * <code>optional uint32 LLSRefNum = 2;</code>
          * @return The lLSRefNum.
          */
+        @java.lang.Override
         public int getLLSRefNum() {
           return lLSRefNum_;
         }
@@ -42819,6 +43738,7 @@ public final class OmnicommMessageOuterClass {
      * <code>repeated uint32 mID = 1 [packed = true];</code>
      * @return A list containing the mID.
      */
+    @java.lang.Override
     public java.util.List<java.lang.Integer>
         getMIDList() {
       return mID_;
@@ -42854,6 +43774,7 @@ public final class OmnicommMessageOuterClass {
      * <code>optional group General = 2 { ... }</code>
      * @return Whether the general field is set.
      */
+    @java.lang.Override
     public boolean hasGeneral() {
       return ((bitField0_ & 0x00000001) != 0);
     }
@@ -42861,12 +43782,14 @@ public final class OmnicommMessageOuterClass {
      * <code>optional group General = 2 { ... }</code>
      * @return The general.
      */
+    @java.lang.Override
     public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.General getGeneral() {
       return general_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.General.getDefaultInstance() : general_;
     }
     /**
      * <code>optional group General = 2 { ... }</code>
      */
+    @java.lang.Override
     public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.GeneralOrBuilder getGeneralOrBuilder() {
       return general_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.General.getDefaultInstance() : general_;
     }
@@ -42877,6 +43800,7 @@ public final class OmnicommMessageOuterClass {
      * <code>optional group Photo = 4 { ... }</code>
      * @return Whether the photo field is set.
      */
+    @java.lang.Override
     public boolean hasPhoto() {
       return ((bitField0_ & 0x00000002) != 0);
     }
@@ -42884,12 +43808,14 @@ public final class OmnicommMessageOuterClass {
      * <code>optional group Photo = 4 { ... }</code>
      * @return The photo.
      */
+    @java.lang.Override
     public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Photo getPhoto() {
       return photo_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Photo.getDefaultInstance() : photo_;
     }
     /**
      * <code>optional group Photo = 4 { ... }</code>
      */
+    @java.lang.Override
     public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.PhotoOrBuilder getPhotoOrBuilder() {
       return photo_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Photo.getDefaultInstance() : photo_;
     }
@@ -42900,6 +43826,7 @@ public final class OmnicommMessageOuterClass {
      * <code>optional group NAV = 5 { ... }</code>
      * @return Whether the nav field is set.
      */
+    @java.lang.Override
     public boolean hasNAV() {
       return ((bitField0_ & 0x00000004) != 0);
     }
@@ -42907,12 +43834,14 @@ public final class OmnicommMessageOuterClass {
      * <code>optional group NAV = 5 { ... }</code>
      * @return The nav.
      */
+    @java.lang.Override
     public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.NAV getNAV() {
       return nAV_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.NAV.getDefaultInstance() : nAV_;
     }
     /**
      * <code>optional group NAV = 5 { ... }</code>
      */
+    @java.lang.Override
     public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.NAVOrBuilder getNAVOrBuilder() {
       return nAV_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.NAV.getDefaultInstance() : nAV_;
     }
@@ -42923,6 +43852,7 @@ public final class OmnicommMessageOuterClass {
      * <code>optional group UniDt = 6 { ... }</code>
      * @return Whether the unidt field is set.
      */
+    @java.lang.Override
     public boolean hasUniDt() {
       return ((bitField0_ & 0x00000008) != 0);
     }
@@ -42930,12 +43860,14 @@ public final class OmnicommMessageOuterClass {
      * <code>optional group UniDt = 6 { ... }</code>
      * @return The unidt.
      */
+    @java.lang.Override
     public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.UniDt getUniDt() {
       return uniDt_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.UniDt.getDefaultInstance() : uniDt_;
     }
     /**
      * <code>optional group UniDt = 6 { ... }</code>
      */
+    @java.lang.Override
     public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.UniDtOrBuilder getUniDtOrBuilder() {
       return uniDt_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.UniDt.getDefaultInstance() : uniDt_;
     }
@@ -42946,6 +43878,7 @@ public final class OmnicommMessageOuterClass {
      * <code>optional group CanDt_J1939 = 7 { ... }</code>
      * @return Whether the candtJ1939 field is set.
      */
+    @java.lang.Override
     public boolean hasCanDtJ1939() {
       return ((bitField0_ & 0x00000010) != 0);
     }
@@ -42953,12 +43886,14 @@ public final class OmnicommMessageOuterClass {
      * <code>optional group CanDt_J1939 = 7 { ... }</code>
      * @return The candtJ1939.
      */
+    @java.lang.Override
     public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.CanDt_J1939 getCanDtJ1939() {
       return canDtJ1939_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.CanDt_J1939.getDefaultInstance() : canDtJ1939_;
     }
     /**
      * <code>optional group CanDt_J1939 = 7 { ... }</code>
      */
+    @java.lang.Override
     public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.CanDt_J1939OrBuilder getCanDtJ1939OrBuilder() {
       return canDtJ1939_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.CanDt_J1939.getDefaultInstance() : canDtJ1939_;
     }
@@ -42969,6 +43904,7 @@ public final class OmnicommMessageOuterClass {
      * <code>optional group LLSDt = 8 { ... }</code>
      * @return Whether the llsdt field is set.
      */
+    @java.lang.Override
     public boolean hasLLSDt() {
       return ((bitField0_ & 0x00000020) != 0);
     }
@@ -42976,12 +43912,14 @@ public final class OmnicommMessageOuterClass {
      * <code>optional group LLSDt = 8 { ... }</code>
      * @return The llsdt.
      */
+    @java.lang.Override
     public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.LLSDt getLLSDt() {
       return lLSDt_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.LLSDt.getDefaultInstance() : lLSDt_;
     }
     /**
      * <code>optional group LLSDt = 8 { ... }</code>
      */
+    @java.lang.Override
     public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.LLSDtOrBuilder getLLSDtOrBuilder() {
       return lLSDt_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.LLSDt.getDefaultInstance() : lLSDt_;
     }
@@ -42992,6 +43930,7 @@ public final class OmnicommMessageOuterClass {
      * <code>optional group Other = 9 { ... }</code>
      * @return Whether the other field is set.
      */
+    @java.lang.Override
     public boolean hasOther() {
       return ((bitField0_ & 0x00000040) != 0);
     }
@@ -42999,12 +43938,14 @@ public final class OmnicommMessageOuterClass {
      * <code>optional group Other = 9 { ... }</code>
      * @return The other.
      */
+    @java.lang.Override
     public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other getOther() {
       return other_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.getDefaultInstance() : other_;
     }
     /**
      * <code>optional group Other = 9 { ... }</code>
      */
+    @java.lang.Override
     public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.OtherOrBuilder getOtherOrBuilder() {
       return other_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.Other.getDefaultInstance() : other_;
     }
@@ -43015,6 +43956,7 @@ public final class OmnicommMessageOuterClass {
      * <code>optional group ICONDt = 10 { ... }</code>
      * @return Whether the icondt field is set.
      */
+    @java.lang.Override
     public boolean hasICONDt() {
       return ((bitField0_ & 0x00000080) != 0);
     }
@@ -43022,12 +43964,14 @@ public final class OmnicommMessageOuterClass {
      * <code>optional group ICONDt = 10 { ... }</code>
      * @return The icondt.
      */
+    @java.lang.Override
     public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.ICONDt getICONDt() {
       return iCONDt_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.ICONDt.getDefaultInstance() : iCONDt_;
     }
     /**
      * <code>optional group ICONDt = 10 { ... }</code>
      */
+    @java.lang.Override
     public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.ICONDtOrBuilder getICONDtOrBuilder() {
       return iCONDt_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.ICONDt.getDefaultInstance() : iCONDt_;
     }
@@ -43038,6 +43982,7 @@ public final class OmnicommMessageOuterClass {
      * <code>optional group OBDDt_J1979 = 11 { ... }</code>
      * @return Whether the obddtJ1979 field is set.
      */
+    @java.lang.Override
     public boolean hasOBDDtJ1979() {
       return ((bitField0_ & 0x00000100) != 0);
     }
@@ -43045,12 +43990,14 @@ public final class OmnicommMessageOuterClass {
      * <code>optional group OBDDt_J1979 = 11 { ... }</code>
      * @return The obddtJ1979.
      */
+    @java.lang.Override
     public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.OBDDt_J1979 getOBDDtJ1979() {
       return oBDDtJ1979_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.OBDDt_J1979.getDefaultInstance() : oBDDtJ1979_;
     }
     /**
      * <code>optional group OBDDt_J1979 = 11 { ... }</code>
      */
+    @java.lang.Override
     public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.OBDDt_J1979OrBuilder getOBDDtJ1979OrBuilder() {
       return oBDDtJ1979_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.OBDDt_J1979.getDefaultInstance() : oBDDtJ1979_;
     }
@@ -43061,6 +44008,7 @@ public final class OmnicommMessageOuterClass {
      * <code>optional group LOG = 16 { ... }</code>
      * @return Whether the log field is set.
      */
+    @java.lang.Override
     public boolean hasLOG() {
       return ((bitField0_ & 0x00000200) != 0);
     }
@@ -43068,12 +44016,14 @@ public final class OmnicommMessageOuterClass {
      * <code>optional group LOG = 16 { ... }</code>
      * @return The log.
      */
+    @java.lang.Override
     public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.LOG getLOG() {
       return lOG_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.LOG.getDefaultInstance() : lOG_;
     }
     /**
      * <code>optional group LOG = 16 { ... }</code>
      */
+    @java.lang.Override
     public org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.LOGOrBuilder getLOGOrBuilder() {
       return lOG_ == null ? org.traccar.protobuf.OmnicommMessageOuterClass.OmnicommMessage.LOG.getDefaultInstance() : lOG_;
     }

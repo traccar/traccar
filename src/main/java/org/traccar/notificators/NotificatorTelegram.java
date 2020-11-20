@@ -164,7 +164,8 @@ public class NotificatorTelegram extends Notificator {
                 });
             }
         } else {
-            LOGGER.warn("Telegram notificator: Couldn't find phone number for user " + user.getName() + " - " + user.getPhone());
+            LOGGER.warn("Telegram notificator: Couldn't find phone number for user "
+            + user.getName() + " - " + user.getPhone());
         }
     }
 
