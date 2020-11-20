@@ -307,8 +307,13 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         if (deviceSession != null) {
             if (channel != null) {
                 if (messageIndex != null) {
-                    String response = ">ACK;ID=" + uniqueId + ";" + messageIndex + ";*";
-                    response += String.format("%02X", Checksum.xor(response)) + "<";
+                    String response;
+                    if (messageIndex.startsWith("#IP:")) {
+                        response = ">SAK;ID=" + uniqueId + ";" + messageIndex + "<";
+                    } else {
+                        response = ">ACK;ID=" + uniqueId + ";" + messageIndex + ";*";
+                        response += String.format("%02X", Checksum.xor(response)) + "<";
+                    }
                     channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
                 } else {
                     channel.writeAndFlush(new NetworkMessage(uniqueId, remoteAddress));
