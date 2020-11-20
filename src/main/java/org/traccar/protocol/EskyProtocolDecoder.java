@@ -102,11 +102,6 @@ public class EskyProtocolDecoder extends BaseProtocolDecoder {
             channel.writeAndFlush(new NetworkMessage("ACK," + sentence.substring(index + 1) + "#", remoteAddress));
         }
 
-        int index = sentence.lastIndexOf('+');
-        if (index > 0 && channel instanceof DatagramChannel) {
-            channel.writeAndFlush(new NetworkMessage("ACK," + sentence.substring(index + 1) + "#", remoteAddress));
-        }
-
         return position;
     }
 
