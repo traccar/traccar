@@ -1,6 +1,6 @@
 FROM openjdk:8-jre-slim
 LABEL maintainer="Godwin peter .O <godwin@peter.com.ng>"
-ENV TRACCAR_VERSION 4.6
+ENV TRACCAR_VERSION 4.11
 WORKDIR /opt/traccar
 COPY setup/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
