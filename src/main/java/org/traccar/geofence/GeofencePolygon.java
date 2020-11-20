@@ -15,8 +15,15 @@
  */
 package org.traccar.geofence;
 
+import org.locationtech.spatial4j.context.SpatialContext;
+import org.locationtech.spatial4j.context.jts.JtsSpatialContextFactory;
+import org.locationtech.spatial4j.shape.ShapeFactory;
+import org.locationtech.spatial4j.shape.jts.JtsShapeFactory;
+
 import java.text.ParseException;
 import java.util.ArrayList;
+
+import static org.locationtech.spatial4j.distance.DistanceUtils.DEG_TO_KM;
 
 public class GeofencePolygon extends GeofenceGeometry {
 
@@ -107,37 +114,14 @@ public class GeofencePolygon extends GeofenceGeometry {
         return oddNodes;
     }
 
-    private double toRadians(double input) {
-        return input / 180.0 * Math.PI;
-    }
-
-    private double polarTriangleArea(double tan1, double lng1, double tan2, double lng2) {
-        double deltaLng = lng1 - lng2;
-        double t = tan1 * tan2;
-        return 2 * Math.atan2(t * Math.sin(deltaLng), 1 + t * Math.sin(deltaLng));
-    }
-
     @Override
     public double calculateArea() {
-        if (coordinates.size() < 3) {
-            return 0;
+        JtsShapeFactory jtsShapeFactory = new JtsSpatialContextFactory().newSpatialContext().getShapeFactory();
+        ShapeFactory.PolygonBuilder polygonBuilder = jtsShapeFactory.polygon();
+        for (Coordinate coordinate : coordinates) {
+            polygonBuilder.pointXY(coordinate.getLon(), coordinate.getLat());
         }
-
-        double total = 0;
-        Coordinate prev = coordinates.get(coordinates.size() - 1);
-        double prevTanLat = Math.tan((Math.PI / 2 - toRadians(prev.getLat())) / 2);
-        double prevLng = toRadians(prev.getLon());
-
-        for (Coordinate point : coordinates) {
-            double tanLat = Math.tan((Math.PI / 2 - toRadians(point.getLat())) / 2);
-            double lng = toRadians(point.getLon());
-            total += polarTriangleArea(tanLat, lng, prevTanLat, prevLng);
-            prevTanLat = tanLat;
-            prevLng = lng;
-        }
-
-        double earthRadius = 6371009;
-        return total * (earthRadius * earthRadius);
+        return polygonBuilder.build().getArea(SpatialContext.GEO) * DEG_TO_KM * DEG_TO_KM;
     }
 
     @Override
