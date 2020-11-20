@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,13 +86,17 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
     }
 
+    static boolean isLongFormat(ByteBuf buf, int flagIndex) {
+        return buf.getUnsignedByte(flagIndex) >> 4 == 0x7;
+    }
+
     private List<Position> decodeBinary(ByteBuf buf, Channel channel, SocketAddress remoteAddress) {
 
         List<Position> positions = new LinkedList<>();
 
         buf.readByte(); // header
 
-        boolean longFormat = buf.getUnsignedByte(buf.readerIndex()) == 0x75;
+        boolean longFormat = isLongFormat(buf, buf.readerIndex());
 
         String id = String.valueOf(Long.parseLong(ByteBufUtil.hexDump(buf.readSlice(5))));
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
@@ -170,6 +174,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
                 if (protocolVersion == 0x17) {
                     buf.readUnsignedByte(); // geofence id
                     buf.skipBytes(3); // reserved
+                    buf.skipBytes(buf.readableBytes() - 1);
                 }
 
             } else if (version == 1) {

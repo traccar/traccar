@@ -77,7 +77,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             .expression("([EW])?,").optional()
             .number("(d+.?d*)?").optional()      // speed
             .number(",(d+.?d*)?").optional()     // course
-            .number(",(d+.?d*)?").optional()     // altitude
+            .number(",(-?d+.?d*)?").optional()   // altitude
             .number(",([01])?").optional()       // ignition
             .number(",([01])?").optional()       // door
             .groupBegin()

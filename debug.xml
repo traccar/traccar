@@ -63,9 +63,9 @@
     -->
     <entry key='filter.static'>true</entry>
     <entry key='filter.allStatic'>false</entry>
-    <entry key='filter.course'>12</entry>
-    <entry key='filter.distance'>50</entry>
-    <entry key='filter.duplicate'>false</entry>
+<!--    <entry key='filter.course'>12</entry>-->
+<!--    <entry key='filter.distance'>50</entry>-->
+<!--    <entry key='filter.duplicate'>false</entry>-->
     <entry key='filter.skipAttributes'>fuel,driverUniqueId,ignition,alarm</entry>
     <entry key='filter.skipAlarm'>true</entry>
 
@@ -83,7 +83,7 @@
 
     <!-- Notification configurations -->
 
-    <entry key='notificator.types'>web,telegram</entry>
+    <entry key='notificator.types'>web,telegram,mail,sms</entry>
 
     <entry key='sms.enable'>false</entry>
 
@@ -96,7 +96,8 @@
     <entry key='sms.smpp.sourceAddress'>MCPLTRACK</entry>
 
     <entry key='notificator.telegram.key'>868099202:AAGFS1k8k3HzCOgbISgNWgQFcMkFzAQPfsM</entry>
-    <entry key='notificator.telegram.chatId'>380529042</entry>
+    <entry key='notificator.telegram.chatId'>-380529042</entry>
+    <entry key="notificator.telegram.cacheRetention">1</entry>
 
     <!-- SMTP Notifitcation settings -->
 

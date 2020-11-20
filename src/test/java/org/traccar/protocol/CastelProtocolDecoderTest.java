@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class CastelProtocolDecoderTest extends ProtocolTest {
 
@@ -9,6 +10,10 @@ public class CastelProtocolDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         CastelProtocolDecoder decoder = new CastelProtocolDecoder(null);
+
+        verifyAttribute(decoder, binary(
+                "40403a00043231334744503230313830323133343300000000a002000001000001012011004d414c43333831434d4b4d353637313438c8fc0d0a"),
+                Position.KEY_RESULT, "MALC381CMKM567148");
 
         verifyAttributes(decoder, binary(
                 "404043000432313357503230313830303138323400000000004005f064d95c8365d95c9f2f0100c50200004006000000000000040003440068000000000100f3660d0a"));

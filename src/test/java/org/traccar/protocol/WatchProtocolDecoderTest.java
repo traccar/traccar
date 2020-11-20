@@ -16,6 +16,12 @@ public class WatchProtocolDecoderTest extends ProtocolTest {
         WatchProtocolDecoder decoder = new WatchProtocolDecoder(null);
 
         verifyPosition(decoder, buffer(
+                "[3G*8809008845*00C0*AL,271219,094744,V,00.000000,N, 0.0000000,E,0.00,0.0,0.0,0,100,81,0,0,00010000,7,0,460,0,9336,3981,141,9336,3912,141,9336,3982,140,9765,4233,134,9765,4071,134,9765,4321,134,9336,4353,132,0,0.0]"));
+
+        verifyPosition(decoder, buffer(
+                "[3G*2104134718*00A1*UD_WCDMA,161019,134938,A,43.373367,N,71.157615,W,22.0,350.206,279.717,17,28,79,0,0,00000000,1,1,310,410,23999,132013696,28,1,Home2,60:45:cb:cb:34:68,-93,8.263865]"));
+
+        verifyPosition(decoder, buffer(
                 "[ZJ*014111001332708*0075*0064*AL,040418,052156,A,22.536207,N,113.938673,E,0,0,0,5,100,82,1000,50,00100000,1,255,460,0,9340,3663,35]"));
 
         verifyPosition(decoder, buffer(
@@ -23,6 +29,9 @@ public class WatchProtocolDecoderTest extends ProtocolTest {
 
         verifyAttributes(decoder, buffer(
                 "[3G*4700609403*0013*bphrt,120,79,73,,,,]"));
+
+        verifyAttributes(decoder, buffer(
+                "[ZJ*357653059860416*0007*000c*BLOOD,109,68]"));
 
         verifyPosition(decoder, buffer(
                 "[3G*8308373902*0080*AL,230817,095346,A,47.083950,N,15.4821850,E,7.60,273.8,0.0,4,15,44,0,0,00200010,2,255,232,1,7605,42530,118,7605,58036,119,0,65.8]"));

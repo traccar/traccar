@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.traccar.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
@@ -67,7 +68,17 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
             return false;
         }
 
-        position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+        if (hardware == 0x413) {
+            buf.readUnsignedByte(); // status
+        } else {
+            position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+        }
+
+        if (hardware == 0x413) {
+            position.setFixTime(new DateBuilder()
+                    .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
+                    .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte()).getDate());
+        }
 
         double lat;
         double lon;
@@ -80,25 +91,39 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
             lon = buf.readUnsignedInt() / 100000.0 / 60.0;
         }
 
-        position.setFixTime(new DateBuilder()
-                .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
-                .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte()).getDate());
+        if (hardware == 0x413) {
 
-        position.setSpeed(buf.readUnsignedShort() * 0.01);
+            position.set(Position.KEY_HDOP, buf.readUnsignedShort() * 0.1);
 
-        position.set(Position.KEY_ODOMETER, buf.readUnsignedMedium());
+            position.setAltitude(buf.readUnsignedShort());
+            position.setCourse(buf.readUnsignedShort());
+            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort() * 0.1));
 
-        int flags = buf.readUnsignedShort();
-        position.setCourse(BitUtil.to(flags, 9));
-        if (!BitUtil.check(flags, 10)) {
-            lat = -lat;
+            position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+
+        } else {
+
+            position.setFixTime(new DateBuilder()
+                    .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
+                    .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte()).getDate());
+
+            position.setSpeed(buf.readUnsignedShort() * 0.01);
+
+            position.set(Position.KEY_ODOMETER, buf.readUnsignedMedium());
+
+            int flags = buf.readUnsignedShort();
+            position.setCourse(BitUtil.to(flags, 9));
+            if (!BitUtil.check(flags, 10)) {
+                lat = -lat;
+            }
+            position.setLatitude(lat);
+            if (BitUtil.check(flags, 9)) {
+                lon = -lon;
+            }
+            position.setLongitude(lon);
+            position.setValid(BitUtil.check(flags, 11));
+
         }
-        position.setLatitude(lat);
-        if (BitUtil.check(flags, 9)) {
-            lon = -lon;
-        }
-        position.setLongitude(lon);
-        position.setValid(BitUtil.check(flags, 11));
 
         buf.readerIndex(blockEnd);
 

@@ -1,6 +1,6 @@
 /*
  * Copyright 2014 - 2015 Stefaan Van Dooren (stefaan.vandooren@gmail.com)
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,16 @@ import javax.json.JsonObject;
 
 public class OpenCageGeocoder extends JsonGeocoder {
 
+    private static String formatUrl(String url, String key) {
+        if (url == null) {
+            url = "https://api.opencagedata.com/geocode/v1";
+        }
+        url += "/json?q=%f,%f&no_annotations=1&key=" + key;
+        return url;
+    }
+
     public OpenCageGeocoder(String url, String key, int cacheSize, AddressFormat addressFormat) {
-        super(url + "/json?q=%f,%f&no_annotations=1&key=" + key, cacheSize, addressFormat);
+        super(formatUrl(url, key), cacheSize, addressFormat);
     }
 
     @Override

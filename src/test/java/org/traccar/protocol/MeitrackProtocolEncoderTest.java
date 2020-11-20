@@ -11,8 +11,8 @@ public class MeitrackProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        MeitrackProtocolEncoder encoder = new MeitrackProtocolEncoder();
-        
+        MeitrackProtocolEncoder encoder = new MeitrackProtocolEncoder(null);
+
         Command command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_POSITION_SINGLE);

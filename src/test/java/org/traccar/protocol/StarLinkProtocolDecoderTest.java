@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class StarLinkProtocolDecoderTest extends ProtocolTest {
 
@@ -9,6 +10,14 @@ public class StarLinkProtocolDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         StarLinkProtocolDecoder decoder = new StarLinkProtocolDecoder(null);
+
+        decoder.setFormat("#IMEI#,#EDT#,#PDT#,#LAT#,#LONG#,#SPD#,#IGN#,#ODO#,#DUR#,#TDUR#,#LAC#,#CID#,#VIN#,#VBAT#,#EID#,#EDSC#,#DRV#,#SATU#,#CSS#,#OUT1#,#OUT2#");
+
+        verifyAttribute(decoder, text(
+                "$SLU862549048472545,06,25,862549048472545,200304085936,200304085937,+4126.1828,+00209.8472,013.9,0,000000,,1,2120,6306,14.452,03.980,33,External Device,0,9,67,0,0,7,0,137,13,2,5625,-11,-20,99*1F"),
+                Position.KEY_IGNITION, false);
+
+        decoder.setFormat("#EDT#,#EID#,#PDT#,#LAT#,#LONG#,#SPD#,#HEAD#,#ODO#,#IN1#,#IN2#,#IN3#,#IN4#,#OUT1#,#OUT2#,#OUT3#,#OUT4#,#LAC#,#CID#,#VIN#,#VBAT#,#DEST#,#IGN#,#ENG#");
 
         verifyAttributes(decoder, text(
                 "$SLU068328,06,55,170518122023,16,,,,,,000000,1,1,0,0,0,0,0,0,10443,32722,12.664,03.910,,0,0,,01000001FDB3A9*BF"));
@@ -48,6 +57,11 @@ public class StarLinkProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, text(
                 "$SLU006968,06,375154,170117052613,04,170117052612,+3203.2079,+03448.1369,000.0,300,085725,1,1,0,0,0,0,0,0,10422,36201,14.287,04.084,,1,0*5B"));
+
+        decoder.setFormat("#EDT#,#EID#,#PDT#,#LAT#,#LONG#,#SPD#,#HEAD#,#ODO#,#LAC#,#CID#,#VIN#,#VBAT#");
+
+        verifyPosition(decoder, text(
+                "$SLU352353083185436,06,85,190527214903,01,190527214903,+0614.1883,-07535.5033,000.0,000,000082.505,5070,50473,0,12.148,03.507,,100,0.02,35.0,1,1513,60,1,99*30"));
 
     }
 

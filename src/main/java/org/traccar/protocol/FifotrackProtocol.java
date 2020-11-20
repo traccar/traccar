@@ -32,7 +32,7 @@ public class FifotrackProtocol extends BaseProtocol {
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new FifotrackFrameDecoder());
                 pipeline.addLast(new StringEncoder());
-                pipeline.addLast(new FifotrackProtocolEncoder());
+                pipeline.addLast(new FifotrackProtocolEncoder(FifotrackProtocol.this));
                 pipeline.addLast(new FifotrackProtocolDecoder(FifotrackProtocol.this));
             }
         });

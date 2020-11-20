@@ -19,13 +19,19 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.helper.Checksum;
+import org.traccar.helper.DataConverter;
 import org.traccar.model.Command;
+import org.traccar.Protocol;
 
 import java.nio.charset.StandardCharsets;
 
 public class RuptelaProtocolEncoder extends BaseProtocolEncoder {
 
-    private ByteBuf encodeContent(int type, ByteBuf content) {
+    public RuptelaProtocolEncoder(Protocol protocol) {
+        super(protocol);
+    }
+
+    public static ByteBuf encodeContent(int type, ByteBuf content) {
 
         ByteBuf buf = Unpooled.buffer();
 
@@ -44,8 +50,14 @@ public class RuptelaProtocolEncoder extends BaseProtocolEncoder {
 
         switch (command.getType()) {
             case Command.TYPE_CUSTOM:
-                content.writeBytes(command.getString(Command.KEY_DATA).getBytes(StandardCharsets.US_ASCII));
-                return encodeContent(RuptelaProtocolDecoder.MSG_SMS_VIA_GPRS, content);
+                String data = command.getString(Command.KEY_DATA);
+                if (data.matches("(\\p{XDigit}{2})+")) {
+                    content.writeBytes(DataConverter.parseHex(data));
+                    return content;
+                } else {
+                    content.writeBytes(data.getBytes(StandardCharsets.US_ASCII));
+                    return encodeContent(RuptelaProtocolDecoder.MSG_SMS_VIA_GPRS, content);
+                }
             case Command.TYPE_REQUEST_PHOTO:
                 content.writeByte(1); // sub-command
                 content.writeByte(0); // source

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2019 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Anatoliy Golubev (darth.naihil@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,8 +18,13 @@ package org.traccar.protocol;
 
 import org.traccar.StringProtocolEncoder;
 import org.traccar.model.Command;
+import org.traccar.Protocol;
 
 public class AdmProtocolEncoder extends StringProtocolEncoder {
+
+    public AdmProtocolEncoder(Protocol protocol) {
+        super(protocol);
+    }
 
     @Override
     protected Object encodeCommand(Command command) {
@@ -29,7 +34,7 @@ public class AdmProtocolEncoder extends StringProtocolEncoder {
                 return formatCommand(command, "STATUS\r\n");
 
             case Command.TYPE_CUSTOM:
-                return formatCommand(command, "{%s}\r\n", Command.KEY_DATA);
+                return formatCommand(command, "%s\r\n", Command.KEY_DATA);
 
             default:
                 return null;

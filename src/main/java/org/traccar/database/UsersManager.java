@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,6 @@
  */
 package org.traccar.database;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -73,8 +72,7 @@ public class UsersManager extends SimpleObjectManager<User> {
 
     @Override
     public Set<Long> getManagedItems(long userId) {
-        Set<Long> result = new HashSet<>();
-        result.addAll(getUserItems(userId));
+        Set<Long> result = getUserItems(userId);
         result.add(userId);
         return result;
     }

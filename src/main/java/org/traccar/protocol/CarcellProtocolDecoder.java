@@ -155,7 +155,7 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
             Double mainVoltage = parser.nextDouble(0) / 100d;
             position.set(Position.KEY_POWER, mainVoltage);
 
-            position.set("iccid", parser.next());
+            position.set(Position.KEY_ICCID, parser.next());
         }
 
         return position;

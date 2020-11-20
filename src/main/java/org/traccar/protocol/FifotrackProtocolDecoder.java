@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
             .number("(-?d+),")                   // altitude
             .number("(d+),")                     // odometer
             .number("d+,")                       // runtime
-            .number("(xxxx),")                   // status
+            .number("(x{4,8}),")                 // status
             .number("(x+)?,")                    // input
             .number("(x+)?,")                    // output
             .number("(d+)|")                     // mcc
@@ -69,7 +69,7 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
             .number("(x+),")                     // cid
             .number("([x|]+)")                   // adc
             .expression(",([^,]+)")              // rfid
-            .expression(",([^*]+)").optional(2)  // sensors
+            .expression(",([^*]*)").optional(2)  // sensors
             .any()
             .compile();
 
@@ -105,6 +105,50 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private String decodeAlarm(Integer alarm) {
+        if (alarm != null) {
+            switch (alarm) {
+                case 2:
+                    return Position.ALARM_SOS;
+                case 14:
+                    return Position.ALARM_LOW_POWER;
+                case 15:
+                    return Position.ALARM_POWER_CUT;
+                case 16:
+                    return Position.ALARM_POWER_RESTORED;
+                case 17:
+                    return Position.ALARM_LOW_BATTERY;
+                case 18:
+                    return Position.ALARM_OVERSPEED;
+                case 20:
+                    return Position.ALARM_GPS_ANTENNA_CUT;
+                case 21:
+                    return Position.ALARM_VIBRATION;
+                case 23:
+                    return Position.ALARM_ACCELERATION;
+                case 24:
+                    return Position.ALARM_BRAKING;
+                case 27:
+                    return Position.ALARM_FATIGUE_DRIVING;
+                case 30:
+                case 32:
+                    return Position.ALARM_JAMMING;
+                case 33:
+                    return Position.ALARM_GEOFENCE_EXIT;
+                case 34:
+                    return Position.ALARM_GEOFENCE_ENTER;
+                case 35:
+                    return Position.ALARM_IDLE;
+                case 40:
+                case 41:
+                    return Position.ALARM_TEMPERATURE;
+                default:
+                    return null;
+            }
+        }
+        return null;
+    }
+
     private Object decodeLocation(
             Channel channel, SocketAddress remoteAddress, String sentence) {
 
@@ -121,35 +165,33 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.set(Position.KEY_ALARM, parser.next());
+        position.set(Position.KEY_ALARM, decodeAlarm(parser.nextInt()));
 
         position.setTime(parser.nextDateTime());
 
         position.setValid(parser.next().equals("A"));
-        position.setLatitude(parser.nextDouble(0));
-        position.setLongitude(parser.nextDouble(0));
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt(0)));
-        position.setCourse(parser.nextInt(0));
-        position.setAltitude(parser.nextInt(0));
+        position.setLatitude(parser.nextDouble());
+        position.setLongitude(parser.nextDouble());
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt()));
+        position.setCourse(parser.nextInt());
+        position.setAltitude(parser.nextInt());
 
-        position.set(Position.KEY_ODOMETER, parser.nextLong(0));
-        position.set(Position.KEY_STATUS, parser.nextHexInt(0));
-        if (parser.hasNext()) {
-            position.set(Position.KEY_INPUT, parser.nextHexInt(0));
-        }
-        if (parser.hasNext()) {
-            position.set(Position.KEY_OUTPUT, parser.nextHexInt(0));
-        }
+        position.set(Position.KEY_ODOMETER, parser.nextLong());
+        position.set(Position.KEY_STATUS, parser.nextHexLong());
+        position.set(Position.KEY_INPUT, parser.nextHexInt());
+        position.set(Position.KEY_OUTPUT, parser.nextHexInt());
 
         position.setNetwork(new Network(CellTower.from(
-                parser.nextInt(0), parser.nextInt(0), parser.nextHexInt(0), parser.nextHexInt(0))));
+                parser.nextInt(), parser.nextInt(), parser.nextHexInt(), parser.nextHexInt())));
 
         String[] adc = parser.next().split("\\|");
         for (int i = 0; i < adc.length; i++) {
             position.set(Position.PREFIX_ADC + (i + 1), Integer.parseInt(adc[i], 16));
         }
 
-        position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
+        if (parser.hasNext()) {
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(parser.nextHexInt()));
+        }
 
         if (parser.hasNext()) {
             String[] sensors = parser.next().split("\\|");

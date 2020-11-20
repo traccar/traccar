@@ -9,8 +9,8 @@ public class KhdProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        KhdProtocolEncoder encoder = new KhdProtocolEncoder();
-        
+        KhdProtocolEncoder encoder = new KhdProtocolEncoder(null);
+
         Command command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_ENGINE_STOP);

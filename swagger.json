@@ -1,8 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "version": "1.3",
-        "title": "gpstrackng"
+        "version": "4.8",
+        "title": "gpstrack"
     },
     "host": "gpstrack.com.ng",
     "basePath": "/api",
@@ -1503,7 +1503,8 @@
                     "type": "number"
                 },
                 "network": {
-                    "type": "string"
+                    "type": "object",
+                    "additionalProperties": true
                 },
                 "attributes": {
                     "type": "object",
@@ -1754,7 +1755,7 @@
                     "type": "integer"
                 },
                 "calendarId": {
-                    "description": "Geofence Id, can be second parameter only and only in combination with userId",
+                    "description": "Calendar Id, can be second parameter only and only in combination with userId",
                     "type": "integer"
                 },
                 "attributeId": {

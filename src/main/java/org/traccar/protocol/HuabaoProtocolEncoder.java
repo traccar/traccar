@@ -21,17 +21,22 @@ import org.traccar.BaseProtocolEncoder;
 import org.traccar.Context;
 import org.traccar.helper.DataConverter;
 import org.traccar.model.Command;
+import org.traccar.Protocol;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class HuabaoProtocolEncoder extends BaseProtocolEncoder {
 
+    public HuabaoProtocolEncoder(Protocol protocol) {
+        super(protocol);
+    }
+
     @Override
     protected Object encodeCommand(Command command) {
 
         boolean alternative = Context.getIdentityManager().lookupAttributeBoolean(
-                command.getDeviceId(), "huabao.alternative", false, true);
+                command.getDeviceId(), getProtocolName() + ".alternative", false, false, true);
 
         ByteBuf id = Unpooled.wrappedBuffer(
                 DataConverter.parseHex(getUniqueId(command.getDeviceId())));

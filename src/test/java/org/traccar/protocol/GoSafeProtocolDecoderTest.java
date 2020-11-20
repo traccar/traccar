@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class GoSafeProtocolDecoderTest extends ProtocolTest {
 
@@ -9,6 +10,18 @@ public class GoSafeProtocolDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         GoSafeProtocolDecoder decoder = new GoSafeProtocolDecoder(null);
+
+        verifyAttribute(decoder, text(
+                "*GS06,356449068350122,013519070819,,SYS:G6S;V3.37;V1.1.8,GPS:A;12;N23.169866;E113.450728;0;255;54;0.79,COT:18779;,ADC:12.66;0.58,DTT:4084;E1;0;0;0;1,IWD:0;1;ad031652643fff28;23.2;1;1;86031652504fff28;24.3;2;1;e603165252a5ff28;24.2;3;1;bb0416557da6ff28;24.0#"),
+                Position.PREFIX_TEMP + 3, 24.0);
+
+        verifyAttribute(decoder, text(
+                "*GS06,351535058659335,081234310719,,SYS:G6S;V3.37;V1.1.8,GPS:A;10;N23.169758;E113.450640;0;323;47;0.82,COT:18539;,ADC:10.81;4.07,DTT:4000;E0;0;0;0;1,IWD:0;1;9f00000655705d28;22.5#"),
+                Position.PREFIX_TEMP + 0, 22.5);
+
+        verifyAttribute(decoder, text(
+                "*GS06,359568052580548,091946150719,1C,SYS:G3C;V1.40;V1.0.4,GPS:A;5;S25.750200;E28.204858;0;0;1337;1.68,COT:,ADC:13.12;4.06,DTT:4004;C6;0;0;10000000;0$091948150719,,SYS:G3C;V1.40;V1.0.4,GPS:A;5;S25.750200;E28.204858;0;0;1337;1.68,COT:,ADC:12.96;4.06,DTT:4004;C6;0;0;0;1#"),
+                Position.KEY_EVENT, 0x1C);
 
         verifyPositions(decoder, text(
                 "*GS06,860078024226974,101437211218,,SYS:G3SC;V3.36;V1.1.8,GPS:A;7;N3.052302;E101.787216;16;137;48;1.58,COT:4261733103,ADC:22.86;0.58;0.01,DTT:4004;E1;0;0;0;3$101439211218,,SYS:G3SC;V3.36;V1.1.8,GPS:A;8;N3.052265;E101.787200;12;152;46;1.31,COT:4261733103,ADC:22.98;0.58;0.01,DTT:4004;E1;0;0;0;3$101441211218,,SYS:G3SC;V3.36;V1.1.8,GPS:A;8;N3.052247;E101.787232;8;131;46;1.34,COT:4261733103,ADC:23.13;0.58;0.01,DTT:4004;E1;0;0;0;3$101510211218,,SYS:G3SC;V3.36;V1.1.8,GPS:A;8;N3.052150;E101.787152;0;131;40;0.97,COT:4261733160,ADC:22.88;0.58;0.01,DTT:4000;E1;0;0;0;1$101540211218,,SYS:G3SC;V3.36;V1.1.8,GPS:A;7;N3.052150;E101.787152;0;131;40;0.97,COT:4261733160,ADC:22.91;0.58;0.00,DTT:4000;E1;0;0;0;1#"));

@@ -11,8 +11,8 @@ public class CellocatorProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        CellocatorProtocolEncoder encoder = new CellocatorProtocolEncoder();
-        
+        CellocatorProtocolEncoder encoder = new CellocatorProtocolEncoder(null);
+
         Command command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_OUTPUT_CONTROL);

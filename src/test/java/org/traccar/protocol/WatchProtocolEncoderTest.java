@@ -9,8 +9,8 @@ public class WatchProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        WatchProtocolEncoder encoder = new WatchProtocolEncoder();
-        
+        WatchProtocolEncoder encoder = new WatchProtocolEncoder(null);
+
         Command command;
 
         command = new Command();
@@ -60,7 +60,7 @@ public class WatchProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeTimezone() {
 
-        WatchProtocolEncoder encoder = new WatchProtocolEncoder();
+        WatchProtocolEncoder encoder = new WatchProtocolEncoder(null);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -77,6 +77,10 @@ public class WatchProtocolEncoderTest extends ProtocolTest {
 
         command.set(Command.KEY_TIMEZONE, "GMT-11:30");
         verifyFrame(buffer("[CS*123456789012345*0009*LZ,,-11.5]"), encoder.encodeCommand(null, command));
+
+        command.set(Command.KEY_LANGUAGE, 0);
+        command.set(Command.KEY_TIMEZONE, "GMT+05:45");
+        verifyFrame(buffer("[CS*123456789012345*000a*LZ,0,+5.75]"), encoder.encodeCommand(null, command));
 
     }
 

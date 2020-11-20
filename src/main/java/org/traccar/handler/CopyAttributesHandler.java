@@ -33,7 +33,7 @@ public class CopyAttributesHandler extends BaseDataHandler {
     @Override
     protected Position handlePosition(Position position) {
         String attributesString = identityManager.lookupAttributeString(
-                position.getDeviceId(), "processing.copyAttributes", "", true);
+                position.getDeviceId(), "processing.copyAttributes", "", false, true);
         if (attributesString.isEmpty()) {
             attributesString = Position.KEY_DRIVER_UNIQUE_ID;
         } else {

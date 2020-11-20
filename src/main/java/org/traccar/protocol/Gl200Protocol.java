@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ public class Gl200Protocol extends BaseProtocol {
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new Gl200FrameDecoder());
                 pipeline.addLast(new StringEncoder());
-                pipeline.addLast(new Gl200ProtocolEncoder());
+                pipeline.addLast(new Gl200ProtocolEncoder(Gl200Protocol.this));
                 pipeline.addLast(new Gl200ProtocolDecoder(Gl200Protocol.this));
             }
         });
@@ -44,7 +44,7 @@ public class Gl200Protocol extends BaseProtocol {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new StringEncoder());
-                pipeline.addLast(new Gl200ProtocolEncoder());
+                pipeline.addLast(new Gl200ProtocolEncoder(Gl200Protocol.this));
                 pipeline.addLast(new Gl200ProtocolDecoder(Gl200Protocol.this));
             }
         });

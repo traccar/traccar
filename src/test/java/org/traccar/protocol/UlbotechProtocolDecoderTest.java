@@ -17,6 +17,10 @@ public class UlbotechProtocolDecoderTest extends ProtocolTest {
                 "*TS01,868323025245751,134955140317,WFE:0#"));
 
         verifyPosition(decoder, binary(
+                "f801010868323028799515251e10d3010e03b52df8ff99fde500000000270f030402020000040402c62a7e0506057c1929220d060800000000000000000f040071eb621001018536f8"),
+                position("2019-09-25 11:49:39.000", false, 62.20543, -6.68521));
+
+        verifyPosition(decoder, binary(
                 "f8010103515810532780699f7e2e3f010e015ee4c906bde45c00000000008b0304004000000404002c776005060373193622110b00240b00fee8ffff807dffff606d0b00fee9af000000af0000000b00feee7d78807dffffffff100101cc2af8"));
 
         verifyPosition(decoder, binary(

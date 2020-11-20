@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -208,9 +208,20 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
                                 position.set("solarPower", buf.readUnsignedShortLE() * 0.001);
                                 break;
                             default:
+                                buf.readUnsignedShortLE(); // other
                                 break;
                         }
                     }
+
+                } else if (fieldId == 26) {
+
+                    position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedIntLE());
+                    position.set("tripHours", buf.readUnsignedIntLE() * 1000);
+
+                } else if (fieldId == 27) {
+
+                    position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
+                    position.set(Position.KEY_HOURS, buf.readUnsignedIntLE() * 1000);
 
                 }
 

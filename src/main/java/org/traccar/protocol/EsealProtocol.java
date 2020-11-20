@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ public class EsealProtocol extends BaseProtocol {
                 pipeline.addLast(new LineBasedFrameDecoder(1024));
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
-                pipeline.addLast(new EsealProtocolEncoder());
+                pipeline.addLast(new EsealProtocolEncoder(EsealProtocol.this));
                 pipeline.addLast(new EsealProtocolDecoder(EsealProtocol.this));
             }
         });

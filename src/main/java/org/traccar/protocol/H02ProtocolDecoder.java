@@ -19,6 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -185,7 +186,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)(dd.d+),")              // longitude
             .groupEnd()
             .expression("([EW]),")
-            .number("(d+.?d*),")                 // speed
+            .number(" *(d+.?d*),")               // speed
             .number("(d+.?d*)?,")                // course
             .number("(?:d+,)?")                  // battery
             .number("(?:(dd)(dd)(dd))?")         // date (ddmmyy)
@@ -223,7 +224,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // mnc
             .number("d+,")                       // gsm delay time
             .number("d+,")                       // count
-            .number("((?:d+,d+,d+,)+)")          // cells
+            .number("((?:d+,d+,-?d+,)+)")        // cells
             .number("(dd)(dd)(dd),")             // date (ddmmyy)
             .number("(x{8})")                    // status
             .any()
@@ -287,9 +288,15 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
     private void sendResponse(Channel channel, SocketAddress remoteAddress, String id, String type) {
         if (channel != null && id != null) {
-            DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+            String response;
+            DateFormat dateFormat = new SimpleDateFormat(type.equals("R12") ? "HHmmss" : "yyyyMMddHHmmss");
             dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-            String response = String.format("*HQ,%s,V4,%s,%s#", id, type, dateFormat.format(new Date()));
+            String time = dateFormat.format(new Date());
+            if (type.equals("R12")) {
+                response = String.format("*HQ,%s,%s,%s#", id, type, time);
+            } else {
+                response = String.format("*HQ,%s,V4,%s,%s#", id, type, time);
+            }
             channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
     }
@@ -316,6 +323,8 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext() && parser.next().equals("V1")) {
             sendResponse(channel, remoteAddress, id, "V1");
+        } else if (Context.getConfig().getBoolean(getProtocolName() + ".ack")) {
+            sendResponse(channel, remoteAddress, id, "R12");
         }
 
         DateBuilder dateBuilder = new DateBuilder();
@@ -554,9 +563,18 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
                 String sentence = buf.toString(StandardCharsets.US_ASCII).trim();
                 int typeStart = sentence.indexOf(',', sentence.indexOf(',') + 1) + 1;
                 int typeEnd = sentence.indexOf(',', typeStart);
+                if (typeEnd < 0) {
+                    typeEnd = sentence.indexOf('#', typeStart);
+                }
                 if (typeEnd > 0) {
                     String type = sentence.substring(typeStart, typeEnd);
                     switch (type) {
+                        case "V0":
+                        case "HTBT":
+                            if (channel != null) {
+                                channel.writeAndFlush(new NetworkMessage(sentence, remoteAddress));
+                            }
+                            return null;
                         case "NBR":
                             return decodeLbs(sentence, channel, remoteAddress);
                         case "LINK":

@@ -13,9 +13,9 @@ public class EelinkProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_ENGINE_STOP);
 
-        verifyCommand(new EelinkProtocolEncoder(false), command, binary("676780000f0000010000000052454c41592c3123"));
+        verifyCommand(new EelinkProtocolEncoder(null, false), command, binary("676780000f0000010000000052454c41592c3123"));
 
-        verifyCommand(new EelinkProtocolEncoder(true), command, binary("454c001eb41a0123456789012345676780000f0000010000000052454c41592c3123"));
+        verifyCommand(new EelinkProtocolEncoder(null, true), command, binary("454c001eb41a0123456789012345676780000f0000010000000052454c41592c3123"));
 
     }
 

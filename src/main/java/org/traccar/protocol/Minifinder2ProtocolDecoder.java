@@ -33,6 +33,7 @@ import org.traccar.model.WifiAccessPoint;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 
 public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
 
@@ -72,8 +73,13 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
         ByteBuf buf = (ByteBuf) msg;
 
         buf.readUnsignedByte(); // header
+        int flags = buf.readUnsignedByte();
+        buf.readUnsignedShortLE(); // length
+        buf.readUnsignedShortLE(); // checksum
+        int index = buf.readUnsignedShortLE();
+        int type = buf.readUnsignedByte();
 
-        if (BitUtil.check(buf.readUnsignedByte(), 4) && channel != null) {
+        if (BitUtil.check(flags, 4) && channel != null) {
 
             ByteBuf content = Unpooled.buffer();
             content.writeByte(MSG_RESPONSE);
@@ -82,20 +88,15 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
 
             ByteBuf response = Unpooled.buffer();
             response.writeByte(0xAB); // header
-            response.writeByte(0); // properties
-            response.writeShortLE(3);
+            response.writeByte(0x00); // properties
+            response.writeShortLE(content.readableBytes());
             response.writeShortLE(Checksum.crc16(Checksum.CRC16_XMODEM, content.nioBuffer()));
-            response.writeShortLE(0); // index
+            response.writeShortLE(index);
             response.writeBytes(content);
             content.release();
 
             channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
-
-        buf.readUnsignedShortLE(); // length
-        buf.readUnsignedShortLE(); // checksum
-        buf.readUnsignedShortLE(); // index
-        int type = buf.readUnsignedByte();
 
         if (type == MSG_DATA) {
 
@@ -115,6 +116,10 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         break;
                     case 0x02:
                         position.set(Position.KEY_ALARM, decodeAlarm(buf.readIntLE()));
+                        break;
+                    case 0x14:
+                        position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+                        position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.001);
                         break;
                     case 0x20:
                         position.setLatitude(buf.readIntLE() * 0.0000001);
@@ -148,6 +153,21 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                             position.getNetwork().addWifiAccessPoint(WifiAccessPoint.from(
                                     mac.substring(0, mac.length() - 1), rssi));
                         }
+                        break;
+                    case 0x23:
+                        if (endIndex > buf.readerIndex()) {
+                            buf.skipBytes(6); // mac
+                        }
+                        if (endIndex > buf.readerIndex()) {
+                            position.setLatitude(buf.readIntLE() * 0.0000001);
+                            position.setLongitude(buf.readIntLE() * 0.0000001);
+                        }
+                        break;
+                    case 0x24:
+                        position.setTime(new Date(buf.readUnsignedIntLE() * 1000));
+                        long status = buf.readUnsignedIntLE();
+                        position.set(Position.KEY_BATTERY_LEVEL, BitUtil.from(status, 24));
+                        position.set(Position.KEY_STATUS, status);
                         break;
                     case 0x40:
                         buf.readUnsignedIntLE(); // timestamp

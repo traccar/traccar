@@ -22,6 +22,7 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
+import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -97,6 +98,7 @@ public class WebServer {
         HandlerList handlers = new HandlerList();
         initClientProxy(config, handlers);
         handlers.addHandler(servletHandler);
+        handlers.addHandler(new GzipHandler());
         server.setHandler(handlers);
     }
 

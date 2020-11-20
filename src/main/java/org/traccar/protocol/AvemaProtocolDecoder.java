@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,17 +48,19 @@ public class AvemaProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // event
             .number("(d+.d+),")                  // odometer
             .number("(d+),")                     // input
-            .number("(d+.d+)V,")                 // adc 1
-            .number("(d+.d+)V,")                 // adc 2
+            .number("(d+.d+)V?,")                // adc 1
+            .number("(d+.d+)V?,")                // adc 2
             .number("(d+),")                     // output
             .number("(d),")                      // roaming
             .number("(d+),")                     // rssi
             .number("d,")                        // communication system
-            .number("(ddd)")                     // mcc
-            .number("(dd),")                     // mnc
+            .number("(ddd)-?")                   // mcc
+            .number("(d+),")                     // mnc
             .number("(x+),")                     // lac
             .number("(x+),")                     // cid
+            .number("(d+.d+),").optional()       // battery
             .number("([^,]+)?")                  // rfid
+            .any()
             .compile();
 
     @Override
@@ -99,6 +101,7 @@ public class AvemaProtocolDecoder extends BaseProtocolDecoder {
         position.setNetwork(new Network(CellTower.from(
                 parser.nextInt(), parser.nextInt(), parser.nextHexInt(), parser.nextHexInt(), rssi)));
 
+        position.set(Position.KEY_BATTERY, parser.nextDouble());
         position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
 
         return position;

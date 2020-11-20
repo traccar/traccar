@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,22 +41,22 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             .text("$")
             .expression(",?[^,]+,")              // event
             .groupBegin()
-            .expression("[^,]+,")                // vendor
+            .expression("[^,]*,")                // vendor
             .expression("[^,]+,")                // firmware version
             .expression("(..),")                 // status
-            .number("(d+),")                     // event
+            .number("(d+),").optional()          // event
             .expression("([LH]),")               // history
             .or()
             .expression("([^,]+),")              // type
             .groupEnd()
             .number("(d{15}),")                  // imei
             .groupBegin()
-            .expression("(..),")                 // status
+            .expression("([^,]{2}),")            // status
             .or()
             .expression("[^,]*,")                // vehicle registration
             .number("([01]),").optional()        // valid
             .groupEnd()
-            .number("(dd),?(dd),?(dddd),")       // date (ddmmyyyy)
+            .number("(dd),?(dd),?(d{2,4}),")     // date (ddmmyyyy)
             .number("(dd),?(dd),?(dd),")         // time (hhmmss)
             .expression("([01AV]),").optional()  // valid
             .number("(d+.d+),([NS]),")           // latitude
@@ -69,21 +69,20 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.?d*),")                 // altitude
             .number("d+.?d*,")                   // pdop
             .number("d+.?d*,")                   // hdop
-            .expression("[^,]*,")
+            .expression("[^,]*,")                // operator
             .number("([01]),")                   // ignition
             .number("([01]),")                   // charging
             .number("(d+.?d*),")                 // power
             .number("(d+.?d*),")                 // battery
             .number("([01]),")                   // emergency
             .expression("[CO]?,")                // tamper
-            .number("((?:x+,){5}")               // main cell
-            .number("(?:-?x+,){12})")            // other cells
-            .number("([01]{4}),")                // inputs
+            .expression("(.*),")                 // cells
+            .number("([012]{4}),")               // inputs
             .number("([01]{2}),")                // outputs
             .groupBegin()
             .number("d+,")                       // index
-            .number("(d+.d+),")                  // adc1
-            .number("(d+.d+),")                  // adc2
+            .number("(d+.?d*),")                 // adc1
+            .number("(d+.?d*),")                 // adc2
             .groupEnd("?")
             .groupEnd("?")
             .or()
@@ -196,22 +195,31 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
 
             position.set("emergency", parser.nextInt() > 0);
 
-            String[] cells = parser.next().split(",");
-            int mcc = Integer.parseInt(cells[1]);
-            int mnc = Integer.parseInt(cells[2]);
-            int lac = Integer.parseInt(cells[3], 16);
-            int cid = Integer.parseInt(cells[4], 16);
-            Network network = new Network(CellTower.from(mcc, mnc, lac, cid, Integer.parseInt(cells[0])));
-            for (int i = 0; i < 4; i++) {
-                lac = Integer.parseInt(cells[5 + 3 * i + 1], 16);
-                cid = Integer.parseInt(cells[5 + 3 * i + 2], 16);
-                if (lac > 0 && cid > 0) {
-                    network.addCellTower(CellTower.from(mcc, mnc, lac, cid));
+            String cellsString = parser.next();
+            if (!cellsString.contains("x")) {
+                String[] cells = cellsString.split(",");
+                int mcc = Integer.parseInt(cells[1]);
+                int mnc = Integer.parseInt(cells[2]);
+                int lac = Integer.parseInt(cells[3], 16);
+                int cid = Integer.parseInt(cells[4], 16);
+                Network network = new Network(CellTower.from(mcc, mnc, lac, cid, Integer.parseInt(cells[0])));
+                if (!cells[5].startsWith("(")) {
+                    for (int i = 0; i < 4; i++) {
+                        lac = Integer.parseInt(cells[5 + 3 * i + 1], 16);
+                        cid = Integer.parseInt(cells[5 + 3 * i + 2], 16);
+                        if (lac > 0 && cid > 0) {
+                            network.addCellTower(CellTower.from(mcc, mnc, lac, cid));
+                        }
+                    }
                 }
+                position.setNetwork(network);
             }
-            position.setNetwork(network);
 
-            position.set(Position.KEY_INPUT, parser.nextBinInt());
+            String input = parser.next();
+            if (input.charAt(input.length() - 1) == '2') {
+                input = input.substring(0, input.length() - 1) + '0';
+            }
+            position.set(Position.KEY_INPUT, Integer.parseInt(input, 2));
             position.set(Position.KEY_OUTPUT, parser.nextBinInt());
         }
 

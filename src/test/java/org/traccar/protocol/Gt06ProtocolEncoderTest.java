@@ -9,8 +9,8 @@ public class Gt06ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        Gt06ProtocolEncoder encoder = new Gt06ProtocolEncoder();
-        
+        Gt06ProtocolEncoder encoder = new Gt06ProtocolEncoder(null);
+
         Command command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_ENGINE_STOP);

@@ -9,8 +9,8 @@ public class NoranProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        NoranProtocolEncoder encoder = new NoranProtocolEncoder();
-        
+        NoranProtocolEncoder encoder = new NoranProtocolEncoder(null);
+
         Command command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_ENGINE_STOP);

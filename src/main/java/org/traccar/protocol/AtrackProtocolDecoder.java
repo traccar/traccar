@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,6 +84,10 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         this.custom = custom;
     }
 
+    public void setForm(String form) {
+        this.form = form;
+    }
+
     private static void sendResponse(Channel channel, SocketAddress remoteAddress, long rawId, int index) {
         if (channel != null) {
             ByteBuf response = Unpooled.buffer(12);
@@ -156,7 +160,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_THROTTLE, Integer.parseInt(values[i]));
                     break;
                 case "ET":
-                    position.set(Position.PREFIX_TEMP + 1, Integer.parseInt(values[i]));
+                    position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(values[i]));
                     break;
                 case "FL":
                     position.set(Position.KEY_FUEL_LEVEL, Integer.parseInt(values[i]));
@@ -166,6 +170,36 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case "AV1":
                     position.set(Position.PREFIX_ADC + 1, Integer.parseInt(values[i]));
+                    break;
+                case "CD":
+                    position.set(Position.KEY_ICCID, values[i]);
+                    break;
+                case "EH":
+                    position.set(Position.KEY_HOURS, UnitsConverter.msFromHours(Integer.parseInt(values[i]) * 0.1));
+                    break;
+                case "IA":
+                    position.set("intakeTemp", Integer.parseInt(values[i]));
+                    break;
+                case "EL":
+                    position.set(Position.KEY_ENGINE_LOAD, Integer.parseInt(values[i]));
+                    break;
+                case "HA":
+                    if (Integer.parseInt(values[i]) > 0) {
+                        position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+                    }
+                    break;
+                case "HB":
+                    if (Integer.parseInt(values[i]) > 0) {
+                        position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+                    }
+                    break;
+                case "HC":
+                    if (Integer.parseInt(values[i]) > 0) {
+                        position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
+                    }
+                    break;
+                case "MT":
+                    position.set(Position.KEY_MOTION, Integer.parseInt(values[i]) > 0);
                     break;
                 default:
                     break;
@@ -274,7 +308,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                     buf.readUnsignedByte(); // pending code status
                     break;
                 case "CD":
-                    readString(buf); // sim cid
+                    position.set(Position.KEY_ICCID, readString(buf));
                     break;
                 case "CM":
                     buf.readLong(); // imsi
@@ -391,7 +425,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
     private List<Position> decodeText(Channel channel, SocketAddress remoteAddress, String sentence) {
 
-        int startIndex = 0;
+        int startIndex = -1;
         for (int i = 0; i < 4; i++) {
             startIndex = sentence.indexOf(',', startIndex + 1);
         }

@@ -73,6 +73,7 @@ import org.traccar.reports.model.TripsConfig;
 
 import javax.annotation.Nullable;
 import javax.ws.rs.client.Client;
+import io.netty.util.Timer;
 
 public class MainModule extends AbstractModule {
 
@@ -170,7 +171,7 @@ public class MainModule extends AbstractModule {
                 case "ban":
                     return new BanGeocoder(cacheSize, addressFormat);
                 case "here":
-                    return new HereGeocoder(id, key, language, cacheSize, addressFormat);
+                    return new HereGeocoder(url, id, key, language, cacheSize, addressFormat);
                 case "mapmyindia":
                     return new MapmyIndiaGeocoder(url, key, cacheSize, addressFormat);
                 default:
@@ -191,7 +192,7 @@ public class MainModule extends AbstractModule {
                 case "google":
                     return new GoogleGeolocationProvider(key);
                 case "opencellid":
-                    return new OpenCellIdGeolocationProvider(key);
+                    return new OpenCellIdGeolocationProvider(url, key);
                 case "unwired":
                     return new UnwiredGeolocationProvider(url, key);
                 default:
@@ -373,6 +374,12 @@ public class MainModule extends AbstractModule {
     @Provides
     public static DriverEventHandler provideDriverEventHandler(IdentityManager identityManager) {
         return new DriverEventHandler(identityManager);
+    }
+
+    @Singleton
+    @Provides
+    public static Timer provideTimer() {
+        return GlobalTimer.getTimer();
     }
 
     @Override
