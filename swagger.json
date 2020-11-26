@@ -130,7 +130,7 @@
         "tags": [
           "Commands"
         ],
-        "description": "Without params, it returns a list of Drivers the user has access to",
+        "description": "Without params, it returns a list of Saved Commands the user has access to",
         "parameters": [
           {
             "name": "all",
