@@ -308,7 +308,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             if (channel != null) {
                 if (messageIndex != null) {
                     String response;
-                    if (messageIndex.startsWith("#IP:")) {
+                    if (messageIndex.startsWith("#IP")) {
                         response = ">SAK;ID=" + uniqueId + ";" + messageIndex + "<";
                     } else {
                         response = ">ACK;ID=" + uniqueId + ";" + messageIndex + ";*";
