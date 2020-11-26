@@ -26,6 +26,8 @@ import org.traccar.helper.BcdUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -138,6 +140,26 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
                         case 0x02:
                             position.set(Position.PREFIX_TEMP + 1,
                                     buf.readUnsignedByte() * 100 + buf.readUnsignedByte());
+                            break;
+                        case 0x18:
+                            for (int i = 1; i <= 4; i++) {
+                                double value = buf.readUnsignedShort();
+                                if (value > 0x0000 && value < 0xFFFF) {
+                                    position.set("fuel" + i, value / 0xFFFE);
+                                }
+                            }
+                            break;
+                        case 0x23:
+                            Network network = new Network();
+                            int count = buf.readUnsignedByte();
+                            for (int i = 0; i < count; i++) {
+                                network.addCellTower(CellTower.from(
+                                        buf.readUnsignedShort(), buf.readUnsignedByte(),
+                                        buf.readUnsignedShort(), buf.readUnsignedShort(), buf.readUnsignedByte()));
+                            }
+                            if (count > 0) {
+                                position.setNetwork(network);
+                            }
                             break;
                         default:
                             break;
