@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
+import org.traccar.Context;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DataConverter;
 import org.traccar.model.Command;
@@ -58,6 +59,13 @@ public class MeiligaoProtocolEncoder extends BaseProtocolEncoder {
     @Override
     protected Object encodeCommand(Command command) {
 
+        boolean alternative = Context.getIdentityManager().lookupAttributeBoolean(
+                command.getDeviceId(), getProtocolName() + ".alternative", false, false, true);
+
+        int outputControlMessageType = alternative
+                ? MeiligaoProtocolDecoder.MSG_OUTPUT_CONTROL_1
+                : MeiligaoProtocolDecoder.MSG_OUTPUT_CONTROL_2;
+
         ByteBuf content = Unpooled.buffer();
 
         switch (command.getType()) {
@@ -68,10 +76,10 @@ public class MeiligaoProtocolEncoder extends BaseProtocolEncoder {
                 return encodeContent(command.getDeviceId(), MeiligaoProtocolDecoder.MSG_TRACK_BY_INTERVAL, content);
             case Command.TYPE_ENGINE_STOP:
                 content.writeByte(0x01);
-                return encodeContent(command.getDeviceId(), MeiligaoProtocolDecoder.MSG_OUTPUT_CONTROL, content);
+                return encodeContent(command.getDeviceId(), outputControlMessageType, content);
             case Command.TYPE_ENGINE_RESUME:
                 content.writeByte(0x00);
-                return encodeContent(command.getDeviceId(), MeiligaoProtocolDecoder.MSG_OUTPUT_CONTROL, content);
+                return encodeContent(command.getDeviceId(), outputControlMessageType, content);
             case Command.TYPE_ALARM_GEOFENCE:
                 content.writeShort(command.getInteger(Command.KEY_RADIUS));
                 return encodeContent(command.getDeviceId(), MeiligaoProtocolDecoder.MSG_MOVEMENT_ALARM, content);
