@@ -249,7 +249,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
 
-        } else if (type.startsWith("UD") || type.equals("AL") || type.equals("WT")) {
+        } else if (type.startsWith("UD") || type.startsWith("AL") || type.startsWith("WT")) {
 
             Position position = decodePosition(deviceSession, buf.toString(StandardCharsets.US_ASCII));
 
