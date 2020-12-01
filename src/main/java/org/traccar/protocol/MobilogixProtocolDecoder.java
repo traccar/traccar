@@ -63,9 +63,9 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
             String time = sentence.substring(1, 20);
             String response;
             if (type.equals("T1")) {
-                response = String.format("[%s,S1,1]\r\n", time);
+                response = String.format("[%s,S1,1]", time);
             } else {
-                response = String.format("[%s,S%c]\r\n", time, type.charAt(1));
+                response = String.format("[%s,S%c]", time, type.charAt(1));
             }
             channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
