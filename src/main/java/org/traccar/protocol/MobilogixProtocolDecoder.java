@@ -45,10 +45,13 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
             .expression("([^,]+),")              // serial number
             .number("(xx),")                     // status
             .number("(d+.d+),")                  // battery
+            .number("(d)")                       // valid
+            .number("(d)")                       // rssi
+            .number("(d),")                      // satellites
             .number("(-?d+.d+),")                // latitude
             .number("(-?d+.d+),")                // longitude
-            .number("(d+.d+),")                  // speed
-            .number("(d+.d+)")                   // course
+            .number("(d+.?d*),")                 // speed
+            .number("(d+.?d*)")                  // course
             .any()
             .compile();
 
@@ -92,7 +95,11 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_BATTERY, parser.nextDouble());
 
-        position.setValid(true);
+        position.setValid(parser.nextInt() > 0);
+
+        position.set(Position.KEY_RSSI, parser.nextInt());
+        position.set(Position.KEY_SATELLITES, parser.nextInt());
+
         position.setLatitude(parser.nextDouble());
         position.setLongitude(parser.nextDouble());
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
