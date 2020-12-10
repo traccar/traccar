@@ -75,8 +75,10 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             .number("|(x{8})")                   // odometer
             .groupBegin()
             .number("|(xx)")                     // satellites
+            .groupBegin()
             .text("|")
             .expression("(.*)")                  // driver
+            .groupEnd("?")
             .groupEnd("?")
             .or()
             .number("|(d{1,9})")                 // odometer
