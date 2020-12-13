@@ -83,6 +83,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_X1_PHOTO_DATA = 0x36;
     public static final int MSG_WIFI_2 = 0x69;
     public static final int MSG_GPS_MODULAR = 0x70;
+    public static final int MSG_WIFI_4 = 0xF3;
     public static final int MSG_COMMAND_0 = 0x80;
     public static final int MSG_COMMAND_1 = 0x81;
     public static final int MSG_COMMAND_2 = 0x82;
@@ -521,7 +522,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             return decodeX1(channel, buf, deviceSession, type);
 
-        } else if (type == MSG_WIFI || type == MSG_WIFI_2) {
+        } else if (type == MSG_WIFI || type == MSG_WIFI_2 || type == MSG_WIFI_4) {
 
             return decodeWifi(channel, buf, deviceSession, type);
 
@@ -620,34 +621,51 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
         Network network = new Network();
 
-        int wifiCount = buf.getByte(2);
-        for (int i = 0; i < wifiCount; i++) {
-            String mac = String.format("%02x:%02x:%02x:%02x:%02x:%02x",
-                    buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte(),
-                    buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
-            network.addWifiAccessPoint(WifiAccessPoint.from(mac, buf.readUnsignedByte()));
+        int wifiCount;
+        if (type == MSG_WIFI_4) {
+            wifiCount = buf.readUnsignedByte();
+        } else {
+            wifiCount = buf.getUnsignedByte(2);
         }
 
-        int cellCount = buf.readUnsignedByte();
-        int mcc = buf.readUnsignedShort();
-        int mnc = buf.readUnsignedByte();
-        for (int i = 0; i < cellCount; i++) {
-            network.addCellTower(CellTower.from(
-                    mcc, mnc, buf.readUnsignedShort(), buf.readUnsignedShort(), buf.readUnsignedByte()));
+        for (int i = 0; i < wifiCount; i++) {
+            if (type == MSG_WIFI_4) {
+                buf.skipBytes(2);
+            }
+            WifiAccessPoint wifiAccessPoint = new WifiAccessPoint();
+            wifiAccessPoint.setMacAddress(String.format("%02x:%02x:%02x:%02x:%02x:%02x",
+                    buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte(),
+                    buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte()));
+            if (type != MSG_WIFI_4) {
+                wifiAccessPoint.setSignalStrength((int) buf.readUnsignedByte());
+            }
+            network.addWifiAccessPoint(wifiAccessPoint);
+        }
+
+        if (type != MSG_WIFI_4) {
+
+            int cellCount = buf.readUnsignedByte();
+            int mcc = buf.readUnsignedShort();
+            int mnc = buf.readUnsignedByte();
+            for (int i = 0; i < cellCount; i++) {
+                network.addCellTower(CellTower.from(
+                        mcc, mnc, buf.readUnsignedShort(), buf.readUnsignedShort(), buf.readUnsignedByte()));
+            }
+
+            if (channel != null) {
+                ByteBuf response = Unpooled.buffer();
+                response.writeShort(0x7878);
+                response.writeByte(0);
+                response.writeByte(type);
+                response.writeBytes(time.resetReaderIndex());
+                response.writeByte('\r');
+                response.writeByte('\n');
+                channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
+            }
+
         }
 
         position.setNetwork(network);
-
-        if (channel != null) {
-            ByteBuf response = Unpooled.buffer();
-            response.writeShort(0x7878);
-            response.writeByte(0);
-            response.writeByte(type);
-            response.writeBytes(time.resetReaderIndex());
-            response.writeByte('\r');
-            response.writeByte('\n');
-            channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
-        }
 
         return position;
     }
