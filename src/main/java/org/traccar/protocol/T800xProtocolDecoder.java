@@ -55,6 +55,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_HEARTBEAT = 0x03;
     public static final int MSG_ALARM = 0x04;
     public static final int MSG_NETWORK = 0x05;
+    public static final int MSG_BLE = 0x10;
     public static final int MSG_COMMAND = 0x81;
 
     private void sendResponse(Channel channel, short header, int type, int index, ByteBuf imei, int alarm) {
@@ -158,6 +159,10 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
             return position;
 
+        } else if (type == MSG_BLE) {
+
+            return decodeBle(channel, deviceSession, buf, type, index, imei);
+
         } else if (type == MSG_COMMAND) {
 
             Position position = new Position(getProtocolName());
@@ -174,6 +179,27 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
         }
 
         return null;
+    }
+
+    private Position decodeBle(
+            Channel channel, DeviceSession deviceSession, ByteBuf buf, int type, int index, ByteBuf imei) {
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, readDate(buf));
+
+        position.set(Position.KEY_IGNITION, buf.readUnsignedByte() > 0);
+
+        int dataCode = buf.readUnsignedShort();
+
+        if (dataCode == 3) {
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, ByteBufUtil.hexDump(buf.readSlice(6)));
+        }
+
+        sendResponse(channel, header, type, index, imei, 0);
+
+        return position;
     }
 
     private Position decodePosition(
@@ -214,8 +240,12 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (header != 0x2626) {
-                position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
-                position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort());
+                for (int i = 1; i <= 2; i++) {
+                    String value = ByteBufUtil.hexDump(buf.readSlice(2));
+                    if (!value.equals("ffff")) {
+                        position.set(Position.PREFIX_ADC + i, Integer.parseInt(value) * 0.01);
+                    }
+                }
             }
 
         }
