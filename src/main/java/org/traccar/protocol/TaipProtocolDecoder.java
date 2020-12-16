@@ -73,8 +73,8 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             .number(",(d{4})(d{4})")             // power / battery
             .number(",(d+)")                     // rpm
             .groupBegin()
-            .number(",(-?d+)")                   // temperature 1
-            .number(",(-?d+)")                   // temperature 2
+            .number(",([-+]?d+.?d*)")            // temperature 1
+            .number(",([-+]?d+.?d*)")            // temperature 2
             .groupEnd("?")
             .number(",(xx)")                     // alarm
             .or()
@@ -191,8 +191,8 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_POWER, parser.nextInt() * 0.01);
             position.set(Position.KEY_BATTERY, parser.nextInt() * 0.01);
             position.set(Position.KEY_RPM, parser.nextInt());
-            position.set(Position.PREFIX_TEMP + 1, parser.nextInt());
-            position.set(Position.PREFIX_TEMP + 2, parser.nextInt());
+            position.set(Position.PREFIX_TEMP + 1, parser.nextDouble());
+            position.set(Position.PREFIX_TEMP + 2, parser.nextDouble());
             position.set(Position.KEY_ALARM, decodeAlarm(parser.nextHexInt()));
         }
 
