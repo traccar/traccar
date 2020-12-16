@@ -19,7 +19,6 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.Protocol;
-import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -47,7 +46,7 @@ public class SwiftechProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d+),")                  // speed
             .number("(dd)(dd)(dd),")             // date (ddmmyy)
             .expression("([AV]),")               // validity
-            .number("([01]{4}),")                // status
+            .number("(d{4}),")                   // status
             .number("([01]),")                   // charge
             .number("d+,")                       // reserved
             .number("(d+),")                     // adc1
@@ -84,10 +83,7 @@ public class SwiftechProtocolDecoder extends BaseProtocolDecoder {
 
         position.setValid(parser.next().equals("A"));
 
-        int status = parser.nextBinInt();
-        position.set(Position.KEY_IGNITION, BitUtil.check(status, 3));
-        position.set(Position.PREFIX_OUT + 1, BitUtil.check(status, 1));
-        position.set(Position.PREFIX_OUT + 2, BitUtil.check(status, 0));
+        position.set(Position.KEY_STATUS, parser.nextInt());
 
         position.set(Position.KEY_CHARGE, parser.nextInt() > 0);
 
