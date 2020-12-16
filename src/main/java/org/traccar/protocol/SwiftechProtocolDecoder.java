@@ -36,7 +36,9 @@ public class SwiftechProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN = new PatternBuilder()
             .text("@@")
-            .number("(d+),,,")                   // imei
+            .number("(d+),")                     // imei
+            .expression("[^,]*,")
+            .expression("[^,]*,")
             .number("(dd)(dd)(dd),")             // time (hhmmss)
             .number("(dd)(dd.d+),")              // latitude
             .expression("([NS]),")
