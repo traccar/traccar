@@ -294,5 +294,6 @@
     <entry key='net.port'>5215</entry>
     <entry key='mobilogix.port'>5216</entry>
     <entry key='swiftech.port'>5217</entry>
+    <entry key='iotm.port'>5218</entry>
 
 </properties>
