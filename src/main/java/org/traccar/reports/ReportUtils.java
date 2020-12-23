@@ -29,6 +29,7 @@ import org.traccar.Context;
 import org.traccar.database.DeviceManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.handler.events.MotionEventHandler;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.DeviceState;
 import org.traccar.model.Driver;
 import org.traccar.model.Event;
@@ -173,11 +174,9 @@ public final class ReportUtils {
         Position startTrip = positions.get(startIndex);
         Position endTrip = positions.get(endIndex);
 
-        double speedMax = 0.0;
-        double speedSum = 0.0;
+        double speedMax = 0;
         for (int i = startIndex; i <= endIndex; i++) {
             double speed = positions.get(i).getSpeed();
-            speedSum += speed;
             if (speed > speedMax) {
                 speedMax = speed;
             }
@@ -214,7 +213,9 @@ public final class ReportUtils {
 
         trip.setDistance(calculateDistance(startTrip, endTrip, !ignoreOdometer));
         trip.setDuration(tripDuration);
-        trip.setAverageSpeed(speedSum / (endIndex - startIndex));
+        if (tripDuration > 0) {
+            trip.setAverageSpeed(UnitsConverter.knotsFromMps(trip.getDistance() * 1000 / tripDuration));
+        }
         trip.setMaxSpeed(speedMax);
         trip.setSpentFuel(calculateFuel(startTrip, endTrip));
 

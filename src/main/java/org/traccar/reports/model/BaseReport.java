@@ -60,7 +60,7 @@ public class BaseReport {
         return averageSpeed;
     }
 
-    public void setAverageSpeed(Double averageSpeed) {
+    public void setAverageSpeed(double averageSpeed) {
         this.averageSpeed = averageSpeed;
     }
 

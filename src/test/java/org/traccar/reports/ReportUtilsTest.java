@@ -91,7 +91,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(date("2016-01-01 00:02:00.000"), itemTrip.getStartTime());
         assertEquals(date("2016-01-01 00:05:00.000"), itemTrip.getEndTime());
         assertEquals(180000, itemTrip.getDuration());
-        assertEquals(10, itemTrip.getAverageSpeed(), 0.01);
+        assertEquals(32.4, itemTrip.getAverageSpeed(), 0.01);
         assertEquals(10, itemTrip.getMaxSpeed(), 0.01);
         assertEquals(3000, itemTrip.getDistance(), 0.01);
 
@@ -145,7 +145,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(date("2016-01-01 00:02:00.000"), itemTrip.getStartTime());
         assertEquals(date("2016-01-01 00:05:00.000"), itemTrip.getEndTime());
         assertEquals(180000, itemTrip.getDuration());
-        assertEquals(10, itemTrip.getAverageSpeed(), 0.01);
+        assertEquals(32.4, itemTrip.getAverageSpeed(), 0.01);
         assertEquals(10, itemTrip.getMaxSpeed(), 0.01);
         assertEquals(3000, itemTrip.getDistance(), 0.01);
 
@@ -160,7 +160,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(date("2016-01-01 00:02:00.000"), itemTrip.getStartTime());
         assertEquals(date("2016-01-01 00:05:00.000"), itemTrip.getEndTime());
         assertEquals(180000, itemTrip.getDuration());
-        assertEquals(10, itemTrip.getAverageSpeed(), 0.01);
+        assertEquals(32.4, itemTrip.getAverageSpeed(), 0.01);
         assertEquals(10, itemTrip.getMaxSpeed(), 0.01);
         assertEquals(3000, itemTrip.getDistance(), 0.01);
 
@@ -216,7 +216,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(date("2016-01-01 00:02:00.000"), itemTrip.getStartTime());
         assertEquals(date("2016-01-01 00:09:00.000"), itemTrip.getEndTime());
         assertEquals(420000, itemTrip.getDuration());
-        assertEquals(8.57, itemTrip.getAverageSpeed(), 0.01);
+        assertEquals(32.4, itemTrip.getAverageSpeed(), 0.01);
         assertEquals(10, itemTrip.getMaxSpeed(), 0.01);
         assertEquals(7000, itemTrip.getDistance(), 0.01);
 
@@ -370,7 +370,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(date("2016-01-01 00:00:00.000"), itemTrip.getStartTime());
         assertEquals(date("2016-01-01 00:04:00.000"), itemTrip.getEndTime());
         assertEquals(240000, itemTrip.getDuration());
-        assertEquals(6.75, itemTrip.getAverageSpeed(), 0.01);
+        assertEquals(4.86, itemTrip.getAverageSpeed(), 0.01);
         assertEquals(7, itemTrip.getMaxSpeed(), 0.01);
         assertEquals(600, itemTrip.getDistance(), 0.01);
 
