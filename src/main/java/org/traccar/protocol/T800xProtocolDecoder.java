@@ -191,10 +191,56 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_IGNITION, buf.readUnsignedByte() > 0);
 
-        int dataCode = buf.readUnsignedShort();
-
-        if (dataCode == 3) {
-            position.set(Position.KEY_DRIVER_UNIQUE_ID, ByteBufUtil.hexDump(buf.readSlice(6)));
+        switch (buf.readUnsignedShort()) {
+            case 0x01:
+                position.set("tagId", ByteBufUtil.hexDump(buf.readSlice(6)));
+                position.set("tagBattery", buf.readUnsignedByte() * 0.01 + 1.22);
+                position.set("tirePressure", buf.readUnsignedByte() * 1.527 * 2);
+                position.set("tagTemp", buf.readUnsignedByte() - 55);
+                position.set("tagStatus", buf.readUnsignedByte());
+                break;
+            case 0x02:
+                position.set("tagId", ByteBufUtil.hexDump(buf.readSlice(6)));
+                position.set("tagBattery", BcdUtil.readInteger(buf, 2) * 0.1);
+                switch (buf.readUnsignedByte()) {
+                    case 0:
+                        position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+                        break;
+                    case 1:
+                        position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            case 0x03:
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, ByteBufUtil.hexDump(buf.readSlice(6)));
+                position.set("tagBattery", BcdUtil.readInteger(buf, 2) * 0.1);
+                if (buf.readUnsignedByte() == 1) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                }
+                break;
+            case 0x04:
+                position.set("tagId", ByteBufUtil.hexDump(buf.readSlice(6)));
+                position.set("tagBattery", buf.readUnsignedByte() * 0.01 + 2);
+                buf.readUnsignedByte(); // battery level
+                position.set(Position.KEY_DEVICE_TEMP, buf.readUnsignedShort() * 0.01);
+                position.set("humidity", buf.readUnsignedShort() * 0.01);
+                position.set("lightSensor", BitUtil.to(buf.readUnsignedByte(), 15));
+                break;
+            case 0x05:
+                position.set("tagId", ByteBufUtil.hexDump(buf.readSlice(6)));
+                position.set("tagBattery", buf.readUnsignedByte() * 0.01 + 2);
+                position.set(Position.KEY_DEVICE_TEMP, buf.readUnsignedShort() * 0.01);
+                position.set(Position.KEY_DOOR, buf.readUnsignedByte() > 0);
+                break;
+            case 0x06:
+                position.set("tagId", ByteBufUtil.hexDump(buf.readSlice(6)));
+                position.set("tagBattery", buf.readUnsignedByte() * 0.01 + 2);
+                position.set(Position.KEY_OUTPUT, buf.readUnsignedByte() > 0);
+                break;
+            default:
+                break;
         }
 
         sendResponse(channel, header, type, index, imei, 0);
