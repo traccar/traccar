@@ -18,11 +18,12 @@ package org.traccar.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.Channel;
-import io.netty.handler.codec.mqtt.MqttConnAckMessage;
 import io.netty.handler.codec.mqtt.MqttConnectMessage;
 import io.netty.handler.codec.mqtt.MqttConnectReturnCode;
+import io.netty.handler.codec.mqtt.MqttMessage;
 import io.netty.handler.codec.mqtt.MqttMessageBuilders;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
+import io.netty.handler.codec.mqtt.MqttSubscribeMessage;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
@@ -108,7 +109,15 @@ public class IotmProtocolDecoder extends BaseProtocolDecoder {
                     ? MqttConnectReturnCode.CONNECTION_ACCEPTED
                     : MqttConnectReturnCode.CONNECTION_REFUSED_IDENTIFIER_REJECTED;
 
-            MqttConnAckMessage response = MqttMessageBuilders.connAck().returnCode(returnCode).build();
+            MqttMessage response = MqttMessageBuilders.connAck().returnCode(returnCode).build();
+
+            if (channel != null) {
+                channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+            }
+
+        } else if (msg instanceof MqttSubscribeMessage) {
+
+            MqttMessage response = MqttMessageBuilders.subAck().packetId((short) 1).build();
 
             if (channel != null) {
                 channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
@@ -174,6 +183,12 @@ public class IotmProtocolDecoder extends BaseProtocolDecoder {
             }
 
             buf.readUnsignedByte(); // checksum
+
+            MqttMessage response = MqttMessageBuilders.pubAck().packetId((short) 1).build();
+
+            if (channel != null) {
+                channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+            }
 
             return positions.isEmpty() ? null : positions;
 
