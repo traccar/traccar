@@ -295,5 +295,6 @@
     <entry key='mobilogix.port'>5216</entry>
     <entry key='swiftech.port'>5217</entry>
     <entry key='iotm.port'>5218</entry>
+    <entry key='dolphin.port'>5219</entry>
 
 </properties>
