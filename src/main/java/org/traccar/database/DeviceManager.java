@@ -45,7 +45,6 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
 
     private final Config config;
     private final long dataRefreshDelay;
-    private final boolean lookupGroupsAttribute;
 
     private Map<String, Device> devicesByUniqueId;
     private Map<String, Device> devicesByPhone;
@@ -70,7 +69,6 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
             writeUnlock();
         }
         dataRefreshDelay = config.getLong("database.refreshDelay", DEFAULT_REFRESH_DELAY) * 1000;
-        lookupGroupsAttribute = config.getBoolean("deviceManager.lookupGroupsAttribute");
         refreshLastPositions();
     }
 
@@ -428,7 +426,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         Device device = getById(deviceId);
         if (device != null) {
             result = device.getAttributes().get(attributeName);
-            if (result == null && lookupGroupsAttribute) {
+            if (result == null) {
                 long groupId = device.getGroupId();
                 while (groupId != 0) {
                     Group group = Context.getGroupsManager().getById(groupId);
