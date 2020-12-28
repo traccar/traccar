@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ public class PatternBuilder {
     }
 
     public PatternBuilder text(String s) {
-        fragments.add(s.replaceAll("([\\\\\\.\\[\\{\\(\\)\\*\\+\\?\\^\\$\\|])", "\\\\$1"));
+        fragments.add(s.replaceAll("([\\\\.\\[{()*+?^$|])", "\\\\$1"));
         return this;
     }
 
@@ -48,7 +48,7 @@ public class PatternBuilder {
         s = s.replace("dddd", "d{4}").replace("ddd", "d{3}").replace("dd", "d{2}");
         s = s.replace("xxxx", "x{4}").replace("xxx", "x{3}").replace("xx", "x{2}");
 
-        s = s.replace("d", "\\d").replace("x", "[0-9a-fA-F]").replaceAll("([\\.])", "\\\\$1");
+        s = s.replace("d", "\\d").replace("x", "[0-9a-fA-F]").replaceAll("([.])", "\\\\$1");
         s = s.replaceAll("\\|$", "\\\\|").replaceAll("^\\|", "\\\\|"); // special case for delimiter
 
         fragments.add(s);
