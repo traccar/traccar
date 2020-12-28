@@ -55,7 +55,7 @@ public class Config {
         }
     }
 
-    public boolean hasKey(ConfigKey key) {
+    public boolean hasKey(ConfigKey<String> key) {
         return hasKey(key.getKey());
     }
 
@@ -65,7 +65,7 @@ public class Config {
                 || properties.containsKey(key);
     }
 
-    public String getString(ConfigKey key) {
+    public String getString(ConfigKey<String> key) {
         return getString(key.getKey());
     }
 
@@ -80,7 +80,7 @@ public class Config {
         return properties.getProperty(key);
     }
 
-    public String getString(ConfigKey key, String defaultValue) {
+    public String getString(ConfigKey<String> key, String defaultValue) {
         return getString(key.getKey(), defaultValue);
     }
 
@@ -89,7 +89,7 @@ public class Config {
         return hasKey(key) ? getString(key) : defaultValue;
     }
 
-    public boolean getBoolean(ConfigKey key) {
+    public boolean getBoolean(ConfigKey<Boolean> key) {
         return getBoolean(key.getKey());
     }
 
@@ -98,7 +98,7 @@ public class Config {
         return Boolean.parseBoolean(getString(key));
     }
 
-    public int getInteger(ConfigKey key) {
+    public int getInteger(ConfigKey<Integer> key) {
         return getInteger(key.getKey());
     }
 
@@ -107,7 +107,7 @@ public class Config {
         return getInteger(key, 0);
     }
 
-    public int getInteger(ConfigKey key, int defaultValue) {
+    public int getInteger(ConfigKey<Integer> key, int defaultValue) {
         return getInteger(key.getKey(), defaultValue);
     }
 

@@ -37,6 +37,10 @@ public class ConfigKey<T> {
         return key;
     }
 
+    public List<KeyType> getTypes() {
+        return types;
+    }
+
     public T getDefaultValue() {
         return defaultValue;
     }
