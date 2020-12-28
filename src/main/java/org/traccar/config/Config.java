@@ -116,17 +116,13 @@ public class Config {
         return hasKey(key) ? Integer.parseInt(getString(key)) : defaultValue;
     }
 
-    public long getLong(ConfigKey key) {
+    public long getLong(ConfigKey<Long> key) {
         return getLong(key.getKey());
     }
 
     @Deprecated
     public long getLong(String key) {
         return getLong(key, 0);
-    }
-
-    public long getLong(ConfigKey key, long defaultValue) {
-        return getLong(key.getKey(), defaultValue);
     }
 
     @Deprecated
