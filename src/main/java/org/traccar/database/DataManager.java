@@ -224,12 +224,10 @@ public class DataManager {
         if (query == null) {
             if (generateQueries) {
                 query = constructObjectQuery(action, clazz, extended);
-                config.setString(queryName, query);
             } else {
                 LOGGER.info("Query not provided: " + queryName);
             }
         }
-
         return query;
     }
 
@@ -249,14 +247,12 @@ public class DataManager {
         String query = config.getString(queryName);
         if (query == null) {
             if (generateQueries) {
-                query = constructPermissionQuery(action, owner,
-                        property.equals(User.class) ? ManagedUser.class : property);
-                config.setString(queryName, query);
+                query = constructPermissionQuery(
+                        action, owner, property.equals(User.class) ? ManagedUser.class : property);
             } else {
                 LOGGER.info("Query not provided: " + queryName);
             }
         }
-
         return query;
     }
 

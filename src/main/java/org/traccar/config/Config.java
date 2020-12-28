@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,12 +146,7 @@ public class Config {
     }
 
     public void setString(ConfigKey key, String value) {
-        setString(key.getKey(), value);
-    }
-
-    @Deprecated
-    public void setString(String key, String value) {
-        properties.put(key, value);
+        properties.put(key.getKey(), value);
     }
 
     static String getEnvironmentVariableName(String key) {
