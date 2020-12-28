@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package org.traccar.config;
 
 public class ConfigSuffix extends ConfigKey {
 
-    ConfigSuffix(String key, Class clazz) {
+    ConfigSuffix(String key, Class<?> clazz) {
         super(key, clazz);
     }
 
