@@ -133,12 +133,7 @@ public class Config {
     }
 
     public double getDouble(ConfigKey key) {
-        return getDouble(key.getKey());
-    }
-
-    @Deprecated
-    public double getDouble(String key) {
-        return getDouble(key, 0.0);
+        return getDouble(key.getKey(), 0.0);
     }
 
     public double getDouble(ConfigKey key, double defaultValue) {
