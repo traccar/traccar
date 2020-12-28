@@ -40,7 +40,7 @@ public final class Keys {
      * Address for uploading aggregated anonymous usage statistics. Uploaded information is the same you can see on the
      * statistics screen in the web app. It does not include any sensitive (e.g. locations).
      */
-    public static final ConfigKey<Boolean> SERVER_STATISTICS = new ConfigKey<>(
+    public static final ConfigKey<String> SERVER_STATISTICS = new ConfigKey<>(
             "server.statistics",
             Collections.singletonList(KeyType.GLOBAL));
 
@@ -547,7 +547,7 @@ public final class Keys {
      * Override latitude sign / hemisphere. Useful in cases where value is incorrect because of device bug. Value can be
      * N for North or S for South.
      */
-    public static final ConfigKey<Boolean> LOCATION_LATITUDE_HEMISPHERE = new ConfigKey<>(
+    public static final ConfigKey<String> LOCATION_LATITUDE_HEMISPHERE = new ConfigKey<>(
             "location.latitudeHemisphere",
             Collections.singletonList(KeyType.GLOBAL));
 
@@ -555,7 +555,7 @@ public final class Keys {
      * Override longitude sign / hemisphere. Useful in cases where value is incorrect because of device bug. Value can
      * be E for East or W for West.
      */
-    public static final ConfigKey<Boolean> LOCATION_LONGITUDE_HEMISPHERE = new ConfigKey<>(
+    public static final ConfigKey<String> LOCATION_LONGITUDE_HEMISPHERE = new ConfigKey<>(
             "location.longitudeHemisphere",
             Collections.singletonList(KeyType.GLOBAL));
 

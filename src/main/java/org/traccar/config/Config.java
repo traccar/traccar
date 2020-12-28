@@ -55,7 +55,7 @@ public class Config {
         }
     }
 
-    public boolean hasKey(ConfigKey<String> key) {
+    public boolean hasKey(ConfigKey<?> key) {
         return hasKey(key.getKey());
     }
 
