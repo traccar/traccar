@@ -15,6 +15,40 @@
  */
 package org.traccar.database;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+import liquibase.Contexts;
+import liquibase.Liquibase;
+import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
+import liquibase.exception.LiquibaseException;
+import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.ResourceAccessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.traccar.Context;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
+import org.traccar.helper.DateUtil;
+import org.traccar.model.Attribute;
+import org.traccar.model.BaseModel;
+import org.traccar.model.Calendar;
+import org.traccar.model.Command;
+import org.traccar.model.Device;
+import org.traccar.model.Driver;
+import org.traccar.model.Event;
+import org.traccar.model.Geofence;
+import org.traccar.model.Group;
+import org.traccar.model.Maintenance;
+import org.traccar.model.ManagedUser;
+import org.traccar.model.Notification;
+import org.traccar.model.Permission;
+import org.traccar.model.Position;
+import org.traccar.model.Server;
+import org.traccar.model.Statistics;
+import org.traccar.model.User;
+
+import javax.sql.DataSource;
 import java.beans.Introspector;
 import java.io.File;
 import java.lang.reflect.Method;
@@ -25,44 +59,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-
-import javax.naming.InitialContext;
-import javax.sql.DataSource;
-
-import liquibase.Contexts;
-import liquibase.Liquibase;
-import liquibase.database.Database;
-import liquibase.database.DatabaseFactory;
-import liquibase.exception.LiquibaseException;
-import liquibase.resource.FileSystemResourceAccessor;
-import liquibase.resource.ResourceAccessor;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.traccar.config.Config;
-import org.traccar.Context;
-import org.traccar.config.Keys;
-import org.traccar.helper.DateUtil;
-import org.traccar.model.Attribute;
-import org.traccar.model.Device;
-import org.traccar.model.Driver;
-import org.traccar.model.Event;
-import org.traccar.model.Geofence;
-import org.traccar.model.Group;
-import org.traccar.model.Maintenance;
-import org.traccar.model.ManagedUser;
-import org.traccar.model.Notification;
-import org.traccar.model.Permission;
-import org.traccar.model.BaseModel;
-import org.traccar.model.Calendar;
-import org.traccar.model.Command;
-import org.traccar.model.Position;
-import org.traccar.model.Server;
-import org.traccar.model.Statistics;
-import org.traccar.model.User;
-
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 
 public class DataManager {
 
@@ -93,53 +89,43 @@ public class DataManager {
 
     private void initDatabase() throws Exception {
 
-        String jndiName = config.getString("database.jndi");
-
-        if (jndiName != null) {
-
-            dataSource = (DataSource) new InitialContext().lookup(jndiName);
-
-        } else {
-
-            String driverFile = config.getString(Keys.DATABASE_DRIVER_FILE);
-            if (driverFile != null) {
-                ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-                try {
-                    Method method = classLoader.getClass().getDeclaredMethod("addURL", URL.class);
-                    method.setAccessible(true);
-                    method.invoke(classLoader, new File(driverFile).toURI().toURL());
-                } catch (NoSuchMethodException e) {
-                    Method method = classLoader.getClass()
-                            .getDeclaredMethod("appendToClassPathForInstrumentation", String.class);
-                    method.setAccessible(true);
-                    method.invoke(classLoader, driverFile);
-                }
+        String driverFile = config.getString(Keys.DATABASE_DRIVER_FILE);
+        if (driverFile != null) {
+            ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+            try {
+                Method method = classLoader.getClass().getDeclaredMethod("addURL", URL.class);
+                method.setAccessible(true);
+                method.invoke(classLoader, new File(driverFile).toURI().toURL());
+            } catch (NoSuchMethodException e) {
+                Method method = classLoader.getClass()
+                        .getDeclaredMethod("appendToClassPathForInstrumentation", String.class);
+                method.setAccessible(true);
+                method.invoke(classLoader, driverFile);
             }
-
-            String driver = config.getString(Keys.DATABASE_DRIVER);
-            if (driver != null) {
-                Class.forName(driver);
-            }
-
-            HikariConfig hikariConfig = new HikariConfig();
-            hikariConfig.setDriverClassName(driver);
-            hikariConfig.setJdbcUrl(config.getString(Keys.DATABASE_URL));
-            hikariConfig.setUsername(config.getString(Keys.DATABASE_USER));
-            hikariConfig.setPassword(config.getString(Keys.DATABASE_PASSWORD));
-            hikariConfig.setConnectionInitSql(config.getString(Keys.DATABASE_CHECK_CONNECTION, "SELECT 1"));
-            hikariConfig.setIdleTimeout(600000);
-
-            int maxPoolSize = config.getInteger("database.maxPoolSize");
-
-            if (maxPoolSize != 0) {
-                hikariConfig.setMaximumPoolSize(maxPoolSize);
-            }
-
-            generateQueries = config.getBoolean("database.generateQueries");
-
-            dataSource = new HikariDataSource(hikariConfig);
-
         }
+
+        String driver = config.getString(Keys.DATABASE_DRIVER);
+        if (driver != null) {
+            Class.forName(driver);
+        }
+
+        HikariConfig hikariConfig = new HikariConfig();
+        hikariConfig.setDriverClassName(driver);
+        hikariConfig.setJdbcUrl(config.getString(Keys.DATABASE_URL));
+        hikariConfig.setUsername(config.getString(Keys.DATABASE_USER));
+        hikariConfig.setPassword(config.getString(Keys.DATABASE_PASSWORD));
+        hikariConfig.setConnectionInitSql(config.getString(Keys.DATABASE_CHECK_CONNECTION, "SELECT 1"));
+        hikariConfig.setIdleTimeout(600000);
+
+        int maxPoolSize = config.getInteger("database.maxPoolSize");
+
+        if (maxPoolSize != 0) {
+            hikariConfig.setMaximumPoolSize(maxPoolSize);
+        }
+
+        generateQueries = config.getBoolean("database.generateQueries");
+
+        dataSource = new HikariDataSource(hikariConfig);
     }
 
     public static String constructObjectQuery(String action, Class<?> clazz, boolean extended) {
