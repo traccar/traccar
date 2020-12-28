@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ public class TmgFrameDecoder extends BaseFrameDecoder {
                         && isLetter(buffer.getByte(guessedIndex + 3))) {
                 return guessedIndex;
             }
-            guessedIndex = buffer.indexOf(guessedIndex, buffer.writerIndex(), (byte) '$');
+            guessedIndex = buffer.indexOf(guessedIndex + 1, buffer.writerIndex(), (byte) '$');
         }
         return -1;
     }
