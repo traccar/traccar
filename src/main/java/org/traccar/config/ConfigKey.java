@@ -37,4 +37,8 @@ public class ConfigKey<T> {
         return key;
     }
 
+    public T getDefaultValue() {
+        return defaultValue;
+    }
+
 }

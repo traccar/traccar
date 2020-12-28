@@ -134,16 +134,22 @@ public class Config {
         return hasKey(key) ? Long.parseLong(getString(key)) : defaultValue;
     }
 
-    public double getDouble(ConfigKey key) {
-        return getDouble(key, 0.0);
-    }
-
-    public double getDouble(ConfigKey key, double defaultValue) {
-        return hasKey(key.getKey()) ? Double.parseDouble(getString(key.getKey())) : defaultValue;
+    public double getDouble(ConfigKey<Double> key) {
+        String value = getString(key.getKey());
+        if (value != null) {
+            return Double.parseDouble(value);
+        } else {
+            Double defaultValue = key.getDefaultValue();
+            if (defaultValue != null) {
+                return defaultValue;
+            } else {
+                return 0;
+            }
+        }
     }
 
     @VisibleForTesting
-    public void setString(ConfigKey key, String value) {
+    public void setString(ConfigKey<?> key, String value) {
         properties.put(key.getKey(), value);
     }
 

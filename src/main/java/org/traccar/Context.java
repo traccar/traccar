@@ -258,7 +258,7 @@ public final class Context {
                 config.getLong("report.trip.minimalNoDataDuration", 3600) * 1000,
                 config.getBoolean("report.trip.useIgnition"),
                 config.getBoolean(Keys.EVENT_MOTION_PROCESS_INVALID_POSITIONS),
-                config.getDouble(Keys.EVENT_MOTION_SPEED_THRESHOLD, 0.01));
+                config.getDouble(Keys.EVENT_MOTION_SPEED_THRESHOLD));
     }
 
     private static class ObjectMapperContextResolver implements ContextResolver<ObjectMapper> {

@@ -91,7 +91,8 @@ public final class Keys {
      */
     public static final ConfigKey<Double> EVENT_MOTION_SPEED_THRESHOLD = new ConfigKey<>(
             "event.motion.speedThreshold",
-            Collections.singletonList(KeyType.FILE));
+            Collections.singletonList(KeyType.FILE),
+            0.01);
 
     /**
      * Global polyline geofence distance. Within that distance from the polyline, point is considered within the
@@ -99,7 +100,8 @@ public final class Keys {
      */
     public static final ConfigKey<Double> GEOFENCE_POLYLINE_DISTANCE = new ConfigKey<>(
             "geofence.polylineDistance",
-            Collections.singletonList(KeyType.FILE));
+            Collections.singletonList(KeyType.FILE),
+            25.0);
 
     /**
      * Path to the database driver JAR file. Traccar includes drivers for MySQL, PostgreSQL and H2 databases. If you use
