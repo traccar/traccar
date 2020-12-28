@@ -23,6 +23,7 @@ import org.eclipse.jetty.util.URIUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.database.AttributesManager;
 import org.traccar.database.BaseObjectManager;
 import org.traccar.database.CalendarManager;
@@ -294,7 +295,7 @@ public final class Context {
 
         client = ClientBuilder.newClient().register(new ObjectMapperContextResolver());
 
-        if (config.hasKey("database.url")) {
+        if (config.hasKey(Keys.DATABASE_URL)) {
             dataManager = new DataManager(config);
         }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.Context;
+import org.traccar.config.Keys;
 import org.traccar.helper.DateUtil;
 import org.traccar.model.Attribute;
 import org.traccar.model.Device;
@@ -100,7 +101,7 @@ public class DataManager {
 
         } else {
 
-            String driverFile = config.getString("database.driverFile");
+            String driverFile = config.getString(Keys.DATABASE_DRIVER_FILE);
             if (driverFile != null) {
                 ClassLoader classLoader = ClassLoader.getSystemClassLoader();
                 try {
@@ -115,17 +116,17 @@ public class DataManager {
                 }
             }
 
-            String driver = config.getString("database.driver");
+            String driver = config.getString(Keys.DATABASE_DRIVER);
             if (driver != null) {
                 Class.forName(driver);
             }
 
             HikariConfig hikariConfig = new HikariConfig();
-            hikariConfig.setDriverClassName(config.getString("database.driver"));
-            hikariConfig.setJdbcUrl(config.getString("database.url"));
-            hikariConfig.setUsername(config.getString("database.user"));
-            hikariConfig.setPassword(config.getString("database.password"));
-            hikariConfig.setConnectionInitSql(config.getString("database.checkConnection", "SELECT 1"));
+            hikariConfig.setDriverClassName(driver);
+            hikariConfig.setJdbcUrl(config.getString(Keys.DATABASE_URL));
+            hikariConfig.setUsername(config.getString(Keys.DATABASE_USER));
+            hikariConfig.setPassword(config.getString(Keys.DATABASE_PASSWORD));
+            hikariConfig.setConnectionInitSql(config.getString(Keys.DATABASE_CHECK_CONNECTION, "SELECT 1"));
             hikariConfig.setIdleTimeout(600000);
 
             int maxPoolSize = config.getInteger("database.maxPoolSize");
@@ -293,19 +294,19 @@ public class DataManager {
 
     private void initDatabaseSchema() throws SQLException, LiquibaseException {
 
-        if (config.hasKey("database.changelog")) {
+        if (config.hasKey(Keys.DATABASE_CHANGELOG)) {
 
             ResourceAccessor resourceAccessor = new FileSystemResourceAccessor();
 
             Database database = DatabaseFactory.getInstance().openDatabase(
-                    config.getString("database.url"),
-                    config.getString("database.user"),
-                    config.getString("database.password"),
-                    config.getString("database.driver"),
+                    config.getString(Keys.DATABASE_URL),
+                    config.getString(Keys.DATABASE_USER),
+                    config.getString(Keys.DATABASE_PASSWORD),
+                    config.getString(Keys.DATABASE_DRIVER),
                     null, null, null, resourceAccessor);
 
             Liquibase liquibase = new Liquibase(
-                    config.getString("database.changelog"), resourceAccessor, database);
+                    config.getString(Keys.DATABASE_CHANGELOG), resourceAccessor, database);
 
             liquibase.clearCheckSums();
 

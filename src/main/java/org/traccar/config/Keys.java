@@ -76,6 +76,50 @@ public final class Keys {
             "extra.handlers", String.class);
 
     /**
+     * Path to the database driver JAR file. Traccar includes drivers for MySQL, PostgreSQL and H2 databases. If you use
+     * one of those, you don't need to specify this parameter.
+     */
+    public static final ConfigKey DATABASE_DRIVER_FILE = new ConfigKey(
+            "database.driverFile", String.class);
+
+    /**
+     * Database driver Java class. For H2 use 'org.h2.Driver'. MySQL driver class name is 'com.mysql.jdbc.Driver'.
+     */
+    public static final ConfigKey DATABASE_DRIVER = new ConfigKey(
+            "database.driver", String.class);
+
+    /**
+     * Database connection URL. By default Traccar uses H2 database.
+     */
+    public static final ConfigKey DATABASE_URL = new ConfigKey(
+            "database.url", String.class);
+
+    /**
+     * Database user name. Default administrator user for H2 database is 'sa'.
+     */
+    public static final ConfigKey DATABASE_USER = new ConfigKey(
+            "database.user", String.class);
+
+    /**
+     * Database user password. Default password for H2 admin (sa) user is empty.
+     */
+    public static final ConfigKey DATABASE_PASSWORD = new ConfigKey(
+            "database.password", String.class);
+
+    /**
+     * Path to Liquibase master changelog file.
+     */
+    public static final ConfigKey DATABASE_CHANGELOG = new ConfigKey(
+            "database.changelog", String.class);
+
+    /**
+     * SQL query to check connection status. Default value is 'SELECT 1'. For Oracle database you can use
+     * 'SELECT 1 FROM DUAL'.
+     */
+    public static final ConfigKey DATABASE_CHECK_CONNECTION = new ConfigKey(
+            "database.checkConnection", String.class);
+
+    /**
      * Store original HEX or string data as "raw" attribute in the corresponding position.
      */
     public static final ConfigKey DATABASE_SAVE_ORIGINAL = new ConfigKey(
