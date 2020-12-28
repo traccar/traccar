@@ -70,6 +70,25 @@ public final class Keys {
             "event.ignoreDuplicateAlerts", Boolean.class);
 
     /**
+     * If set to true, invalid positions will be considered for motion logic.
+     */
+    public static final ConfigKey EVENT_MOTION_PROCESS_INVALID_POSITIONS = new ConfigKey(
+            "event.motion.processInvalidPositions", Boolean.class);
+
+    /**
+     * If the speed is above specified value, the object is considered to be in motion. Default value is 0.01 knots.
+     */
+    public static final ConfigKey EVENT_MOTION_SPEED_THRESHOLD = new ConfigKey(
+            "event.motion.speedThreshold", Double.class);
+
+    /**
+     * Global polyline geofence distance. Within that distance from the polyline, point is considered within the
+     * geofence. Each individual geofence can also has 'polylineDistance' attribute which will take precedence.
+     */
+    public static final ConfigKey GEOFENCE_POLYLINE_DISTANCE = new ConfigKey(
+            "geofence.polylineDistance", Double.class);
+
+    /**
      * List of external handler classes to use in Netty pipeline.
      */
     public static final ConfigKey EXTRA_HANDLERS = new ConfigKey(

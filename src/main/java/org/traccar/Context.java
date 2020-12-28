@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -257,8 +257,8 @@ public final class Context {
                 config.getLong("report.trip.minimalParkingDuration", 300) * 1000,
                 config.getLong("report.trip.minimalNoDataDuration", 3600) * 1000,
                 config.getBoolean("report.trip.useIgnition"),
-                config.getBoolean("event.motion.processInvalidPositions"),
-                config.getDouble("event.motion.speedThreshold", 0.01));
+                config.getBoolean(Keys.EVENT_MOTION_PROCESS_INVALID_POSITIONS),
+                config.getDouble(Keys.EVENT_MOTION_SPEED_THRESHOLD, 0.01));
     }
 
     private static class ObjectMapperContextResolver implements ContextResolver<ObjectMapper> {

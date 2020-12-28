@@ -15,6 +15,8 @@
  */
 package org.traccar.config;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -133,18 +135,14 @@ public class Config {
     }
 
     public double getDouble(ConfigKey key) {
-        return getDouble(key.getKey(), 0.0);
+        return getDouble(key, 0.0);
     }
 
     public double getDouble(ConfigKey key, double defaultValue) {
-        return getDouble(key.getKey(), defaultValue);
+        return hasKey(key.getKey()) ? Double.parseDouble(getString(key.getKey())) : defaultValue;
     }
 
-    @Deprecated
-    public double getDouble(String key, double defaultValue) {
-        return hasKey(key) ? Double.parseDouble(getString(key)) : defaultValue;
-    }
-
+    @VisibleForTesting
     public void setString(ConfigKey key, String value) {
         properties.put(key.getKey(), value);
     }
