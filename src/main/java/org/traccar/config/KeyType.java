@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,26 +15,9 @@
  */
 package org.traccar.config;
 
-import java.util.List;
-
-public class ConfigKey<T> {
-
-    private final String key;
-    private final List<KeyType> types;
-    private final T defaultValue;
-
-    ConfigKey(String key, List<KeyType> types) {
-        this(key, types, null);
-    }
-
-    ConfigKey(String key, List<KeyType> types, T defaultValue) {
-        this.key = key;
-        this.types = types;
-        this.defaultValue = defaultValue;
-    }
-
-    String getKey() {
-        return key;
-    }
-
+public enum KeyType {
+    FILE,
+    SERVER,
+    USER,
+    DEVICE,
 }
