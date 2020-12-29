@@ -17,7 +17,6 @@
     <entry key='geocoder.enable'>false</entry>
     <entry key='geocoder.type'>google</entry>
 
-    <entry key='logger.enable'>true</entry>
     <entry key='logger.level'>info</entry>
     <entry key='logger.file'>./logs/tracker-server.log</entry>
     <entry key='logger.rotate'>true</entry>

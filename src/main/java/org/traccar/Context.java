@@ -274,14 +274,11 @@ public final class Context {
 
         try {
             config = new Config(configFile);
+            Log.setupLogger(config);
         } catch (Exception e) {
             config = new Config();
             Log.setupDefaultLogger();
             throw e;
-        }
-
-        if (config.getBoolean("logger.enable")) {
-            Log.setupLogger(config);
         }
 
         objectMapper = new ObjectMapper();
@@ -299,7 +296,7 @@ public final class Context {
             dataManager = new DataManager(config);
         }
 
-        if (config.getBoolean("ldap.enable")) {
+        if (config.hasKey(Keys.LDAP_URL)) {
             ldapProvider = new LdapProvider(config);
         }
 
