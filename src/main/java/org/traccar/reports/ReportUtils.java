@@ -26,6 +26,7 @@ import org.jxls.transform.Transformer;
 import org.jxls.transform.poi.PoiTransformer;
 import org.jxls.util.TransformerFactory;
 import org.traccar.Context;
+import org.traccar.config.Keys;
 import org.traccar.database.DeviceManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.handler.events.MotionEventHandler;
@@ -58,7 +59,7 @@ public final class ReportUtils {
     }
 
     public static void checkPeriodLimit(Date from, Date to) {
-        long limit = Context.getConfig().getLong("report.periodLimit") * 1000;
+        long limit = Context.getConfig().getLong(Keys.REPORT_PERIOD_LIMIT) * 1000;
         if (limit > 0 && to.getTime() - from.getTime() > limit) {
             throw new IllegalArgumentException("Time period exceeds the limit");
         }

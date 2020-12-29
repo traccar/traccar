@@ -117,17 +117,17 @@ public class Config {
     }
 
     public long getLong(ConfigKey<Long> key) {
-        return getLong(key.getKey());
-    }
-
-    @Deprecated
-    public long getLong(String key) {
-        return getLong(key, 0);
-    }
-
-    @Deprecated
-    public long getLong(String key, long defaultValue) {
-        return hasKey(key) ? Long.parseLong(getString(key)) : defaultValue;
+        String value = getString(key.getKey());
+        if (value != null) {
+            return Long.parseLong(value);
+        } else {
+            Long defaultValue = key.getDefaultValue();
+            if (defaultValue != null) {
+                return defaultValue;
+            } else {
+                return 0;
+            }
+        }
     }
 
     public double getDouble(ConfigKey<Double> key) {

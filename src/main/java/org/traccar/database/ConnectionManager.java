@@ -23,6 +23,7 @@ import org.traccar.Context;
 import org.traccar.GlobalTimer;
 import org.traccar.Main;
 import org.traccar.Protocol;
+import org.traccar.config.Keys;
 import org.traccar.handler.events.MotionEventHandler;
 import org.traccar.handler.events.OverspeedEventHandler;
 import org.traccar.model.Device;
@@ -44,8 +45,6 @@ public class ConnectionManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionManager.class);
 
-    private static final long DEFAULT_TIMEOUT = 600;
-
     private final long deviceTimeout;
     private final boolean enableStatusEvents;
     private final boolean updateDeviceState;
@@ -55,7 +54,7 @@ public class ConnectionManager {
     private final Map<Long, Timeout> timeouts = new ConcurrentHashMap<>();
 
     public ConnectionManager() {
-        deviceTimeout = Context.getConfig().getLong("status.timeout", DEFAULT_TIMEOUT) * 1000;
+        deviceTimeout = Context.getConfig().getLong(Keys.STATUS_TIMEOUT) * 1000;
         enableStatusEvents = Context.getConfig().getBoolean("event.enable");
         updateDeviceState = Context.getConfig().getBoolean("status.updateDeviceState");
     }

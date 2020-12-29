@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.Context;
+import org.traccar.config.Keys;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceState;
@@ -40,8 +41,6 @@ import org.traccar.model.Server;
 public class DeviceManager extends BaseObjectManager<Device> implements IdentityManager, ManagableObjects {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DeviceManager.class);
-
-    public static final long DEFAULT_REFRESH_DELAY = 300;
 
     private final Config config;
     private final long dataRefreshDelay;
@@ -68,7 +67,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         } finally {
             writeUnlock();
         }
-        dataRefreshDelay = config.getLong("database.refreshDelay", DEFAULT_REFRESH_DELAY) * 1000;
+        dataRefreshDelay = config.getLong(Keys.DATABASE_REFRESH_DELAY) * 1000;
         refreshLastPositions();
     }
 
@@ -77,9 +76,9 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         Device device = new Device();
         device.setName(uniqueId);
         device.setUniqueId(uniqueId);
-        device.setCategory(Context.getConfig().getString("database.registerUnknown.defaultCategory"));
+        device.setCategory(Context.getConfig().getString(Keys.DATABASE_REGISTER_UNKNOWN_DEFAULT_CATEGORY));
 
-        long defaultGroupId = Context.getConfig().getLong("database.registerUnknown.defaultGroupId");
+        long defaultGroupId = Context.getConfig().getLong(Keys.DATABASE_REGISTER_UNKNOWN_DEFAULT_GROUP_ID);
         if (defaultGroupId != 0) {
             device.setGroupId(defaultGroupId);
         }

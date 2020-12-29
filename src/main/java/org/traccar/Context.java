@@ -252,11 +252,11 @@ public final class Context {
 
     public static TripsConfig initTripsConfig() {
         return new TripsConfig(
-                config.getLong("report.trip.minimalTripDistance", 500),
-                config.getLong("report.trip.minimalTripDuration", 300) * 1000,
-                config.getLong("report.trip.minimalParkingDuration", 300) * 1000,
-                config.getLong("report.trip.minimalNoDataDuration", 3600) * 1000,
-                config.getBoolean("report.trip.useIgnition"),
+                config.getLong(Keys.REPORT_TRIP_MINIMAL_TRIP_DISTANCE),
+                config.getLong(Keys.REPORT_TRIP_MINIMAL_TRIP_DURATION) * 1000,
+                config.getLong(Keys.REPORT_TRIP_MINIMAL_PARKING_DURATION) * 1000,
+                config.getLong(Keys.REPORT_TRIP_MINIMAL_NO_DATA_DURATION) * 1000,
+                config.getBoolean(Keys.REPORT_TRIP_USE_IGNITION),
                 config.getBoolean(Keys.EVENT_MOTION_PROCESS_INVALID_POSITIONS),
                 config.getDouble(Keys.EVENT_MOTION_SPEED_THRESHOLD));
     }

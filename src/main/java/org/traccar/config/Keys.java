@@ -162,6 +162,45 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
+     * Default category for auto-registered devices.
+     */
+    public static final ConfigKey<String> DATABASE_REGISTER_UNKNOWN_DEFAULT_CATEGORY = new ConfigKey<>(
+            "database.registerUnknown.defaultCategory",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * The group id assigned to auto-registered devices.
+     */
+    public static final ConfigKey<Long> DATABASE_REGISTER_UNKNOWN_DEFAULT_GROUP_ID = new ConfigKey<>(
+            "database.registerUnknown.defaultGroupId",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Minimum device refresh timeout in seconds. Default timeout is 5 minutes.
+     */
+    public static final ConfigKey<Long> DATABASE_REFRESH_DELAY = new ConfigKey<>(
+            "database.refreshDelay",
+            Collections.singletonList(KeyType.GLOBAL),
+            300L);
+
+    /**
+     * If no data is reported by a device for the given amount of time, status changes from online to unknown. Value is
+     * in seconds. Default timeout is 10 minutes.
+     */
+    public static final ConfigKey<Long> STATUS_TIMEOUT = new ConfigKey<>(
+            "status.timeout",
+            Collections.singletonList(KeyType.GLOBAL),
+            600L);
+
+    /**
+     * WebSocket connection timeout in milliseconds. Default timeout is 10 minutes.
+     */
+    public static final ConfigKey<Long> WEB_TIMEOUT = new ConfigKey<>(
+            "web.timeout",
+            Collections.singletonList(KeyType.GLOBAL),
+            60000L);
+
+    /**
      * Enable positions forwarding to other web server.
      */
     public static final ConfigKey<Boolean> FORWARD_ENABLE = new ConfigKey<>(
@@ -231,6 +270,53 @@ public final class Keys {
      */
     public static final ConfigKey<Integer> FORWARD_RETRY_LIMIT = new ConfigKey<>(
             "forward.retry.limit",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Maximum time period for reports in seconds. Can be useful to prevent users to request unreasonably long reports.
+     * By default there is no limit.
+     */
+    public static final ConfigKey<Long> REPORT_PERIOD_LIMIT = new ConfigKey<>(
+            "report.periodLimit",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Trips less than minimal duration and minimal distance are ignored. 300 seconds and 500 meters are default.
+     */
+    public static final ConfigKey<Long> REPORT_TRIP_MINIMAL_TRIP_DISTANCE = new ConfigKey<>(
+            "report.trip.minimalTripDistance",
+            Collections.singletonList(KeyType.GLOBAL),
+            500L);
+
+    /**
+     * Trips less than minimal duration and minimal distance are ignored. 300 seconds and 500 meters are default.
+     */
+    public static final ConfigKey<Long> REPORT_TRIP_MINIMAL_TRIP_DURATION = new ConfigKey<>(
+            "report.trip.minimalTripDuration",
+            Collections.singletonList(KeyType.GLOBAL),
+            300L);
+
+    /**
+     * Parking less than minimal duration does not cut trip. Default 300 seconds.
+     */
+    public static final ConfigKey<Long> REPORT_TRIP_MINIMAL_PARKING_DURATION = new ConfigKey<>(
+            "report.trip.minimalParkingDuration",
+            Collections.singletonList(KeyType.GLOBAL),
+            300L);
+
+    /**
+     * Gaps of more than specified time are counted as stops. Default value is one hour.
+     */
+    public static final ConfigKey<Long> REPORT_TRIP_MINIMAL_NO_DATA_DURATION = new ConfigKey<>(
+            "report.trip.minimalNoDataDuration",
+            Collections.singletonList(KeyType.GLOBAL),
+            3600L);
+
+    /**
+     * Flag to enable ignition use for trips calculation.
+     */
+    public static final ConfigKey<Boolean> REPORT_TRIP_USE_IGNITION = new ConfigKey<>(
+            "report.trip.useIgnition",
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
