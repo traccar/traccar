@@ -99,7 +99,17 @@ public class Config {
     }
 
     public int getInteger(ConfigKey<Integer> key) {
-        return getInteger(key.getKey());
+        String value = getString(key.getKey());
+        if (value != null) {
+            return Integer.parseInt(value);
+        } else {
+            Integer defaultValue = key.getDefaultValue();
+            if (defaultValue != null) {
+                return defaultValue;
+            } else {
+                return 0;
+            }
+        }
     }
 
     @Deprecated

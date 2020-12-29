@@ -64,8 +64,8 @@ public class WebServer {
 
     private void initServer(Config config) {
 
-        String address = config.getString("web.address");
-        int port = config.getInteger("web.port", 8082);
+        String address = config.getString(Keys.WEB_ADDRESS);
+        int port = config.getInteger(Keys.WEB_PORT);
         if (address == null) {
             server = new Server(port);
         } else {
@@ -113,7 +113,7 @@ public class WebServer {
     }
 
     private void initClientProxy(Config config, HandlerList handlers) {
-        int port = config.getInteger("osmand.port");
+        int port = config.getInteger(Keys.PROTOCOL_PORT.withPrefix("osmand"));
         if (port != 0) {
             ServletContextHandler servletHandler = new ServletContextHandler() {
                 @Override

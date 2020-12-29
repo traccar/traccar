@@ -20,6 +20,21 @@ import java.util.Collections;
 public final class Keys {
 
     /**
+     * Network interface for a the protocol. If not specified, server will bind all interfaces.
+     */
+    public static final ConfigSuffix<String> PROTOCOL_ADDRESS = new ConfigSuffix<>(
+            ".address",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Port number for the protocol. Most protocols use TCP on the transport layer. Some protocols use UDP. Some
+     * support both TCP and UDP.
+     */
+    public static final ConfigSuffix<Integer> PROTOCOL_PORT = new ConfigSuffix<>(
+            ".port",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
      * Connection timeout value in seconds. Because sometimes there is no way to detect lost TCP connection old
      * connections stay in open state. On most systems there is a limit on number of open connection, so this leads to
      * problems with establishing new connections when number of devices is high or devices data connections are
@@ -191,6 +206,23 @@ public final class Keys {
             "status.timeout",
             Collections.singletonList(KeyType.GLOBAL),
             600L);
+
+    /**
+     * Optional parameter to specify network interface for web interface to bind to. By default server will bind to all
+     * available interfaces.
+     */
+    public static final ConfigKey<String> WEB_ADDRESS = new ConfigKey<>(
+            "web.address",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Web interface TCP port number. By default Traccar uses port 8082. To avoid specifying port in the browser you
+     * can set it to 80 (default HTTP port).
+     */
+    public static final ConfigKey<Integer> WEB_PORT = new ConfigKey<>(
+            "web.port",
+            Collections.singletonList(KeyType.GLOBAL),
+            8082);
 
     /**
      * WebSocket connection timeout in milliseconds. Default timeout is 10 minutes.
