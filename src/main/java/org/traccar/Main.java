@@ -27,10 +27,8 @@ import java.lang.management.MemoryMXBean;
 import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.RuntimeMXBean;
 import java.nio.charset.Charset;
-import java.sql.SQLException;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.Locale;
+import java.util.Timer;
 
 public final class Main {
 
