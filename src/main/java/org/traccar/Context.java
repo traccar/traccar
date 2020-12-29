@@ -60,8 +60,8 @@ import org.traccar.notification.EventForwarder;
 import org.traccar.notification.NotificatorManager;
 import org.traccar.reports.model.TripsConfig;
 import org.traccar.schedule.ScheduleManager;
+import org.traccar.sms.HttpSmsClient;
 import org.traccar.sms.SmsManager;
-import org.traccar.sms.smpp.SmppClient;
 import org.traccar.web.WebServer;
 
 import javax.ws.rs.client.Client;
@@ -326,12 +326,7 @@ public final class Context {
         tripsConfig = initTripsConfig();
 
         if (config.getBoolean("sms.enable")) {
-            final String smsManagerClass = config.getString("sms.manager.class", SmppClient.class.getCanonicalName());
-            try {
-                smsManager = (SmsManager) Class.forName(smsManagerClass).newInstance();
-            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-                LOGGER.warn("Error loading SMS Manager class : " + smsManagerClass, e);
-            }
+            smsManager = new HttpSmsClient();
         }
 
         if (config.getBoolean("event.enable")) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,27 +24,15 @@ import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.notification.MessageException;
 import org.traccar.notification.NotificationFormatter;
-import org.traccar.sms.SmsManager;
 
 public final class NotificatorSms extends Notificator {
-
-    private final SmsManager smsManager;
-
-    public NotificatorSms() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-        final String smsClass = Context.getConfig().getString("notificator.sms.manager.class", "");
-        if (smsClass.length() > 0) {
-            smsManager = (SmsManager) Class.forName(smsClass).newInstance();
-        } else {
-            smsManager = Context.getSmsManager();
-        }
-    }
 
     @Override
     public void sendAsync(long userId, Event event, Position position) {
         final User user = Context.getPermissionsManager().getUser(userId);
         if (user.getPhone() != null) {
             Main.getInjector().getInstance(StatisticsManager.class).registerSms();
-            smsManager.sendMessageAsync(user.getPhone(),
+            Context.getSmsManager().sendMessageAsync(user.getPhone(),
                     NotificationFormatter.formatShortMessage(userId, event, position), false);
         }
     }
@@ -54,7 +42,7 @@ public final class NotificatorSms extends Notificator {
         final User user = Context.getPermissionsManager().getUser(userId);
         if (user.getPhone() != null) {
             Main.getInjector().getInstance(StatisticsManager.class).registerSms();
-            smsManager.sendMessageSync(user.getPhone(),
+            Context.getSmsManager().sendMessageSync(user.getPhone(),
                     NotificationFormatter.formatShortMessage(userId, event, position), false);
         }
     }
