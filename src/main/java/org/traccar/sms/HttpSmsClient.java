@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2020 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,12 +37,12 @@ public class HttpSmsClient implements SmsManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpSmsClient.class);
 
-    private String url;
-    private String authorizationHeader;
+    private final String url;
+    private final String authorizationHeader;
     private String authorization;
-    private String template;
-    private boolean encode;
-    private MediaType mediaType;
+    private final String template;
+    private final boolean encode;
+    private final MediaType mediaType;
 
     public HttpSmsClient() {
         url = Context.getConfig().getString("sms.http.url");
