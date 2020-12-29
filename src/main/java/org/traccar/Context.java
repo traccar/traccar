@@ -363,12 +363,12 @@ public final class Context {
 
         String address;
         try {
-            address = config.getString("web.address", InetAddress.getLocalHost().getHostAddress());
+            address = config.getString(Keys.WEB_ADDRESS, InetAddress.getLocalHost().getHostAddress());
         } catch (UnknownHostException e) {
             address = "localhost";
         }
 
-        String webUrl = URIUtil.newURI("http", address, config.getInteger("web.port", 8082), "", "");
+        String webUrl = URIUtil.newURI("http", address, config.getInteger(Keys.WEB_PORT), "", "");
         webUrl = Context.getConfig().getString("web.url", webUrl);
         velocityProperties.setProperty("web.url", webUrl);
 
