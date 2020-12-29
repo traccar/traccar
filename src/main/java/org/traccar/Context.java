@@ -20,8 +20,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr353.JSR353Module;
 import org.apache.velocity.app.VelocityEngine;
 import org.eclipse.jetty.util.URIUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.AttributesManager;
@@ -72,8 +70,6 @@ import java.net.UnknownHostException;
 import java.util.Properties;
 
 public final class Context {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(Context.class);
 
     private Context() {
     }
@@ -286,9 +282,6 @@ public final class Context {
         objectMapper.registerModule(new JSR353Module());
         objectMapper.setConfig(
                 objectMapper.getSerializationConfig().without(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS));
-        if (Context.getConfig().getBoolean("mapper.prettyPrintedJson")) {
-            objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-        }
 
         client = ClientBuilder.newClient().register(new ObjectMapperContextResolver());
 
