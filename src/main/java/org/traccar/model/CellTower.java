@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.traccar.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.traccar.Context;
+import org.traccar.config.Keys;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CellTower {
@@ -38,8 +39,8 @@ public class CellTower {
 
     public static CellTower fromLacCid(int lac, long cid) {
         return from(
-                Context.getConfig().getInteger("geolocation.mcc"),
-                Context.getConfig().getInteger("geolocation.mnc"), lac, cid);
+                Context.getConfig().getInteger(Keys.GEOLOCATION_MCC),
+                Context.getConfig().getInteger(Keys.GEOLOCATION_MCC), lac, cid);
     }
 
     public static CellTower fromCidLac(long cid, int lac) {

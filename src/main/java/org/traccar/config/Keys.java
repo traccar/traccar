@@ -45,6 +45,20 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
+     * Default protocol mask to use. Currently used only by Skypatrol protocol.
+     */
+    public static final ConfigSuffix<Integer> PROTOCOL_MASK = new ConfigSuffix<>(
+            ".mask",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Custom message length. Currently used only by H2 protocol for specifying binary message length.
+     */
+    public static final ConfigSuffix<Integer> PROTOCOL_MESSAGE_LENGTH = new ConfigSuffix<>(
+            ".messageLength",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
      * Server wide connection timeout value in seconds. See protocol timeout for more information.
      */
     public static final ConfigKey<Integer> SERVER_TIMEOUT = new ConfigKey<>(
@@ -748,6 +762,20 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> GEOLOCATION_PROCESS_INVALID_POSITIONS = new ConfigKey<>(
             "geolocation.processInvalidPositions",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Default MCC value to use if device doesn't report MCC.
+     */
+    public static final ConfigKey<Integer> GEOLOCATION_MCC = new ConfigKey<>(
+            "geolocation.mcc",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Default MNC value to use if device doesn't report MNC.
+     */
+    public static final ConfigKey<Integer> GEOLOCATION_MNC = new ConfigKey<>(
+            "geolocation.mnc",
             Collections.singletonList(KeyType.GLOBAL));
 
     /**

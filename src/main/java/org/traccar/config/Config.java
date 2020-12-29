@@ -112,11 +112,6 @@ public class Config {
         }
     }
 
-    @Deprecated
-    public int getInteger(String key) {
-        return getInteger(key, 0);
-    }
-
     public int getInteger(ConfigKey<Integer> key, int defaultValue) {
         return getInteger(key.getKey(), defaultValue);
     }
