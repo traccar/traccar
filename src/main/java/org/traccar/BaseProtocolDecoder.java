@@ -93,12 +93,6 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
         String timeZoneName = identityManager.lookupAttributeString(deviceId, "decoder.timezone", null, false, true);
         if (timeZoneName != null) {
             result = TimeZone.getTimeZone(timeZoneName);
-        } else {
-            int timeZoneOffset = config.getInteger(getProtocolName() + ".timezone", 0);
-            if (timeZoneOffset != 0) {
-                result.setRawOffset(timeZoneOffset * 1000);
-                LOGGER.warn("Config parameter " + getProtocolName() + ".timezone is deprecated");
-            }
         }
         return result;
     }
