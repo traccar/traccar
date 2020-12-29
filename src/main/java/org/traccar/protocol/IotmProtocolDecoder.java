@@ -117,7 +117,11 @@ public class IotmProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (msg instanceof MqttSubscribeMessage) {
 
-            MqttMessage response = MqttMessageBuilders.subAck().packetId((short) 1).build();
+            MqttPublishMessage message = (MqttPublishMessage) msg;
+
+            MqttMessage response = MqttMessageBuilders.subAck()
+                    .packetId((short) message.variableHeader().packetId())
+                    .build();
 
             if (channel != null) {
                 channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
@@ -184,7 +188,9 @@ public class IotmProtocolDecoder extends BaseProtocolDecoder {
 
             buf.readUnsignedByte(); // checksum
 
-            MqttMessage response = MqttMessageBuilders.pubAck().packetId((short) 1).build();
+            MqttMessage response = MqttMessageBuilders.pubAck()
+                    .packetId((short) message.variableHeader().packetId())
+                    .build();
 
             if (channel != null) {
                 channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
