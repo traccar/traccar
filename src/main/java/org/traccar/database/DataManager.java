@@ -80,7 +80,7 @@ public class DataManager {
     public DataManager(Config config) throws Exception {
         this.config = config;
 
-        forceLdap = config.getBoolean("ldap.force");
+        forceLdap = config.getBoolean(Keys.LDAP_FORCE);
 
         initDatabase();
         initDatabaseSchema();

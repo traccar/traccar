@@ -59,6 +59,85 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
+     * Enable extended functionality for the protocol. The reason it's disabled by default is that not all devices
+     * support it.
+     */
+    public static final ConfigSuffix<Boolean> PROTOCOL_EXTENDED = new ConfigSuffix<>(
+            ".extended",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Decode string as UTF8 instead of ASCII. Only applicable for some protocols.
+     */
+    public static final ConfigSuffix<Boolean> PROTOCOL_UTF8 = new ConfigSuffix<>(
+            ".utf8",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Enable CAN decoding for the protocol. Similar to 'extended' configuration, it's not supported for some devices.
+     */
+    public static final ConfigSuffix<Boolean> PROTOCOL_CAN = new ConfigSuffix<>(
+            ".can",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Indicates whether server acknowledgement is required. Only applicable for some protocols.
+     */
+    public static final ConfigSuffix<Boolean> PROTOCOL_ACK = new ConfigSuffix<>(
+            ".ack",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Ignore device reported fix time. Useful in case some devices report invalid time. Currently only available for
+     * GL200 protocol.
+     */
+    public static final ConfigSuffix<Boolean> PROTOCOL_IGNORE_FIX_TIME = new ConfigSuffix<>(
+            ".ignoreFixTime",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Decode additional TK103 attributes. Not supported for some devices.
+     */
+    public static final ConfigSuffix<Boolean> PROTOCOL_DECODE_LOW = new ConfigSuffix<>(
+            ".decodeLow",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Use long date format for Atrack protocol.
+     */
+    public static final ConfigSuffix<Boolean> PROTOCOL_LONG_DATE = new ConfigSuffix<>(
+            ".longDate",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Use decimal fuel value format for Atrack protocol.
+     */
+    public static final ConfigSuffix<Boolean> PROTOCOL_DECIMAL_FUEL = new ConfigSuffix<>(
+            ".decimalFuel",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Indicates additional custom attributes for Atrack protocol.
+     */
+    public static final ConfigSuffix<Boolean> PROTOCOL_CUSTOM = new ConfigSuffix<>(
+            ".custom",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Custom format string for Atrack protocol.
+     */
+    public static final ConfigSuffix<String> PROTOCOL_FORM = new ConfigSuffix<>(
+            ".form",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Alarm mapping for Atrack protocol.
+     */
+    public static final ConfigSuffix<String> PROTOCOL_ALARM_MAP = new ConfigSuffix<>(
+            ".alarmMap",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
      * Server wide connection timeout value in seconds. See protocol timeout for more information.
      */
     public static final ConfigKey<Integer> SERVER_TIMEOUT = new ConfigKey<>(
@@ -206,6 +285,21 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
+     * By default server syncs with the database if it encounters and unknown device. This flag allows to disable that
+     * behavior to improve performance in some cases.
+     */
+    public static final ConfigKey<Boolean> DATABASE_IGNORE_UNKNOWN = new ConfigKey<>(
+            "database.ignoreUnknown",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Automatically register unknown devices in the database.
+     */
+    public static final ConfigKey<Boolean> DATABASE_REGISTER_UNKNOWN = new ConfigKey<>(
+            "database.registerUnknown",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
      * Default category for auto-registered devices.
      */
     public static final ConfigKey<String> DATABASE_REGISTER_UNKNOWN_DEFAULT_CATEGORY = new ConfigKey<>(
@@ -261,6 +355,13 @@ public final class Keys {
      */
     public static final ConfigKey<String> LDAP_PASSWORD = new ConfigKey<>(
             "ldap.password",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Force LDAP authentication.
+     */
+    public static final ConfigKey<Boolean> LDAP_FORCE = new ConfigKey<>(
+            "ldap.force",
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
@@ -354,6 +455,21 @@ public final class Keys {
      */
     public static final ConfigKey<Integer> WEB_SESSION_TIMEOUT = new ConfigKey<>(
             "web.sessionTimeout",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Enable database access console via '/console' URL. Use only for debugging. Never use in production.
+     */
+    public static final ConfigKey<Boolean> WEB_CONSOLE = new ConfigKey<>(
+            "web.console",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Server debug version of the web app. Not recommended to use for performance reasons. It is intended to be used
+     * for development and debugging purposes.
+     */
+    public static final ConfigKey<Boolean> WEB_DEBUG = new ConfigKey<>(
+            "web.debug",
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
@@ -723,6 +839,13 @@ public final class Keys {
      */
     public static final ConfigKey<Integer> GEOCODER_REUSE_DISTANCE = new ConfigKey<>(
             "geocoder.reuseDistance",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Perform geocoding when preparing reports and sending notifications.
+     */
+    public static final ConfigKey<Boolean> GEOCODER_ON_REQUEST = new ConfigKey<>(
+            "geocoder.onRequest",
             Collections.singletonList(KeyType.GLOBAL));
 
     /**

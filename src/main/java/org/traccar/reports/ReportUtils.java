@@ -196,7 +196,7 @@ public final class ReportUtils {
         trip.setStartTime(startTrip.getFixTime());
         String startAddress = startTrip.getAddress();
         if (startAddress == null && Context.getGeocoder() != null
-                && Context.getConfig().getBoolean("geocoder.onRequest")) {
+                && Context.getConfig().getBoolean(Keys.GEOCODER_ON_REQUEST)) {
             startAddress = Context.getGeocoder().getAddress(startTrip.getLatitude(), startTrip.getLongitude(), null);
         }
         trip.setStartAddress(startAddress);
@@ -207,7 +207,7 @@ public final class ReportUtils {
         trip.setEndTime(endTrip.getFixTime());
         String endAddress = endTrip.getAddress();
         if (endAddress == null && Context.getGeocoder() != null
-                && Context.getConfig().getBoolean("geocoder.onRequest")) {
+                && Context.getConfig().getBoolean(Keys.GEOCODER_ON_REQUEST)) {
             endAddress = Context.getGeocoder().getAddress(endTrip.getLatitude(), endTrip.getLongitude(), null);
         }
         trip.setEndAddress(endAddress);
@@ -254,7 +254,7 @@ public final class ReportUtils {
         stop.setStartTime(startStop.getFixTime());
         String address = startStop.getAddress();
         if (address == null && Context.getGeocoder() != null
-                && Context.getConfig().getBoolean("geocoder.onRequest")) {
+                && Context.getConfig().getBoolean(Keys.GEOCODER_ON_REQUEST)) {
             address = Context.getGeocoder().getAddress(stop.getLatitude(), stop.getLongitude(), null);
         }
         stop.setAddress(address);

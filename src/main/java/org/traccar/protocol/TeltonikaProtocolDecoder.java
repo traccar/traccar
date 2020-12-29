@@ -24,6 +24,7 @@ import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.config.Keys;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.UnitsConverter;
@@ -54,7 +55,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
     public TeltonikaProtocolDecoder(Protocol protocol, boolean connectionless) {
         super(protocol);
         this.connectionless = connectionless;
-        this.extended = Context.getConfig().getBoolean(getProtocolName() + ".extended");
+        this.extended = Context.getConfig().getBoolean(Keys.PROTOCOL_EXTENDED.withPrefix(getProtocolName()));
     }
 
     private void parseIdentification(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {

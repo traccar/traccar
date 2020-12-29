@@ -113,7 +113,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         boolean forceUpdate;
         try {
             readLock();
-            forceUpdate = !devicesByUniqueId.containsKey(uniqueId) && !config.getBoolean("database.ignoreUnknown");
+            forceUpdate = !devicesByUniqueId.containsKey(uniqueId) && !config.getBoolean(Keys.DATABASE_IGNORE_UNKNOWN);
         } finally {
             readUnlock();
         }

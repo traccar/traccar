@@ -82,7 +82,7 @@ public class WebServer {
         initApi(config, servletHandler);
         initSessionConfig(config, servletHandler);
 
-        if (config.getBoolean("web.console")) {
+        if (config.getBoolean(Keys.WEB_CONSOLE)) {
             servletHandler.addServlet(new ServletHolder(new ConsoleServlet()), "/console/*");
         }
 
@@ -135,7 +135,7 @@ public class WebServer {
     private void initWebApp(Config config, ServletContextHandler servletHandler) {
         ServletHolder servletHolder = new ServletHolder(DefaultServlet.class);
         servletHolder.setInitParameter("resourceBase", new File(config.getString("web.path")).getAbsolutePath());
-        if (config.getBoolean("web.debug")) {
+        if (config.getBoolean(Keys.WEB_DEBUG)) {
             servletHandler.setWelcomeFiles(new String[] {"debug.html", "index.html"});
         } else {
             String cache = config.getString("web.cacheControl");

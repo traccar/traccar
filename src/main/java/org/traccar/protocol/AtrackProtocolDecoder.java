@@ -23,6 +23,7 @@ import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.config.Keys;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -61,19 +62,23 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
     public AtrackProtocolDecoder(Protocol protocol) {
         super(protocol);
 
-        longDate = Context.getConfig().getBoolean(getProtocolName() + ".longDate");
-        decimalFuel = Context.getConfig().getBoolean(getProtocolName() + ".decimalFuel");
+        longDate = Context.getConfig().getBoolean(Keys.PROTOCOL_LONG_DATE.withPrefix(getProtocolName()));
+        decimalFuel = Context.getConfig().getBoolean(Keys.PROTOCOL_DECIMAL_FUEL.withPrefix(getProtocolName()));
 
-        custom = Context.getConfig().getBoolean(getProtocolName() + ".custom");
-        form = Context.getConfig().getString(getProtocolName() + ".form");
+        custom = Context.getConfig().getBoolean(Keys.PROTOCOL_CUSTOM.withPrefix(getProtocolName()));
+        form = Context.getConfig().getString(Keys.PROTOCOL_FORM.withPrefix(getProtocolName()));
         if (form != null) {
             custom = true;
         }
 
-        for (String pair : Context.getConfig().getString(getProtocolName() + ".alarmMap", "").split(",")) {
-            if (!pair.isEmpty()) {
-                alarmMap.put(
-                        Integer.parseInt(pair.substring(0, pair.indexOf('='))), pair.substring(pair.indexOf('=') + 1));
+        String alarmMapString = Context.getConfig().getString(Keys.PROTOCOL_ALARM_MAP.withPrefix(getProtocolName()));
+        if (alarmMapString != null) {
+            for (String pair : alarmMapString.split(",")) {
+                if (!pair.isEmpty()) {
+                    alarmMap.put(
+                            Integer.parseInt(pair.substring(0, pair.indexOf('='))),
+                            pair.substring(pair.indexOf('=') + 1));
+                }
             }
         }
     }

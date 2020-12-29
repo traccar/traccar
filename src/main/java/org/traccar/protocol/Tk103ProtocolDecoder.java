@@ -21,6 +21,7 @@ import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.config.Keys;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
@@ -39,7 +40,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
     public Tk103ProtocolDecoder(Protocol protocol) {
         super(protocol);
-        decodeLow = Context.getConfig().getBoolean(getProtocolName() + ".decodeLow");
+        decodeLow = Context.getConfig().getBoolean(Keys.PROTOCOL_DECODE_LOW.withPrefix(getProtocolName()));
     }
 
     private static final Pattern PATTERN = new PatternBuilder()

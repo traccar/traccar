@@ -21,6 +21,7 @@ import io.netty.handler.codec.http.HttpRequestDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.database.CommandsManager;
 import org.traccar.database.ConnectionManager;
 import org.traccar.database.IdentityManager;
@@ -117,10 +118,10 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
             } catch (Exception e) {
                 LOGGER.warn("Find device error", e);
             }
-            if (deviceId == 0 && config.getBoolean("database.registerUnknown")) {
+            if (deviceId == 0 && config.getBoolean(Keys.DATABASE_REGISTER_UNKNOWN)) {
                 return identityManager.addUnknownDevice(uniqueIds[0]);
             }
-            if (device != null && !device.getDisabled() || config.getBoolean("database.storeDisabled")) {
+            if (device != null && !device.getDisabled()) {
                 return deviceId;
             }
             StringBuilder message = new StringBuilder();
