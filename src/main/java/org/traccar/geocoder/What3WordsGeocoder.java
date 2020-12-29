@@ -36,8 +36,9 @@ public class What3WordsGeocoder extends JsonGeocoder {
     @Override
     public Address parseAddress(JsonObject json) {
         Address address = new Address();
-        if(json.containsKey("words")) {
-            String w3wAddress = "<span style='color: #E11F26'>///</span><a href='" + json.getString("map") + "' target='_blank'>";
+        if (json.containsKey("words")) {
+            String w3wAddress = "<span style='color: #E11F26'>///</span><a href='"
+                    + json.getString("map") + "' target='_blank'>";
             w3wAddress += json.getString("words");
             w3wAddress += "</a>";
             address.setFormattedAddress(w3wAddress);
