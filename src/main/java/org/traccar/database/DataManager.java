@@ -114,16 +114,15 @@ public class DataManager {
         hikariConfig.setJdbcUrl(config.getString(Keys.DATABASE_URL));
         hikariConfig.setUsername(config.getString(Keys.DATABASE_USER));
         hikariConfig.setPassword(config.getString(Keys.DATABASE_PASSWORD));
-        hikariConfig.setConnectionInitSql(config.getString(Keys.DATABASE_CHECK_CONNECTION, "SELECT 1"));
+        hikariConfig.setConnectionInitSql(config.getString(Keys.DATABASE_CHECK_CONNECTION));
         hikariConfig.setIdleTimeout(600000);
 
-        int maxPoolSize = config.getInteger("database.maxPoolSize");
-
+        int maxPoolSize = config.getInteger(Keys.DATABASE_MAX_POOL_SIZE);
         if (maxPoolSize != 0) {
             hikariConfig.setMaximumPoolSize(maxPoolSize);
         }
 
-        generateQueries = config.getBoolean("database.generateQueries");
+        generateQueries = config.getBoolean(Keys.DATABASE_GENERATE_QUERIES);
 
         dataSource = new HikariDataSource(hikariConfig);
     }
@@ -340,20 +339,6 @@ public class DataManager {
     public Collection<Position> getLatestPositions() throws SQLException {
         return QueryBuilder.create(dataSource, getQuery("database.selectLatestPositions"))
                 .executeQuery(Position.class);
-    }
-
-    public void clearHistory() throws SQLException {
-        long historyDays = config.getInteger("database.historyDays");
-        if (historyDays != 0) {
-            Date timeLimit = new Date(System.currentTimeMillis() - historyDays * 24 * 3600 * 1000);
-            LOGGER.info("Clearing history earlier than " + DateUtil.formatDate(timeLimit, false));
-            QueryBuilder.create(dataSource, getQuery("database.deletePositions"))
-                    .setDate("serverTime", timeLimit)
-                    .executeUpdate();
-            QueryBuilder.create(dataSource, getQuery("database.deleteEvents"))
-                    .setDate("serverTime", timeLimit)
-                    .executeUpdate();
-        }
     }
 
     public Server getServer() throws SQLException {

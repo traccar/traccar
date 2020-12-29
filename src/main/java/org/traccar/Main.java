@@ -119,19 +119,6 @@ public final class Main {
         }
     }
 
-    private static void scheduleDatabaseCleanup() {
-        new Timer().scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                try {
-                    Context.getDataManager().clearHistory();
-                } catch (SQLException error) {
-                    LOGGER.warn("Clear history error", error);
-                }
-            }
-        }, 0, CLEAN_PERIOD);
-    }
-
     public static void run(String configFile) {
         try {
             Context.init(configFile);
@@ -147,7 +134,6 @@ public final class Main {
             Context.getScheduleManager().start();
 
             scheduleHealthCheck();
-            scheduleDatabaseCleanup();
 
             Thread.setDefaultUncaughtExceptionHandler((t, e) -> LOGGER.error("Thread exception", e));
 

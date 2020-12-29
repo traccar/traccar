@@ -168,7 +168,7 @@ public class WebServer {
     }
 
     private void initSessionConfig(Config config, ServletContextHandler servletHandler) {
-        int sessionTimeout = config.getInteger("web.sessionTimeout");
+        int sessionTimeout = config.getInteger(Keys.WEB_SESSION_TIMEOUT);
         if (sessionTimeout > 0) {
             servletHandler.getSessionHandler().setMaxInactiveInterval(sessionTimeout);
         }

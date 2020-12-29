@@ -162,12 +162,27 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
+     * Automatically generate SQL database queries when possible.
+     */
+    public static final ConfigKey<Boolean> DATABASE_GENERATE_QUERIES = new ConfigKey<>(
+            "database.generateQueries",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Database connection pool size. Default value is defined by the HikariCP library.
+     */
+    public static final ConfigKey<Integer> DATABASE_MAX_POOL_SIZE = new ConfigKey<>(
+            "database.maxPoolSize",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
      * SQL query to check connection status. Default value is 'SELECT 1'. For Oracle database you can use
      * 'SELECT 1 FROM DUAL'.
      */
     public static final ConfigKey<String> DATABASE_CHECK_CONNECTION = new ConfigKey<>(
             "database.checkConnection",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.GLOBAL),
+            "SELECT 1");
 
     /**
      * Store original HEX or string data as "raw" attribute in the corresponding position.
@@ -319,6 +334,13 @@ public final class Keys {
             "web.timeout",
             Collections.singletonList(KeyType.GLOBAL),
             60000L);
+
+    /**
+     * Authentication sessions timeout in seconds. By default no timeout.
+     */
+    public static final ConfigKey<Integer> WEB_SESSION_TIMEOUT = new ConfigKey<>(
+            "web.sessionTimeout",
+            Collections.singletonList(KeyType.GLOBAL));
 
     /**
      * Enable positions forwarding to other web server.
