@@ -29,22 +29,7 @@ import org.traccar.database.GeofenceManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.database.MaintenancesManager;
 import org.traccar.database.StatisticsManager;
-import org.traccar.geocoder.AddressFormat;
-import org.traccar.geocoder.BanGeocoder;
-import org.traccar.geocoder.BingMapsGeocoder;
-import org.traccar.geocoder.FactualGeocoder;
-import org.traccar.geocoder.GeocodeFarmGeocoder;
-import org.traccar.geocoder.GeocodeXyzGeocoder;
-import org.traccar.geocoder.Geocoder;
-import org.traccar.geocoder.GisgraphyGeocoder;
-import org.traccar.geocoder.GoogleGeocoder;
-import org.traccar.geocoder.HereGeocoder;
-import org.traccar.geocoder.MapQuestGeocoder;
-import org.traccar.geocoder.MapmyIndiaGeocoder;
-import org.traccar.geocoder.NominatimGeocoder;
-import org.traccar.geocoder.OpenCageGeocoder;
-import org.traccar.geocoder.PositionStackGeocoder;
-import org.traccar.geocoder.TomTomGeocoder;
+import org.traccar.geocoder.*;
 import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.geolocation.GoogleGeolocationProvider;
 import org.traccar.geolocation.MozillaGeolocationProvider;
@@ -184,6 +169,8 @@ public class MainModule extends AbstractModule {
                     return new TomTomGeocoder(url, key, cacheSize, addressFormat);
                 case "positionstack":
                     return new PositionStackGeocoder(key, cacheSize, addressFormat);
+                case "what3words":
+                    return new What3WordsGeocoder(key, language, cacheSize, new AddressFormat("%f"));
                 default:
                     return new GoogleGeocoder(key, language, cacheSize, addressFormat);
             }
