@@ -199,6 +199,94 @@ public final class Keys {
             300L);
 
     /**
+     * Device limit for self registered users. Default value is -1, which indicates no limit.
+     */
+    public static final ConfigKey<Integer> USERS_DEFAULT_DEVICE_LIMIT = new ConfigKey<>(
+            "users.defaultDeviceLimit",
+            Collections.singletonList(KeyType.GLOBAL),
+            -1);
+
+    /**
+     * Default user expiration for self registered users. Value is in days. By default no expiration is set.
+     */
+    public static final ConfigKey<Integer> USERS_DEFAULT_EXPIRATION_DAYS = new ConfigKey<>(
+            "users.defaultExpirationDays",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * LDAP server URL.
+     */
+    public static final ConfigKey<String> LDAP_URL = new ConfigKey<>(
+            "ldap.url",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * LDAP server login.
+     */
+    public static final ConfigKey<String> LDAP_USER = new ConfigKey<>(
+            "ldap.user",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * LDAP server password.
+     */
+    public static final ConfigKey<String> LDAP_PASSWORD = new ConfigKey<>(
+            "ldap.password",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * LDAP user search base.
+     */
+    public static final ConfigKey<String> LDAP_BASE = new ConfigKey<>(
+            "ldap.base",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * LDAP attribute used as user id. Default value is 'uid'.
+     */
+    public static final ConfigKey<String> LDAP_ID_ATTRIBUTE = new ConfigKey<>(
+            "ldap.idAttribute",
+            Collections.singletonList(KeyType.GLOBAL),
+            "uid");
+
+    /**
+     * LDAP attribute used as user name. Default value is 'cn'.
+     */
+    public static final ConfigKey<String> LDAP_NAME_ATTRIBUTE = new ConfigKey<>(
+            "ldap.nameAttribute",
+            Collections.singletonList(KeyType.GLOBAL),
+            "cn");
+
+    /**
+     * LDAP attribute used as user email. Default value is 'mail'.
+     */
+    public static final ConfigKey<String> LDAP_MAIN_ATTRIBUTE = new ConfigKey<>(
+            "ldap.mailAttribute",
+            Collections.singletonList(KeyType.GLOBAL),
+            "mail");
+
+    /**
+     * LDAP custom search filter. If not specified, '({idAttribute}=:login)' will be used as a filter.
+     */
+    public static final ConfigKey<String> LDAP_SEARCH_FILTER = new ConfigKey<>(
+            "ldap.searchFilter",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * LDAP custom admin search filter.
+     */
+    public static final ConfigKey<String> LDAP_ADMIN_FILTER = new ConfigKey<>(
+            "ldap.adminFilter",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * LDAP admin user group. Used if custom admin filter is not specified.
+     */
+    public static final ConfigKey<String> LDAP_ADMIN_GROUP = new ConfigKey<>(
+            "ldap.adminGroup",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
      * If no data is reported by a device for the given amount of time, status changes from online to unknown. Value is
      * in seconds. Default timeout is 10 minutes.
      */

@@ -66,7 +66,7 @@ public class Config {
     }
 
     public String getString(ConfigKey<String> key) {
-        return getString(key.getKey());
+        return getString(key.getKey(), key.getDefaultValue());
     }
 
     @Deprecated
