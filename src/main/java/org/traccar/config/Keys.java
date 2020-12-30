@@ -45,6 +45,13 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
+     * Device password. Commonly used in some protocol for sending commands.
+     */
+    public static final ConfigSuffix<String> PROTOCOL_DEVICE_PASSWORD = new ConfigSuffix<>(
+            ".devicePassword",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
      * Default protocol mask to use. Currently used only by Skypatrol protocol.
      */
     public static final ConfigSuffix<Integer> PROTOCOL_MASK = new ConfigSuffix<>(
@@ -493,6 +500,13 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
+     * Path to the web app folder.
+     */
+    public static final ConfigKey<String> WEB_PATH = new ConfigKey<>(
+            "web.path",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
      * WebSocket connection timeout in milliseconds. Default timeout is 10 minutes.
      */
     public static final ConfigKey<Long> WEB_TIMEOUT = new ConfigKey<>(
@@ -668,6 +682,48 @@ public final class Keys {
      */
     public static final ConfigKey<String> SMS_HTTP_TEMPLATE = new ConfigKey<>(
             "sms.http.template",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Traccar notification API key.
+     */
+    public static final ConfigKey<String> NOTIFICATOR_TRACCAR_KEY = new ConfigKey<>(
+            "notificator.traccar.key",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Firebase server API key for push notifications.
+     */
+    public static final ConfigKey<String> NOTIFICATOR_FIREBASE_KEY = new ConfigKey<>(
+            "notificator.firebase.key",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Pushover notification user name.
+     */
+    public static final ConfigKey<String> NOTIFICATOR_PUSHOVER_USER = new ConfigKey<>(
+            "notificator.pushover.user",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Pushover notification user token.
+     */
+    public static final ConfigKey<String> NOTIFICATOR_PUSHOVER_TOKEN = new ConfigKey<>(
+            "notificator.pushover.token",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Telegram notification API key.
+     */
+    public static final ConfigKey<String> NOTIFICATOR_TELEGRAM_KEY = new ConfigKey<>(
+            "notificator.telegram.key",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Telegram notification chat id to post messages to.
+     */
+    public static final ConfigKey<String> NOTIFICATOR_TELEGRAM_CHAT_ID = new ConfigKey<>(
+            "notificator.telegram.chatId",
             Collections.singletonList(KeyType.GLOBAL));
 
     /**

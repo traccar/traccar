@@ -135,7 +135,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         }
 
         if (protocol != null) {
-            password = Context.getConfig().getString(protocol + "." + Command.KEY_DEVICE_PASSWORD);
+            password = Context.getConfig().getString(Keys.PROTOCOL_DEVICE_PASSWORD.withPrefix(protocol));
             if (password != null) {
                 return password;
             }
