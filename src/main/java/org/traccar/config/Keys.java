@@ -131,6 +131,13 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
+     * Protocol configuration. Required for some devices for decoding incoming data.
+     */
+    public static final ConfigSuffix<String> PROTOCOL_CONFIG = new ConfigSuffix<>(
+            ".config",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
      * Alarm mapping for Atrack protocol.
      */
     public static final ConfigSuffix<String> PROTOCOL_ALARM_MAP = new ConfigSuffix<>(
@@ -454,6 +461,22 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
+     * List of protocol names to ignore offline status. Can be useful to not trigger status change when devices are
+     * configured to disconnect after reporting a batch of data.
+     */
+    public static final ConfigKey<String> STATUS_IGNORE_OFFLINE = new ConfigKey<>(
+            "status.ignoreOffline",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Path to the media folder. Server stores audio, video and photo files in that folder. Sub-folders will be
+     * automatically created for each device by unique id.
+     */
+    public static final ConfigKey<String> MEDIA_PATH = new ConfigKey<>(
+            "media.path",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
      * Optional parameter to specify network interface for web interface to bind to. By default server will bind to all
      * available interfaces.
      */
@@ -498,6 +521,21 @@ public final class Keys {
     public static final ConfigKey<Boolean> WEB_DEBUG = new ConfigKey<>(
             "web.debug",
             Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Cross-origin resource sharing origin header value.
+     */
+    public static final ConfigKey<String> WEB_ORIGIN = new ConfigKey<>(
+            "web.origin",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Cache control header value. By default resources are cached for one hour.
+     */
+    public static final ConfigKey<String> WEB_CACHE_CONTROL = new ConfigKey<>(
+            "web.cacheControl",
+            Collections.singletonList(KeyType.GLOBAL),
+            "max-age=3600,public");
 
     /**
      * URL to forward positions. Data is passed through URL parameters. For example, {uniqueId} for device identifier,

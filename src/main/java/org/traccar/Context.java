@@ -295,7 +295,7 @@ public final class Context {
 
         mailManager = new MailManager();
 
-        mediaManager = new MediaManager(config.getString("media.path"));
+        mediaManager = new MediaManager(config.getString(Keys.MEDIA_PATH));
 
         if (dataManager != null) {
             usersManager = new UsersManager(dataManager);

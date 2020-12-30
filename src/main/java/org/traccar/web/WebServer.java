@@ -138,7 +138,7 @@ public class WebServer {
         if (config.getBoolean(Keys.WEB_DEBUG)) {
             servletHandler.setWelcomeFiles(new String[] {"debug.html", "index.html"});
         } else {
-            String cache = config.getString("web.cacheControl");
+            String cache = config.getString(Keys.WEB_CACHE_CONTROL);
             if (cache != null && !cache.isEmpty()) {
                 servletHolder.setInitParameter("cacheControl", cache);
             }
@@ -153,7 +153,7 @@ public class WebServer {
         if (config.hasKey("media.path")) {
             ServletHolder servletHolder = new ServletHolder(DefaultServlet.class);
             servletHolder.setInitParameter("resourceBase", new File(config.getString("media.path")).getAbsolutePath());
-            servletHolder.setInitParameter("dirAllowed", config.getString("media.dirAllowed", "false"));
+            servletHolder.setInitParameter("dirAllowed", "false");
             servletHolder.setInitParameter("pathInfoOnly", "true");
             servletHandler.addServlet(servletHolder, "/api/media/*");
             servletHandler.addFilter(MediaFilter.class, "/api/media/*", EnumSet.allOf(DispatcherType.class));

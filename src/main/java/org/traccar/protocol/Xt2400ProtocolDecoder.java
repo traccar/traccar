@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.Protocol;
+import org.traccar.config.Keys;
 import org.traccar.helper.DataConverter;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -38,7 +39,7 @@ public class Xt2400ProtocolDecoder extends BaseProtocolDecoder {
     public Xt2400ProtocolDecoder(Protocol protocol) {
         super(protocol);
 
-        String config = Context.getConfig().getString(getProtocolName() + ".config");
+        String config = Context.getConfig().getString(Keys.PROTOCOL_CONFIG.withPrefix(getProtocolName()));
         if (config != null) {
             setConfig(config);
         }

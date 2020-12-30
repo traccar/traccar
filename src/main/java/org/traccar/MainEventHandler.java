@@ -42,7 +42,7 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
     private final Set<String> logAttributes = new LinkedHashSet<>();
 
     public MainEventHandler() {
-        String connectionlessProtocolList = Context.getConfig().getString("status.ignoreOffline");
+        String connectionlessProtocolList = Context.getConfig().getString(Keys.STATUS_IGNORE_OFFLINE);
         if (connectionlessProtocolList != null) {
             connectionlessProtocols.addAll(Arrays.asList(connectionlessProtocolList.split("[, ]")));
         }
