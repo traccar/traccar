@@ -319,14 +319,12 @@ public final class Context {
             smsManager = new HttpSmsClient();
         }
 
-        if (config.getBoolean("event.enable")) {
-            initEventsModule();
-        }
+        initEventsModule();
 
         serverManager = new ServerManager();
         scheduleManager = new ScheduleManager();
 
-        if (config.getBoolean("event.forward.enable")) {
+        if (config.hasKey(Keys.EVENT_FORWARD_URL)) {
             eventForwarder = new EventForwarder();
         }
 

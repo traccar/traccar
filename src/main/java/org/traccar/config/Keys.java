@@ -153,13 +153,6 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
-     * Enable events subsystem. Flag to enable all events handlers.
-     */
-    public static final ConfigKey<Boolean> EVENT_ENABLE = new ConfigKey<>(
-            "event.enable",
-            Collections.singletonList(KeyType.GLOBAL));
-
-    /**
      * If true, the event is generated once at the beginning of overspeeding period.
      */
     public static final ConfigKey<Boolean> EVENT_OVERSPEED_NOT_REPEAT = new ConfigKey<>(
@@ -426,6 +419,13 @@ public final class Keys {
             600L);
 
     /**
+     * Force additional state check when device status changes to 'offline' or 'unknown'. Default false.
+     */
+    public static final ConfigKey<Boolean> STATUS_UPDATE_DEVICE_STATE = new ConfigKey<>(
+            "status.updateDeviceState",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
      * Optional parameter to specify network interface for web interface to bind to. By default server will bind to all
      * available interfaces.
      */
@@ -469,13 +469,6 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> WEB_DEBUG = new ConfigKey<>(
             "web.debug",
-            Collections.singletonList(KeyType.GLOBAL));
-
-    /**
-     * Enable positions forwarding to other web server.
-     */
-    public static final ConfigKey<Boolean> FORWARD_ENABLE = new ConfigKey<>(
-            "forward.enable",
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
@@ -541,6 +534,22 @@ public final class Keys {
      */
     public static final ConfigKey<Integer> FORWARD_RETRY_LIMIT = new ConfigKey<>(
             "forward.retry.limit",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Events forwarding URL.
+     */
+    public static final ConfigKey<String> EVENT_FORWARD_URL = new ConfigKey<>(
+            "event.forward.url",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Events forwarding headers. Example value:
+     * FirstHeader: hello
+     * SecondHeader: world
+     */
+    public static final ConfigKey<String> EVENT_FORWARD_HEADERS = new ConfigKey<>(
+            "event.forward.header",
             Collections.singletonList(KeyType.GLOBAL));
 
     /**

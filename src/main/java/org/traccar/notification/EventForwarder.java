@@ -18,6 +18,7 @@ package org.traccar.notification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
+import org.traccar.config.Keys;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Geofence;
@@ -39,8 +40,8 @@ public class EventForwarder {
     private final String header;
 
     public EventForwarder() {
-        url = Context.getConfig().getString("event.forward.url", "http://localhost/");
-        header = Context.getConfig().getString("event.forward.header");
+        url = Context.getConfig().getString(Keys.EVENT_FORWARD_URL);
+        header = Context.getConfig().getString(Keys.EVENT_FORWARD_HEADERS);
     }
 
     private static final String KEY_POSITION = "position";
