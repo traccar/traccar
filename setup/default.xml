@@ -10,7 +10,7 @@
 
     -->
 
-    <entry key='web.enable'>true</entry>
+    <entry key='web.port'>8082</entry>
     <entry key='web.path'>./web</entry>
     <entry key='web.cacheControl'>max-age=3600,public</entry>
 

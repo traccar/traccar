@@ -439,8 +439,7 @@ public final class Keys {
      */
     public static final ConfigKey<Integer> WEB_PORT = new ConfigKey<>(
             "web.port",
-            Collections.singletonList(KeyType.GLOBAL),
-            8082);
+            Collections.singletonList(KeyType.GLOBAL));
 
     /**
      * WebSocket connection timeout in milliseconds. Default timeout is 10 minutes.
@@ -542,6 +541,50 @@ public final class Keys {
      */
     public static final ConfigKey<Integer> FORWARD_RETRY_LIMIT = new ConfigKey<>(
             "forward.retry.limit",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * SMS API service full URL. Enables SMS commands and notifications.
+     */
+    public static final ConfigKey<String> SMS_HTTP_URL = new ConfigKey<>(
+            "sms.http.url",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * SMS API authorization header name. Default value is 'Authorization'.
+     */
+    public static final ConfigKey<String> SMS_HTTP_AUTHORIZATION_HEADER = new ConfigKey<>(
+            "sms.http.authorizationHeader",
+            Collections.singletonList(KeyType.GLOBAL),
+            "Authorization");
+
+    /**
+     * SMS API authorization header value. This value takes precedence over user and password.
+     */
+    public static final ConfigKey<String> SMS_HTTP_AUTHORIZATION = new ConfigKey<>(
+            "sms.http.authorization",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * SMS API basic authentication user.
+     */
+    public static final ConfigKey<String> SMS_HTTP_USER = new ConfigKey<>(
+            "sms.http.user",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * SMS API basic authentication password.
+     */
+    public static final ConfigKey<String> SMS_HTTP_PASSWORD = new ConfigKey<>(
+            "sms.http.password",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * SMS API body template. Placeholders {phone} and {message} can be used in the template.
+     * If value starts with '{' or '[', server automatically assumes JSON format.
+     */
+    public static final ConfigKey<String> SMS_HTTP_TEMPLATE = new ConfigKey<>(
+            "sms.http.template",
             Collections.singletonList(KeyType.GLOBAL));
 
     /**

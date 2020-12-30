@@ -305,7 +305,7 @@ public final class Context {
 
         identityManager = deviceManager;
 
-        if (config.getBoolean("web.enable")) {
+        if (config.hasKey(Keys.WEB_PORT)) {
             webServer = new WebServer(config);
         }
 
@@ -315,7 +315,7 @@ public final class Context {
 
         tripsConfig = initTripsConfig();
 
-        if (config.getBoolean("sms.enable")) {
+        if (config.hasKey(Keys.SMS_HTTP_URL)) {
             smsManager = new HttpSmsClient();
         }
 
