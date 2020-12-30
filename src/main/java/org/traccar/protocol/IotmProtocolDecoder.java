@@ -150,7 +150,7 @@ public class IotmProtocolDecoder extends BaseProtocolDecoder {
 
                     Position position = new Position(getProtocolName());
                     position.setDeviceId(deviceSession.getDeviceId());
-                    position.setTime(new Date(record.readUnsignedIntLE()));
+                    position.setTime(new Date(record.readUnsignedIntLE() * 1000));
 
                     while (record.readableBytes() > 0) {
                         int sensorType = record.readUnsignedByte();
