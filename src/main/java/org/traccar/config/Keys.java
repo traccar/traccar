@@ -977,6 +977,51 @@ public final class Keys {
             "web.sameSiteCookie",
             Collections.singletonList(KeyType.GLOBAL));
 
+    /**
+     * Output logging to the standard terminal output instead of a log file.
+     */
+    public static final ConfigKey<Boolean> LOGGER_CONSOLE = new ConfigKey<>(
+            "logger.console",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Log file name. For rotating logs, a date is added at the end of the file name for non-current logs.
+     */
+    public static final ConfigKey<String> LOGGER_FILE = new ConfigKey<>(
+            "logger.file",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Logging level. Default value is 'info'.
+     * Available options: off, severe, warning, info, config, fine, finer, finest, all.
+     */
+    public static final ConfigKey<String> LOGGER_LEVEL = new ConfigKey<>(
+            "logger.level",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Print full exception traces. Useful for debugging. By default shortened traces are logged.
+     */
+    public static final ConfigKey<Boolean> LOGGER_FULL_STACK_TRACES = new ConfigKey<>(
+            "logger.fullStackTraces",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Create a new log file daily. Helps with log management. For example, downloading and cleaning logs. Enabled by
+     * default.
+     */
+    public static final ConfigKey<Boolean> LOGGER_ROTATE = new ConfigKey<>(
+            "logger.rotate",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * A list of position attributes to log.
+     */
+    public static final ConfigKey<String> LOGGER_ATTRIBUTES = new ConfigKey<>(
+            "logger.attributes",
+            Collections.singletonList(KeyType.GLOBAL),
+            "time,position,speed,course,accuracy,result");
+
     private Keys() {
     }
 

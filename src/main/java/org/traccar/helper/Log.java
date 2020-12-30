@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.traccar.helper;
 
 import org.traccar.config.Config;
+import org.traccar.config.Keys;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -46,10 +47,10 @@ public final class Log {
 
     private static class RollingFileHandler extends Handler {
 
-        private String name;
+        private final String name;
         private String suffix;
         private Writer writer;
-        private boolean rotate;
+        private final boolean rotate;
 
         RollingFileHandler(String name, boolean rotate) {
             this.name = name;
@@ -110,7 +111,7 @@ public final class Log {
 
     public static class LogFormatter extends Formatter {
 
-        private boolean fullStackTraces;
+        private final boolean fullStackTraces;
 
         LogFormatter(boolean fullStackTraces) {
             this.fullStackTraces = fullStackTraces;
@@ -178,11 +179,11 @@ public final class Log {
 
     public static void setupLogger(Config config) {
         setupLogger(
-                config.getBoolean("logger.console"),
-                config.getString("logger.file"),
-                config.getString("logger.level"),
-                config.getBoolean("logger.fullStackTraces"),
-                config.getBoolean("logger.rotate"));
+                config.getBoolean(Keys.LOGGER_CONSOLE),
+                config.getString(Keys.LOGGER_FILE),
+                config.getString(Keys.LOGGER_LEVEL),
+                config.getBoolean(Keys.LOGGER_FULL_STACK_TRACES),
+                config.getBoolean(Keys.LOGGER_ROTATE));
     }
 
     private static void setupLogger(
