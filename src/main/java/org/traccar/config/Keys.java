@@ -19,6 +19,9 @@ import java.util.Collections;
 
 public final class Keys {
 
+    private Keys() {
+    }
+
     /**
      * Network interface for a the protocol. If not specified, server will bind all interfaces.
      */
@@ -1203,8 +1206,5 @@ public final class Keys {
             "logger.attributes",
             Collections.singletonList(KeyType.GLOBAL),
             "time,position,speed,course,accuracy,result");
-
-    private Keys() {
-    }
 
 }
