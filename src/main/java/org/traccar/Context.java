@@ -332,7 +332,7 @@ public final class Context {
 
         driversManager = new DriversManager(dataManager);
 
-        commandsManager = new CommandsManager(dataManager, config.getBoolean("commands.queueing"));
+        commandsManager = new CommandsManager(dataManager, config.getBoolean(Keys.COMMANDS_QUEUEING));
 
     }
 

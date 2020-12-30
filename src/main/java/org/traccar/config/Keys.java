@@ -315,6 +315,13 @@ public final class Keys {
             300L);
 
     /**
+     * Store empty messages as positions. For example, heartbeats.
+     */
+    public static final ConfigKey<Boolean> DATABASE_SAVE_EMPTY = new ConfigKey<>(
+            "database.saveEmpty",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
      * Device limit for self registered users. Default value is -1, which indicates no limit.
      */
     public static final ConfigKey<Integer> USERS_DEFAULT_DEVICE_LIMIT = new ConfigKey<>(
@@ -550,6 +557,14 @@ public final class Keys {
      */
     public static final ConfigKey<String> EVENT_FORWARD_HEADERS = new ConfigKey<>(
             "event.forward.header",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Enable commands queuing when devices are offline. Commands are buffered in memory only, so restarting service
+     * will clear the buffer.
+     */
+    public static final ConfigKey<Boolean> COMMANDS_QUEUEING = new ConfigKey<>(
+            "commands.queueing",
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
