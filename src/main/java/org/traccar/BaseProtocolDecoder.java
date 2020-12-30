@@ -63,7 +63,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     }
 
     public String getServer(Channel channel, char delimiter) {
-        String server = config.getString(getProtocolName() + ".server");
+        String server = config.getString(Keys.PROTOCOL_SERVER.withPrefix(getProtocolName()));
         if (server == null && channel != null) {
             InetSocketAddress address = (InetSocketAddress) channel.localAddress();
             server = address.getAddress().getHostAddress() + ":" + address.getPort();
@@ -148,8 +148,8 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     public DeviceSession getDeviceSession(
             Channel channel, SocketAddress remoteAddress, boolean ignoreCache, String... uniqueIds) {
         if (channel != null && BasePipelineFactory.getHandler(channel.pipeline(), HttpRequestDecoder.class) != null
-                || ignoreCache || config.getBoolean(getProtocolName() + ".ignoreSessionCache")
-                || config.getBoolean("decoder.ignoreSessionCache")) {
+                || ignoreCache || config.getBoolean(Keys.PROTOCOL_IGNORE_SESSIONS_CACHE.withPrefix(getProtocolName()))
+                || config.getBoolean(Keys.DECODER_IGNORE_SESSIONS_CACHE)) {
             long deviceId = findDeviceId(remoteAddress, uniqueIds);
             if (deviceId != 0) {
                 if (connectionManager != null) {

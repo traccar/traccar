@@ -138,6 +138,27 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
+     * Some devices require server address confirmation. Use this parameter to configure correct public address.
+     */
+    public static final ConfigSuffix<String> PROTOCOL_SERVER = new ConfigSuffix<>(
+            ".server",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Skip device connection session cache. Per protocol configuration.
+     */
+    public static final ConfigSuffix<Boolean> PROTOCOL_IGNORE_SESSIONS_CACHE = new ConfigSuffix<>(
+            ".ignoreSessionCache",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Skip device connection session cache. Global configuration.
+     */
+    public static final ConfigKey<Boolean> DECODER_IGNORE_SESSIONS_CACHE = new ConfigKey<>(
+            "decoder.ignoreSessionCache",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
      * Server wide connection timeout value in seconds. See protocol timeout for more information.
      */
     public static final ConfigKey<Integer> SERVER_TIMEOUT = new ConfigKey<>(
