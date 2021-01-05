@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,6 +131,22 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private String decodeAlarm2(int value) {
+        switch (value) {
+            case 22:
+                return Position.ALARM_ACCELERATION;
+            case 23:
+                return Position.ALARM_BRAKING;
+            case 24:
+                return Position.ALARM_ACCIDENT;
+            case 26:
+            case 28:
+                return Position.ALARM_CORNERING;
+            default:
+                return null;
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -193,7 +209,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_RPM, parser.nextInt());
             position.set(Position.PREFIX_TEMP + 1, parser.nextDouble());
             position.set(Position.PREFIX_TEMP + 2, parser.nextDouble());
-            position.set(Position.KEY_ALARM, decodeAlarm(parser.nextHexInt()));
+            event = parser.nextHexInt();
         }
 
         if (parser.hasNext(2)) {
@@ -220,22 +236,10 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
 
         if (event != null) {
             position.set(Position.KEY_EVENT, event);
-            switch (event) {
-                case 22:
-                    position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
-                    break;
-                case 23:
-                    position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
-                    break;
-                case 24:
-                    position.set(Position.KEY_ALARM, Position.ALARM_ACCIDENT);
-                    break;
-                case 26:
-                case 28:
-                    position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
-                    break;
-                default:
-                    break;
+            if (sentence.charAt(5) == ',') {
+                position.set(Position.KEY_ALARM, decodeAlarm2(event));
+            } else {
+                position.set(Position.KEY_ALARM, decodeAlarm(event));
             }
         }
 
