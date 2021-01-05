@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2020 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -144,9 +145,8 @@ public class IotmProtocolDecoder extends BaseProtocolDecoder {
             while (buf.readableBytes() > 1) {
                 int type = buf.readUnsignedByte();
                 int length = buf.readUnsignedShortLE();
+                ByteBuf record = buf.readSlice(length);
                 if (type == 1) {
-
-                    ByteBuf record = buf.readSlice(length);
 
                     Position position = new Position(getProtocolName());
                     position.setDeviceId(deviceSession.getDeviceId());
@@ -160,7 +160,7 @@ public class IotmProtocolDecoder extends BaseProtocolDecoder {
                             position.setValid(true);
                             position.setLatitude(record.readFloatLE());
                             position.setLongitude(record.readFloatLE());
-                            position.setSpeed(record.readUnsignedShortLE());
+                            position.setSpeed(UnitsConverter.knotsFromKph(record.readUnsignedShortLE()));
 
                             position.set(Position.KEY_HDOP, record.readUnsignedByte());
                             position.set(Position.KEY_SATELLITES, record.readUnsignedByte());
@@ -181,8 +181,19 @@ public class IotmProtocolDecoder extends BaseProtocolDecoder {
 
                     positions.add(position);
 
-                } else {
-                    buf.skipBytes(length);
+                } else if (type == 3) {
+
+                    Position position = new Position(getProtocolName());
+                    position.setDeviceId(deviceSession.getDeviceId());
+
+                    getLastLocation(position, new Date(record.readUnsignedIntLE() * 1000));
+
+                    record.readUnsignedByte(); // function identifier
+
+                    position.set(Position.KEY_EVENT, record.readUnsignedByte());
+
+                    positions.add(position);
+
                 }
             }
 
