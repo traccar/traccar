@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,6 +100,12 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         if ((type.equals("TX") || type.equals("MQ")) && channel != null) {
             channel.writeAndFlush(new NetworkMessage(sentence + "#", remoteAddress));
         }
+
+        return decodeLocation(channel, remoteAddress, sentence);
+    }
+
+    protected Object decodeLocation(
+            Channel channel, SocketAddress remoteAddress, String sentence) {
 
         Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
