@@ -159,7 +159,9 @@ public class IotmProtocolDecoder extends BaseProtocolDecoder {
 
                         } else {
 
-                            if (sensorType == 3) continue;
+                            if (sensorType == 3) {
+                                continue;
+                            }
 
                             String key;
                             switch (sensorId) {
