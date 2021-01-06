@@ -84,17 +84,6 @@ public class IotmProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private String getKey(int sensorId) {
-        switch (sensorId) {
-            case 0x300C:
-                return Position.KEY_RPM;
-            case 0x4003:
-                return Position.KEY_ODOMETER;
-            default:
-                return null;
-        }
-    }
-
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -170,10 +159,63 @@ public class IotmProtocolDecoder extends BaseProtocolDecoder {
 
                         } else {
 
-                            String key = getKey(sensorId);
-                            Object value = readValue(record, sensorType);
-                            if (key != null && value != null) {
-                                position.getAttributes().put(key, value);
+                            if (sensorType == 3) continue;
+
+                            String key;
+                            switch (sensorId) {
+                                case 0x0008:
+                                    if (sensorType > 0) {
+                                        position.set(Position.KEY_ALARM, Position.ALARM_JAMMING);
+                                    }
+                                    break;
+                                case 0x0010:
+                                case 0x0011:
+                                case 0x0012:
+                                case 0x0013:
+                                    key = Position.PREFIX_IN + (sensorId - 0x0010 + 2);
+                                    position.set(key, sensorType > 0);
+                                    break;
+                                case 0x001E:
+                                    position.set("buttonPresent", sensorType > 0);
+                                    break;
+                                case 0x006D:
+                                    position.set(Position.KEY_IGNITION, sensorType > 0);
+                                    break;
+                                case 0x3000:
+                                    position.set(Position.KEY_POWER, record.readUnsignedShortLE() * 0.001);
+                                    break;
+                                case 0x3001:
+                                case 0x3002:
+                                case 0x3003:
+                                    key = Position.PREFIX_ADC + (0x3003 - sensorId + 3);
+                                    position.set(key, record.readUnsignedShortLE() * 0.001);
+                                    break;
+                                case 0x3004:
+                                    position.set(Position.KEY_BATTERY, record.readUnsignedShortLE() * 0.001);
+                                    break;
+                                case 0x300C:
+                                    position.set(Position.KEY_RPM, record.readUnsignedShortLE());
+                                    break;
+                                case 0x4003:
+                                    position.set(Position.KEY_ODOMETER, record.readUnsignedIntLE() * 5);
+                                    break;
+                                case 0x5000:
+                                    position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(record.readLongLE()));
+                                    break;
+                                case 0xA001:
+                                    position.set(Position.KEY_ACCELERATION, record.readFloatLE());
+                                    break;
+                                case 0xA002:
+                                    position.set("cornering", record.readFloatLE());
+                                    break;
+                                case 0xA017:
+                                    key = Position.PREFIX_TEMP + (sensorId - 0xA017 + 1);
+                                    position.set(key, record.readFloatLE());
+                                    break;
+                                default:
+                                    key = Position.PREFIX_IO + sensorId;
+                                    position.getAttributes().put(key, readValue(record, sensorType));
+                                    break;
                             }
 
                         }
