@@ -178,6 +178,10 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
         ByteBuf buf = (ByteBuf) msg;
 
+        if (Character.isDigit(buf.getUnsignedByte(buf.readerIndex()))) {
+            getDeviceSession(channel, remoteAddress, buf.readSlice(15).toString(StandardCharsets.UTF_8));
+        }
+
         buf.readUnsignedShortLE(); // device id
 
         int size = buf.readUnsignedByte();
