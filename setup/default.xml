@@ -284,5 +284,6 @@
     <entry key='swiftech.port'>5217</entry>
     <entry key='iotm.port'>5218</entry>
     <entry key='dolphin.port'>5219</entry>
+    <entry key='ennfu.port'>5220</entry>
 
 </properties>
