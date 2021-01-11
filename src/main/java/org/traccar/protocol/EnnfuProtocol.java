@@ -31,7 +31,7 @@ public class EnnfuProtocol extends BaseProtocol {
                 pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, '$'));
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
-                pipeline.addLast(new Ardi01ProtocolDecoder(EnnfuProtocol.this));
+                pipeline.addLast(new EnnfuProtocolDecoder(EnnfuProtocol.this));
             }
         });
     }
