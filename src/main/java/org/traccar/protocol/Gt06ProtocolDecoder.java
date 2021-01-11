@@ -758,7 +758,11 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (isSupported(type)) {
 
-            decodeBasicUniversal(buf, deviceSession, type, position);
+            if (type == MSG_STATUS && buf.readableBytes() == 22) {
+                decodeHeartbeat(buf, position);
+            } else {
+                decodeBasicUniversal(buf, deviceSession, type, position);
+            }
 
         } else if (type == MSG_ALARM) {
             boolean extendedAlarm = dataLength > 7;
@@ -820,6 +824,27 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         sendResponse(channel, false, type, buf.getShort(buf.writerIndex() - 6), null);
 
         return position;
+    }
+
+    private void decodeHeartbeat(ByteBuf buf, Position position) {
+
+        getLastLocation(position, null);
+
+        buf.readUnsignedByte(); // information content
+        buf.readUnsignedShort(); // satellites
+        buf.readUnsignedByte(); // alarm
+        buf.readUnsignedByte(); // language
+        buf.readUnsignedByte(); // battery
+        buf.readUnsignedByte(); // working mode
+        buf.readUnsignedShort(); // working voltage
+        buf.readUnsignedByte(); // reserved
+        buf.readUnsignedShort(); // working times
+        buf.readUnsignedShort(); // working time
+
+        int value = buf.readUnsignedShort();
+        double temperature = BitUtil.to(value, 15) * 0.1;
+        position.set(Position.PREFIX_TEMP + 1, BitUtil.check(value, 15) ? temperature : -temperature);
+
     }
 
     private void decodeBasicUniversal(ByteBuf buf, DeviceSession deviceSession, int type, Position position) {
