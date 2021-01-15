@@ -285,7 +285,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 break;
             case 236:
                 if (readValue(buf, length, false) == 1) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+                    position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
                 }
                 break;
             case 239:
