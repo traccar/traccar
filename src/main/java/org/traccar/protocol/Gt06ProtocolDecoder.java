@@ -1065,33 +1065,35 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             String data = buf.readCharSequence(buf.readableBytes() - 18, StandardCharsets.US_ASCII).toString();
             for (String pair : data.split(",")) {
                 String[] values = pair.split("=");
-                switch (Integer.parseInt(values[0].substring(0, 2), 16)) {
-                    case 40:
-                        position.set(Position.KEY_ODOMETER, Integer.parseInt(values[1], 16) * 0.01);
-                        break;
-                    case 43:
-                        position.set(Position.KEY_FUEL_LEVEL, Integer.parseInt(values[1], 16) * 0.01);
-                        break;
-                    case 45:
-                        position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(values[1], 16) * 0.01);
-                        break;
-                    case 53:
-                        position.set(Position.KEY_OBD_SPEED, Integer.parseInt(values[1], 16) * 0.01);
-                        break;
-                    case 54:
-                        position.set(Position.KEY_RPM, Integer.parseInt(values[1], 16) * 0.01);
-                        break;
-                    case 71:
-                        position.set(Position.KEY_FUEL_USED, Integer.parseInt(values[1], 16) * 0.01);
-                        break;
-                    case 73:
-                        position.set(Position.KEY_HOURS, Integer.parseInt(values[1], 16) * 0.01);
-                        break;
-                    case 74:
-                        position.set(Position.KEY_VIN, values[1]);
-                        break;
-                    default:
-                        break;
+                if (values.length >= 2) {
+                    switch (Integer.parseInt(values[0].substring(0, 2), 16)) {
+                        case 40:
+                            position.set(Position.KEY_ODOMETER, Integer.parseInt(values[1], 16) * 0.01);
+                            break;
+                        case 43:
+                            position.set(Position.KEY_FUEL_LEVEL, Integer.parseInt(values[1], 16) * 0.01);
+                            break;
+                        case 45:
+                            position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(values[1], 16) * 0.01);
+                            break;
+                        case 53:
+                            position.set(Position.KEY_OBD_SPEED, Integer.parseInt(values[1], 16) * 0.01);
+                            break;
+                        case 54:
+                            position.set(Position.KEY_RPM, Integer.parseInt(values[1], 16) * 0.01);
+                            break;
+                        case 71:
+                            position.set(Position.KEY_FUEL_USED, Integer.parseInt(values[1], 16) * 0.01);
+                            break;
+                        case 73:
+                            position.set(Position.KEY_HOURS, Integer.parseInt(values[1], 16) * 0.01);
+                            break;
+                        case 74:
+                            position.set(Position.KEY_VIN, values[1]);
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
 
