@@ -28,7 +28,7 @@ public class DolphinProtocol extends BaseProtocol {
         addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 4096, 20, 4, 0, 0, true));
+                pipeline.addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 4096, 20, 4, 4, 0, true));
                 pipeline.addLast(new DolphinProtocolDecoder(DolphinProtocol.this));
             }
         });
