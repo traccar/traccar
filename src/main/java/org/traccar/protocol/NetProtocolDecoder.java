@@ -81,7 +81,7 @@ public class NetProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_STATUS, parser.nextHexLong());
         position.setSpeed(parser.nextHexInt() * 0.01);
-        position.set(Position.KEY_ODOMETER, parser.nextHexInt());
+        position.set(Position.KEY_ODOMETER, parser.nextHexInt() * 1852.0 / 16);
         position.setCourse(parser.nextHexInt());
 
         parser.nextHexInt(); // alarm
