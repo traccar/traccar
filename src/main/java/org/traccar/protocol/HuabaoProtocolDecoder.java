@@ -115,6 +115,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(value, 8)) {
             return Position.ALARM_POWER_OFF;
         }
+        if (BitUtil.check(value, 17)) {
+            return Position.ALARM_TAMPERING;
+        }
         if (BitUtil.check(value, 20)) {
             return Position.ALARM_GEOFENCE;
         }
