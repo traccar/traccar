@@ -145,11 +145,6 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
         String[] dataTags = getFormat(deviceSession.getDeviceId());
         DateFormat dateFormat = getDateFormat(deviceSession.getDeviceId());
 
-        /*
-29.0 (#TVI #),
-0 (#OUTC #),
-         */
-
         for (int i = 0; i < Math.min(data.length, dataTags.length); i++) {
             if (data[i].isEmpty()) {
                 continue;
