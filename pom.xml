@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.traccar</groupId>
     <artifactId>traccar</artifactId>
-    <version>4.11-SNAPSHOT</version>
+    <version>4.12-SNAPSHOT</version>
 
     <name>traccar</name>
     <url>https://www.traccar.org</url>
