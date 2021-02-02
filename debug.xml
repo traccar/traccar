@@ -10,6 +10,7 @@
     <entry key='web.debug'>true</entry>
     <entry key='web.console'>true</entry>
 
+
     <entry key='geocoder.enable'>false</entry>
     <entry key='geocoder.type'>ban</entry>
 
@@ -17,6 +18,7 @@
     <entry key='logger.enable'>true</entry>
     <entry key='logger.level'>all</entry>
     <entry key='logger.file'>/opt/traccar/logs/tracker-server.log</entry>
+    <entry key='logger.fullStackTraces'>true</entry>
 
     <entry key='database.driver'>org.postgresql.Driver</entry>
     <entry key='database.url'>jdbc:postgresql://127.0.0.1:5432/embark</entry>
@@ -24,7 +26,7 @@
     <entry key='database.password'>postgres</entry>
 
 
-    <entry key='atrack.custom'>true</entry>
+    <entry key='track.custom'>true</entry>
     <entry key='intellitrac.port'>6037</entry>
 
 </properties>
