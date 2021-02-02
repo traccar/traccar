@@ -37,7 +37,7 @@ protobuf {
 dependencies {
     implementation "commons-codec:commons-codec:1.15"
     implementation "com.h2database:h2:1.4.200"
-    implementation "mysql:mysql-connector-java:8.0.21"
+    implementation "mysql:mysql-connector-java:8.0.21" // verify a bug fix
     implementation "org.postgresql:postgresql:42.2.18"
     implementation "com.microsoft.sqlserver:mssql-jdbc:9.2.0.jre8"
     implementation "com.zaxxer:HikariCP:4.0.1"
