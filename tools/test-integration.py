@@ -10,7 +10,7 @@ import socket
 import time
 
 messages = {
-    'gps103' : 'imei:123456789012345,help me,1201011201,,F,120100.000,A,6000.0000,N,13000.0000,E,0.00,;',
+    'gps103' : 'imei:1234567890123456,help me,1201011201,,F,120100.000,A,6000.0000,N,13000.0000,E,0.00,;',
     'tk103' : '(123456789012BP05123456789012345120101A6000.0000N13000.0000E000.0120200000.0000000000L000946BB)',
     'gl100' : '+RESP:GTSOS,123456789012345,0,0,0,1,0.0,0,0.0,1,130.000000,60.000000,20120101120300,0460,0000,18d8,6141,00,11F0,0102120204\0',
     'gl200' : '+RESP:GTFRI,020102,123456789012345,,0,0,1,1,0.0,0,0.0,130.000000,60.000000,20120101120400,0460,0000,18d8,6141,00,,20120101120400,11F0$',
@@ -91,7 +91,7 @@ messages = {
     'vtfms' : '(123456789012345,00I76,00,000,,,,,A,133755,210617,10.57354,077.24912,SW,000,00598,00000,K,0017368,1,12.7,,,0.000,,,0,0,0,0,1,1,0,,)074'
 }
 
-baseUrl = 'http://localhost:8082'
+baseUrl = 'http://embend.enbake.com'
 user = { 'email' : 'admin', 'password' : 'admin' }
 
 debug = '-v' in sys.argv
@@ -113,6 +113,7 @@ def login():
     response = urllib2.urlopen(request, urllib.urlencode(user))
     if debug:
         print '\nlogin: %s\n' % repr(json.load(response))
+    print 'came here login'
     return response.headers.get('Set-Cookie')
 
 def remove_devices(cookie):
@@ -138,8 +139,10 @@ def add_device(cookie, unique_id):
     return data['id']
 
 def send_message(port, message):
+    print 'sending message '  + message + '/nnnn'
+    print port
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect(('127.0.0.1', port))
+    s.connect(('15.206.203.92', port))
     s.send(message)
     s.close()
 
@@ -161,6 +164,7 @@ cookie = login()
 remove_devices(cookie)
 
 devices = {
+    '1234567890123456' : add_device(cookie, '1234567890123456'),
     '123456789012345' : add_device(cookie, '123456789012345'),
     '123456789012' : add_device(cookie, '123456789012'),
     '1234567890' : add_device(cookie, '1234567890'),
