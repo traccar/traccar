@@ -16,9 +16,12 @@
 package org.traccar.protocol;
 
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.Protocol;
+import org.traccar.handler.StandardLoggingHandler;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -65,8 +68,8 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
-    // 2020 version
-    private static final Pattern PATTERN2020 = new PatternBuilder()
+    // 2020a version
+    private static final Pattern PATTERN2020a = new PatternBuilder()
             .text("HDR,")
             .expression("[^,]+,")                // model
             .expression("[^,]+,")                // firmware
@@ -75,34 +78,54 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
             .expression("([LH]),")               // Packet status / archive
             .number("(d+),")                     // imei
             .expression("[^,]+,")                // m2m sim iccid number
-//            .expression("([CO]),")               // Tamper switch
             .number("([01]),")                   // GPS Fix
-            .number("(dd)(dd)(dd),")             // date (ddmmyy) in UTC
+            .number("(dd)(dd)(dddd),")             // date (ddmmyy) in UTC
             .number("(dd)(dd)(dd),")             // time (hhmmss)
             .number("(-?d+.d+),")                // latitude
             .expression("([NS]),")               // direction
             .number("(-?d+.d+),")                // longitude
-         /*   .expression("([EW]),")               // direction
+            .expression("([EW]),")               // direction
             .number("(d+.d+),")                  // speed
             .number("(d+.d+),")                  // heading
             .number("(d+),")                     // satellites
-            .number("(-?d+),")                   // altitude
-            .expression("[^,]+,")                //
-            .expression("[^,]+,")                //
+            .number("(-?d+.d+),")                // altitude
+            .number("(d+.d+),")                  // PDOP
+            .expression("[^,]+,")                // HDOP
             .expression("[^,]+,")                // operator
-            .number("d+,")                       // signal strength
             .number("([01]),")                   // Ignition
-            .expression("[^,]+,")                //
-            .expression("[^,]+,")                //
-            .number("([01]),")                   // AC / panic
-            .number("([01]),")                   // Digital Output
-//            .number("([01]),")                   // Main power*/
+            .number("([01]),")                   // Power Status
+            .number("(d+.d+),")                  // input voltage
+            .number("(d+.d+),")                  // battery voltage
+            .number("([01]),")                   // Energency status
+            .expression("([CO]),")               // Tamper switch
+            .number("d+,")                       // gsm signal strength
+            .expression("[^,]+,")                // MCC
+            .expression("[^,]+,")                // MNC
+            .expression("[^,]+,")                // LAC
+            .expression("[^,]+,")                // Cell ID
+            .expression("[^,]+,")                // NMR1 LAC
+            .expression("[^,]+,")                // NMR1 Cell id
+            .number("d+,")                       // nmr1 signal strength
+            .expression("[^,]+,")                // NMR2 LAC
+            .expression("[^,]+,")                // NMR2 Cell id
+            .number("d+,")                       // nmr2 signal strength
+            .expression("[^,]+,")                // NMR3 LAC
+            .expression("[^,]+,")                // NMR3 Cell id
+            .number("d+,")                       // nmr3 signal strength
+            .expression("[^,]+,")                // NMR4 LAC
+            .expression("[^,]+,")                // NMR4 Cell id
+            .number("d+,")                       // nmr4 signal strength
+            .number("(d+),")                    // Digital input
+            .number("(d+),")                   // Digital Output
+            .number("(d+),")                   // Frame number
             .any()
-//            .number("(d+.d+),")                  // input voltage
-//            .number("(d+.d+),")                  // battery voltage
+            .compile();
+
+//            .number("(d+.d+),")                  // analog
+//            .number("([01]),")                   // AC / panic
+//            .number("([01]),")                   // Main power*/
 //            .number("(d+.d+),")                  // analog
 //            .number("(d+.?d*),")                 // temperature
-            .compile();
 
     private Position decodePosition(Channel channel, SocketAddress remoteAddress, String line) {
 
@@ -147,46 +170,48 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
 
         return position;
     }
+    private static final Logger LOGGER = LoggerFactory.getLogger(StandardLoggingHandler.class);
 
-    private Position decodePosition2020(Channel channel, SocketAddress remoteAddress, String line) {
+    private Position decodePosition2020a(Channel channel, SocketAddress remoteAddress, String line) {
 
-        Parser parser = new Parser(PATTERN2020, line);
-        if (!parser.matches()) {
-            return null;
-        }
+        Parser parser = new Parser(PATTERN2020a, line);
 
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
-        if (deviceSession == null) {
-            return null;
-        }
+        if (!parser.matches()) { return null; }
+
+        String[] parsed = line.split(",");
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parsed[6]);
+
+        if (deviceSession == null) { return null; }
+
 
         Position position = new Position(getProtocolName());
+        position.set(Position.KEY_VERSION_FW, parsed[2]);
         position.setDeviceId(deviceSession.getDeviceId());
-//        position.set(Position.KEY_INDEX, parser.nextInt());
+        position.set(Position.KEY_INDEX, parsed[4]);
 
-        if (parser.next().equals("H")) {
+        if (parsed[5].equals("H")) {
             position.set(Position.KEY_ARCHIVE, true);
         }
 
-        position.set(Position.KEY_EVENT, parser.nextInt());
+        position.set(Position.KEY_EVENT, parsed[4]);
 
         position.setValid(true);
         position.setTime(parser.nextDateTime());
         position.setLatitude(parser.nextDouble());
         position.setLongitude(parser.nextDouble());
-        position.setAltitude(parser.nextInt());
-        position.setCourse(parser.nextInt());
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+        position.setAltitude(Double.parseDouble(parsed[8]));
+        position.setCourse(Double.parseDouble(parsed[6]));
+        position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(parsed[5])));
 
-        position.set(Position.KEY_SATELLITES, parser.nextInt());
-        position.set(Position.KEY_ODOMETER, parser.nextLong());
-        position.set(Position.KEY_INPUT, parser.nextInt());
-        position.set(Position.KEY_OUTPUT, parser.nextInt());
-        position.set(Position.KEY_POWER, parser.nextInt() * 0.001);
-        position.set(Position.KEY_BATTERY, parser.nextInt() * 0.001);
-        position.set(Position.PREFIX_ADC + 1, parser.nextInt());
-        position.set(Position.PREFIX_ADC + 2, parser.nextInt());
-        position.set(Position.PREFIX_TEMP + 1, parser.nextDouble());
+//        position.set(Position.KEY_SATELLITES, parser.nextInt());
+//        position.set(Position.KEY_ODOMETER, parser.nextLong());
+//        position.set(Position.KEY_INPUT, parser.nextInt());
+//        position.set(Position.KEY_OUTPUT, parser.nextInt());
+//        position.set(Position.KEY_POWER, parser.nextInt() * 0.001);
+//        position.set(Position.KEY_BATTERY, parser.nextInt() * 0.001);
+//        position.set(Position.PREFIX_ADC + 1, parser.nextInt());
+//        position.set(Position.PREFIX_ADC + 2, parser.nextInt());
+//        position.set(Position.PREFIX_TEMP + 1, parser.nextDouble());
 
         return position;
     }
@@ -203,8 +228,8 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
             if (!line.isEmpty()) {
                 Position position = null;
 
-                if (line.startsWith("HDR")) // check if latest 2020 model protocol
-                    position = decodePosition2020(channel, remoteAddress, line);
+                if (line.startsWith("HDR")) // check if latest 2020a model protocol
+                    position = decodePosition2020a(channel, remoteAddress, line);
                 else
                     position = decodePosition(channel, remoteAddress, line);
                 if (position != null) {
