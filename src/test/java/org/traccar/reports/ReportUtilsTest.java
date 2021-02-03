@@ -90,7 +90,7 @@ public class ReportUtilsTest extends BaseTest {
         //Should be this if you calculate avg. speed over total dist. divided by total time.
         // Avg. speed is calculated as avg. speed from the intervals.
         //assertEquals(10, itemTrip.getAverageSpeed(), 0.01);
-        assertEquals(15, itemTrip.getAverageSpeed(), 0.01);
+        assertEquals(32.4, itemTrip.getAverageSpeed(), 0.1);
         assertEquals(10, itemTrip.getMaxSpeed(), 0.01);
         assertEquals(2000, itemTrip.getDistance(), 0.01);
 
