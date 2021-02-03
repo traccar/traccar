@@ -189,12 +189,16 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                     case 0x28:
                         int beaconFlags = buf.readUnsignedByte();
                         position.set("tagId", ByteBufUtil.hexDump(buf.readSlice(6)));
-                        buf.readUnsignedByte(); // rssi
+                        position.set("tagRssi", buf.readUnsignedByte());
                         buf.readUnsignedByte(); // 1m rssi
                         if (BitUtil.check(beaconFlags, 7)) {
                             position.setLatitude(buf.readIntLE() * 0.0000001);
                             position.setLongitude(buf.readIntLE() * 0.0000001);
                             hasLocation = true;
+                        }
+                        if (BitUtil.check(beaconFlags, 6)) {
+                            position.set("description", buf.readCharSequence(
+                                    endIndex - buf.readerIndex(), StandardCharsets.US_ASCII).toString());
                         }
                         break;
                     case 0x30:
