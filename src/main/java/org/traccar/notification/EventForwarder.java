@@ -52,8 +52,10 @@ public class EventForwarder {
     private static final String KEY_USERS = "users";
 
     public final void forwardEvent(Event event, Position position, Set<Long> users) {
+        String baseUrl = Context.getIdentityManager().lookupAttributeString(
+                position.getDeviceId(), Keys.EVENT_FORWARD_URL.getKey(), url, false, false);
 
-        Invocation.Builder requestBuilder = Context.getClient().target(url).request();
+        Invocation.Builder requestBuilder = Context.getClient().target(baseUrl).request();
 
         if (header != null && !header.isEmpty()) {
             for (String line: header.split("\\r?\\n")) {

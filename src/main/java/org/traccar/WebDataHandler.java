@@ -132,11 +132,12 @@ public class WebDataHandler extends BaseDataHandler {
         }
     }
 
-    public String formatRequest(Position position) throws UnsupportedEncodingException, JsonProcessingException {
+    public String formatRequest(
+            String baseUrl, Position position) throws UnsupportedEncodingException, JsonProcessingException {
 
         Device device = identityManager.getById(position.getDeviceId());
 
-        String request = url
+        String request = baseUrl
                 .replace("{name}", URLEncoder.encode(device.getName(), StandardCharsets.UTF_8.name()))
                 .replace("{uniqueId}", device.getUniqueId())
                 .replace("{status}", device.getStatus())
@@ -192,9 +193,12 @@ public class WebDataHandler extends BaseDataHandler {
 
         AsyncRequestAndCallback(Position position) {
 
+            String baseUrl = Context.getIdentityManager().lookupAttributeString(
+                    position.getDeviceId(), Keys.FORWARD_URL.getKey(), url, false, false);
+
             String formattedUrl;
             try {
-                formattedUrl = json && !urlVariables ? url : formatRequest(position);
+                formattedUrl = json && !urlVariables ? baseUrl : formatRequest(baseUrl, position);
             } catch (UnsupportedEncodingException | JsonProcessingException e) {
                 throw new RuntimeException("Forwarding formatting error", e);
             }
