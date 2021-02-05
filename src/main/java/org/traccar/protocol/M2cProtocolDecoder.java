@@ -30,6 +30,7 @@ import org.traccar.model.Position;
 import java.net.SocketAddress;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 public class M2cProtocolDecoder extends BaseProtocolDecoder {
@@ -70,7 +71,7 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
 
     // 2020a version
     private static final Pattern PATTERN2020a = new PatternBuilder()
-            .text("HDR,")
+            .expression("[^,]+,")               // model or header
             .expression("[^,]+,")                // model
             .expression("([^,]+),")                // firmware
             .expression("([^,]+),")                // packet type
@@ -121,11 +122,41 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
-//            .number("(d+.d+),")                  // analog
-//            .number("([01]),")                   // AC / panic
-//            .number("([01]),")                   // Main power*/
-//            .number("(d+.d+),")                  // analog
-//            .number("(d+.?d*),")                 // temperature
+
+    // 2025a version
+    private static final Pattern PATTERN2025a = new PatternBuilder()
+            .expression("[^,]+,")               // model or header
+            .expression("[^,]+,")                // model
+            .expression("([^,]+),")                // firmware
+            .expression("([^,]+),")                // packet type
+            .number("(d+),")                     // Alert Id
+            .expression("([LH]),")               // Packet status / archive
+            .number("(d+),")                     // imei
+            .expression("[^,]+,")                // m2m sim iccid number
+            .expression("([CO]),")               // Tamper switch
+            .number("[01],")                   // GPS Fix
+            .number("(dd)(dd)(dddd),")             // date (ddmmyy) in UTC
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
+            .number("(-?d+.d+),")                // latitude
+            .expression("([NS]),")               // direction
+            .number("(-?d+.d+),")                // longitude
+            .expression("([EW]),")               // direction
+            .number("(d+.d+),")                  // speed
+            .number("(d+.d+),")                  // heading
+            .number("(d+),")                     // satellites
+            .number("(-?d+.d+),")                // altitude
+            .expression("[^,]+,")                // operator
+            .number("d+,")                       // gsm signal strength
+            .number("([01]),")                   // Ignition
+            .number("([01]),")                    // AC/panic Digital input
+            .number("([01]),")                   // Digital Output
+            .number("([01]),")                   // Power Status
+            .number("(d+.d+),")                  // input voltage
+            .number("(d+.d+),")                  // battery voltage
+            .number("(d+.d+),")                  // analog
+            .expression("([^,]+),")                  // temperature
+            .any()
+            .compile();
 
     private Position decodePosition(Channel channel, SocketAddress remoteAddress, String line) {
 
@@ -199,9 +230,10 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
         position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
-//        position.set(Position.KEY_SATELLITES, parser.nextInt());
-//        position.setCourse(parser.nextInt());
-//        position.setAltitude(parser.nextDouble());
+        position.setCourse(parser.nextDouble());
+        position.set(Position.KEY_SATELLITES, parser.nextInt());
+        position.setAltitude(parser.nextDouble());
+        position.set(Position.KEY_ORIGINAL, line);
 
 //        position.set(Position.KEY_SATELLITES, parser.nextInt());
 //        position.set(Position.KEY_ODOMETER, parser.nextLong());
@@ -216,6 +248,52 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private Position decodePosition2025a(Channel channel, SocketAddress remoteAddress, String line) {
+
+        Parser parser = new Parser(PATTERN2025a, line);
+
+        if (!parser.matches()) { return null; }
+
+        String[] parsed = line.split(",");
+
+        Position position = new Position(getProtocolName());
+        position.set(Position.KEY_VERSION_FW, parser.next());
+        position.set(Position.KEY_EVENT, parser.next());
+        position.set(Position.KEY_INDEX, parser.nextInt());
+
+        if (parser.next().equals("H")) {
+            position.set(Position.KEY_ARCHIVE, true);
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+
+        if (deviceSession == null) { return null; }
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        position.setValid(true);
+        position.set(Position.ALARM_TAMPERING, parser.next());
+        position.setTime(parser.nextDateTime( Parser.DateTimeFormat.DMY_HMS));
+        position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
+        position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+        position.setCourse(parser.nextDouble());
+        position.set(Position.KEY_SATELLITES, parser.nextInt());
+        position.setAltitude(parser.nextDouble());
+        position.set(Position.KEY_OPERATOR, parser.nextDouble());
+        position.set(Position.KEY_ORIGINAL, line);
+
+//        position.set(Position.KEY_SATELLITES, parser.nextInt());
+//        position.set(Position.KEY_ODOMETER, parser.nextLong());
+//        position.set(Position.KEY_INPUT, parser.nextInt());
+//        position.set(Position.KEY_OUTPUT, parser.nextInt());
+//        position.set(Position.KEY_POWER, parser.nextInt() * 0.001);
+//        position.set(Position.KEY_BATTERY, parser.nextInt() * 0.001);
+//        position.set(Position.PREFIX_ADC + 1, parser.nextInt());
+//        position.set(Position.PREFIX_ADC + 2, parser.nextInt());
+//        position.set(Position.PREFIX_TEMP + 1, parser.nextDouble());
+
+        return position;
+    }
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -227,11 +305,11 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
         for (String line : sentence.split("\r\n")) {
             if (!line.isEmpty()) {
                 Position position = null;
-
-                if (line.startsWith("HDR")) // check if latest 2020a model protocol
+                String lower = line.toLowerCase();
+                if (lower.contains("2020")) // check if latest 2020a model protocol
                     position = decodePosition2020a(channel, remoteAddress, line);
-                else
-                    position = decodePosition(channel, remoteAddress, line);
+                else if (lower.contains("2025")) // check if latest 2020a model protocol
+                    position = decodePosition2025a(channel, remoteAddress, line);
                 if (position != null) {
                     positions.add(position);
                 }
