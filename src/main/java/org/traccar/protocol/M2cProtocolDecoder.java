@@ -72,13 +72,13 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN2020a = new PatternBuilder()
             .text("HDR,")
             .expression("[^,]+,")                // model
-            .expression("[^,]+,")                // firmware
-            .expression("[^,]+,")                // packet type
+            .expression("([^,]+),")                // firmware
+            .expression("([^,]+),")                // packet type
             .number("(d+),")                     // Alert Id
             .expression("([LH]),")               // Packet status / archive
             .number("(d+),")                     // imei
             .expression("[^,]+,")                // m2m sim iccid number
-            .number("([01]),")                   // GPS Fix
+            .number("[01],")                   // GPS Fix
             .number("(dd)(dd)(dddd),")             // date (ddmmyy) in UTC
             .number("(dd)(dd)(dd),")             // time (hhmmss)
             .number("(-?d+.d+),")                // latitude
@@ -179,29 +179,29 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
         if (!parser.matches()) { return null; }
 
         String[] parsed = line.split(",");
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parsed[6]);
-
-        if (deviceSession == null) { return null; }
-
 
         Position position = new Position(getProtocolName());
-        position.set(Position.KEY_VERSION_FW, parsed[2]);
-        position.setDeviceId(deviceSession.getDeviceId());
-        position.set(Position.KEY_INDEX, parsed[4]);
+        position.set(Position.KEY_VERSION_FW, parser.next());
+        position.set(Position.KEY_EVENT, parser.next());
+        position.set(Position.KEY_INDEX, parser.nextInt());
 
-        if (parsed[5].equals("H")) {
+        if (parser.next().equals("H")) {
             position.set(Position.KEY_ARCHIVE, true);
         }
 
-        position.set(Position.KEY_EVENT, parsed[4]);
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+
+        if (deviceSession == null) { return null; }
+        position.setDeviceId(deviceSession.getDeviceId());
 
         position.setValid(true);
-        position.setTime(parser.nextDateTime());
-        position.setLatitude(parser.nextDouble());
-        position.setLongitude(parser.nextDouble());
-        position.setAltitude(Double.parseDouble(parsed[8]));
-        position.setCourse(Double.parseDouble(parsed[6]));
-        position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(parsed[5])));
+        position.setTime(parser.nextDateTime( Parser.DateTimeFormat.DMY_HMS));
+        position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
+        position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+//        position.set(Position.KEY_SATELLITES, parser.nextInt());
+//        position.setCourse(parser.nextInt());
+//        position.setAltitude(parser.nextDouble());
 
 //        position.set(Position.KEY_SATELLITES, parser.nextInt());
 //        position.set(Position.KEY_ODOMETER, parser.nextLong());
