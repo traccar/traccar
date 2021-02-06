@@ -191,11 +191,7 @@ public class WebDataHandler extends BaseDataHandler {
         private final Invocation.Builder requestBuilder;
         private MediaType mediaType = MediaType.APPLICATION_JSON_TYPE;
 
-        AsyncRequestAndCallback(Position position) {
-
-            String baseUrl = Context.getIdentityManager().lookupAttributeString(
-                    position.getDeviceId(), Keys.FORWARD_URL.getKey(), url, false, false);
-
+        AsyncRequestAndCallback(Position position, String baseUrl) {
             String formattedUrl;
             try {
                 formattedUrl = json && !urlVariables ? baseUrl : formatRequest(baseUrl, position);
@@ -290,11 +286,22 @@ public class WebDataHandler extends BaseDataHandler {
 
     @Override
     protected Position handlePosition(Position position) {
-
-        AsyncRequestAndCallback request = new AsyncRequestAndCallback(position);
-        request.send();
+        String forwardUrl = getForwardUrl(position.getDeviceId());
+        if (forwardUrl != null) {
+            AsyncRequestAndCallback request = new AsyncRequestAndCallback(position, forwardUrl);
+            request.send();
+        }
 
         return position;
+    }
+
+    private String getForwardUrl(long deviceId) {
+        if (url != null) {
+            // Global 'forward.url' has precedence over per-device overrides.
+            return url;
+        }
+        return Context.getIdentityManager().lookupAttributeString(
+                deviceId, Keys.FORWARD_URL.getKey(), null, false, false);
     }
 
     private Map<String, Object> prepareJsonPayload(Position position) {

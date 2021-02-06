@@ -324,7 +324,7 @@ public final class Context {
         serverManager = new ServerManager();
         scheduleManager = new ScheduleManager();
 
-        if (config.hasKey(Keys.EVENT_FORWARD_URL)) {
+        if (config.getBoolean(Keys.EVENT_FORWARD_ENABLE)) {
             eventForwarder = new EventForwarder();
         }
 
