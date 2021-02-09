@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.handler.StandardLoggingHandler;
 import org.traccar.helper.Parser;
@@ -41,7 +42,7 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
 
     // old ASCII v5 version
     private static final Pattern PATTERN = new PatternBuilder()
-            .text("#M2C,")
+            .text("M2C,")
             .expression("[^,]+,")                // model
             .expression("[^,]+,")                // firmware
             .number("d+,")                       // protocol
@@ -66,6 +67,16 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // adc 1
             .number("(d+),")                     // adc 2
             .number("(d+.?d*),")                 // temperature
+            .expression("[^,]+,")                  // rfid
+            .expression("[^,]+,")                  // barcode
+            .expression("[^,]+,")                  // camera pic
+            .expression("[^,]+,")                  // mcc
+            .expression("[^,]+,")                  // mnc
+            .expression("[^,]+,")                  // lac
+            .expression("[^,]+,")                  // cell id
+            .expression("[^,]+,")                  // signal strength
+//            .expression("[^,]+,")                  // reg status -- one extra param in doc, we dont know which
+            .expression("([^,]+)")                  // rfid
             .any()
             .compile();
 
@@ -90,8 +101,8 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d+),")                  // heading
             .number("(d+),")                     // satellites
             .number("(-?d+.d+),")                // altitude
-            .number("(d+.d+),")                  // PDOP
-            .expression("[^,]+,")                // HDOP
+            .number("(d+.?d+?),")                  // PDOP
+            .number("(d+.?d+?),")                // HDOP
             .expression("[^,]+,")                // operator
             .number("([01]),")                   // Ignition
             .number("([01]),")                   // Power Status
@@ -106,16 +117,16 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
             .expression("[^,]+,")                // Cell ID
             .expression("[^,]+,")                // NMR1 LAC
             .expression("[^,]+,")                // NMR1 Cell id
-            .number("d+,")                       // nmr1 signal strength
+            .expression("[^,]+,")                       // nmr1 signal strength
             .expression("[^,]+,")                // NMR2 LAC
             .expression("[^,]+,")                // NMR2 Cell id
-            .number("d+,")                       // nmr2 signal strength
+            .expression("[^,]+,")                       // nmr2 signal strength
             .expression("[^,]+,")                // NMR3 LAC
             .expression("[^,]+,")                // NMR3 Cell id
-            .number("d+,")                       // nmr3 signal strength
+            .expression("[^,]+,")                       // nmr3 signal strength
             .expression("[^,]+,")                // NMR4 LAC
             .expression("[^,]+,")                // NMR4 Cell id
-            .number("d+,")                       // nmr4 signal strength
+            .expression("[^,]+,")                       // nmr4 signal strength
             .number("(d+),")                    // Digital input
             .number("(d+),")                   // Digital Output
             .number("(d+),")                   // Frame number
@@ -198,9 +209,15 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.PREFIX_ADC + 1, parser.nextInt());
         position.set(Position.PREFIX_ADC + 2, parser.nextInt());
         position.set(Position.PREFIX_TEMP + 1, parser.nextDouble());
+        position.set(Position.KEY_ORIGINAL, line);
+
+        String prefix = "[0,1";
+        channel.writeAndFlush(new NetworkMessage(
+                prefix + "," + parser.next() + ']', channel.remoteAddress()));
 
         return position;
     }
+
     private static final Logger LOGGER = LoggerFactory.getLogger(StandardLoggingHandler.class);
 
     private Position decodePosition2020a(Channel channel, SocketAddress remoteAddress, String line) {
@@ -304,12 +321,18 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
         List<Position> positions = new LinkedList<>();
         for (String line : sentence.split("\r\n")) {
             if (!line.isEmpty()) {
+                line.replace("xx", "00").replace("XX", "00")
+                        .replace(".x", ".0").replace(".X", ".0");;
+
                 Position position = null;
                 String lower = line.toLowerCase();
-                if (lower.contains("2020")) // check if latest 2020a model protocol
+                if (lower.contains("2020a") || lower.contains("2030")
+                        || lower.contains("at369")|| lower.contains("adti")) // check if latest 2020a model protocol
                     position = decodePosition2020a(channel, remoteAddress, line);
                 else if (lower.contains("2025")) // check if latest 2020a model protocol
                     position = decodePosition2025a(channel, remoteAddress, line);
+                else
+                    position = decodePosition(channel, remoteAddress, line);
                 if (position != null) {
                     positions.add(position);
                 }
