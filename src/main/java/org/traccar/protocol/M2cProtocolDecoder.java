@@ -173,11 +173,19 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
 
         Parser parser = new Parser(PATTERN, line);
         if (!parser.matches()) {
+            String prefix = "[0,1";
+
+            channel.writeAndFlush(new NetworkMessage(
+                    prefix + "," + "0*276" + "]", channel.remoteAddress())); // failure to send negative ack
             return null;
         }
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
+            String prefix = "[0,1";
+
+            channel.writeAndFlush(new NetworkMessage(
+                    prefix + "," + "0*276" + "]", channel.remoteAddress()));
             return null;
         }
 
@@ -213,7 +221,7 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
 
         String prefix = "[0,1";
         channel.writeAndFlush(new NetworkMessage(
-                prefix + "," + parser.next() + ']', channel.remoteAddress()));
+                prefix + "," + "0*275" + "]", channel.remoteAddress()));
 
         return position;
     }
@@ -317,6 +325,7 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
 
         String sentence = (String) msg;
         sentence = sentence.substring(1); // remove start symbol
+        sentence = sentence.replace("#", "").replace("]", "");
 
         List<Position> positions = new LinkedList<>();
         for (String line : sentence.split("\r\n")) {
