@@ -18,6 +18,9 @@ package org.traccar.protocol;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
+import io.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.string.StringEncoder;
+
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
@@ -32,6 +35,14 @@ public class OpenGtsProtocol extends BaseProtocol {
                 pipeline.addLast(new HttpRequestDecoder());
                 pipeline.addLast(new HttpObjectAggregator(16384));
                 pipeline.addLast(new OpenGtsProtocolDecoder(OpenGtsProtocol.this));
+            }
+        });
+        addServer(new TrackerServer(true, getName()) {
+            @Override
+            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new OpenGtsDatagramProtocolDecoder(OpenGtsProtocol.this));
             }
         });
     }
