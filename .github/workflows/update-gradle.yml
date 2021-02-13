@@ -1,0 +1,16 @@
+# This workflow checks every Monday morning if a new version of Gradle is available. If so, it opens a PR to update the Gradle wrapper.
+
+name: "Check for new Gradle version"
+on:
+  schedule:
+    - cron: "0 6 * * 1" # Each Monday at 06:00 UTC
+
+jobs:
+  update-gradle-wrapper:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Update Gradle Wrapper
+        uses: gradle-update/update-gradle-wrapper-action@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
