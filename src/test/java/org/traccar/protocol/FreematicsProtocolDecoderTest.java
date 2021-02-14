@@ -10,6 +10,9 @@ public class FreematicsProtocolDecoderTest extends ProtocolTest {
 
         FreematicsProtocolDecoder decoder = new FreematicsProtocolDecoder(null);
 
+        verifyPositions(decoder, text(
+                "M0ZR4X0#0:204391,11:140221,10:8445000,A:49.215920,B:18.737755,C:410,D:0,E:208,24:1252,20:0;0;0,82:47*B5"));
+
         verifyNull(decoder, text(
                 "1#EV=2,TS=1871902,ID=ESP32305C06C40A24*AC"));
 

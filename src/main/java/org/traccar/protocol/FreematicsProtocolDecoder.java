@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,9 +75,9 @@ public class FreematicsProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private Object decodePosition(
-            Channel channel, SocketAddress remoteAddress, String sentence) throws Exception {
+            Channel channel, SocketAddress remoteAddress, String sentence, String id) {
 
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
         if (deviceSession == null) {
             return null;
         }
@@ -187,12 +187,13 @@ public class FreematicsProtocolDecoder extends BaseProtocolDecoder {
         int endIndex = sentence.indexOf('*');
 
         if (startIndex > 0 && endIndex > 0) {
+            String id = sentence.substring(0, startIndex);
             sentence = sentence.substring(startIndex + 1, endIndex);
 
             if (sentence.startsWith("EV")) {
                 return decodeEvent(channel, remoteAddress, sentence);
             } else {
-                return decodePosition(channel, remoteAddress, sentence);
+                return decodePosition(channel, remoteAddress, sentence, id);
             }
         }
 
