@@ -155,10 +155,10 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case 3:
                     if (BitUtil.check(mask, 6)) {
-                        data.readUnsignedShort();
+                        position.set("tag" + i + "Humidity", data.readUnsignedShort());
                     }
                     if (BitUtil.check(mask, 5)) {
-                        data.readUnsignedShort();
+                        position.set("tag" + i + "Temp", data.readUnsignedShort());
                     }
                     if (BitUtil.check(mask, 3)) {
                         position.set("tag" + i + "Rssi", data.readUnsignedByte());
