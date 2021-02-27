@@ -27,16 +27,12 @@ import java.lang.management.MemoryMXBean;
 import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.RuntimeMXBean;
 import java.nio.charset.Charset;
-import java.sql.SQLException;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.Locale;
+import java.util.Timer;
 
 public final class Main {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
-
-    private static final long CLEAN_PERIOD = 24 * 60 * 60 * 1000;
 
     private static Injector injector;
 
@@ -119,19 +115,6 @@ public final class Main {
         }
     }
 
-    private static void scheduleDatabaseCleanup() {
-        new Timer().scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                try {
-                    Context.getDataManager().clearHistory();
-                } catch (SQLException error) {
-                    LOGGER.warn("Clear history error", error);
-                }
-            }
-        }, 0, CLEAN_PERIOD);
-    }
-
     public static void run(String configFile) {
         try {
             Context.init(configFile);
@@ -147,7 +130,6 @@ public final class Main {
             Context.getScheduleManager().start();
 
             scheduleHealthCheck();
-            scheduleDatabaseCleanup();
 
             Thread.setDefaultUncaughtExceptionHandler((t, e) -> LOGGER.error("Thread exception", e));
 

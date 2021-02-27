@@ -21,6 +21,7 @@ import io.netty.handler.codec.http.HttpRequestDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.database.CommandsManager;
 import org.traccar.database.ConnectionManager;
 import org.traccar.database.IdentityManager;
@@ -62,7 +63,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     }
 
     public String getServer(Channel channel, char delimiter) {
-        String server = config.getString(getProtocolName() + ".server");
+        String server = config.getString(Keys.PROTOCOL_SERVER.withPrefix(getProtocolName()));
         if (server == null && channel != null) {
             InetSocketAddress address = (InetSocketAddress) channel.localAddress();
             server = address.getAddress().getHostAddress() + ":" + address.getPort();
@@ -93,12 +94,6 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
         String timeZoneName = identityManager.lookupAttributeString(deviceId, "decoder.timezone", null, false, true);
         if (timeZoneName != null) {
             result = TimeZone.getTimeZone(timeZoneName);
-        } else {
-            int timeZoneOffset = config.getInteger(getProtocolName() + ".timezone", 0);
-            if (timeZoneOffset != 0) {
-                result.setRawOffset(timeZoneOffset * 1000);
-                LOGGER.warn("Config parameter " + getProtocolName() + ".timezone is deprecated");
-            }
         }
         return result;
     }
@@ -123,10 +118,10 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
             } catch (Exception e) {
                 LOGGER.warn("Find device error", e);
             }
-            if (deviceId == 0 && config.getBoolean("database.registerUnknown")) {
+            if (deviceId == 0 && config.getBoolean(Keys.DATABASE_REGISTER_UNKNOWN)) {
                 return identityManager.addUnknownDevice(uniqueIds[0]);
             }
-            if (device != null && !device.getDisabled() || config.getBoolean("database.storeDisabled")) {
+            if (device != null && !device.getDisabled()) {
                 return deviceId;
             }
             StringBuilder message = new StringBuilder();
@@ -153,8 +148,8 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     public DeviceSession getDeviceSession(
             Channel channel, SocketAddress remoteAddress, boolean ignoreCache, String... uniqueIds) {
         if (channel != null && BasePipelineFactory.getHandler(channel.pipeline(), HttpRequestDecoder.class) != null
-                || ignoreCache || config.getBoolean(getProtocolName() + ".ignoreSessionCache")
-                || config.getBoolean("decoder.ignoreSessionCache")) {
+                || ignoreCache || config.getBoolean(Keys.PROTOCOL_IGNORE_SESSIONS_CACHE.withPrefix(getProtocolName()))
+                || config.getBoolean(Keys.DECODER_IGNORE_SESSIONS_CACHE)) {
             long deviceId = findDeviceId(remoteAddress, uniqueIds);
             if (deviceId != 0) {
                 if (connectionManager != null) {
@@ -261,7 +256,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     @Override
     protected Object handleEmptyMessage(Channel channel, SocketAddress remoteAddress, Object msg) {
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
-        if (config.getBoolean("database.saveEmpty") && deviceSession != null) {
+        if (config.getBoolean(Keys.DATABASE_SAVE_EMPTY) && deviceSession != null) {
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
             getLastLocation(position, null);

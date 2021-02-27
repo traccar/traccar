@@ -1,6 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
- * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
+ * Copyright 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.sms.smpp;
+package org.traccar.config;
 
-public class ReconnectionTask implements Runnable {
-
-    private final SmppClient smppClient;
-
-    protected ReconnectionTask(SmppClient smppClient) {
-        this.smppClient = smppClient;
-    }
-
-    @Override
-    public void run() {
-        smppClient.reconnect();
-    }
-
+public enum KeyType {
+    GLOBAL,
+    SERVER,
+    USER,
+    DEVICE,
 }

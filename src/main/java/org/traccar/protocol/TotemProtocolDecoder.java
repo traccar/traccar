@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -168,6 +168,33 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             .number("(ddd)(dd.dddd)([EW])")      // longitude
             .number("dddd")                      // serial number
             .number("xx")                        // checksum
+            .any()
+            .compile();
+
+    private static final Pattern PATTERN_OBD = new PatternBuilder()
+            .text("$$")                          // header
+            .number("dddd")                      // length
+            .number("xx")                        // type
+            .number("(d+)|")                     // imei
+            .number("(dd)(dd)(dd)")              // date (yymmdd)
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
+            .number("(-?d+.d+),")                // longitude
+            .number("(-?d+.d+),")                // latitude
+            .expression("[^,]*,")                // obd version
+            .number("(d+),")                     // odometer
+            .number("(d+),")                     // fuel used
+            .number("(d+),")                     // fuel consumption
+            .number("(d+),")                     // power
+            .number("(d+),")                     // rpm
+            .number("(d+),")                     // speed
+            .number("(d+),")                     // intake flow
+            .number("(d+),")                     // intake pressure
+            .number("(d+),")                     // coolant temperature
+            .number("(d+),")                     // intake temperature
+            .number("(d+),")                     // engine load
+            .number("(d+),")                     // throttle
+            .number("(d+),")                     // fuel
+            .number("|xx")                       // checksum
             .any()
             .compile();
 
@@ -341,7 +368,6 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 18) ? Position.ALARM_LOW_BATTERY : null);
         position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 22) ? Position.ALARM_JAMMING : null);
 
-
         position.setTime(parser.nextDateTime());
 
         position.set(Position.KEY_BATTERY, parser.nextDouble() * 0.1);
@@ -385,13 +411,39 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         return true;
     }
 
+    private boolean decodeObd(Position position, Parser parser) {
+
+        position.setValid(true);
+        position.setTime(parser.nextDateTime());
+        position.setLatitude(parser.nextDouble());
+        position.setLongitude(parser.nextDouble());
+
+        position.set(Position.KEY_ODOMETER, parser.nextLong());
+        position.set(Position.KEY_FUEL_USED, parser.nextInt());
+        position.set(Position.KEY_FUEL_CONSUMPTION, parser.nextInt());
+        position.set(Position.KEY_POWER, parser.nextInt() * 0.001);
+        position.set(Position.KEY_RPM, parser.nextInt());
+        position.set(Position.KEY_OBD_SPEED, parser.nextInt());
+        parser.nextInt(); // intake flow
+        parser.nextInt(); // intake pressure
+        position.set(Position.KEY_COOLANT_TEMP, parser.nextInt());
+        position.set("intakeTemp", parser.nextInt());
+        position.set(Position.KEY_ENGINE_LOAD, parser.nextInt());
+        position.set(Position.KEY_THROTTLE, parser.nextInt());
+        position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
+
+        return true;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         String sentence = (String) msg;
         Pattern pattern = PATTERN3;
-        if (sentence.charAt(2) == '0') {
+        if (sentence.contains("$Cloud")) {
+            pattern = PATTERN_OBD;
+        } else if (sentence.charAt(2) == '0') {
             pattern = PATTERN4;
         } else if (sentence.contains("$GPRMC")) {
             pattern = PATTERN1;
@@ -409,8 +461,10 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position(getProtocolName());
 
+        String type = null;
         if (pattern == PATTERN4) {
-            position.set(Position.KEY_ALARM, decodeAlarm4(parser.nextHexInt()));
+            type = parser.next();
+            position.set(Position.KEY_ALARM, decodeAlarm4(Integer.parseInt(type, 16)));
         }
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
@@ -424,13 +478,15 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             result = decode12(position, parser, pattern);
         } else if (pattern == PATTERN3) {
             result = decode3(position, parser);
-        } else {
+        } else if (pattern == PATTERN4) {
             result = decode4(position, parser);
+        } else {
+            result = decodeObd(position, parser);
         }
 
         if (channel != null) {
-            if (pattern == PATTERN4) {
-                String response = "$$0014AA" + sentence.substring(sentence.length() - 6, sentence.length() - 2);
+            if (type != null) {
+                String response = "$$0014" + type + sentence.substring(sentence.length() - 6, sentence.length() - 2);
                 response += String.format("%02X", Checksum.xor(response)).toUpperCase();
                 channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
             } else {

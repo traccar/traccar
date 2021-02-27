@@ -61,8 +61,8 @@ public class HealthCheckService {
     }
 
     private String getUrl() {
-        String address = Context.getConfig().getString("web.address", "localhost");
-        int port = Context.getConfig().getInteger("web.port", 8082);
+        String address = Context.getConfig().getString(Keys.WEB_ADDRESS, "localhost");
+        int port = Context.getConfig().getInteger(Keys.WEB_PORT);
         return "http://" + address + ":" + port + "/api/server";
     }
 

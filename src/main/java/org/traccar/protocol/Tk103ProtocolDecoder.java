@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.config.Keys;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
@@ -39,7 +40,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
     public Tk103ProtocolDecoder(Protocol protocol) {
         super(protocol);
-        decodeLow = Context.getConfig().getBoolean(getProtocolName() + ".decodeLow");
+        decodeLow = Context.getConfig().getBoolean(Keys.PROTOCOL_DECODE_LOW.withPrefix(getProtocolName()));
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
@@ -63,7 +64,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .expression("([NS]),?")
             .number(" *(d+)(dd.d+)")             // longitude
             .expression("([EW]),?")
-            .number(" *(d+.d)(?:d*,)?")          // speed
+            .number("([ d.]{1,5})(?:d*,)?")      // speed
             .number("(dd)(dd)(dd),?")            // time (hhmmss)
             .groupBegin()
             .number("(?:([ d.]{6})|(dd)),?")     // course

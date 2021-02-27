@@ -264,7 +264,7 @@ public class MainModule extends AbstractModule {
     @Provides
     public static WebDataHandler provideWebDataHandler(
             Config config, IdentityManager identityManager, ObjectMapper objectMapper, Client client) {
-        if (config.getBoolean(Keys.FORWARD_ENABLE)) {
+        if (config.hasKey(Keys.FORWARD_URL)) {
             return new WebDataHandler(config, identityManager, objectMapper, client);
         }
         return null;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,13 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.traccar.Context;
 import org.traccar.api.resource.SessionResource;
+import org.traccar.config.Keys;
 
 public class AsyncSocketServlet extends WebSocketServlet {
 
-    private static final long ASYNC_TIMEOUT = 10 * 60 * 1000;
-
     @Override
     public void configure(WebSocketServletFactory factory) {
-        factory.getPolicy().setIdleTimeout(Context.getConfig().getLong("web.timeout", ASYNC_TIMEOUT));
+        factory.getPolicy().setIdleTimeout(Context.getConfig().getLong(Keys.WEB_TIMEOUT));
         factory.setCreator((req, resp) -> {
             if (req.getSession() != null) {
                 long userId = (Long) req.getSession().getAttribute(SessionResource.USER_ID_KEY);

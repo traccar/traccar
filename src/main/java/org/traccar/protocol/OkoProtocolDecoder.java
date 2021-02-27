@@ -49,8 +49,8 @@ public class OkoProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d+|xx),")               // adc
             .number("(xx),")                     // event
             .number("(d+.d+|xx),")               // power
-            .number("d,")                        // memory status
-            .number("(xx)?")                     // io
+            .number("d")                         // memory status
+            .number(",(xx)").optional()          // io
             .any()
             .compile();
 

@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
+import org.traccar.config.Keys;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
@@ -33,7 +34,7 @@ public class NotificatorPushover extends Notificator {
 
     private final String url;
     private final String token;
-    private final String puser;
+    private final String user;
 
     public static class Message {
         @JsonProperty("token")
@@ -48,8 +49,8 @@ public class NotificatorPushover extends Notificator {
 
     public NotificatorPushover() {
         url = "https://api.pushover.net/1/messages.json";
-        token = Context.getConfig().getString("notificator.pushover.token");
-        puser = Context.getConfig().getString("notificator.pushover.user");
+        token = Context.getConfig().getString(Keys.NOTIFICATOR_PUSHOVER_TOKEN);
+        user = Context.getConfig().getString(Keys.NOTIFICATOR_PUSHOVER_USER);
     }
 
     @Override
@@ -68,14 +69,14 @@ public class NotificatorPushover extends Notificator {
             return;
         }
 
-        if (puser == null) {
+        if (this.user == null) {
             LOGGER.warn("Pushover user not found");
             return;
         }
 
         Message message = new Message();
         message.token = token;
-        message.user = puser;
+        message.user = this.user;
         message.device = device;
         message.message = NotificationFormatter.formatShortMessage(userId, event, position);
 

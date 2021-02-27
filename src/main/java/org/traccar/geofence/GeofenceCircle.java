@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,11 @@ public class GeofenceCircle extends GeofenceGeometry {
     }
 
     @Override
+    public double calculateArea() {
+        return Math.PI * radius * radius;
+    }
+
+    @Override
     public String toWkt() {
         String wkt;
         wkt = "CIRCLE (";
@@ -68,7 +73,7 @@ public class GeofenceCircle extends GeofenceGeometry {
             throw new ParseException("Mismatch geometry type", 0);
         }
         String content = wkt.substring(wkt.indexOf("(") + 1, wkt.indexOf(")"));
-        if (content == null || content.equals("")) {
+        if (content.equals("")) {
             throw new ParseException("No content", 0);
         }
         String[] commaTokens = content.split(",");

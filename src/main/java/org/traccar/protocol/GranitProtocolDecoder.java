@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -37,17 +36,8 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
 
     private static final int HEADER_LENGTH = 6;
 
-    private double adc1Ratio;
-    private double adc2Ratio;
-    private double adc3Ratio;
-    private double adc4Ratio;
-
     public GranitProtocolDecoder(Protocol protocol) {
         super(protocol);
-        adc1Ratio = Context.getConfig().getDouble("granit.adc1Ratio", 1);
-        adc2Ratio = Context.getConfig().getDouble("granit.adc2Ratio", 1);
-        adc3Ratio = Context.getConfig().getDouble("granit.adc3Ratio", 1);
-        adc4Ratio = Context.getConfig().getDouble("granit.adc4Ratio", 1);
     }
 
     public static void appendChecksum(ByteBuf buffer, int length) {
@@ -133,10 +123,10 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
         analogIn3 = analogInHi << 4 & 0x300 | analogIn3;
         analogIn4 = analogInHi << 2 & 0x300 | analogIn4;
 
-        position.set(Position.PREFIX_ADC + 1, analogIn1 * adc1Ratio);
-        position.set(Position.PREFIX_ADC + 2, analogIn2 * adc2Ratio);
-        position.set(Position.PREFIX_ADC + 3, analogIn3 * adc3Ratio);
-        position.set(Position.PREFIX_ADC + 4, analogIn4 * adc4Ratio);
+        position.set(Position.PREFIX_ADC + 1, analogIn1);
+        position.set(Position.PREFIX_ADC + 2, analogIn2);
+        position.set(Position.PREFIX_ADC + 3, analogIn3);
+        position.set(Position.PREFIX_ADC + 4, analogIn4);
 
         position.setAltitude(buf.readUnsignedByte() * 10);
 

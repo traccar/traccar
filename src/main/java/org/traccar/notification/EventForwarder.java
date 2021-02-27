@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,27 +15,33 @@
  */
 package org.traccar.notification;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.Context;
+import org.traccar.config.Keys;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Geofence;
 import org.traccar.model.Maintenance;
 import org.traccar.model.Position;
 
-import javax.ws.rs.client.AsyncInvoker;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.InvocationCallback;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public abstract class EventForwarder {
+public class EventForwarder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventForwarder.class);
 
     private final String url;
     private final String header;
 
     public EventForwarder() {
-        url = Context.getConfig().getString("event.forward.url", "http://localhost/");
-        header = Context.getConfig().getString("event.forward.header");
+        url = Context.getConfig().getString(Keys.EVENT_FORWARD_URL);
+        header = Context.getConfig().getString(Keys.EVENT_FORWARD_HEADERS);
     }
 
     private static final String KEY_POSITION = "position";
@@ -56,7 +62,19 @@ public abstract class EventForwarder {
             }
         }
 
-        executeRequest(event, position, users, requestBuilder.async());
+        LOGGER.debug("Event forwarding initiated");
+        requestBuilder.async().post(
+                Entity.json(preparePayload(event, position, users)), new InvocationCallback<Object>() {
+                    @Override
+                    public void completed(Object o) {
+                        LOGGER.debug("Event forwarding succeeded");
+                    }
+
+                    @Override
+                    public void failed(Throwable throwable) {
+                        LOGGER.warn("Event forwarding failed", throwable);
+                    }
+                });
     }
 
     protected Map<String, Object> preparePayload(Event event, Position position, Set<Long> users) {
@@ -84,8 +102,5 @@ public abstract class EventForwarder {
         data.put(KEY_USERS, Context.getUsersManager().getItems(users));
         return data;
     }
-
-    protected abstract void executeRequest(
-            Event event, Position position, Set<Long> users, AsyncInvoker invoker);
 
 }

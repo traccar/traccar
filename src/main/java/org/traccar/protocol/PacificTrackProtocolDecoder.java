@@ -73,7 +73,7 @@ public class PacificTrackProtocolDecoder extends BaseProtocolDecoder {
                     position.setValid(BitUtil.check(buf.readUnsignedByte(), 4));
                     int date = buf.readUnsignedByte();
                     DateBuilder dateBuilder = new DateBuilder()
-                            .setDate(2010 + BitUtil.from(date, 4), BitUtil.to(date, 4), buf.readUnsignedByte())
+                            .setDate(2020 + BitUtil.from(date, 4), BitUtil.to(date, 4), buf.readUnsignedByte())
                             .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
                     position.setTime(dateBuilder.getDate());
                     position.setLatitude(buf.readUnsignedInt() / 1000000.0 - 90.0);

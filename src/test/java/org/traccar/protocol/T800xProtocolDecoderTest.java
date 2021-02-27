@@ -11,6 +11,9 @@ public class T800xProtocolDecoderTest extends ProtocolTest {
 
         T800xProtocolDecoder decoder = new T800xProtocolDecoder(null);
 
+        verifyAttributes(decoder, binary(
+                "252510003100180865284041080544201221191023000003ffff9702eff820014700000000912a6ac26dff09c200000000"));
+
         verifyAttribute(decoder, binary(
                 "2727020049052e086528404072393849002008060310110000000068b7c8c286eaa441000000008000008100001617410700019ce782b0001e000002581e00000530d4801f00000000"),
                 Position.KEY_BATTERY_LEVEL, 100);

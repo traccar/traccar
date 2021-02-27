@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -60,7 +60,7 @@ public class BaseReport {
         return averageSpeed;
     }
 
-    public void setAverageSpeed(Double averageSpeed) {
+    public void setAverageSpeed(double averageSpeed) {
         this.averageSpeed = averageSpeed;
     }
 
@@ -71,9 +71,7 @@ public class BaseReport {
     }
 
     public void setMaxSpeed(double maxSpeed) {
-        if (maxSpeed > this.maxSpeed) {
-            this.maxSpeed = maxSpeed;
-        }
+        this.maxSpeed = maxSpeed;
     }
 
     private double spentFuel;

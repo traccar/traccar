@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
+import org.traccar.config.Keys;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.notification.NotificationFormatter;
@@ -30,8 +31,8 @@ public class NotificatorTelegram extends Notificator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificatorTelegram.class);
 
-    private String url;
-    private String chatId;
+    private final String url;
+    private final String chatId;
 
     public static class Message {
         @JsonProperty("chat_id")
@@ -45,8 +46,8 @@ public class NotificatorTelegram extends Notificator {
     public NotificatorTelegram() {
         url = String.format(
                 "https://api.telegram.org/bot%s/sendMessage",
-                Context.getConfig().getString("notificator.telegram.key"));
-        chatId = Context.getConfig().getString("notificator.telegram.chatId");
+                Context.getConfig().getString(Keys.NOTIFICATOR_TELEGRAM_KEY));
+        chatId = Context.getConfig().getString(Keys.NOTIFICATOR_TELEGRAM_CHAT_ID);
     }
 
     @Override

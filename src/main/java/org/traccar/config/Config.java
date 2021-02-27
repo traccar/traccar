@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 package org.traccar.config;
+
+import com.google.common.annotations.VisibleForTesting;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -53,7 +55,7 @@ public class Config {
         }
     }
 
-    public boolean hasKey(ConfigKey key) {
+    public boolean hasKey(ConfigKey<?> key) {
         return hasKey(key.getKey());
     }
 
@@ -63,8 +65,8 @@ public class Config {
                 || properties.containsKey(key);
     }
 
-    public String getString(ConfigKey key) {
-        return getString(key.getKey());
+    public String getString(ConfigKey<String> key) {
+        return getString(key.getKey(), key.getDefaultValue());
     }
 
     @Deprecated
@@ -78,7 +80,7 @@ public class Config {
         return properties.getProperty(key);
     }
 
-    public String getString(ConfigKey key, String defaultValue) {
+    public String getString(ConfigKey<String> key, String defaultValue) {
         return getString(key.getKey(), defaultValue);
     }
 
@@ -87,7 +89,7 @@ public class Config {
         return hasKey(key) ? getString(key) : defaultValue;
     }
 
-    public boolean getBoolean(ConfigKey key) {
+    public boolean getBoolean(ConfigKey<Boolean> key) {
         return getBoolean(key.getKey());
     }
 
@@ -96,16 +98,21 @@ public class Config {
         return Boolean.parseBoolean(getString(key));
     }
 
-    public int getInteger(ConfigKey key) {
-        return getInteger(key.getKey());
+    public int getInteger(ConfigKey<Integer> key) {
+        String value = getString(key.getKey());
+        if (value != null) {
+            return Integer.parseInt(value);
+        } else {
+            Integer defaultValue = key.getDefaultValue();
+            if (defaultValue != null) {
+                return defaultValue;
+            } else {
+                return 0;
+            }
+        }
     }
 
-    @Deprecated
-    public int getInteger(String key) {
-        return getInteger(key, 0);
-    }
-
-    public int getInteger(ConfigKey key, int defaultValue) {
+    public int getInteger(ConfigKey<Integer> key, int defaultValue) {
         return getInteger(key.getKey(), defaultValue);
     }
 
@@ -114,49 +121,37 @@ public class Config {
         return hasKey(key) ? Integer.parseInt(getString(key)) : defaultValue;
     }
 
-    public long getLong(ConfigKey key) {
-        return getLong(key.getKey());
+    public long getLong(ConfigKey<Long> key) {
+        String value = getString(key.getKey());
+        if (value != null) {
+            return Long.parseLong(value);
+        } else {
+            Long defaultValue = key.getDefaultValue();
+            if (defaultValue != null) {
+                return defaultValue;
+            } else {
+                return 0;
+            }
+        }
     }
 
-    @Deprecated
-    public long getLong(String key) {
-        return getLong(key, 0);
+    public double getDouble(ConfigKey<Double> key) {
+        String value = getString(key.getKey());
+        if (value != null) {
+            return Double.parseDouble(value);
+        } else {
+            Double defaultValue = key.getDefaultValue();
+            if (defaultValue != null) {
+                return defaultValue;
+            } else {
+                return 0;
+            }
+        }
     }
 
-    public long getLong(ConfigKey key, long defaultValue) {
-        return getLong(key.getKey(), defaultValue);
-    }
-
-    @Deprecated
-    public long getLong(String key, long defaultValue) {
-        return hasKey(key) ? Long.parseLong(getString(key)) : defaultValue;
-    }
-
-    public double getDouble(ConfigKey key) {
-        return getDouble(key.getKey());
-    }
-
-    @Deprecated
-    public double getDouble(String key) {
-        return getDouble(key, 0.0);
-    }
-
-    public double getDouble(ConfigKey key, double defaultValue) {
-        return getDouble(key.getKey(), defaultValue);
-    }
-
-    @Deprecated
-    public double getDouble(String key, double defaultValue) {
-        return hasKey(key) ? Double.parseDouble(getString(key)) : defaultValue;
-    }
-
-    public void setString(ConfigKey key, String value) {
-        setString(key.getKey(), value);
-    }
-
-    @Deprecated
-    public void setString(String key, String value) {
-        properties.put(key, value);
+    @VisibleForTesting
+    public void setString(ConfigKey<?> key, String value) {
+        properties.put(key.getKey(), value);
     }
 
     static String getEnvironmentVariableName(String key) {

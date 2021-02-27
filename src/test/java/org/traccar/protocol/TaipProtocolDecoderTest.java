@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class TaipProtocolDecoderTest extends ProtocolTest {
 
@@ -9,6 +10,20 @@ public class TaipProtocolDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         TaipProtocolDecoder decoder = new TaipProtocolDecoder(null);
+
+        verifyAttribute(decoder, text(
+                ">RUS00,111220124402-3138067-06417623000012200FF,000000000000000000000000000,0000000111,15640422,00000,+25.5,00000,51;ID=CST3G0443;#IP1:089F;*34<"),
+                Position.PREFIX_TEMP + 1, 25.5);
+
+        verifyAttribute(decoder, text(
+                ">RUS00,031120185945-3138060-06417622000209200FF,000000000000000000000000000,0000000000,11440419,00000,00000,00000,00;ID=CST3G0495;#IP0:1EF7;*4B<"),
+                Position.KEY_BATTERY, 4.19);
+
+        verifyPosition(decoder, text(
+                ">RUS00,031120185945-3138060-06417622000209200FF,000000000000000000000000000,0000000000,11440419,00000,00;ID=CST3G0495;#IP0:1EF7;*4B<"));
+
+        verifyPosition(decoder, text(
+                ">RGP041120190000-3137454-064075520001883004D50;ID=8385;#IP0:0080;*19<"));
 
         verifyNull(decoder, text(
                 ">RLN25601000+297185103-0955755990+000059150000+0000000012000000000000000000000000000000000000000000000000000000000012;ID=3580;*48<"));

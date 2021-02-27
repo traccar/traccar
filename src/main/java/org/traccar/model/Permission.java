@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,10 +24,10 @@ import org.traccar.database.DataManager;
 
 public class Permission {
 
-    private Class<?> ownerClass;
-    private long ownerId;
-    private Class<?> propertyClass;
-    private long propertyId;
+    private final Class<?> ownerClass;
+    private final long ownerId;
+    private final Class<?> propertyClass;
+    private final long propertyId;
 
     public Permission(LinkedHashMap<String, Long> permissionMap) throws ClassNotFoundException {
         Iterator<Map.Entry<String, Long>> iterator = permissionMap.entrySet().iterator();

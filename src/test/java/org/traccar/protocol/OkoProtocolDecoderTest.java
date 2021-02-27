@@ -11,6 +11,9 @@ public class OkoProtocolDecoderTest extends ProtocolTest {
         OkoProtocolDecoder decoder = new OkoProtocolDecoder(null);
 
         verifyPosition(decoder, text(
+                "{861001001012919,090745,A,4944.302,N,02353.366,E,0.0,225,251120,7,0.27,F9,11.3,1}"));
+
+        verifyPosition(decoder, text(
                 "{868204000482330,125138,A,5026.821,N,03032.472,E,0.0,171,240200,7,00,F9,7D,1,,,,,,,91,,,187.7,M,2,,}"));
 
         verifyPosition(decoder, text(

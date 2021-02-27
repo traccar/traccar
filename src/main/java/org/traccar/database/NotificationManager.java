@@ -30,6 +30,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
+import org.traccar.config.Keys;
 import org.traccar.model.Calendar;
 import org.traccar.model.Event;
 import org.traccar.model.Notification;
@@ -44,7 +45,7 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
 
     public NotificationManager(DataManager dataManager) {
         super(dataManager, Notification.class);
-        geocodeOnRequest = Context.getConfig().getBoolean("geocoder.onRequest");
+        geocodeOnRequest = Context.getConfig().getBoolean(Keys.GEOCODER_ON_REQUEST);
     }
 
     private Set<Long> getEffectiveNotifications(long userId, long deviceId, Date time) {

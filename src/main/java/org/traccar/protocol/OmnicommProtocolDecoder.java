@@ -28,7 +28,7 @@ import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
-import org.traccar.protobuf.OmnicommMessageOuterClass;
+import org.traccar.protobuf.omnicomm.OmnicommMessageOuterClass;
 
 import java.net.SocketAddress;
 import java.util.Date;

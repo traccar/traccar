@@ -20,6 +20,7 @@ import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.config.Keys;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -49,8 +50,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     public Gl200TextProtocolDecoder(Protocol protocol) {
         super(protocol);
-
-        ignoreFixTime = Context.getConfig().getBoolean(getProtocolName() + ".ignoreFixTime");
+        ignoreFixTime = Context.getConfig().getBoolean(Keys.PROTOCOL_IGNORE_FIX_TIME.withPrefix(getProtocolName()));
     }
 
     private static final Pattern PATTERN_ACK = new PatternBuilder()
@@ -1147,7 +1147,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         decodeDeviceTime(position, parser);
 
-        if (Context.getConfig().getBoolean(getProtocolName() + ".ack") && channel != null) {
+        if (channel != null && Context.getConfig().getBoolean(Keys.PROTOCOL_ACK.withPrefix(getProtocolName()))) {
             channel.writeAndFlush(new NetworkMessage("+SACK:" + parser.next() + "$", remoteAddress));
         }
 

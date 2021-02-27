@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,39 @@
  */
 package org.traccar.database;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+import liquibase.Contexts;
+import liquibase.Liquibase;
+import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
+import liquibase.exception.LiquibaseException;
+import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.ResourceAccessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.traccar.Context;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
+import org.traccar.model.Attribute;
+import org.traccar.model.BaseModel;
+import org.traccar.model.Calendar;
+import org.traccar.model.Command;
+import org.traccar.model.Device;
+import org.traccar.model.Driver;
+import org.traccar.model.Event;
+import org.traccar.model.Geofence;
+import org.traccar.model.Group;
+import org.traccar.model.Maintenance;
+import org.traccar.model.ManagedUser;
+import org.traccar.model.Notification;
+import org.traccar.model.Permission;
+import org.traccar.model.Position;
+import org.traccar.model.Server;
+import org.traccar.model.Statistics;
+import org.traccar.model.User;
+
+import javax.sql.DataSource;
 import java.beans.Introspector;
 import java.io.File;
 import java.lang.reflect.Method;
@@ -25,43 +58,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-
-import javax.naming.InitialContext;
-import javax.sql.DataSource;
-
-import liquibase.Contexts;
-import liquibase.Liquibase;
-import liquibase.database.Database;
-import liquibase.database.DatabaseFactory;
-import liquibase.exception.LiquibaseException;
-import liquibase.resource.FileSystemResourceAccessor;
-import liquibase.resource.ResourceAccessor;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.traccar.config.Config;
-import org.traccar.Context;
-import org.traccar.helper.DateUtil;
-import org.traccar.model.Attribute;
-import org.traccar.model.Device;
-import org.traccar.model.Driver;
-import org.traccar.model.Event;
-import org.traccar.model.Geofence;
-import org.traccar.model.Group;
-import org.traccar.model.Maintenance;
-import org.traccar.model.ManagedUser;
-import org.traccar.model.Notification;
-import org.traccar.model.Permission;
-import org.traccar.model.BaseModel;
-import org.traccar.model.Calendar;
-import org.traccar.model.Command;
-import org.traccar.model.Position;
-import org.traccar.model.Server;
-import org.traccar.model.Statistics;
-import org.traccar.model.User;
-
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 
 public class DataManager {
 
@@ -84,7 +80,7 @@ public class DataManager {
     public DataManager(Config config) throws Exception {
         this.config = config;
 
-        forceLdap = config.getBoolean("ldap.force");
+        forceLdap = config.getBoolean(Keys.LDAP_FORCE);
 
         initDatabase();
         initDatabaseSchema();
@@ -92,53 +88,42 @@ public class DataManager {
 
     private void initDatabase() throws Exception {
 
-        String jndiName = config.getString("database.jndi");
-
-        if (jndiName != null) {
-
-            dataSource = (DataSource) new InitialContext().lookup(jndiName);
-
-        } else {
-
-            String driverFile = config.getString("database.driverFile");
-            if (driverFile != null) {
-                ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-                try {
-                    Method method = classLoader.getClass().getDeclaredMethod("addURL", URL.class);
-                    method.setAccessible(true);
-                    method.invoke(classLoader, new File(driverFile).toURI().toURL());
-                } catch (NoSuchMethodException e) {
-                    Method method = classLoader.getClass()
-                            .getDeclaredMethod("appendToClassPathForInstrumentation", String.class);
-                    method.setAccessible(true);
-                    method.invoke(classLoader, driverFile);
-                }
+        String driverFile = config.getString(Keys.DATABASE_DRIVER_FILE);
+        if (driverFile != null) {
+            ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+            try {
+                Method method = classLoader.getClass().getDeclaredMethod("addURL", URL.class);
+                method.setAccessible(true);
+                method.invoke(classLoader, new File(driverFile).toURI().toURL());
+            } catch (NoSuchMethodException e) {
+                Method method = classLoader.getClass()
+                        .getDeclaredMethod("appendToClassPathForInstrumentation", String.class);
+                method.setAccessible(true);
+                method.invoke(classLoader, driverFile);
             }
-
-            String driver = config.getString("database.driver");
-            if (driver != null) {
-                Class.forName(driver);
-            }
-
-            HikariConfig hikariConfig = new HikariConfig();
-            hikariConfig.setDriverClassName(config.getString("database.driver"));
-            hikariConfig.setJdbcUrl(config.getString("database.url"));
-            hikariConfig.setUsername(config.getString("database.user"));
-            hikariConfig.setPassword(config.getString("database.password"));
-            hikariConfig.setConnectionInitSql(config.getString("database.checkConnection", "SELECT 1"));
-            hikariConfig.setIdleTimeout(600000);
-
-            int maxPoolSize = config.getInteger("database.maxPoolSize");
-
-            if (maxPoolSize != 0) {
-                hikariConfig.setMaximumPoolSize(maxPoolSize);
-            }
-
-            generateQueries = config.getBoolean("database.generateQueries");
-
-            dataSource = new HikariDataSource(hikariConfig);
-
         }
+
+        String driver = config.getString(Keys.DATABASE_DRIVER);
+        if (driver != null) {
+            Class.forName(driver);
+        }
+
+        HikariConfig hikariConfig = new HikariConfig();
+        hikariConfig.setDriverClassName(driver);
+        hikariConfig.setJdbcUrl(config.getString(Keys.DATABASE_URL));
+        hikariConfig.setUsername(config.getString(Keys.DATABASE_USER));
+        hikariConfig.setPassword(config.getString(Keys.DATABASE_PASSWORD));
+        hikariConfig.setConnectionInitSql(config.getString(Keys.DATABASE_CHECK_CONNECTION));
+        hikariConfig.setIdleTimeout(600000);
+
+        int maxPoolSize = config.getInteger(Keys.DATABASE_MAX_POOL_SIZE);
+        if (maxPoolSize != 0) {
+            hikariConfig.setMaximumPoolSize(maxPoolSize);
+        }
+
+        generateQueries = config.getBoolean(Keys.DATABASE_GENERATE_QUERIES);
+
+        dataSource = new HikariDataSource(hikariConfig);
     }
 
     public static String constructObjectQuery(String action, Class<?> clazz, boolean extended) {
@@ -237,12 +222,10 @@ public class DataManager {
         if (query == null) {
             if (generateQueries) {
                 query = constructObjectQuery(action, clazz, extended);
-                config.setString(queryName, query);
             } else {
                 LOGGER.info("Query not provided: " + queryName);
             }
         }
-
         return query;
     }
 
@@ -262,14 +245,12 @@ public class DataManager {
         String query = config.getString(queryName);
         if (query == null) {
             if (generateQueries) {
-                query = constructPermissionQuery(action, owner,
-                        property.equals(User.class) ? ManagedUser.class : property);
-                config.setString(queryName, query);
+                query = constructPermissionQuery(
+                        action, owner, property.equals(User.class) ? ManagedUser.class : property);
             } else {
                 LOGGER.info("Query not provided: " + queryName);
             }
         }
-
         return query;
     }
 
@@ -293,19 +274,19 @@ public class DataManager {
 
     private void initDatabaseSchema() throws SQLException, LiquibaseException {
 
-        if (config.hasKey("database.changelog")) {
+        if (config.hasKey(Keys.DATABASE_CHANGELOG)) {
 
             ResourceAccessor resourceAccessor = new FileSystemResourceAccessor();
 
             Database database = DatabaseFactory.getInstance().openDatabase(
-                    config.getString("database.url"),
-                    config.getString("database.user"),
-                    config.getString("database.password"),
-                    config.getString("database.driver"),
+                    config.getString(Keys.DATABASE_URL),
+                    config.getString(Keys.DATABASE_USER),
+                    config.getString(Keys.DATABASE_PASSWORD),
+                    config.getString(Keys.DATABASE_DRIVER),
                     null, null, null, resourceAccessor);
 
             Liquibase liquibase = new Liquibase(
-                    config.getString("database.changelog"), resourceAccessor, database);
+                    config.getString(Keys.DATABASE_CHANGELOG), resourceAccessor, database);
 
             liquibase.clearCheckSums();
 
@@ -357,20 +338,6 @@ public class DataManager {
     public Collection<Position> getLatestPositions() throws SQLException {
         return QueryBuilder.create(dataSource, getQuery("database.selectLatestPositions"))
                 .executeQuery(Position.class);
-    }
-
-    public void clearHistory() throws SQLException {
-        long historyDays = config.getInteger("database.historyDays");
-        if (historyDays != 0) {
-            Date timeLimit = new Date(System.currentTimeMillis() - historyDays * 24 * 3600 * 1000);
-            LOGGER.info("Clearing history earlier than " + DateUtil.formatDate(timeLimit, false));
-            QueryBuilder.create(dataSource, getQuery("database.deletePositions"))
-                    .setDate("serverTime", timeLimit)
-                    .executeUpdate();
-            QueryBuilder.create(dataSource, getQuery("database.deleteEvents"))
-                    .setDate("serverTime", timeLimit)
-                    .executeUpdate();
-        }
     }
 
     public Server getServer() throws SQLException {

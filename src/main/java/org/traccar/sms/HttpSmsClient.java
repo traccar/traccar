@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2020 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,19 +16,18 @@
  */
 package org.traccar.sms;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.traccar.Context;
+import org.traccar.config.Keys;
+import org.traccar.helper.DataConverter;
+import org.traccar.notification.MessageException;
+
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.InvocationCallback;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.traccar.Context;
-import org.traccar.api.SecurityRequestFilter;
-import org.traccar.helper.DataConverter;
-import org.traccar.notification.MessageException;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -37,27 +36,29 @@ public class HttpSmsClient implements SmsManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpSmsClient.class);
 
-    private String url;
-    private String authorizationHeader;
-    private String authorization;
-    private String template;
-    private boolean encode;
-    private MediaType mediaType;
+    private final String url;
+    private final String authorizationHeader;
+    private final String authorization;
+    private final String template;
+    private final boolean encode;
+    private final MediaType mediaType;
 
     public HttpSmsClient() {
-        url = Context.getConfig().getString("sms.http.url");
-        authorizationHeader = Context.getConfig().getString("sms.http.authorizationHeader",
-                SecurityRequestFilter.AUTHORIZATION_HEADER);
-        authorization = Context.getConfig().getString("sms.http.authorization");
-        if (authorization == null) {
-            String user = Context.getConfig().getString("sms.http.user");
-            String password = Context.getConfig().getString("sms.http.password");
+        url = Context.getConfig().getString(Keys.SMS_HTTP_URL);
+        authorizationHeader = Context.getConfig().getString(Keys.SMS_HTTP_AUTHORIZATION_HEADER);
+        if (Context.getConfig().hasKey(Keys.SMS_HTTP_AUTHORIZATION)) {
+            authorization = Context.getConfig().getString(Keys.SMS_HTTP_AUTHORIZATION);
+        } else {
+            String user = Context.getConfig().getString(Keys.SMS_HTTP_USER);
+            String password = Context.getConfig().getString(Keys.SMS_HTTP_PASSWORD);
             if (user != null && password != null) {
                 authorization = "Basic "
                         + DataConverter.printBase64((user + ":" + password).getBytes(StandardCharsets.UTF_8));
+            } else {
+                authorization = null;
             }
         }
-        template = Context.getConfig().getString("sms.http.template").trim();
+        template = Context.getConfig().getString(Keys.SMS_HTTP_TEMPLATE).trim();
         if (template.charAt(0) == '{' || template.charAt(0) == '[') {
             encode = false;
             mediaType = MediaType.APPLICATION_JSON_TYPE;
