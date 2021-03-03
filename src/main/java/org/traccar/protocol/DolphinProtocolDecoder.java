@@ -45,7 +45,7 @@ public class DolphinProtocolDecoder extends BaseProtocolDecoder {
         ByteBuf buf = (ByteBuf) msg;
 
         buf.readUnsignedShort(); // header
-        buf.readUnsignedIntLE(); // index
+        int index = (int) buf.readUnsignedIntLE();
         buf.readUnsignedShort(); // version
         buf.readUnsignedShort(); // flags
         int type = buf.readUnsignedShortLE();
@@ -64,11 +64,21 @@ public class DolphinProtocolDecoder extends BaseProtocolDecoder {
                     ByteBufUtil.getBytes(buf, buf.readerIndex(), length, false));
 
             if (channel != null) {
-                DolphinMessages.DataPackResponse response = DolphinMessages.DataPackResponse.newBuilder()
+                byte[] responseData = DolphinMessages.DataPackResponse.newBuilder()
                         .setResponse(DolphinMessages.DataPackResponseCode.DataPack_OK)
-                        .build();
-                channel.writeAndFlush(new NetworkMessage(
-                        Unpooled.wrappedBuffer(response.toByteArray()), remoteAddress));
+                        .build()
+                        .toByteArray();
+
+                ByteBuf response = Unpooled.buffer();
+                response.writeShort(0xABAB); // header
+                response.writeIntLE(index);
+                response.writeShort(0); // flags
+                response.writeShortLE(DolphinMessages.MessageType.DataPack_Response.getNumber());
+                response.writeIntLE(responseData.length);
+                response.writeIntLE(0); // reserved
+                response.writeBytes(responseData);
+
+                channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
             }
 
             List<Position> positions = new LinkedList<>();
