@@ -1,18 +1,3 @@
-/*
- * Copyright 2021 Anton Tananaev (anton@traccar.org)
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.traccar.sms;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
@@ -21,7 +6,7 @@ import com.amazonaws.services.sns.AmazonSNS;
 import com.amazonaws.services.sns.AmazonSNSClientBuilder;
 import com.amazonaws.services.sns.model.MessageAttributeValue;
 import com.amazonaws.services.sns.model.PublishRequest;
-
+import com.amazonaws.services.sns.model.PublishResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
@@ -31,48 +16,54 @@ import org.traccar.notification.MessageException;
 import java.util.HashMap;
 import java.util.Map;
 
+
 public class SnsSmsClient implements SmsManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(SnsSmsClient.class);
 
+    private final String access_key;
+    private final String secret_key;
+    private final String region;
+
+    private final String sns_status;
     private final AmazonSNS snsClient;
 
     public SnsSmsClient() {
-        if (Context.getConfig().hasKey(Keys.SMS_AWS_REGION)
-                && Context.getConfig().hasKey(Keys.SMS_AWS_ACCESS)
-                && Context.getConfig().hasKey(Keys.SMS_AWS_SECRET)) {
-            snsClient = awsSNSClient();
-        } else {
-            throw new RuntimeException("SNS Not Configured Properly. Please provide valid config.");
+        access_key = Context.getConfig().getString(Keys.AWS_ACCESS_KEY);
+        secret_key = Context.getConfig().getString(Keys.AWS_SECRET_KEY);
+        sns_status = Context.getConfig().getString(Keys.AWS_SNS_ENABLED);
+        region = Context.getConfig().getString(Keys.AWS_REGION);
+        snsClient = awsSNSClient(access_key, secret_key, region);
+
+        if (!sns_status.equals("true") || access_key == null || secret_key == null || region == null) {
+            LOGGER.error("SNS Not Configured Properly. Please provide valid config.");
         }
     }
 
-    public AmazonSNS awsSNSClient() {
-        BasicAWSCredentials awsCredentials = new BasicAWSCredentials(Context.getConfig().getString(Keys.SMS_AWS_ACCESS),
-                Context.getConfig().getString(Keys.SMS_AWS_SECRET));
-        return AmazonSNSClientBuilder.standard().withRegion(Context.getConfig().getString(Keys.SMS_AWS_REGION))
-                .withCredentials(new AWSStaticCredentialsProvider(awsCredentials)).build();
+    public AmazonSNS awsSNSClient(String access_key, String secret_key, String region) {
+        BasicAWSCredentials awsCreds = new BasicAWSCredentials(access_key, secret_key);
+        return AmazonSNSClientBuilder.standard().withRegion(region)
+                .withCredentials(new AWSStaticCredentialsProvider(awsCreds)).build();
     }
 
-    @Override
-    public void sendMessageSync(String destAddress, String message, boolean command)
-            throws InterruptedException, MessageException {
+    public void sendSNSMessage(String message, String destAddress) {
         Map<String, MessageAttributeValue> smsAttributes = new HashMap<>();
         smsAttributes.put("AWS.SNS.SMS.SenderID",
-                new MessageAttributeValue().withStringValue("SNS").withDataType("String"));
+                new MessageAttributeValue().withStringValue("VegitOne").withDataType("String"));
         smsAttributes.put("AWS.SNS.SMS.SMSType",
                 new MessageAttributeValue().withStringValue("Transactional").withDataType("String"));
-        snsClient.publish(new PublishRequest().withMessage(message)
+
+        PublishResult result = this.snsClient.publish(new PublishRequest().withMessage(message)
                 .withPhoneNumber(destAddress).withMessageAttributes(smsAttributes));
     }
 
-    @Override
+    @java.lang.Override
+    public void sendMessageSync(String destAddress, String message, boolean command)
+            throws InterruptedException, MessageException {
+        sendSNSMessage(message, destAddress);
+    }
+
+    @java.lang.Override
     public void sendMessageAsync(String destAddress, String message, boolean command) {
-        try {
-            sendMessageSync(destAddress, message, command);
-        } catch (InterruptedException interruptedException) {
-            LOGGER.warn("SMS send failed", interruptedException.getMessage());
-        } catch (MessageException messageException) {
-            LOGGER.warn("SMS send failed", messageException.getMessage());
-        }
+        sendSNSMessage(message, destAddress);
     }
 }
