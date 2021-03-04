@@ -20,21 +20,21 @@ import java.util.Map;
 public class SnsSmsClient implements SmsManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(SnsSmsClient.class);
 
-    private final String access_key;
-    private final String secret_key;
+    private final String accessKey;
+    private final String secretKey;
     private final String region;
 
-    private final String sns_status;
+    private final String snsStatus;
     private final AmazonSNS snsClient;
 
     public SnsSmsClient() {
-        access_key = Context.getConfig().getString(Keys.AWS_ACCESS_KEY);
-        secret_key = Context.getConfig().getString(Keys.AWS_SECRET_KEY);
-        sns_status = Context.getConfig().getString(Keys.AWS_SNS_ENABLED);
+        accessKey = Context.getConfig().getString(Keys.AWS_ACCESS_KEY);
+        secretKey = Context.getConfig().getString(Keys.AWS_SECRET_KEY);
+        snsStatus = Context.getConfig().getString(Keys.AWS_SNS_ENABLED);
         region = Context.getConfig().getString(Keys.AWS_REGION);
-        snsClient = awsSNSClient(access_key, secret_key, region);
+        snsClient = awsSNSClient(accessKey, secretKey, region);
 
-        if (!sns_status.equals("true") || access_key == null || secret_key == null || region == null) {
+        if (!snsStatus.equals("true") || accessKey == null || secretKey == null || region == null) {
             LOGGER.error("SNS Not Configured Properly. Please provide valid config.");
         }
     }
@@ -48,7 +48,7 @@ public class SnsSmsClient implements SmsManager {
     public void sendSNSMessage(String message, String destAddress) {
         Map<String, MessageAttributeValue> smsAttributes = new HashMap<>();
         smsAttributes.put("AWS.SNS.SMS.SenderID",
-                new MessageAttributeValue().withStringValue("VegitOne").withDataType("String"));
+                new MessageAttributeValue().withStringValue("SNS").withDataType("String"));
         smsAttributes.put("AWS.SNS.SMS.SMSType",
                 new MessageAttributeValue().withStringValue("Transactional").withDataType("String"));
 
