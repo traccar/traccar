@@ -39,8 +39,8 @@ public class SnsSmsClient implements SmsManager {
         }
     }
 
-    public AmazonSNS awsSNSClient(String access_key, String secret_key, String region) {
-        BasicAWSCredentials awsCreds = new BasicAWSCredentials(access_key, secret_key);
+    public AmazonSNS awsSNSClient(String accessKey, String secretKey, String region) {
+        BasicAWSCredentials awsCreds = new BasicAWSCredentials(accessKey, secretKey);
         return AmazonSNSClientBuilder.standard().withRegion(region)
                 .withCredentials(new AWSStaticCredentialsProvider(awsCreds)).build();
     }
