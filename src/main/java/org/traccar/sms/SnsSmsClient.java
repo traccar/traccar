@@ -21,6 +21,7 @@ import com.amazonaws.services.sns.AmazonSNS;
 import com.amazonaws.services.sns.AmazonSNSClientBuilder;
 import com.amazonaws.services.sns.model.MessageAttributeValue;
 import com.amazonaws.services.sns.model.PublishRequest;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
@@ -30,25 +31,25 @@ import org.traccar.notification.MessageException;
 import java.util.HashMap;
 import java.util.Map;
 
-
 public class SnsSmsClient implements SmsManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(SnsSmsClient.class);
 
     private final AmazonSNS snsClient;
 
     public SnsSmsClient() {
-        if (Context.getConfig().getString(Keys.AWS_REGION) == null
-                || Context.getConfig().getString(Keys.AWS_ACCESS_KEY) == null
-                || Context.getConfig().getString(Keys.AWS_SECRET_KEY) == null) {
+        if (Context.getConfig().hasKey(Keys.SMS_AWS_REGION)
+                && Context.getConfig().hasKey(Keys.SMS_AWS_ACCESS)
+                && Context.getConfig().hasKey(Keys.SMS_AWS_SECRET)) {
+            snsClient = awsSNSClient();
+        } else {
             throw new RuntimeException("SNS Not Configured Properly. Please provide valid config.");
         }
-        snsClient = awsSNSClient();
     }
 
     public AmazonSNS awsSNSClient() {
-        BasicAWSCredentials awsCredentials = new BasicAWSCredentials(Context.getConfig().getString(Keys.AWS_ACCESS_KEY),
-                Context.getConfig().getString(Keys.AWS_SECRET_KEY));
-        return AmazonSNSClientBuilder.standard().withRegion(Context.getConfig().getString(Keys.AWS_REGION))
+        BasicAWSCredentials awsCredentials = new BasicAWSCredentials(Context.getConfig().getString(Keys.SMS_AWS_ACCESS),
+                Context.getConfig().getString(Keys.SMS_AWS_SECRET));
+        return AmazonSNSClientBuilder.standard().withRegion(Context.getConfig().getString(Keys.SMS_AWS_REGION))
                 .withCredentials(new AWSStaticCredentialsProvider(awsCredentials)).build();
     }
 

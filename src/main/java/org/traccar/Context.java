@@ -318,7 +318,7 @@ public final class Context {
 
         if (config.hasKey(Keys.SMS_HTTP_URL)) {
             smsManager = new HttpSmsClient();
-        } else if (config.hasKey(Keys.AWS_REGION)) {
+        } else if (config.hasKey(Keys.SMS_AWS_REGION)) {
             smsManager = new SnsSmsClient();
         }
 
