@@ -688,6 +688,36 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
+     * AWS Access Key with SNS permission.
+     */
+    public static final ConfigKey<String> AWS_ACCESS_KEY = new ConfigKey<>(
+            "aws.access_key",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * AWS Secret Access Key with SNS permission.
+     */
+    public static final ConfigKey<String> AWS_SECRET_KEY = new ConfigKey<>(
+            "aws.secret_key",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * SNS Enable switch.
+     * Use 'enable' to send message with SNS or 'disable' to stop using SNS
+     */
+    public static final ConfigKey<String> AWS_SNS_ENABLED = new ConfigKey<>(
+            "aws.sns_enabled",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * AWS Region for SNS service.
+     * Make sure to use regions that are supported for messaging.
+     */
+    public static final ConfigKey<String> AWS_REGION = new ConfigKey<>(
+            "aws.region",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
      * Traccar notification API key.
      */
     public static final ConfigKey<String> NOTIFICATOR_TRACCAR_KEY = new ConfigKey<>(
