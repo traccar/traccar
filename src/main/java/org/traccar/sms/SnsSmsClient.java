@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class SnsSmsClient implements SmsManager{
+public class SnsSmsClient implements SmsManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(SnsSmsClient.class);
 
     private final String access_key;
@@ -57,7 +57,8 @@ public class SnsSmsClient implements SmsManager{
     }
 
     @java.lang.Override
-    public void sendMessageSync(String destAddress, String message, boolean command) throws InterruptedException, MessageException {
+    public void sendMessageSync(String destAddress, String message, boolean command)
+            throws InterruptedException, MessageException {
         sendSNSMessage(message, destAddress);
     }
 
