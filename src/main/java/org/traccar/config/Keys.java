@@ -691,14 +691,14 @@ public final class Keys {
      * AWS Access Key with SNS permission.
      */
     public static final ConfigKey<String> AWS_ACCESS_KEY = new ConfigKey<>(
-            "aws.access",
+            "sms.aws.access",
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
      * AWS Secret Access Key with SNS permission.
      */
     public static final ConfigKey<String> AWS_SECRET_KEY = new ConfigKey<>(
-            "aws.secret",
+            "sms.aws.secret",
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
@@ -706,7 +706,7 @@ public final class Keys {
      * Use 'enable' to send message with SNS or 'disable' to stop using SNS
      */
     public static final ConfigKey<String> AWS_SNS_ENABLED = new ConfigKey<>(
-            "aws.sns.enabled",
+            "sms.sns.enabled",
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
@@ -714,7 +714,7 @@ public final class Keys {
      * Make sure to use regions that are supported for messaging.
      */
     public static final ConfigKey<String> AWS_REGION = new ConfigKey<>(
-            "aws.region",
+            "sms.aws.region",
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
