@@ -690,31 +690,23 @@ public final class Keys {
     /**
      * AWS Access Key with SNS permission.
      */
-    public static final ConfigKey<String> AWS_ACCESS_KEY = new ConfigKey<>(
-            "aws.access",
+    public static final ConfigKey<String> SMS_AWS_ACCESS = new ConfigKey<>(
+            "sms.aws.access",
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
      * AWS Secret Access Key with SNS permission.
      */
-    public static final ConfigKey<String> AWS_SECRET_KEY = new ConfigKey<>(
-            "aws.secret",
-            Collections.singletonList(KeyType.GLOBAL));
-
-    /**
-     * SNS Enable switch.
-     * Use 'enable' to send message with SNS or 'disable' to stop using SNS
-     */
-    public static final ConfigKey<String> AWS_SNS_ENABLED = new ConfigKey<>(
-            "aws.sns.enabled",
+    public static final ConfigKey<String> SMS_AWS_SECRET = new ConfigKey<>(
+            "sms.aws.secret",
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
      * AWS Region for SNS service.
      * Make sure to use regions that are supported for messaging.
      */
-    public static final ConfigKey<String> AWS_REGION = new ConfigKey<>(
-            "aws.region",
+    public static final ConfigKey<String> SMS_AWS_REGION = new ConfigKey<>(
+            "sms.aws.region",
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
