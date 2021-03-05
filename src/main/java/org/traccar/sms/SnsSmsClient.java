@@ -21,7 +21,6 @@ import com.amazonaws.services.sns.AmazonSNS;
 import com.amazonaws.services.sns.AmazonSNSClientBuilder;
 import com.amazonaws.services.sns.model.MessageAttributeValue;
 import com.amazonaws.services.sns.model.PublishRequest;
-import com.amazonaws.services.sns.model.PublishResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
@@ -38,10 +37,10 @@ public class SnsSmsClient implements SmsManager {
     private final AmazonSNS snsClient;
 
     public SnsSmsClient() {
-        if (!Context.getConfig().getString(Keys.AWS_SNS_ENABLED).equals("true") ||
-                Context.getConfig().getString(Keys.AWS_ACCESS_KEY) == null ||
-                Context.getConfig().getString(Keys.AWS_SECRET_KEY) == null ||
-                Context.getConfig().getString(Keys.AWS_REGION) == null) {
+        if (!Context.getConfig().getString(Keys.AWS_SNS_ENABLED).equals("true")
+                || Context.getConfig().getString(Keys.AWS_ACCESS_KEY) == null
+                || Context.getConfig().getString(Keys.AWS_SECRET_KEY) == null
+                || Context.getConfig().getString(Keys.AWS_REGION) == null) {
             throw new RuntimeException("SNS Not Configured Properly. Please provide valid config.");
         }
         snsClient = awsSNSClient();
