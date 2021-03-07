@@ -838,7 +838,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedShort(); // satellites
         buf.readUnsignedByte(); // alarm
         buf.readUnsignedByte(); // language
-        buf.readUnsignedByte(); // battery
+
+        position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+
         buf.readUnsignedByte(); // working mode
         buf.readUnsignedShort(); // working voltage
         buf.readUnsignedByte(); // reserved
