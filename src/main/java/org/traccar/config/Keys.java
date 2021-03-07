@@ -702,14 +702,6 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
-     * SNS Enable switch.
-     * Use 'enable' to send message with SNS or 'disable' to stop using SNS
-     */
-    public static final ConfigKey<String> AWS_SNS_ENABLED = new ConfigKey<>(
-            "sms.sns.enabled",
-            Collections.singletonList(KeyType.GLOBAL));
-
-    /**
      * AWS Region for SNS service.
      * Make sure to use regions that are supported for messaging.
      */

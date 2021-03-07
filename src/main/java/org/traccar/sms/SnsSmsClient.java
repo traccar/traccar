@@ -37,10 +37,9 @@ public class SnsSmsClient implements SmsManager {
     private final AmazonSNS snsClient;
 
     public SnsSmsClient() {
-        if (!Context.getConfig().getString(Keys.AWS_SNS_ENABLED).equals("true")
+        if (Context.getConfig().getString(Keys.AWS_REGION) == null
                 || Context.getConfig().getString(Keys.AWS_ACCESS_KEY) == null
-                || Context.getConfig().getString(Keys.AWS_SECRET_KEY) == null
-                || Context.getConfig().getString(Keys.AWS_REGION) == null) {
+                || Context.getConfig().getString(Keys.AWS_SECRET_KEY) == null) {
             throw new RuntimeException("SNS Not Configured Properly. Please provide valid config.");
         }
         snsClient = awsSNSClient();
@@ -53,7 +52,9 @@ public class SnsSmsClient implements SmsManager {
                 .withCredentials(new AWSStaticCredentialsProvider(awsCredentials)).build();
     }
 
-    public void sendSNSMessage(String message, String destAddress) {
+    @Override
+    public void sendMessageSync(String destAddress, String message, boolean command)
+            throws InterruptedException, MessageException {
         Map<String, MessageAttributeValue> smsAttributes = new HashMap<>();
         smsAttributes.put("AWS.SNS.SMS.SenderID",
                 new MessageAttributeValue().withStringValue("SNS").withDataType("String"));
@@ -64,13 +65,13 @@ public class SnsSmsClient implements SmsManager {
     }
 
     @Override
-    public void sendMessageSync(String destAddress, String message, boolean command)
-            throws InterruptedException, MessageException {
-        sendSNSMessage(message, destAddress);
-    }
-
-    @Override
     public void sendMessageAsync(String destAddress, String message, boolean command) {
-        sendSNSMessage(message, destAddress);
+        try {
+            sendMessageSync(destAddress, message, command);
+        } catch (InterruptedException interruptedException) {
+            LOGGER.warn("SMS send failed", interruptedException.getMessage());
+        } catch (MessageException messageException) {
+            LOGGER.warn("SMS send failed", messageException.getMessage());
+        }
     }
 }
