@@ -69,10 +69,8 @@ public class SnsSmsClient implements SmsManager {
     public void sendMessageAsync(String destAddress, String message, boolean command) {
         try {
             sendMessageSync(destAddress, message, command);
-        } catch (InterruptedException interruptedException) {
-            LOGGER.warn("SMS send failed", interruptedException.getMessage());
-        } catch (MessageException messageException) {
-            LOGGER.warn("SMS send failed", messageException.getMessage());
+        } catch (InterruptedException | MessageException exception) {
+            LOGGER.warn("SMS send failed", exception.getMessage());
         }
     }
 }
