@@ -57,7 +57,7 @@ public class FuelDropEventHandler extends BaseEventHandler {
                 double drop = lastPosition.getDouble(Position.KEY_FUEL_LEVEL)
                         - position.getDouble(Position.KEY_FUEL_LEVEL);
                 if (drop >= fuelDropThreshold) {
-                    Event event = new Event(Event.TYPE_DEVICE_FUEL_DROP, position.getDeviceId(), position.getId());
+                    Event event = new Event(Event.TYPE_DEVICE_FUEL_DROP, position);
                     event.set(ATTRIBUTE_FUEL_DROP_THRESHOLD, fuelDropThreshold);
                     return Collections.singletonMap(event, position);
                 }

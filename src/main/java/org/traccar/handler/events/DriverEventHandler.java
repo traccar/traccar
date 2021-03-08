@@ -46,7 +46,7 @@ public class DriverEventHandler extends BaseEventHandler {
                 oldDriverUniqueId = lastPosition.getString(Position.KEY_DRIVER_UNIQUE_ID);
             }
             if (!driverUniqueId.equals(oldDriverUniqueId)) {
-                Event event = new Event(Event.TYPE_DRIVER_CHANGED, position.getDeviceId(), position.getId());
+                Event event = new Event(Event.TYPE_DRIVER_CHANGED, position);
                 event.set(Position.KEY_DRIVER_UNIQUE_ID, driverUniqueId);
                 return Collections.singletonMap(event, position);
             }

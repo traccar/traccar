@@ -29,7 +29,7 @@ public class CommandResultEventHandler extends BaseEventHandler {
     protected Map<Event, Position> analyzePosition(Position position) {
         Object commandResult = position.getAttributes().get(Position.KEY_RESULT);
         if (commandResult != null) {
-            Event event = new Event(Event.TYPE_COMMAND_RESULT, position.getDeviceId(), position.getId());
+            Event event = new Event(Event.TYPE_COMMAND_RESULT, position);
             event.set(Position.KEY_RESULT, (String) commandResult);
             return Collections.singletonMap(event, position);
         }

@@ -53,7 +53,7 @@ public class OverspeedEventHandler extends BaseEventHandler {
 
     private Map<Event, Position> newEvent(DeviceState deviceState, double speedLimit) {
         Position position = deviceState.getOverspeedPosition();
-        Event event = new Event(Event.TYPE_DEVICE_OVERSPEED, position.getDeviceId(), position.getId());
+        Event event = new Event(Event.TYPE_DEVICE_OVERSPEED, position);
         event.set(ATTRIBUTE_SPEED, deviceState.getOverspeedPosition().getSpeed());
         event.set(ATTRIBUTE_SPEED_LIMIT, speedLimit);
         event.setGeofenceId(deviceState.getOverspeedGeofenceId());

@@ -45,7 +45,7 @@ public class MotionEventHandler extends BaseEventHandler {
     private Map<Event, Position> newEvent(DeviceState deviceState, boolean newMotion) {
         String eventType = newMotion ? Event.TYPE_DEVICE_MOVING : Event.TYPE_DEVICE_STOPPED;
         Position position = deviceState.getMotionPosition();
-        Event event = new Event(eventType, position.getDeviceId(), position.getId());
+        Event event = new Event(eventType, position);
         deviceState.setMotionState(newMotion);
         deviceState.setMotionPosition(null);
         return Collections.singletonMap(event, position);

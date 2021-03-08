@@ -48,7 +48,7 @@ public class AlertEventHandler extends BaseEventHandler {
                 }
             }
             if (!ignoreAlert) {
-                Event event = new Event(Event.TYPE_ALARM, position.getDeviceId(), position.getId());
+                Event event = new Event(Event.TYPE_ALARM, position);
                 event.set(Position.KEY_ALARM, (String) alarm);
                 return Collections.singletonMap(event, position);
             }
