@@ -57,7 +57,7 @@
     </entry>
 
     <entry key='database.selectEvents'>
-        SELECT * FROM tc_events WHERE deviceId = :deviceId AND serverTime BETWEEN :from AND :to ORDER BY serverTime
+        SELECT * FROM tc_events WHERE deviceId = :deviceId AND eventTime BETWEEN :from AND :to ORDER BY eventTime
     </entry>
 
     <entry key='database.selectStatistics'>

@@ -27,7 +27,7 @@ public class Event extends Message {
     public Event(String type, long deviceId) {
         setType(type);
         setDeviceId(deviceId);
-        this.serverTime = new Date();
+        this.eventTime = new Date();
     }
 
     public Event() {
@@ -62,14 +62,14 @@ public class Event extends Message {
 
     public static final String TYPE_DRIVER_CHANGED = "driverChanged";
 
-    private Date serverTime;
+    private Date eventTime;
 
-    public Date getServerTime() {
-        return serverTime;
+    public Date getEventTime() {
+        return eventTime;
     }
 
-    public void setServerTime(Date serverTime) {
-        this.serverTime = serverTime;
+    public void setEventTime(Date eventTime) {
+        this.eventTime = eventTime;
     }
 
     private long positionId;

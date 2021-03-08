@@ -90,7 +90,7 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
                     usersToForward.add(userId);
                 }
                 final Set<String> notificators = new HashSet<>();
-                for (long notificationId : getEffectiveNotifications(userId, deviceId, event.getServerTime())) {
+                for (long notificationId : getEffectiveNotifications(userId, deviceId, event.getEventTime())) {
                     Notification notification = getById(notificationId);
                     if (getById(notificationId).getType().equals(event.getType())) {
                         boolean filter = false;
