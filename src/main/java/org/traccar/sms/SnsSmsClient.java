@@ -30,6 +30,7 @@ import org.traccar.notification.MessageException;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public class SnsSmsClient implements SmsManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(SnsSmsClient.class);
@@ -54,8 +55,7 @@ public class SnsSmsClient implements SmsManager {
     }
 
     @Override
-    public void sendMessageSync(String destAddress, String message, boolean command)
-            throws InterruptedException, MessageException {
+    public void sendMessageSync(String destAddress, String message, boolean command) {
         Map<String, MessageAttributeValue> smsAttributes = new HashMap<>();
         smsAttributes.put("AWS.SNS.SMS.SenderID",
                 new MessageAttributeValue().withStringValue("SNS").withDataType("String"));
@@ -67,10 +67,6 @@ public class SnsSmsClient implements SmsManager {
 
     @Override
     public void sendMessageAsync(String destAddress, String message, boolean command) {
-        try {
-            sendMessageSync(destAddress, message, command);
-        } catch (InterruptedException | MessageException exception) {
-            LOGGER.warn("SMS send failed", exception.getMessage());
-        }
+        new Thread(() -> sendMessageSync(destAddress, message, command));
     }
 }
