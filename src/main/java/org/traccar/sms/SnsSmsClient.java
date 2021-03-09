@@ -26,11 +26,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
 import org.traccar.config.Keys;
-import org.traccar.notification.MessageException;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 public class SnsSmsClient implements SmsManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(SnsSmsClient.class);
