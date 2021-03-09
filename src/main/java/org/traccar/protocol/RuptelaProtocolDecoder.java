@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,6 +109,16 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
             case 79:
             case 80:
                 position.set(Position.PREFIX_TEMP + (id - 78), readValue(buf, length, true) * 0.1);
+                break;
+            case 198:
+                position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+                break;
+            case 199:
+            case 200:
+                position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+                break;
+            case 201:
+                position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
                 break;
             default:
                 position.set(Position.PREFIX_IO + id, readValue(buf, length, false));
