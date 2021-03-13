@@ -65,7 +65,7 @@ public class WebServer {
     private Server server;
 
     private void initServer(Config config) {
-
+        LOGGER.info("initServer");
         String address = config.getString("web.address");
         int port = config.getInteger("web.port", 8082);
         if (address == null) {
@@ -103,7 +103,12 @@ public class WebServer {
         HandlerList handlers = new HandlerList();
         initClientProxy(config, handlers);
         handlers.addHandler(servletHandler);
-        handlers.addHandler(new GzipHandler());
+        GzipHandler gzipHandler = new GzipHandler();
+        LOGGER.info(String.join(",", gzipHandler.getIncludedMimeTypes()));
+        gzipHandler.addIncludedMimeTypes("application/javascript");
+        LOGGER.warn("adding mime types");
+        LOGGER.info(String.join(",", gzipHandler.getIncludedMimeTypes()));
+        handlers.addHandler(gzipHandler);
         server.setHandler(handlers);
 
         if (config.getBoolean(Keys.WEB_REQUEST_LOG_ENABLE)) {
@@ -200,6 +205,7 @@ public class WebServer {
 
     public void start() {
         try {
+            LOGGER.warn("Starting web server");
             server.start();
         } catch (Exception error) {
             LOGGER.warn("Web server start failed", error);
