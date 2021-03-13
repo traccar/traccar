@@ -97,11 +97,14 @@ public final class MailManager {
     }
 
     public void sendMessage(
-            long userId, String subject, String body, MimeBodyPart attachment) throws MessagingException {
-        User user = Context.getPermissionsManager().getUser(userId);
+            User user, String subject, String body) throws MessagingException {
+        sendMessage(user, subject, body, null);
+    }
 
+    public void sendMessage(
+            User user, String subject, String body, MimeBodyPart attachment) throws MessagingException {
         Properties properties = null;
-        if (!Context.getConfig().getBoolean("mail.smtp.ignoreUserConfig")) {
+        if (!Context.getConfig().getBoolean("mail.smtp.ignoreUserConfig") && !Context.getConfig().getBoolean("users.emailValidation.enable")) {
             properties = getProperties(new PropertiesProvider(user));
         }
         if (properties == null || !properties.containsKey("mail.smtp.host")) {
@@ -146,6 +149,12 @@ public final class MailManager {
                     properties.getProperty("mail.smtp.password"));
             transport.sendMessage(message, message.getAllRecipients());
         }
+    }
+
+    public void sendMessage(
+            long userId, String subject, String body, MimeBodyPart attachment) throws MessagingException {
+        User user = Context.getPermissionsManager().getUser(userId);
+        sendMessage(user, subject, body, attachment);
     }
 
 }

@@ -1,0 +1,8 @@
+#set($subject = "Validate email")
+<!DOCTYPE html>
+<html>
+<body>
+To validate your email please click on the following link:<br>
+<a href="$webUrl/api/users/validate?user=$user&signature=$signature&salt=$salt&">Confirm email</a><br>
+</body>
+</html>

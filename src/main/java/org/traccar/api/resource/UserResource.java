@@ -15,15 +15,20 @@
  */
 package org.traccar.api.resource;
 
+import org.apache.velocity.VelocityContext;
 import org.traccar.Context;
 import org.traccar.api.BaseObjectResource;
 import org.traccar.config.Keys;
 import org.traccar.database.UsersManager;
+import org.traccar.helper.Hashing;
 import org.traccar.helper.LogAction;
 import org.traccar.model.ManagedUser;
 import org.traccar.model.User;
+import org.traccar.notification.FullMessage;
+import org.traccar.notification.TextTemplateFormatter;
 
 import javax.annotation.security.PermitAll;
+import javax.mail.MessagingException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -82,13 +87,25 @@ public class UserResource extends BaseObjectResource<User> {
                 }
             }
         }
-        Context.getUsersManager().addItem(entity);
-        LogAction.create(getUserId(), entity);
-        if (Context.getPermissionsManager().getUserManager(getUserId())) {
-            Context.getDataManager().linkObject(User.class, getUserId(), ManagedUser.class, entity.getId(), true);
-            LogAction.link(getUserId(), User.class, getUserId(), ManagedUser.class, entity.getId());
+        if (!Context.getConfig().getBoolean(Keys.USERS_EMAIL_VALIDATION_ENABLE)) {
+            Context.getUsersManager().addItem(entity);
+            LogAction.create(getUserId(), entity);
+            if (Context.getPermissionsManager().getUserManager(getUserId())) {
+                Context.getDataManager().linkObject(User.class, getUserId(), ManagedUser.class, entity.getId(), true);
+                LogAction.link(getUserId(), User.class, getUserId(), ManagedUser.class, entity.getId());
+            }
+            Context.getUsersManager().refreshUserItems();
+        } else {
+            VelocityContext velocityContext = TextTemplateFormatter.prepareContext(entity);
+            velocityContext.put("signature", Hashing.createHash(entity.getEmail()).getHash());
+            velocityContext.put("salt", Hashing.createHash(entity.getEmail()).getSalt());
+            FullMessage message = TextTemplateFormatter.formatFullMessage(velocityContext, "validateEmail");
+            try {
+                Context.getMailManager().sendMessage(entity, message.getSubject(), message.getBody());
+            } catch (MessagingException e) {
+                return Response.serverError().build();
+            }
         }
-        Context.getUsersManager().refreshUserItems();
         return Response.ok(entity).build();
     }
 

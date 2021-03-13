@@ -375,6 +375,13 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
+     * Send email validation emails before user creation and email change.
+     */
+    public static final ConfigKey<Boolean> USERS_EMAIL_VALIDATION_ENABLE = new ConfigKey<>(
+            "users.emailValidation.enable",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
      * LDAP server URL.
      */
     public static final ConfigKey<String> LDAP_URL = new ConfigKey<>(
