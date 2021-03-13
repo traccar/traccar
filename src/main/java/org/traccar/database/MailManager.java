@@ -104,7 +104,8 @@ public final class MailManager {
     public void sendMessage(
             User user, String subject, String body, MimeBodyPart attachment) throws MessagingException {
         Properties properties = null;
-        if (!Context.getConfig().getBoolean("mail.smtp.ignoreUserConfig") && !Context.getConfig().getBoolean("users.emailValidation.enable")) {
+        if (!Context.getConfig().getBoolean("mail.smtp.ignoreUserConfig")
+                && !Context.getConfig().getBoolean("users.emailValidation.enable")) {
             properties = getProperties(new PropertiesProvider(user));
         }
         if (properties == null || !properties.containsKey("mail.smtp.host")) {
