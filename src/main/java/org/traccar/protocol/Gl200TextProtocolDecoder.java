@@ -75,7 +75,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .expression("(?:[0-9Ff]{20})?,")     // iccid
             .number("(d{1,2}),")                 // rssi
             .number("d{1,2},")
-            .expression("[01],")                 // external power
+            .expression("[01]{1,2},")            // external power
             .number("([d.]+)?,")                 // odometer or external power
             .number("d*,")                       // backup battery or lightness
             .number("(d+.d+),")                  // battery
@@ -97,6 +97,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("(xx)?,")                    // digital output
             .number("[-+]dddd,")                 // timezone
             .expression("[01],")                 // daylight saving
+            .or()
+            .any()
             .groupEnd()
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
             .number("(dd)(dd)(dd),")             // time (hhmmss)
