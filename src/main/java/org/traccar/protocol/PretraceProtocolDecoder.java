@@ -16,6 +16,8 @@
 package org.traccar.protocol;
 
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.Protocol;
@@ -37,7 +39,7 @@ public class PretraceProtocolDecoder extends BaseProtocolDecoder {
             .text("(")
             .number("(d{15})")                   // imei
             .number("Uddd")                      // type
-            .number("d")                         // gps type
+            .number("(d)")                         // gps type
             .expression("([AV])")                // validity
             .number("(dd)(dd)(dd)")              // date (yymmdd)
             .number("(dd)(dd)(dd)")              // time (hhmmss)
@@ -75,8 +77,8 @@ public class PretraceProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
+        position.set(Position.KEY_GPS, parser.nextInt(0));
         position.setValid(parser.next().equals("A"));
-
         position.setTime(parser.nextDateTime());
 
         position.setLatitude(parser.nextCoordinate());
@@ -90,7 +92,16 @@ public class PretraceProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_HDOP, parser.nextInt(0));
         position.set(Position.KEY_RSSI, parser.nextInt(0));
 
-        parser.next(); // state
+        String stateValue = parser.next(); // state
+        int bitName = 0;
+        for (int bytePos=7; bytePos>=0; bytePos--)
+        {
+            for (int bitPos=0; bitPos<4; bitPos++)
+            {
+                if (((stateValue.charAt(bytePos) - '0') & (1 << bitPos)) == (1 << bitPos)) position.set("State_Bit"+bitName, true);
+                bitName++;
+            }
+        }
 
         if (parser.hasNext()) {
             for (String value : parser.next().split(",")) {

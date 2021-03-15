@@ -19,6 +19,8 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
@@ -538,7 +540,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 int length = buf.readUnsignedShort();
                 if (id == 256) {
                     position.set(Position.KEY_VIN, buf.readSlice(length).toString(StandardCharsets.US_ASCII));
-                } else if (id == 385) {
+                } else if ((id == 385) || (id == 10500)) {
                     ByteBuf data = buf.readSlice(length);
                     data.readUnsignedByte(); // data part
                     int index = 1;
@@ -559,6 +561,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                         if (BitUtil.check(flags, 2)) {
                             position.set("beacon" + index + "Temp", data.readUnsignedShort());
                         }
+
                         index += 1;
                     }
                 } else {
