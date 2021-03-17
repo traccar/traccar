@@ -17,11 +17,11 @@ package org.traccar.sms;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.sns.AmazonSNS;
-import com.amazonaws.services.sns.AmazonSNSClientBuilder;
+import com.amazonaws.services.sns.*;
 import com.amazonaws.services.sns.model.MessageAttributeValue;
 import com.amazonaws.services.sns.model.PublishRequest;
 
+import com.amazonaws.services.sns.model.PublishResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
@@ -29,11 +29,12 @@ import org.traccar.config.Keys;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Future;
 
 public class SnsSmsClient implements SmsManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(SnsSmsClient.class);
 
-    private final AmazonSNS snsClient;
+    private final AmazonSNSAsync snsClient;
 
     public SnsSmsClient() {
         if (Context.getConfig().hasKey(Keys.SMS_AWS_REGION)
@@ -45,10 +46,10 @@ public class SnsSmsClient implements SmsManager {
         }
     }
 
-    public AmazonSNS awsSNSClient() {
+    public AmazonSNSAsync awsSNSClient() {
         BasicAWSCredentials awsCredentials = new BasicAWSCredentials(Context.getConfig().getString(Keys.SMS_AWS_ACCESS),
                 Context.getConfig().getString(Keys.SMS_AWS_SECRET));
-        return AmazonSNSClientBuilder.standard().withRegion(Context.getConfig().getString(Keys.SMS_AWS_REGION))
+        return AmazonSNSAsyncClientBuilder.standard().withRegion(Context.getConfig().getString(Keys.SMS_AWS_REGION))
                 .withCredentials(new AWSStaticCredentialsProvider(awsCredentials)).build();
     }
 
@@ -59,12 +60,12 @@ public class SnsSmsClient implements SmsManager {
                 new MessageAttributeValue().withStringValue("SNS").withDataType("String"));
         smsAttributes.put("AWS.SNS.SMS.SMSType",
                 new MessageAttributeValue().withStringValue("Transactional").withDataType("String"));
-        snsClient.publish(new PublishRequest().withMessage(message)
+        snsClient.publishAsync(new PublishRequest().withMessage(message)
                 .withPhoneNumber(destAddress).withMessageAttributes(smsAttributes));
     }
 
     @Override
     public void sendMessageAsync(String destAddress, String message, boolean command) {
-        new Thread(() -> sendMessageSync(destAddress, message, command));
+        sendMessageSync(destAddress, message, command);
     }
 }
