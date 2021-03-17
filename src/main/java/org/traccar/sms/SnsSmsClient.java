@@ -17,11 +17,11 @@ package org.traccar.sms;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.sns.*;
+import com.amazonaws.services.sns.AmazonSNSAsync;
+import com.amazonaws.services.sns.AmazonSNSAsyncClientBuilder;
 import com.amazonaws.services.sns.model.MessageAttributeValue;
 import com.amazonaws.services.sns.model.PublishRequest;
 
-import com.amazonaws.services.sns.model.PublishResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
@@ -29,7 +29,6 @@ import org.traccar.config.Keys;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Future;
 
 public class SnsSmsClient implements SmsManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(SnsSmsClient.class);
