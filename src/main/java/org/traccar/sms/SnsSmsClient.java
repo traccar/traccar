@@ -1,5 +1,6 @@
 /*
  * Copyright 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2021 Subodh Ranadive (subodhranadive3103@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,9 +41,7 @@ public class SnsSmsClient implements SmsManager {
                 && Context.getConfig().hasKey(Keys.SMS_AWS_ACCESS)
                 && Context.getConfig().hasKey(Keys.SMS_AWS_SECRET)) {
             snsClient = awsSNSClient();
-        } else {
-            throw new RuntimeException("SNS Not Configured Properly. Please provide valid config.");
-        }
+        } else { throw new RuntimeException("SNS Not Configured Properly. Please provide valid config."); }
     }
 
     public AmazonSNSAsync awsSNSClient() {
@@ -59,8 +58,10 @@ public class SnsSmsClient implements SmsManager {
                 new MessageAttributeValue().withStringValue("SNS").withDataType("String"));
         smsAttributes.put("AWS.SNS.SMS.SMSType",
                 new MessageAttributeValue().withStringValue("Transactional").withDataType("String"));
-        snsClient.publishAsync(new PublishRequest().withMessage(message)
-                .withPhoneNumber(destAddress).withMessageAttributes(smsAttributes));
+        try {
+            snsClient.publishAsync(new PublishRequest().withMessage(message)
+                    .withPhoneNumber(destAddress).withMessageAttributes(smsAttributes));
+        } catch (Exception exception) { LOGGER.warn("SMS send failed", exception); }
     }
 
     @Override
