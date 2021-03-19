@@ -41,7 +41,9 @@ public class SnsSmsClient implements SmsManager {
                 && Context.getConfig().hasKey(Keys.SMS_AWS_ACCESS)
                 && Context.getConfig().hasKey(Keys.SMS_AWS_SECRET)) {
             snsClient = awsSNSClient();
-        } else { throw new RuntimeException("SNS Not Configured Properly. Please provide valid config."); }
+        } else {
+            throw new RuntimeException("SNS Not Configured Properly. Please provide valid config.");
+        }
     }
 
     public AmazonSNSAsync awsSNSClient() {
@@ -61,7 +63,9 @@ public class SnsSmsClient implements SmsManager {
         try {
             snsClient.publishAsync(new PublishRequest().withMessage(message)
                     .withPhoneNumber(destAddress).withMessageAttributes(smsAttributes));
-        } catch (Exception exception) { LOGGER.warn("SMS send failed", exception); }
+        } catch (Exception exception) {
+            LOGGER.warn("SMS send failed", exception);
+        }
     }
 
     @Override
