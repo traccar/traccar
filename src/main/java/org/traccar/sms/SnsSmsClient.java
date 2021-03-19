@@ -40,17 +40,15 @@ public class SnsSmsClient implements SmsManager {
         if (Context.getConfig().hasKey(Keys.SMS_AWS_REGION)
                 && Context.getConfig().hasKey(Keys.SMS_AWS_ACCESS)
                 && Context.getConfig().hasKey(Keys.SMS_AWS_SECRET)) {
-            snsClient = awsSNSClient();
+            BasicAWSCredentials awsCredentials =
+                    new BasicAWSCredentials(Context.getConfig().getString(Keys.SMS_AWS_ACCESS),
+                    Context.getConfig().getString(Keys.SMS_AWS_SECRET));
+            snsClient = AmazonSNSAsyncClientBuilder.standard()
+                    .withRegion(Context.getConfig().getString(Keys.SMS_AWS_REGION))
+                    .withCredentials(new AWSStaticCredentialsProvider(awsCredentials)).build();
         } else {
             throw new RuntimeException("SNS Not Configured Properly. Please provide valid config.");
         }
-    }
-
-    public AmazonSNSAsync awsSNSClient() {
-        BasicAWSCredentials awsCredentials = new BasicAWSCredentials(Context.getConfig().getString(Keys.SMS_AWS_ACCESS),
-                Context.getConfig().getString(Keys.SMS_AWS_SECRET));
-        return AmazonSNSAsyncClientBuilder.standard().withRegion(Context.getConfig().getString(Keys.SMS_AWS_REGION))
-                .withCredentials(new AWSStaticCredentialsProvider(awsCredentials)).build();
     }
 
     @Override
