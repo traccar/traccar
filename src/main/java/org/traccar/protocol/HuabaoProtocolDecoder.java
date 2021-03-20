@@ -335,24 +335,36 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     position.set("cover", BitUtil.check(deviceStatus, 3));
                     break;
                 case 0xEB:
-                    while (buf.readerIndex() < endIndex) {
-                        int extendedLength = buf.readUnsignedShort();
-                        int extendedType = buf.readUnsignedShort();
-                        switch (extendedType) {
-                            case 0x0001:
-                                position.set("fuel1", buf.readUnsignedShort() * 0.1);
-                                buf.readUnsignedByte(); // unused
-                                break;
-                            case 0x0023:
-                                position.set("fuel2", Double.parseDouble(
-                                        buf.readCharSequence(6, StandardCharsets.US_ASCII).toString()));
-                                break;
-                            case 0x00CE:
-                                position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
-                                break;
-                            default:
-                                buf.skipBytes(extendedLength - 2);
-                                break;
+                    if (buf.getUnsignedShort(buf.readerIndex()) > 200) {
+                        Network network = new Network();
+                        int mcc = buf.readUnsignedShort();
+                        int mnc = buf.readUnsignedByte();
+                        while (buf.readerIndex() < endIndex) {
+                            network.addCellTower(CellTower.from(
+                                    mcc, mnc, buf.readUnsignedShort(), buf.readUnsignedShort(),
+                                    buf.readUnsignedByte()));
+                        }
+                        position.setNetwork(network);
+                    } else {
+                        while (buf.readerIndex() < endIndex) {
+                            int extendedLength = buf.readUnsignedShort();
+                            int extendedType = buf.readUnsignedShort();
+                            switch (extendedType) {
+                                case 0x0001:
+                                    position.set("fuel1", buf.readUnsignedShort() * 0.1);
+                                    buf.readUnsignedByte(); // unused
+                                    break;
+                                case 0x0023:
+                                    position.set("fuel2", Double.parseDouble(
+                                            buf.readCharSequence(6, StandardCharsets.US_ASCII).toString()));
+                                    break;
+                                case 0x00CE:
+                                    position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
+                                    break;
+                                default:
+                                    buf.skipBytes(extendedLength - 2);
+                                    break;
+                            }
                         }
                     }
                     break;
