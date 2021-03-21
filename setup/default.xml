@@ -285,5 +285,6 @@
     <entry key='iotm.port'>5218</entry>
     <entry key='dolphin.port'>5219</entry>
     <entry key='ennfu.port'>5220</entry>
+    <entry key='navtelecom.port'>5221</entry>
 
 </properties>
