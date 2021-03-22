@@ -61,7 +61,7 @@ public class SnsSmsClient implements SmsManager {
         try {
             snsClient.publishAsync(new PublishRequest().withMessage(message)
                     .withPhoneNumber(destAddress).withMessageAttributes(smsAttributes));
-        } catch (Exception exception) {
+        } catch (RuntimeException exception) {
             LOGGER.warn("SMS send failed", exception);
         }
     }
