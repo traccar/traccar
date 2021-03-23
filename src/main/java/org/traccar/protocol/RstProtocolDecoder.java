@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,8 +87,8 @@ public class RstProtocolDecoder extends BaseProtocolDecoder {
         int index = parser.nextInt();
         parser.nextInt(); // type
 
-        if (channel != null && archive.equals("A")) {
-            String response = "RST;A;" + model + ";" + firmware + ";" + serial + ";" + index + ";6;FIM;";
+        if (channel != null) {
+            String response = "RST;" + archive + ";" + model + ";" + firmware + ";" + serial + ";" + index + ";6;FIM;";
             channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
 
