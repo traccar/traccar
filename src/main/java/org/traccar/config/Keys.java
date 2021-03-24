@@ -688,6 +688,28 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
+     * AWS Access Key with SNS permission.
+     */
+    public static final ConfigKey<String> SMS_AWS_ACCESS = new ConfigKey<>(
+            "sms.aws.access",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * AWS Secret Access Key with SNS permission.
+     */
+    public static final ConfigKey<String> SMS_AWS_SECRET = new ConfigKey<>(
+            "sms.aws.secret",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * AWS Region for SNS service.
+     * Make sure to use regions that are supported for messaging.
+     */
+    public static final ConfigKey<String> SMS_AWS_REGION = new ConfigKey<>(
+            "sms.aws.region",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
      * Traccar notification API key.
      */
     public static final ConfigKey<String> NOTIFICATOR_TRACCAR_KEY = new ConfigKey<>(
