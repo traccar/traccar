@@ -61,16 +61,16 @@ public class SnsSmsClient implements SmsManager {
         smsAttributes.put("AWS.SNS.SMS.SMSType",
                 new MessageAttributeValue().withStringValue("Transactional").withDataType("String"));
 
-        PublishRequest pubReq = new PublishRequest().withMessage(message)
+        PublishRequest publishRequest = new PublishRequest().withMessage(message)
                 .withPhoneNumber(destAddress).withMessageAttributes(smsAttributes);
 
-        snsClient.publishAsync( pubReq, new AsyncHandler<PublishRequest, PublishResult>() {
+        snsClient.publishAsync(publishRequest, new AsyncHandler<PublishRequest, PublishResult>() {
             @Override
-            public void onError( Exception exception) {
+            public void onError(Exception exception) {
                 LOGGER.error("SMS send failed", exception);
             }
             @Override
-            public void onSuccess( PublishRequest request, PublishResult result ) {
+            public void onSuccess(PublishRequest request, PublishResult result) {
                 LOGGER.info("SMS sent successfully");
             }
         });
