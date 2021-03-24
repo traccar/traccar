@@ -71,7 +71,6 @@ public class SnsSmsClient implements SmsManager {
             }
             @Override
             public void onSuccess(PublishRequest request, PublishResult result) {
-                LOGGER.info("SMS sent successfully");
             }
         });
     }
