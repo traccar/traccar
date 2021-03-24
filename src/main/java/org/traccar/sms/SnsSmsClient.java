@@ -18,11 +18,13 @@ package org.traccar.sms;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.handlers.AsyncHandler;
 import com.amazonaws.services.sns.AmazonSNSAsync;
 import com.amazonaws.services.sns.AmazonSNSAsyncClientBuilder;
 import com.amazonaws.services.sns.model.MessageAttributeValue;
 import com.amazonaws.services.sns.model.PublishRequest;
 
+import com.amazonaws.services.sns.model.PublishResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
@@ -58,12 +60,20 @@ public class SnsSmsClient implements SmsManager {
                 new MessageAttributeValue().withStringValue("SNS").withDataType("String"));
         smsAttributes.put("AWS.SNS.SMS.SMSType",
                 new MessageAttributeValue().withStringValue("Transactional").withDataType("String"));
-        try {
-            snsClient.publishAsync(new PublishRequest().withMessage(message)
-                    .withPhoneNumber(destAddress).withMessageAttributes(smsAttributes));
-        } catch (RuntimeException exception) {
-            LOGGER.warn("SMS send failed", exception);
-        }
+
+        PublishRequest pubReq = new PublishRequest().withMessage(message)
+                .withPhoneNumber(destAddress).withMessageAttributes(smsAttributes);
+
+        snsClient.publishAsync( pubReq, new AsyncHandler<PublishRequest, PublishResult>() {
+            @Override
+            public void onError( Exception exception) {
+                LOGGER.error("SMS send failed", exception);
+            }
+            @Override
+            public void onSuccess( PublishRequest request, PublishResult result ) {
+                LOGGER.info("SMS sent successfully");
+            }
+        });
     }
 
     @Override
