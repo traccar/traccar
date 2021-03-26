@@ -1,5 +1,4 @@
 /*
- * Copyright 2020 Anton Tananaev (anton@traccar.org)
  * Copyright 2021 Rafael Miquelino (rafaelmiquelino@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
