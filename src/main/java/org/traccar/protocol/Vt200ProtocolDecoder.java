@@ -142,6 +142,32 @@ public class Vt200ProtocolDecoder extends BaseProtocolDecoder {
 
             return position;
 
+        } else if (type == 0x3089) {
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            position.set(Position.KEY_IGNITION, buf.readUnsignedByte() == 1);
+            buf.readUnsignedShort(); // trip id
+
+            position.setTime(decodeDate(buf));
+
+            if (buf.readableBytes() >= 9) {
+                position.setLatitude(decodeCoordinate(BcdUtil.readInteger(buf, 8)));
+                position.setLongitude(decodeCoordinate(BcdUtil.readInteger(buf, 9)));
+
+                int flags = buf.readUnsignedByte();
+                position.setValid(BitUtil.check(flags, 0));
+                if (!BitUtil.check(flags, 1)) {
+                    position.setLatitude(-position.getLatitude());
+                }
+                if (!BitUtil.check(flags, 2)) {
+                    position.setLongitude(-position.getLongitude());
+                }
+            }
+
+            return position;
+
         }
 
         return null;
