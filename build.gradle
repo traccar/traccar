@@ -17,7 +17,7 @@ ext {
     protobufVersion = "3.14.0"
 }
 
-sourceCompatibility = "1.8"
+sourceCompatibility = "11"
 compileJava.options.encoding = "UTF-8"
 jar.destinationDirectory = file("$projectDir/target")
 
@@ -36,7 +36,7 @@ protobuf {
 
 enforce {
     rule(enforcer.rules.EnforceBytecodeVersion) { r ->
-        r.maxJdkVersion = "1.8"
+        r.maxJdkVersion = "11"
     }
 }
 
