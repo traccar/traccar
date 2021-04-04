@@ -184,7 +184,7 @@
         <dependency>
             <groupId>org.mnode.ical4j</groupId>
             <artifactId>ical4j</artifactId>
-            <version>2.0.5</version> <!-- TODO UPGRADE -->
+            <version>3.0.22</version>
         </dependency>
         <dependency>
             <groupId>org.locationtech.spatial4j</groupId>
@@ -231,6 +231,11 @@
             <artifactId>activation</artifactId>
             <version>1.1.1</version>
         </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk</artifactId>
+            <version>1.11.967</version>
+        </dependency>
 
         <!-- override dependencies to match gradle -->
         <dependency>
@@ -263,12 +268,6 @@
             <artifactId>jackson-module-jaxb-annotations</artifactId>
             <version>2.12.1</version>
         </dependency>
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk</artifactId>
-            <version>1.11.967</version>
-        </dependency>
-
     </dependencies>
 
     <build>

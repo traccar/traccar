@@ -67,7 +67,7 @@ dependencies {
     implementation "org.apache.velocity:velocity:1.7"
     implementation "org.apache.velocity:velocity-tools:2.0"
     implementation "org.apache.commons:commons-collections4:4.4"
-    implementation "org.mnode.ical4j:ical4j:2.0.5" // needs upgrade
+    implementation "org.mnode.ical4j:ical4j:3.0.22"
     implementation "org.locationtech.spatial4j:spatial4j:0.8"
     implementation "org.locationtech.jts:jts-core:1.18.0"
     implementation "net.java.dev.jna:jna-platform:5.6.0"
