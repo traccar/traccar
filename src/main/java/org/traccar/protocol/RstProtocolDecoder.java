@@ -43,6 +43,7 @@ public class RstProtocolDecoder extends BaseProtocolDecoder {
             .number("(d{9});")                   // serial number
             .number("(d+);")                     // index
             .number("(d+);")                     // type
+            .groupBegin()
             .number("(dd)-(dd)-(dddd) ")         // event date
             .number("(dd):(dd):(dd);")           // event time
             .number("(dd)-(dd)-(dddd) ")         // fix date
@@ -68,6 +69,7 @@ public class RstProtocolDecoder extends BaseProtocolDecoder {
             .number("x{4};")                     // sensors
             .number("(xx);")                     // status 1
             .number("(xx);")                     // status 2
+            .groupEnd("?")
             .any()
             .compile();
 
@@ -85,7 +87,7 @@ public class RstProtocolDecoder extends BaseProtocolDecoder {
         String firmware = parser.next();
         String serial = parser.next();
         int index = parser.nextInt();
-        parser.nextInt(); // type
+        int type = parser.nextInt();
 
         if (channel != null) {
             String response = "RST;A;" + model + ";" + firmware + ";" + serial + ";" + index + ";6;FIM;";
@@ -97,36 +99,44 @@ public class RstProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position(getProtocolName());
-        position.setDeviceId(deviceSession.getDeviceId());
+        if (parser.hasNext()) {
 
-        position.setDeviceTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
-        position.setFixTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
-        position.setLatitude(parser.nextDouble());
-        position.setLongitude(parser.nextDouble());
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt()));
-        position.setCourse(parser.nextInt());
-        position.setAltitude(parser.nextInt());
-        position.setValid(parser.nextInt() > 0);
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
 
-        position.set(Position.KEY_SATELLITES, parser.nextInt());
-        position.set(Position.KEY_HDOP, parser.nextInt());
-        position.set(Position.PREFIX_IN + 1, parser.nextHexInt());
-        position.set(Position.PREFIX_IN + 2, parser.nextHexInt());
-        position.set(Position.PREFIX_IN + 3, parser.nextHexInt());
-        position.set(Position.PREFIX_OUT + 1, parser.nextHexInt());
-        position.set(Position.PREFIX_OUT + 2, parser.nextHexInt());
-        position.set(Position.KEY_POWER, parser.nextDouble());
-        position.set(Position.KEY_BATTERY, parser.nextDouble());
-        position.set(Position.KEY_ODOMETER, parser.nextInt());
-        position.set(Position.KEY_RSSI, parser.nextInt());
-        position.set(Position.PREFIX_TEMP + 1, (int) parser.nextHexInt().byteValue());
+            position.setDeviceTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
+            position.setFixTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
+            position.setLatitude(parser.nextDouble());
+            position.setLongitude(parser.nextDouble());
+            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt()));
+            position.setCourse(parser.nextInt());
+            position.setAltitude(parser.nextInt());
+            position.setValid(parser.nextInt() > 0);
 
-        int status = (parser.nextHexInt() << 8) + parser.nextHexInt();
-        position.set(Position.KEY_IGNITION, BitUtil.check(status, 7));
-        position.set(Position.KEY_STATUS, status);
+            position.set(Position.KEY_SATELLITES, parser.nextInt());
+            position.set(Position.KEY_HDOP, parser.nextInt());
+            position.set(Position.PREFIX_IN + 1, parser.nextHexInt());
+            position.set(Position.PREFIX_IN + 2, parser.nextHexInt());
+            position.set(Position.PREFIX_IN + 3, parser.nextHexInt());
+            position.set(Position.PREFIX_OUT + 1, parser.nextHexInt());
+            position.set(Position.PREFIX_OUT + 2, parser.nextHexInt());
+            position.set(Position.KEY_POWER, parser.nextDouble());
+            position.set(Position.KEY_BATTERY, parser.nextDouble());
+            position.set(Position.KEY_ODOMETER, parser.nextInt());
+            position.set(Position.KEY_RSSI, parser.nextInt());
+            position.set(Position.PREFIX_TEMP + 1, (int) parser.nextHexInt().byteValue());
 
-        return position;
+            int status = (parser.nextHexInt() << 8) + parser.nextHexInt();
+            position.set(Position.KEY_IGNITION, BitUtil.check(status, 7));
+            position.set(Position.KEY_STATUS, status);
+
+            return position;
+
+        } else {
+
+            return null;
+
+        }
     }
 
 }
