@@ -3,7 +3,6 @@ plugins {
     id "checkstyle"
     id "com.google.protobuf" version "0.8.12"
     id "org.kordamp.gradle.project-enforcer" version "0.9.0"
-    id "application"
 }
 
 repositories {
@@ -20,7 +19,7 @@ ext {
 
 sourceCompatibility = "1.8"
 compileJava.options.encoding = "UTF-8"
-mainClassName = "org.traccar.Main"
+jar.destinationDirectory = file("$projectDir/target")
 
 checkstyle {
     toolVersion = "8.26"
@@ -92,11 +91,7 @@ task copyDependencies(type: Copy) {
     into "$projectDir/target/lib"
     from configurations.runtimeClasspath
 }
-task copyBinary(type: Copy) {
-    into "$projectDir/target"
-    from jar
-}
-assemble.dependsOn(copyBinary, copyDependencies)
+assemble.dependsOn(copyDependencies)
 
 jar {
     manifest {
