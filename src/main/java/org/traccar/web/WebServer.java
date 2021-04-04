@@ -29,6 +29,7 @@ import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
@@ -149,6 +150,7 @@ public class WebServer {
 
     private void initApi(Config config, ServletContextHandler servletHandler) {
         servletHandler.addServlet(new ServletHolder(new AsyncSocketServlet()), "/api/socket");
+        JettyWebSocketServletContainerInitializer.configure(servletHandler, null);
 
         String mediaPath = config.getString(Keys.MEDIA_PATH);
         if (mediaPath != null) {

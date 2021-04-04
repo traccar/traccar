@@ -11,7 +11,7 @@ repositories {
 
 ext {
     guiceVersion = "4.2.3"
-    jettyVersion = "9.4.36.v20210114" // jetty 10 requires java 11, jetty 11 javax to jakarta
+    jettyVersion = "10.0.2" // jetty 11 javax to jakarta
     jerseyVersion = "2.33" // jersey 3 javax to jakarta
     jacksonVersion = "2.12.1" // same version as jersey-media-json-jackson dependency
     protobufVersion = "3.14.0"
@@ -48,7 +48,7 @@ dependencies {
     implementation "com.microsoft.sqlserver:mssql-jdbc:9.2.0.jre8"
     implementation "com.zaxxer:HikariCP:4.0.1"
     implementation "io.netty:netty-all:4.1.58.Final"
-    implementation "org.slf4j:slf4j-jdk14:1.7.30"
+    implementation "org.slf4j:slf4j-jdk14:2.0.0-alpha1"
     implementation "com.google.inject:guice:$guiceVersion"
     implementation "com.google.inject.extensions:guice-assistedinject:$guiceVersion"
     implementation "org.owasp.encoder:encoder:1.2.3"
@@ -58,7 +58,7 @@ dependencies {
     implementation "org.eclipse.jetty:jetty-webapp:$jettyVersion"
     implementation "org.eclipse.jetty:jetty-jndi:$jettyVersion"
     implementation "org.eclipse.jetty:jetty-proxy:$jettyVersion"
-    implementation "org.eclipse.jetty.websocket:websocket-server:$jettyVersion" // websocket-jetty-server from jetty 10
+    implementation "org.eclipse.jetty.websocket:websocket-jetty-server:$jettyVersion"
     implementation "org.glassfish.jersey.containers:jersey-container-servlet:$jerseyVersion"
     implementation "org.glassfish.jersey.media:jersey-media-json-jackson:$jerseyVersion"
     implementation "org.glassfish.jersey.inject:jersey-hk2:$jerseyVersion"
