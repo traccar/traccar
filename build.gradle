@@ -2,6 +2,7 @@ plugins {
     id "java"
     id "checkstyle"
     id "com.google.protobuf" version "0.8.12"
+    id "org.kordamp.gradle.project-enforcer" version "0.9.0"
     id "application"
 }
 
@@ -31,6 +32,12 @@ protobuf {
     generatedFilesBaseDir = "$projectDir/src"
     protoc {
         artifact = "com.google.protobuf:protoc:$protobufVersion"
+    }
+}
+
+enforce {
+    rule(enforcer.rules.EnforceBytecodeVersion) { r ->
+        r.maxJdkVersion = "1.8"
     }
 }
 
