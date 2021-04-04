@@ -16,23 +16,21 @@
  */
 package org.traccar.model;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.time.Duration;
-import java.util.Collection;
-import java.util.Date;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.filter.Filter;
 import net.fortuna.ical4j.filter.PeriodRule;
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.Period;
-import net.fortuna.ical4j.model.TimeZoneRegistryImpl;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import org.traccar.database.QueryIgnore;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.time.Duration;
+import java.util.Collection;
+import java.util.Date;
 
 public class Calendar extends ExtendedModel {
 
