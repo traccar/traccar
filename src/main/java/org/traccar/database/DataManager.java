@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -272,11 +272,11 @@ public class DataManager {
         return result;
     }
 
-    private void initDatabaseSchema() throws SQLException, LiquibaseException {
+    private void initDatabaseSchema() throws LiquibaseException {
 
         if (config.hasKey(Keys.DATABASE_CHANGELOG)) {
 
-            ResourceAccessor resourceAccessor = new FileSystemResourceAccessor();
+            ResourceAccessor resourceAccessor = new FileSystemResourceAccessor(new File("."));
 
             Database database = DatabaseFactory.getInstance().openDatabase(
                     config.getString(Keys.DATABASE_URL),
