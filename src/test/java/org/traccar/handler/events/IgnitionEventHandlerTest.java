@@ -1,6 +1,6 @@
 package org.traccar.handler.events;
 
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.Map;
 
@@ -21,7 +21,7 @@ public class IgnitionEventHandlerTest extends BaseTest {
         position.set(Position.KEY_IGNITION, true);
         position.setValid(true);
         Map<Event, Position> events = ignitionEventHandler.analyzePosition(position);
-        assertNull(events);
+        assertNotNull(events);
     }
 
 }

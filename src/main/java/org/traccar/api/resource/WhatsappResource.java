@@ -6,12 +6,22 @@
 package org.traccar.api.resource;
 
 import java.text.Normalizer;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoField;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.security.PermitAll;
@@ -22,6 +32,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.InvocationCallback;
 import javax.ws.rs.core.MediaType;
+import org.apache.velocity.tools.generic.DateTool;
 import org.apache.velocity.tools.generic.NumberTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,13 +45,19 @@ import org.traccar.model.Position;
 import org.traccar.model.Server;
 import org.traccar.model.User;
 import org.traccar.notification.NotificationFormatter;
+import org.traccar.reports.ReportUtils;
+import org.traccar.reports.Summary;
+import org.traccar.reports.model.SummaryReport;
 
 @Path("whatsapp")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class WhatsappResource {
 
-    private static final List<String> commands = Arrays.asList("LOCALIZAR", "EMERGENCIA", "SEGUIR", "BLOQUEAR", "DESBLOQUEAR", "VELOCIDADE", "SILENCIAR", "NOTIFICAR", "SUPORTE", "CANCELAR");
+    private static final List<String> commands = Arrays.asList("LOCALIZAR",
+            "EMERGENCIA", "SEGUIR", "BLOQUEAR", "DESBLOQUEAR", "VELOCIDADE",
+            "SILENCIAR", "NOTIFICAR", "SUPORTE", "CANCELAR", "KMHOJE", "KMONTEM",
+            "KMSEMANA", "KMMES");
     private static final Logger LOGGER = LoggerFactory.getLogger(WhatsappResource.class);
 
     @POST
@@ -137,6 +154,7 @@ public class WhatsappResource {
                 } else {
                     name = messages.get(1);
                 }
+
                 for (Device d : devices) {
                     if (!d.getName().isEmpty() && d.getName().toUpperCase().contains(name)) {
                         device = d;
@@ -159,7 +177,23 @@ public class WhatsappResource {
 
             mapParams.put("device", device);
             mapParams.put("position", position);
+            mapParams.put("timezone", ReportUtils.getTimezone(user.getId()));
+            TimeZone timezone = ReportUtils.getTimezone(user.getId());
+            mapParams.put("dateTool", new DateTool());
+            mapParams.put("numberTool", new NumberTool());
+            mapParams.put("locale", Locale.getDefault());
+
             String whatsappEmergency = user.getString("whatsappEmergency");
+
+            ZoneId clientTimezone = ZoneId.of(timezone.getID());
+            ZoneId serverTimezone = ZoneId.of(TimeZone.getDefault().getID());
+            ZonedDateTime zonedDateTime = ZonedDateTime.of(LocalDate.now(clientTimezone)
+                    .atStartOfDay(clientTimezone).toLocalDateTime(), clientTimezone)
+                    .withZoneSameInstant(serverTimezone);
+
+            Date startDate;
+            Date endDate;
+            Collection<SummaryReport> report;
 
             switch (messages.get(0)) {
                 case "LOCALIZAR":
@@ -234,6 +268,67 @@ public class WhatsappResource {
 
                     return NotificationFormatter
                             .formatMessage(mapParams, "cancelEmergencyResponse", "whatsapp");
+
+                case "KMHOJE":
+                    startDate = Date.from(zonedDateTime.toInstant());
+                    endDate = Date.from(zonedDateTime.plusHours(23).plusMinutes(59).plusSeconds(59).toInstant());
+                    mapParams.put("startDate", startDate);
+                    mapParams.put("endDate", endDate);
+
+                    report = Summary.getObjects(user.getId(),
+                            Arrays.asList(device.getId()),
+                            new ArrayList<>(),
+                            startDate,
+                            endDate);
+                    mapParams.put("report", report);
+                    return NotificationFormatter
+                            .formatMessage(mapParams, "report", "whatsapp");
+
+                case "KMONTEM":
+                    startDate = Date.from(zonedDateTime.minusDays(1).toInstant());
+                    endDate = Date.from(zonedDateTime.minusDays(1).plusHours(23).plusMinutes(59).plusSeconds(59).toInstant());
+                    mapParams.put("startDate", startDate);
+                    mapParams.put("endDate", endDate);
+
+                    report = Summary.getObjects(user.getId(),
+                            Arrays.asList(device.getId()),
+                            new ArrayList<>(),
+                            startDate,
+                            endDate);
+                    mapParams.put("report", report);
+                    return NotificationFormatter
+                            .formatMessage(mapParams, "report", "whatsapp");
+
+                case "KMSEMANA":
+                    startDate = Date.from(zonedDateTime.with(ChronoField.DAY_OF_WEEK, 1).toInstant());
+                    endDate = Date.from(zonedDateTime.with(ChronoField.DAY_OF_WEEK, 7).plusHours(23).plusMinutes(59).plusSeconds(59).toInstant());
+                    mapParams.put("startDate", startDate);
+                    mapParams.put("endDate", endDate);
+
+                    report = Summary.getObjects(user.getId(),
+                            Arrays.asList(device.getId()),
+                            new ArrayList<>(),
+                            startDate,
+                            endDate);
+                    mapParams.put("report", report);
+                    return NotificationFormatter
+                            .formatMessage(mapParams, "report", "whatsapp");
+
+                case "KMMES":
+                    startDate = Date.from(zonedDateTime.with(ChronoField.DAY_OF_MONTH, 1).toInstant());
+                    endDate = Date.from(zonedDateTime.plusMonths(1).with(ChronoField.DAY_OF_MONTH, 1).minusDays(1).plusHours(23).plusMinutes(59).plusSeconds(59).toInstant());
+                    mapParams.put("startDate", startDate);
+                    mapParams.put("endDate", endDate);
+
+                    report = Summary.getObjects(user.getId(),
+                            Arrays.asList(device.getId()),
+                            new ArrayList<>(),
+                            startDate,
+                            endDate);
+                    mapParams.put("report", report);
+                    return NotificationFormatter
+                            .formatMessage(mapParams, "report", "whatsapp");
+
                 default:
                     return NotificationFormatter.formatMessage(null, "menu", "whatsapp");
             }

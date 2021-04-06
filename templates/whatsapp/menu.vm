@@ -39,4 +39,18 @@ _Para qualquer tipo de apoio técnico, administrativo ou financeiro de nossa equ
 _Em casos de intervenção policial, nossa equipe de pronta resposta será acionada_
 #end
 
+📃 ```.:: RELATÓRIOS ::.```
+
+*KMHOJE*
+_Retorna o resumo da data atual_
+
+*KMONTEM*
+_Retorna o resumo do dia anterior_
+
+*KMSEMANA*
+_Retorna o resumo da semana atual_
+
+*KMMES*
+_Retorna o resumo do mês atual_
+
 ❗ Caso tenha mais de um veículo os comandos deverão ser seguidos da placa ou nome do mesmo. Exemplo, LOCALIZAR AAA-1234

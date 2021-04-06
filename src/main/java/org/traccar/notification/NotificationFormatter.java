@@ -26,11 +26,12 @@ import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.tools.generic.DateTool;
+import org.apache.velocity.tools.generic.EscapeTool;
 import org.apache.velocity.tools.generic.NumberTool;
+import org.apache.velocity.tools.view.tools.LinkTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
-import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -53,6 +54,8 @@ public final class NotificationFormatter {
         velocityContext.put("user", user);
         velocityContext.put("device", device);
         velocityContext.put("event", event);
+        velocityContext.put("escapeTool", new EscapeTool());
+        velocityContext.put("linkTool", new LinkTool());
         if (position != null) {
             velocityContext.put("position", position);
             velocityContext.put("speedUnit", ReportUtils.getSpeedUnit(userId));
@@ -110,6 +113,8 @@ public final class NotificationFormatter {
 
     public static String formatMessage(Map params, String template, String path) {
         VelocityContext velocityContext = new VelocityContext(params);
+        velocityContext.put("escapeTool", new EscapeTool());
+        velocityContext.put("linkTool", new LinkTool());
         Template temp = getTemplate(new Event(template, 0), path);
         StringWriter writer = new StringWriter();
         temp.merge(velocityContext, writer);

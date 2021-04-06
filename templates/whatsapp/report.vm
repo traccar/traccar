@@ -1,0 +1,31 @@
+ℹ️ *$device.name*
+
+_Data inicial_
+	- *$dateTool.format("dd/MM/yy HH:mm:ss", $startDate, $locale, $timezone)*
+_Data final_
+	- *$dateTool.format("dd/MM/yy HH:mm:ss", $endDate, $locale, $timezone)*
+#if($report.isEmpty)
+
+Nenhum dado para o período informado.
+
+#else
+#set($data = $report[0])
+#set($data.engineHours = $data.engineHours / 3600000)
+#set($data.maxSpeed = $data.maxSpeed * 1.852)
+#set($data.averageSpeed = $data.averageSpeed * 1.852)
+#set($data.startOdometer = $data.startOdometer / 1000)
+#set($data.endOdometer = $data.endOdometer / 1000)
+#set($data.distance = $data.distance / 1000)
+_Velocidade Máxima_
+	- *$numberTool.format("0.0 km/h", $data.maxSpeed)*
+_Velocidade Média_
+	- *$numberTool.format("0.0 km/h", $data.averageSpeed)*
+_Tempo Ligado_
+	- *$numberTool.format("0.00 horas", $data.engineHours)*
+_Odômetro Inicial_
+	- *$numberTool.format("0.00 km", $data.startOdometer)*
+_Odômetro Final_
+	- *$numberTool.format("0.00 km", $data.endOdometer)*
+_Distância Total_
+	- *$numberTool.format("0.00 km", $data.distance)*
+#end
