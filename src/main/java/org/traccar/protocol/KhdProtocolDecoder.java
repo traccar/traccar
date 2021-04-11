@@ -73,6 +73,8 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_EXIT);
         } else if (BitUtil.check(status[0], 7)) {
             position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_ENTER);
+        } else if (BitUtil.check(status[1], 0)) {
+            position.set(Position.KEY_ALARM, Position.ALARM_SOS);
         } else if (BitUtil.check(status[1], 1)) {
             position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
         } else if (BitUtil.check(status[1], 3)) {
