@@ -287,5 +287,6 @@
     <entry key='ennfu.port'>5220</entry>
     <entry key='navtelecom.port'>5221</entry>
     <entry key='startek.port'>5222</entry>
+    <entry key='gs100.port'>5223</entry>
 
 </properties>
