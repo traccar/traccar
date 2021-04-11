@@ -8,7 +8,7 @@ public class XexunProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        XexunProtocolDecoder decoder = new XexunProtocolDecoder(null, false);
+        var decoder = new XexunProtocolDecoder(null, false);
 
         verifyAttributes(decoder, text(
                 "GPRMC,.000,A,0.000000,S,0.0000,W,0.00,0.00,,00,0000.0,A*55,L,,imei:353579010727036,"));

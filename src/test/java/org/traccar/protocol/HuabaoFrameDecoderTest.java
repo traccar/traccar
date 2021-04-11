@@ -8,7 +8,7 @@ public class HuabaoFrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        HuabaoFrameDecoder decoder = new HuabaoFrameDecoder();
+        var decoder = new HuabaoFrameDecoder();
 
         verifyFrame(
                 binary("283734303139303331313138352c312c3030312c454c4f434b2c332c35323934333929"),

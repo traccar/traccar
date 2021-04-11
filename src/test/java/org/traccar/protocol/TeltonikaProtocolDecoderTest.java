@@ -9,7 +9,7 @@ public class TeltonikaProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        TeltonikaProtocolDecoder decoder = new TeltonikaProtocolDecoder(null, false);
+        var decoder = new TeltonikaProtocolDecoder(null, false);
 
         verifyNull(decoder, binary(
                 "000F313233343536373839303132333435"));
@@ -118,7 +118,7 @@ public class TeltonikaProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecodePhoto() throws Exception {
 
-        TeltonikaProtocolDecoder decoder = new TeltonikaProtocolDecoder(null, false);
+        var decoder = new TeltonikaProtocolDecoder(null, false);
 
         verifyNull(decoder, binary(
                 "000F313233343536373839303132333435"));
@@ -138,7 +138,7 @@ public class TeltonikaProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecodeConnectionless() throws Exception {
 
-        TeltonikaProtocolDecoder decoder = new TeltonikaProtocolDecoder(null, true);
+        var decoder = new TeltonikaProtocolDecoder(null, true);
 
         verifyPositions(decoder, false, binary(
                 "0049cafe0122000f33353734353430373237313339373508010000015d3766f6a800003eef961ec6215e0063006d09003100070401000200f001c8000242381c18003201c7000000e10001"));

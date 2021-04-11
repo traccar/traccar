@@ -8,7 +8,7 @@ public class ManPowerProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        ManPowerProtocolDecoder decoder = new ManPowerProtocolDecoder(null);
+        var decoder = new ManPowerProtocolDecoder(null);
 
         verifyPosition(decoder, text(
                 "simei:352581250259539,,,tracker,51,24,1.73,130426023608,A,3201.5462,N,03452.2975,E,0.01,28B9,1DED,425,01,1x0x0*0x1*60x+2,en-us,"),

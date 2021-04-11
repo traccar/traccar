@@ -8,7 +8,7 @@ public class TytanProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        TytanProtocolDecoder decoder = new TytanProtocolDecoder(null);
+        var decoder = new TytanProtocolDecoder(null);
 
         verifyPositions(decoder, binary(
                 "B500192000001405125652CA9B1A325FC98D11A9990018020118FC0D"));

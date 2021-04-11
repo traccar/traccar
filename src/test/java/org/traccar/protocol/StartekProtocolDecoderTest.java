@@ -8,7 +8,7 @@ public class StartekProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        StartekProtocolDecoder decoder = new StartekProtocolDecoder(null);
+        var decoder = new StartekProtocolDecoder(null);
 
         verifyPosition(decoder, text(
                 "&&A147,021104023195429,000,0,,180106093046,A,22.646430,114.065730,8,0.9,54,86,76,326781,460|0|27B3|0EA7,27,0000000F,02,01,04E2|018C|01C8|0000,1,0104B0,01013D|02813546"));

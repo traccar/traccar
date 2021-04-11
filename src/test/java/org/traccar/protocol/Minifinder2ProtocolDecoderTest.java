@@ -8,7 +8,7 @@ public class Minifinder2ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        Minifinder2ProtocolDecoder decoder = new Minifinder2ProtocolDecoder(null);
+        var decoder = new Minifinder2ProtocolDecoder(null);
 
         verifyNull(decoder, binary(
                 "ab10150076f1320003100133353534363530373130323933303602105a"));

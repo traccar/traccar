@@ -8,7 +8,7 @@ public class TeltonikaFrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        TeltonikaFrameDecoder decoder = new TeltonikaFrameDecoder();
+        var decoder = new TeltonikaFrameDecoder();
 
         verifyFrame(
                 binary("000F313233343536373839303132333435"),

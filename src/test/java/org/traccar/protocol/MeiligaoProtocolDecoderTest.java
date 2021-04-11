@@ -9,7 +9,7 @@ public class MeiligaoProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        MeiligaoProtocolDecoder decoder = new MeiligaoProtocolDecoder(null);
+        var decoder = new MeiligaoProtocolDecoder(null);
 
         verifyAttribute(decoder, binary(
                 "2424008f142180340967ff99553033333233302e3030302c412c313531362e383039392c4e2c31303435322e383835352c452c302e30302c33332c3038313232302c2c2a33367c302e387c3132337c323130307c303030302c303030302c303230452c303241417c30323038303030353038394530304531434638347c31437c31373243353832437c3042a8060d0a"),

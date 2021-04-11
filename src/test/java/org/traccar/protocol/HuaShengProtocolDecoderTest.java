@@ -9,7 +9,7 @@ public class HuaShengProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        HuaShengProtocolDecoder decoder = new HuaShengProtocolDecoder(null);
+        var decoder = new HuaShengProtocolDecoder(null);
 
         verifyNull(decoder, binary(
                 "c0010c003c0002000000000044020010a0014f42445f3347315f56322e320013a0043335353835353035313032303536360006a08700000006a0a105c9c0"));

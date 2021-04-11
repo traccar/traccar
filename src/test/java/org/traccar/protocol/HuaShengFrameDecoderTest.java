@@ -10,7 +10,7 @@ public class HuaShengFrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        HuaShengFrameDecoder decoder = new HuaShengFrameDecoder();
+        var decoder = new HuaShengFrameDecoder();
 
         assertEquals(
                 binary("c0010c00120060000000000004000600010100c0"),

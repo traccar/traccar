@@ -8,7 +8,7 @@ public class MegastekFrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        MegastekFrameDecoder decoder = new MegastekFrameDecoder();
+        var decoder = new MegastekFrameDecoder();
 
         verifyFrame(
                 binary("30313337244d47563030322c3335343535303035303239323636392c4756543930302c522c3134313231352c3033313830342c412c2c532c2c452c30302c30332c30302c332e36372c302e3030302c302e30302c3131372e312c302e302c3531302c31302c2c2c2c303030302c303030302c32322c31322c302c202c202c2c312d312c39382c5057204f4e3b21"),

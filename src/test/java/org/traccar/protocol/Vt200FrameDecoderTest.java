@@ -8,7 +8,7 @@ public class Vt200FrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        Vt200FrameDecoder decoder = new Vt200FrameDecoder();
+        var decoder = new Vt200FrameDecoder();
 
         verifyFrame(
                 binary("28631037309456208400340102dc0906171616454415760201144494473f920a0c0000030500200100417c1f383a9d1090510000006a00007000000e00180ee129"),

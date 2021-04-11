@@ -9,7 +9,7 @@ public class RuptelaProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        RuptelaProtocolEncoder encoder = new RuptelaProtocolEncoder(null);
+        var encoder = new RuptelaProtocolEncoder(null);
 
         Command command = new Command();
         command.setDeviceId(1);

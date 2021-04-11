@@ -8,7 +8,7 @@ public class MegastekProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        MegastekProtocolDecoder decoder = new MegastekProtocolDecoder(null);
+        var decoder = new MegastekProtocolDecoder(null);
 
         verifyPosition(decoder, text(
                 "0132$MGV002,869152024261561,,S,310818,133945,V,3814.35442,N,02144.50662,E,00,00,00,99.9,,,44.2,,202,10,,,13,0,0,0,0,90,,,,11,100,Timer;!"));

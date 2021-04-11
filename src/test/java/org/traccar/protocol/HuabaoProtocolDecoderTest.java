@@ -9,7 +9,7 @@ public class HuabaoProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        HuabaoProtocolDecoder decoder = new HuabaoProtocolDecoder(null);
+        var decoder = new HuabaoProtocolDecoder(null);
 
         verifyNull(decoder, binary(
                 "7E01000021013345678906000F002C012F373031313142534A2D4D3742203030303030303001D4C1423838383838B47E"));

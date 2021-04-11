@@ -8,7 +8,7 @@ public class DishaProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        DishaProtocolDecoder decoder = new DishaProtocolDecoder(null);
+        var decoder = new DishaProtocolDecoder(null);
 
         verifyPosition(decoder, text(
                 "$A#A#864161028848856#A#053523#010216#2232.7733#N#08821.1940#E#002.75#038.1#09#00.8#1800#0#000#0000#9999#11.7#285.7#0001*"));

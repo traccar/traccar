@@ -8,7 +8,7 @@ public class M2cProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        M2cProtocolDecoder decoder = new M2cProtocolDecoder(null);
+        var decoder = new M2cProtocolDecoder(null);
 
         verifyPositions(decoder, text(
                 "[#M2C,2020,P1.B1.H3.F9.R1,102,864547034433966,1,L,0,20,171221,062016,28.647552,77.192841,0,0,0.0,0,0,64,255,11983,0,0,0,0.0,0,0,0,404,4,1F6,4D77,31,0*7524\r\n",

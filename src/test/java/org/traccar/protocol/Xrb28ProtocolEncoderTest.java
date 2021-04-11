@@ -11,7 +11,7 @@ public class Xrb28ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodePositionPeriodic() {
 
-        Xrb28ProtocolEncoder encoder = new Xrb28ProtocolEncoder(null);
+        var encoder = new Xrb28ProtocolEncoder(null);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -25,7 +25,7 @@ public class Xrb28ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeCustom() {
 
-        Xrb28ProtocolEncoder encoder = new Xrb28ProtocolEncoder(null);
+        var encoder = new Xrb28ProtocolEncoder(null);
 
         Command command = new Command();
         command.setDeviceId(1);

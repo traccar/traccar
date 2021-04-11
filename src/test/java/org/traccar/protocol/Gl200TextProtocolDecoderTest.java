@@ -9,7 +9,7 @@ public class Gl200TextProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        Gl200TextProtocolDecoder decoder = new Gl200TextProtocolDecoder(null);
+        var decoder = new Gl200TextProtocolDecoder(null);
 
         verifyAttributes(decoder, buffer(
                 "+RESP:GTINF,DC0103,865284049247079,gv600mg,21,89883070000007211665,22,0,11,12913,12917,4.26,0,1,,,20210216154607,1,79,,01,00,,,20210216104606,1EBE$"));

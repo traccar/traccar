@@ -10,7 +10,7 @@ public class AppletProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        AppletProtocolDecoder decoder = new AppletProtocolDecoder(null);
+        var decoder = new AppletProtocolDecoder(null);
 
         DefaultHttpHeaders headers = new DefaultHttpHeaders();
 

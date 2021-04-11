@@ -8,7 +8,7 @@ public class TekFrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        TekFrameDecoder decoder = new TekFrameDecoder();
+        var decoder = new TekFrameDecoder();
 
         verifyFrame(
                 binary("020315048715E70861074028023219026200400A0340002C007F0009000000000000000000402842064028420641284206402844064128440640284406402844064028440641284406402844060010010C04052B000253000000000001060A0000000000000228330000FF0000FF360014B394"),

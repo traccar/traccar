@@ -8,7 +8,7 @@ public class Vt200ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        Vt200ProtocolDecoder decoder = new Vt200ProtocolDecoder(null);
+        var decoder = new Vt200ProtocolDecoder(null);
 
         verifyPosition(decoder, binary(
                 "28192030961807208200210101b919011818375801245774036424612500160917000003aa008800007b00aa3429"));

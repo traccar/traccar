@@ -9,7 +9,7 @@ public class T800xProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        T800xProtocolDecoder decoder = new T800xProtocolDecoder(null);
+        var decoder = new T800xProtocolDecoder(null);
 
         verifyAttributes(decoder, binary(
                 "252510003100180865284041080544201221191023000003ffff9702eff820014700000000912a6ac26dff09c200000000"));

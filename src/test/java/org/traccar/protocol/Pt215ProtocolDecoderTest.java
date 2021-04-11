@@ -8,7 +8,7 @@ public class Pt215ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        Pt215ProtocolDecoder decoder = new Pt215ProtocolDecoder(null);
+        var decoder = new Pt215ProtocolDecoder(null);
 
         verifyNull(decoder, binary(
                 "58580d010359339075435451010d0a"));

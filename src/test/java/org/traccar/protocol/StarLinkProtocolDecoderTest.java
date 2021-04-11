@@ -9,7 +9,7 @@ public class StarLinkProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        StarLinkProtocolDecoder decoder = new StarLinkProtocolDecoder(null);
+        var decoder = new StarLinkProtocolDecoder(null);
 
         decoder.setFormat("#IMEI#,#EDT#,#PDT#,#LAT#,#LONG#,#SPD#,#IGN#,#ODO#,#DUR#,#TDUR#,#LAC#,#CID#,#VIN#,#VBAT#,#EID#,#EDSC#,#DRV#,#SATU#,#CSS#,#OUT1#,#OUT2#,#CFL#");
 

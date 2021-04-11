@@ -8,7 +8,7 @@ public class SmartSoleProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        SmartSoleProtocolDecoder decoder = new SmartSoleProtocolDecoder(null);
+        var decoder = new SmartSoleProtocolDecoder(null);
 
         verifyPosition(decoder, text(
                 "#GTXRP=359366080000385,8,180514200051,34.041981,-118.255806,60,1,1,7,1.80,180514200051,4.16,11"));

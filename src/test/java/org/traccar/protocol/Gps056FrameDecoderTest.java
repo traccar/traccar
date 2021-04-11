@@ -10,7 +10,7 @@ public class Gps056FrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        Gps056FrameDecoder decoder = new Gps056FrameDecoder();
+        var decoder = new Gps056FrameDecoder();
 
         assertEquals(
                 binary("242435314750534c5f30323836323436323033333738323934361905110f160b0b7710584e1cbd1b9b4500005b100300fb0a071700ffff23"),

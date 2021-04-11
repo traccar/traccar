@@ -9,7 +9,7 @@ public class CastelProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        CastelProtocolEncoder encoder = new CastelProtocolEncoder(null);
+        var encoder = new CastelProtocolEncoder(null);
 
         Command command = new Command();
         command.setDeviceId(1);

@@ -13,7 +13,7 @@ public class WatchProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        WatchProtocolDecoder decoder = new WatchProtocolDecoder(null);
+        var decoder = new WatchProtocolDecoder(null);
 
         verifyPosition(decoder, buffer(
                 "[3G*358839237678820*0122*ALCUSTOMER1,251120,081821,V,0.0,N,0.0,E,2.58,317.462,35.147,14,100,2,11089,0,00100008,1,1,460,01,42308,101992452,100,5,shizhou1,44:56:e2:03:ea:2a,-69,FART3,30:0d:9e:bb:fa:4d,-70,ZKY-A209,88:c3:97:c1:f4:7f,-73,ChinaNet-HNeD,e8:84:c6:21:7c:dc,-77,,30:45:96:10:14:5d,-79,1.2035439]"));
@@ -127,7 +127,7 @@ public class WatchProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecodeVoiceMessage() throws Exception {
 
-        WatchProtocolDecoder decoder = new WatchProtocolDecoder(null);
+        var decoder = new WatchProtocolDecoder(null);
 
         verifyNull(decoder.decode(null, null, buffer("[CS*1234567890*0004*TK,1]")));
 

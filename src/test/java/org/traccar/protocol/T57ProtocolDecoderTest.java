@@ -8,7 +8,7 @@ public class T57ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        T57ProtocolDecoder decoder = new T57ProtocolDecoder(null);
+        var decoder = new T57ProtocolDecoder(null);
 
         verifyPosition(decoder, text(
                 "*T57#F1#T571117001#301117#000843#2234.1303#N#08826.1714#E#+0.242,+0.109,-0.789#0.000#6.20000#A2#4.2#"));

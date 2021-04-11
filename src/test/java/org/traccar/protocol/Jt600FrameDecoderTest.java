@@ -8,7 +8,7 @@ public class Jt600FrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        Jt600FrameDecoder decoder = new Jt600FrameDecoder();
+        var decoder = new Jt600FrameDecoder();
 
         verifyFrame(
                 binary("2478905197081711003405101917164812492365028134847d0a1c000002640c0000000020c032759600731000000f0f0f0f0f0f0f0f0f0f000702850274"),

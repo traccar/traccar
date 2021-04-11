@@ -8,7 +8,7 @@ public class MictrackProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecodeStandard() throws Exception {
 
-        MictrackProtocolDecoder decoder = new MictrackProtocolDecoder(null);
+        var decoder = new MictrackProtocolDecoder(null);
 
         verifyNull(decoder, text(
                 "mode=Success!"));
@@ -39,7 +39,7 @@ public class MictrackProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecodeLowAltitude() throws Exception {
 
-        MictrackProtocolDecoder decoder = new MictrackProtocolDecoder(null);
+        var decoder = new MictrackProtocolDecoder(null);
 
         verifyPositions(decoder, text(
                 "861108032038761$062232.00,A,2238.2832,N,11401.7381,E,0.01,309.62,95.0,131117"));

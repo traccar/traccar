@@ -19,7 +19,7 @@ public class H02ProtocolEncoderTest extends ProtocolTest {
             LocalDateTime.of(LocalDate.now(), LocalTime.of(1, 2, 3)).atZone(ZoneOffset.systemDefault()).toInstant());
 
     @Test
-    public void testAlarmArmEncode() throws Exception {
+    public void testAlarmArmEncode() {
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -29,7 +29,7 @@ public class H02ProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
-    public void testAlarmDisarmEncode() throws Exception {
+    public void testAlarmDisarmEncode() {
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -39,7 +39,7 @@ public class H02ProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
-    public void testEngineStopEncode() throws Exception {
+    public void testEngineStopEncode() {
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -49,7 +49,7 @@ public class H02ProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
-    public void testEngineResumeEncode() throws Exception {
+    public void testEngineResumeEncode() {
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -59,7 +59,7 @@ public class H02ProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
-    public void testPositionPeriodicEncode() throws Exception {
+    public void testPositionPeriodicEncode() {
 
         Command command = new Command();
         command.setDeviceId(1);

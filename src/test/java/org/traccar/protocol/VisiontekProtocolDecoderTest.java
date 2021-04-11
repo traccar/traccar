@@ -8,7 +8,7 @@ public class VisiontekProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        VisiontekProtocolDecoder decoder = new VisiontekProtocolDecoder(null);
+        var decoder = new VisiontekProtocolDecoder(null);
 
         verifyPosition(decoder, text(
                 "$1,117,28,01,16,15,05,48,1725.0518N,07824.5298E,0620,11,0,185,2062,0,0,0,1,1,1,1,24,00.0000,00.3740,00.0000,VAJRA V1.00,A"));

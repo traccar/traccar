@@ -8,7 +8,7 @@ public class VnetProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        VnetProtocolDecoder decoder = new VnetProtocolDecoder(null);
+        var decoder = new VnetProtocolDecoder(null);
 
         verifyNull(decoder, binary(
                 "24240000140029111909062986818303379282604c452e322e30302ea32b020f0000d3552323"));

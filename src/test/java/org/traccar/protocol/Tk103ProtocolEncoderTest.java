@@ -11,7 +11,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeOutputControl() {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null);
+        var encoder = new Tk103ProtocolEncoder(null);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -25,7 +25,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeEngineStop() {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null);
+        var encoder = new Tk103ProtocolEncoder(null);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -38,7 +38,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodePositionSingle() {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null);
+        var encoder = new Tk103ProtocolEncoder(null);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -51,7 +51,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodePositionPeriodic() {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null);
+        var encoder = new Tk103ProtocolEncoder(null);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -65,7 +65,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodePositionStop() {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null);
+        var encoder = new Tk103ProtocolEncoder(null);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -78,7 +78,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeGetVersion() {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null);
+        var encoder = new Tk103ProtocolEncoder(null);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -91,7 +91,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeRebootDevice() {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null);
+        var encoder = new Tk103ProtocolEncoder(null);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -104,7 +104,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeSetOdometer() {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null);
+        var encoder = new Tk103ProtocolEncoder(null);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -117,7 +117,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodePositionSingleAlternative() {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null, true);
+        var encoder = new Tk103ProtocolEncoder(null, true);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -130,7 +130,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodePositionPeriodicAlternative() {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null, true);
+        var encoder = new Tk103ProtocolEncoder(null, true);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -143,7 +143,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodePositionStopAlternative() {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null, true);
+        var encoder = new Tk103ProtocolEncoder(null, true);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -156,7 +156,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeGetVersionAlternative() {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null, true);
+        var encoder = new Tk103ProtocolEncoder(null, true);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -169,7 +169,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeRebootDeviceAlternative() {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null, true);
+        var encoder = new Tk103ProtocolEncoder(null, true);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -182,7 +182,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeIdentificationAlternative() {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null, true);
+        var encoder = new Tk103ProtocolEncoder(null, true);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -195,7 +195,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeSosOnAlternative() {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null, true);
+        var encoder = new Tk103ProtocolEncoder(null, true);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -209,7 +209,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeSosOffAlternative() {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null, true);
+        var encoder = new Tk103ProtocolEncoder(null, true);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -223,7 +223,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeCustom() {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null);
+        var encoder = new Tk103ProtocolEncoder(null);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -237,7 +237,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeCustomAlternative() {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null, true);
+        var encoder = new Tk103ProtocolEncoder(null, true);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -251,7 +251,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeSetConnectionAlternative() {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null, true);
+        var encoder = new Tk103ProtocolEncoder(null, true);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -266,7 +266,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeSosNumberAlternative() {
 
-        Tk103ProtocolEncoder encoder = new Tk103ProtocolEncoder(null, true);
+        var encoder = new Tk103ProtocolEncoder(null, true);
 
         Command command = new Command();
         command.setDeviceId(1);

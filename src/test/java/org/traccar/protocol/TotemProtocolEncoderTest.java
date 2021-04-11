@@ -11,7 +11,7 @@ public class TotemProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        TotemProtocolEncoder encoder = new TotemProtocolEncoder(null);
+        var encoder = new TotemProtocolEncoder(null);
 
         Command command = new Command();
         command.setDeviceId(2);

@@ -11,7 +11,7 @@ public class Pt502ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeCustom() throws Exception {
 
-        Pt502ProtocolEncoder encoder = new Pt502ProtocolEncoder(null);
+        var encoder = new Pt502ProtocolEncoder(null);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -25,7 +25,7 @@ public class Pt502ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeOutputControl() throws Exception {
 
-        Pt502ProtocolEncoder encoder = new Pt502ProtocolEncoder(null);
+        var encoder = new Pt502ProtocolEncoder(null);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -40,7 +40,7 @@ public class Pt502ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeTimezone() throws Exception {
 
-        Pt502ProtocolEncoder encoder = new Pt502ProtocolEncoder(null);
+        var encoder = new Pt502ProtocolEncoder(null);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -55,7 +55,7 @@ public class Pt502ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeAlarmSpeed() throws Exception {
 
-        Pt502ProtocolEncoder encoder = new Pt502ProtocolEncoder(null);
+        var encoder = new Pt502ProtocolEncoder(null);
 
         Command command = new Command();
         command.setDeviceId(1);

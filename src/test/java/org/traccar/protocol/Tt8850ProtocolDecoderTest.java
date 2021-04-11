@@ -8,7 +8,7 @@ public class Tt8850ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        Tt8850ProtocolDecoder decoder = new Tt8850ProtocolDecoder(null);
+        var decoder = new Tt8850ProtocolDecoder(null);
 
         verifyPosition(decoder, text(
                 "\u0000\u0004,007F,0,GTFRI,020102,867844000667538,4142726856,0,0,1,3,1.6,0,997.3,-66.830786,10.483394,20171212171418,0734,0004,041A,4220,69,20171212171657,FF61"));

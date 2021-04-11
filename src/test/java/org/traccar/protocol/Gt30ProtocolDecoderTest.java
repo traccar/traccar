@@ -8,7 +8,7 @@ public class Gt30ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        Gt30ProtocolDecoder decoder = new Gt30ProtocolDecoder(null);
+        var decoder = new Gt30ProtocolDecoder(null);
 
         verifyPosition(decoder, text(
                 "$$005D3037811014    9955102834.000,A,3802.8629,N,02349.7163,E,0.00,,060117,,*13|1.3|26225BD"));

@@ -9,7 +9,7 @@ public class Tlt2hProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        Tlt2hProtocolDecoder decoder = new Tlt2hProtocolDecoder(null);
+        var decoder = new Tlt2hProtocolDecoder(null);
 
         verifyPositions(decoder, text(
                 "#860425040088567#MT600+#0000#0#1#129#40#0#AUTOLOW#1\r\n",
