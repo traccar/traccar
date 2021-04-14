@@ -26,19 +26,20 @@ import org.traccar.handler.StandardLoggingHandler;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.regex.Pattern;
 
 public class M2cbinProtocolDecoder extends BaseProtocolDecoder {
 
     public M2cbinProtocolDecoder(Protocol protocol) {
         super(protocol);
-      }
+    }
 
     // old ASCII v5 version
     private static final Pattern PATTERN = new PatternBuilder()
@@ -81,7 +82,7 @@ public class M2cbinProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     // 2020a version
-    private static final Pattern PATTERN2020a = new PatternBuilder()
+    private static final Pattern PATTERN2020A = new PatternBuilder()
             .expression("[^,]+,")               // model or header
             .expression("[^,]+,")                // model
             .expression("([^,]+),")                // firmware
@@ -103,12 +104,12 @@ public class M2cbinProtocolDecoder extends BaseProtocolDecoder {
             .number("(-?d+.d+),")                // altitude
             .number("(d+.?d+?),")                  // PDOP
             .number("(d+.?d+?),")                // HDOP
-            .expression("[^,]+,")                // operator
+            .expression("([^,]+)?,")             // operator
             .number("([01]),")                   // Ignition
             .number("([01]),")                   // Power Status
             .number("(d+.d+),")                  // input voltage
             .number("(d+.d+),")                  // battery voltage
-            .number("([01]),")                   // Energency status
+            .number("([01]),")                   // Emergency status
             .expression("([CO]),")               // Tamper switch
             .number("d+,")                       // gsm signal strength
             .expression("[^,]+,")                // MCC
@@ -135,7 +136,7 @@ public class M2cbinProtocolDecoder extends BaseProtocolDecoder {
 
 
     // 2025a version
-    private static final Pattern PATTERN2025a = new PatternBuilder()
+    private static final Pattern PATTERN2025A = new PatternBuilder()
             .expression("[^,]+,")               // model or header
             .expression("[^,]+,")                // model
             .expression("([^,]+),")                // firmware
@@ -156,8 +157,8 @@ public class M2cbinProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d+),")                  // heading
             .number("(d+),")                     // satellites
             .number("(-?d+.d+),")                // altitude
-            .expression("[^,]+,")                // operator
-            .number("d+,")                       // gsm signal strength
+            .expression("([^,]+)?,")             // operator
+            .number("(d+),")                       // gsm signal strength
             .number("([01]),")                   // Ignition
             .number("([01]),")                    // AC/panic Digital input
             .number("([01]),")                   // Digital Output
@@ -165,9 +166,36 @@ public class M2cbinProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d+),")                  // input voltage
             .number("(d+.d+),")                  // battery voltage
             .number("(d+.d+),")                  // analog
-            .expression("([^,]+),")                  // temperature
+            .number("(-?d+.d+),")                  // temperature
             .any()
             .compile();
+
+    private String decodeAlarm(int value) {
+        switch (value) {
+            case 3:
+                return Position.ALARM_POWER_CUT;
+            case 4:
+                return Position.ALARM_LOW_BATTERY;
+            case 5:
+                return Position.ALARM_GENERAL;
+            case 6:
+            case 7:
+            case 23:
+                return Position.ALARM_POWER_ON;
+            case 8:
+                return Position.ALARM_POWER_OFF;
+            case 13:
+                return Position.ALARM_ACCELERATION;
+            case 14:
+                return Position.ALARM_BRAKING;
+            case 15:
+                return Position.ALARM_CORNERING;
+            case 17:
+                return Position.ALARM_OVERSPEED;
+            default:
+                return null;
+        }
+    }
 
     private Position decodePosition(Channel channel, SocketAddress remoteAddress, String line) {
 
@@ -229,62 +257,82 @@ public class M2cbinProtocolDecoder extends BaseProtocolDecoder {
     private static final Logger LOGGER = LoggerFactory.getLogger(StandardLoggingHandler.class);
 
     private Position decodePosition2020a(Channel channel, SocketAddress remoteAddress, String line) {
-
-        Parser parser = new Parser(PATTERN2020a, line);
-
-        if (!parser.matches()) { return null; }
-
-        String[] parsed = line.split(",");
-
         Position position = new Position(getProtocolName());
-        position.set(Position.KEY_VERSION_FW, parser.next());
-        position.set(Position.KEY_EVENT, parser.next());
-        position.set(Position.KEY_INDEX, parser.nextInt());
+        try {
+            Parser parser = new Parser(PATTERN2020A, line);
 
-        if (parser.next().equals("H")) {
-            position.set(Position.KEY_ARCHIVE, true);
+            if (!parser.matches()) {
+                return null;
+            }
+
+            position.set(Position.KEY_VERSION_FW, parser.next());
+            position.set(Position.KEY_EVENT, parser.next());
+
+            Integer alertId = parser.nextInt();
+
+            position.set(Position.KEY_ALARM, decodeAlarm(alertId));
+            position.set(Position.KEY_INDEX, alertId);
+
+
+            if (parser.next().equals("H")) {
+                position.set(Position.KEY_ARCHIVE, true);
+            }
+
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+
+            if (deviceSession == null) {
+                return null;
+            }
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            position.setValid(true);
+            position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
+            position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
+            position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
+            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+            position.setCourse(parser.nextDouble());
+            position.set(Position.KEY_SATELLITES, parser.nextInt());
+            position.setAltitude(parser.nextDouble());
+            position.set(Position.KEY_PDOP, parser.nextDouble());
+            position.set(Position.KEY_HDOP, parser.nextDouble());
+            position.set(Position.KEY_OPERATOR, parser.next());
+            position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
+            position.set(Position.KEY_CHARGE, parser.next().equals("1")); // main power status
+            position.set(Position.KEY_INPUT, parser.nextDouble());
+            position.set(Position.KEY_BATTERY, parser.nextDouble());
+            position.set("panic", parser.nextInt() == 1);
+            position.set("tamper", parser.next().equals("O"));
+
+            CellTower cellTower = new CellTower();
+            cellTower.setSignalStrength(parser.nextInt());
+
+            position.setNetwork(new Network(cellTower));
+            position.set(Position.KEY_ORIGINAL, line);
+        } catch (Exception e) {
+            LOGGER.info(e.getMessage());
+            throw e;
         }
-
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
-
-        if (deviceSession == null) { return null; }
-        position.setDeviceId(deviceSession.getDeviceId());
-
-        position.setValid(true);
-        position.setTime(parser.nextDateTime( Parser.DateTimeFormat.DMY_HMS));
-        position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
-        position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
-        position.setCourse(parser.nextDouble());
-        position.set(Position.KEY_SATELLITES, parser.nextInt());
-        position.setAltitude(parser.nextDouble());
-        position.set(Position.KEY_ORIGINAL, line);
-
-//        position.set(Position.KEY_SATELLITES, parser.nextInt());
-//        position.set(Position.KEY_ODOMETER, parser.nextLong());
-//        position.set(Position.KEY_INPUT, parser.nextInt());
-//        position.set(Position.KEY_OUTPUT, parser.nextInt());
-//        position.set(Position.KEY_POWER, parser.nextInt() * 0.001);
-//        position.set(Position.KEY_BATTERY, parser.nextInt() * 0.001);
-//        position.set(Position.PREFIX_ADC + 1, parser.nextInt());
-//        position.set(Position.PREFIX_ADC + 2, parser.nextInt());
-//        position.set(Position.PREFIX_TEMP + 1, parser.nextDouble());
 
         return position;
     }
 
     private Position decodePosition2025a(Channel channel, SocketAddress remoteAddress, String line) {
 
-        Parser parser = new Parser(PATTERN2025a, line);
+        Parser parser = new Parser(PATTERN2025A, line);
 
-        if (!parser.matches()) { return null; }
-
-        String[] parsed = line.split(",");
+        if (!parser.matches()) {
+            return null;
+        }
 
         Position position = new Position(getProtocolName());
         position.set(Position.KEY_VERSION_FW, parser.next());
         position.set(Position.KEY_EVENT, parser.next());
-        position.set(Position.KEY_INDEX, parser.nextInt());
+
+        Integer alertId = parser.nextInt();
+
+        position.set(Position.KEY_ALARM, decodeAlarm(alertId));
+        position.set(Position.KEY_INDEX, alertId);
+
 
         if (parser.next().equals("H")) {
             position.set(Position.KEY_ARCHIVE, true);
@@ -292,33 +340,39 @@ public class M2cbinProtocolDecoder extends BaseProtocolDecoder {
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
 
-        if (deviceSession == null) { return null; }
+        if (deviceSession == null) {
+            return null;
+        }
         position.setDeviceId(deviceSession.getDeviceId());
-
         position.setValid(true);
         position.set(Position.ALARM_TAMPERING, parser.next());
-        position.setTime(parser.nextDateTime( Parser.DateTimeFormat.DMY_HMS));
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
         position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
         position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
         position.setCourse(parser.nextDouble());
         position.set(Position.KEY_SATELLITES, parser.nextInt());
         position.setAltitude(parser.nextDouble());
-        position.set(Position.KEY_OPERATOR, parser.nextDouble());
-        position.set(Position.KEY_ORIGINAL, line);
+        position.set(Position.KEY_OPERATOR, parser.next());
 
-//        position.set(Position.KEY_SATELLITES, parser.nextInt());
-//        position.set(Position.KEY_ODOMETER, parser.nextLong());
-//        position.set(Position.KEY_INPUT, parser.nextInt());
-//        position.set(Position.KEY_OUTPUT, parser.nextInt());
-//        position.set(Position.KEY_POWER, parser.nextInt() * 0.001);
-//        position.set(Position.KEY_BATTERY, parser.nextInt() * 0.001);
-//        position.set(Position.PREFIX_ADC + 1, parser.nextInt());
-//        position.set(Position.PREFIX_ADC + 2, parser.nextInt());
-//        position.set(Position.PREFIX_TEMP + 1, parser.nextDouble());
+        CellTower cellTower = new CellTower();
+        cellTower.setSignalStrength(parser.nextInt());
+        position.setNetwork(new Network(cellTower));
+
+        position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
+        position.set("panic", parser.nextInt() == 1);
+        position.set("immobilizer", parser.nextInt() == 1);
+        position.set(Position.KEY_CHARGE, parser.next().equals("1")); // main power status
+        position.set(Position.KEY_INPUT, parser.nextDouble());
+        position.set(Position.KEY_BATTERY, parser.nextDouble());
+        parser.next();
+        position.set(Position.KEY_DEVICE_TEMP, parser.nextDouble());
+
+        position.set(Position.KEY_ORIGINAL, line);
 
         return position;
     }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -328,20 +382,23 @@ public class M2cbinProtocolDecoder extends BaseProtocolDecoder {
         sentence = sentence.replace("#", "").replace("]", "");
 
         List<Position> positions = new LinkedList<>();
+
         for (String line : sentence.split("\r\n")) {
             if (!line.isEmpty()) {
-                line.replace("xx", "00").replace("XX", "00")
-                        .replace(".x", ".0").replace(".X", ".0");;
+                line = line.replace("xx", "00").replace("XX", "00");
+                line = line.replace(".x", ".0").replace(".X", ".0");
 
-                Position position = null;
+                Position position;
                 String lower = line.toLowerCase();
-                if (lower.contains("2020a") || lower.contains("2030")
-                        || lower.contains("at369")|| lower.contains("adti")) // check if latest 2020a model protocol
+                if (lower.contains(",2020a,") || lower.contains("030,") || lower.contains(",2025,")
+                        || lower.contains(",at369,") || lower.contains(",adti,")) {
                     position = decodePosition2020a(channel, remoteAddress, line);
-                else if (lower.contains("2025")) // check if latest 2020a model protocol
+                } else if (lower.contains(",2025a,")) { // check if latest 2020a model protocol
                     position = decodePosition2025a(channel, remoteAddress, line);
-                else
+                } else {
                     position = decodePosition(channel, remoteAddress, line);
+                }
+
                 if (position != null) {
                     positions.add(position);
                 }

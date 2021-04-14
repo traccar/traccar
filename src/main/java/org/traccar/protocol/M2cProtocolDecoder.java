@@ -23,7 +23,6 @@ import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.handler.StandardLoggingHandler;
-import org.traccar.helper.BitUtil;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -34,7 +33,6 @@ import org.traccar.model.Position;
 import java.net.SocketAddress;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.regex.Pattern;
 
 public class M2cProtocolDecoder extends BaseProtocolDecoder {
@@ -160,7 +158,7 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // satellites
             .number("(-?d+.d+),")                // altitude
             .expression("([^,]+)?,")             // operator
-            .number("d+,")                       // gsm signal strength
+            .number("(d+),")                       // gsm signal strength
             .number("([01]),")                   // Ignition
             .number("([01]),")                    // AC/panic Digital input
             .number("([01]),")                   // Digital Output
@@ -168,9 +166,36 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d+),")                  // input voltage
             .number("(d+.d+),")                  // battery voltage
             .number("(d+.d+),")                  // analog
-            .expression("([^,]+),")                  // temperature
+            .number("(-?d+.d+),")                  // temperature
             .any()
             .compile();
+
+    private String decodeAlarm(int value) {
+        switch (value) {
+            case 3:
+                return Position.ALARM_POWER_CUT;
+            case 4:
+                return Position.ALARM_LOW_BATTERY;
+            case 5:
+                return Position.ALARM_GENERAL;
+            case 6:
+            case 7:
+            case 23:
+                return Position.ALARM_POWER_ON;
+            case 8:
+                return Position.ALARM_POWER_OFF;
+            case 13:
+                return Position.ALARM_ACCELERATION;
+            case 14:
+                return Position.ALARM_BRAKING;
+            case 15:
+                return Position.ALARM_CORNERING;
+            case 17:
+                return Position.ALARM_OVERSPEED;
+            default:
+                return null;
+        }
+    }
 
     private Position decodePosition(Channel channel, SocketAddress remoteAddress, String line) {
 
@@ -240,10 +265,14 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
                 return null;
             }
 
-            String[] parsed = line.split(",");
             position.set(Position.KEY_VERSION_FW, parser.next());
             position.set(Position.KEY_EVENT, parser.next());
-            position.set(Position.KEY_INDEX, parser.nextInt());
+
+            Integer alertId = parser.nextInt();
+
+            position.set(Position.KEY_ALARM, decodeAlarm(alertId));
+            position.set(Position.KEY_INDEX, alertId);
+
 
             if (parser.next().equals("H")) {
                 position.set(Position.KEY_ARCHIVE, true);
@@ -295,12 +324,15 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        String[] parsed = line.split(",");
-
         Position position = new Position(getProtocolName());
         position.set(Position.KEY_VERSION_FW, parser.next());
         position.set(Position.KEY_EVENT, parser.next());
-        position.set(Position.KEY_INDEX, parser.nextInt());
+
+        Integer alertId = parser.nextInt();
+
+        position.set(Position.KEY_ALARM, decodeAlarm(alertId));
+        position.set(Position.KEY_INDEX, alertId);
+
 
         if (parser.next().equals("H")) {
             position.set(Position.KEY_ARCHIVE, true);
@@ -333,6 +365,9 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_CHARGE, parser.next().equals("1")); // main power status
         position.set(Position.KEY_INPUT, parser.nextDouble());
         position.set(Position.KEY_BATTERY, parser.nextDouble());
+        parser.next();
+        position.set(Position.KEY_DEVICE_TEMP, parser.nextDouble());
+
         position.set(Position.KEY_ORIGINAL, line);
 
         return position;
