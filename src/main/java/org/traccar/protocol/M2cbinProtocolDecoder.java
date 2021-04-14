@@ -23,12 +23,9 @@ import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.handler.StandardLoggingHandler;
-import org.traccar.helper.BitUtil;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.CellTower;
-import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -37,11 +34,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
-public class M2cProtocolDecoder extends BaseProtocolDecoder {
+public class M2cbinProtocolDecoder extends BaseProtocolDecoder {
 
-    public M2cProtocolDecoder(Protocol protocol) {
+    public M2cbinProtocolDecoder(Protocol protocol) {
         super(protocol);
-    }
+      }
 
     // old ASCII v5 version
     private static final Pattern PATTERN = new PatternBuilder()
@@ -84,7 +81,7 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     // 2020a version
-    private static final Pattern PATTERN2020A = new PatternBuilder()
+    private static final Pattern PATTERN2020a = new PatternBuilder()
             .expression("[^,]+,")               // model or header
             .expression("[^,]+,")                // model
             .expression("([^,]+),")                // firmware
@@ -106,12 +103,12 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
             .number("(-?d+.d+),")                // altitude
             .number("(d+.?d+?),")                  // PDOP
             .number("(d+.?d+?),")                // HDOP
-            .expression("([^,]+)?,")             // operator
+            .expression("[^,]+,")                // operator
             .number("([01]),")                   // Ignition
             .number("([01]),")                   // Power Status
             .number("(d+.d+),")                  // input voltage
             .number("(d+.d+),")                  // battery voltage
-            .number("([01]),")                   // Emergency status
+            .number("([01]),")                   // Energency status
             .expression("([CO]),")               // Tamper switch
             .number("d+,")                       // gsm signal strength
             .expression("[^,]+,")                // MCC
@@ -138,7 +135,7 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
 
 
     // 2025a version
-    private static final Pattern PATTERN2025A = new PatternBuilder()
+    private static final Pattern PATTERN2025a = new PatternBuilder()
             .expression("[^,]+,")               // model or header
             .expression("[^,]+,")                // model
             .expression("([^,]+),")                // firmware
@@ -159,7 +156,7 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d+),")                  // heading
             .number("(d+),")                     // satellites
             .number("(-?d+.d+),")                // altitude
-            .expression("([^,]+)?,")             // operator
+            .expression("[^,]+,")                // operator
             .number("d+,")                       // gsm signal strength
             .number("([01]),")                   // Ignition
             .number("([01]),")                    // AC/panic Digital input
@@ -232,68 +229,10 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
     private static final Logger LOGGER = LoggerFactory.getLogger(StandardLoggingHandler.class);
 
     private Position decodePosition2020a(Channel channel, SocketAddress remoteAddress, String line) {
-        Position position = new Position(getProtocolName());
-        try {
-            Parser parser = new Parser(PATTERN2020A, line);
 
-            if (!parser.matches()) {
-                return null;
-            }
+        Parser parser = new Parser(PATTERN2020a, line);
 
-            String[] parsed = line.split(",");
-            position.set(Position.KEY_VERSION_FW, parser.next());
-            position.set(Position.KEY_EVENT, parser.next());
-            position.set(Position.KEY_INDEX, parser.nextInt());
-
-            if (parser.next().equals("H")) {
-                position.set(Position.KEY_ARCHIVE, true);
-            }
-
-            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
-
-            if (deviceSession == null) {
-                return null;
-            }
-            position.setDeviceId(deviceSession.getDeviceId());
-
-            position.setValid(true);
-            position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
-            position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
-            position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
-            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
-            position.setCourse(parser.nextDouble());
-            position.set(Position.KEY_SATELLITES, parser.nextInt());
-            position.setAltitude(parser.nextDouble());
-            position.set(Position.KEY_PDOP, parser.nextDouble());
-            position.set(Position.KEY_HDOP, parser.nextDouble());
-            position.set(Position.KEY_OPERATOR, parser.next());
-            position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
-            position.set(Position.KEY_CHARGE, parser.next().equals("1")); // main power status
-            position.set(Position.KEY_INPUT, parser.nextDouble());
-            position.set(Position.KEY_BATTERY, parser.nextDouble());
-            position.set("panic", parser.nextInt() == 1);
-            position.set("tamper", parser.next().equals("O"));
-
-            CellTower cellTower = new CellTower();
-            cellTower.setSignalStrength(parser.nextInt());
-
-            position.setNetwork(new Network(cellTower));
-            position.set(Position.KEY_ORIGINAL, line);
-        } catch (Exception e) {
-            LOGGER.info(e.getMessage());
-            throw e;
-        }
-
-        return position;
-    }
-
-    private Position decodePosition2025a(Channel channel, SocketAddress remoteAddress, String line) {
-
-        Parser parser = new Parser(PATTERN2025A, line);
-
-        if (!parser.matches()) {
-            return null;
-        }
+        if (!parser.matches()) { return null; }
 
         String[] parsed = line.split(",");
 
@@ -308,36 +247,78 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
 
-        if (deviceSession == null) {
-            return null;
-        }
+        if (deviceSession == null) { return null; }
         position.setDeviceId(deviceSession.getDeviceId());
+
         position.setValid(true);
-        position.set(Position.ALARM_TAMPERING, parser.next());
-        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
+        position.setTime(parser.nextDateTime( Parser.DateTimeFormat.DMY_HMS));
         position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
         position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
         position.setCourse(parser.nextDouble());
         position.set(Position.KEY_SATELLITES, parser.nextInt());
         position.setAltitude(parser.nextDouble());
-        position.set(Position.KEY_OPERATOR, parser.next());
-
-        CellTower cellTower = new CellTower();
-        cellTower.setSignalStrength(parser.nextInt());
-        position.setNetwork(new Network(cellTower));
-
-        position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
-        position.set("panic", parser.nextInt() == 1);
-        position.set("immobilizer", parser.nextInt() == 1);
-        position.set(Position.KEY_CHARGE, parser.next().equals("1")); // main power status
-        position.set(Position.KEY_INPUT, parser.nextDouble());
-        position.set(Position.KEY_BATTERY, parser.nextDouble());
         position.set(Position.KEY_ORIGINAL, line);
+
+//        position.set(Position.KEY_SATELLITES, parser.nextInt());
+//        position.set(Position.KEY_ODOMETER, parser.nextLong());
+//        position.set(Position.KEY_INPUT, parser.nextInt());
+//        position.set(Position.KEY_OUTPUT, parser.nextInt());
+//        position.set(Position.KEY_POWER, parser.nextInt() * 0.001);
+//        position.set(Position.KEY_BATTERY, parser.nextInt() * 0.001);
+//        position.set(Position.PREFIX_ADC + 1, parser.nextInt());
+//        position.set(Position.PREFIX_ADC + 2, parser.nextInt());
+//        position.set(Position.PREFIX_TEMP + 1, parser.nextDouble());
 
         return position;
     }
 
+    private Position decodePosition2025a(Channel channel, SocketAddress remoteAddress, String line) {
+
+        Parser parser = new Parser(PATTERN2025a, line);
+
+        if (!parser.matches()) { return null; }
+
+        String[] parsed = line.split(",");
+
+        Position position = new Position(getProtocolName());
+        position.set(Position.KEY_VERSION_FW, parser.next());
+        position.set(Position.KEY_EVENT, parser.next());
+        position.set(Position.KEY_INDEX, parser.nextInt());
+
+        if (parser.next().equals("H")) {
+            position.set(Position.KEY_ARCHIVE, true);
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+
+        if (deviceSession == null) { return null; }
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        position.setValid(true);
+        position.set(Position.ALARM_TAMPERING, parser.next());
+        position.setTime(parser.nextDateTime( Parser.DateTimeFormat.DMY_HMS));
+        position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
+        position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+        position.setCourse(parser.nextDouble());
+        position.set(Position.KEY_SATELLITES, parser.nextInt());
+        position.setAltitude(parser.nextDouble());
+        position.set(Position.KEY_OPERATOR, parser.nextDouble());
+        position.set(Position.KEY_ORIGINAL, line);
+
+//        position.set(Position.KEY_SATELLITES, parser.nextInt());
+//        position.set(Position.KEY_ODOMETER, parser.nextLong());
+//        position.set(Position.KEY_INPUT, parser.nextInt());
+//        position.set(Position.KEY_OUTPUT, parser.nextInt());
+//        position.set(Position.KEY_POWER, parser.nextInt() * 0.001);
+//        position.set(Position.KEY_BATTERY, parser.nextInt() * 0.001);
+//        position.set(Position.PREFIX_ADC + 1, parser.nextInt());
+//        position.set(Position.PREFIX_ADC + 2, parser.nextInt());
+//        position.set(Position.PREFIX_TEMP + 1, parser.nextDouble());
+
+        return position;
+    }
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -347,23 +328,20 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
         sentence = sentence.replace("#", "").replace("]", "");
 
         List<Position> positions = new LinkedList<>();
-
         for (String line : sentence.split("\r\n")) {
             if (!line.isEmpty()) {
-                line = line.replace("xx", "00").replace("XX", "00");
-                line = line.replace(".x", ".0").replace(".X", ".0");
+                line.replace("xx", "00").replace("XX", "00")
+                        .replace(".x", ".0").replace(".X", ".0");;
 
-                Position position;
+                Position position = null;
                 String lower = line.toLowerCase();
-                if (lower.contains(",2020a,") || lower.contains("030,") || lower.contains(",2025,")
-                        || lower.contains(",at369,") || lower.contains(",adti,")) {
+                if (lower.contains("2020a") || lower.contains("2030")
+                        || lower.contains("at369")|| lower.contains("adti")) // check if latest 2020a model protocol
                     position = decodePosition2020a(channel, remoteAddress, line);
-                } else if (lower.contains(",2025a,")) { // check if latest 2020a model protocol
+                else if (lower.contains("2025")) // check if latest 2020a model protocol
                     position = decodePosition2025a(channel, remoteAddress, line);
-                } else {
+                else
                     position = decodePosition(channel, remoteAddress, line);
-                }
-
                 if (position != null) {
                     positions.add(position);
                 }
