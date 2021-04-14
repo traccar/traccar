@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2021 Anton Tananaev (anton@traccar.org)
  * Copyright 2020 Roeland Boeters (roeland@geodelta.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -168,8 +168,48 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
 
         if (sentence.startsWith("MT")) {
             return decodeStandard(channel, remoteAddress, sentence);
-        } else {
+        } else if (sentence.contains("$")) {
             return decodeLowAltitude(channel, remoteAddress, sentence);
+        } else {
+            return decodeResult(channel, remoteAddress, sentence);
+        }
+    }
+
+    private Object decodeResult(
+            Channel channel, SocketAddress remoteAddress, String sentence) throws Exception {
+
+        if (sentence.matches("\\d{15} .+")) {
+
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, sentence.substring(0, 15));
+            if (deviceSession == null) {
+                return null;
+            }
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            position.set(Position.KEY_RESULT, sentence.substring(16, sentence.length() - 1));
+
+            return position;
+
+        } else {
+
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+            if (deviceSession == null) {
+                return null;
+            }
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            position.set(Position.KEY_RESULT, sentence.substring(0, sentence.length() - 1));
+
+            return position;
+
         }
     }
 

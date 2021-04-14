@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class MictrackProtocolDecoderTest extends ProtocolTest {
 
@@ -10,8 +11,13 @@ public class MictrackProtocolDecoderTest extends ProtocolTest {
 
         var decoder = new MictrackProtocolDecoder(null);
 
-        verifyNull(decoder, text(
-                "mode=Success!"));
+        verifyAttribute(decoder, text(
+                "867035041390699 netlock=Success!"),
+                Position.KEY_RESULT, "netlock=Success");
+
+        verifyAttribute(decoder, text(
+                "mode=Success!"),
+                Position.KEY_RESULT, "mode=Success");
 
         verifyPosition(decoder, text(
                 "MT;6;866425031361423;R0;10+190109091803+22.63827+114.02922+2.14+69+2+3744+113"),
