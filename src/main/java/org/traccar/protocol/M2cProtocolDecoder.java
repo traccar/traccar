@@ -166,7 +166,7 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d+),")                  // input voltage
             .number("(d+.d+),")                  // battery voltage
             .number("(d+.d+),")                  // analog
-            .number("(-?d+.d+),")                  // temperature
+            .expression("([^,]+),")                  // temperature
             .any()
             .compile();
 
@@ -366,7 +366,11 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_INPUT, parser.nextDouble());
         position.set(Position.KEY_BATTERY, parser.nextDouble());
         parser.next();
-        position.set(Position.KEY_DEVICE_TEMP, parser.nextDouble());
+
+        String temp = parser.next();
+        if (!temp.toLowerCase().contains("x")) {
+            position.set(Position.KEY_DEVICE_TEMP, Double.parseDouble(temp));
+        }
 
         position.set(Position.KEY_ORIGINAL, line);
 
