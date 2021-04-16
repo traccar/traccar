@@ -41,7 +41,7 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
             .number("d+,")                       // length
             .number("(d+),")                     // imei
             .number("xxx,")                      // command
-            .number("(d),")                      // event
+            .number("(d+),")                     // event
             .expression("[^,]*,")                // event data
             .number("(dd)(dd)(dd)")              // date (yyymmdd)
             .number("(dd)(dd)(dd),")             // time (hhmmss)
