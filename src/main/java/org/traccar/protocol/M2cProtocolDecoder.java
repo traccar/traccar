@@ -216,16 +216,16 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
                 .number("(x+),")                     // Cell ID
                 .number("(x+),")                     // NMR1 LAC
                 .number("(x+),")                     // NMR1 Cell id
-                .number("(d+),")                     // nmr1 signal strength
+                .number("(x+),")                     // nmr1 signal strength
                 .number("(x+),")                     // NMR2 LAC
                 .number("(x+),")                     // NMR2 Cell id
-                .number("(d+),")                     // nmr2 signal strength
+                .number("(x+),")                     // nmr2 signal strength
                 .number("(x+),")                     // NMR3 LAC
                 .number("(x+),")                     // NMR3 Cell id
-                .number("(d+),")                     // nmr3 signal strength
+                .number("(x+),")                     // nmr3 signal strength
                 .number("(x+),")                     // NMR4 LAC
                 .number("(x+),")                     // NMR4 Cell id
-                .number("(d+),")                     // nmr4 signal strength
+                .number("(x+),")                     // nmr4 signal strength
                 .number("([01]{4}),")                // Digital input
                 .number("([01]{2}),")                // Digital Output
                 .number("(d+),")                     // Frame number
