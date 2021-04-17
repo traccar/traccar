@@ -23,6 +23,7 @@ import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.handler.StandardLoggingHandler;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -42,133 +43,10 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
     }
 
     // old ASCII v5 version
-    private static final Pattern PATTERN = new PatternBuilder()
-            .text("M2C,")
-            .expression("[^,]+,")                // model
-            .expression("[^,]+,")                // firmware
-            .number("d+,")                       // protocol
-            .number("(d+),")                     // imei
-            .number("(d+),")                     // index
-            .expression("([LH]),")               // archive
-            .number("d+,")                       // priority
-            .number("(d+),")                     // event
-            .number("(dd)(dd)(dd),")             // date (yymmdd)
-            .number("(dd)(dd)(dd),")             // time (hhmmss)
-            .number("(-?d+.d+),")                // latitude
-            .number("(-?d+.d+),")                // longitude
-            .number("(-?d+),")                   // altitude
-            .number("(d+),")                     // course
-            .number("(d+.d+),")                  // speed
-            .number("(d+),")                     // satellites
-            .number("(d+),")                     // odometer
-            .number("(d+),")                     // input
-            .number("(d+),")                     // output
-            .number("(d+),")                     // power
-            .number("(d+),")                     // battery
-            .number("(d+),")                     // adc 1
-            .number("(d+),")                     // adc 2
-            .number("(d+.?d*),")                 // temperature
-            .expression("[^,]+,")                  // rfid
-            .expression("[^,]+,")                  // barcode
-            .expression("[^,]+,")                  // camera pic
-            .expression("[^,]+,")                  // mcc
-            .expression("[^,]+,")                  // mnc
-            .expression("[^,]+,")                  // lac
-            .expression("[^,]+,")                  // cell id
-            .expression("[^,]+,")                  // signal strength
-//            .expression("[^,]+,")                  // reg status -- one extra param in doc, we dont know which
-            .expression("([^,]+)")                  // rfid
-            .any()
-            .compile();
-
-    // 2020a version
-    private static final Pattern PATTERN2020A = new PatternBuilder()
-            .expression("[^,]+,")               // model or header
-            .expression("[^,]+,")                // model
-            .expression("([^,]+),")                // firmware
-            .expression("([^,]+),")                // packet type
-            .number("(d+),")                     // Alert Id
-            .expression("([LH]),")               // Packet status / archive
-            .number("(d+),")                     // imei
-            .expression("([^,]+),")                // m2m sim iccid number
-            .number("([01]),")                   // GPS Fix
-            .number("(dd)(dd)(dddd),")             // date (ddmmyy) in UTC
-            .number("(dd)(dd)(dd),")             // time (hhmmss)
-            .number("(-?d+.d+),")                // latitude
-            .expression("([NS]),")               // direction
-            .number("(-?d+.d+),")                // longitude
-            .expression("([EW]),")               // direction
-            .number("(d+.d+),")                  // speed
-            .number("(d+.d+),")                  // heading
-            .number("(d+),")                     // satellites
-            .number("(-?d+.d+),")                // altitude
-            .number("(d+.?d+?),")                  // PDOP
-            .number("(d+.?d+?),")                // HDOP
-            .expression("([^,]+)?,")             // operator
-            .number("([01]),")                   // Ignition
-            .number("([01]),")                   // Power Status
-            .number("(d+.d+),")                  // input voltage
-            .number("(d+.d+),")                  // battery voltage
-            .number("([01]),")                   // Emergency status
-            .expression("([CO]),")               // Tamper switch
-            .number("d+,")                       // gsm signal strength
-            .expression("[^,]+,")                // MCC
-            .expression("[^,]+,")                // MNC
-            .expression("[^,]+,")                // LAC
-            .expression("[^,]+,")                // Cell ID
-            .expression("[^,]+,")                // NMR1 LAC
-            .expression("[^,]+,")                // NMR1 Cell id
-            .expression("[^,]+,")                       // nmr1 signal strength
-            .expression("[^,]+,")                // NMR2 LAC
-            .expression("[^,]+,")                // NMR2 Cell id
-            .expression("[^,]+,")                       // nmr2 signal strength
-            .expression("[^,]+,")                // NMR3 LAC
-            .expression("[^,]+,")                // NMR3 Cell id
-            .expression("[^,]+,")                       // nmr3 signal strength
-            .expression("[^,]+,")                // NMR4 LAC
-            .expression("[^,]+,")                // NMR4 Cell id
-            .expression("[^,]+,")                       // nmr4 signal strength
-            .number("(d+),")                    // Digital input
-            .number("(d+),")                   // Digital Output
-            .number("(d+),")                   // Frame number
-            .any()
-            .compile();
-
-
-    // 2025a version
-    private static final Pattern PATTERN2025A = new PatternBuilder()
-            .expression("[^,]+,")               // model or header
-            .expression("[^,]+,")                // model
-            .expression("([^,]+),")                // firmware
-            .expression("([^,]+),")                // packet type
-            .number("(d+),")                     // Alert Id
-            .expression("([LH]),")               // Packet status / archive
-            .number("(d+),")                     // imei
-            .expression("([^,]+),")                // m2m sim iccid number
-            .expression("([CO]),")               // Tamper switch
-            .number("([01]),")                   // GPS Fix
-            .number("(dd)(dd)(dddd),")             // date (ddmmyy) in UTC
-            .number("(dd)(dd)(dd),")             // time (hhmmss)
-            .number("(-?d+.d+),")                // latitude
-            .expression("([NS]),")               // direction
-            .number("(-?d+.d+),")                // longitude
-            .expression("([EW]),")               // direction
-            .number("(d+.d+),")                  // speed
-            .number("(d+.d+),")                  // heading
-            .number("(d+),")                     // satellites
-            .number("(-?d+.d+),")                // altitude
-            .expression("([^,]+)?,")             // operator
-            .number("(d+),")                       // gsm signal strength
-            .number("([01]),")                   // Ignition
-            .number("([01]),")                    // AC/panic Digital input
-            .number("([01]),")                   // Digital Output
-            .number("([01]),")                   // Power Status
-            .number("(d+.d+),")                  // input voltage
-            .number("(d+.d+),")                  // battery voltage
-            .number("(d+.d+),")                  // analog
-            .expression("([^,]+),")                  // temperature
-            .any()
-            .compile();
+    private static final Pattern PATTERN;
+    private static final Pattern PATTERN2020A;
+    private static final Pattern PATTERN2025A;
+    private static final Logger LOGGER = LoggerFactory.getLogger(StandardLoggingHandler.class);
 
     private String decodeAlarm(int value) {
         switch (value) {
@@ -202,6 +80,47 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    // binary
+    static {
+        PATTERN = new PatternBuilder()
+                .text("M2C,")
+                .expression("[^,]+,")                // model
+                .expression("[^,]+,")                // firmware
+                .number("d+,")                       // protocol
+                .number("(d+),")                     // imei
+                .number("(d+),")                     // index
+                .expression("([LH]),")               // archive
+                .number("d+,")                       // priority
+                .number("(d+),")                     // event
+                .number("(dd)(dd)(dd),")             // date (yymmdd)
+                .number("(dd)(dd)(dd),")             // time (hhmmss)
+                .number("(-?d+.d+),")                // latitude
+                .number("(-?d+.d+),")                // longitude
+                .number("(-?d+),")                   // altitude
+                .number("(d+),")                     // course
+                .number("(d+.d+),")                  // speed
+                .number("(d+),")                     // satellites
+                .number("(d+),")                     // odometer
+                .number("(d+),")                     // input
+                .number("(d+),")                     // output
+                .number("(d+),")                     // power
+                .number("(d+),")                     // battery
+                .number("(d+),")                     // adc 1
+                .number("(d+),")                     // adc 2
+                .number("(d+.?d*),")                 // temperature
+                .expression("[^,]+,")                  // rfid
+                .expression("[^,]+,")                  // barcode
+                .expression("[^,]+,")                  // camera pic
+                .expression("[^,]+,")                  // mcc
+                .expression("[^,]+,")                  // mnc
+                .expression("[^,]+,")                  // lac
+                .expression("[^,]+,")                  // cell id
+                .expression("[^,]+,")                  // signal strength
+//            .expression("[^,]+,")                  // reg status -- one extra param in doc, we dont know which
+                .expression("([^,]+)")                  // rfid
+                .any()
+                .compile();
+    }
     private Position decodePosition(Channel channel, SocketAddress remoteAddress, String line) {
 
         Parser parser = new Parser(PATTERN, line);
@@ -259,8 +178,60 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StandardLoggingHandler.class);
-
+    // 2020a version
+    static {
+        PATTERN2020A = new PatternBuilder()
+                .expression("[^,]+,")               // model or header
+                .expression("[^,]+,")                // model
+                .expression("([^,]+),")                // firmware
+                .expression("([^,]+),")                // packet type
+                .number("(d+),")                     // Alert Id
+                .expression("([LH]),")               // Packet status / archive
+                .number("(d+),")                     // imei
+                .expression("([^,]+),")                // m2m sim iccid number
+                .number("([01]),")                   // GPS Fix
+                .number("(dd)(dd)(dddd),")             // date (ddmmyy) in UTC
+                .number("(dd)(dd)(dd),")             // time (hhmmss)
+                .number("(-?d+.d+),")                // latitude
+                .expression("([NS]),")               // direction
+                .number("(-?d+.d+),")                // longitude
+                .expression("([EW]),")               // direction
+                .number("(d+.d+),")                  // speed
+                .number("(d+.d+),")                  // heading
+                .number("(d+),")                     // satellites
+                .number("(-?d+.d+),")                // altitude
+                .number("(d+.?d+?),")                  // PDOP
+                .number("(d+.?d+?),")                // HDOP
+                .expression("([^,]+)?,")             // operator
+                .number("([01]),")                   // Ignition
+                .number("([01]),")                   // Power Status
+                .number("(d+.d+),")                  // input voltage
+                .number("(d+.d+),")                  // battery voltage
+                .number("([01]),")                   // Emergency status
+                .expression("([CO]),")               // Tamper switch
+                .number("(d+),")                     // gsm signal strength
+                .number("(d+),")                     // MCC
+                .number("(d+),")                     // MNC
+                .number("(x+),")                     // LAC
+                .number("(x+),")                     // Cell ID
+                .number("(x+),")                     // NMR1 LAC
+                .number("(x+),")                     // NMR1 Cell id
+                .number("(d+),")                     // nmr1 signal strength
+                .number("(x+),")                     // NMR2 LAC
+                .number("(x+),")                     // NMR2 Cell id
+                .number("(d+),")                     // nmr2 signal strength
+                .number("(x+),")                     // NMR3 LAC
+                .number("(x+),")                     // NMR3 Cell id
+                .number("(d+),")                     // nmr3 signal strength
+                .number("(x+),")                     // NMR4 LAC
+                .number("(x+),")                     // NMR4 Cell id
+                .number("(d+),")                     // nmr4 signal strength
+                .number("([01]{4}),")                // Digital input
+                .number("([01]{2}),")                // Digital Output
+                .number("(d+),")                     // Frame number
+                .any()
+                .compile();
+    }
     private Position decodePosition2020a(Channel channel, SocketAddress remoteAddress, String line) {
         Position position = new Position(getProtocolName());
         try {
@@ -312,8 +283,35 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
 
             CellTower cellTower = new CellTower();
             cellTower.setSignalStrength(parser.nextInt());
+            cellTower.setMobileCountryCode(parser.nextInt());
+            cellTower.setMobileNetworkCode(parser.nextInt());
+            cellTower.setLocationAreaCode(parser.nextHexInt());
+            cellTower.setCellId(parser.nextHexLong());
 
-            position.setNetwork(new Network(cellTower));
+            Network net = new Network(cellTower);
+
+            for (int i = 0; i < 4; ++i) {
+                cellTower.setLocationAreaCode(parser.nextHexInt());
+                cellTower.setCellId(parser.nextHexLong());
+                cellTower.setSignalStrength(parser.nextInt());
+                net.addCellTower(cellTower);
+            }
+
+            position.setNetwork(net);
+
+            int digInput = parser.nextBinInt();
+            int digOutput = parser.nextBinInt();
+
+            for (int i = 0; i < 4; ++i) {
+                position.set(Position.PREFIX_IN + (4 - i),
+                        BitUtil.check(digInput, i) ? 1 : 0);
+            }
+            position.set(Position.PREFIX_OUT + 2,
+                    BitUtil.check(digOutput, 0) ? 1 : 0);
+
+            position.set(Position.PREFIX_OUT + 1,
+                    BitUtil.check(digOutput, 1) ? 1 : 0);
+
             position.set(Position.KEY_ORIGINAL, line);
         } catch (Exception e) {
             LOGGER.info(e.getMessage());
@@ -323,6 +321,42 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    // 2025a version
+    static {
+        PATTERN2025A = new PatternBuilder()
+                .expression("[^,]+,")               // model or header
+                .expression("[^,]+,")                // model
+                .expression("([^,]+),")                // firmware
+                .expression("([^,]+),")                // packet type
+                .number("(d+),")                     // Alert Id
+                .expression("([LH]),")               // Packet status / archive
+                .number("(d+),")                     // imei
+                .expression("([^,]+),")                // m2m sim iccid number
+                .expression("([CO]),")               // Tamper switch
+                .number("([01]),")                   // GPS Fix
+                .number("(dd)(dd)(dddd),")             // date (ddmmyy) in UTC
+                .number("(dd)(dd)(dd),")             // time (hhmmss)
+                .number("(-?d+.d+),")                // latitude
+                .expression("([NS]),")               // direction
+                .number("(-?d+.d+),")                // longitude
+                .expression("([EW]),")               // direction
+                .number("(d+.d+),")                  // speed
+                .number("(d+.d+),")                  // heading
+                .number("(d+),")                     // satellites
+                .number("(-?d+.d+),")                // altitude
+                .expression("([^,]+)?,")             // operator
+                .number("(d+),")                       // gsm signal strength
+                .number("([01]),")                   // Ignition
+                .number("([01]),")                    // AC/panic Digital input
+                .number("([01]),")                   // Digital Output
+                .number("([01]),")                   // Power Status
+                .number("(d+.d+),")                  // input voltage
+                .number("(d+.d+),")                  // battery voltage
+                .number("(d+.d+),")                  // analog
+                .expression("([^,]+),")                  // temperature
+                .any()
+                .compile();
+    }
     private Position decodePosition2025a(Channel channel, SocketAddress remoteAddress, String line) {
         try {
             Parser parser = new Parser(PATTERN2025A, line);
@@ -380,7 +414,7 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
             String temp = parser.next();
 
             if (!temp.toLowerCase().contains("x")) {
-                position.set(Position.KEY_DEVICE_TEMP, Double.parseDouble(temp));
+                position.set(Position.PREFIX_TEMP + 1, Double.parseDouble(temp));
             }
             position.set(Position.KEY_ORIGINAL, line);
 
