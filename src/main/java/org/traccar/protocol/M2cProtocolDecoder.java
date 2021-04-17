@@ -90,8 +90,8 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // Alert Id
             .expression("([LH]),")               // Packet status / archive
             .number("(d+),")                     // imei
-            .expression("[^,]+,")                // m2m sim iccid number
-            .number("[01],")                   // GPS Fix
+            .expression("([^,]+),")                // m2m sim iccid number
+            .number("([01]),")                   // GPS Fix
             .number("(dd)(dd)(dddd),")             // date (ddmmyy) in UTC
             .number("(dd)(dd)(dd),")             // time (hhmmss)
             .number("(-?d+.d+),")                // latitude
@@ -144,9 +144,9 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // Alert Id
             .expression("([LH]),")               // Packet status / archive
             .number("(d+),")                     // imei
-            .expression("[^,]+,")                // m2m sim iccid number
+            .expression("([^,]+),")                // m2m sim iccid number
             .expression("([CO]),")               // Tamper switch
-            .number("[01],")                   // GPS Fix
+            .number("([01]),")                   // GPS Fix
             .number("(dd)(dd)(dddd),")             // date (ddmmyy) in UTC
             .number("(dd)(dd)(dd),")             // time (hhmmss)
             .number("(-?d+.d+),")                // latitude
@@ -184,6 +184,11 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_POWER_ON;
             case 8:
                 return Position.ALARM_POWER_OFF;
+            case 9:
+            case 16:
+                return Position.ALARM_TAMPERING;
+            case 10:
+                return Position.ALARM_SOS;
             case 13:
                 return Position.ALARM_ACCELERATION;
             case 14:
@@ -284,8 +289,8 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
                 return null;
             }
             position.setDeviceId(deviceSession.getDeviceId());
-
-            position.setValid(true);
+            position.set(Position.KEY_VIN, parser.next());
+            position.setValid(parser.nextInt() == 1);
             position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
             position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
             position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
@@ -300,8 +305,10 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_CHARGE, parser.next().equals("1")); // main power status
             position.set(Position.KEY_INPUT, parser.nextDouble());
             position.set(Position.KEY_BATTERY, parser.nextDouble());
-            position.set("panic", parser.nextInt() == 1);
-            position.set("tamper", parser.next().equals("O"));
+            if (parser.nextInt() == 1)
+                position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+            if (parser.next().equals("O"))
+                position.set(Position.KEY_ALARM, Position.ALARM_TAMPERING);
 
             CellTower cellTower = new CellTower();
             cellTower.setSignalStrength(parser.nextInt());
@@ -317,64 +324,72 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private Position decodePosition2025a(Channel channel, SocketAddress remoteAddress, String line) {
+        try {
+            Parser parser = new Parser(PATTERN2025A, line);
 
-        Parser parser = new Parser(PATTERN2025A, line);
+            if (!parser.matches()) {
+                return null;
+            }
 
-        if (!parser.matches()) {
-            return null;
+            Position position = new Position(getProtocolName());
+            position.set(Position.KEY_VERSION_FW, parser.next());
+            position.set(Position.KEY_EVENT, parser.next());
+
+            Integer alertId = parser.nextInt();
+
+            position.set(Position.KEY_ALARM, decodeAlarm(alertId));
+            position.set(Position.KEY_INDEX, alertId);
+
+
+            if (parser.next().equals("H")) {
+                position.set(Position.KEY_ARCHIVE, true);
+            }
+
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+
+            if (deviceSession == null) {
+                return null;
+            }
+            position.setDeviceId(deviceSession.getDeviceId());
+            position.set(Position.KEY_VIN, parser.next());
+            if (parser.next().equals("O"))
+                position.set(Position.KEY_ALARM, Position.ALARM_TAMPERING);
+            position.setValid(parser.nextInt() == 1);
+            position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
+            position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
+            position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
+            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+            position.setCourse(parser.nextDouble());
+            position.set(Position.KEY_SATELLITES, parser.nextInt());
+            position.setAltitude(parser.nextDouble());
+            position.set(Position.KEY_OPERATOR, parser.next());
+
+            CellTower cellTower = new CellTower();
+            cellTower.setSignalStrength(parser.nextInt());
+
+            position.setNetwork(new Network(cellTower));
+            position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
+            if (parser.nextInt() == 1)
+                position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+            position.set("immobilizer", parser.nextInt() == 1);
+            position.set(Position.KEY_CHARGE, parser.next().equals("1")); // main power status
+            position.set(Position.KEY_INPUT, parser.nextDouble());
+            position.set(Position.KEY_BATTERY, parser.nextDouble());
+            position.set(Position.PREFIX_ADC + 1, parser.next());
+
+            String temp = parser.next();
+
+            if (!temp.toLowerCase().contains("x")) {
+                position.set(Position.KEY_DEVICE_TEMP, Double.parseDouble(temp));
+            }
+            position.set(Position.KEY_ORIGINAL, line);
+
+            return position;
+        } catch (Exception e) {
+            LOGGER.info(e.getMessage());
+            throw e;
         }
 
-        Position position = new Position(getProtocolName());
-        position.set(Position.KEY_VERSION_FW, parser.next());
-        position.set(Position.KEY_EVENT, parser.next());
-
-        Integer alertId = parser.nextInt();
-
-        position.set(Position.KEY_ALARM, decodeAlarm(alertId));
-        position.set(Position.KEY_INDEX, alertId);
-
-
-        if (parser.next().equals("H")) {
-            position.set(Position.KEY_ARCHIVE, true);
-        }
-
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
-
-        if (deviceSession == null) {
-            return null;
-        }
-        position.setDeviceId(deviceSession.getDeviceId());
-        position.setValid(true);
-        position.set(Position.ALARM_TAMPERING, parser.next());
-        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
-        position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
-        position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
-        position.setCourse(parser.nextDouble());
-        position.set(Position.KEY_SATELLITES, parser.nextInt());
-        position.setAltitude(parser.nextDouble());
-        position.set(Position.KEY_OPERATOR, parser.next());
-
-        CellTower cellTower = new CellTower();
-        cellTower.setSignalStrength(parser.nextInt());
-        position.setNetwork(new Network(cellTower));
-
-        position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
-        position.set("panic", parser.nextInt() == 1);
-        position.set("immobilizer", parser.nextInt() == 1);
-        position.set(Position.KEY_CHARGE, parser.next().equals("1")); // main power status
-        position.set(Position.KEY_INPUT, parser.nextDouble());
-        position.set(Position.KEY_BATTERY, parser.nextDouble());
-        parser.next();
-
-        String temp = parser.next();
-        if (!temp.toLowerCase().contains("x")) {
-            position.set(Position.KEY_DEVICE_TEMP, Double.parseDouble(temp));
-        }
-
-        position.set(Position.KEY_ORIGINAL, line);
-
-        return position;
     }
 
     @Override
