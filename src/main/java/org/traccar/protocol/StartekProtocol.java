@@ -31,7 +31,7 @@ public class StartekProtocol extends BaseProtocol {
                 pipeline.addLast(new LineBasedFrameDecoder(1024));
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
-                pipeline.addLast(new Ardi01ProtocolDecoder(StartekProtocol.this));
+                pipeline.addLast(new StartekProtocolDecoder(StartekProtocol.this));
             }
         });
     }
