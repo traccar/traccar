@@ -60,9 +60,9 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .groupEnd()
             .number("(dd)(dd)(dd),?")            // date (mmddyy if comma-delimited, otherwise yyddmm)
             .expression("([AV]),?")              // validity
-            .number(" *(d+)(dd.d+)")             // latitude
+            .number(" *(d*)(dd.d+)")             // latitude
             .expression("([NS]),?")
-            .number(" *(d+)(dd.d+)")             // longitude
+            .number(" *(d*)(dd.d+)")             // longitude
             .expression("([EW]),?")
             .number("([ d.]{1,5})(?:d*,)?")      // speed
             .number("(dd)(dd)(dd),?")            // time (hhmmss)
