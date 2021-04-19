@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,10 @@ import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 public class ItsProtocolDecoder extends BaseProtocolDecoder {
@@ -136,6 +140,19 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         String sentence = (String) msg;
+
+        if (channel != null) {
+            if (sentence.startsWith("$,01,")) {
+                channel.writeAndFlush(new NetworkMessage("$,1,*", remoteAddress));
+            } else if (sentence.startsWith("$,LGN,")) {
+                DateFormat dateFormat = new SimpleDateFormat("ddMMyyyyHHmmss");
+                dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+                String time = dateFormat.format(new Date());
+                channel.writeAndFlush(new NetworkMessage("$,LGN," + time + ",*", remoteAddress));
+            } else if (sentence.startsWith("$,HBT,")) {
+                channel.writeAndFlush(new NetworkMessage("$,HBT,*", remoteAddress));
+            }
+        }
 
         if (channel != null && sentence.startsWith("$,01,")) {
             channel.writeAndFlush(new NetworkMessage("$,1,*", remoteAddress));

@@ -12,6 +12,9 @@ public class ItsProtocolDecoderTest extends ProtocolTest {
         var decoder = new ItsProtocolDecoder(null);
 
         verifyNull(decoder, text(
+                "$,LGN,MARK,000000000,358980100077446,V0.0.1,AIS140,19.804487,N,75.225876,E,*"));
+
+        verifyNull(decoder, text(
                 "$LGN,,869867037009679,3.2AIH,9.99546000,N,76.35886167,E"));
 
         verifyAttribute(decoder, text(
