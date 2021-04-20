@@ -110,6 +110,10 @@ public class Gs100ProtocolDecoder extends BaseProtocolDecoder {
                     position.setSpeed(Integer.parseInt(other.substring(0, 5)));
                     position.setCourse(Integer.parseInt(other.substring(5, 8)));
 
+                } else {
+
+                    getLastLocation(position, null);
+
                 }
 
                 positions.add(position);
