@@ -193,9 +193,9 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
                 .number("(dd)(dd)(dddd),")             // date (ddmmyy) in UTC
                 .number("(dd)(dd)(dd),")             // time (hhmmss)
                 .number("(-?d+.d+),")                // latitude
-                .expression("([NS]),")               // direction
+                .expression("([NS0]),")               // direction
                 .number("(-?d+.d+),")                // longitude
-                .expression("([EW]),")               // direction
+                .expression("([EW0]),")               // direction
                 .number("(d+.d+),")                  // speed
                 .number("(d+.d+),")                  // heading
                 .number("(d+),")                     // satellites
@@ -334,12 +334,12 @@ public class M2cProtocolDecoder extends BaseProtocolDecoder {
                 .expression("([^,]+),")                // m2m sim iccid number
                 .expression("([CO]),")               // Tamper switch
                 .number("([01]),")                   // GPS Fix
-                .number("(dd)(dd)(dddd),")             // date (ddmmyy) in UTC
+                .number("(dd)(dd)(d+),")             // date (ddmmyy) in UTC
                 .number("(dd)(dd)(dd),")             // time (hhmmss)
                 .number("(-?d+.d+),")                // latitude
-                .expression("([NS]),")               // direction
+                .expression("([NS0]),")               // direction
                 .number("(-?d+.d+),")                // longitude
-                .expression("([EW]),")               // direction
+                .expression("([EW0]),")               // direction
                 .number("(d+.d+),")                  // speed
                 .number("(d+.d+),")                  // heading
                 .number("(d+),")                     // satellites
