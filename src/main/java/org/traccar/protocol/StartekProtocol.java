@@ -21,16 +21,22 @@ import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.model.Command;
 
 public class StartekProtocol extends BaseProtocol {
 
     public StartekProtocol() {
+        setSupportedDataCommands(
+                Command.TYPE_OUTPUT_CONTROL,
+                Command.TYPE_ENGINE_STOP,
+                Command.TYPE_ENGINE_RESUME);
         addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new LineBasedFrameDecoder(1024));
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new StartekProtocolEncoder(StartekProtocol.this));
                 pipeline.addLast(new StartekProtocolDecoder(StartekProtocol.this));
             }
         });
