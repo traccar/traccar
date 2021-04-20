@@ -148,9 +148,9 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
                 DateFormat dateFormat = new SimpleDateFormat("ddMMyyyyHHmmss");
                 dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
                 String time = dateFormat.format(new Date());
-                channel.writeAndFlush(new NetworkMessage("$,LGN," + time + ",*", remoteAddress));
+                channel.writeAndFlush(new NetworkMessage("$LGN" + time + "*", remoteAddress));
             } else if (sentence.startsWith("$,HBT,")) {
-                channel.writeAndFlush(new NetworkMessage("$,HBT,*", remoteAddress));
+                channel.writeAndFlush(new NetworkMessage("$HBT*", remoteAddress));
             }
         }
 
