@@ -79,7 +79,7 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.?d*),")                 // power
             .number("(d+.?d*),")                 // battery
             .number("([01]),")                   // emergency
-            .expression("[CO]?,")                // tamper
+            .expression("[COYN]?,")              // tamper
             .expression("(.*),")                 // cells
             .number("([012]{4}),")               // inputs
             .number("([01]{2}),")                // outputs
@@ -100,6 +100,12 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             .number("d+,")                       // index
             .number("(d+.?d*),")                 // adc1
             .number("(d+.?d*),")                 // adc2
+            .or()
+            .number("(d+.d+),")                  // adc1
+            .number("(d+),")                     // odometer
+            .number("(d{6}),")                   // index
+            .expression("([^,]+),")              // response format
+            .expression("([^,]+),")              // response
             .groupEnd("?")
             .groupEnd("?")
             .or()
@@ -268,6 +274,14 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
         if (parser.hasNext(2)) {
             position.set(Position.PREFIX_ADC + 1, parser.nextDouble());
             position.set(Position.PREFIX_ADC + 2, parser.nextDouble());
+        }
+
+        if (parser.hasNext(5)) {
+            position.set(Position.PREFIX_ADC + 1, parser.nextDouble());
+            position.set(Position.KEY_ODOMETER, parser.nextInt());
+            position.set(Position.KEY_INDEX, parser.nextInt());
+            position.set("responseFormat", parser.next());
+            position.set("response", parser.next());
         }
 
         if (parser.hasNext(2)) {
