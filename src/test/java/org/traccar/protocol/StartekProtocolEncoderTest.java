@@ -17,7 +17,7 @@ public class StartekProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_ENGINE_STOP);
 
-        assertEquals("$$:23,123456789012345,900,1,19E\r\n", encoder.encodeCommand(null, command));
+        assertEquals("$$:24,123456789012345,900,1,19F\r\n", encoder.encodeCommand(null, command));
 
     }
 
