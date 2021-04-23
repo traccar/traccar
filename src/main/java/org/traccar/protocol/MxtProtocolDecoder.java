@@ -101,7 +101,7 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
             long minutes = BitUtil.between(date, 6, 6 + 6);
             long seconds = BitUtil.to(date, 6);
 
-            dateBuilder.addMillis((((days * 24 + (hours-1)) * 60 + minutes) * 60 + seconds) * 1000);
+            dateBuilder.addMillis((((days * 24 + (hours - 1)) * 60 + minutes) * 60 + seconds) * 1000);
 
             position.setTime(dateBuilder.getDate());
 

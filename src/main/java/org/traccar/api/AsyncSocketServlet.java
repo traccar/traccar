@@ -15,7 +15,11 @@
  */
 package org.traccar.api;
 
-import org.eclipse.jetty.websocket.servlet.*;
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
+import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
+import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
+import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
@@ -34,8 +38,9 @@ public class AsyncSocketServlet extends WebSocketServlet {
             public Object createWebSocket(ServletUpgradeRequest req, ServletUpgradeResponse resp) {
                 if (req.getSession() != null) {
                     Object userId = req.getSession().getAttribute(SessionResource.USER_ID_KEY);
-                    if (userId != null)
+                    if (userId != null) {
                         return new AsyncSocket((Long) userId);
+                    }
                 }
                 LOGGER.warn("Invalid session: {}", req.getHeaders());
                 return null;
