@@ -99,15 +99,15 @@ public class Gs100ProtocolDecoder extends BaseProtocolDecoder {
                     position.setLatitude(Integer.parseInt(coordinates.substring(10, 12))
                             + Integer.parseInt(coordinates.substring(12, 18)) * 0.0001 / 60);
                     int flags = Integer.parseInt(coordinates.substring(9, 10), 16);
-                    if (!BitUtil.check(flags, 4)) {
+                    if (!BitUtil.check(flags, 3)) {
                         position.setLongitude(-position.getLongitude());
                     }
-                    if (!BitUtil.check(flags, 3)) {
+                    if (!BitUtil.check(flags, 2)) {
                         position.setLatitude(-position.getLatitude());
                     }
 
                     String other = ByteBufUtil.hexDump(buf.readSlice(4));
-                    position.setSpeed(Integer.parseInt(other.substring(0, 5)));
+                    position.setSpeed(Integer.parseInt(other.substring(0, 5)) * 0.01);
                     position.setCourse(Integer.parseInt(other.substring(5, 8)));
 
                 } else {
