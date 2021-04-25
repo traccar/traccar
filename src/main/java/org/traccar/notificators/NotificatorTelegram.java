@@ -16,7 +16,6 @@
 package org.traccar.notificators;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
@@ -25,7 +24,6 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.notification.NotificationFormatter;
 
-import javax.annotation.Nullable;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.InvocationCallback;
 
@@ -42,9 +40,6 @@ public class NotificatorTelegram extends Notificator {
         private String chatId;
         @JsonProperty("text")
         private String text;
-        @Nullable
-        @JsonProperty("reply_to_message_id")
-        private Long replyToMessageId;
         @JsonProperty("parse_mode")
         private String parseMode = "html";
     }
@@ -86,20 +81,24 @@ public class NotificatorTelegram extends Notificator {
         });
     }
 
+    private LocationMessage createMessage(Position position) {
+        LocationMessage locationMessage = new LocationMessage();
+        locationMessage.chatId = chatId;
+        locationMessage.latitude = position.getLatitude();
+        locationMessage.longitude = position.getLongitude();
+        locationMessage.bearing = (int) Math.ceil(position.getCourse());
+        locationMessage.accuracy = position.getAccuracy();
+        return locationMessage;
+    }
+
     @Override
     public void sendSync(long userId, Event event, Position position) {
         if (position != null) {
-            LocationMessage locationMessage = new LocationMessage();
-            locationMessage.chatId = chatId;
-            locationMessage.latitude = position.getLatitude();
-            locationMessage.longitude = position.getLongitude();
-            locationMessage.bearing = (int) Math.ceil(position.getCourse());
-            locationMessage.accuracy = position.getAccuracy();
+            LocationMessage locationMessage = createMessage(position);
             executeRequest(urlSendLocation, locationMessage);
         }
         TextMessage message = new TextMessage();
         message.chatId = chatId;
-        // message.replyToMessageId = Long.MIN_VALUE; TODO add message ID from the first request here
         message.text = NotificationFormatter.formatFullMessage(userId, event, position).getBody();
         executeRequest(urlSendText, message);
     }
