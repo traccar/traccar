@@ -18,6 +18,8 @@ package org.traccar.geocoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
+import org.traccar.Main;
+import org.traccar.database.StatisticsManager;
 
 import javax.json.JsonObject;
 import javax.ws.rs.ClientErrorException;
@@ -94,6 +96,8 @@ public abstract class JsonGeocoder implements Geocoder {
                 return cachedAddress;
             }
         }
+
+        Main.getInjector().getInstance(StatisticsManager.class).registerGeocoderRequest();
 
         Invocation.Builder request = Context.getClient().target(String.format(url, latitude, longitude)).request();
 

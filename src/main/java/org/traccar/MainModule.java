@@ -286,10 +286,9 @@ public class MainModule extends AbstractModule {
     @Singleton
     @Provides
     public static GeocoderHandler provideGeocoderHandler(
-            Config config, @Nullable Geocoder geocoder, IdentityManager identityManager,
-            StatisticsManager statisticsManager) {
+            Config config, @Nullable Geocoder geocoder, IdentityManager identityManager) {
         if (geocoder != null) {
-            return new GeocoderHandler(config, geocoder, identityManager, statisticsManager);
+            return new GeocoderHandler(config, geocoder, identityManager);
         }
         return null;
     }
