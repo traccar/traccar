@@ -81,7 +81,7 @@ public class NotificatorTelegram extends Notificator {
         });
     }
 
-    private LocationMessage createMessage(Position position) {
+    private LocationMessage createLocationMessage(Position position) {
         LocationMessage locationMessage = new LocationMessage();
         locationMessage.chatId = chatId;
         locationMessage.latitude = position.getLatitude();
@@ -94,8 +94,7 @@ public class NotificatorTelegram extends Notificator {
     @Override
     public void sendSync(long userId, Event event, Position position) {
         if (position != null) {
-            LocationMessage locationMessage = createMessage(position);
-            executeRequest(urlSendLocation, locationMessage);
+            executeRequest(urlSendLocation, createLocationMessage(position));
         }
         TextMessage message = new TextMessage();
         message.chatId = chatId;
