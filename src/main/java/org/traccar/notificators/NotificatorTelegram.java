@@ -31,10 +31,11 @@ public class NotificatorTelegram extends Notificator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificatorTelegram.class);
 
-    private final String url;
+    private final String urlSendText;
+    private final String urlSendLocation;
     private final String chatId;
 
-    public static class Message {
+    public static class TextMessage {
         @JsonProperty("chat_id")
         private String chatId;
         @JsonProperty("text")
@@ -43,20 +44,30 @@ public class NotificatorTelegram extends Notificator {
         private String parseMode = "html";
     }
 
+    public static class LocationMessage {
+        @JsonProperty("chat_id")
+        private String chatId;
+        @JsonProperty("latitude")
+        private double latitude;
+        @JsonProperty("longitude")
+        private double longitude;
+        @JsonProperty("horizontal_accuracy")
+        private double accuracy;
+        @JsonProperty("bearing")
+        private int bearing;
+    }
+
     public NotificatorTelegram() {
-        url = String.format(
+        urlSendText = String.format(
                 "https://api.telegram.org/bot%s/sendMessage",
+                Context.getConfig().getString(Keys.NOTIFICATOR_TELEGRAM_KEY));
+        urlSendLocation = String.format(
+                "https://api.telegram.org/bot%s/sendLocation",
                 Context.getConfig().getString(Keys.NOTIFICATOR_TELEGRAM_KEY));
         chatId = Context.getConfig().getString(Keys.NOTIFICATOR_TELEGRAM_CHAT_ID);
     }
 
-    @Override
-    public void sendSync(long userId, Event event, Position position) {
-
-        Message message = new Message();
-        message.chatId = chatId;
-        message.text = NotificationFormatter.formatShortMessage(userId, event, position);
-
+    private void executeRequest(String url, Object message) {
         Context.getClient().target(url).request()
                 .async().post(Entity.json(message), new InvocationCallback<Object>() {
             @Override
@@ -68,6 +79,27 @@ public class NotificatorTelegram extends Notificator {
                 LOGGER.warn("Telegram API error", throwable);
             }
         });
+    }
+
+    private LocationMessage createLocationMessage(Position position) {
+        LocationMessage locationMessage = new LocationMessage();
+        locationMessage.chatId = chatId;
+        locationMessage.latitude = position.getLatitude();
+        locationMessage.longitude = position.getLongitude();
+        locationMessage.bearing = (int) Math.ceil(position.getCourse());
+        locationMessage.accuracy = position.getAccuracy();
+        return locationMessage;
+    }
+
+    @Override
+    public void sendSync(long userId, Event event, Position position) {
+        if (position != null) {
+            executeRequest(urlSendLocation, createLocationMessage(position));
+        }
+        TextMessage message = new TextMessage();
+        message.chatId = chatId;
+        message.text = NotificationFormatter.formatFullMessage(userId, event, position).getBody();
+        executeRequest(urlSendText, message);
     }
 
     @Override
