@@ -190,8 +190,17 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_VERSION_FW, buf.readUnsignedByte());
             buf.readUnsignedByte(); // timezone
             int interval = buf.readUnsignedByte();
-            if (length >= 7) {
+            if (buf.readableBytes() >= 1 + 2) {
                 position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+            }
+            if (buf.readableBytes() >= 3 + 2) {
+                buf.skipBytes(3); // temperature
+            }
+            if (buf.readableBytes() >= 1 + 2) {
+                position.set(Position.KEY_CHARGE, buf.readUnsignedByte() > 0);
+            }
+            if (buf.readableBytes() >= 1 + 2) {
+                position.set(Position.KEY_HEART_RATE, buf.readUnsignedByte());
             }
 
             ByteBuf content = Unpooled.buffer();
