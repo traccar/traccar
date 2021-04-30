@@ -158,7 +158,7 @@ public final class Keys {
      * Indicates whether TAIP protocol should have prefixes for messages.
      */
     public static final ConfigSuffix<Boolean> PROTOCOL_PREFIX = new ConfigSuffix<>(
-            ".alarmMap",
+            ".prefix",
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
