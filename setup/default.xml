@@ -288,5 +288,6 @@
     <entry key='navtelecom.port'>5221</entry>
     <entry key='startek.port'>5222</entry>
     <entry key='gs100.port'>5223</entry>
+    <entry key='mavlink2.port'>5224</entry>
 
 </properties>
