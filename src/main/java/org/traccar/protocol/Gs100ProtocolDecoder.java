@@ -26,6 +26,7 @@ import org.traccar.Protocol;
 import org.traccar.helper.BcdUtil;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -107,7 +108,7 @@ public class Gs100ProtocolDecoder extends BaseProtocolDecoder {
                     }
 
                     String other = ByteBufUtil.hexDump(buf.readSlice(4));
-                    position.setSpeed(Integer.parseInt(other.substring(0, 5)) * 0.01);
+                    position.setSpeed(UnitsConverter.knotsFromKph(Integer.parseInt(other.substring(0, 5)) * 0.01));
                     position.setCourse(Integer.parseInt(other.substring(5, 8)));
 
                 } else {
