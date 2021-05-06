@@ -15,18 +15,16 @@
  */
 package org.traccar.protocol;
 
-import java.net.SocketAddress;
-import java.time.Instant;
-import java.util.Date;
-
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
+import java.net.SocketAddress;
+import java.util.Date;
 
 public class Mavlink2ProtocolDecoder extends BaseProtocolDecoder {
 
@@ -36,39 +34,51 @@ public class Mavlink2ProtocolDecoder extends BaseProtocolDecoder {
 
     @Override
     protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+
         ByteBuf buf = (ByteBuf) msg;
-        if (buf.readUnsignedByte() != 0xFD) { //Packet start marker
+        if (buf.readUnsignedByte() != 0xFD) {
             return null;
         }
-        buf.readUnsignedByte(); // Payload length
-        buf.readUnsignedByte(); // Incompatibility Flags
-        buf.readUnsignedByte(); // Compatibility Flags
-        buf.readUnsignedByte(); // Packet sequence number
-        int senderSystemId = buf.readUnsignedByte(); // System ID (sender)
+
+        buf.readUnsignedByte(); // length
+        buf.readUnsignedByte(); // incompatibility flags
+        buf.readUnsignedByte(); // compatibility flags
+        buf.readUnsignedByte(); // index
+
+        int senderSystemId = buf.readUnsignedByte();
+        buf.readUnsignedByte(); // component id
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, Integer.toString(senderSystemId));
-        buf.readUnsignedByte(); // Component ID (sender)
         if (deviceSession == null) {
             return null;
         }
-        int messageId = buf.readUnsignedMediumLE(); // Message ID (low, middle, high bytes)
-        if (messageId == 33) {
+
+        int type = buf.readUnsignedMediumLE();
+        if (type == 33) {
+
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
+
+            position.set("timeBoot", buf.readUnsignedIntLE()); // time since system boot
+
             position.setValid(true);
-            position.setTime(Date.from(Instant.now()));
-            position.set("timeBootms", buf.readUnsignedIntLE()); // Timestamp (time since system boot).
+            position.setTime(new Date());
             position.setLatitude(buf.readIntLE() / 10000000.0);
             position.setLongitude(buf.readIntLE() / 10000000.0);
-            position.setAltitude(buf.readIntLE() / 1000.0); // Altitude (MSL).
-            position.set("relativeAltitude", buf.readIntLE() / 1000.0); // Altitude above ground
+            position.setAltitude(buf.readIntLE() / 1000.0);
+            position.set("relativeAltitude", buf.readIntLE() / 1000.0);
+
             int groundSpeedX = buf.readShortLE();
             int groundSpeedY = buf.readShortLE();
-            buf.readShortLE(); // Ground Z Speed
+            buf.readShortLE(); // ground speed z
             double speed = Math.sqrt(Math.pow(groundSpeedX, 2) + Math.pow(groundSpeedY, 2));
             position.setSpeed(UnitsConverter.knotsFromCps(speed));
+
             position.setCourse(buf.readUnsignedShortLE() / 100.0);
+
             return position;
+
         }
+
         return null;
     }
 
