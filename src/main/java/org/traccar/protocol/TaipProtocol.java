@@ -16,6 +16,7 @@
 package org.traccar.protocol;
 
 import io.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.PipelineBuilder;
@@ -28,16 +29,18 @@ public class TaipProtocol extends BaseProtocol {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, '<'));
+                pipeline.addLast(new TaipPrefixEncoder(TaipProtocol.this));
                 pipeline.addLast(new StringDecoder());
-                pipeline.addLast(new TaipStringEncoder(TaipProtocol.this));
+                pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new TaipProtocolDecoder(TaipProtocol.this));
             }
         });
         addServer(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
+                pipeline.addLast(new TaipPrefixEncoder(TaipProtocol.this));
                 pipeline.addLast(new StringDecoder());
-                pipeline.addLast(new TaipStringEncoder(TaipProtocol.this));
+                pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new TaipProtocolDecoder(TaipProtocol.this));
             }
         });

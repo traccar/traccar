@@ -24,29 +24,24 @@ import org.traccar.Context;
 import org.traccar.Protocol;
 import org.traccar.config.Keys;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @ChannelHandler.Sharable
-public class TaipStringEncoder extends MessageToMessageEncoder<CharSequence> {
+public class TaipPrefixEncoder extends MessageToMessageEncoder<ByteBuf> {
 
     private final Protocol protocol;
 
-    public TaipStringEncoder(Protocol protocol) {
+    public TaipPrefixEncoder(Protocol protocol) {
         this.protocol = protocol;
     }
 
     @Override
-    protected void encode(ChannelHandlerContext ctx, CharSequence msg, List<Object> out) throws Exception {
-        if (msg.length() == 0) {
-            return;
-        }
-        ByteBuf buf = Unpooled.buffer();
+    protected void encode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
         if (Context.getConfig().getBoolean(Keys.PROTOCOL_PREFIX.withPrefix(protocol.getName()))) {
-            buf.writeBytes(new byte[] {0x20, 0x20, 0x06, 0x00});
+            Unpooled.wrappedBuffer(Unpooled.wrappedBuffer(new byte[] {0x20, 0x20, 0x06, 0x00}), msg);
+        } else {
+            out.add(msg);
         }
-        buf.writeCharSequence(msg, StandardCharsets.US_ASCII);
-        out.add(buf);
     }
 
 }
