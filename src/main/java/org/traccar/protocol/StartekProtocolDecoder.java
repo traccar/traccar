@@ -19,6 +19,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.Protocol;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -66,7 +67,9 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
             .number("(x+)|")                     // battery
             .expression("([^,]+),")              // adc
             .number("d,")                        // extended
-            .any()
+            .expression("([^,]+)?,")             // fuel
+            .expression("([^,]+)?")              // temperature
+            .number("xx")                        // checksum
             .compile();
 
     private String decodeAlarm(int value) {
@@ -133,6 +136,28 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
         String[] adc = parser.next().split("\\|");
         for (int i = 0; i < adc.length; i++) {
             position.set(Position.PREFIX_ADC + (i + 1), Integer.parseInt(adc[i], 16) * 0.01);
+        }
+
+        if (parser.hasNext()) {
+            String[] fuels = parser.next().split("\\|");
+            for (String fuel : fuels) {
+                int index = Integer.parseInt(fuel.substring(0, 2));
+                int value = Integer.parseInt(fuel.substring(2), 16);
+                position.set("fuel" + index, value * 0.1);
+            }
+        }
+
+        if (parser.hasNext()) {
+            String[] temperatures = parser.next().split("\\|");
+            for (String temperature : temperatures) {
+                int index = Integer.parseInt(temperature.substring(0, 2));
+                int value = Integer.parseInt(temperature.substring(2), 16);
+                double convertedValue = BitUtil.to(value, 15);
+                if (BitUtil.check(value, 15)) {
+                    convertedValue = -convertedValue;
+                }
+                position.set(Position.PREFIX_TEMP + index, convertedValue * 0.01);
+            }
         }
 
         return position;
