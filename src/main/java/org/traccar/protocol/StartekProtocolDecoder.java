@@ -156,7 +156,7 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
                 if (BitUtil.check(value, 15)) {
                     convertedValue = -convertedValue;
                 }
-                position.set(Position.PREFIX_TEMP + index, convertedValue * 0.01);
+                position.set(Position.PREFIX_TEMP + index, convertedValue * 0.1);
             }
         }
 
