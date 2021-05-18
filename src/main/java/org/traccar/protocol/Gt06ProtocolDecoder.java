@@ -877,6 +877,17 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             position.set("driverLicense", data.trim());
         }
 
+        if (type == MSG_GPS_LBS_1 && buf.readableBytes() == 18) {
+            decodeStatus(position, buf);
+            position.set("oil", buf.readUnsignedShort());
+            int temperature = buf.readUnsignedByte();
+            if (BitUtil.check(temperature, 7)) {
+                temperature = -BitUtil.to(temperature, 7);
+            }
+            position.set(Position.PREFIX_TEMP + 1, temperature);
+            position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 10);
+        }
+
         if (type == MSG_GPS_LBS_1 && buf.readableBytes() == 2 + 6) {
             int mask = buf.readUnsignedShort();
             position.set(Position.KEY_IGNITION, BitUtil.check(mask, 8 + 7));
