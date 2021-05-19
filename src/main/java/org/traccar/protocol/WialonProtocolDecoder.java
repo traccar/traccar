@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,12 +49,12 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN = new PatternBuilder()
             .number("(dd)(dd)(dd);")             // date (ddmmyy)
             .number("(dd)(dd)(dd);")             // time (hhmmss)
-            .number("(dd)(dd.d+);")              // latitude
-            .expression("([NS]);")
-            .number("(ddd)(dd.d+);")             // longitude
-            .expression("([EW]);")
+            .number("(?:NA|(dd)(dd.d+));")       // latitude
+            .expression("(?:NA|([NS]));")
+            .number("(?:NA|(ddd)(dd.d+));")      // longitude
+            .expression("(?:NA|([EW]));")
             .number("(d+.?d*)?;")                // speed
-            .number("(d+.?d*)?;")                // course
+            .number("(?:NA|(d+.?d*))?;")         // course
             .number("(?:NA|(-?d+.?d*));")        // altitude
             .number("(?:NA|(d+))")               // satellites
             .groupBegin().text(";")
@@ -97,11 +97,15 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
 
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
 
-        position.setLatitude(parser.nextCoordinate());
-        position.setLongitude(parser.nextCoordinate());
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
-        position.setCourse(parser.nextDouble(0));
-        position.setAltitude(parser.nextDouble(0));
+        if (parser.hasNext(9)) {
+            position.setLatitude(parser.nextCoordinate());
+            position.setLongitude(parser.nextCoordinate());
+            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
+            position.setCourse(parser.nextDouble(0));
+            position.setAltitude(parser.nextDouble(0));
+        } else {
+            getLastLocation(position, position.getDeviceTime());
+        }
 
         if (parser.hasNext()) {
             int satellites = parser.nextInt(0);
