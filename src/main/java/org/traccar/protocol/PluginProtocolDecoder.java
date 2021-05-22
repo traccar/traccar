@@ -103,7 +103,7 @@ public class PluginProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_SATELLITES, parser.nextInt());
         position.set(Position.KEY_ODOMETER, (long) (parser.nextDouble() * 1000));
 
-        int status = parser.nextInt();
+        long status = parser.nextLong();
         position.setValid(BitUtil.check(status, 0));
         position.set(Position.KEY_IGNITION, BitUtil.check(status, 1));
         for (int i = 0; i < 4; i++) {

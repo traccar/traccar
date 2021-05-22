@@ -11,6 +11,9 @@ public class PluginProtocolDecoderTest extends ProtocolTest {
 
         var decoder = new PluginProtocolDecoder(null);
 
+        verifyPosition(decoder, text(
+                "$$STATUS,000000900005,20210521111252,27.171105,-25.600934,62.0,323,0,-1,2,0.000,2147489155,0.00,0,0,0.0,0.0,0,0,0,0,0,0,0,0,0"));
+
         verifyAttribute(decoder, text(
                 "$$STATUS,60925,20190829123115,28.254151,-25.860605,0.0,0,0,-1,2,0.000,13699,0.00,0,0,28.4,23.4,0,0,0,0,0,0,0,0,0"),
                 Position.PREFIX_TEMP + 1, 28.4);
