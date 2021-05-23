@@ -295,7 +295,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         return true;
     }
 
-    private boolean decodeStatus(Position position, ByteBuf buf) {
+    private boolean decodeStatus(Position position, ByteBuf buf, boolean batteryLevel) {
 
         int status = buf.readUnsignedByte();
 
@@ -324,7 +324,11 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 break;
         }
 
-        position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte() * 100 / 6);
+        if (batteryLevel) {
+            position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte() * 100 / 6);
+        } else {
+            position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
+        }
         position.set(Position.KEY_RSSI, buf.readUnsignedByte());
         position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
 
@@ -866,7 +870,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (hasStatus(type)) {
-            decodeStatus(position, buf);
+            decodeStatus(position, buf, true);
         }
 
         if (type == MSG_GPS_LBS_1 && buf.readableBytes() > 75 + 6) {
@@ -878,7 +882,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (type == MSG_GPS_LBS_1 && buf.readableBytes() == 18) {
-            decodeStatus(position, buf);
+            decodeStatus(position, buf, false);
             position.set("oil", buf.readUnsignedShort());
             int temperature = buf.readUnsignedByte();
             if (BitUtil.check(temperature, 7)) {
