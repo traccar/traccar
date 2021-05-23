@@ -290,5 +290,6 @@
     <entry key='gs100.port'>5223</entry>
     <entry key='mavlink2.port'>5224</entry>
     <entry key='uux.port'>5225</entry>
+    <entry key='r12w.port'>5226</entry>
 
 </properties>
