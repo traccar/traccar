@@ -4,8 +4,6 @@ import org.junit.Test;
 import org.traccar.model.Position;
 import org.traccar.ProtocolTest;
 
-import static org.junit.Assert.assertEquals;
-
 public class MegastekProtocolDecoderTest extends ProtocolTest {
 
     @Test
@@ -59,6 +57,14 @@ public class MegastekProtocolDecoderTest extends ProtocolTest {
                 "$MGV002,860719020193193,DeviceName,R,240214,104742,A,2238.20471,N,11401.97967,E,00,03,00,1.20,0.462,356.23,137.9,1.5,460,07,262C,0F54,25,0000,0000,0,0,0,28.5,28.3,,10,100,Timer;!"),
                 position("2014-02-24 10:47:42.000", true, 22.63675, 114.03299));
 
+        verifyAttribute(decoder, text(
+                "$MGV002,860719020193193,DeviceName,R,240214,104742,A,2238.20471,N,11401.97967,E,00,03,00,1.20,0.462,356.23,137.9,1.5,460,07,262C,0F54,25,0000,0000,0,0,0,28.5,28.3,,10,100,Timer;!"),
+                Position.KEY_CHARGE, true);
+
+        verifyAttribute(decoder, text(
+                "$MGV002,860719020193193,DeviceName,R,240214,104742,A,2238.20471,N,11401.97967,E,00,03,00,1.20,0.462,356.23,137.9,1.5,460,07,262C,0F54,25,0000,0000,0,0,0,28.5,28.3,,02,100,Timer;!"),
+                "belt", 2);
+
         verifyPosition(decoder, text(
                 "STX2010101801      j$GPRMC,101053.000,A,2232.7607,N,11404.7669,E,0.00,,231110,,,A*7F,460,00,2795,0E6A,14,94,1000,0000,91,Timer;1D"));
 
@@ -100,10 +106,6 @@ public class MegastekProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, text(
                 "LOGSTX,123456789012345,$GPRMC,230739.000,A,3841.81895,N,09494.12409,W,0.00,0.00,270914,,,A*70,L,,imei:123456789012345,0/7,269.7,Battery=100%,,0,,,5856,78A3;78"));
-        
-        Position testPosition = (Position) decoder.decode(null, null, "$MGV002,860719020193193,DeviceName,R,240214,104742,A,2238.20471,N,11401.97967,E,00,03,00,1.20,0.462,356.23,137.9,1.5,460,07,262C,0F54,25,0000,0000,0,0,0,28.5,28.3,,10,100,Timer;!");
-        assertEquals(true, testPosition.getBoolean(Position.KEY_CHARGE));
-        assertEquals(0, testPosition.getInteger("belt"));
     }
 
 }
