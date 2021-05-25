@@ -1,7 +1,10 @@
 package org.traccar.protocol;
 
 import org.junit.Test;
+import org.traccar.model.Position;
 import org.traccar.ProtocolTest;
+
+import static org.junit.Assert.assertEquals;
 
 public class MegastekProtocolDecoderTest extends ProtocolTest {
 
@@ -50,7 +53,10 @@ public class MegastekProtocolDecoderTest extends ProtocolTest {
                 "0125$MGV002,860719020193193,DeviceName,R,240214,104742,A,2238.20471,N,11401.97967,E,00,03,00,1.20,0.462,356.23,137.9,1.5,460,07,262C,0F54,25,0000,0000,0,0,0,28.5,28.3,,,100,Timer;"));
 
         verifyPosition(decoder, text(
-                "$MGV002,860719020193193,DeviceName,R,240214,104742,A,2238.20471,N,11401.97967,E,00,03,00,1.20,0.462,356.23,137.9,1.5,460,07,262C,0F54,25,0000,0000,0,0,0,28.5,28.3,,,100,Timer;!"),
+                "0339$MGV002,860719020193193,DeviceName,R,240214,104742,A,2238.20471,N,11401.97967,E,00,03,00,1.20,0.462,356.23,137.9,1.5,460,07,262C,0F54,25,0000,0000,0,0,0,28.5,28.3,,10,100,Timer,18339df945d0:53|108c0fb0a2f1:57|e46f133d6f5c:59|108ccf109f21:59|8adc963d752a:82|04c5a48cc6c0:82|9adc963d752a:83|8800b0b00004:85|90671c80e2fc:85|80c5e68c8d36:86,;!"));
+
+        verifyPosition(decoder, text(
+                "$MGV002,860719020193193,DeviceName,R,240214,104742,A,2238.20471,N,11401.97967,E,00,03,00,1.20,0.462,356.23,137.9,1.5,460,07,262C,0F54,25,0000,0000,0,0,0,28.5,28.3,,10,100,Timer;!"),
                 position("2014-02-24 10:47:42.000", true, 22.63675, 114.03299));
 
         verifyPosition(decoder, text(
@@ -95,6 +101,9 @@ public class MegastekProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "LOGSTX,123456789012345,$GPRMC,230739.000,A,3841.81895,N,09494.12409,W,0.00,0.00,270914,,,A*70,L,,imei:123456789012345,0/7,269.7,Battery=100%,,0,,,5856,78A3;78"));
         
+        Position testPosition = (Position) decoder.decode(null, null, "$MGV002,860719020193193,DeviceName,R,240214,104742,A,2238.20471,N,11401.97967,E,00,03,00,1.20,0.462,356.23,137.9,1.5,460,07,262C,0F54,25,0000,0000,0,0,0,28.5,28.3,,10,100,Timer;!");
+        assertEquals(true, testPosition.getBoolean(Position.KEY_CHARGE));
+        assertEquals(0, testPosition.getInteger("belt"));
     }
 
 }
