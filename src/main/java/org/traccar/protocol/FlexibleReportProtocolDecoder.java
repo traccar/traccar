@@ -24,6 +24,7 @@ import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
@@ -49,6 +50,18 @@ public class FlexibleReportProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private Date decodeTime(ByteBuf buf) {
+        int timestamp = buf.readInt();
+        return new DateBuilder()
+                .setSecond(timestamp % 60)
+                .setMinute((timestamp / 60) % 60)
+                .setHour((timestamp / (60 * 60)) % 24)
+                .setDay(1 + timestamp / (60 * 60 * 24) % 31)
+                .setMonth(1 + timestamp / (60 * 60 * 24 * 31) % 12)
+                .setYear(2000 + timestamp / (60 * 60 * 24 * 31 * 12))
+                .getDate();
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -70,7 +83,7 @@ public class FlexibleReportProtocolDecoder extends BaseProtocolDecoder {
             sendResponse(channel, remoteAddress, index);
         }
 
-        Date time = new Date(buf.readUnsignedInt() * 1000);
+        Date time = decodeTime(buf);
         int event = buf.readUnsignedByte();
 
         buf.readUnsignedByte(); // length
@@ -93,7 +106,7 @@ public class FlexibleReportProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedByte(); // product id
             }
             if (BitUtil.check(mask, 1)) {
-                position.setFixTime(new Date(buf.readUnsignedInt() * 1000));
+                position.setFixTime(decodeTime(buf));
             }
             if (BitUtil.check(mask, 2)) {
                 position.setValid(true);
@@ -123,7 +136,10 @@ public class FlexibleReportProtocolDecoder extends BaseProtocolDecoder {
                 position.set("solarPower", buf.readUnsignedShort() * 0.01);
             }
             if (BitUtil.check(mask, 10)) {
-                buf.skipBytes(5); // cell info
+                int cellService = buf.readUnsignedByte();
+                position.set(Position.KEY_ROAMING, BitUtil.check(cellService, 7));
+                position.set("service", BitUtil.to(cellService, 7));
+                buf.skipBytes(4); // cell info
             }
             if (BitUtil.check(mask, 11)) {
                 buf.readUnsignedByte(); // rssi
