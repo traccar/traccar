@@ -275,10 +275,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             .or().text(" ")
             .groupEnd("?").text(",")
             .number("(d+)?,")                    // rfid
-            .groupBegin()                        // ext accessories
-            .number("([01])")                    // charging
-            .number("(d)?")                      // belt status
-            .groupEnd("?")
+            .number("([01])(d)?").optional()     // charge and belt status
             .expression("[^,]*,")
             .number("(d+)?,")                    // battery
             .expression("([^,]*)[,;]")           // alert
@@ -360,7 +357,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
         
         if (parser.hasNext()) {
-            position.set(Position.KEY_CHARGE, parser.nextInt() == 1);
+            position.set(Position.KEY_CHARGE, parser.nextInt() > 0);
         }
         if (parser.hasNext()) {
             position.set("belt", parser.nextInt());
