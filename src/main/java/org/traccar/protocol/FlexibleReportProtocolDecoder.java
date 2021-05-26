@@ -145,7 +145,9 @@ public class FlexibleReportProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedByte(); // rssi
             }
             if (BitUtil.check(mask, 12)) {
-                position.set(Position.PREFIX_IO + 1, buf.readUnsignedByte());
+                int inputs = buf.readUnsignedByte();
+                position.set(Position.KEY_IGNITION, BitUtil.check(inputs, 0));
+                position.set(Position.PREFIX_IO + 1, inputs);
             }
             if (BitUtil.check(mask, 13)) {
                 position.set(Position.PREFIX_IO + 2, buf.readUnsignedByte());
