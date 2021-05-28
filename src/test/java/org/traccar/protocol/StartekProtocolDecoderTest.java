@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class StartekProtocolDecoderTest extends ProtocolTest {
 
@@ -9,6 +10,10 @@ public class StartekProtocolDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         var decoder = new StartekProtocolDecoder(null);
+
+        verifyAttribute(decoder, text(
+                "&&a152,860262050010565,000,53,8F5300,210528015706,A,-38.229746,145.043446,6,1.5,0,285,84,2102994,505|1|306E|082D6101,31,0000003D,02,02,04C0|01A0|0000|0000,1,,DC"),
+                Position.KEY_DRIVER_UNIQUE_ID, "8F5300");
 
         verifyPosition(decoder, text(
                 "&&>141,860262050010565,000,36,,210407094323,V,-38.229711,145.043161,0,0.0,0,0,0,14222,505|1|306E|082D6115,24,00000039,00,00,04C0|0164|0000|0000,1,,41"));

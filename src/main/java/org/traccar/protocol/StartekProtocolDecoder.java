@@ -43,7 +43,7 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // imei
             .number("xxx,")                      // command
             .number("(d+),")                     // event
-            .expression("[^,]*,")                // event data
+            .expression("([^,]+)?,")             // event data
             .number("(dd)(dd)(dd)")              // date (yyymmdd)
             .number("(dd)(dd)(dd),")             // time (hhmmss)
             .expression("([AV]),")               // valid
@@ -106,8 +106,13 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         int event = parser.nextInt();
-        position.set(Position.KEY_ALARM, decodeAlarm(event));
+        String eventData = parser.next();
         position.set(Position.KEY_EVENT, event);
+        if (event == 53) {
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, eventData);
+        } else {
+            position.set(Position.KEY_ALARM, decodeAlarm(event));
+        }
 
         position.setTime(parser.nextDateTime());
         position.setValid(parser.next().equals("A"));
