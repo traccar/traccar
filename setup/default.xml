@@ -292,5 +292,6 @@
     <entry key='uux.port'>5225</entry>
     <entry key='r12w.port'>5226</entry>
     <entry key='flexiblereport.port'>5227</entry>
+    <entry key='thinkpower.port'>5228</entry>
 
 </properties>
