@@ -355,7 +355,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
         }
 
         position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
-        
+
         if (parser.hasNext()) {
             position.set(Position.KEY_CHARGE, parser.nextInt() > 0);
         }
