@@ -275,9 +275,10 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             .or().text(" ")
             .groupEnd("?").text(",")
             .number("(d+)?,")                    // rfid
+            .number("([01])(d)?").optional()     // charge and belt status
             .expression("[^,]*,")
             .number("(d+)?,")                    // battery
-            .expression("([^,]*)")               // alert
+            .expression("([^,]*)[,;]")           // alert
             .any()
             .compile();
 
@@ -355,6 +356,13 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
 
+        if (parser.hasNext()) {
+            position.set(Position.KEY_CHARGE, parser.nextInt() > 0);
+        }
+        if (parser.hasNext()) {
+            position.set("belt", parser.nextInt());
+        }
+
         String battery = parser.next();
         if (battery != null) {
             position.set(Position.KEY_BATTERY, Integer.parseInt(battery));
@@ -375,10 +383,11 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             }
         }
         switch (value) {
+            case "pw on":
             case "poweron":
                 return Position.ALARM_POWER_ON;
             case "poweroff":
-                return Position.ALARM_POWER_ON;
+                return Position.ALARM_POWER_OFF;
             case "sos":
             case "help":
                 return Position.ALARM_SOS;
@@ -390,12 +399,32 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             case "low battery":
             case "lowbattery":
                 return Position.ALARM_LOW_BATTERY;
+            case "low extern voltage":
+                return Position.ALARM_LOW_POWER;
+            case "gps cut":
+                return Position.ALARM_GPS_ANTENNA_CUT;
             case "vib":
                 return Position.ALARM_VIBRATION;
             case "move in":
                 return Position.ALARM_GEOFENCE_ENTER;
             case "move out":
                 return Position.ALARM_GEOFENCE_EXIT;
+            case "corner":
+                return Position.ALARM_CORNERING;
+            case "fatigue":
+                return Position.ALARM_FATIGUE_DRIVING;
+            case "psd":
+                return Position.ALARM_POWER_CUT;
+            case "psr":
+                return Position.ALARM_POWER_RESTORED;
+            case "hit":
+                return Position.ALARM_SHOCK;
+            case "belt on":
+            case "belton":
+                return Position.ALARM_LOCK;
+            case "belt off":
+            case "beltoff":
+                return Position.ALARM_UNLOCK;
             case "error":
                 return Position.ALARM_FAULT;
             default:
