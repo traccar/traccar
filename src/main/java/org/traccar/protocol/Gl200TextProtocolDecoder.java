@@ -1161,10 +1161,6 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         decodeDeviceTime(position, parser);
 
-        if (channel != null && Context.getConfig().getBoolean(Keys.PROTOCOL_ACK.withPrefix(getProtocolName()))) {
-            channel.writeAndFlush(new NetworkMessage("+SACK:" + parser.next() + "$", remoteAddress));
-        }
-
         return position;
     }
 
@@ -1327,6 +1323,16 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                     }
                 }
             }
+        }
+
+        if (channel != null && Context.getConfig().getBoolean(Keys.PROTOCOL_ACK.withPrefix(getProtocolName()))) {
+            String checksum;
+            if (sentence.endsWith("$")) {
+                checksum = sentence.substring(sentence.length() - 1 - 4, sentence.length() - 1);
+            } else {
+                checksum = sentence.substring(sentence.length() - 4);
+            }
+            channel.writeAndFlush(new NetworkMessage("+SACK:" + checksum + "$", remoteAddress));
         }
 
         return result;
