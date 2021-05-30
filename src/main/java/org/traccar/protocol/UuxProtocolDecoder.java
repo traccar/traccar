@@ -22,6 +22,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.model.Position;
 
@@ -40,10 +41,10 @@ public class UuxProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_NACK = 0xF0;
 
     private void sendResponse(Channel channel, int productCode, int protocolVersion, int type) {
-        if (channel != null) {
+        if (channel != null && BitUtil.check(protocolVersion, 7)) {
             ByteBuf response = Unpooled.buffer();
             response.writeShort(productCode);
-            response.writeByte(protocolVersion);
+            response.writeByte(BitUtil.to(protocolVersion, 7));
             response.writeByte(1); // length
             response.writeByte(type);
             channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
