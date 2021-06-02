@@ -27,6 +27,7 @@ public class StartekProtocol extends BaseProtocol {
 
     public StartekProtocol() {
         setSupportedDataCommands(
+                Command.TYPE_CUSTOM,
                 Command.TYPE_OUTPUT_CONTROL,
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME);

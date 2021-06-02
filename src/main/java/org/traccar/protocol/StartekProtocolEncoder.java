@@ -40,6 +40,8 @@ public class StartekProtocolEncoder extends StringProtocolEncoder {
     protected Object encodeCommand(Channel channel, Command command) {
 
         switch (command.getType()) {
+            case Command.TYPE_CUSTOM:
+                return formatCommand(command, "%s", Command.KEY_DATA);
             case Command.TYPE_OUTPUT_CONTROL:
                 return formatCommand(command, "900,%s,%s", Command.KEY_INDEX, Command.KEY_DATA);
             case Command.TYPE_ENGINE_STOP:
