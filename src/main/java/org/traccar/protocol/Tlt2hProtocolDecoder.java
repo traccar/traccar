@@ -179,6 +179,9 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
 
                     dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
                     position.setTime(dateBuilder.getDate());
+
+                } else {
+                    continue;
                 }
 
             } else if (message.contains("$WIFI")) {
@@ -220,7 +223,7 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
             positions.add(position);
         }
 
-        return positions;
+        return positions.isEmpty() ? null : positions;
     }
 
 }

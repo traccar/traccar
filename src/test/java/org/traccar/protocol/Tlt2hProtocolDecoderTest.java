@@ -11,6 +11,10 @@ public class Tlt2hProtocolDecoderTest extends ProtocolTest {
 
         var decoder = new Tlt2hProtocolDecoder(null);
 
+        verifyNull(decoder, text(
+                "#860517049471362#MT700#0000#AUTO#1\r\n",
+                "#36$GPRMC,,V,,,,,,,,,,A*5C\r\n"));
+
         verifyPositions(decoder, text(
                 "#867198059727390#MT700#0000#AUTO#1\r\n",
                 "#38$GPRMC,105721.00,A,2238.3071,N,11401.7575,E,,96.70,250321,,,A*74\r\n"));
