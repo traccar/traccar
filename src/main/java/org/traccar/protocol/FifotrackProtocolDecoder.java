@@ -23,6 +23,7 @@ import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -187,7 +188,12 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
         position.setAltitude(parser.nextInt());
 
         position.set(Position.KEY_ODOMETER, parser.nextLong());
-        position.set(Position.KEY_STATUS, parser.nextHexLong());
+
+        long status = parser.nextHexLong();
+        position.set(Position.KEY_RSSI, BitUtil.between(status, 3, 8));
+        position.set(Position.KEY_SATELLITES, BitUtil.from(status, 28));
+        position.set(Position.KEY_STATUS, status);
+
         position.set(Position.KEY_INPUT, parser.nextHexInt());
         position.set(Position.KEY_OUTPUT, parser.nextHexInt());
 
