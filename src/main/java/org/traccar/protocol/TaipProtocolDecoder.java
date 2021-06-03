@@ -313,7 +313,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
                 if (messageIndex != null) {
                     String response;
                     if (messageIndex.startsWith("#IP")) {
-                        response = "\u0020\u0020\u0006\u0000>SAK;ID=" + uniqueId + ";" + messageIndex + "<";
+                        response = ">SAK;ID=" + uniqueId + ";" + messageIndex + "<";
                     } else {
                         response = ">ACK;ID=" + uniqueId + ";" + messageIndex + ";*";
                         response += String.format("%02X", Checksum.xor(response)) + "<";
