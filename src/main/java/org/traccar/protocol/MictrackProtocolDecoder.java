@@ -176,7 +176,7 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private Object decodeResult(
-            Channel channel, SocketAddress remoteAddress, String sentence) throws Exception {
+            Channel channel, SocketAddress remoteAddress, String sentence) {
 
         if (sentence.matches("\\d{15} .+")) {
 
@@ -224,6 +224,7 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
+        position.set(Position.KEY_TYPE, Integer.parseInt(fragments[1]));
 
         switch (fragments[3]) {
             case "R0":
