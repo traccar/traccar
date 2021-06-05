@@ -82,7 +82,7 @@ public class Vt200ProtocolDecoder extends BaseProtocolDecoder {
 
             position.setTime(decodeDate(buf));
 
-            if (buf.readableBytes() >= 9) {
+            if (buf.readableBytes() > 2) {
                 position.setLatitude(decodeCoordinate(BcdUtil.readInteger(buf, 8)));
                 position.setLongitude(decodeCoordinate(BcdUtil.readInteger(buf, 9)));
 
