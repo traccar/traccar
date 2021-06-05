@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class Vt200ProtocolDecoderTest extends ProtocolTest {
 
@@ -43,7 +44,7 @@ public class Vt200ProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, binary(
                 "28631037309456208200210103302307171805444417097301147188170198090f0000073a002000007e00074429"));
 
-        verifyNull(decoder, binary(
+        verifyPosition(decoder, binary(
                 "286310373094563089001200032f2107171740144417075001147188872c29"));
 
         verifyAttributes(decoder, binary(
@@ -54,6 +55,22 @@ public class Vt200ProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, binary(
                 "28631037309456208400340102dc090617161654441577230114439597368c0a0c0000030500200100417c1baa349d3290510000006a00007000003d15004c11c629"));
+
+        verifyPosition(decoder, binary(
+                "2830140414000130890009010003280414090004df29"),
+                position("2014-04-28 09:00:04.000", false, 0.0, 0.0));
+
+        verifyPosition(decoder, binary(
+                "2830140414000130890012000003280414090004224388161134912397df29"),
+                position("2014-04-28 09:00:04.000", true, 22.73136, 113.81873166666666));
+
+        verifyAttribute(decoder, binary(
+                "2830140414000130890012000003280414090004224388161134912397df29"),
+                Position.KEY_IGNITION, false);
+
+        verifyAttribute(decoder, binary(
+                "2830140414000130890012010003280414090004224388161134912397df29"),
+                Position.KEY_IGNITION, true);
 
     }
 

@@ -67,37 +67,46 @@ public class Vt200ProtocolDecoder extends BaseProtocolDecoder {
         int type = buf.readUnsignedShort();
         buf.readUnsignedShort(); // length
 
-        if (type == 0x2086 || type == 0x2084 || type == 0x2082) {
+        if (type == 0x2086 || type == 0x2084 || type == 0x2082 || type == 0x3089) {
 
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
-            buf.readUnsignedByte(); // data type
+            if (type == 0x3089) {
+                position.set(Position.KEY_IGNITION, buf.readUnsignedByte() == 1);
+            } else {
+                buf.readUnsignedByte(); // data type
+            }
+
             buf.readUnsignedShort(); // trip id
 
             position.setTime(decodeDate(buf));
 
-            position.setLatitude(decodeCoordinate(BcdUtil.readInteger(buf, 8)));
-            position.setLongitude(decodeCoordinate(BcdUtil.readInteger(buf, 9)));
+            if (buf.readableBytes() > 2) {
+                position.setLatitude(decodeCoordinate(BcdUtil.readInteger(buf, 8)));
+                position.setLongitude(decodeCoordinate(BcdUtil.readInteger(buf, 9)));
 
-            int flags = buf.readUnsignedByte();
-            position.setValid(BitUtil.check(flags, 0));
-            if (!BitUtil.check(flags, 1)) {
-                position.setLatitude(-position.getLatitude());
+                int flags = buf.readUnsignedByte();
+                position.setValid(BitUtil.check(flags, 0));
+                if (!BitUtil.check(flags, 1)) {
+                    position.setLatitude(-position.getLatitude());
+                }
+                if (!BitUtil.check(flags, 2)) {
+                    position.setLongitude(-position.getLongitude());
+                }
             }
-            if (!BitUtil.check(flags, 2)) {
-                position.setLongitude(-position.getLongitude());
+
+            if (type != 0x3089) {
+                position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
+                position.setCourse(buf.readUnsignedByte() * 2);
+
+                position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+                position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+                position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 1000);
+                position.set(Position.KEY_STATUS, buf.readUnsignedInt());
+
+                // additional data
             }
-
-            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
-            position.setCourse(buf.readUnsignedByte() * 2);
-
-            position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
-            position.set(Position.KEY_RSSI, buf.readUnsignedByte());
-            position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 1000);
-            position.set(Position.KEY_STATUS, buf.readUnsignedInt());
-
-            // additional data
 
             return position;
 
