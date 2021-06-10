@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,13 +93,13 @@ public class NotificatorTelegram extends Notificator {
 
     @Override
     public void sendSync(long userId, Event event, Position position) {
+        TextMessage message = new TextMessage();
+        message.chatId = chatId;
+        message.text = NotificationFormatter.formatShortMessage(userId, event, position);
+        executeRequest(urlSendText, message);
         if (position != null) {
             executeRequest(urlSendLocation, createLocationMessage(position));
         }
-        TextMessage message = new TextMessage();
-        message.chatId = chatId;
-        message.text = NotificationFormatter.formatFullMessage(userId, event, position).getBody();
-        executeRequest(urlSendText, message);
     }
 
     @Override
