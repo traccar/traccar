@@ -97,9 +97,8 @@ public class NotificatorTelegram extends Notificator {
     public void sendSync(long userId, Event event, Position position) {
         User user = Context.getPermissionsManager().getUser(userId);
         TextMessage message = new TextMessage();
-        if (user.getAttributes().containsKey("notificationTelegramChatId")) {
-            message.chatId = user.getString("notificationTelegramChatId");
-        } else {
+        message.chatId = user.getString("telegramChatId");
+        if (message.chatId == null) {
             message.chatId = chatId;
         }
         message.text = NotificationFormatter.formatShortMessage(userId, event, position);
