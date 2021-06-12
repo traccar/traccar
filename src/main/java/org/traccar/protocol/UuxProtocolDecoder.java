@@ -36,6 +36,7 @@ public class UuxProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
+    public static final int MSG_GENERAL = 0x90;
     public static final int MSG_IMMOBILIZER = 0x9E;
     public static final int MSG_ACK = 0xD0;
     public static final int MSG_NACK = 0xF0;
@@ -49,6 +50,14 @@ public class UuxProtocolDecoder extends BaseProtocolDecoder {
             response.writeByte(type);
             channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
+    }
+
+    private int readInt(ByteBuf buf, int length) {
+        return Integer.parseInt(buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
+    }
+
+    private double readDouble(ByteBuf buf, int length) {
+        return Double.parseDouble(buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
     }
 
     @Override
@@ -69,14 +78,54 @@ public class UuxProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        if (type == MSG_IMMOBILIZER) {
+        DateBuilder dateBuilder = new DateBuilder()
+                .setDate(Calendar.getInstance().get(Calendar.YEAR), buf.readUnsignedByte(), buf.readUnsignedByte())
+                .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
+
+        if (type == MSG_GENERAL) {
 
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
-            DateBuilder dateBuilder = new DateBuilder()
-                    .setDate(Calendar.getInstance().get(Calendar.YEAR), buf.readUnsignedByte(), buf.readUnsignedByte())
-                    .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
+            position.setTime(dateBuilder.getDate());
+
+            buf.skipBytes(10); // reason
+            buf.readUnsignedShort(); // flags
+
+            buf.readUnsignedByte(); // position status
+            position.setValid(true);
+
+            position.set(Position.KEY_SATELLITES, readInt(buf, 2));
+
+            double latitude = readInt(buf, 2);
+            latitude += readDouble(buf, 7);
+            position.setLatitude(buf.readUnsignedByte() == 'S' ? -latitude : latitude);
+
+            double longitude = readInt(buf, 3);
+            longitude += readDouble(buf, 7);
+            position.setLongitude(buf.readUnsignedByte() == 'W' ? -longitude : longitude);
+
+            position.setSpeed(readInt(buf, 3));
+            position.setCourse(readInt(buf, 3));
+            readInt(buf, 3); // alternative speed
+
+            position.set(Position.KEY_ODOMETER, buf.readUnsignedByte() * 10000 + buf.readUnsignedByte() * 256
+                    + buf.readUnsignedByte() + buf.readUnsignedByte() * 0.1);
+            position.set(Position.KEY_HOURS, buf.readUnsignedInt());
+            position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+
+            position.set("companyId", buf.readCharSequence(6, StandardCharsets.US_ASCII).toString());
+
+            buf.skipBytes(10); // reason data
+
+            position.set("tripId", buf.readUnsignedShort());
+
+            return position;
+
+        } else if (type == MSG_IMMOBILIZER) {
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
 
             getLastLocation(position, dateBuilder.getDate());
 
