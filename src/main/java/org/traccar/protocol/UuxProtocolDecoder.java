@@ -98,11 +98,11 @@ public class UuxProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_SATELLITES, readInt(buf, 2));
 
             double latitude = readInt(buf, 2);
-            latitude += readDouble(buf, 7);
+            latitude += readDouble(buf, 7) / 60;
             position.setLatitude(buf.readUnsignedByte() == 'S' ? -latitude : latitude);
 
             double longitude = readInt(buf, 3);
-            longitude += readDouble(buf, 7);
+            longitude += readDouble(buf, 7) / 60;
             position.setLongitude(buf.readUnsignedByte() == 'W' ? -longitude : longitude);
 
             position.setSpeed(readInt(buf, 3));
