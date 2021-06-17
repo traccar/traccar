@@ -244,6 +244,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
                     getLastLocation(position, null);
 
                     position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(values[2]));
+                    position.set(Position.KEY_STEPS, Integer.parseInt(values[0]));
 
                     return position;
                 }
