@@ -111,14 +111,20 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.PREFIX_TEMP + (id - 78), readValue(buf, length, true) * 0.1);
                 break;
             case 198:
-                position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+                if (readValue(buf, length, false) > 0) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+                }
                 break;
             case 199:
             case 200:
-                position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+                if (readValue(buf, length, false) > 0) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+                }
                 break;
             case 201:
-                position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+                if (readValue(buf, length, false) > 0) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+                }
                 break;
             default:
                 position.set(Position.PREFIX_IO + id, readValue(buf, length, false));
@@ -181,29 +187,29 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                 }
 
                 // Read 1 byte data
-                int cnt = buf.readUnsignedByte();
-                for (int j = 0; j < cnt; j++) {
+                int valueCount = buf.readUnsignedByte();
+                for (int j = 0; j < valueCount; j++) {
                     int id = type == MSG_EXTENDED_RECORDS ? buf.readUnsignedShort() : buf.readUnsignedByte();
                     decodeParameter(position, id, buf, 1);
                 }
 
                 // Read 2 byte data
-                cnt = buf.readUnsignedByte();
-                for (int j = 0; j < cnt; j++) {
+                valueCount = buf.readUnsignedByte();
+                for (int j = 0; j < valueCount; j++) {
                     int id = type == MSG_EXTENDED_RECORDS ? buf.readUnsignedShort() : buf.readUnsignedByte();
                     decodeParameter(position, id, buf, 2);
                 }
 
                 // Read 4 byte data
-                cnt = buf.readUnsignedByte();
-                for (int j = 0; j < cnt; j++) {
+                valueCount = buf.readUnsignedByte();
+                for (int j = 0; j < valueCount; j++) {
                     int id = type == MSG_EXTENDED_RECORDS ? buf.readUnsignedShort() : buf.readUnsignedByte();
                     decodeParameter(position, id, buf, 4);
                 }
 
                 // Read 8 byte data
-                cnt = buf.readUnsignedByte();
-                for (int j = 0; j < cnt; j++) {
+                valueCount = buf.readUnsignedByte();
+                for (int j = 0; j < valueCount; j++) {
                     int id = type == MSG_EXTENDED_RECORDS ? buf.readUnsignedShort() : buf.readUnsignedByte();
                     decodeParameter(position, id, buf, 8);
                 }
