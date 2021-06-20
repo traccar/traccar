@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,6 +136,7 @@ public class WebServer {
     private void initWebApp(Config config, ServletContextHandler servletHandler) {
         ServletHolder servletHolder = new ServletHolder(DefaultServlet.class);
         servletHolder.setInitParameter("resourceBase", new File(config.getString(Keys.WEB_PATH)).getAbsolutePath());
+        servletHolder.setInitParameter("dirAllowed", "false");
         if (config.getBoolean(Keys.WEB_DEBUG)) {
             servletHandler.setWelcomeFiles(new String[] {"debug.html", "index.html"});
         } else {
