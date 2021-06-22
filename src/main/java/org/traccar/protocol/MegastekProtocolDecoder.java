@@ -276,7 +276,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             .groupEnd("?").text(",")
             .number("(d+)?,")                    // rfid
             .number("([01])(d)?").optional()     // charge and belt status
-            .expression("[^,]*,")
+            .expression("[^,]*,").optional()
             .number("(d+)?,")                    // battery
             .expression("([^,]*)[,;]")           // alert
             .any()
