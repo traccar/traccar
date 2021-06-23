@@ -246,7 +246,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d+),")                  // hdop
             .number("(d+.d+)?,")                 // speed
             .number("(d+.d+)?,")                 // course
-            .number("(-?d+.d+)?,")                // altitude
+            .number("(-?d+.d+)?,")               // altitude
             .number("(d+.d+)?,")                 // odometer
             .number("(d+),")                     // mcc
             .number("(d+),")                     // mnc
