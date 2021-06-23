@@ -48,6 +48,9 @@ public class MictrackProtocolDecoderTest extends ProtocolTest {
         var decoder = new MictrackProtocolDecoder(null);
 
         verifyPositions(decoder, text(
+                "861836051888035$162835.00,A,4139.6460,N,07009.7239,W,,41.53,-25.8,220621"));
+
+        verifyPositions(decoder, text(
                 "861108032038761$062232.00,A,2238.2832,N,11401.7381,E,0.01,309.62,95.0,131117"));
 
         verifyPositions(decoder, text(

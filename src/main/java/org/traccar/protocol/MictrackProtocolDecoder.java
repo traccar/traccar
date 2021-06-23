@@ -54,7 +54,7 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
             .expression("([EW]),")
             .number("(d+.?d*)?,")                // speed
             .number("(d+.?d*)?,")                // course
-            .number("(d+.?d*)?,")                // altitude
+            .number("(-?d+.?d*)?,")              // altitude
             .number("(dd)(dd)(dd)")              // date (ddmmyy)
             .compile();
 
