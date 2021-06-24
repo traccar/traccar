@@ -141,7 +141,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
 
             beginIndex = endIndex + 2;
             endIndex = sentence.indexOf('*', beginIndex) + 3;
-            if (beginIndex > endIndex) {
+            if (endIndex < 0) {
                 return null;
             }
             location = sentence.substring(beginIndex, endIndex);
