@@ -22,7 +22,7 @@ import org.traccar.Main;
 import org.traccar.database.StatisticsManager;
 
 import javax.json.JsonObject;
-import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.InvocationCallback;
 import java.util.AbstractMap;
@@ -116,7 +116,7 @@ public abstract class JsonGeocoder implements Geocoder {
         } else {
             try {
                 return handleResponse(latitude, longitude, request.get(JsonObject.class), null);
-            } catch (ClientErrorException e) {
+            } catch (WebApplicationException e) {
                 LOGGER.warn("Geocoder network error", e);
             }
         }
