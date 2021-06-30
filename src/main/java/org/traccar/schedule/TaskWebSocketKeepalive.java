@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,29 +15,22 @@
  */
 package org.traccar.schedule;
 
-import java.util.concurrent.Executors;
+import org.traccar.Context;
+
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
-public class ScheduleManager {
+public class TaskWebSocketKeepalive implements Runnable {
 
-    private ScheduledExecutorService executor;
+    private static final long PERIOD_SECONDS = 55;
 
-    public void start() {
-
-        executor = Executors.newSingleThreadScheduledExecutor();
-
-        new TaskDeviceInactivityCheck().schedule(executor);
-        new TaskWebSocketKeepalive().schedule(executor);
-
+    public void schedule(ScheduledExecutorService executor) {
+        executor.scheduleAtFixedRate(this, PERIOD_SECONDS, PERIOD_SECONDS, TimeUnit.SECONDS);
     }
 
-    public void stop() {
-
-        if (executor != null) {
-            executor.shutdown();
-            executor = null;
-        }
-
+    @Override
+    public void run() {
+        Context.getConnectionManager().sendKeepalive();
     }
 
 }

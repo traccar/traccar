@@ -154,6 +154,14 @@ public class ConnectionManager {
         return result;
     }
 
+    public synchronized void sendKeepalive() {
+        for (Set<UpdateListener> userListeners : listeners.values()) {
+            for (UpdateListener listener : userListeners) {
+                listener.onKeepalive();
+            }
+        }
+    }
+
     public synchronized void updateDevice(Device device) {
         for (long userId : Context.getPermissionsManager().getDeviceUsers(device.getId())) {
             if (listeners.containsKey(userId)) {
@@ -185,6 +193,7 @@ public class ConnectionManager {
     }
 
     public interface UpdateListener {
+        void onKeepalive();
         void onUpdateDevice(Device device);
         void onUpdatePosition(Position position);
         void onUpdateEvent(Event event);
