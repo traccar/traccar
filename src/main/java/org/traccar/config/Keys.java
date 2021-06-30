@@ -759,6 +759,13 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
+     * Telegram notification send location message.
+     */
+    public static final ConfigKey<Boolean> NOTIFICATOR_TELEGRAM_SEND_LOCATION = new ConfigKey<>(
+            "notificator.telegram.sendLocation",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
      * Maximum time period for reports in seconds. Can be useful to prevent users to request unreasonably long reports.
      * By default there is no limit.
      */

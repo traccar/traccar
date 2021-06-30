@@ -36,6 +36,7 @@ public class NotificatorTelegram extends Notificator {
     private final String urlSendText;
     private final String urlSendLocation;
     private final String chatId;
+    private final boolean sendLocation;
 
     public static class TextMessage {
         @JsonProperty("chat_id")
@@ -67,6 +68,7 @@ public class NotificatorTelegram extends Notificator {
                 "https://api.telegram.org/bot%s/sendLocation",
                 Context.getConfig().getString(Keys.NOTIFICATOR_TELEGRAM_KEY));
         chatId = Context.getConfig().getString(Keys.NOTIFICATOR_TELEGRAM_CHAT_ID);
+        sendLocation = Context.getConfig().getBoolean(Keys.NOTIFICATOR_TELEGRAM_SEND_LOCATION);
     }
 
     private void executeRequest(String url, Object message) {
@@ -103,7 +105,7 @@ public class NotificatorTelegram extends Notificator {
         }
         message.text = NotificationFormatter.formatShortMessage(userId, event, position);
         executeRequest(urlSendText, message);
-        if (position != null) {
+        if (sendLocation && position != null) {
             executeRequest(urlSendLocation, createLocationMessage(message.chatId, position));
         }
     }
