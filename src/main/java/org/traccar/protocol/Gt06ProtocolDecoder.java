@@ -685,7 +685,11 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        if (type == MSG_LBS_MULTIPLE_1 || type == MSG_LBS_MULTIPLE_2 || type == MSG_LBS_EXTEND
+        if (type == MSG_LBS_STATUS && dataLength >= 18) {
+
+            return null; // space10x multi-lbs message
+
+        } else if (type == MSG_LBS_MULTIPLE_1 || type == MSG_LBS_MULTIPLE_2 || type == MSG_LBS_EXTEND
                 || type == MSG_LBS_WIFI || type == MSG_LBS_2 || type == MSG_WIFI_3) {
 
             boolean longFormat = type == MSG_LBS_2 || type == MSG_WIFI_3;
