@@ -40,6 +40,7 @@ public class UuxProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_IMMOBILIZER = 0x9E;
     public static final int MSG_ACK = 0xD0;
     public static final int MSG_NACK = 0xF0;
+    public static final int MSG_KEEPALIVE = 0xFF;
 
     private void sendResponse(Channel channel, int productCode, int protocolVersion, int type) {
         if (channel != null && BitUtil.check(protocolVersion, 7)) {
@@ -70,6 +71,10 @@ public class UuxProtocolDecoder extends BaseProtocolDecoder {
         int protocolVersion = buf.readUnsignedByte();
         buf.readUnsignedByte(); // length
         int type = buf.readUnsignedByte();
+
+        if (type == MSG_KEEPALIVE) {
+            return null;
+        }
 
         String vehicleId = buf.readCharSequence(10, StandardCharsets.US_ASCII).toString();
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, vehicleId);
