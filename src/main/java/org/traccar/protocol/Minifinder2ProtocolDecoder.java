@@ -46,6 +46,8 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public static final int MSG_DATA = 0x01;
+    public static final int MSG_CONFIGURATION = 0x02;
+    public static final int MSG_SERVICES = 0x03;
     public static final int MSG_RESPONSE = 0x7F;
 
     private String decodeAlarm(int code) {
@@ -70,6 +72,58 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
+    private void sendResponse(Channel channel, SocketAddress remoteAddress, int index, int type, ByteBuf buf) {
+
+        if (channel != null) {
+
+            ByteBuf body = Unpooled.buffer();
+            if (type == MSG_SERVICES) {
+                while (buf.isReadable()) {
+                    int endIndex = buf.readUnsignedByte() + buf.readerIndex();
+                    int key = buf.readUnsignedByte();
+                    switch (key) {
+                        case 0x11:
+                        case 0x21:
+                        case 0x22:
+                            body.writeByte(9 + 1); // length
+                            body.writeByte(key);
+                            body.writeIntLE(0); // latitude
+                            body.writeIntLE(0); // longitude
+                            body.writeByte(0); // address
+                            break;
+                        case 0x12:
+                            body.writeByte(5); // length
+                            body.writeByte(key);
+                            body.writeIntLE((int) (System.currentTimeMillis() / 1000));
+                            break;
+                        default:
+                            break;
+                    }
+                    buf.readerIndex(endIndex);
+                }
+            } else {
+                body.writeByte(1); // key length
+                body.writeByte(0); // success
+            }
+
+            ByteBuf content = Unpooled.buffer();
+            content.writeByte(type == MSG_SERVICES ? type : MSG_RESPONSE);
+            content.writeBytes(body);
+            body.release();
+
+            ByteBuf response = Unpooled.buffer();
+            response.writeByte(0xAB); // header
+            response.writeByte(0x00); // properties
+            response.writeShortLE(content.readableBytes());
+            response.writeShortLE(Checksum.crc16(Checksum.CRC16_XMODEM, content.nioBuffer()));
+            response.writeShortLE(index);
+            response.writeBytes(content);
+            content.release();
+
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -83,23 +137,8 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
         int index = buf.readUnsignedShortLE();
         int type = buf.readUnsignedByte();
 
-        if (BitUtil.check(flags, 4) && channel != null) {
-
-            ByteBuf content = Unpooled.buffer();
-            content.writeByte(MSG_RESPONSE);
-            content.writeByte(1); // key length
-            content.writeByte(0); // success
-
-            ByteBuf response = Unpooled.buffer();
-            response.writeByte(0xAB); // header
-            response.writeByte(0x00); // properties
-            response.writeShortLE(content.readableBytes());
-            response.writeShortLE(Checksum.crc16(Checksum.CRC16_XMODEM, content.nioBuffer()));
-            response.writeShortLE(index);
-            response.writeBytes(content);
-            content.release();
-
-            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+        if (BitUtil.check(flags, 4)) {
+            sendResponse(channel, remoteAddress, index, type, buf);
         }
 
         if (type == MSG_DATA) {
