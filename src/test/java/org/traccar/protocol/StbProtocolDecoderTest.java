@@ -10,7 +10,7 @@ public class StbProtocolDecoderTest extends ProtocolTest {
 
         var decoder = new StbProtocolDecoder(null);
 
-        verifyPosition(decoder, text(
+        verifyNull(decoder, text(
                 "{\"devId\":\"CHZD08KPD0210425046\",\"devType\":2,\"hardVersion\":\"HDTTVA19\",\"msgType\":110,\"protocolVersion\":\"V1\",\"softVersion\":\"3.1.8\",\"switchCabStatus\":\"1\",\"txnNo\":\"1625212741537\"}"));
 
     }
