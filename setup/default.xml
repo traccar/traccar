@@ -293,5 +293,6 @@
     <entry key='r12w.port'>5226</entry>
     <entry key='flexiblereport.port'>5227</entry>
     <entry key='thinkpower.port'>5228</entry>
+    <entry key='stb.port'>5229</entry>
 
 </properties>
