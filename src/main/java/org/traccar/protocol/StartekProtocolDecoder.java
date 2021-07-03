@@ -64,11 +64,17 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
             .number("(x+),")                     // inputs
             .number("(x+),")                     // outputs
             .number("(x+)|")                     // power
-            .number("(x+)|")                     // battery
-            .expression("([^,]+),")              // adc
+            .number("(x+)")                      // battery
+            .groupBegin()
+            .text("|")
+            .expression("([^,]+)").optional()    // adc
+            .groupBegin()
+            .text(",")
             .number("d,")                        // extended
             .expression("([^,]+)?,")             // fuel
             .expression("([^,]+)?")              // temperature
+            .groupEnd("?")
+            .groupEnd("?")
             .number("xx")                        // checksum
             .compile();
 
@@ -138,9 +144,11 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_POWER, parser.nextHexInt() * 0.01);
         position.set(Position.KEY_BATTERY, parser.nextHexInt() * 0.01);
 
-        String[] adc = parser.next().split("\\|");
-        for (int i = 0; i < adc.length; i++) {
-            position.set(Position.PREFIX_ADC + (i + 1), Integer.parseInt(adc[i], 16) * 0.01);
+        if (parser.hasNext()) {
+            String[] adc = parser.next().split("\\|");
+            for (int i = 0; i < adc.length; i++) {
+                position.set(Position.PREFIX_ADC + (i + 1), Integer.parseInt(adc[i], 16) * 0.01);
+            }
         }
 
         if (parser.hasNext()) {
