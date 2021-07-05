@@ -175,6 +175,7 @@ public class WebServer {
         int sessionTimeout = config.getInteger(Keys.WEB_SESSION_TIMEOUT);
         if (sessionTimeout > 0) {
             servletHandler.getSessionHandler().setMaxInactiveInterval(sessionTimeout);
+            
         }
 
         String sameSiteCookie = config.getString(Keys.WEB_SAME_SITE_COOKIE);
