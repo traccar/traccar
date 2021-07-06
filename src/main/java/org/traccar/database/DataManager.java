@@ -75,6 +75,10 @@ public class DataManager {
 
     private final Config config;
 
+    public DataSource getDataSource() {
+        return dataSource;
+    }
+
     private DataSource dataSource;
 
     private boolean generateQueries;

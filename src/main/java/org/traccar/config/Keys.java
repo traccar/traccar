@@ -436,6 +436,13 @@ public final class Keys {
     public static final ConfigKey WEB_SAME_SITE_COOKIE = new ConfigKey(
             "web.sameSiteCookie", String.class);
 
+    /**
+     * Sets SameSite cookie attribute value.
+     * Supported options: Lax, Strict, None.
+     */
+    public static final ConfigKey WEB_SESSION_PERSISTED = new ConfigKey(
+            "web.sessionPersisted", String.class);
+
     private Keys() {
     }
 
