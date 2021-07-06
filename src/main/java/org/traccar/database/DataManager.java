@@ -73,6 +73,10 @@ public class DataManager {
 
     private DataSource dataSource;
 
+    public DataSource getDataSource() {
+        return dataSource;
+    }
+
     private boolean generateQueries;
 
     private final boolean forceLdap;

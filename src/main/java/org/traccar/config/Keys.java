@@ -1199,6 +1199,13 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
+     * Enables persisting Jetty session to the database
+     */
+    public static final ConfigKey<Boolean> WEB_SESSION_PERSISTED = new ConfigKey<>(
+            "web.sessionPersisted",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
      * Output logging to the standard terminal output instead of a log file.
      */
     public static final ConfigKey<Boolean> LOGGER_CONSOLE = new ConfigKey<>(
