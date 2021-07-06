@@ -190,11 +190,10 @@ public class WebServer {
             databaseAdaptor.setDatasource(Context.getDataManager().getDataSource());
             JDBCSessionDataStoreFactory jdbcSessionDataStoreFactory = new JDBCSessionDataStoreFactory();
             jdbcSessionDataStoreFactory.setDatabaseAdaptor(databaseAdaptor);
-            SessionHandler sessionHandler = new SessionHandler();
+            SessionHandler sessionHandler = servletHandler.getSessionHandler();
             SessionCache sessionCache = new DefaultSessionCache(sessionHandler);
             sessionCache.setSessionDataStore(jdbcSessionDataStoreFactory.getSessionDataStore(sessionHandler));
             sessionHandler.setSessionCache(sessionCache);
-            servletHandler.setSessionHandler(sessionHandler);
         }
 
         int sessionTimeout = config.getInteger("web.sessionTimeout");
