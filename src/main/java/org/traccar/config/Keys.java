@@ -1201,8 +1201,8 @@ public final class Keys {
     /**
      * Enables persisting Jetty session to the database
      */
-    public static final ConfigKey<Boolean> WEB_SESSION_PERSISTED = new ConfigKey<>(
-            "web.sessionPersisted",
+    public static final ConfigKey<Boolean> WEB_PERSIST_SESSION = new ConfigKey<>(
+            "web.persistSession",
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
