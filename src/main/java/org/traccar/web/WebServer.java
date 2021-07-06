@@ -178,8 +178,7 @@ public class WebServer {
     }
 
     private void initSessionConfig(Config config, ServletContextHandler servletHandler) {
-        boolean sessionPersisted = config.getBoolean(Keys.WEB_SESSION_PERSISTED);
-        if (sessionPersisted) {
+        if (config.getBoolean(Keys.WEB_SESSION_PERSISTED)) {
             DatabaseAdaptor databaseAdaptor = new DatabaseAdaptor();
             databaseAdaptor.setDatasource(Context.getDataManager().getDataSource());
             JDBCSessionDataStoreFactory jdbcSessionDataStoreFactory = new JDBCSessionDataStoreFactory();
