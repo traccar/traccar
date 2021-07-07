@@ -231,7 +231,7 @@ public final class Keys {
     public static final ConfigKey<Double> EVENT_MOTION_SPEED_THRESHOLD = new ConfigKey<>(
             "event.motion.speedThreshold",
             Collections.singletonList(KeyType.GLOBAL),
-            0.5); //=1 km/h, Strava uses 3.2 km/h
+            0.05); //=0.1 km/h, Strava uses 3.2 km/h
 
     /**
      * Global polyline geofence distance. Within that distance from the polyline, point is considered within the
