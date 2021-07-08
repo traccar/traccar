@@ -2989,7 +2989,7 @@
           "type": {
             "type": "string"
           },
-          "serverTime": {
+          "eventTime": {
             "type": "string",
             "description": "in IS0 8601 format. eg. `1963-11-22T18:30:00Z`",
             "format": "date-time"
