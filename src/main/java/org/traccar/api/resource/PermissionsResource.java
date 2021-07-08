@@ -105,4 +105,5 @@ public class PermissionsResource  extends BaseResource {
             Context.getPermissionsManager().refreshPermissions(new Permission(entities.get(0)));
         return Response.noContent().build();
     }
+
 }
