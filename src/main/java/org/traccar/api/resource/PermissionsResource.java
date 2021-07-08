@@ -77,8 +77,9 @@ public class PermissionsResource  extends BaseResource {
                     permission.getPropertyClass(), permission.getPropertyId());
         }
         // we assume all permissions are of same type so we use the first one for refreshing
-        if (!entities.isEmpty())
+        if (!entities.isEmpty()) {
             Context.getPermissionsManager().refreshPermissions(new Permission(entities.get(0)));
+        }
         return Response.noContent().build();
     }
 
@@ -101,8 +102,9 @@ public class PermissionsResource  extends BaseResource {
             LogAction.unlink(getUserId(), permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId());
         }
-        if (!entities.isEmpty())
+        if (!entities.isEmpty()) {
             Context.getPermissionsManager().refreshPermissions(new Permission(entities.get(0)));
+        }
         return Response.noContent().build();
     }
 
