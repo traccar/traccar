@@ -17,7 +17,6 @@
 package org.traccar.api.resource;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
