@@ -162,7 +162,13 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
 
             if (type != MSG_ALARM) {
 
-                position.set(Position.KEY_ODOMETER, buf.readUnsignedMedium());
+                int odometer = buf.readUnsignedMedium();
+                if (BitUtil.to(odometer, 16) > 0) {
+                    position.set(Position.KEY_ODOMETER, odometer);
+                } else if (odometer > 0) {
+                    position.set(Position.KEY_FUEL_LEVEL, BitUtil.from(odometer, 16));
+                }
+
                 position.set(Position.KEY_STATUS, buf.readUnsignedInt());
 
                 buf.readUnsignedShort();
