@@ -18,6 +18,7 @@ package org.traccar.api.resource;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -59,9 +60,7 @@ public class PermissionsResource  extends BaseResource {
 
     @POST
     public Response add(LinkedHashMap<String, Long> entity) throws SQLException, ClassNotFoundException {
-        List<LinkedHashMap<String, Long>> list = new ArrayList<>();
-        list.add(entity);
-        return add(list);
+        return add(Collections.singletonList(entity));
     }
 
     @Path("bulk")
@@ -85,9 +84,7 @@ public class PermissionsResource  extends BaseResource {
 
     @DELETE
     public Response remove(LinkedHashMap<String, Long> entity) throws SQLException, ClassNotFoundException {
-        List<LinkedHashMap<String, Long>> list = new ArrayList<>();
-        list.add(entity);
-        return remove(list);
+        return remove(Collections.singletonList(entity));
     }
 
     @DELETE
