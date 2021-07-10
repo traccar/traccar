@@ -26,6 +26,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -66,6 +67,7 @@ public class PermissionsResource  extends BaseResource {
     @POST
     public Response add(List<LinkedHashMap<String, Long>> entities) throws SQLException, ClassNotFoundException {
         Context.getPermissionsManager().checkReadonly(getUserId());
+        checkPermissionTypes(entities);
         for (LinkedHashMap<String, Long> entity: entities) {
             Permission permission = new Permission(entity);
             checkPermission(permission, true);
@@ -74,11 +76,23 @@ public class PermissionsResource  extends BaseResource {
             LogAction.link(getUserId(), permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId());
         }
-        // we assume all permissions are of same type so we use the first one for refreshing
         if (!entities.isEmpty()) {
             Context.getPermissionsManager().refreshPermissions(new Permission(entities.get(0)));
         }
         return Response.noContent().build();
+    }
+
+    private void checkPermissionTypes(List<LinkedHashMap<String, Long>> entities) throws ClassNotFoundException {
+        if (!entities.isEmpty()) {
+            Permission first = new Permission(entities.get(0));
+            for (LinkedHashMap<String, Long> entity: entities) {
+                Permission permission = new Permission(entity);
+                if (!first.getOwnerClass().equals(permission.getOwnerClass())
+                    || !first.getPropertyClass().equals(permission.getPropertyClass())) {
+                    throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).build());
+                }
+            }
+        }
     }
 
     @DELETE
@@ -90,6 +104,7 @@ public class PermissionsResource  extends BaseResource {
     @Path("bulk")
     public Response remove(List<LinkedHashMap<String, Long>> entities) throws SQLException, ClassNotFoundException {
         Context.getPermissionsManager().checkReadonly(getUserId());
+        checkPermissionTypes(entities);
         for (LinkedHashMap<String, Long> entity: entities) {
             Permission permission = new Permission(entity);
             checkPermission(permission, false);
