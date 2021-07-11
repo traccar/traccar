@@ -20,6 +20,7 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -82,16 +83,13 @@ public class PermissionsResource  extends BaseResource {
         return Response.noContent().build();
     }
 
-    private void checkPermissionTypes(List<LinkedHashMap<String, Long>> entities) throws ClassNotFoundException {
-        if (!entities.isEmpty()) {
-            Permission first = new Permission(entities.get(0));
-            for (LinkedHashMap<String, Long> entity: entities) {
-                Permission permission = new Permission(entity);
-                if (!first.getOwnerClass().equals(permission.getOwnerClass())
-                    || !first.getPropertyClass().equals(permission.getPropertyClass())) {
-                    throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).build());
-                }
+    private void checkPermissionTypes(List<LinkedHashMap<String, Long>> entities) {
+        Set<String> keys = null;
+        for (LinkedHashMap<String, Long> entity: entities) {
+            if (keys != null & !entity.keySet().equals(keys)) {
+                throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).build());
             }
+            keys = entity.keySet();
         }
     }
 
