@@ -41,6 +41,11 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
             .expression(".")                     // index
             .number("d+,")                       // length
             .number("(d+),")                     // imei
+            .expression("(.+)")                  // content
+            .number("xx")                        // checksum
+            .compile();
+
+    private static final Pattern PATTERN_POSITION = new PatternBuilder()
             .number("xxx,")                      // command
             .number("(d+),")                     // event
             .expression("([^,]+)?,")             // event data
@@ -75,7 +80,6 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
             .expression("([^,]+)?")              // temperature
             .groupEnd("?")
             .groupEnd("?")
-            .number("xx")                        // checksum
             .compile();
 
     private String decodeAlarm(int value) {
@@ -105,6 +109,32 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
+            return null;
+        }
+
+        String content = parser.next();
+        if (content.length() < 100) {
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            position.set(Position.KEY_RESULT, content);
+
+            return position;
+
+        } else {
+
+            return decodePosition(deviceSession, content);
+
+        }
+    }
+
+    protected Object decodePosition(DeviceSession deviceSession, String content) throws Exception {
+
+        Parser parser = new Parser(PATTERN_POSITION, content);
+        if (!parser.matches()) {
             return null;
         }
 

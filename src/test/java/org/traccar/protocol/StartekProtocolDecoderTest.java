@@ -11,6 +11,10 @@ public class StartekProtocolDecoderTest extends ProtocolTest {
 
         var decoder = new StartekProtocolDecoder(null);
 
+        verifyAttribute(decoder, text(
+                "&&:23,860262050015424,129,OKA2"),
+                Position.KEY_RESULT, "129,OK");
+
         verifyPosition(decoder, text(
                 "&&o125,861157040554384,000,0,,210702235150,A,27.263505,153.037061,11,1.2,0,0,31,5125,505|1|7032|8C89802,20,0000002D,00,00,01E2|019DF0"));
 
