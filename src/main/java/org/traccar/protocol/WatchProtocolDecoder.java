@@ -101,7 +101,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             return Position.ALARM_GEOFENCE_ENTER;
         } else if (BitUtil.check(status, 20)) {
             return Position.ALARM_REMOVING;
-        } else if (BitUtil.check(status, 21)) {
+        } else if (BitUtil.check(status, 21) || BitUtil.check(status, 22)) {
             return Position.ALARM_FALL_DOWN;
         }
         return null;
