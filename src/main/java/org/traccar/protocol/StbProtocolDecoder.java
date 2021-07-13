@@ -51,7 +51,7 @@ public class StbProtocolDecoder extends BaseProtocolDecoder {
         JsonObject root = Json.createReader(new StringReader((String) msg)).readObject();
 
         Response response = new Response();
-        response.type = root.getInt("msgType");
+        response.type = root.getInt("msgType") + 1;
         response.deviceId = root.getString("devId");
         response.result = 1;
         response.transaction = root.getString("txnNo");
