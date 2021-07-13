@@ -94,7 +94,7 @@ public class PermissionsResource  extends BaseResource {
             LogAction.link(getUserId(), permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId());
         }
-        refreshPermissions(entities);
+        // refreshPermissions(entities);
         return Response.noContent().build();
     }
 
@@ -115,7 +115,7 @@ public class PermissionsResource  extends BaseResource {
             LogAction.unlink(getUserId(), permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId());
         }
-        refreshPermissions(entities);
+        // refreshPermissions(entities);
         return Response.noContent().build();
     }
 }
