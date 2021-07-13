@@ -59,9 +59,14 @@ public class PermissionsResource  extends BaseResource {
                 permission.getPropertyClass(), getUserId(), permission.getPropertyId());
     }
 
-    @POST
-    public Response add(LinkedHashMap<String, Long> entity) throws SQLException, ClassNotFoundException {
-        return add(Collections.singletonList(entity));
+    private void checkPermissionTypes(List<LinkedHashMap<String, Long>> entities) {
+        Set<String> keys = null;
+        for (LinkedHashMap<String, Long> entity: entities) {
+            if (keys != null & !entity.keySet().equals(keys)) {
+                throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).build());
+            }
+            keys = entity.keySet();
+        }
     }
 
     @Path("bulk")
@@ -83,19 +88,9 @@ public class PermissionsResource  extends BaseResource {
         return Response.noContent().build();
     }
 
-    private void checkPermissionTypes(List<LinkedHashMap<String, Long>> entities) {
-        Set<String> keys = null;
-        for (LinkedHashMap<String, Long> entity: entities) {
-            if (keys != null & !entity.keySet().equals(keys)) {
-                throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).build());
-            }
-            keys = entity.keySet();
-        }
-    }
-
-    @DELETE
-    public Response remove(LinkedHashMap<String, Long> entity) throws SQLException, ClassNotFoundException {
-        return remove(Collections.singletonList(entity));
+    @POST
+    public Response add(LinkedHashMap<String, Long> entity) throws SQLException, ClassNotFoundException {
+        return add(Collections.singletonList(entity));
     }
 
     @DELETE
@@ -115,6 +110,11 @@ public class PermissionsResource  extends BaseResource {
             Context.getPermissionsManager().refreshPermissions(new Permission(entities.get(0)));
         }
         return Response.noContent().build();
+    }
+
+    @DELETE
+    public Response remove(LinkedHashMap<String, Long> entity) throws SQLException, ClassNotFoundException {
+        return remove(Collections.singletonList(entity));
     }
 
 }
