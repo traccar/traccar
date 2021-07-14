@@ -14,4 +14,5 @@ traccar-other*.zip
 .gradle
 out
 build
+bin
 src/main/java/org/traccar/protobuf
