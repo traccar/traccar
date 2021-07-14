@@ -4,6 +4,7 @@ services:
   traccar:
     image: gpproton/traccar:4.13
     build:
+      context: ./
       dockerfile: Dockerfile
     volumes:
       - ./logs:/opt/traccar/logs:rw
