@@ -18,7 +18,7 @@ javac -version
 
 git clone --recurse-submodules https://github.com/elevenClouds/traccar.git
 (cd traccar/traccar-web && git checkout build)
-(cd traccar && git checkout build && ./gradlew build)
+(cd traccar && git checkout build && ./gradlew build && sleep 10)
 
 wget http://cdn.sencha.com/ext/gpl/ext-6.2.0-gpl.zip
 unzip ext-*-gpl.zip ; rm ext-*-gpl.zip
