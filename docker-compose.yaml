@@ -1,0 +1,54 @@
+version: "3.3"
+
+services:
+  traccar:
+    image: gpproton/traccar:4.13
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    volumes:
+      - ./logs:/opt/traccar/logs:rw
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    env_file: .env
+    command: java -Xms512m -Xmx4096m -Djava.net.preferIPv4Stack=true -jar /opt/traccar/tracker-server.jar /opt/traccar/conf/traccar.xml
+    ulimits:
+      rtprio: 95
+      memlock: -1
+      nproc: 1024000
+      nofile:
+        soft: 1024000
+        hard: 1024000
+    healthcheck:
+      test:
+        ["CMD", "printf", "\"GET / HTTP/1.1\n\n\" > /dev/tcp/127.0.0.1/5001"]
+      interval: 1m
+      timeout: 30s
+      retries: 3
+    ports:
+      #- "18090:8082"
+      ## GPS103
+      - "5001:5001"
+      - "5001:5001/udp"
+      ## TK103
+      - "5002:5002"
+      - "5002:5002/udp"
+      ## Meiligao
+      - "5009:5009"
+      ## H02
+      - "5013:5013"
+      - "5013:5013/udp"
+      ## V680
+      - "5016:5016"
+      - "5016:5016/udp"
+      ## Concox
+      - "5023:5023"
+      - "5023:5023/udp"
+      ## Wonde Pround
+      - "5032:5032"
+      - "5032:5032/udp"
+      ## OSMAND
+      - "5055:5055"
+      ## CalAmp
+      - "5082:5082"
+      - "5082:5082/udp"

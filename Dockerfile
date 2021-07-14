@@ -1,10 +1,20 @@
-FROM openjdk:8-jre-slim
+FROM debian:buster-slim as builder
+
+WORKDIR /build/
+
+COPY setup/environment.sh .
+RUN chmod +x environment.sh && ./environment.sh
+
+
+FROM openjdk:11-jre-slim as runtime
 LABEL maintainer="Godwin peter .O <godwin@peter.com.ng>"
-ENV TRACCAR_VERSION 4.11
+ENV TRACCAR_VERSION 4.13
+
 WORKDIR /opt/traccar
+COPY --from=builder /build/traccar/setup/traccar-other--o.zip /tmp/traccar.zip
 COPY setup/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
-COPY setup/traccar-other--o.zip /tmp/traccar.zip
+
 RUN set -ex \
     && apt-get update \
     && TERM=xterm DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends unzip \
@@ -13,7 +23,7 @@ RUN set -ex \
     && apt-get autoremove --yes unzip \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/*
+
 ENTRYPOINT ["/entrypoint.sh"]
-##docker build -t gpproton/traccar .
-##docker login
-##docker push gpproton/traccar
+
+# CMD ["java", "-Xms512m", "-Xmx512m", "-Djava.net.preferIPv4Stack=true", "-jar", "tracker-server.jar", "conf/traccar.xml"]
