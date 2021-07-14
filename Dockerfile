@@ -3,14 +3,13 @@ FROM debian:buster as builder
 WORKDIR /build/
 
 RUN apt update && \
-    apt install -y sudo curl git software-properties-common \
+    apt install -y sudo curl git \
     dirmngr apt-transport-https zip wget unzip && \
-    sudo add-apt-repository ppa:openjdk-r/ppa && \
     curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash - && \
     dpkg --add-architecture i386
 
 RUN apt update &&  \
-    apt install -y openjdk-11-jdk innoextract wine wine32 makeself nodejs && \
+    apt install -y default-jdk innoextract wine wine32 makeself nodejs && \
     export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64 && \
     export PATH=$PATH:$JAVA_HOME/bin && \
     echo $PATH
