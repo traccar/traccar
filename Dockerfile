@@ -1,4 +1,4 @@
-FROM debian:buster-slim as builder
+FROM debian:buster as builder
 
 WORKDIR /build/
 
