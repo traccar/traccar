@@ -2,12 +2,9 @@ FROM debian:buster as builder
 
 WORKDIR /build/
 
-# COPY setup/environment.sh .
-# RUN chmod +x environment.sh && ./environment.sh
-
 RUN apt update && \
     apt install -y sudo curl git software-properties-common \
-    dirmngr apt-transport-https zip wget unzip && \
+    dirmngr apt-transport-https zip wget unzip ppa-purge && \
     sudo ppa-purge ppa:openjdk-r/ppa && \
     curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash - && \
     dpkg --add-architecture i386
@@ -43,7 +40,7 @@ COPY setup/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 RUN set -ex \
-    && apt-get update \
+    && apt-get update && apt-get upgrade -y \
     && TERM=xterm DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends unzip \
     && unzip -qo /tmp/traccar.zip -d /opt/traccar \
     && rm /tmp/traccar.zip \
