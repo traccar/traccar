@@ -440,8 +440,8 @@ public final class Keys {
      * Sets SameSite cookie attribute value.
      * Supported options: Lax, Strict, None.
      */
-    public static final ConfigKey WEB_SESSION_PERSISTED = new ConfigKey(
-            "web.sessionPersisted", String.class);
+    public static final ConfigKey WEB_PERSIST_SESSION = new ConfigKey(
+            "web.persistSession", String.class);
 
     private Keys() {
     }

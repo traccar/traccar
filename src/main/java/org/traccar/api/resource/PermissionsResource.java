@@ -17,19 +17,17 @@
 package org.traccar.api.resource;
 
 import java.sql.SQLException;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -61,31 +59,21 @@ public class PermissionsResource  extends BaseResource {
                 permission.getPropertyClass(), getUserId(), permission.getPropertyId());
     }
 
-    private void refreshPermissions(List<LinkedHashMap<String, Long>> entities) {
-        Set<String> ownerProperty = new HashSet<>();
-        entities.stream()
-            .map(e -> {
-                try {
-                    return new Permission(e);
-                } catch (ClassNotFoundException classNotFoundException) {
-                    classNotFoundException.printStackTrace();
-                    return null;
-                }
-            })
-            .filter(Objects::nonNull)
-            .filter(p -> ownerProperty.add(p.getOwnerClass().getName() + p.getPropertyClass().getName()))
-            .forEach(p -> Context.getPermissionsManager().refreshPermissions(p));
-    }
-
-    @POST
-    public Response add(LinkedHashMap<String, Long> entity) throws SQLException, ClassNotFoundException {
-        return add(Stream.of(entity).collect(Collectors.toList()));
+    private void checkPermissionTypes(List<LinkedHashMap<String, Long>> entities) {
+        Set<String> keys = null;
+        for (LinkedHashMap<String, Long> entity: entities) {
+            if (keys != null & !entity.keySet().equals(keys)) {
+                throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).build());
+            }
+            keys = entity.keySet();
+        }
     }
 
     @Path("bulk")
     @POST
     public Response add(List<LinkedHashMap<String, Long>> entities) throws SQLException, ClassNotFoundException {
         Context.getPermissionsManager().checkReadonly(getUserId());
+        checkPermissionTypes(entities);
         for (LinkedHashMap<String, Long> entity: entities) {
             Permission permission = new Permission(entity);
             checkPermission(permission, true);
@@ -94,19 +82,22 @@ public class PermissionsResource  extends BaseResource {
             LogAction.link(getUserId(), permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId());
         }
-        refreshPermissions(entities);
+        if (!entities.isEmpty()) {
+            Context.getPermissionsManager().refreshPermissions(new Permission(entities.get(0)));
+        }
         return Response.noContent().build();
     }
 
-    @DELETE
-    public Response remove(LinkedHashMap<String, Long> entity) throws SQLException, ClassNotFoundException {
-        return remove(Stream.of(entity).collect(Collectors.toList()));
+    @POST
+    public Response add(LinkedHashMap<String, Long> entity) throws SQLException, ClassNotFoundException {
+        return add(Collections.singletonList(entity));
     }
 
     @DELETE
     @Path("bulk")
     public Response remove(List<LinkedHashMap<String, Long>> entities) throws SQLException, ClassNotFoundException {
         Context.getPermissionsManager().checkReadonly(getUserId());
+        checkPermissionTypes(entities);
         for (LinkedHashMap<String, Long> entity: entities) {
             Permission permission = new Permission(entity);
             checkPermission(permission, false);
@@ -115,7 +106,15 @@ public class PermissionsResource  extends BaseResource {
             LogAction.unlink(getUserId(), permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId());
         }
-        refreshPermissions(entities);
+        if (!entities.isEmpty()) {
+            Context.getPermissionsManager().refreshPermissions(new Permission(entities.get(0)));
+        }
         return Response.noContent().build();
     }
+
+    @DELETE
+    public Response remove(LinkedHashMap<String, Long> entity) throws SQLException, ClassNotFoundException {
+        return remove(Collections.singletonList(entity));
+    }
+
 }
