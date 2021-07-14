@@ -46,6 +46,9 @@ public class MegastekFrameDecoder extends BaseFrameDecoder {
             if (delimiter == -1) {
                 delimiter = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '!');
             }
+            if (delimiter == -1) {
+                delimiter = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '\n');
+            }
             if (delimiter != -1) {
                 ByteBuf result = buf.readRetainedSlice(delimiter - buf.readerIndex());
                 buf.skipBytes(1);

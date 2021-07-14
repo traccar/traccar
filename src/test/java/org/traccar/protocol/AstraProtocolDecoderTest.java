@@ -8,7 +8,7 @@ public class AstraProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        AstraProtocolDecoder decoder = new AstraProtocolDecoder(null);
+        var decoder = new AstraProtocolDecoder(null);
 
         verifyPositions(decoder, binary(
                 "4b00700529c0c265976b8202cba9ff00676d864554a9c30000000020073401006436000300030008000000000000a0000100001920c43d00009600428302cba9ff00676d864554aa3e000000002007240100643b000300020008000000000000b0000100001920c43d00009600420f0e"));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,8 +73,8 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             .number(",(d{4})(d{4})")             // power / battery
             .number(",(d+)")                     // rpm
             .groupBegin()
-            .number(",(-?d+)")                   // temperature 1
-            .number(",(-?d+)")                   // temperature 2
+            .number(",([-+]?d+.?d*)")            // temperature 1
+            .number(",([-+]?d+.?d*)")            // temperature 2
             .groupEnd("?")
             .number(",(xx)")                     // alarm
             .or()
@@ -126,6 +126,22 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_SOS;
             case 0x02:
                 return Position.ALARM_POWER_CUT;
+            default:
+                return null;
+        }
+    }
+
+    private String decodeAlarm2(int value) {
+        switch (value) {
+            case 22:
+                return Position.ALARM_ACCELERATION;
+            case 23:
+                return Position.ALARM_BRAKING;
+            case 24:
+                return Position.ALARM_ACCIDENT;
+            case 26:
+            case 28:
+                return Position.ALARM_CORNERING;
             default:
                 return null;
         }
@@ -191,9 +207,9 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_POWER, parser.nextInt() * 0.01);
             position.set(Position.KEY_BATTERY, parser.nextInt() * 0.01);
             position.set(Position.KEY_RPM, parser.nextInt());
-            position.set(Position.PREFIX_TEMP + 1, parser.nextInt());
-            position.set(Position.PREFIX_TEMP + 2, parser.nextInt());
-            position.set(Position.KEY_ALARM, decodeAlarm(parser.nextHexInt()));
+            position.set(Position.PREFIX_TEMP + 1, parser.nextDouble());
+            position.set(Position.PREFIX_TEMP + 2, parser.nextDouble());
+            event = parser.nextHexInt();
         }
 
         if (parser.hasNext(2)) {
@@ -220,22 +236,10 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
 
         if (event != null) {
             position.set(Position.KEY_EVENT, event);
-            switch (event) {
-                case 22:
-                    position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
-                    break;
-                case 23:
-                    position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
-                    break;
-                case 24:
-                    position.set(Position.KEY_ALARM, Position.ALARM_ACCIDENT);
-                    break;
-                case 26:
-                case 28:
-                    position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
-                    break;
-                default:
-                    break;
+            if (sentence.charAt(5) == ',') {
+                position.set(Position.KEY_ALARM, decodeAlarm2(event));
+            } else {
+                position.set(Position.KEY_ALARM, decodeAlarm(event));
             }
         }
 
@@ -308,7 +312,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             if (channel != null) {
                 if (messageIndex != null) {
                     String response;
-                    if (messageIndex.startsWith("#IP:")) {
+                    if (messageIndex.startsWith("#IP")) {
                         response = ">SAK;ID=" + uniqueId + ";" + messageIndex + "<";
                     } else {
                         response = ">ACK;ID=" + uniqueId + ";" + messageIndex + ";*";

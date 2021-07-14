@@ -8,7 +8,7 @@ public class RecodaProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        RecodaProtocolDecoder decoder = new RecodaProtocolDecoder(null);
+        var decoder = new RecodaProtocolDecoder(null);
 
         verifyNull(decoder, binary(
                 "01100020480000000300000030393535360000000000000001000000303030303000000000000000000000000000000000000000006100004531313037353500ffffffffffff0000"));

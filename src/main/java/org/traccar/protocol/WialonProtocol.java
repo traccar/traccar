@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import org.traccar.BaseProtocol;
 import org.traccar.Context;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Keys;
 import org.traccar.model.Command;
 
 import io.netty.handler.codec.LineBasedFrameDecoder;
@@ -26,6 +27,7 @@ import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 
 import java.nio.charset.StandardCharsets;
+
 public class WialonProtocol extends BaseProtocol {
 
     public WialonProtocol() {
@@ -38,7 +40,7 @@ public class WialonProtocol extends BaseProtocol {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new LineBasedFrameDecoder(4 * 1024));
-                boolean utf8 = Context.getConfig().getBoolean(getName() + ".utf8");
+                boolean utf8 = Context.getConfig().getBoolean(Keys.PROTOCOL_UTF8.withPrefix(getName()));
                 if (utf8) {
                     pipeline.addLast(new StringEncoder(StandardCharsets.UTF_8));
                     pipeline.addLast(new StringDecoder(StandardCharsets.UTF_8));
@@ -54,7 +56,7 @@ public class WialonProtocol extends BaseProtocol {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new LineBasedFrameDecoder(4 * 1024));
-                boolean utf8 = Context.getConfig().getBoolean(getName() + ".utf8");
+                boolean utf8 = Context.getConfig().getBoolean(Keys.PROTOCOL_UTF8.withPrefix(getName()));
                 if (utf8) {
                     pipeline.addLast(new StringEncoder(StandardCharsets.UTF_8));
                     pipeline.addLast(new StringDecoder(StandardCharsets.UTF_8));

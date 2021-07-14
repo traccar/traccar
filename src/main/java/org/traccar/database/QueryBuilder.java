@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
-import org.traccar.model.MiscFormatter;
 import org.traccar.model.Permission;
 
 import javax.sql.DataSource;
@@ -280,12 +279,7 @@ public final class QueryBuilder {
                     } else if (method.getReturnType().equals(byte[].class)) {
                         setBlob(name, (byte[]) method.invoke(object));
                     } else {
-                        if (method.getReturnType().equals(Map.class)
-                                && Context.getConfig().getBoolean("database.xml")) {
-                            setString(name, MiscFormatter.toXmlString((Map) method.invoke(object)));
-                        } else {
-                            setString(name, Context.getObjectMapper().writeValueAsString(method.invoke(object)));
-                        }
+                        setString(name, Context.getObjectMapper().writeValueAsString(method.invoke(object)));
                     }
                 } catch (IllegalAccessException | InvocationTargetException | JsonProcessingException error) {
                     LOGGER.warn("Get property error", error);

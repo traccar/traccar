@@ -8,7 +8,7 @@ public class XexunFrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        XexunFrameDecoder decoder = new XexunFrameDecoder();
+        var decoder = new XexunFrameDecoder();
 
         verifyFrame(
                 binary("4750524d432c3230353933352e3030302c412c353134302e343335302c4e2c3530312e303638362c452c302e30302c302e30302c3132313031352c30302c303030302e302c412a37302c462c2c696d65693a3335393538373031343731383339322c"),

@@ -9,7 +9,7 @@ public class Jt600ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        Jt600ProtocolDecoder decoder = new Jt600ProtocolDecoder(null);
+        var decoder = new Jt600ProtocolDecoder(null);
 
         verifyPositions(decoder, binary(
                 "2478807035371711003419081920061851380856003256223b000000000000070000000020c0ff965d54de1800000f0f0f0f0f0f0f0f0f0f02d600ea0a21"));

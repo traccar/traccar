@@ -17,6 +17,7 @@ package org.traccar.api;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.traccar.Context;
+import org.traccar.config.Keys;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
@@ -45,7 +46,7 @@ public class CorsResponseFilter implements ContainerResponseFilter {
 
         if (!response.getHeaders().containsKey(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN.toString())) {
             String origin = request.getHeaderString(HttpHeaderNames.ORIGIN.toString());
-            String allowed = Context.getConfig().getString("web.origin");
+            String allowed = Context.getConfig().getString(Keys.WEB_ORIGIN);
 
             if (origin == null) {
                 response.getHeaders().add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN.toString(), ORIGIN_ALL);

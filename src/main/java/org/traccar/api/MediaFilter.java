@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2021 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -62,20 +62,17 @@ public class MediaFilter implements Filter {
             }
 
             String path = ((HttpServletRequest) request).getPathInfo();
-            String[] parts = path.split("/");
-            if (parts.length < 2 || parts.length == 2 && !path.endsWith("/")) {
-                Context.getPermissionsManager().checkAdmin(userId);
-            } else {
+            String[] parts = path != null ? path.split("/") : null;
+            if (parts != null && parts.length >= 2) {
                 Device device = Context.getDeviceManager().getByUniqueId(parts[1]);
                 if (device != null) {
                     Context.getPermissionsManager().checkDevice(userId, device.getId());
-                } else {
-                    httpResponse.sendError(HttpServletResponse.SC_NOT_FOUND);
+                    chain.doFilter(request, response);
                     return;
                 }
             }
 
-            chain.doFilter(request, response);
+            httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN);
         } catch (SecurityException e) {
             httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
             httpResponse.getWriter().println(Log.exceptionStack(e));

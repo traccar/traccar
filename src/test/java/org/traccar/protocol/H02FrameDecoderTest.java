@@ -10,7 +10,7 @@ public class H02FrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecodeShort() throws Exception {
 
-        H02FrameDecoder decoder = new H02FrameDecoder(0);
+        var decoder = new H02FrameDecoder(0);
 
         assertEquals(
                 binary("2a48512c3335353438383032303131333931312c56312c3031323934352c412c353233312e37393238332c4e2c30313332342e31303731382c452c302e30352c302c3137303231372c464646464646464623"),
@@ -37,7 +37,7 @@ public class H02FrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecodeLong() throws Exception {
 
-        H02FrameDecoder decoder = new H02FrameDecoder(0);
+        var decoder = new H02FrameDecoder(0);
 
         assertEquals(
                 binary("24410600082621532131081504419390060740418306000000fffffbfdff0015060000002c02dc0c000000001f"),
@@ -48,7 +48,7 @@ public class H02FrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecodeAlternative() throws Exception {
 
-        H02FrameDecoder decoder = new H02FrameDecoder(0);
+        var decoder = new H02FrameDecoder(0);
 
         assertEquals(
                 binary("2a48512c343230363131393133302c4e42522c3130323430332c3233382c312c302c372c313131312c323236342c36332c313131312c323236352c35382c313131312c323236362c35302c313131312c333133352c33372c313131312c3630352c33332c313131312c343932302c33302c313131312c3630372c32382c3131303131372c46464646444646462c3623"),

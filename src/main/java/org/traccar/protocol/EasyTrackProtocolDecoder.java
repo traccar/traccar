@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -65,6 +67,18 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
+    private static final Pattern PATTERN_CELL = new PatternBuilder()
+            .text("*").expression("..,")         // manufacturer
+            .number("(d+),")                     // imei
+            .text("JZ,")                         // command
+            .number("([01]),")                   // result
+            .number("(d+),")                     // cid
+            .number("(d+),")                     // lac
+            .number("(d+),")                     // mcc
+            .number("(d+)")                      // mnc
+            .any()
+            .compile();
+
     private String decodeAlarm(long status) {
         if ((status & 0x02000000) != 0) {
             return Position.ALARM_GEOFENCE_ENTER;
@@ -97,21 +111,30 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         String sentence = (String) msg;
         String type = sentence.substring(20, 22);
 
-        if ((type.equals("TX") || type.equals("MQ")) && channel != null) {
+        if (channel != null && (type.equals("TX") || type.equals("MQ"))) {
             channel.writeAndFlush(new NetworkMessage(sentence + "#", remoteAddress));
         }
+
+        if (type.equals("JZ")) {
+            return decodeCell(channel, remoteAddress, sentence);
+        } else {
+            return decodeLocation(channel, remoteAddress, sentence);
+        }
+    }
+
+    private Position decodeLocation(Channel channel, SocketAddress remoteAddress, String sentence) {
 
         Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
             return null;
         }
 
-        Position position = new Position(getProtocolName());
-
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
             return null;
         }
+
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.set(Position.KEY_COMMAND, parser.next());
@@ -160,6 +183,38 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.PREFIX_ADC + 1, parser.nextDouble());
             position.set(Position.KEY_SATELLITES, parser.nextInt());
         }
+
+        return position;
+    }
+
+    private Position decodeCell(Channel channel, SocketAddress remoteAddress, String sentence) {
+
+        Parser parser = new Parser(PATTERN_CELL, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        String imei = parser.next();
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, null);
+
+        if (channel != null && parser.nextInt() > 0) {
+            String response = String.format("*ET,%s,JZ,undefined#", imei);
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+        }
+
+        int cid = parser.nextInt();
+        int lac = parser.nextInt();
+        int mcc = parser.nextInt();
+        int mnc = parser.nextInt();
+        position.setNetwork(new Network(CellTower.from(mcc, mnc, lac, cid)));
 
         return position;
     }

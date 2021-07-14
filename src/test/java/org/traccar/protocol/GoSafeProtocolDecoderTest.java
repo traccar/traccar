@@ -9,7 +9,7 @@ public class GoSafeProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        GoSafeProtocolDecoder decoder = new GoSafeProtocolDecoder(null);
+        var decoder = new GoSafeProtocolDecoder(null);
 
         verifyAttribute(decoder, text(
                 "*GS06,356449068350122,013519070819,,SYS:G6S;V3.37;V1.1.8,GPS:A;12;N23.169866;E113.450728;0;255;54;0.79,COT:18779;,ADC:12.66;0.58,DTT:4084;E1;0;0;0;1,IWD:0;1;ad031652643fff28;23.2;1;1;86031652504fff28;24.3;2;1;e603165252a5ff28;24.2;3;1;bb0416557da6ff28;24.0#"),

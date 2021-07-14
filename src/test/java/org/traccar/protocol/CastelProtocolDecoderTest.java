@@ -9,7 +9,7 @@ public class CastelProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        CastelProtocolDecoder decoder = new CastelProtocolDecoder(null);
+        var decoder = new CastelProtocolDecoder(null);
 
         verifyAttribute(decoder, binary(
                 "40403a00043231334744503230313830323133343300000000a002000001000001012011004d414c43333831434d4b4d353637313438c8fc0d0a"),

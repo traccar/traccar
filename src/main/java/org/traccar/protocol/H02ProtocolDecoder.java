@@ -23,6 +23,7 @@ import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.config.Keys;
 import org.traccar.helper.BcdUtil;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
@@ -331,7 +332,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext() && parser.next().equals("V1")) {
             sendResponse(channel, remoteAddress, id, "V1");
-        } else if (Context.getConfig().getBoolean(getProtocolName() + ".ack")) {
+        } else if (Context.getConfig().getBoolean(Keys.PROTOCOL_ACK.withPrefix(getProtocolName()))) {
             sendResponse(channel, remoteAddress, id, "R12");
         }
 

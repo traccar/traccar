@@ -11,7 +11,7 @@ public class PortmanProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeEngineStop() {
 
-        PortmanProtocolEncoder encoder = new PortmanProtocolEncoder(null);
+        var encoder = new PortmanProtocolEncoder(null);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -24,7 +24,7 @@ public class PortmanProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeEngineResume() {
 
-        PortmanProtocolEncoder encoder = new PortmanProtocolEncoder(null);
+        var encoder = new PortmanProtocolEncoder(null);
 
         Command command = new Command();
         command.setDeviceId(1);

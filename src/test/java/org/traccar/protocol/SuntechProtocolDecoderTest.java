@@ -9,7 +9,7 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecodeTemperature() throws Exception {
 
-        SuntechProtocolDecoder decoder = new SuntechProtocolDecoder(null);
+        var decoder = new SuntechProtocolDecoder(null);
 
         decoder.setHbm(true);
         decoder.setIncludeAdc(true);
@@ -38,7 +38,7 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecodeRpm() throws Exception {
 
-        SuntechProtocolDecoder decoder = new SuntechProtocolDecoder(null);
+        var decoder = new SuntechProtocolDecoder(null);
 
         decoder.setHbm(true);
         decoder.setIncludeRpm(true);
@@ -52,7 +52,7 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecodeHours() throws Exception {
 
-        SuntechProtocolDecoder decoder = new SuntechProtocolDecoder(null);
+        var decoder = new SuntechProtocolDecoder(null);
 
         decoder.setHbm(true);
 
@@ -65,7 +65,7 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecodeDriver() throws Exception {
 
-        SuntechProtocolDecoder decoder = new SuntechProtocolDecoder(null);
+        var decoder = new SuntechProtocolDecoder(null);
 
         verifyAttribute(decoder, buffer(
                 "ST300HTE;511050566;45;308;20200909;13:38:38;0;12.50;001354;0.0;1;0;1;1;0;-27.636632;-052.277933;-27.636675;-052.277947;000.000;002.296;0;00000000000000"),
@@ -80,7 +80,11 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        SuntechProtocolDecoder decoder = new SuntechProtocolDecoder(null);
+        var decoder = new SuntechProtocolDecoder(null);
+
+        verifyAttribute(decoder, buffer(
+                "ST300UEX;511331307;45;311;20210420;12:41:01;12361;-01.280825;-047.931773;000.000;000.00;16;1;0;12.54;000000;23;GTSL|6|1|0|9255143|2|;6F;000276;0.0;1;00000000000000;0"),
+                Position.KEY_DRIVER_UNIQUE_ID, "9255143");
 
         verifyAttribute(decoder, buffer(
                 "STT;0560001616;BFFFFF;56;1.0.15;1;20200219;20:52:25;00008D6C;334;20;0925;24;+20.741764;-103.430364;0.00;0.00;19;1;00000001;00000000;2;1;1765;00008003;0.0;12.14;136598"),

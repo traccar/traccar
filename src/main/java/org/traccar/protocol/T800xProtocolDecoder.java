@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_HEARTBEAT = 0x03;
     public static final int MSG_ALARM = 0x04;
     public static final int MSG_NETWORK = 0x05;
+    public static final int MSG_BLE = 0x10;
     public static final int MSG_COMMAND = 0x81;
 
     private void sendResponse(Channel channel, short header, int type, int index, ByteBuf imei, int alarm) {
@@ -158,6 +159,10 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
             return position;
 
+        } else if (type == MSG_BLE) {
+
+            return decodeBle(channel, deviceSession, buf, type, index, imei);
+
         } else if (type == MSG_COMMAND) {
 
             Position position = new Position(getProtocolName());
@@ -174,6 +179,85 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
         }
 
         return null;
+    }
+
+    private Position decodeBle(
+            Channel channel, DeviceSession deviceSession, ByteBuf buf, int type, int index, ByteBuf imei) {
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, readDate(buf));
+
+        position.set(Position.KEY_IGNITION, buf.readUnsignedByte() > 0);
+
+        int i = 1;
+        while (buf.isReadable()) {
+            switch (buf.readUnsignedShort()) {
+                case 0x01:
+                    position.set("tag" + i + "Id", ByteBufUtil.hexDump(buf.readSlice(6)));
+                    position.set("tag" + i + "Battery", buf.readUnsignedByte() * 0.01 + 1.22);
+                    position.set("tag" + i + "TirePressure", buf.readUnsignedByte() * 1.527 * 2);
+                    position.set("tag" + i + "TireTemp", buf.readUnsignedByte() - 55);
+                    position.set("tag" + i + "TireStatus", buf.readUnsignedByte());
+                    break;
+                case 0x02:
+                    position.set("tag" + i + "Id", ByteBufUtil.hexDump(buf.readSlice(6)));
+                    position.set("tag" + i + "Battery", BcdUtil.readInteger(buf, 2) * 0.1);
+                    switch (buf.readUnsignedByte()) {
+                        case 0:
+                            position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+                            break;
+                        case 1:
+                            position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                            break;
+                        default:
+                            break;
+                    }
+                    buf.readUnsignedByte(); // status
+                    buf.skipBytes(16); // location
+                    break;
+                case 0x03:
+                    position.set(Position.KEY_DRIVER_UNIQUE_ID, ByteBufUtil.hexDump(buf.readSlice(6)));
+                    position.set("tag" + i + "Battery", BcdUtil.readInteger(buf, 2) * 0.1);
+                    if (buf.readUnsignedByte() == 1) {
+                        position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                    }
+                    buf.readUnsignedByte(); // status
+                    buf.skipBytes(16); // location
+                    break;
+                case 0x04:
+                    position.set("tag" + i + "Id", ByteBufUtil.hexDump(buf.readSlice(6)));
+                    position.set("tag" + i + "Battery", buf.readUnsignedByte() * 0.01 + 2);
+                    buf.readUnsignedByte(); // battery level
+                    position.set("tag" + i + "Temp", buf.readUnsignedShort() * 0.01);
+                    position.set("tag" + i + "Humidity", buf.readUnsignedShort() * 0.01);
+                    position.set("tag" + i + "LightSensor", buf.readUnsignedShort());
+                    position.set("tag" + i + "Rssi", buf.readUnsignedByte() - 128);
+                    break;
+                case 0x05:
+                    position.set("tag" + i + "Id", ByteBufUtil.hexDump(buf.readSlice(6)));
+                    position.set("tag" + i + "Battery", buf.readUnsignedByte() * 0.01 + 2);
+                    buf.readUnsignedByte(); // battery level
+                    position.set("tag" + i + "Temp", buf.readUnsignedShort() * 0.01);
+                    position.set("tag" + i + "Door", buf.readUnsignedByte() > 0);
+                    position.set("tag" + i + "Rssi", buf.readUnsignedByte() - 128);
+                    break;
+                case 0x06:
+                    position.set("tag" + i + "Id", ByteBufUtil.hexDump(buf.readSlice(6)));
+                    position.set("tag" + i + "Battery", buf.readUnsignedByte() * 0.01 + 2);
+                    position.set("tag" + i + "Output", buf.readUnsignedByte() > 0);
+                    position.set("tag" + i + "Rssi", buf.readUnsignedByte() - 128);
+                    break;
+                default:
+                    break;
+            }
+            i += 1;
+        }
+
+        sendResponse(channel, header, type, index, imei, 0);
+
+        return position;
     }
 
     private Position decodePosition(
@@ -209,13 +293,19 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             int io = buf.readUnsignedShort();
             position.set(Position.KEY_IGNITION, BitUtil.check(io, 14));
             position.set("ac", BitUtil.check(io, 13));
-            for (int i = 0; i <= 2; i++) {
-                position.set(Position.PREFIX_OUT + (i + 1), BitUtil.check(io, 7 + i));
-            }
+            position.set(Position.PREFIX_IN + 3, BitUtil.check(io, 12));
+            position.set(Position.PREFIX_IN + 4, BitUtil.check(io, 11));
+            position.set(Position.PREFIX_OUT + 1, BitUtil.check(io, 7));
+            position.set(Position.PREFIX_OUT + 2, BitUtil.check(io, 8));
+            position.set(Position.PREFIX_OUT + 3, BitUtil.check(io, 9));
 
             if (header != 0x2626) {
-                position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
-                position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort());
+                for (int i = 1; i <= 2; i++) {
+                    String value = ByteBufUtil.hexDump(buf.readSlice(2));
+                    if (!value.equals("ffff")) {
+                        position.set(Position.PREFIX_ADC + i, Integer.parseInt(value) * 0.01);
+                    }
+                }
             }
 
         }

@@ -8,7 +8,7 @@ public class SatsolProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        SatsolProtocolDecoder decoder = new SatsolProtocolDecoder(null);
+        var decoder = new SatsolProtocolDecoder(null);
 
         verifyPositions(decoder, binary(
                 "f0e1bf4cb2ec1600e1005f8791e901000000c959515c2cc24a03aeadcd010e01a800250001090201878e92e901000000cb59515c2dc24a03b8adcd018801a8001d0001080201325993e901000000cc59515c2fc24a03bfadcd01ab01a800220001080201dd8194e901000000cd59515c32c24a03ceadcd015801a8002500010802015f3795e905000900ce59515c32c24a03d8adcd01f600a700250001091401000000000000000000863496e901000000cf59515c34c24a03ddadcd019b00a700280001090201714197e904000600cf59515c34c24a03ddadcd019b00a7002800010a1401becd07001901"));

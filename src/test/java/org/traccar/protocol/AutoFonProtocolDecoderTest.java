@@ -9,7 +9,7 @@ public class AutoFonProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        AutoFonProtocolDecoder decoder = new AutoFonProtocolDecoder(null);
+        var decoder = new AutoFonProtocolDecoder(null);
 
         verifyNull(decoder, binary(
                 "10556103592310314825728F"));

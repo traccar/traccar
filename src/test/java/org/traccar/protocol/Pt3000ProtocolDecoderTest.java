@@ -8,7 +8,7 @@ public class Pt3000ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        Pt3000ProtocolDecoder decoder = new Pt3000ProtocolDecoder(null);
+        var decoder = new Pt3000ProtocolDecoder(null);
 
         verifyPosition(decoder, text(
                 "%356939010012099,$GPRMC,124945.752,A,4436.6245,N,01054.4634,E,0.11,358.52,060408,,,A,+393334347445,N028d"),

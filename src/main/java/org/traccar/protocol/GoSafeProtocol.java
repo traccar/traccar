@@ -34,6 +34,14 @@ public class GoSafeProtocol extends BaseProtocol {
                 pipeline.addLast(new GoSafeProtocolDecoder(GoSafeProtocol.this));
             }
         });
+        addServer(new TrackerServer(true, getName()) {
+            @Override
+            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new GoSafeProtocolDecoder(GoSafeProtocol.this));
+            }
+        });
     }
 
 }

@@ -45,6 +45,7 @@ import org.traccar.geocoder.NominatimGeocoder;
 import org.traccar.geocoder.OpenCageGeocoder;
 import org.traccar.geocoder.PositionStackGeocoder;
 import org.traccar.geocoder.TomTomGeocoder;
+import org.traccar.geocoder.MapboxGeocoder;
 import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.geolocation.GoogleGeolocationProvider;
 import org.traccar.geolocation.MozillaGeolocationProvider;
@@ -184,6 +185,8 @@ public class MainModule extends AbstractModule {
                     return new TomTomGeocoder(url, key, cacheSize, addressFormat);
                 case "positionstack":
                     return new PositionStackGeocoder(key, cacheSize, addressFormat);
+                case "mapbox":
+                    return new MapboxGeocoder(key, cacheSize, addressFormat);
                 default:
                     return new GoogleGeocoder(key, language, cacheSize, addressFormat);
             }
@@ -264,7 +267,7 @@ public class MainModule extends AbstractModule {
     @Provides
     public static WebDataHandler provideWebDataHandler(
             Config config, IdentityManager identityManager, ObjectMapper objectMapper, Client client) {
-        if (config.getBoolean(Keys.FORWARD_ENABLE)) {
+        if (config.hasKey(Keys.FORWARD_URL)) {
             return new WebDataHandler(config, identityManager, objectMapper, client);
         }
         return null;
@@ -283,10 +286,9 @@ public class MainModule extends AbstractModule {
     @Singleton
     @Provides
     public static GeocoderHandler provideGeocoderHandler(
-            Config config, @Nullable Geocoder geocoder, IdentityManager identityManager,
-            StatisticsManager statisticsManager) {
+            Config config, @Nullable Geocoder geocoder, IdentityManager identityManager) {
         if (geocoder != null) {
-            return new GeocoderHandler(config, geocoder, identityManager, statisticsManager);
+            return new GeocoderHandler(config, geocoder, identityManager);
         }
         return null;
     }

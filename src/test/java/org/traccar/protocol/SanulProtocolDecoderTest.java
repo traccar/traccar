@@ -8,7 +8,7 @@ public class SanulProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        SanulProtocolDecoder decoder = new SanulProtocolDecoder(null);
+        var decoder = new SanulProtocolDecoder(null);
 
         verifyNull(decoder, binary(
                 "aa007020000100000000000033353333353830313831353431313700000000000000000000"));

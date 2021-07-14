@@ -8,7 +8,7 @@ public class PricolProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        PricolProtocolDecoder decoder = new PricolProtocolDecoder(null);
+        var decoder = new PricolProtocolDecoder(null);
 
         verifyPosition(decoder, binary(
                 "3c5052493030303350020000011402110b222b0455152e4e001de819ca450000000000000003820249000000000000000000000000000000000000000040003e"));

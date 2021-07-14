@@ -10,7 +10,7 @@ public class SigfoxProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        SigfoxProtocolDecoder decoder = new SigfoxProtocolDecoder(null);
+        var decoder = new SigfoxProtocolDecoder(null);
 
         verifyAttributes(decoder, request(HttpMethod.POST, "/",
                 buffer("{\"messageType\":\"accelerometer\",\"deviceId\":\"testdev001\",\"snr\":\"1234\",\"rssi\":\"-120.00\",\"station\":\"5678\",\"seqNum\":\"9123\",\"newPosition\":false,\"latitude\":\"null\",\"longitude\":\"null\",\"positionTime\":\"null\",\"moving\":true,\"magChange\":\"true\",\"magStatus\":\"true\",\"temperature\":\"7.5\",\"battery\":\"null\",\"batteryPercentage\":\"null\",\"lastSeen\":\"1582560425\",\"fwVersion\":\"null\",\"dlConfig\":\"null\",\"recievedPayload\":\"cb020051\"}")));

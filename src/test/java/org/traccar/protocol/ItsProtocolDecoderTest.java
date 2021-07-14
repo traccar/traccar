@@ -9,10 +9,16 @@ public class ItsProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        ItsProtocolDecoder decoder = new ItsProtocolDecoder(null);
+        var decoder = new ItsProtocolDecoder(null);
+
+        verifyNull(decoder, text(
+                "$,LGN,MARK,000000000,358980100077446,V0.0.1,AIS140,19.804487,N,75.225876,E,*"));
 
         verifyNull(decoder, text(
                 "$LGN,,869867037009679,3.2AIH,9.99546000,N,76.35886167,E"));
+
+        verifyPosition(decoder, text(
+                "$,NRM,MARK,V0.0.1,NR,01,L,358980100040246,000000000,1,10032021,073239,25.932051,N,71.509872,E,0.6,1.40,13,211.2,1.4,0.7,IDEA,0,1,0.1,3.7,0,N,20,404,60,A5F,FD3F,A5F,6F88,29,A5F,5855,18,A5F,6F87,18,A5F,FD41,14,0000,00,0.1,0,000027,0,0,0,4E9C,*"));
 
         verifyAttribute(decoder, text(
                 "$,C,CTPL,4.0.0,NR,01,L,869247045166383,NA00000000,1,12032020,144453,30.452524,N,077.610351,E,1.4,34.8,14,384.19,1.8,0.8,IDEA P,1,1,14.2,4.17,0,C,22,404,82,0FB1,3B26,516B,0FB1,18,3B25,0FB1,15,5169,0FB1,14,3B27,0FB1,13,0000,00,8083,194.9,0B,*,IP=106.67.5.173"),

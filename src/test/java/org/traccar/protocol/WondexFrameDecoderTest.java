@@ -11,7 +11,7 @@ public class WondexFrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        WondexFrameDecoder decoder = new WondexFrameDecoder();
+        var decoder = new WondexFrameDecoder();
 
         assertNull(
                 decoder.decode(null, null, binary("f0d70b0001ca9a3b")));

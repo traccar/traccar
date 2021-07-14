@@ -28,6 +28,7 @@ import java.util.Date;
 
 import org.jxls.util.JxlsHelper;
 import org.traccar.Context;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 import org.traccar.reports.model.SummaryReport;
 
@@ -43,25 +44,34 @@ public final class Summary {
         if (positions != null && !positions.isEmpty()) {
             Position firstPosition = null;
             Position previousPosition = null;
-            double speedSum = 0;
             for (Position position : positions) {
                 if (firstPosition == null) {
                     firstPosition = position;
                 }
                 previousPosition = position;
-                speedSum += position.getSpeed();
-                result.setMaxSpeed(position.getSpeed());
+                if (position.getSpeed() > result.getMaxSpeed()) {
+                    result.setMaxSpeed(position.getSpeed());
+                }
             }
             boolean ignoreOdometer = Context.getDeviceManager()
                     .lookupAttributeBoolean(deviceId, "report.ignoreOdometer", false, false, true);
             result.setDistance(ReportUtils.calculateDistance(firstPosition, previousPosition, !ignoreOdometer));
-            result.setAverageSpeed(speedSum / positions.size());
             result.setSpentFuel(ReportUtils.calculateFuel(firstPosition, previousPosition));
 
+            long durationMilliseconds;
             if (firstPosition.getAttributes().containsKey(Position.KEY_HOURS)
                     && previousPosition.getAttributes().containsKey(Position.KEY_HOURS)) {
-                result.setEngineHours(
-                        previousPosition.getLong(Position.KEY_HOURS) - firstPosition.getLong(Position.KEY_HOURS));
+                durationMilliseconds =
+                        previousPosition.getLong(Position.KEY_HOURS) - firstPosition.getLong(Position.KEY_HOURS);
+                result.setEngineHours(durationMilliseconds);
+            } else {
+                durationMilliseconds =
+                        previousPosition.getFixTime().getTime() - firstPosition.getFixTime().getTime();
+            }
+
+            if (durationMilliseconds > 0) {
+                result.setAverageSpeed(
+                        UnitsConverter.knotsFromMps(result.getDistance() * 1000 / durationMilliseconds));
             }
 
             if (!ignoreOdometer
@@ -75,7 +85,7 @@ public final class Summary {
             }
 
             result.setStartTime(firstPosition.getFixTime());
-            result.setEndTime(previousPosition.getServerTime());
+            result.setEndTime(previousPosition.getFixTime());
         }
         return result;
     }

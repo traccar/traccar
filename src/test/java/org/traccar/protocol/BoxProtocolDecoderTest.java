@@ -9,7 +9,7 @@ public class BoxProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        BoxProtocolDecoder decoder = new BoxProtocolDecoder(null);
+        var decoder = new BoxProtocolDecoder(null);
 
         verifyNull(decoder, text(
                 "H,BT,358281002435893,081028142432,F5813D19,6D6E6DC2"));

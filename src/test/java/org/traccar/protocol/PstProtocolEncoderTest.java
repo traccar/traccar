@@ -9,7 +9,7 @@ public class PstProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeEngineStop() {
 
-        PstProtocolEncoder encoder = new PstProtocolEncoder(null);
+        var encoder = new PstProtocolEncoder(null);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -22,7 +22,7 @@ public class PstProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeEngineResume() {
 
-        PstProtocolEncoder encoder = new PstProtocolEncoder(null);
+        var encoder = new PstProtocolEncoder(null);
 
         Command command = new Command();
         command.setDeviceId(1);

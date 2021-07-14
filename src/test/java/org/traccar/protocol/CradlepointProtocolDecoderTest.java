@@ -8,7 +8,7 @@ public class CradlepointProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        CradlepointProtocolDecoder decoder = new CradlepointProtocolDecoder(null);
+        var decoder = new CradlepointProtocolDecoder(null);
 
         verifyPosition(decoder, text(
                 "356526070063940,0,4337.19009,N,11612.34705,W,0.0,277.2,AT&T,,,-79,,-14.0,"));

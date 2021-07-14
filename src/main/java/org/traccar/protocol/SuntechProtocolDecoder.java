@@ -356,6 +356,8 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                             totalFuel += fuel2;
                             position.set("fuel2", fuel2);
                         }
+                    } else if (attribute.startsWith("GTSL")) {
+                        position.set(Position.KEY_DRIVER_UNIQUE_ID, attribute.split("\\|")[4]);
                     } else {
                         String[] pair = attribute.split("=");
                         if (pair.length >= 2) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BcdUtil;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
@@ -151,6 +152,21 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
 
             Gt06ProtocolDecoder.decodeGps(position, buf, false, TimeZone.getTimeZone("UTC"));
 
+            if (buf.readableBytes() >= 5) {
+                position.setAltitude(buf.readShort());
+
+                int alarms = buf.readUnsignedByte();
+                if (BitUtil.check(alarms, 0)) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
+                }
+                if (BitUtil.check(alarms, 1)) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+                }
+                if (BitUtil.check(alarms, 4)) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
+                }
+            }
+
             ByteBuf content = Unpooled.buffer();
             content.writeBytes(time);
             sendResponse(channel, length, type, content);
@@ -174,8 +190,17 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_VERSION_FW, buf.readUnsignedByte());
             buf.readUnsignedByte(); // timezone
             int interval = buf.readUnsignedByte();
-            if (length >= 7) {
+            if (buf.readableBytes() >= 1 + 2) {
                 position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+            }
+            if (buf.readableBytes() >= 3 + 2) {
+                buf.skipBytes(3); // temperature
+            }
+            if (buf.readableBytes() >= 1 + 2) {
+                position.set(Position.KEY_CHARGE, buf.readUnsignedByte() > 0);
+            }
+            if (buf.readableBytes() >= 1 + 2) {
+                position.set(Position.KEY_HEART_RATE, buf.readUnsignedByte());
             }
 
             ByteBuf content = Unpooled.buffer();

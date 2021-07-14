@@ -8,7 +8,7 @@ public class IdplProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        IdplProtocolDecoder decoder = new IdplProtocolDecoder(null);
+        var decoder = new IdplProtocolDecoder(null);
         
         verifyPosition(decoder, text(
                 "*ID1,863071011086474,210314,153218,A,1831.4577,N,07351.1433,E,0.79,240.64,9,20,A,1,4.20,0,1,01,1,0,0,A01,R,935D#"),

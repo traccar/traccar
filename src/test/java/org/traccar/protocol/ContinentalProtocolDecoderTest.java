@@ -8,7 +8,7 @@ public class ContinentalProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        ContinentalProtocolDecoder decoder = new ContinentalProtocolDecoder(null);
+        var decoder = new ContinentalProtocolDecoder(null);
 
         verifyPosition(decoder, binary(
                 "5356003216001eb48505025b4001e90f7f18ce0f00522200400001015b4001e9000e820100000c24000100014e0400736a7a"),

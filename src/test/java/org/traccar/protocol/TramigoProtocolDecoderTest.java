@@ -8,7 +8,7 @@ public class TramigoProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        TramigoProtocolDecoder decoder = new TramigoProtocolDecoder(null);
+        var decoder = new TramigoProtocolDecoder(null);
 
         verifyAttributes(decoder, binary(
                 "8000c426b000a6000101c557037598050d5c8a595472616d69676f3a204d6f76696e672c20302e3132206b6d2045206f66204c617275742054696e2049736c616d6963205072696d617279205363686f6f6c2c2054616970696e672c20506572616b2c204d592c20342e38333134392c203130302e37333038352c204e572077697468207370656564203130206b6d2f682c2030303a34393a30382041756720392020454f46"));

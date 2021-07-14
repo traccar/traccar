@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Parser;
@@ -75,6 +76,10 @@ public class PluginProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
+        if (channel != null) {
+            channel.writeAndFlush(new NetworkMessage("$$hb,1#", remoteAddress));
+        }
+
         Parser parser = new Parser(PATTERN, (String) msg);
         if (!parser.matches()) {
             return null;
@@ -98,7 +103,7 @@ public class PluginProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_SATELLITES, parser.nextInt());
         position.set(Position.KEY_ODOMETER, (long) (parser.nextDouble() * 1000));
 
-        int status = parser.nextInt();
+        long status = parser.nextLong();
         position.setValid(BitUtil.check(status, 0));
         position.set(Position.KEY_IGNITION, BitUtil.check(status, 1));
         for (int i = 0; i < 4; i++) {

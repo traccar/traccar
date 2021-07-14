@@ -8,7 +8,7 @@ public class PstProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        PstProtocolDecoder decoder = new PstProtocolDecoder(null);
+        var decoder = new PstProtocolDecoder(null);
 
         verifyPosition(decoder, binary(
                 "2faf97de06000024db0551380cbb08070b040000015a0c09b50177e5100a1822da0d010d0f0451380628101451380cc384b800488a84036901b202d3010001061103ffff00150203523687"));

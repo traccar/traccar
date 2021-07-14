@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import org.traccar.Context;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.IdentityManager;
-import org.traccar.database.StatisticsManager;
 import org.traccar.geocoder.Geocoder;
 import org.traccar.model.Position;
 
@@ -35,16 +34,14 @@ public class GeocoderHandler extends ChannelInboundHandlerAdapter {
 
     private final Geocoder geocoder;
     private final IdentityManager identityManager;
-    private final StatisticsManager statisticsManager;
     private final boolean ignorePositions;
     private final boolean processInvalidPositions;
     private final int geocoderReuseDistance;
 
     public GeocoderHandler(
-            Config config, Geocoder geocoder, IdentityManager identityManager, StatisticsManager statisticsManager) {
+            Config config, Geocoder geocoder, IdentityManager identityManager) {
         this.geocoder = geocoder;
         this.identityManager = identityManager;
-        this.statisticsManager = statisticsManager;
         ignorePositions = Context.getConfig().getBoolean(Keys.GEOCODER_IGNORE_POSITIONS);
         processInvalidPositions = config.getBoolean(Keys.GEOCODER_PROCESS_INVALID_POSITIONS);
         geocoderReuseDistance = config.getInteger(Keys.GEOCODER_REUSE_DISTANCE, 0);
@@ -63,10 +60,6 @@ public class GeocoderHandler extends ChannelInboundHandlerAdapter {
                         ctx.fireChannelRead(position);
                         return;
                     }
-                }
-
-                if (statisticsManager != null) {
-                    statisticsManager.registerGeocoderRequest();
                 }
 
                 geocoder.getAddress(position.getLatitude(), position.getLongitude(),

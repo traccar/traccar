@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.traccar.BaseProtocol;
 import org.traccar.Context;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Keys;
 
 public class Mta6Protocol extends BaseProtocol {
 
@@ -33,7 +34,7 @@ public class Mta6Protocol extends BaseProtocol {
                 pipeline.addLast(new HttpRequestDecoder());
                 pipeline.addLast(new HttpObjectAggregator(65535));
                 pipeline.addLast(new Mta6ProtocolDecoder(
-                        Mta6Protocol.this, !Context.getConfig().getBoolean(getName() + ".can")));
+                        Mta6Protocol.this, !Context.getConfig().getBoolean(Keys.PROTOCOL_CAN.withPrefix(getName()))));
             }
         });
     }

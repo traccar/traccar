@@ -8,7 +8,7 @@ public class TotemFrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        TotemFrameDecoder decoder = new TotemFrameDecoder();
+        var decoder = new TotemFrameDecoder();
 
         verifyFrame(
                 binary("24243030323542423836323031303033373239343836313345"),

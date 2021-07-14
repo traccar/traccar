@@ -8,7 +8,7 @@ public class GenxProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        GenxProtocolDecoder decoder = new GenxProtocolDecoder(null);
+        var decoder = new GenxProtocolDecoder(null);
 
         decoder.setReportColumns("28,2,3,4,13,17,10,23,27,11,7,8,46,56,59,70,74,75,77,89,90,93,99,107,112,113,114,176,175,178,181,182");
 

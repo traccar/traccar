@@ -8,7 +8,7 @@ public class TelemaxProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        TelemaxProtocolDecoder decoder = new TelemaxProtocolDecoder(null);
+        var decoder = new TelemaxProtocolDecoder(null);
 
         verifyNull(decoder, text(
                 "%067374070128"));

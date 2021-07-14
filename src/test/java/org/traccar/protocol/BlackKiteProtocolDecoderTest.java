@@ -8,7 +8,7 @@ public class BlackKiteProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        BlackKiteProtocolDecoder decoder = new BlackKiteProtocolDecoder(null);
+        var decoder = new BlackKiteProtocolDecoder(null);
 
         verifyNull(decoder, binary(
                 "01150003313131313131313131313131313131209836055605BA"));

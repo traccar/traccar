@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,6 +83,11 @@ public class PacificTrackProtocolDecoder extends BaseProtocolDecoder {
                     position.setSpeed(UnitsConverter.knotsFromKph(BitUtil.to(speedAndCourse, 12) * 0.1));
                     position.set(Position.KEY_INDEX, buf.readUnsignedShort());
                     break;
+                case 0x20:
+                    int voltage = buf.readUnsignedMedium();
+                    position.set(Position.KEY_BATTERY, BitUtil.between(voltage, 0, 12) * 0.01);
+                    position.set(Position.KEY_POWER, BitUtil.between(voltage, 12, 24) * 0.01);
+                    break;
                 case 0x92:
                     while (buf.readerIndex() < segmentEnd) {
                         int field = buf.readUnsignedByte();
@@ -105,6 +110,24 @@ public class PacificTrackProtocolDecoder extends BaseProtocolDecoder {
                                     break;
                                 case 0b00001:
                                     position.set(Position.KEY_RPM, buf.readUnsignedByte() * 32);
+                                    break;
+                                case 0b00011:
+                                    position.set("oilPressure", buf.readUnsignedByte() * 4);
+                                    break;
+                                case 0b00100:
+                                    position.set("oilLevel", buf.readUnsignedByte() * 0.4);
+                                    break;
+                                case 0b00101:
+                                    position.set("oilTemp", buf.readUnsignedByte() - 40);
+                                    break;
+                                case 0b00110:
+                                    position.set("coolantLevel", buf.readUnsignedByte() * 0.4);
+                                    break;
+                                case 0b00111:
+                                    position.set(Position.KEY_COOLANT_TEMP, buf.readUnsignedByte() - 40);
+                                    break;
+                                case 0b01000:
+                                    position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte() * 0.4);
                                     break;
                                 case 0b01001:
                                     position.set("defLevel", buf.readUnsignedByte() * 0.4);

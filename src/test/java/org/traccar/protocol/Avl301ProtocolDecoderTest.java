@@ -9,7 +9,7 @@ public class Avl301ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        Avl301ProtocolDecoder decoder = new Avl301ProtocolDecoder(null);
+        var decoder = new Avl301ProtocolDecoder(null);
 
         verifyNull(decoder, binary(
                 "244c0f086058500087335500010d0a"));

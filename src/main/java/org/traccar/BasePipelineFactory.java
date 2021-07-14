@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,23 +22,10 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOutboundHandler;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.timeout.IdleStateHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.traccar.config.Keys;
-import org.traccar.handler.DefaultDataHandler;
-import org.traccar.handler.SpeedLimitHandler;
-import org.traccar.handler.TimeHandler;
-import org.traccar.handler.events.AlertEventHandler;
-import org.traccar.handler.events.CommandResultEventHandler;
-import org.traccar.handler.events.DriverEventHandler;
-import org.traccar.handler.events.FuelDropEventHandler;
-import org.traccar.handler.events.GeofenceEventHandler;
-import org.traccar.handler.events.IgnitionEventHandler;
-import org.traccar.handler.events.MaintenanceEventHandler;
-import org.traccar.handler.events.MotionEventHandler;
-import org.traccar.handler.events.OverspeedEventHandler;
 import org.traccar.handler.ComputedAttributesHandler;
 import org.traccar.handler.CopyAttributesHandler;
+import org.traccar.handler.DefaultDataHandler;
 import org.traccar.handler.DistanceHandler;
 import org.traccar.handler.EngineHoursHandler;
 import org.traccar.handler.FilterHandler;
@@ -49,23 +36,30 @@ import org.traccar.handler.MotionHandler;
 import org.traccar.handler.NetworkMessageHandler;
 import org.traccar.handler.OpenChannelHandler;
 import org.traccar.handler.RemoteAddressHandler;
+import org.traccar.handler.SpeedLimitHandler;
 import org.traccar.handler.StandardLoggingHandler;
+import org.traccar.handler.TimeHandler;
+import org.traccar.handler.events.AlertEventHandler;
+import org.traccar.handler.events.CommandResultEventHandler;
+import org.traccar.handler.events.DriverEventHandler;
+import org.traccar.handler.events.FuelDropEventHandler;
+import org.traccar.handler.events.GeofenceEventHandler;
+import org.traccar.handler.events.IgnitionEventHandler;
+import org.traccar.handler.events.MaintenanceEventHandler;
+import org.traccar.handler.events.MotionEventHandler;
+import org.traccar.handler.events.OverspeedEventHandler;
 
 import java.util.Map;
 
 public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BasePipelineFactory.class);
-
     private final TrackerServer server;
     private final String protocol;
-    private final boolean eventsEnabled;
     private int timeout;
 
     public BasePipelineFactory(TrackerServer server, String protocol) {
         this.server = server;
         this.protocol = protocol;
-        eventsEnabled = Context.getConfig().getBoolean(Keys.EVENT_ENABLE);
         timeout = Context.getConfig().getInteger(Keys.PROTOCOL_TIMEOUT.withPrefix(protocol));
         if (timeout == 0) {
             timeout = Context.getConfig().getInteger(Keys.SERVER_TIMEOUT);
@@ -126,12 +120,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
                 GeolocationHandler.class,
                 HemisphereHandler.class,
                 DistanceHandler.class,
-                RemoteAddressHandler.class);
-
-        addDynamicHandlers(pipeline);
-
-        addHandlers(
-                pipeline,
+                RemoteAddressHandler.class,
                 FilterHandler.class,
                 GeocoderHandler.class,
                 SpeedLimitHandler.class,
@@ -140,36 +129,18 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
                 EngineHoursHandler.class,
                 ComputedAttributesHandler.class,
                 WebDataHandler.class,
-                DefaultDataHandler.class);
-
-        if (eventsEnabled) {
-            addHandlers(
-                    pipeline,
-                    CommandResultEventHandler.class,
-                    OverspeedEventHandler.class,
-                    FuelDropEventHandler.class,
-                    MotionEventHandler.class,
-                    GeofenceEventHandler.class,
-                    AlertEventHandler.class,
-                    IgnitionEventHandler.class,
-                    MaintenanceEventHandler.class,
-                    DriverEventHandler.class);
-        }
+                DefaultDataHandler.class,
+                CommandResultEventHandler.class,
+                OverspeedEventHandler.class,
+                FuelDropEventHandler.class,
+                MotionEventHandler.class,
+                GeofenceEventHandler.class,
+                AlertEventHandler.class,
+                IgnitionEventHandler.class,
+                MaintenanceEventHandler.class,
+                DriverEventHandler.class);
 
         pipeline.addLast(new MainEventHandler());
-    }
-
-    private void addDynamicHandlers(ChannelPipeline pipeline) {
-        String handlers = Context.getConfig().getString(Keys.EXTRA_HANDLERS);
-        if (handlers != null) {
-            for (String handler : handlers.split(",")) {
-                try {
-                    pipeline.addLast((ChannelHandler) Class.forName(handler).getDeclaredConstructor().newInstance());
-                } catch (ReflectiveOperationException error) {
-                    LOGGER.warn("Dynamic handler error", error);
-                }
-            }
-        }
     }
 
 }

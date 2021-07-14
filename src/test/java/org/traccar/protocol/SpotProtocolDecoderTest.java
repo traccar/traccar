@@ -9,7 +9,7 @@ public class SpotProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        SpotProtocolDecoder decoder = new SpotProtocolDecoder(null);
+        var decoder = new SpotProtocolDecoder(null);
 
         verifyPositions(decoder, request(HttpMethod.POST, "/", buffer(
                 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n",

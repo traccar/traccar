@@ -1,6 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
- * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
+ * Copyright 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.sms.smpp;
+package org.traccar.protocol;
 
-public class ReconnectionTask implements Runnable {
+import org.traccar.BaseProtocol;
+import org.traccar.PipelineBuilder;
+import org.traccar.TrackerServer;
 
-    private final SmppClient smppClient;
+public class FlexibleReportProtocol extends BaseProtocol {
 
-    protected ReconnectionTask(SmppClient smppClient) {
-        this.smppClient = smppClient;
-    }
-
-    @Override
-    public void run() {
-        smppClient.reconnect();
+    public FlexibleReportProtocol() {
+        addServer(new TrackerServer(true, getName()) {
+            @Override
+            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+                pipeline.addLast(new FlexibleReportProtocolDecoder(FlexibleReportProtocol.this));
+            }
+        });
     }
 
 }

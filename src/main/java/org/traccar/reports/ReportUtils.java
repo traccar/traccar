@@ -26,9 +26,11 @@ import org.jxls.transform.Transformer;
 import org.jxls.transform.poi.PoiTransformer;
 import org.jxls.util.TransformerFactory;
 import org.traccar.Context;
+import org.traccar.config.Keys;
 import org.traccar.database.DeviceManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.handler.events.MotionEventHandler;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.DeviceState;
 import org.traccar.model.Driver;
 import org.traccar.model.Event;
@@ -57,7 +59,7 @@ public final class ReportUtils {
     }
 
     public static void checkPeriodLimit(Date from, Date to) {
-        long limit = Context.getConfig().getLong("report.periodLimit") * 1000;
+        long limit = Context.getConfig().getLong(Keys.REPORT_PERIOD_LIMIT) * 1000;
         if (limit > 0 && to.getTime() - from.getTime() > limit) {
             throw new IllegalArgumentException("Time period exceeds the limit");
         }
@@ -173,11 +175,9 @@ public final class ReportUtils {
         Position startTrip = positions.get(startIndex);
         Position endTrip = positions.get(endIndex);
 
-        double speedMax = 0.0;
-        double speedSum = 0.0;
+        double speedMax = 0;
         for (int i = startIndex; i <= endIndex; i++) {
             double speed = positions.get(i).getSpeed();
-            speedSum += speed;
             if (speed > speedMax) {
                 speedMax = speed;
             }
@@ -196,7 +196,7 @@ public final class ReportUtils {
         trip.setStartTime(startTrip.getFixTime());
         String startAddress = startTrip.getAddress();
         if (startAddress == null && Context.getGeocoder() != null
-                && Context.getConfig().getBoolean("geocoder.onRequest")) {
+                && Context.getConfig().getBoolean(Keys.GEOCODER_ON_REQUEST)) {
             startAddress = Context.getGeocoder().getAddress(startTrip.getLatitude(), startTrip.getLongitude(), null);
         }
         trip.setStartAddress(startAddress);
@@ -207,14 +207,16 @@ public final class ReportUtils {
         trip.setEndTime(endTrip.getFixTime());
         String endAddress = endTrip.getAddress();
         if (endAddress == null && Context.getGeocoder() != null
-                && Context.getConfig().getBoolean("geocoder.onRequest")) {
+                && Context.getConfig().getBoolean(Keys.GEOCODER_ON_REQUEST)) {
             endAddress = Context.getGeocoder().getAddress(endTrip.getLatitude(), endTrip.getLongitude(), null);
         }
         trip.setEndAddress(endAddress);
 
         trip.setDistance(calculateDistance(startTrip, endTrip, !ignoreOdometer));
         trip.setDuration(tripDuration);
-        trip.setAverageSpeed(speedSum / (endIndex - startIndex));
+        if (tripDuration > 0) {
+            trip.setAverageSpeed(UnitsConverter.knotsFromMps(trip.getDistance() * 1000 / tripDuration));
+        }
         trip.setMaxSpeed(speedMax);
         trip.setSpentFuel(calculateFuel(startTrip, endTrip));
 
@@ -252,7 +254,7 @@ public final class ReportUtils {
         stop.setStartTime(startStop.getFixTime());
         String address = startStop.getAddress();
         if (address == null && Context.getGeocoder() != null
-                && Context.getConfig().getBoolean("geocoder.onRequest")) {
+                && Context.getConfig().getBoolean(Keys.GEOCODER_ON_REQUEST)) {
             address = Context.getGeocoder().getAddress(stop.getLatitude(), stop.getLongitude(), null);
         }
         stop.setAddress(address);
