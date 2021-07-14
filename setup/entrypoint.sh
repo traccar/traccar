@@ -34,8 +34,3 @@ sed -i 's/82px/'"$BACK_LOGO_WIDTH px"'/g' /opt/traccar/web/app.min.js
 sed -i 's/27px/'"$BACK_LOGO_HEIGHT px"'/g' /opt/traccar/web/app.min.js
 
 exec "$@"
-
-################################
-##Main Excecution ##############
-################################
-exec java -Xms512m -Xmx4096m -Djava.net.preferIPv4Stack=true -jar /opt/traccar/tracker-server.jar /opt/traccar/conf/traccar.xml

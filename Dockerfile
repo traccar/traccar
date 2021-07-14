@@ -22,5 +22,7 @@ RUN set -ex \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/*
 
+HEALTHCHECK --interval=35s --timeout=5s CMD curl -f http://localhost:8082/ || exit 1
+EXPOSE 8082
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["java", "-Xms512m", "-Xmx512m", "-Djava.net.preferIPv4Stack=true", "-jar", "tracker-server.jar", "conf/traccar.xml"]
