@@ -10,7 +10,7 @@ services:
       - ./logs:/opt/traccar/logs:rw
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
-    env_file: .env
+    env_file: .env.sample
     command: java -Xms512m -Xmx4096m -Djava.net.preferIPv4Stack=true -jar /opt/traccar/tracker-server.jar /opt/traccar/conf/traccar.xml
     ulimits:
       rtprio: 95
