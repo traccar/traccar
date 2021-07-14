@@ -32,4 +32,4 @@ export PATH=$PATH:~/bin/Sencha/Cmd/
 
 cd traccar/setup && \
 wget https://github.com/ojdkbuild/contrib_jdk11u-ci/releases/download/jdk-11.0.8%2B10/jdk-11.0.8-ojdkbuild-linux-x64.zip && \
-./package.sh -o
+./package.sh -o other
