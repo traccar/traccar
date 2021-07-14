@@ -12,7 +12,7 @@
 
     <entry key='geocoder.enable'>true</entry>
     <entry key='geocoder.type'>nominatim</entry>
-    <entry key='geocoder.url'>http://lxx3.realtrack.ml:8064/reverse</entry>
+    <entry key='geocoder.url'>https://geocoder.bhn.ng/reverse</entry>
     <!-- More geoCODER configurations -->
     <entry key='geocoder.onRequest'>true</entry>
     <entry key='geocoder.processInvalidPositions'>false</entry>
@@ -30,89 +30,6 @@
     <entry key='atrack.custom'>true</entry>
     <entry key='intellitrac.port'>6037</entry>
 
-
-
-    <entry key='status.ignoreOffline'>h02,calamp,tk103,gps103,gt06,wondex,gpsgate,eelink,meiligao,enfora,huabao,v680,meitrack,teltonika,osmand,watch,tramigo</entry>
-    <entry key='tcp.timeout'>600</entry>
-    <!--<entry key='decoder.ignoreSessionCache'>true</entry>-->
-    <!-- Trip and movement configurations -->
-
-    <entry key='report.trip.minimalTripDuration'>180</entry>
-    <entry key='report.trip.minimalTripDistance'>300</entry>
-    <entry key='report.trip.minimalParkingDuration'>600</entry>
-    <entry key='report.trip.minimalNoDataDuration'>900</entry>
-
-    <entry key='status.updateDeviceState'>true</entry>
-    <entry key='event.overspeed.notRepeat'>true</entry>
-    <entry key='event.ignoreDuplicateAlerts'>true</entry>
-
-    <entry key ='report.trip.greedyParking'>true</entry>
-    <entry key='report.trip.useIgnition'>false</entry>
-
-    <entry key='speedLimit'>21.78</entry>
-    <entry key='event.motion.speedThreshold'>0.7</entry>
-
-    <!-- All server filters -->
-
-    <entry key='filter.enable'>true</entry>
-    <entry key='filter.maxSpeed'>200</entry>
-    <entry key='filter.future'>32400</entry>
-    <entry key='filter.zero'>true</entry>
-    <entry key='filter.invalid'>true</entry>
-    <!--<##Affects Static filter don't enable
-    <entry key='filter.skipLimit'>45</entry>
-    -->
-    <entry key='filter.static'>true</entry>
-    <entry key='filter.allStatic'>false</entry>
-<!--    <entry key='filter.course'>12</entry>-->
-<!--    <entry key='filter.distance'>50</entry>-->
-<!--    <entry key='filter.duplicate'>false</entry>-->
-    <entry key='filter.skipAttributes'>fuel,driverUniqueId,ignition,alarm</entry>
-    <entry key='filter.skipAlarm'>true</entry>
-
-
-    <!-- Sensor copy Settings -->
-    <entry key='processing.copyAttributes.enable'>true</entry>
-    <entry key='processing.copyAttributes'>ignition,Status,power,acc,mnc,lac,mcc,cid,charge,door,event,driverUniqueId,fuel,rfid,hours,status,Input,input,output,Output,Satellites,motion</entry>
-    <entry key='processing.remoteAddress.enable'>true</entry>
-
-    <!-- coordinate errors filters -->
-
-    <entry key='coordinates.filter'>true</entry>
-    <entry key='coordinates.maxError'>90000</entry>
-    <entry key='coordinates.minError'>55</entry>
-
-    <!-- Notification configurations -->
-
-    <entry key='notificator.types'>web,telegram,mail,sms</entry>
-
-    <entry key='sms.enable'>false</entry>
-
-    <entry key='sms.smpp.host'>api.smslive247.com</entry>
-    <entry key='sms.smpp.port'>8085</entry>
-    <entry key='sms.smpp.username'>8e3c86f0</entry>
-    <entry key='sms.smpp.password'>312d-4a8f</entry>
-    <entry key='sms.smpp.notificationsCharset'>GSM</entry>
-    <entry key='sms.smpp.notificationsDataCoding'>0</entry>
-    <entry key='sms.smpp.sourceAddress'>MCPLTRACK</entry>
-
-    <entry key='notificator.telegram.key'>868099202:AAGFS1k8k3HzCOgbISgNWgQFcMkFzAQPfsM</entry>
-    <entry key='notificator.telegram.chatId'>-380529042</entry>
-    <entry key="notificator.telegram.cacheRetention">1</entry>
-
-    <!-- SMTP Notifitcation settings -->
-
-    <entry key='mail.smtp.host'>lxx3.realtrack.ml</entry>
-    <entry key='mail.smtp.port'>25</entry>
-    <entry key='mail.smtp.starttls.enable'>false</entry>
-    <entry key='mail.smtp.starttls.required'>false</entry>
-    <entry key='mail.smtp.ssl.trust'>*</entry>
-    <entry key='mail.smtp.from'>no_reply@mcpl.ga</entry>
-    <entry key='mail.smtp.auth'>true</entry>
-    <entry key='mail.smtp.username'>no_reply@mcpl.ga</entry>
-    <entry key='mail.smtp.password'>bhn321</entry>
-
-    <!--<entry key='database.historyDays'>138</entry>-->
 
 
 </properties>
