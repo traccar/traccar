@@ -4,8 +4,8 @@ WORKDIR /build/
 
 RUN apt update && \
     apt install -y sudo curl git software-properties-common \
-    dirmngr apt-transport-https zip wget unzip ppa-purge && \
-    sudo ppa-purge ppa:openjdk-r/ppa && \
+    dirmngr apt-transport-https zip wget unzip && \
+    sudo add-apt-repository ppa:openjdk-r/ppa && \
     curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash - && \
     dpkg --add-architecture i386
 
