@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 
 apt update
-apt install -y curl git software-properties-common && \
-dirmngr apt-transport-https zip wget unzip
+apt install -y sudo curl git software-properties-common dirmngr apt-transport-https zip wget unzip
 
 sudo ppa-purge ppa:openjdk-r/ppa
 curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
