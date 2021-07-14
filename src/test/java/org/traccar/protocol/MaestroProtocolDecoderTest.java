@@ -8,7 +8,7 @@ public class MaestroProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        MaestroProtocolDecoder decoder = new MaestroProtocolDecoder(null);
+        var decoder = new MaestroProtocolDecoder(null);
 
         verifyPosition(decoder, text(
                 "@353893040202807,705,UPV-02,1,13.2,17,0,0,16/09/11,11:42:49,0.352705,32.647918,1210.5,0.000000,35.33,11,0.8,0.000,0!\0"));

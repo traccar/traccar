@@ -8,7 +8,10 @@ public class EasyTrackProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        EasyTrackProtocolDecoder decoder = new EasyTrackProtocolDecoder(null);
+        var decoder = new EasyTrackProtocolDecoder(null);
+
+        verifyNotNull(decoder, text(
+                "*ET,354522180593498,JZ,0,20222,262,724,4#"));
 
         verifyNull(decoder, text(
                 "*ET,358155100132943,MQ"));

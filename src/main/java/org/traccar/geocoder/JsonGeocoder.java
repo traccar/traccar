@@ -18,9 +18,11 @@ package org.traccar.geocoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
+import org.traccar.Main;
+import org.traccar.database.StatisticsManager;
 
 import javax.json.JsonObject;
-import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.InvocationCallback;
 import java.util.AbstractMap;
@@ -95,6 +97,8 @@ public abstract class JsonGeocoder implements Geocoder {
             }
         }
 
+        Main.getInjector().getInstance(StatisticsManager.class).registerGeocoderRequest();
+
         Invocation.Builder request = Context.getClient().target(String.format(url, latitude, longitude)).request();
 
         if (callback != null) {
@@ -112,7 +116,7 @@ public abstract class JsonGeocoder implements Geocoder {
         } else {
             try {
                 return handleResponse(latitude, longitude, request.get(JsonObject.class), null);
-            } catch (ClientErrorException e) {
+            } catch (WebApplicationException e) {
                 LOGGER.warn("Geocoder network error", e);
             }
         }

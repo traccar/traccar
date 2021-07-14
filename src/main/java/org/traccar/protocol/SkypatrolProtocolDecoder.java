@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.Protocol;
+import org.traccar.config.Keys;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.model.Position;
@@ -38,7 +39,7 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
 
     public SkypatrolProtocolDecoder(Protocol protocol) {
         super(protocol);
-        defaultMask = Context.getConfig().getInteger(getProtocolName() + ".mask");
+        defaultMask = Context.getConfig().getInteger(Keys.PROTOCOL_MASK.withPrefix(getProtocolName()));
     }
 
     private static double convertCoordinate(long coordinate) {

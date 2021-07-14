@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,11 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
     }
 
     @Override
+    public void onKeepalive() {
+        sendData(new HashMap<>());
+    }
+
+    @Override
     public void onUpdateDevice(Device device) {
         Map<String, Collection<?>> data = new HashMap<>();
         data.put(KEY_DEVICES, Collections.singletonList(device));
@@ -85,7 +90,7 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
     }
 
     private void sendData(Map<String, Collection<?>> data) {
-        if (!data.isEmpty() && isConnected()) {
+        if (isConnected()) {
             try {
                 getRemote().sendString(Context.getObjectMapper().writeValueAsString(data), null);
             } catch (JsonProcessingException e) {

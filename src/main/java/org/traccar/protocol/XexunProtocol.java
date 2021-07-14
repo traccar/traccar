@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import org.traccar.BaseProtocol;
 import org.traccar.Context;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Keys;
 import org.traccar.model.Command;
 
 import io.netty.handler.codec.LineBasedFrameDecoder;
@@ -34,7 +35,7 @@ public class XexunProtocol extends BaseProtocol {
         addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                boolean full = Context.getConfig().getBoolean(getName() + ".extended");
+                boolean full = Context.getConfig().getBoolean(Keys.PROTOCOL_EXTENDED.withPrefix(getName()));
                 if (full) {
                     pipeline.addLast(new LineBasedFrameDecoder(1024)); // tracker bug \n\r
                 } else {

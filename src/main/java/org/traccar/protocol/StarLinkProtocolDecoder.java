@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
-import org.traccar.protobuf.StarLinkMessage;
+import org.traccar.protobuf.starlink.StarLinkMessage;
 
 import java.net.SocketAddress;
 import java.text.DateFormat;
@@ -145,11 +145,6 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
         String[] dataTags = getFormat(deviceSession.getDeviceId());
         DateFormat dateFormat = getDateFormat(deviceSession.getDeviceId());
 
-        /*
-29.0 (#TVI #),
-0 (#OUTC #),
-         */
-
         for (int i = 0; i < Math.min(data.length, dataTags.length); i++) {
             if (data[i].isEmpty()) {
                 continue;
@@ -197,6 +192,12 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case "#TVI#":
                     position.set(Position.KEY_DEVICE_TEMP, Double.parseDouble(data[i]));
+                    break;
+                case "#CFL#":
+                    position.set(Position.KEY_FUEL_LEVEL, Integer.parseInt(data[i]));
+                    break;
+                case "#CFL2#":
+                    position.set("fuel2", Integer.parseInt(data[i]));
                     break;
                 case "#IN1#":
                 case "#IN2#":

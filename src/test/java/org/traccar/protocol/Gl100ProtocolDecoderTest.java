@@ -9,7 +9,7 @@ public class Gl100ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        Gl100ProtocolDecoder decoder = new Gl100ProtocolDecoder(null);
+        var decoder = new Gl100ProtocolDecoder(null);
 
         verifyPosition(decoder, text(
                 "+RESP:GTLGL,359464030492644,1,2,1,0,0.4,0,299.7,1,5.455551,51.449776,20160311083229,0204,0016,03EC,BD94,00,0036,0102090501"));

@@ -8,7 +8,7 @@ public class FoxProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        FoxProtocolDecoder decoder = new FoxProtocolDecoder(null);
+        var decoder = new FoxProtocolDecoder(null);
 
         verifyPosition(decoder, text(
                 "<fox><gps id=\"10\" data=\"51,A,010416,085317,4444.4158,N,02025.4466,E,1,182,,1110111111110111 141 0 0 0 0 0 10010000 10142,018C81851800009B\"/></fox>"));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2021 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,23 +16,21 @@
  */
 package org.traccar.model;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Date;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.filter.Filter;
 import net.fortuna.ical4j.filter.PeriodRule;
 import net.fortuna.ical4j.model.DateTime;
-import net.fortuna.ical4j.model.Dur;
 import net.fortuna.ical4j.model.Period;
 import net.fortuna.ical4j.model.component.CalendarComponent;
-import org.apache.commons.collections4.Predicate;
 import org.traccar.database.QueryIgnore;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.time.Duration;
+import java.util.Collection;
+import java.util.Date;
 
 public class Calendar extends ExtendedModel {
 
@@ -68,13 +66,10 @@ public class Calendar extends ExtendedModel {
 
     public boolean checkMoment(Date date) {
         if (calendar != null) {
-            Period period = new Period(new DateTime(date), new Dur(0, 0, 0, 0));
-            Predicate<CalendarComponent> periodRule = new PeriodRule<>(period);
-            Filter<CalendarComponent> filter = new Filter<>(new Predicate[] {periodRule}, Filter.MATCH_ANY);
+            Period period = new Period(new DateTime(date), Duration.ZERO);
+            Filter<CalendarComponent> filter = new Filter<>(new PeriodRule<>(period));
             Collection<CalendarComponent> events = filter.filter(calendar.getComponents(CalendarComponent.VEVENT));
-            if (events != null && !events.isEmpty()) {
-                return true;
-            }
+            return events != null && !events.isEmpty();
         }
         return false;
     }

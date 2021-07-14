@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public abstract class WindowsService {
             String account, String password, String config) throws URISyntaxException {
 
         String javaHome = System.getProperty("java.home");
-        String javaBinary = javaHome + "\\bin\\java.exe";
+        String javaBinary = "\"" + javaHome + "\\bin\\java.exe\"";
 
         File jar = new File(WindowsService.class.getProtectionDomain().getCodeSource().getLocation().toURI());
         String command = javaBinary

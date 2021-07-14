@@ -8,7 +8,7 @@ public class C2stekProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        C2stekProtocolDecoder decoder = new C2stekProtocolDecoder(null);
+        var decoder = new C2stekProtocolDecoder(null);
 
         verifyNull(decoder, text(
                 "PA$863083038046613$D#181123#162850#1#+37.92684#+23.75933#0.62#200.1#0.0#3768#000#9#00#sz-w1001#B0907839$AP"));

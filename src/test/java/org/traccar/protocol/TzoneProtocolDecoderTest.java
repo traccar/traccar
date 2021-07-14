@@ -8,7 +8,7 @@ public class TzoneProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        TzoneProtocolDecoder decoder = new TzoneProtocolDecoder(null);
+        var decoder = new TzoneProtocolDecoder(null);
 
         verifyAttributes(decoder, binary(
                 "545A004B2424041302000000086706003324776413030C0A1A2900180513030C0A1A25080F7E1028CAC830000A000F0000000005000AA53201633D05046000010009AA201737019408973B0032B0260D0A"));

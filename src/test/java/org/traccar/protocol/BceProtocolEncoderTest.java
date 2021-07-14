@@ -9,7 +9,7 @@ public class BceProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        BceProtocolEncoder encoder = new BceProtocolEncoder(null);
+        var encoder = new BceProtocolEncoder(null);
 
         Command command = new Command();
         command.setDeviceId(1);

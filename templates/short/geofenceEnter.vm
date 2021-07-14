@@ -1,1 +1,1 @@
-$device.nameentered geofence $geofence.name on $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.serverTime, $locale, $timezone) at $position.address
+$device.nameentered geofence $geofence.name on $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone) at $position.address

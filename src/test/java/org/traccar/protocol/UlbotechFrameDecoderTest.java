@@ -8,7 +8,7 @@ public class UlbotechFrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        UlbotechFrameDecoder decoder = new UlbotechFrameDecoder();
+        var decoder = new UlbotechFrameDecoder();
 
         verifyFrame(
                 binary("f8010103515810532780699f7e2e3f010e015ee4c906bde45c00000000008b0304004000000404002c776005060373193622110b00240b00fee8ffff807dffff606d0b00fee9af000000af0000000b00feee7d78807dffffffff100101cc2af8"),

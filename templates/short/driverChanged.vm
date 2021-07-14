@@ -3,4 +3,4 @@
 #else
 #set($driverName = $event.getString("driverUniqueId"))
 #end
-Driver $driverName has changed in $device.name on $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.serverTime, $locale, $timezone) at $position.address
+Driver $driverName has changed in $device.name on $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone) at $position.address

@@ -8,7 +8,7 @@ public class EsealProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        EsealProtocolDecoder decoder = new EsealProtocolDecoder(null);
+        var decoder = new EsealProtocolDecoder(null);
 
         verifyPosition(decoder, text(
                 "##S,eSeal,1000821,256,3.0.6,Normal,34,2017-08-31,08:14:40,15,A,25.708828N 100.372870W,10,0,Close,0.71,0:0:3:0,3.8,-73,E##"));

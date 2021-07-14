@@ -1,6 +1,6 @@
 
 /*
- * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.traccar.Context;
 import org.traccar.GlobalTimer;
 import org.traccar.Main;
 import org.traccar.Protocol;
+import org.traccar.config.Keys;
 import org.traccar.handler.events.MotionEventHandler;
 import org.traccar.handler.events.OverspeedEventHandler;
 import org.traccar.model.Device;
@@ -46,10 +47,7 @@ public class ConnectionManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionManager.class);
 
-    private static final long DEFAULT_TIMEOUT = 600;
-
     private final long deviceTimeout;
-    private final boolean enableStatusEvents;
     private final boolean updateDeviceState;
 
     private final Map<Long, ActiveDevice> activeDevices = new ConcurrentHashMap<>();
@@ -57,9 +55,8 @@ public class ConnectionManager {
     private final Map<Long, Timeout> timeouts = new ConcurrentHashMap<>();
 
     public ConnectionManager() {
-        deviceTimeout = Context.getConfig().getLong("status.timeout", DEFAULT_TIMEOUT) * 1000;
-        enableStatusEvents = Context.getConfig().getBoolean("event.enable");
-        updateDeviceState = Context.getConfig().getBoolean("status.updateDeviceState");
+        deviceTimeout = Context.getConfig().getLong(Keys.STATUS_TIMEOUT) * 1000;
+        updateDeviceState = Context.getConfig().getBoolean(Keys.STATUS_UPDATE_DEVICE_STATE);
     }
 
     public void addActiveDevice(long deviceId, Protocol protocol, Channel channel, SocketAddress remoteAddress) {
@@ -108,7 +105,7 @@ public class ConnectionManager {
         String oldStatus = device.getStatus();
         device.setStatus(status);
 
-        if (enableStatusEvents && !status.equals(oldStatus)) {
+        if (!status.equals(oldStatus)) {
             String eventType;
             Map<Event, Position> events = new HashMap<>();
             switch (status) {
@@ -178,6 +175,14 @@ public class ConnectionManager {
         return result;
     }
 
+    public synchronized void sendKeepalive() {
+        for (Set<UpdateListener> userListeners : listeners.values()) {
+            for (UpdateListener listener : userListeners) {
+                listener.onKeepalive();
+            }
+        }
+    }
+
     public synchronized void updateDevice(Device device) {
         for (long userId : Context.getPermissionsManager().getDeviceUsers(device.getId())) {
             if (listeners.containsKey(userId)) {
@@ -209,6 +214,7 @@ public class ConnectionManager {
     }
 
     public interface UpdateListener {
+        void onKeepalive();
         void onUpdateDevice(Device device);
         void onUpdatePosition(Position position);
         void onUpdateEvent(Event event);
@@ -216,14 +222,14 @@ public class ConnectionManager {
 
     public synchronized void addListener(long userId, UpdateListener listener) {
         if (!listeners.containsKey(userId)) {
-            listeners.put(userId, new HashSet<UpdateListener>());
+            listeners.put(userId, new HashSet<>());
         }
         listeners.get(userId).add(listener);
     }
 
     public synchronized void removeListener(long userId, UpdateListener listener) {
         if (!listeners.containsKey(userId)) {
-            listeners.put(userId, new HashSet<UpdateListener>());
+            listeners.put(userId, new HashSet<>());
         }
         listeners.get(userId).remove(listener);
     }

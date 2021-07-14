@@ -24,6 +24,7 @@ import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.util.concurrent.GlobalEventExecutor;
+import org.traccar.config.Keys;
 
 import java.net.InetSocketAddress;
 
@@ -39,8 +40,8 @@ public abstract class TrackerServer {
     public TrackerServer(boolean datagram, String protocol) {
         this.datagram = datagram;
 
-        address = Context.getConfig().getString(protocol + ".address");
-        port = Context.getConfig().getInteger(protocol + ".port");
+        address = Context.getConfig().getString(Keys.PROTOCOL_ADDRESS.withPrefix(protocol));
+        port = Context.getConfig().getInteger(Keys.PROTOCOL_PORT.withPrefix(protocol));
 
         BasePipelineFactory pipelineFactory = new BasePipelineFactory(this, protocol) {
             @Override

@@ -75,8 +75,10 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             .number("|(x{8})")                   // odometer
             .groupBegin()
             .number("|(xx)")                     // satellites
+            .groupBegin()
             .text("|")
             .expression("(.*)")                  // driver
+            .groupEnd("?")
             .groupEnd("?")
             .or()
             .number("|(d{1,9})")                 // odometer
@@ -144,7 +146,8 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_TRACK_ON_DEMAND = 0x4101;
     public static final int MSG_TRACK_BY_INTERVAL = 0x4102;
     public static final int MSG_MOVEMENT_ALARM = 0x4106;
-    public static final int MSG_OUTPUT_CONTROL = 0x4115;
+    public static final int MSG_OUTPUT_CONTROL_1 = 0x4114;
+    public static final int MSG_OUTPUT_CONTROL_2 = 0x4115;
     public static final int MSG_TIME_ZONE = 0x4132;
     public static final int MSG_TAKE_PHOTO = 0x4151;
     public static final int MSG_UPLOAD_PHOTO = 0x0800;

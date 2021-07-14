@@ -1,5 +1,6 @@
 /*
- * Copyright 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2021 Rafael Miquelino (rafaelmiquelino@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,31 +20,25 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
+import org.traccar.model.User;
+import org.traccar.config.Keys;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
-import org.traccar.model.User;
 import org.traccar.notification.NotificationFormatter;
 
-import javax.json.JsonObject;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.InvocationCallback;
-import java.util.HashMap;
 
 public class NotificatorTelegram extends Notificator {
-    private static final String TELEGRAM_API_PREFIX = "https://api.telegram.org/bot%s/%s";
-    private static final long HOUR_TIME_FACTOR = 1000 * 60 * 60; // mSec to hour factor
+
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificatorTelegram.class);
 
-    private String sendMessageUrl;
-    private String sendContactUrl;
-    private String chatId;
-    private TelegramCache cache = new TelegramCache();
+    private final String urlSendText;
+    private final String urlSendLocation;
+    private final String chatId;
+    private final boolean sendLocation;
 
     public static class TextMessage {
-        public TextMessage(String chatId, String text) {
-            this.chatId = chatId;
-            this.text = text;
-        }
         @JsonProperty("chat_id")
         private String chatId;
         @JsonProperty("text")
@@ -52,120 +47,63 @@ public class NotificatorTelegram extends Notificator {
         private String parseMode = "html";
     }
 
-    public static class ContactMessage {
-        public ContactMessage(String chatId, String phoneNumber) {
-            this.chatId = chatId;
-            this.phoneNumber = phoneNumber;
-        }
+    public static class LocationMessage {
         @JsonProperty("chat_id")
         private String chatId;
-        @JsonProperty("phone_number")
-        private String phoneNumber;
-        @JsonProperty("first_name")
-        private String firstName = "dummy";
-    }
-
-    public static class TelegramCache {
-        private class CachePayload {
-            CachePayload(String chatId) {
-                this.chatId = chatId;
-                timestamp = System.currentTimeMillis();
-            }
-            private String chatId;
-            private long timestamp;
-        }
-
-        private HashMap<String, CachePayload> cache = new HashMap<>();
-        private long retention;
-
-        public TelegramCache() {
-            retention = Context.getConfig().getLong("notificator.telegram.cacheRetention", 0) * HOUR_TIME_FACTOR;
-        }
-
-        private Boolean isValid(long timestamp) {
-            long currTime = System.currentTimeMillis();
-            return retention < 0 || ((currTime - timestamp) <= retention);
-        }
-
-        public String getChatId(String phoneNumber) {
-            CachePayload payload = cache.get(phoneNumber);
-            if (payload != null && isValid(payload.timestamp)) {
-                return payload.chatId;
-            }
-            return null;
-        }
-
-        public void storeCache(String phoneNumber, String chatId) {
-            cache.put(phoneNumber, new CachePayload(chatId));
-        }
+        @JsonProperty("latitude")
+        private double latitude;
+        @JsonProperty("longitude")
+        private double longitude;
+        @JsonProperty("horizontal_accuracy")
+        private double accuracy;
+        @JsonProperty("bearing")
+        private int bearing;
     }
 
     public NotificatorTelegram() {
-        String botKey = Context.getConfig().getString("notificator.telegram.key");
-        sendMessageUrl = String.format(TELEGRAM_API_PREFIX, botKey, "sendMessage");
-        sendContactUrl = String.format(TELEGRAM_API_PREFIX, botKey, "sendContact");
-        chatId = Context.getConfig().getString("notificator.telegram.chatId");
+        urlSendText = String.format("https://api.telegram.org/bot%s/sendMessage",
+                Context.getConfig().getString(Keys.NOTIFICATOR_TELEGRAM_KEY));
+        urlSendLocation = String.format("https://api.telegram.org/bot%s/sendLocation",
+                Context.getConfig().getString(Keys.NOTIFICATOR_TELEGRAM_KEY));
+        chatId = Context.getConfig().getString(Keys.NOTIFICATOR_TELEGRAM_CHAT_ID);
+        sendLocation = Context.getConfig().getBoolean(Keys.NOTIFICATOR_TELEGRAM_SEND_LOCATION);
     }
 
-    private void sendTextMessage(long userId, Event event, Position position, String userChatId) {
-        TextMessage message = new TextMessage(
-                userChatId, NotificationFormatter.formatShortMessage(userId, event, position));
-
-        Context.getClient().target(sendMessageUrl).request()
-                .async().post(Entity.json(message), new InvocationCallback<Object>() {
+    private void executeRequest(String url, Object message) {
+        Context.getClient().target(url).request().async().post(Entity.json(message), new InvocationCallback<Object>() {
             @Override
             public void completed(Object o) {
             }
 
             @Override
             public void failed(Throwable throwable) {
-                LOGGER.warn("Telegram API error - send message failed", throwable);
+                LOGGER.warn("Telegram API error", throwable);
             }
         });
     }
 
+    private LocationMessage createLocationMessage(String messageChatId, Position position) {
+        LocationMessage locationMessage = new LocationMessage();
+        locationMessage.chatId = messageChatId;
+        locationMessage.latitude = position.getLatitude();
+        locationMessage.longitude = position.getLongitude();
+        locationMessage.bearing = (int) Math.ceil(position.getCourse());
+        locationMessage.accuracy = position.getAccuracy();
+        return locationMessage;
+    }
+
     @Override
     public void sendSync(long userId, Event event, Position position) {
-
-        final User user = Context.getPermissionsManager().getUser(userId);
-        Boolean checkTelegramId = user.getAttributes().containsKey("notificationTelegramChatId");
-        if (user.getPhone() != null || checkTelegramId) {
-            String userChatId;
-            if (checkTelegramId) {
-                userChatId = user.getString("notificationTelegramChatId");
-            } else {
-                userChatId = cache.getChatId(user.getPhone());
-            }
-            if (userChatId != null) {
-                sendTextMessage(userId, event, position, userChatId);
-            } else {
-                ContactMessage message = new ContactMessage(chatId, user.getPhone());
-                Context.getClient().target(sendContactUrl).request()
-                        .async().post(Entity.json(message), new InvocationCallback<JsonObject>() {
-                    @Override
-                    public void completed(JsonObject json) {
-                        JsonObject result = json.getJsonObject("result");
-                        if (json.getBoolean("ok")) {
-                            JsonObject contact = result.getJsonObject("contact");
-                            String userChatId = contact.getJsonNumber("user_id").toString();
-
-                            cache.storeCache(user.getPhone(), userChatId);
-                            sendTextMessage(userId, event, position, userChatId);
-                        } else {
-                            LOGGER.warn("Telegram notificator: contact retrieval failed");
-                        }
-                    }
-
-                    @Override
-                    public void failed(Throwable throwable) {
-                        LOGGER.warn("Telegram API error - user " + user.getName() + "chatId retrieval failed",
-                                throwable);
-                    }
-                });
-            }
-        } else {
-            LOGGER.warn("Telegram notificator: Couldn't find phone number for user "
-            + user.getName() + " - " + user.getPhone());
+        User user = Context.getPermissionsManager().getUser(userId);
+        TextMessage message = new TextMessage();
+        message.chatId = user.getString("telegramChatId");
+        if (message.chatId == null) {
+            message.chatId = chatId;
+        }
+        message.text = NotificationFormatter.formatShortMessage(userId, event, position);
+        executeRequest(urlSendText, message);
+        if (sendLocation && position != null) {
+            executeRequest(urlSendLocation, createLocationMessage(message.chatId, position));
         }
     }
 
@@ -173,4 +111,5 @@ public class NotificatorTelegram extends Notificator {
     public void sendAsync(long userId, Event event, Position position) {
         sendSync(userId, event, position);
     }
+
 }

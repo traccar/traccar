@@ -8,7 +8,7 @@ public class EgtsProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecodeWithObjectId() throws Exception {
 
-        EgtsProtocolDecoder decoder = new EgtsProtocolDecoder(null);
+        var decoder = new EgtsProtocolDecoder(null);
 
         verifyNull(decoder, binary(
                 "0100020b002300020001871c00020000010105190000ab0800006247396e615734366347467a63336476636d513daadf"));
@@ -31,7 +31,7 @@ public class EgtsProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecodeWithAuth() throws Exception {
 
-        EgtsProtocolDecoder decoder = new EgtsProtocolDecoder(null);
+        var decoder = new EgtsProtocolDecoder(null);
 
         verifyNull(decoder, binary(
                 "0100010b002200c06401f21700c1640171360d00010101140071360d000238363539303500000000000000000047fc"));

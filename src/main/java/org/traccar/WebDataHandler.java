@@ -221,6 +221,7 @@ public class WebDataHandler extends BaseDataHandler {
         }
 
         private void send() {
+            LOGGER.debug("Position forwarding initiated");
             if (json) {
                 try {
                     Entity<String> entity = Entity.entity(objectMapper.writeValueAsString(payload), mediaType);
@@ -233,7 +234,7 @@ public class WebDataHandler extends BaseDataHandler {
             }
         }
 
-        private void retry() {
+        private void retry(Throwable throwable) {
             boolean scheduled = false;
             try {
                 if (retryEnabled && deliveryPending.get() <= retryLimit && retries < retryCount) {
@@ -242,27 +243,28 @@ public class WebDataHandler extends BaseDataHandler {
                 }
             } finally {
                 int pending = scheduled ? deliveryPending.get() : deliveryPending.decrementAndGet();
-                LOGGER.warn("Position forwarding failed: " + pending + " pending");
+                LOGGER.warn("Position forwarding failed: " + pending + " pending", throwable);
             }
         }
 
         private void schedule() {
             Main.getInjector().getInstance(Timer.class).newTimeout(
-                this, retryDelay * (int) Math.pow(2, retries++), TimeUnit.MILLISECONDS);
+                this, retryDelay * (long) Math.pow(2, retries++), TimeUnit.MILLISECONDS);
         }
 
         @Override
         public void completed(Response response) {
             if (response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL) {
                 deliveryPending.decrementAndGet();
+                LOGGER.debug("Position forwarding succeeded");
             } else {
-                retry();
+                retry(new RuntimeException("Status code 2xx expected"));
             }
         }
 
         @Override
         public void failed(Throwable throwable) {
-            retry();
+            retry(throwable);
         }
 
         @Override

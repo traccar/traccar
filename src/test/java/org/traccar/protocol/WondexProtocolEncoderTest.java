@@ -10,7 +10,7 @@ public class WondexProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        WondexProtocolEncoder encoder = new WondexProtocolEncoder(null);
+        var encoder = new WondexProtocolEncoder(null);
 
         Command command = new Command();
         command.setDeviceId(2);

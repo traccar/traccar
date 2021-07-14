@@ -8,7 +8,7 @@ public class ItsFrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        ItsFrameDecoder decoder = new ItsFrameDecoder();
+        var decoder = new ItsFrameDecoder();
 
         verifyFrame(
                 binary("242c2c3836383732383033373731373434312c312e3444335f4149533134305f312e302c56455253494f4e312e302c32382e3633333731372c4e2c37372e3232323730322c45"),

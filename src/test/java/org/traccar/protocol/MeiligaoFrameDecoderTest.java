@@ -11,7 +11,7 @@ public class MeiligaoFrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        MeiligaoFrameDecoder decoder = new MeiligaoFrameDecoder();
+        var decoder = new MeiligaoFrameDecoder();
 
         assertNull(
                 decoder.decode(null, null, binary("00")));

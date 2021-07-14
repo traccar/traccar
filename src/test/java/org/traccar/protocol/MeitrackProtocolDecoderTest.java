@@ -9,7 +9,7 @@ public class MeitrackProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        MeitrackProtocolDecoder decoder = new MeitrackProtocolDecoder(null);
+        var decoder = new MeitrackProtocolDecoder(null);
 
         verifyPositions(decoder, binary(
                 "2424413132332c3836313538353034333230303836322c4343452c010000000100590015000305010609071b0b081c000939010a07000b1700199e011a9505921a0099c4089c5500c93e00405a000602a8b114000343f12e0604d18806270c654a2e000da20537009bb8963904010e0c0d020300aa7a0af69e0100002a35340d0a"));

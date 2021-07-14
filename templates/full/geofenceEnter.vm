@@ -4,7 +4,7 @@
 <body>
 Asset: $device.name<br>
 Has entered geofence: $geofence.name<br>
-Time: $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.serverTime, $locale, $timezone)<br>
+Time: $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone)<br>
 Location: <a href="http://maps.google.com/maps?f=q&q=$position.latitude,$position.longitude&z=16">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
 <br>
 Lat: $position.latitude&deg;<br>

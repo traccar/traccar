@@ -8,7 +8,7 @@ public class S168ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        S168ProtocolDecoder decoder = new S168ProtocolDecoder(null);
+        var decoder = new S168ProtocolDecoder(null);
 
         verifyNull(decoder, text(
                 "S168#358511139046180#00c9#0009#SYNC:0000"));

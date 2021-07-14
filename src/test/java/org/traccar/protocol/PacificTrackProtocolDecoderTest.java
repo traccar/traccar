@@ -22,7 +22,7 @@ public class PacificTrackProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        PacificTrackProtocolDecoder decoder = new PacificTrackProtocolDecoder(null);
+        var decoder = new PacificTrackProtocolDecoder(null);
 
         verifyAttributes(decoder, binary(
                 "fb80c88181b00280883592151012618820b18b1f123340f004c90001300301928a0080008100c00000000091971c0b0417020d074df0ec03c242550b20081d0c009a0601a1855571a30000"));

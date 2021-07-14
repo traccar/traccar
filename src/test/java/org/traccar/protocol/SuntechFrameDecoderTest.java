@@ -8,7 +8,7 @@ public class SuntechFrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        SuntechFrameDecoder decoder = new SuntechFrameDecoder();
+        var decoder = new SuntechFrameDecoder();
 
         verifyFrame(
                 binary("81004e05200013383fffff3401000301130a0512080400000000000000000000000047f9d5846a06810072225214010100020300a8002604c1000004b000000470000025a100000000000025c4000000a6"),

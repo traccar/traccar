@@ -1,1 +1,1 @@
-$device.name device status changed to Delayed on $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.serverTime, $locale, $timezone)
+$device.name device status changed to Delayed on $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone)

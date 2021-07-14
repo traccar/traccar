@@ -8,7 +8,7 @@ public class LeafSpyProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        LeafSpyProtocolDecoder decoder = new LeafSpyProtocolDecoder(null);
+        var decoder = new LeafSpyProtocolDecoder(null);
 
         verifyNull(decoder, request(
                 "/?Lat=60.0&Long=30.0"));

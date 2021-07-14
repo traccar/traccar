@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
+import org.traccar.config.Keys;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
@@ -38,6 +39,8 @@ public class NotificatorFirebase extends Notificator {
     public static class Notification {
         @JsonProperty("body")
         private String body;
+        @JsonProperty("sound")
+        private String sound;
     }
 
     public static class Message {
@@ -50,7 +53,7 @@ public class NotificatorFirebase extends Notificator {
     public NotificatorFirebase() {
         this(
                 "https://fcm.googleapis.com/fcm/send",
-                Context.getConfig().getString("notificator.firebase.key"));
+                Context.getConfig().getString(Keys.NOTIFICATOR_FIREBASE_KEY));
     }
 
     protected NotificatorFirebase(String url, String key) {
@@ -65,6 +68,7 @@ public class NotificatorFirebase extends Notificator {
 
             Notification notification = new Notification();
             notification.body = NotificationFormatter.formatShortMessage(userId, event, position).trim();
+            notification.sound = "default";
 
             Message message = new Message();
             message.tokens = user.getString("notificationTokens").split("[, ]");

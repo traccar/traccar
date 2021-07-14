@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import org.traccar.BaseProtocol;
 import org.traccar.Context;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Keys;
 import org.traccar.model.Command;
 
 public class H02Protocol extends BaseProtocol {
@@ -35,7 +36,7 @@ public class H02Protocol extends BaseProtocol {
         addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                int messageLength = Context.getConfig().getInteger(getName() + ".messageLength");
+                int messageLength = Context.getConfig().getInteger(Keys.PROTOCOL_MESSAGE_LENGTH.withPrefix(getName()));
                 pipeline.addLast(new H02FrameDecoder(messageLength));
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new H02ProtocolEncoder(H02Protocol.this));

@@ -8,7 +8,7 @@ public class SanavProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        SanavProtocolDecoder decoder = new SanavProtocolDecoder(null);
+        var decoder = new SanavProtocolDecoder(null);
 
         verifyPosition(decoder, text(
                 "imei=353197040023431&rmc=$GPRMC,015258.000,A,2457.8101,N,12125.5393,E,0.00,0.00,210111,,*18,AUTO,0300,2.1,10,466,97,34E7,3391,74,466,9 7,3F2D,3391,65,466,97,39C9,3391,79,466,97,3F2C,3391,81,466,97,0000,00 00,83,466,97,0000,0000,85,466,97,0000,0000,85,1,24"));

@@ -17,6 +17,7 @@ package org.traccar;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.config.Keys;
 
 import java.io.File;
 import java.io.IOException;
@@ -70,10 +71,10 @@ public class ServerManager {
         }
 
         for (String name : names) {
-            Class protocolClass = Class.forName(packageName + '.' + name);
-            if (BaseProtocol.class.isAssignableFrom(protocolClass)
-                    && Context.getConfig().hasKey(BaseProtocol.nameFromClass(protocolClass) + ".port")) {
-                BaseProtocol protocol = (BaseProtocol) protocolClass.newInstance();
+            Class<?> protocolClass = Class.forName(packageName + '.' + name);
+            if (BaseProtocol.class.isAssignableFrom(protocolClass) && Context.getConfig().hasKey(
+                    Keys.PROTOCOL_PORT.withPrefix(BaseProtocol.nameFromClass(protocolClass)))) {
+                BaseProtocol protocol = (BaseProtocol) protocolClass.getDeclaredConstructor().newInstance();
                 serverList.addAll(protocol.getServerList());
                 protocolList.put(protocol.getName(), protocol);
             }

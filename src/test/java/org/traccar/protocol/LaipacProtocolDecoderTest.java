@@ -8,7 +8,7 @@ public class LaipacProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        LaipacProtocolDecoder decoder = new LaipacProtocolDecoder(null);
+        var decoder = new LaipacProtocolDecoder(null);
 
         verifyPosition(decoder, text(
                 "$AVRMC,80006405,212645,r,3013.9938,N,08133.3998,W,0.00,0.00,010317,a,4076,0,1,0,0,53170583,310260*78"));

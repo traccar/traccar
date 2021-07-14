@@ -24,6 +24,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.Protocol;
+import org.traccar.config.Keys;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -302,7 +303,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             decodeEventData(position, buf, event);
         }
 
-        if (Context.getConfig().getBoolean(getProtocolName() + ".can")
+        if (Context.getConfig().getBoolean(Keys.PROTOCOL_CAN.withPrefix(getProtocolName()))
                 && buf.isReadable() && (selector & 0x1000) != 0 && event == EVENT_DATA) {
             decodeCanData(buf, position);
         }
@@ -500,7 +501,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_AXLE_WEIGHT, buf.readUnsignedShort() * 2);
                     break;
                 case 0x04:
-                    position.set("tyrePressure", buf.readUnsignedByte() * 10);
+                    position.set("tirePressure", buf.readUnsignedByte() * 10);
                     position.set("pneumaticPressure", buf.readUnsignedByte() * 5);
                     break;
                 case 0x05:

@@ -8,7 +8,7 @@ public class TramigoFrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        TramigoFrameDecoder decoder = new TramigoFrameDecoder();
+        var decoder = new TramigoFrameDecoder();
 
         verifyFrame(
                 binary("8000ed2bb0009c000101bee000050b09633d925b5472616d69676f3a205472697020737461727465642c2053686f636b2053656e736f722c206174204b696e6720437265656b20526f61642d46726565746f776e205374726565742c20506f727420486172636f7572742c205269766572732c204e472c20342e37363336312c20372e30313836382c2030373a31383a333620536570203320454f46"),

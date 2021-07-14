@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,7 +97,7 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
 
             if (BitUtil.check(type, 5)) {
                 for (int i = 1; i <= 3; i++) {
-                    buf.readUnsignedShortLE(); // fuel level
+                    position.set("fuel" + i, buf.readUnsignedShortLE());
                 }
                 for (int i = 1; i <= 3; i++) {
                     position.set(Position.PREFIX_TEMP + i, buf.readUnsignedByte());
@@ -177,6 +177,10 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
     @Override
     protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
         ByteBuf buf = (ByteBuf) msg;
+
+        if (Character.isDigit(buf.getUnsignedByte(buf.readerIndex()))) {
+            getDeviceSession(channel, remoteAddress, buf.readSlice(15).toString(StandardCharsets.UTF_8));
+        }
 
         buf.readUnsignedShortLE(); // device id
 

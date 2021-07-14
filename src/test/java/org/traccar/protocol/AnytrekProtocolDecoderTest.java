@@ -8,7 +8,7 @@ public class AnytrekProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        AnytrekProtocolDecoder decoder = new AnytrekProtocolDecoder(null);
+        var decoder = new AnytrekProtocolDecoder(null);
 
         verifyPosition(decoder, binary(
                 "78783500300086428703204121160085015111050C0A0D20C6FD24A102FF8EAC0C01001404000000FFFFFFFF131702210000000000000000000D0A"));

@@ -9,7 +9,7 @@ public class GpsMarkerProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        GpsMarkerProtocolDecoder decoder = new GpsMarkerProtocolDecoder(null);
+        var decoder = new GpsMarkerProtocolDecoder(null);
 
         verifyPosition(decoder, text(
                 "$GM23D863071014445404T260816142611N55441051E037325071033063C0530304#"));

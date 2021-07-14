@@ -45,10 +45,13 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
             .expression("([^,]+),")              // serial number
             .number("(xx),")                     // status
             .number("(d+.d+),")                  // battery
+            .number("(d)")                       // valid
+            .number("(d)")                       // rssi
+            .number("(d),")                      // satellites
             .number("(-?d+.d+),")                // latitude
             .number("(-?d+.d+),")                // longitude
-            .number("(d+.d+),")                  // speed
-            .number("(d+.d+)")                   // course
+            .number("(d+.?d*),")                 // speed
+            .number("(d+.?d*)")                  // course
             .any()
             .compile();
 
@@ -63,9 +66,9 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
             String time = sentence.substring(1, 20);
             String response;
             if (type.equals("T1")) {
-                response = String.format("[%s,S1,1]\r\n", time);
+                response = String.format("[%s,S1,1]", time);
             } else {
-                response = String.format("[%s,S%c]\r\n", time, type.charAt(1));
+                response = String.format("[%s,S%c]", time, type.charAt(1));
             }
             channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
@@ -92,7 +95,11 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_BATTERY, parser.nextDouble());
 
-        position.setValid(true);
+        position.setValid(parser.nextInt() > 0);
+
+        position.set(Position.KEY_RSSI, parser.nextInt());
+        position.set(Position.KEY_SATELLITES, parser.nextInt());
+
         position.setLatitude(parser.nextDouble());
         position.setLongitude(parser.nextDouble());
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));

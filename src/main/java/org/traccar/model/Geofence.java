@@ -18,6 +18,7 @@ package org.traccar.model;
 import java.text.ParseException;
 
 import org.traccar.Context;
+import org.traccar.config.Keys;
 import org.traccar.database.QueryIgnore;
 import org.traccar.geofence.GeofenceCircle;
 import org.traccar.geofence.GeofenceGeometry;
@@ -67,7 +68,7 @@ public class Geofence extends ScheduledModel {
         } else if (area.startsWith("LINESTRING")) {
             final double distance = getDouble("polylineDistance");
             geometry = new GeofencePolyline(area, distance > 0 ? distance
-                    : Context.getConfig().getDouble("geofence.polylineDistance", 25));
+                    : Context.getConfig().getDouble(Keys.GEOFENCE_POLYLINE_DISTANCE));
         } else {
             throw new ParseException("Unknown geometry type", 0);
         }

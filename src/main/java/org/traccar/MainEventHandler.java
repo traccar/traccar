@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.config.Keys;
 import org.traccar.database.StatisticsManager;
 import org.traccar.helper.DateUtil;
 import org.traccar.model.Position;
@@ -37,18 +38,16 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MainEventHandler.class);
 
-    private static final String DEFAULT_LOGGER_ATTRIBUTES = "time,position,speed,course,accuracy,result";
-
     private final Set<String> connectionlessProtocols = new HashSet<>();
     private final Set<String> logAttributes = new LinkedHashSet<>();
 
     public MainEventHandler() {
-        String connectionlessProtocolList = Context.getConfig().getString("status.ignoreOffline");
+        String connectionlessProtocolList = Context.getConfig().getString(Keys.STATUS_IGNORE_OFFLINE);
         if (connectionlessProtocolList != null) {
             connectionlessProtocols.addAll(Arrays.asList(connectionlessProtocolList.split("[, ]")));
         }
         logAttributes.addAll(Arrays.asList(
-                Context.getConfig().getString("logger.attributes", DEFAULT_LOGGER_ATTRIBUTES).split("[, ]")));
+                Context.getConfig().getString(Keys.LOGGER_ATTRIBUTES).split("[, ]")));
     }
 
     @Override

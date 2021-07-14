@@ -8,7 +8,7 @@ public class GnxProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        GnxProtocolDecoder decoder = new GnxProtocolDecoder(null);
+        var decoder = new GnxProtocolDecoder(null);
 
         verifyPosition(decoder, text(
                 "$GNX_MIF,865733022354161,143,0,172642,180316,172642,180316,1,13.034581,N,080.234521,E,0,05396274,ROUTE_2#########,Deo ############,GNX04008,B0*"));

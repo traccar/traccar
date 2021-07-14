@@ -101,7 +101,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             return Position.ALARM_GEOFENCE_ENTER;
         } else if (BitUtil.check(status, 20)) {
             return Position.ALARM_REMOVING;
-        } else if (BitUtil.check(status, 21)) {
+        } else if (BitUtil.check(status, 21) || BitUtil.check(status, 22)) {
             return Position.ALARM_FALL_DOWN;
         }
         return null;
@@ -244,12 +244,13 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
                     getLastLocation(position, null);
 
                     position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(values[2]));
+                    position.set(Position.KEY_STEPS, Integer.parseInt(values[0]));
 
                     return position;
                 }
             }
 
-        } else if (type.startsWith("UD") || type.equals("AL") || type.equals("WT")) {
+        } else if (type.startsWith("UD") || type.startsWith("AL") || type.startsWith("WT")) {
 
             Position position = decodePosition(deviceSession, buf.toString(StandardCharsets.US_ASCII));
 

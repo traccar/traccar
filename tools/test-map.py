@@ -3,6 +3,7 @@
 import urllib
 import urllib2
 import httplib
+import time
 import random
 import json
 
@@ -21,9 +22,10 @@ def add_device(cookie, unique_id):
     request.add_header('Cookie', cookie)
     request.add_header('Content-Type', 'application/json')
     device = { 'name' : unique_id, 'uniqueId' : unique_id }
-    response = urllib2.urlopen(request, json.dumps(device))
-    data = json.load(response)
-    return data['id']
+    try:
+        response = urllib2.urlopen(request, json.dumps(device))
+    except urllib2.HTTPError:
+        pass
 
 def send_message(conn, device_id):
     params = (('id', device_id), ('lat', random.uniform(59, 61)), ('lon', random.uniform(29, 31)))
@@ -36,4 +38,8 @@ conn = httplib.HTTPConnection(server)
 for i in range(devices):
     device_id = "{0:0>6}".format(i)
     add_device(cookie, device_id)
+
+while True:
+    device_id = "{0:0>6}".format(random.randint(0, devices))
     send_message(conn, device_id)
+    time.sleep(1)

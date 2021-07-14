@@ -11,7 +11,7 @@ public class FifotrackProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        FifotrackProtocolEncoder encoder = new FifotrackProtocolEncoder(null);
+        var encoder = new FifotrackProtocolEncoder(null);
 
         Command command = new Command();
         command.setDeviceId(1);

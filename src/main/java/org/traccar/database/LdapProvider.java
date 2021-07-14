@@ -26,6 +26,7 @@ import javax.naming.directory.SearchResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.model.User;
 
 import java.util.Hashtable;
@@ -34,35 +35,39 @@ public class LdapProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LdapProvider.class);
 
-    private String url;
-    private String searchBase;
-    private String idAttribute;
-    private String nameAttribute;
-    private String mailAttribute;
-    private String searchFilter;
-    private String adminFilter;
-    private String serviceUser;
-    private String servicePassword;
+    private final String url;
+    private final String searchBase;
+    private final String idAttribute;
+    private final String nameAttribute;
+    private final String mailAttribute;
+    private final String searchFilter;
+    private final String adminFilter;
+    private final String serviceUser;
+    private final String servicePassword;
 
     public LdapProvider(Config config) {
-        String url = config.getString("ldap.url");
-        if (url != null) {
-            this.url = url;
+        url = config.getString(Keys.LDAP_URL);
+        searchBase = config.getString(Keys.LDAP_BASE);
+        idAttribute = config.getString(Keys.LDAP_ID_ATTRIBUTE);
+        nameAttribute = config.getString(Keys.LDAP_NAME_ATTRIBUTE);
+        mailAttribute = config.getString(Keys.LDAP_MAIN_ATTRIBUTE);
+        if (config.hasKey(Keys.LDAP_SEARCH_FILTER)) {
+            searchFilter = config.getString(Keys.LDAP_SEARCH_FILTER);
         } else {
-            this.url = "ldap://" + config.getString("ldap.server") + ":" + config.getInteger("ldap.port", 389);
+            searchFilter = "(" + idAttribute + "=:login)";
         }
-        this.searchBase = config.getString("ldap.base");
-        this.idAttribute = config.getString("ldap.idAttribute", "uid");
-        this.nameAttribute = config.getString("ldap.nameAttribute", "cn");
-        this.mailAttribute = config.getString("ldap.mailAttribute", "mail");
-        this.searchFilter = config.getString("ldap.searchFilter", "(" + idAttribute + "=:login)");
-        String adminGroup = config.getString("ldap.adminGroup");
-        this.adminFilter = config.getString("ldap.adminFilter");
-        if (this.adminFilter == null && adminGroup != null) {
-            this.adminFilter = "(&(" + idAttribute + "=:login)(memberOf=" + adminGroup + "))";
+        if (config.hasKey(Keys.LDAP_ADMIN_FILTER)) {
+            adminFilter = config.getString(Keys.LDAP_ADMIN_FILTER);
+        } else {
+            String adminGroup = config.getString(Keys.LDAP_ADMIN_GROUP);
+            if (adminGroup != null) {
+                adminFilter = "(&(" + idAttribute + "=:login)(memberOf=" + adminGroup + "))";
+            } else {
+                adminFilter = null;
+            }
         }
-        this.serviceUser = config.getString("ldap.user");
-        this.servicePassword = config.getString("ldap.password");
+        serviceUser = config.getString(Keys.LDAP_USER);
+        servicePassword = config.getString(Keys.LDAP_PASSWORD);
     }
 
     private InitialDirContext auth(String accountName, String password) throws NamingException {

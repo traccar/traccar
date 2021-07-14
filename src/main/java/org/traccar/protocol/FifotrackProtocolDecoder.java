@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -93,6 +94,16 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
             .expression("([^,]+),")              // photo id
             .number("(d+),")                     // offset
             .number("(d+),")                     // size
+            .compile();
+
+    private static final Pattern PATTERN_RESULT = new PatternBuilder()
+            .text("$$")
+            .number("d+,")                       // length
+            .number("(d+),")                     // imei
+            .any()
+            .expression(",([A-Z]+)")             // result
+            .text("*")
+            .number("xx")
             .compile();
 
     private void requestPhoto(Channel channel, SocketAddress socketAddress, String imei, String file) {
@@ -177,7 +188,12 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
         position.setAltitude(parser.nextInt());
 
         position.set(Position.KEY_ODOMETER, parser.nextLong());
-        position.set(Position.KEY_STATUS, parser.nextHexLong());
+
+        long status = parser.nextHexLong();
+        position.set(Position.KEY_RSSI, BitUtil.between(status, 3, 8));
+        position.set(Position.KEY_SATELLITES, BitUtil.from(status, 28));
+        position.set(Position.KEY_STATUS, status);
+
         position.set(Position.KEY_INPUT, parser.nextHexInt());
         position.set(Position.KEY_OUTPUT, parser.nextHexInt());
 
@@ -203,6 +219,27 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private Object decodeResult(
+            Channel channel, SocketAddress remoteAddress, String sentence) {
+
+        Parser parser = new Parser(PATTERN_RESULT, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        position.set(Position.KEY_RESULT, parser.next());
+
+        return position;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -213,7 +250,12 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
         typeIndex = buf.indexOf(typeIndex, buf.writerIndex(), (byte) ',') + 1;
         String type = buf.toString(typeIndex, 3, StandardCharsets.US_ASCII);
 
-        if (type.equals("D05")) {
+        if (type.startsWith("B")) {
+
+            return decodeResult(channel, remoteAddress, buf.toString(StandardCharsets.US_ASCII));
+
+        } else if (type.equals("D05")) {
+
             String sentence = buf.toString(StandardCharsets.US_ASCII);
             Parser parser = new Parser(PATTERN_PHOTO, sentence);
             if (parser.matches()) {
@@ -223,7 +265,9 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
                 photo = Unpooled.buffer(length);
                 requestPhoto(channel, remoteAddress, imei, photoId);
             }
+
         } else if (type.equals("D06")) {
+
             if (photo == null) {
                 return null;
             }
@@ -251,9 +295,11 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
                     return position;
                 }
             }
+
         } else {
-            String sentence = buf.toString(StandardCharsets.US_ASCII);
-            return decodeLocation(channel, remoteAddress, sentence);
+
+            return decodeLocation(channel, remoteAddress, buf.toString(StandardCharsets.US_ASCII));
+
         }
 
         return null;
