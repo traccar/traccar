@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 
 #add-apt-repository ppa:openjdk-r/ppa
-curl -sL https://deb.nodesource.com/setup_14.x | bash -
+apt update
+apt install -y curl git default-jdk zip wget unzip
+curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
 dpkg --add-architecture i386
 apt update
-apt install -y git default-jdk zip wget unzip innoextract wine wine32 makeself nodejs
+apt install -y innoextract wine wine32 makeself nodejs
 
 export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 export PATH=$PATH:$JAVA_HOME/bin
