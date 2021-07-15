@@ -27,11 +27,7 @@ import org.eclipse.jetty.server.ServerConnectionStatistics;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
-import org.eclipse.jetty.server.session.DatabaseAdaptor;
-import org.eclipse.jetty.server.session.JDBCSessionDataStoreFactory;
-import org.eclipse.jetty.server.session.NullSessionCache;
-import org.eclipse.jetty.server.session.SessionCache;
-import org.eclipse.jetty.server.session.SessionHandler;
+import org.eclipse.jetty.server.session.*;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -191,7 +187,7 @@ public class WebServer {
             JDBCSessionDataStoreFactory jdbcSessionDataStoreFactory = new JDBCSessionDataStoreFactory();
             jdbcSessionDataStoreFactory.setDatabaseAdaptor(databaseAdaptor);
             SessionHandler sessionHandler = new SessionHandler();
-            SessionCache sessionCache = new NullSessionCache(sessionHandler);
+            SessionCache sessionCache = new DefaultSessionCache(sessionHandler);
             sessionCache.setSessionDataStore(jdbcSessionDataStoreFactory.getSessionDataStore(sessionHandler));
             sessionHandler.setSessionCache(sessionCache);
         }
