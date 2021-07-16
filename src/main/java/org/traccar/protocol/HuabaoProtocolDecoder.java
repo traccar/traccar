@@ -34,8 +34,10 @@ import org.traccar.model.Position;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TimeZone;
 
 public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
@@ -55,6 +57,8 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_LOCATION_REPORT_BLIND = 0x5502;
     public static final int MSG_LOCATION_BATCH = 0x0704;
     public static final int MSG_OIL_CONTROL = 0XA006;
+    public static final int MSG_TIME_SYNC_REQUEST = 0x0109;
+    public static final int MSG_TIME_SYNC_RESPONSE = 0x8109;
 
     public static final int RESULT_SUCCESS = 0;
 
@@ -192,7 +196,24 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == MSG_LOCATION_BATCH) {
 
+            sendGeneralResponse(channel, remoteAddress, id, type, index);
+
             return decodeLocationBatch(deviceSession, buf);
+
+        } else if (type == MSG_TIME_SYNC_REQUEST) {
+
+            if (channel != null) {
+                Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                ByteBuf response = Unpooled.buffer();
+                response.writeShort(calendar.get(Calendar.YEAR));
+                response.writeByte(calendar.get(Calendar.MONTH) + 1);
+                response.writeByte(calendar.get(Calendar.DAY_OF_MONTH));
+                response.writeByte(calendar.get(Calendar.HOUR_OF_DAY));
+                response.writeByte(calendar.get(Calendar.MINUTE));
+                response.writeByte(calendar.get(Calendar.SECOND));
+                channel.writeAndFlush(new NetworkMessage(
+                        formatMessage(MSG_TERMINAL_REGISTER_RESPONSE, id, false, response), remoteAddress));
+            }
 
         }
 
