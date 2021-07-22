@@ -239,7 +239,7 @@
     <entry key='autotrack.port'>5172</entry>
     <entry key='tek.port'>5173</entry>
     <entry key='wristband.port'>5174</entry>
-    <entry key='applet.port'>5175</entry>
+    <entry key='lacak.port'>5175</entry>
     <entry key='milesmate.port'>5176</entry>
     <entry key='anytrek.port'>5177</entry>
     <entry key='smartsole.port'>5178</entry>
