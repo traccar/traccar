@@ -20,14 +20,16 @@ import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 
+import java.nio.ByteOrder;
+
 public class NavtelecomProtocol extends BaseProtocol {
 
     public NavtelecomProtocol() {
         addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast(new LengthFieldBasedFrameDecoder(256, 2, 1, 2, 0));
-                pipeline.addLast(new Gt02ProtocolDecoder(NavtelecomProtocol.this));
+                pipeline.addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 1024, 12, 2, 2, 0, true));
+                pipeline.addLast(new NavtelecomProtocolDecoder(NavtelecomProtocol.this));
             }
         });
     }
