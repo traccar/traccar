@@ -217,6 +217,7 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         position.set("tagId", ByteBufUtil.hexDump(buf.readSlice(6)));
                         position.setLatitude(buf.readIntLE() * 0.0000001);
                         position.setLongitude(buf.readIntLE() * 0.0000001);
+                        position.setValid(true);
                         hasLocation = true;
                         break;
                     case 0x24:
@@ -233,6 +234,7 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         if (BitUtil.check(beaconFlags, 7)) {
                             position.setLatitude(buf.readIntLE() * 0.0000001);
                             position.setLongitude(buf.readIntLE() * 0.0000001);
+                            position.setValid(true);
                             hasLocation = true;
                         }
                         if (BitUtil.check(beaconFlags, 6)) {
