@@ -8,7 +8,7 @@ public class NyitechProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        NyitechProtocolDecoder decoder = new NyitechProtocolDecoder(null);
+        var decoder = new NyitechProtocolDecoder(null);
 
         verifyPosition(decoder, binary(
                 "4040690030313436383230303238373201201c0c12031a308080801c0c12031a3007d67e7e08aceb841002000000ae08000000000000000000000000001e002900f0ffdd002700f2ffe0002700f2ffe1002400f0ffdf002400f3ffe3008a00ffff01010000a9c70d0a"));

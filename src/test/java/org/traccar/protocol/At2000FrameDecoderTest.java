@@ -8,7 +8,7 @@ public class At2000FrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        At2000FrameDecoder decoder = new At2000FrameDecoder();
+        var decoder = new At2000FrameDecoder();
 
         verifyFrame(
                 binary("01012f00000000000000000000000000003335363137333036343430373439320fad981997ae8e031fe10c0ea7641903ca32c0331df467233d2a9cd886fbeef8"),

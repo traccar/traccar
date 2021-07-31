@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,8 +89,6 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             return Position.ALARM_GEOFENCE_EXIT;
         } else if (BitUtil.check(status, 2)) {
             return Position.ALARM_GEOFENCE_ENTER;
-        } else if (BitUtil.check(status, 3)) {
-            return Position.ALARM_OVERSPEED;
         } else if (BitUtil.check(status, 16)) {
             return Position.ALARM_SOS;
         } else if (BitUtil.check(status, 17)) {
@@ -101,7 +99,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             return Position.ALARM_GEOFENCE_ENTER;
         } else if (BitUtil.check(status, 20)) {
             return Position.ALARM_REMOVING;
-        } else if (BitUtil.check(status, 21)) {
+        } else if (BitUtil.check(status, 21) || BitUtil.check(status, 22)) {
             return Position.ALARM_FALL_DOWN;
         }
         return null;
@@ -244,6 +242,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
                     getLastLocation(position, null);
 
                     position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(values[2]));
+                    position.set(Position.KEY_STEPS, Integer.parseInt(values[0]));
 
                     return position;
                 }
@@ -269,7 +268,8 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
         } else if (type.equalsIgnoreCase("PULSE")
                 || type.equalsIgnoreCase("HEART")
                 || type.equalsIgnoreCase("BLOOD")
-                || type.equalsIgnoreCase("BPHRT")) {
+                || type.equalsIgnoreCase("BPHRT")
+                || type.equalsIgnoreCase("btemp2")) {
 
             if (buf.isReadable()) {
 
@@ -281,13 +281,18 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
                 String[] values = buf.toString(StandardCharsets.US_ASCII).split(",");
                 int valueIndex = 0;
 
-                if (type.equalsIgnoreCase("BPHRT") || type.equalsIgnoreCase("BLOOD")) {
-                    position.set("pressureHigh", values[valueIndex++]);
-                    position.set("pressureLow", values[valueIndex++]);
-                }
-
-                if (valueIndex <= values.length - 1) {
-                    position.set(Position.KEY_HEART_RATE, Integer.parseInt(values[valueIndex]));
+                if (type.equalsIgnoreCase("btemp2")) {
+                    if (Integer.parseInt(values[valueIndex++]) > 0) {
+                        position.set(Position.PREFIX_TEMP + 1, Double.parseDouble(values[valueIndex]));
+                    }
+                } else {
+                    if (type.equalsIgnoreCase("BPHRT") || type.equalsIgnoreCase("BLOOD")) {
+                        position.set("pressureHigh", values[valueIndex++]);
+                        position.set("pressureLow", values[valueIndex++]);
+                    }
+                    if (valueIndex <= values.length - 1) {
+                        position.set(Position.KEY_HEART_RATE, Integer.parseInt(values[valueIndex]));
+                    }
                 }
 
                 return position;

@@ -8,7 +8,7 @@ public class AisProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        AisProtocolDecoder decoder = new AisProtocolDecoder(null);
+        var decoder = new AisProtocolDecoder(null);
 
         verifyPositions(decoder, text(
                 "!AIVDM,2,1,8,A,53UlSb01l>Ei=H4KF218PTpv222222222222221?8h=766gB0<Ck11DTp888,0*14s:MTb827ebc7686b,c:1481688227737*4d\\\r\n" +

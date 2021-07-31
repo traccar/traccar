@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2020 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,11 @@ package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -43,7 +45,7 @@ public class DolphinProtocolDecoder extends BaseProtocolDecoder {
         ByteBuf buf = (ByteBuf) msg;
 
         buf.readUnsignedShort(); // header
-        buf.readUnsignedIntLE(); // index
+        int index = (int) buf.readUnsignedIntLE();
         buf.readUnsignedShort(); // version
         buf.readUnsignedShort(); // flags
         int type = buf.readUnsignedShortLE();
@@ -60,6 +62,24 @@ public class DolphinProtocolDecoder extends BaseProtocolDecoder {
 
             DolphinMessages.DataPackRequest message = DolphinMessages.DataPackRequest.parseFrom(
                     ByteBufUtil.getBytes(buf, buf.readerIndex(), length, false));
+
+            if (channel != null) {
+                byte[] responseData = DolphinMessages.DataPackResponse.newBuilder()
+                        .setResponse(DolphinMessages.DataPackResponseCode.DataPack_OK)
+                        .build()
+                        .toByteArray();
+
+                ByteBuf response = Unpooled.buffer();
+                response.writeShort(0xABAB); // header
+                response.writeIntLE(index);
+                response.writeShort(0); // flags
+                response.writeShortLE(DolphinMessages.MessageType.DataPack_Response.getNumber());
+                response.writeIntLE(responseData.length);
+                response.writeIntLE(0); // reserved
+                response.writeBytes(responseData);
+
+                channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+            }
 
             List<Position> positions = new LinkedList<>();
 

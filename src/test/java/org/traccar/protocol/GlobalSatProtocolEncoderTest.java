@@ -11,7 +11,7 @@ public class GlobalSatProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeAlarmDismiss() {
 
-        GlobalSatProtocolEncoder encoder = new GlobalSatProtocolEncoder(null);
+        var encoder = new GlobalSatProtocolEncoder(null);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -24,7 +24,7 @@ public class GlobalSatProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeOutputControl() {
 
-        GlobalSatProtocolEncoder encoder = new GlobalSatProtocolEncoder(null);
+        var encoder = new GlobalSatProtocolEncoder(null);
 
         Command command = new Command();
         command.setDeviceId(1);

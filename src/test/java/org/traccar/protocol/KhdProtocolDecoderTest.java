@@ -8,7 +8,10 @@ public class KhdProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        KhdProtocolDecoder decoder = new KhdProtocolDecoder(null);
+        var decoder = new KhdProtocolDecoder(null);
+
+        verifyPosition(decoder, binary(
+                "2929800028258b8c10210731035840031534240542120200000337fb000000ffff5a00000a0000000005005d0d"));
 
         verifyPosition(decoder, binary(
                 "292980002825863156210105095059035109370460010100000211ffff000002fc0000001e780b12000034e70d"));

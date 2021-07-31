@@ -8,7 +8,7 @@ public class FreedomProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        FreedomProtocolDecoder decoder = new FreedomProtocolDecoder(null);
+        var decoder = new FreedomProtocolDecoder(null);
 
         verifyPosition(decoder, text(
                 "IMEI,353358011714362,2014/05/22, 20:49:32, N, Lat:4725.9624, E, Lon:01912.5483, Spd:5.05"),

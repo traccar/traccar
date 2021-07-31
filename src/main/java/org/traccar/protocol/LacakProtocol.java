@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,16 +22,16 @@ import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 
-public class AppletProtocol extends BaseProtocol {
+public class LacakProtocol extends BaseProtocol {
 
-    public AppletProtocol() {
+    public LacakProtocol() {
         addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new HttpResponseEncoder());
                 pipeline.addLast(new HttpRequestDecoder());
                 pipeline.addLast(new HttpObjectAggregator(16384));
-                pipeline.addLast(new AppletProtocolDecoder(AppletProtocol.this));
+                pipeline.addLast(new LacakProtocolDecoder(LacakProtocol.this));
             }
         });
     }

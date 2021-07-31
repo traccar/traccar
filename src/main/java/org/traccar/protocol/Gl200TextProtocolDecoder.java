@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .expression("(?:[0-9Ff]{20})?,")     // iccid
             .number("(d{1,2}),")                 // rssi
             .number("d{1,2},")
-            .expression("[01],")                 // external power
+            .expression("[01]{1,2},")            // external power
             .number("([d.]+)?,")                 // odometer or external power
             .number("d*,")                       // backup battery or lightness
             .number("(d+.d+),")                  // battery
@@ -97,6 +97,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("(xx)?,")                    // digital output
             .number("[-+]dddd,")                 // timezone
             .expression("[01],")                 // daylight saving
+            .or()
+            .any()
             .groupEnd()
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
             .number("(dd)(dd)(dd),")             // time (hhmmss)
@@ -237,8 +239,14 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("(d{5}:dd:dd)?,")            // hour meter
             .number("(x+)?,")                    // adc 1
             .number("(x+)?,").optional()         // adc 2
+            .groupBegin()
+            .number("(x+)?,")                    // adc 3
+            .number("(xx),")                     // inputs
+            .number("(xx),")                     // outputs
+            .or()
             .number("(d{1,3})?,")                // battery
             .number("(?:(xx)(xx)(xx))?,")        // device status
+            .groupEnd()
             .expression("(.*)")                  // additional data
             .or()
             .number("d*,,")
@@ -920,15 +928,21 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_POWER, power * 0.001);
         }
 
-        if (parser.hasNext(9)) {
+        if (parser.hasNext(12)) {
 
             position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
             position.set(Position.KEY_HOURS, parseHours(parser.next()));
             position.set(Position.PREFIX_ADC + 1, parser.next());
             position.set(Position.PREFIX_ADC + 2, parser.next());
-            position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
-
-            decodeStatus(position, parser);
+            position.set(Position.PREFIX_ADC + 3, parser.next());
+            if (parser.hasNext(2)) {
+                position.set(Position.KEY_INPUT, parser.nextHexInt());
+                position.set(Position.KEY_OUTPUT, parser.nextHexInt());
+            }
+            if (parser.hasNext(4)) {
+                position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
+                decodeStatus(position, parser);
+            }
 
             int index = 0;
             String[] data = parser.next().split(",");
@@ -1147,10 +1161,6 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         decodeDeviceTime(position, parser);
 
-        if (channel != null && Context.getConfig().getBoolean(Keys.PROTOCOL_ACK.withPrefix(getProtocolName()))) {
-            channel.writeAndFlush(new NetworkMessage("+SACK:" + parser.next() + "$", remoteAddress));
-        }
-
         return position;
     }
 
@@ -1313,6 +1323,16 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                     }
                 }
             }
+        }
+
+        if (channel != null && Context.getConfig().getBoolean(Keys.PROTOCOL_ACK.withPrefix(getProtocolName()))) {
+            String checksum;
+            if (sentence.endsWith("$")) {
+                checksum = sentence.substring(sentence.length() - 1 - 4, sentence.length() - 1);
+            } else {
+                checksum = sentence.substring(sentence.length() - 4);
+            }
+            channel.writeAndFlush(new NetworkMessage("+SACK:" + checksum + "$", remoteAddress));
         }
 
         return result;

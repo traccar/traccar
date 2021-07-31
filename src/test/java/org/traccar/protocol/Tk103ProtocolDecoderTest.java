@@ -9,7 +9,10 @@ public class Tk103ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        Tk103ProtocolDecoder decoder = new Tk103ProtocolDecoder(null);
+        var decoder = new Tk103ProtocolDecoder(null);
+
+        verifyPosition(decoder, text(
+                "(868822040452227,DW3B,150421,A,4154.51607N,45.78950E,0.050,103142,0.000,595.200,7,0)"));
 
         verifyPosition(decoder, text(
                 "(086375304593BR00210119A2220.0160N11335.4073E0000014000309.84001000293L0000015FP23BS27F)"));

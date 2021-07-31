@@ -11,7 +11,7 @@ public class EsealProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        EsealProtocolEncoder encoder = new EsealProtocolEncoder(null);
+        var encoder = new EsealProtocolEncoder(null);
 
         Command command = new Command();
         command.setDeviceId(1);

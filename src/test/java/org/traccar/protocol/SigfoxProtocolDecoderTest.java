@@ -10,7 +10,7 @@ public class SigfoxProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        SigfoxProtocolDecoder decoder = new SigfoxProtocolDecoder(null);
+        var decoder = new SigfoxProtocolDecoder(null);
 
         verifyPosition(decoder, request(HttpMethod.POST, "/",
                 buffer("{ \"device\":\"BFE47E\", \"time\":1590497040, \"data\":\"10297eb01e621122070000be\", \"seqNumber\":8, \"deviceTypeId\":\"5ecb8bfac563d620cc9e6798\", \"ack\":false }")));

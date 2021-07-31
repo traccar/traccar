@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,10 @@ import org.traccar.model.Position;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TimeZone;
 
 public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
@@ -45,6 +47,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
     public static final int MSG_GENERAL_RESPONSE = 0x8001;
     public static final int MSG_GENERAL_RESPONSE_2 = 0x4401;
+    public static final int MSG_HEARTBEAT = 0x0002;
     public static final int MSG_TERMINAL_REGISTER = 0x0100;
     public static final int MSG_TERMINAL_REGISTER_RESPONSE = 0x8100;
     public static final int MSG_TERMINAL_CONTROL = 0x8105;
@@ -54,6 +57,8 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_LOCATION_REPORT_BLIND = 0x5502;
     public static final int MSG_LOCATION_BATCH = 0x0704;
     public static final int MSG_OIL_CONTROL = 0XA006;
+    public static final int MSG_TIME_SYNC_REQUEST = 0x0109;
+    public static final int MSG_TIME_SYNC_RESPONSE = 0x8109;
 
     public static final int RESULT_SUCCESS = 0;
 
@@ -171,7 +176,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                         formatMessage(MSG_TERMINAL_REGISTER_RESPONSE, id, false, response), remoteAddress));
             }
 
-        } else if (type == MSG_TERMINAL_AUTH) {
+        } else if (type == MSG_TERMINAL_AUTH || type == MSG_HEARTBEAT) {
 
             sendGeneralResponse(channel, remoteAddress, id, type, index);
 
@@ -191,7 +196,24 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == MSG_LOCATION_BATCH) {
 
+            sendGeneralResponse(channel, remoteAddress, id, type, index);
+
             return decodeLocationBatch(deviceSession, buf);
+
+        } else if (type == MSG_TIME_SYNC_REQUEST) {
+
+            if (channel != null) {
+                Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                ByteBuf response = Unpooled.buffer();
+                response.writeShort(calendar.get(Calendar.YEAR));
+                response.writeByte(calendar.get(Calendar.MONTH) + 1);
+                response.writeByte(calendar.get(Calendar.DAY_OF_MONTH));
+                response.writeByte(calendar.get(Calendar.HOUR_OF_DAY));
+                response.writeByte(calendar.get(Calendar.MINUTE));
+                response.writeByte(calendar.get(Calendar.SECOND));
+                channel.writeAndFlush(new NetworkMessage(
+                        formatMessage(MSG_TERMINAL_REGISTER_RESPONSE, id, false, response), remoteAddress));
+            }
 
         }
 
@@ -334,24 +356,36 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     position.set("cover", BitUtil.check(deviceStatus, 3));
                     break;
                 case 0xEB:
-                    while (buf.readerIndex() < endIndex) {
-                        int extendedLength = buf.readUnsignedShort();
-                        int extendedType = buf.readUnsignedShort();
-                        switch (extendedType) {
-                            case 0x0001:
-                                position.set("fuel1", buf.readUnsignedShort() * 0.1);
-                                buf.readUnsignedByte(); // unused
-                                break;
-                            case 0x0023:
-                                position.set("fuel2", Double.parseDouble(
-                                        buf.readCharSequence(6, StandardCharsets.US_ASCII).toString()));
-                                break;
-                            case 0x00CE:
-                                position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
-                                break;
-                            default:
-                                buf.skipBytes(extendedLength - 2);
-                                break;
+                    if (buf.getUnsignedShort(buf.readerIndex()) > 200) {
+                        Network network = new Network();
+                        int mcc = buf.readUnsignedShort();
+                        int mnc = buf.readUnsignedByte();
+                        while (buf.readerIndex() < endIndex) {
+                            network.addCellTower(CellTower.from(
+                                    mcc, mnc, buf.readUnsignedShort(), buf.readUnsignedShort(),
+                                    buf.readUnsignedByte()));
+                        }
+                        position.setNetwork(network);
+                    } else {
+                        while (buf.readerIndex() < endIndex) {
+                            int extendedLength = buf.readUnsignedShort();
+                            int extendedType = buf.readUnsignedShort();
+                            switch (extendedType) {
+                                case 0x0001:
+                                    position.set("fuel1", buf.readUnsignedShort() * 0.1);
+                                    buf.readUnsignedByte(); // unused
+                                    break;
+                                case 0x0023:
+                                    position.set("fuel2", Double.parseDouble(
+                                            buf.readCharSequence(6, StandardCharsets.US_ASCII).toString()));
+                                    break;
+                                case 0x00CE:
+                                    position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
+                                    break;
+                                default:
+                                    buf.skipBytes(extendedLength - 2);
+                                    break;
+                            }
                         }
                     }
                     break;

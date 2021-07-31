@@ -4,6 +4,6 @@
 <body>
 Device: $device.name<br>
 Message:  $event.getString("message")<br>
-Time: $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.serverTime, $locale, $timezone)<br>
+Time: $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone)<br>
 </body>
 </html>  

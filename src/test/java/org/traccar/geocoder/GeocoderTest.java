@@ -93,4 +93,12 @@ public class GeocoderTest {
         String address = geocoder.getAddress(28.6129602407977, 77.2294557094574, null);
         assertEquals("India Gate, New Delhi, India", address);
     }
+
+    @Ignore
+    @Test
+    public void testMapbox() {
+        Geocoder geocoder = new MapboxGeocoder("", 0, new AddressFormat("%f"));
+        String address = geocoder.getAddress(40.733, -73.989, null);
+        assertEquals("120 East 13th Street, New York, New York 10003, United States", address);
+    }
 }

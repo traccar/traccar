@@ -387,7 +387,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             position.setNetwork(new Network(CellTower.fromLacCid(parser.nextHexInt(0), parser.nextHexInt(0))));
         }
 
-        if (parser.hasNext(4)) {
+        if (parser.hasNext()) {
             String[] values = parser.next().split(",");
             for (int i = 0; i < values.length; i++) {
                 position.set(Position.PREFIX_IO + (i + 1), values[i].trim());

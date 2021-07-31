@@ -8,7 +8,7 @@ public class NiotProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        NiotProtocolDecoder decoder = new NiotProtocolDecoder(null);
+        var decoder = new NiotProtocolDecoder(null);
 
         verifyPosition(decoder, binary(
                 "585880004c08675430347318522007161451458024b28003f566ee00000328f8000748217ffc500729007a280000000000160001383932353430323130363431363738373136323100050002004e00570d"),

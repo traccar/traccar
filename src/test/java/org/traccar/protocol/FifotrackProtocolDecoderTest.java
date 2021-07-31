@@ -9,7 +9,11 @@ public class FifotrackProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        FifotrackProtocolDecoder decoder = new FifotrackProtocolDecoder(null);
+        var decoder = new FifotrackProtocolDecoder(null);
+
+        verifyAttribute(decoder, buffer(
+                "$$25,863003046473534,1,B03,OK*4D"),
+                Position.KEY_RESULT, "OK");
 
         verifyPosition(decoder, buffer(
                 "$$118,863003046473534,258,A01,,201007231735,V,3.067783,101.672858,0,176,96,189890,0,A0,03,0,502|19|5C1|93349F,196|4E0|6C,1,*13"));

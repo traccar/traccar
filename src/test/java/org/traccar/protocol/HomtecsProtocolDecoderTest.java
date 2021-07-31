@@ -8,7 +8,7 @@ public class HomtecsProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        HomtecsProtocolDecoder decoder = new HomtecsProtocolDecoder(null);
+        var decoder = new HomtecsProtocolDecoder(null);
 
         verifyNull(decoder, text(
                 "MDS0001_R6d1821f7,170323,143601.00,04,,,,,,,,,"));

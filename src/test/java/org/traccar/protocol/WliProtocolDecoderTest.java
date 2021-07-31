@@ -8,7 +8,7 @@ public class WliProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        WliProtocolDecoder decoder = new WliProtocolDecoder(null);
+        var decoder = new WliProtocolDecoder(null);
 
         verifyNull(decoder, binary(
                 "0232776c693a30343930333332303332343103"));

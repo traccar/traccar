@@ -9,7 +9,19 @@ public class Tlt2hProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        Tlt2hProtocolDecoder decoder = new Tlt2hProtocolDecoder(null);
+        var decoder = new Tlt2hProtocolDecoder(null);
+
+        verifyNull(decoder, text(
+                "#860517049471362#MT700#0000#AUTO#1\r\n",
+                "#36$GPRMC,,V,,,,,,,,,,A*5C\r\n"));
+
+        verifyPositions(decoder, text(
+                "#867198059727390#MT700#0000#AUTO#1\r\n",
+                "#38$GPRMC,105721.00,A,2238.3071,N,11401.7575,E,,96.70,250321,,,A*74\r\n"));
+
+        verifyPositions(decoder, false, text(
+                "#867198059727390#MT700#0000#AUTO#1\r\n",
+                "#40$WIFI,123532.00,A,-62,D8325A0ABADD,-64,EC172F8965BC,-64,7405A5D457D4,260321*07\r\n"));
 
         verifyPositions(decoder, text(
                 "#860425040088567#MT600+#0000#0#1#129#40#0#AUTOLOW#1\r\n",

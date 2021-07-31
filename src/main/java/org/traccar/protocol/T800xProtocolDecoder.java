@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -191,56 +191,68 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_IGNITION, buf.readUnsignedByte() > 0);
 
-        switch (buf.readUnsignedShort()) {
-            case 0x01:
-                position.set("tagId", ByteBufUtil.hexDump(buf.readSlice(6)));
-                position.set("tagBattery", buf.readUnsignedByte() * 0.01 + 1.22);
-                position.set("tirePressure", buf.readUnsignedByte() * 1.527 * 2);
-                position.set("tagTemp", buf.readUnsignedByte() - 55);
-                position.set("tagStatus", buf.readUnsignedByte());
-                break;
-            case 0x02:
-                position.set("tagId", ByteBufUtil.hexDump(buf.readSlice(6)));
-                position.set("tagBattery", BcdUtil.readInteger(buf, 2) * 0.1);
-                switch (buf.readUnsignedByte()) {
-                    case 0:
-                        position.set(Position.KEY_ALARM, Position.ALARM_SOS);
-                        break;
-                    case 1:
+        int i = 1;
+        while (buf.isReadable()) {
+            switch (buf.readUnsignedShort()) {
+                case 0x01:
+                    position.set("tag" + i + "Id", ByteBufUtil.hexDump(buf.readSlice(6)));
+                    position.set("tag" + i + "Battery", buf.readUnsignedByte() * 0.01 + 1.22);
+                    position.set("tag" + i + "TirePressure", buf.readUnsignedByte() * 1.527 * 2);
+                    position.set("tag" + i + "TireTemp", buf.readUnsignedByte() - 55);
+                    position.set("tag" + i + "TireStatus", buf.readUnsignedByte());
+                    break;
+                case 0x02:
+                    position.set("tag" + i + "Id", ByteBufUtil.hexDump(buf.readSlice(6)));
+                    position.set("tag" + i + "Battery", BcdUtil.readInteger(buf, 2) * 0.1);
+                    switch (buf.readUnsignedByte()) {
+                        case 0:
+                            position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+                            break;
+                        case 1:
+                            position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                            break;
+                        default:
+                            break;
+                    }
+                    buf.readUnsignedByte(); // status
+                    buf.skipBytes(16); // location
+                    break;
+                case 0x03:
+                    position.set(Position.KEY_DRIVER_UNIQUE_ID, ByteBufUtil.hexDump(buf.readSlice(6)));
+                    position.set("tag" + i + "Battery", BcdUtil.readInteger(buf, 2) * 0.1);
+                    if (buf.readUnsignedByte() == 1) {
                         position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            case 0x03:
-                position.set(Position.KEY_DRIVER_UNIQUE_ID, ByteBufUtil.hexDump(buf.readSlice(6)));
-                position.set("tagBattery", BcdUtil.readInteger(buf, 2) * 0.1);
-                if (buf.readUnsignedByte() == 1) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
-                }
-                break;
-            case 0x04:
-                position.set("tagId", ByteBufUtil.hexDump(buf.readSlice(6)));
-                position.set("tagBattery", buf.readUnsignedByte() * 0.01 + 2);
-                buf.readUnsignedByte(); // battery level
-                position.set(Position.KEY_DEVICE_TEMP, buf.readUnsignedShort() * 0.01);
-                position.set("humidity", buf.readUnsignedShort() * 0.01);
-                position.set("lightSensor", BitUtil.to(buf.readUnsignedByte(), 15));
-                break;
-            case 0x05:
-                position.set("tagId", ByteBufUtil.hexDump(buf.readSlice(6)));
-                position.set("tagBattery", buf.readUnsignedByte() * 0.01 + 2);
-                position.set(Position.KEY_DEVICE_TEMP, buf.readUnsignedShort() * 0.01);
-                position.set(Position.KEY_DOOR, buf.readUnsignedByte() > 0);
-                break;
-            case 0x06:
-                position.set("tagId", ByteBufUtil.hexDump(buf.readSlice(6)));
-                position.set("tagBattery", buf.readUnsignedByte() * 0.01 + 2);
-                position.set(Position.KEY_OUTPUT, buf.readUnsignedByte() > 0);
-                break;
-            default:
-                break;
+                    }
+                    buf.readUnsignedByte(); // status
+                    buf.skipBytes(16); // location
+                    break;
+                case 0x04:
+                    position.set("tag" + i + "Id", ByteBufUtil.hexDump(buf.readSlice(6)));
+                    position.set("tag" + i + "Battery", buf.readUnsignedByte() * 0.01 + 2);
+                    buf.readUnsignedByte(); // battery level
+                    position.set("tag" + i + "Temp", buf.readUnsignedShort() * 0.01);
+                    position.set("tag" + i + "Humidity", buf.readUnsignedShort() * 0.01);
+                    position.set("tag" + i + "LightSensor", buf.readUnsignedShort());
+                    position.set("tag" + i + "Rssi", buf.readUnsignedByte() - 128);
+                    break;
+                case 0x05:
+                    position.set("tag" + i + "Id", ByteBufUtil.hexDump(buf.readSlice(6)));
+                    position.set("tag" + i + "Battery", buf.readUnsignedByte() * 0.01 + 2);
+                    buf.readUnsignedByte(); // battery level
+                    position.set("tag" + i + "Temp", buf.readUnsignedShort() * 0.01);
+                    position.set("tag" + i + "Door", buf.readUnsignedByte() > 0);
+                    position.set("tag" + i + "Rssi", buf.readUnsignedByte() - 128);
+                    break;
+                case 0x06:
+                    position.set("tag" + i + "Id", ByteBufUtil.hexDump(buf.readSlice(6)));
+                    position.set("tag" + i + "Battery", buf.readUnsignedByte() * 0.01 + 2);
+                    position.set("tag" + i + "Output", buf.readUnsignedByte() > 0);
+                    position.set("tag" + i + "Rssi", buf.readUnsignedByte() - 128);
+                    break;
+                default:
+                    break;
+            }
+            i += 1;
         }
 
         sendResponse(channel, header, type, index, imei, 0);

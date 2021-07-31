@@ -8,7 +8,7 @@ public class MiniFinderProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        MiniFinderProtocolDecoder decoder = new MiniFinderProtocolDecoder(null);
+        var decoder = new MiniFinderProtocolDecoder(null);
 
         verifyNull(decoder, text(
                 "!1,867273023933661,V07S.5701.1621,100"));

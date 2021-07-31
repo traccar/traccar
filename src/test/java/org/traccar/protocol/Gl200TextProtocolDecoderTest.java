@@ -9,7 +9,13 @@ public class Gl200TextProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        Gl200TextProtocolDecoder decoder = new Gl200TextProtocolDecoder(null);
+        var decoder = new Gl200TextProtocolDecoder(null);
+
+        verifyAttributes(decoder, buffer(
+                "+RESP:GTINF,DC0103,865284049247079,gv600mg,21,89883070000007211665,22,0,11,12913,12917,4.26,0,1,,,20210216154607,1,79,,01,00,,,20210216104606,1EBE$"));
+
+        verifyPositions(decoder, buffer(
+                "+RESP:GTERI,040A00,862894022579562,gv200,00000002,,10,1,1,96.1,180,749.7,39.222692,24.165463,20210225065756,0420,0004,759C,3360,00,15529.8,,,2789,,01,00,2,2,282BD47A0B000063,1,FFE2,281FDD5D0B000057,1,FFC8,20210225065800,6974$"));
 
         verifyAttribute(decoder, buffer(
                 "+RESP:GTERI,DE0115,865284042104863,gl500m,00000100,0,0,1,2,0.0,0,36.9,-1.844589,52.177779,20201006125701,0234,0015,0135,34A1,19,0,,79,1,,0,20201006125723,184D$"),

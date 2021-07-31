@@ -8,7 +8,7 @@ public class AppelloProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        AppelloProtocolDecoder decoder = new AppelloProtocolDecoder(null);
+        var decoder = new AppelloProtocolDecoder(null);
 
         verifyAttributes(decoder, text(
                 "FOLLOWIT,867273024233699,UTCTIME,0.000000,0.000000,0,0,0,0,L,262:3:c703:4bf8:64:255|262:3:c703:9a18:45|262:3:c703:e838:33|262:3:c703:7190:20|262:3:c704:d896:17|,02,44,,31,,4.20,0,0,86/44/24,,,,26,02264DFF6E16:69|4C09D408554E:79|4C09D408554F:79|E0885DE705E5:81|E2885DE705E7:81|246511122CCC:83|,34925"));

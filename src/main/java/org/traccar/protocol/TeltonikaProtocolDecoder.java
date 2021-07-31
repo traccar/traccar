@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -312,6 +312,11 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                         break;
                 }
                 break;
+            case 389:
+                if (BitUtil.between(readValue(buf, length, false), 4, 8) == 1) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+                }
+                break;
             default:
                 position.set(Position.PREFIX_IO + id, readValue(buf, length, false));
                 break;
@@ -537,7 +542,11 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 int id = buf.readUnsignedShort();
                 int length = buf.readUnsignedShort();
                 if (id == 256) {
-                    position.set(Position.KEY_VIN, buf.readSlice(length).toString(StandardCharsets.US_ASCII));
+                    position.set(Position.KEY_VIN,
+                            buf.readSlice(length).toString(StandardCharsets.US_ASCII));
+                } else if (id == 281) {
+                    position.set(Position.KEY_DTCS,
+                            buf.readSlice(length).toString(StandardCharsets.US_ASCII).replace(',', ' '));
                 } else if (id == 385) {
                     ByteBuf data = buf.readSlice(length);
                     data.readUnsignedByte(); // data part
@@ -617,19 +626,17 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (channel != null && codec != CODEC_12 && codec != CODEC_13) {
+            ByteBuf response = Unpooled.buffer();
             if (connectionless) {
-                ByteBuf response = Unpooled.buffer();
                 response.writeShort(5);
                 response.writeShort(0);
                 response.writeByte(0x01);
                 response.writeByte(locationPacketId);
                 response.writeByte(count);
-                channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
             } else {
-                ByteBuf response = Unpooled.buffer();
                 response.writeInt(count);
-                channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
             }
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
 
         return positions.isEmpty() ? null : positions;

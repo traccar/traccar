@@ -8,7 +8,7 @@ public class T57FrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        T57FrameDecoder decoder = new T57FrameDecoder();
+        var decoder = new T57FrameDecoder();
 
         verifyFrame(
                 binary("2a5435372346312354353731313137303031233330313131372330303038343323323233342e31333033234e2330383832362e313731342345232b302e3234322c2b302e3130392c2d302e37383923302e30303023362e323030303023413223342e3223"),

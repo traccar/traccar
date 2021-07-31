@@ -60,6 +60,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_GPS_LBS_1 = 0x12;
     public static final int MSG_GPS_LBS_2 = 0x22;
     public static final int MSG_GPS_LBS_3 = 0x37;
+    public static final int MSG_GPS_LBS_4 = 0x2D;
     public static final int MSG_STATUS = 0x13;
     public static final int MSG_SATELLITE = 0x14;
     public static final int MSG_STRING = 0x15;
@@ -67,7 +68,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_WIFI = 0x17;
     public static final int MSG_GPS_LBS_STATUS_2 = 0x26;
     public static final int MSG_GPS_LBS_STATUS_3 = 0x27;
-    public static final int MSG_LBS_MULTIPLE = 0x28;
+    public static final int MSG_LBS_MULTIPLE_1 = 0x28;
+    public static final int MSG_LBS_MULTIPLE_2 = 0x2E;
     public static final int MSG_LBS_WIFI = 0x2C;
     public static final int MSG_LBS_EXTEND = 0x18;
     public static final int MSG_LBS_STATUS = 0x19;
@@ -117,6 +119,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             case MSG_GPS_LBS_1:
             case MSG_GPS_LBS_2:
             case MSG_GPS_LBS_3:
+            case MSG_GPS_LBS_4:
             case MSG_GPS_LBS_STATUS_1:
             case MSG_GPS_LBS_STATUS_2:
             case MSG_GPS_LBS_STATUS_3:
@@ -138,6 +141,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             case MSG_GPS_LBS_1:
             case MSG_GPS_LBS_2:
             case MSG_GPS_LBS_3:
+            case MSG_GPS_LBS_4:
             case MSG_GPS_LBS_STATUS_1:
             case MSG_GPS_LBS_STATUS_2:
             case MSG_GPS_LBS_STATUS_3:
@@ -170,7 +174,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             case MSG_GPS_PHONE:
             case MSG_HEARTBEAT:
             case MSG_GPS_LBS_STATUS_3:
-            case MSG_LBS_MULTIPLE:
+            case MSG_LBS_MULTIPLE_1:
+            case MSG_LBS_MULTIPLE_2:
             case MSG_LBS_2:
             case MSG_FENCE_MULTI:
                 return true;
@@ -295,7 +300,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         return true;
     }
 
-    private boolean decodeStatus(Position position, ByteBuf buf) {
+    private boolean decodeStatus(Position position, ByteBuf buf, boolean batteryLevel) {
 
         int status = buf.readUnsignedByte();
 
@@ -324,7 +329,11 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 break;
         }
 
-        position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte() * 100 / 6);
+        if (batteryLevel) {
+            position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte() * 100 / 6);
+        } else {
+            position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
+        }
         position.set(Position.KEY_RSSI, buf.readUnsignedByte());
         position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
 
@@ -676,8 +685,12 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        if (type == MSG_LBS_MULTIPLE || type == MSG_LBS_EXTEND || type == MSG_LBS_WIFI
-                || type == MSG_LBS_2 || type == MSG_WIFI_3) {
+        if (type == MSG_LBS_STATUS && dataLength >= 18) {
+
+            return null; // space10x multi-lbs message
+
+        } else if (type == MSG_LBS_MULTIPLE_1 || type == MSG_LBS_MULTIPLE_2 || type == MSG_LBS_EXTEND
+                || type == MSG_LBS_WIFI || type == MSG_LBS_2 || type == MSG_WIFI_3) {
 
             boolean longFormat = type == MSG_LBS_2 || type == MSG_WIFI_3;
 
@@ -701,7 +714,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             buf.readUnsignedByte(); // time leads
 
-            if (type != MSG_LBS_MULTIPLE && type != MSG_LBS_2) {
+            if (type != MSG_LBS_MULTIPLE_1 && type != MSG_LBS_MULTIPLE_2 && type != MSG_LBS_2) {
                 int wifiCount = buf.readUnsignedByte();
                 for (int i = 0; i < wifiCount; i++) {
                     String mac = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");
@@ -838,7 +851,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedShort(); // satellites
         buf.readUnsignedByte(); // alarm
         buf.readUnsignedByte(); // language
-        buf.readUnsignedByte(); // battery
+
+        position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+
         buf.readUnsignedByte(); // working mode
         buf.readUnsignedShort(); // working voltage
         buf.readUnsignedByte(); // reserved
@@ -864,7 +879,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (hasStatus(type)) {
-            decodeStatus(position, buf);
+            decodeStatus(position, buf, true);
         }
 
         if (type == MSG_GPS_LBS_1 && buf.readableBytes() > 75 + 6) {
@@ -873,6 +888,17 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedByte(); // alarm
             buf.readUnsignedByte(); // swiped
             position.set("driverLicense", data.trim());
+        }
+
+        if (type == MSG_GPS_LBS_1 && buf.readableBytes() == 18) {
+            decodeStatus(position, buf, false);
+            position.set("oil", buf.readUnsignedShort());
+            int temperature = buf.readUnsignedByte();
+            if (BitUtil.check(temperature, 7)) {
+                temperature = -BitUtil.to(temperature, 7);
+            }
+            position.set(Position.PREFIX_TEMP + 1, temperature);
+            position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 10);
         }
 
         if (type == MSG_GPS_LBS_1 && buf.readableBytes() == 2 + 6) {
@@ -895,7 +921,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        if ((type == MSG_GPS_LBS_2 || type == MSG_GPS_LBS_3) && buf.readableBytes() >= 3 + 6) {
+        if ((type == MSG_GPS_LBS_2 || type == MSG_GPS_LBS_3 || type == MSG_GPS_LBS_4) && buf.readableBytes() >= 3 + 6) {
             position.set(Position.KEY_IGNITION, buf.readUnsignedByte() > 0);
             position.set(Position.KEY_EVENT, buf.readUnsignedByte()); // reason
             position.set(Position.KEY_ARCHIVE, buf.readUnsignedByte() > 0);

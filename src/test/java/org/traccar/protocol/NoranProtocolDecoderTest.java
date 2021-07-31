@@ -8,7 +8,7 @@ public class NoranProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        NoranProtocolDecoder decoder = new NoranProtocolDecoder(null);
+        var decoder = new NoranProtocolDecoder(null);
 
         verifyNull(decoder, binary(
                 "0d0a2a4b57000d000080010d0a"));

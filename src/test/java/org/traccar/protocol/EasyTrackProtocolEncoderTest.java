@@ -11,7 +11,7 @@ public class EasyTrackProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeEngineStop() {
 
-        EasyTrackProtocolEncoder encoder = new EasyTrackProtocolEncoder(null);
+        var encoder = new EasyTrackProtocolEncoder(null);
 
         Command command = new Command();
         command.setDeviceId(1);

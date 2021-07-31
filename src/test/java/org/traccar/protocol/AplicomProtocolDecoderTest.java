@@ -8,7 +8,7 @@ public class AplicomProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        AplicomProtocolDecoder decoder = new AplicomProtocolDecoder(null);
+        var decoder = new AplicomProtocolDecoder(null);
 
         verifyNull(decoder, binary(
                 "434946010A0100075253F85F0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000FEEA0000FEE90000F0030000F0040000FEF10000FEF20000FEF50000FEFC0000FEC10000FEE500"));

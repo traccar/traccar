@@ -57,7 +57,7 @@
     </entry>
 
     <entry key='database.selectEvents'>
-        SELECT * FROM tc_events WHERE deviceId = :deviceId AND serverTime BETWEEN :from AND :to ORDER BY serverTime
+        SELECT * FROM tc_events WHERE deviceId = :deviceId AND eventTime BETWEEN :from AND :to ORDER BY eventTime
     </entry>
 
     <entry key='database.selectStatistics'>
@@ -239,7 +239,7 @@
     <entry key='autotrack.port'>5172</entry>
     <entry key='tek.port'>5173</entry>
     <entry key='wristband.port'>5174</entry>
-    <entry key='applet.port'>5175</entry>
+    <entry key='lacak.port'>5175</entry>
     <entry key='milesmate.port'>5176</entry>
     <entry key='anytrek.port'>5177</entry>
     <entry key='smartsole.port'>5178</entry>
@@ -285,5 +285,14 @@
     <entry key='iotm.port'>5218</entry>
     <entry key='dolphin.port'>5219</entry>
     <entry key='ennfu.port'>5220</entry>
+    <entry key='navtelecom.port'>5221</entry>
+    <entry key='startek.port'>5222</entry>
+    <entry key='gs100.port'>5223</entry>
+    <entry key='mavlink2.port'>5224</entry>
+    <entry key='uux.port'>5225</entry>
+    <entry key='r12w.port'>5226</entry>
+    <entry key='flexiblereport.port'>5227</entry>
+    <entry key='thinkpower.port'>5228</entry>
+    <entry key='stb.port'>5229</entry>
 
 </properties>

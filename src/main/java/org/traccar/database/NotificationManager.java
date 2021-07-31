@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2021 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,7 +41,7 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificationManager.class);
 
-    private boolean geocodeOnRequest;
+    private final boolean geocodeOnRequest;
 
     public NotificationManager(DataManager dataManager) {
         super(dataManager, Notification.class);
@@ -70,11 +70,6 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
             LOGGER.warn("Event save error", error);
         }
 
-        if (position != null && geocodeOnRequest && Context.getGeocoder() != null && position.getAddress() == null) {
-            position.setAddress(Context.getGeocoder()
-                    .getAddress(position.getLatitude(), position.getLongitude(), null));
-        }
-
         long deviceId = event.getDeviceId();
         Set<Long> users = Context.getPermissionsManager().getDeviceUsers(deviceId);
         Set<Long> usersToForward = null;
@@ -90,7 +85,7 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
                     usersToForward.add(userId);
                 }
                 final Set<String> notificators = new HashSet<>();
-                for (long notificationId : getEffectiveNotifications(userId, deviceId, event.getServerTime())) {
+                for (long notificationId : getEffectiveNotifications(userId, deviceId, event.getEventTime())) {
                     Notification notification = getById(notificationId);
                     if (getById(notificationId).getType().equals(event.getType())) {
                         boolean filter = false;
@@ -108,6 +103,13 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
                         }
                     }
                 }
+
+                if (position != null && position.getAddress() == null
+                        && geocodeOnRequest && Context.getGeocoder() != null) {
+                    position.setAddress(Context.getGeocoder()
+                            .getAddress(position.getLatitude(), position.getLongitude(), null));
+                }
+
                 for (String notificator : notificators) {
                     Context.getNotificatorManager().getNotificator(notificator).sendAsync(userId, event, position);
                 }

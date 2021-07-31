@@ -8,7 +8,7 @@ public class UlbotechProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        UlbotechProtocolDecoder decoder = new UlbotechProtocolDecoder(null);
+        var decoder = new UlbotechProtocolDecoder(null);
 
         verifyPosition(decoder, binary(
                 "f801010353323083177450a703f6f0010efe55a31a0923d01400050070007003040a42000004040070cca00506039b1876220f060800000000000000000725310553410c0c9e310d05310f4641100440311119411f00476101810f8000310487411f00480804203a14c009033320159310f8"));
