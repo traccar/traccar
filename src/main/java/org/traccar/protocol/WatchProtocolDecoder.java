@@ -252,7 +252,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
             Position position = decodePosition(deviceSession, buf.toString(StandardCharsets.US_ASCII));
 
-            if (type.equals("AL")) {
+            if (type.startsWith("AL")) {
                 if (position != null) {
                     position.set(Position.KEY_ALARM, Position.ALARM_SOS);
                 }
