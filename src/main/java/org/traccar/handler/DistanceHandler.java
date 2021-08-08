@@ -1,6 +1,6 @@
 /*
  * Copyright 2015 Amila Silva
- * Copyright 2016 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,11 +61,11 @@ public class DistanceHandler extends BaseDataHandler {
                         last.getLatitude(), last.getLongitude());
                 distance = BigDecimal.valueOf(distance).setScale(2, RoundingMode.HALF_EVEN).doubleValue();
             }
-            if (filter && last.getValid() && last.getLatitude() != 0 && last.getLongitude() != 0) {
+            if (filter && last.getLatitude() != 0 && last.getLongitude() != 0) {
                 boolean satisfiesMin = coordinatesMinError == 0 || distance > coordinatesMinError;
-                boolean satisfiesMax = coordinatesMaxError == 0
-                        || distance < coordinatesMaxError || position.getValid();
+                boolean satisfiesMax = coordinatesMaxError == 0 || distance < coordinatesMaxError;
                 if (!satisfiesMin || !satisfiesMax) {
+                    position.setValid(last.getValid());
                     position.setLatitude(last.getLatitude());
                     position.setLongitude(last.getLongitude());
                     distance = 0;
