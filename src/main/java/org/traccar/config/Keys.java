@@ -212,10 +212,24 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
-     * Relevant only for geofence speed limits. Use lowest speed limits from all geofences.
+     * Relevant only for geofence speed limits. Use the lowest speed limit from all geofences.
      */
     public static final ConfigKey<Boolean> EVENT_OVERSPEED_PREFER_LOWEST = new ConfigKey<>(
             "event.overspeed.preferLowest",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Driver behavior acceleration threshold. Value is in meter per second squared.
+     */
+    public static final ConfigKey<Double> EVENT_BEHAVIOR_ACCELERATION_THRESHOLD = new ConfigKey<>(
+            "event.behavior.accelerationThreshold",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Driver behavior braking threshold. Value is in meter per second squared.
+     */
+    public static final ConfigKey<Double> EVENT_BEHAVIOR_BRAKING_THRESHOLD = new ConfigKey<>(
+            "event.behavior.brakingThreshold",
             Collections.singletonList(KeyType.GLOBAL));
 
     /**

@@ -65,6 +65,7 @@ import org.traccar.handler.RemoteAddressHandler;
 import org.traccar.handler.SpeedLimitHandler;
 import org.traccar.handler.TimeHandler;
 import org.traccar.handler.events.AlertEventHandler;
+import org.traccar.handler.events.BehaviorEventHandler;
 import org.traccar.handler.events.CommandResultEventHandler;
 import org.traccar.handler.events.DriverEventHandler;
 import org.traccar.handler.events.FuelDropEventHandler;
@@ -365,6 +366,12 @@ public class MainModule extends AbstractModule {
     public static OverspeedEventHandler provideOverspeedEventHandler(
             Config config, DeviceManager deviceManager, GeofenceManager geofenceManager) {
         return new OverspeedEventHandler(config, deviceManager, geofenceManager);
+    }
+
+    @Singleton
+    @Provides
+    public static BehaviorEventHandler provideBehaviorEventHandler(Config config, IdentityManager identityManager) {
+        return new BehaviorEventHandler(config, identityManager);
     }
 
     @Singleton

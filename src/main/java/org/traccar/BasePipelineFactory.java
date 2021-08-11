@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.traccar.handler.SpeedLimitHandler;
 import org.traccar.handler.StandardLoggingHandler;
 import org.traccar.handler.TimeHandler;
 import org.traccar.handler.events.AlertEventHandler;
+import org.traccar.handler.events.BehaviorEventHandler;
 import org.traccar.handler.events.CommandResultEventHandler;
 import org.traccar.handler.events.DriverEventHandler;
 import org.traccar.handler.events.FuelDropEventHandler;
@@ -132,6 +133,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
                 DefaultDataHandler.class,
                 CommandResultEventHandler.class,
                 OverspeedEventHandler.class,
+                BehaviorEventHandler.class,
                 FuelDropEventHandler.class,
                 MotionEventHandler.class,
                 GeofenceEventHandler.class,
