@@ -138,6 +138,21 @@ public class PacificTrackProtocolDecoder extends BaseProtocolDecoder {
                                 case 0b01011:
                                     position.set("barometer", buf.readUnsignedByte() * 0.5);
                                     break;
+                                case 0b01100:
+                                    position.set("intakeManifoldTemp", buf.readUnsignedByte() - 40);
+                                    break;
+                                case 0b01101:
+                                    position.set("fuelTankTemp", buf.readUnsignedByte() - 40);
+                                    break;
+                                case 0b01110:
+                                    position.set("intercoolerTemp", buf.readUnsignedByte() - 40);
+                                    break;
+                                case 0b01111:
+                                    position.set("turboOilTemp", buf.readUnsignedByte() - 40);
+                                    break;
+                                case 0b10000:
+                                    position.set("transOilTemp", buf.readUnsignedByte() - 40);
+                                    break;
                                 default:
                                     buf.readUnsignedByte();
                                     break;
