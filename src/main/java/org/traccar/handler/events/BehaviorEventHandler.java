@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ public class BehaviorEventHandler extends BaseEventHandler {
     protected Map<Event, Position> analyzePosition(Position position) {
 
         Position lastPosition = identityManager.getLastPosition(position.getDeviceId());
-        if (lastPosition != null) {
+        if (lastPosition != null && position.getFixTime().equals(lastPosition.getFixTime())) {
             double acceleration = UnitsConverter.mpsFromKnots(position.getSpeed() - lastPosition.getSpeed()) * 1000
                     / (position.getFixTime().getTime() - lastPosition.getFixTime().getTime());
             if (accelerationThreshold != 0 && acceleration >= accelerationThreshold) {
