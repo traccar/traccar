@@ -22,6 +22,6 @@ export PATH=$PATH:~/bin/Sencha/Cmd/
 
 cd traccar/setup
 wget http://files.jrsoftware.org/is/5/isetup-5.5.6.exe
-wget https://github.com/ojdkbuild/ojdkbuild/releases/download/java-11-openjdk-debug-11.0.9.11-1/java-11-openjdk-debug-11.0.9.11-1.windows.ojdkbuild.x86_64.zip
-wget https://github.com/ojdkbuild/contrib_jdk11u-ci/releases/download/jdk-11.0.8%2B10/jdk-11.0.8-ojdkbuild-linux-x64.zip
-wget https://github.com/ojdkbuild/contrib_jdk11u-arm32-ci/releases/download/jdk-11.0.8%2B10/jdk-11.0.8-ojdkbuild-linux-armhf.zip
+wget https://github.com/ojdkbuild/ojdkbuild/releases/download/java-11-openjdk-debug-11.0.12.7-1/java-11-openjdk-debug-11.0.12.7-1.windows.ojdkbuild.x86_64.zip
+wget https://github.com/ojdkbuild/contrib_jdk11u-ci/releases/download/jdk-11.0.12%2B7/jdk-11.0.12-ojdkbuild-linux-x64.zip
+wget https://github.com/ojdkbuild/contrib_jdk11u-arm32-ci/releases/download/jdk-11.0.12%2B7/jdk-11.0.12-ojdkbuild-linux-armhf.zip
