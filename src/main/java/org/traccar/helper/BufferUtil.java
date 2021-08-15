@@ -41,7 +41,7 @@ public final class BufferUtil {
         wrappedHaystack.readerIndex(startIndex - haystack.readerIndex());
         wrappedHaystack.writerIndex(endIndex - haystack.readerIndex());
         int result = indexOf(needle, wrappedHaystack);
-        return result < 0 ? result : haystack.readerIndex() + result;
+        return result < 0 ? result : haystack.readerIndex() + startIndex + result;
     }
 
 }
