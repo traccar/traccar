@@ -13,9 +13,6 @@ git clone --recurse-submodules https://github.com/traccar/traccar.git
 (cd traccar/traccar-web && git checkout master)
 (cd traccar && ./gradlew build)
 
-wget http://cdn.sencha.com/ext/gpl/ext-6.2.0-gpl.zip
-unzip ext-*-gpl.zip ; rm ext-*-gpl.zip
-
 wget http://cdn.sencha.com/cmd/7.1.0.15/no-jre/SenchaCmd-7.1.0.15-linux-i386.sh.zip
 unzip SenchaCmd-*.zip ; rm SenchaCmd-*.zip
 ./SenchaCmd-*.sh -q ; rm SenchaCmd-*
