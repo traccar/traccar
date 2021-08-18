@@ -105,12 +105,6 @@ public class WebServer {
         HandlerList handlers = new HandlerList();
         initClientProxy(config, handlers);
         handlers.addHandler(servletHandler);
-        GzipHandler gzipHandler = new GzipHandler();
-        LOGGER.info(String.join(",", gzipHandler.getIncludedMimeTypes()));
-        gzipHandler.addIncludedMimeTypes("application/javascript");
-        LOGGER.warn("adding mime types");
-        LOGGER.info(String.join(",", gzipHandler.getIncludedMimeTypes()));
-        handlers.addHandler(gzipHandler);
         server.setHandler(handlers);
 
         if (config.getBoolean(Keys.WEB_REQUEST_LOG_ENABLE)) {
