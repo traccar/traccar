@@ -184,7 +184,7 @@ public class WebServer {
             JDBCSessionDataStoreFactory jdbcSessionDataStoreFactory = new JDBCSessionDataStoreFactory();
             jdbcSessionDataStoreFactory.setDatabaseAdaptor(databaseAdaptor);
             SessionHandler sessionHandler = servletHandler.getSessionHandler();
-            SessionCache sessionCache = new NullSessionCache(sessionHandler);
+            SessionCache sessionCache = new DefaultSessionCache(sessionHandler);
             sessionCache.setSessionDataStore(jdbcSessionDataStoreFactory.getSessionDataStore(sessionHandler));
             sessionHandler.setSessionCache(sessionCache);
         }
