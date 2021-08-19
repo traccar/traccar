@@ -29,6 +29,7 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.util.Calendar;
 
 public class MxtProtocolDecoder extends BaseProtocolDecoder {
 
@@ -102,6 +103,12 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
             long seconds = BitUtil.to(date, 6);
 
             dateBuilder.addMillis((((days * 24 + (hours - 1)) * 60 + minutes) * 60 + seconds) * 1000);
+            Calendar calendar = Calendar.getInstance();
+
+            calendar.add(Calendar.WEEK_OF_YEAR, -1023);
+            if (dateBuilder.getDate().before(calendar.getTime())) {
+                dateBuilder.addMillis(1024L * 7 * 24 * 60 * 60 * 1000);
+            }
 
             position.setTime(dateBuilder.getDate());
 
