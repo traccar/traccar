@@ -39,7 +39,6 @@ warn () {
 
 VERSION=$1
 PLATFORM=${2:-all}
-export EXTJS_PATH=$(cd ../..; pwd)/ext-6.2.0
 PREREQ=true
 
 check_requirement () {
