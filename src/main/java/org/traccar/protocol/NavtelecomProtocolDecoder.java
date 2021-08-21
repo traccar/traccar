@@ -32,6 +32,23 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
+    private void sendResponse(
+            Channel channel, SocketAddress remoteAddress, int receiver, int sender, ByteBuf content) {
+        if (channel != null) {
+            ByteBuf response = Unpooled.buffer();
+            response.writeCharSequence("@NTC", StandardCharsets.US_ASCII);
+            response.writeIntLE(sender);
+            response.writeIntLE(receiver);
+            response.writeShortLE(content.readableBytes());
+            response.writeByte(Checksum.xor(content.nioBuffer()));
+            response.writeByte(Checksum.xor(response.nioBuffer()));
+            response.writeBytes(content);
+            content.release();
+
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -45,24 +62,27 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedByte(); // data checksum
         buf.readUnsignedByte(); // header checksum
 
-        String sentence = buf.readCharSequence(length, StandardCharsets.US_ASCII).toString();
+        String type = buf.toString(buf.readerIndex(), 6, StandardCharsets.US_ASCII);
 
-        if (sentence.startsWith("*>S")) {
+        if (type.startsWith("*>S")) {
 
-            String data = "*<S";
+            String sentence = buf.readCharSequence(length, StandardCharsets.US_ASCII).toString();
+            getDeviceSession(channel, remoteAddress, sentence.substring(4));
 
-            ByteBuf response = Unpooled.buffer();
-            response.writeCharSequence("@NTC", StandardCharsets.US_ASCII);
-            response.writeIntLE(sender);
-            response.writeIntLE(receiver);
-            response.writeShortLE(data.length());
-            response.writeByte(Checksum.xor(data));
-            response.writeByte(Checksum.xor(response.nioBuffer()));
-            response.writeCharSequence(data, StandardCharsets.US_ASCII);
+            ByteBuf payload = Unpooled.copiedBuffer("*<S", StandardCharsets.US_ASCII);
 
-            if (channel != null) {
-                channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
-            }
+            sendResponse(channel, remoteAddress, receiver, sender, payload);
+
+        } else if (type.startsWith("*>FLEX")) {
+
+            buf.skipBytes(6);
+
+            ByteBuf payload = Unpooled.buffer();
+            payload.writeByte(buf.readUnsignedByte()); // protocol
+            payload.writeByte(buf.readUnsignedByte()); // protocol version
+            payload.writeByte(buf.readUnsignedByte()); // struct version
+
+            sendResponse(channel, remoteAddress, receiver, sender, payload);
 
         }
 

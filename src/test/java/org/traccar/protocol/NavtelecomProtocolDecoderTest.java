@@ -16,6 +16,9 @@ public class NavtelecomProtocolDecoderTest extends ProtocolTest {
         verifyNull(decoder, binary(
                 "404e544301000000000000001300f7fc2a3e464c4558b00a0a45fffe00000000000000"));
 
+        verifyNull(decoder, binary(
+                "404e544301000000000000001300cbc02a3e464c4558b00a0a45fffe300a0e08000000"));
+
     }
 
 }
