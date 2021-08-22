@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.traccar.geocoder.GisgraphyGeocoder;
 import org.traccar.geocoder.GoogleGeocoder;
 import org.traccar.geocoder.HereGeocoder;
 import org.traccar.geocoder.MapQuestGeocoder;
+import org.traccar.geocoder.MapTilerGeocoder;
 import org.traccar.geocoder.MapmyIndiaGeocoder;
 import org.traccar.geocoder.NominatimGeocoder;
 import org.traccar.geocoder.OpenCageGeocoder;
@@ -188,6 +189,8 @@ public class MainModule extends AbstractModule {
                     return new PositionStackGeocoder(key, cacheSize, addressFormat);
                 case "mapbox":
                     return new MapboxGeocoder(key, cacheSize, addressFormat);
+                case "maptiler":
+                    return new MapTilerGeocoder(key, cacheSize, addressFormat);
                 default:
                     return new GoogleGeocoder(key, language, cacheSize, addressFormat);
             }

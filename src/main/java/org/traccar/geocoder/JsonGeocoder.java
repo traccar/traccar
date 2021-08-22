@@ -97,7 +97,9 @@ public abstract class JsonGeocoder implements Geocoder {
             }
         }
 
-        Main.getInjector().getInstance(StatisticsManager.class).registerGeocoderRequest();
+        if (Main.getInjector() != null) {
+            Main.getInjector().getInstance(StatisticsManager.class).registerGeocoderRequest();
+        }
 
         Invocation.Builder request = Context.getClient().target(String.format(url, latitude, longitude)).request();
 
