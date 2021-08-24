@@ -168,8 +168,12 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
                 parser.nextInt(), parser.nextInt(), parser.nextHexInt(), parser.nextHexInt(), parser.nextInt())));
 
         position.set(Position.KEY_STATUS, parser.nextHexInt());
-        position.set(Position.KEY_INPUT, parser.nextHexInt());
-        position.set(Position.KEY_OUTPUT, parser.nextHexInt());
+
+        int input = parser.nextHexInt();
+        int output = parser.nextHexInt();
+        position.set(Position.KEY_IGNITION, BitUtil.check(input, 1));
+        position.set(Position.KEY_INPUT, input);
+        position.set(Position.KEY_OUTPUT, output);
 
         position.set(Position.KEY_POWER, parser.nextHexInt() * 0.01);
         position.set(Position.KEY_BATTERY, parser.nextHexInt() * 0.01);
