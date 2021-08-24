@@ -90,9 +90,6 @@ public class Position extends Message {
     public static final String KEY_DTCS = "dtcs";
     public static final String KEY_OBD_SPEED = "obdSpeed"; // knots
     public static final String KEY_OBD_ODOMETER = "obdOdometer"; // meters
-    public static final String KEY_OBD_IGNITION_TIMING = "obdIgnitionTiming"; // degree
-    public static final String KEY_OBD_INTAKE_FLOW_RATE = "obdIntakeFlowRate"; // %
-
 
     public static final String KEY_RESULT = "result";
 
