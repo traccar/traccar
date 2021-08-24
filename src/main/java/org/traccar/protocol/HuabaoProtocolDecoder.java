@@ -52,6 +52,8 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_TERMINAL_REGISTER_RESPONSE = 0x8100;
     public static final int MSG_TERMINAL_CONTROL = 0x8105;
     public static final int MSG_TERMINAL_AUTH = 0x0102;
+    public static final int MSG_TERMINAL_PARAM_QUERY_REPORT = 0x0107;
+    public static final int MSG_TERMINAL_TRIP_EVENT = 0x0900;
     public static final int MSG_LOCATION_REPORT = 0x0200;
     public static final int MSG_LOCATION_REPORT_2 = 0x5501;
     public static final int MSG_LOCATION_REPORT_BLIND = 0x5502;
@@ -126,12 +128,18 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(value, 20)) {
             return Position.ALARM_GEOFENCE;
         }
-        if (BitUtil.check(value, 28)) {
+        if (BitUtil.check(value, 28)|| BitUtil.check(value,15)) {
             return Position.ALARM_MOVEMENT;
         }
         if (BitUtil.check(value, 29)) {
             return Position.ALARM_ACCIDENT;
         }
+        if (BitUtil.check(value, 7)) {
+            return Position.ALARM_LOW_POWER;
+        }
+
+
+
         return null;
     }
 
@@ -176,7 +184,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                         formatMessage(MSG_TERMINAL_REGISTER_RESPONSE, id, false, response), remoteAddress));
             }
 
-        } else if (type == MSG_TERMINAL_AUTH || type == MSG_HEARTBEAT) {
+        } else if (type == MSG_TERMINAL_AUTH || type == MSG_HEARTBEAT || type == MSG_TERMINAL_PARAM_QUERY_REPORT || type == MSG_TERMINAL_TRIP_EVENT) {
 
             sendGeneralResponse(channel, remoteAddress, id, type, index);
 
@@ -389,6 +397,51 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                         }
                     }
                     break;
+                case 0xF3:
+                    //buf.skipBytes(1);
+                    while (buf.readerIndex() < endIndex) {
+                        int extendedType = buf.readUnsignedShort();
+                        int extendedLength = buf.readUnsignedByte();
+                        switch (extendedType) {
+                            case 0x0002:
+                                position.set(Position.KEY_OBD_SPEED, buf.readUnsignedShort() * 0.1);
+                                break;
+                            case 0x0003:
+                                position.set(Position.KEY_RPM, buf.readUnsignedShort());
+                                break;
+                            case 0x0004:
+                                position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
+                                break;
+                            case 0x0005:
+                                position.set(Position.KEY_OBD_ODOMETER, (buf.readUnsignedInt() * 0.1 * 0.001));
+                                break;
+                            case 0x0006:
+                                position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedShort() * 0.1);
+                                break;
+                            case 0x0008:
+                                position.set(Position.KEY_ENGINE_LOAD, buf.readUnsignedByte() * 100 / 255);
+                                break;
+                            case 0x0009:
+                                position.set(Position.KEY_COOLANT_TEMP, buf.readUnsignedShort() - 40);
+                                break;
+                            case 0x000D:
+                                position.set(Position.KEY_OBD_INTAKE_FLOW_RATE, buf.readUnsignedShort());
+                                break;
+                            case 0x000E:
+                                position.set(Position.KEY_THROTTLE, buf.readUnsignedByte() * 100 / 255);
+                                break;
+                            case 0x000F:
+                                position.set(Position.KEY_OBD_IGNITION_TIMING, (buf.readUnsignedByte() * 0.5) - 64);
+                                break;
+
+                            default:
+                                buf.skipBytes(extendedLength);
+                                break;
+                        }
+                    }
+
+                    break;
+
                 default:
                     break;
             }
