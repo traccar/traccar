@@ -128,7 +128,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(value, 20)) {
             return Position.ALARM_GEOFENCE;
         }
-        if (BitUtil.check(value, 28)|| BitUtil.check(value,15)) {
+        if (BitUtil.check(value, 28) || BitUtil.check(value,15)) {
             return Position.ALARM_MOVEMENT;
         }
         if (BitUtil.check(value, 29)) {
@@ -137,9 +137,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(value, 7)) {
             return Position.ALARM_LOW_POWER;
         }
-
-
-
+        
         return null;
     }
 
@@ -398,7 +396,6 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     }
                     break;
                 case 0xF3:
-                    //buf.skipBytes(1);
                     while (buf.readerIndex() < endIndex) {
                         int extendedType = buf.readUnsignedShort();
                         int extendedLength = buf.readUnsignedByte();
@@ -425,15 +422,14 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                                 position.set(Position.KEY_COOLANT_TEMP, buf.readUnsignedShort() - 40);
                                 break;
                             case 0x000D:
-                                position.set(Position.KEY_OBD_INTAKE_FLOW_RATE, buf.readUnsignedShort());
+                                position.set("OBDIntakeFlowRate", buf.readUnsignedShort());
                                 break;
                             case 0x000E:
                                 position.set(Position.KEY_THROTTLE, buf.readUnsignedByte() * 100 / 255);
                                 break;
                             case 0x000F:
-                                position.set(Position.KEY_OBD_IGNITION_TIMING, (buf.readUnsignedByte() * 0.5) - 64);
+                                position.set("OBDIgnitionTiming", (buf.readUnsignedByte() * 0.5) - 64);
                                 break;
-
                             default:
                                 buf.skipBytes(extendedLength);
                                 break;
