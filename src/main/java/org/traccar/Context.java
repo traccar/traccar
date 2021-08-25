@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.traccar.database.MailManager;
 import org.traccar.database.MaintenancesManager;
 import org.traccar.database.MediaManager;
 import org.traccar.database.NotificationManager;
+import org.traccar.database.OrderManager;
 import org.traccar.database.PermissionsManager;
 import org.traccar.database.UsersManager;
 import org.traccar.geocoder.Geocoder;
@@ -53,6 +54,7 @@ import org.traccar.model.Geofence;
 import org.traccar.model.Group;
 import org.traccar.model.Maintenance;
 import org.traccar.model.Notification;
+import org.traccar.model.Order;
 import org.traccar.model.User;
 import org.traccar.notification.EventForwarder;
 import org.traccar.notification.NotificatorManager;
@@ -235,6 +237,12 @@ public final class Context {
         return maintenancesManager;
     }
 
+    private static OrderManager orderManager;
+
+    public static OrderManager getOrderManager() {
+        return orderManager;
+    }
+
     private static SmsManager smsManager;
 
     public static SmsManager getSmsManager() {
@@ -337,6 +345,8 @@ public final class Context {
 
         commandsManager = new CommandsManager(dataManager, config.getBoolean(Keys.COMMANDS_QUEUEING));
 
+        orderManager = new OrderManager(dataManager);
+
     }
 
     private static void initEventsModule() {
@@ -397,6 +407,8 @@ public final class Context {
             return (BaseObjectManager<T>) maintenancesManager;
         } else if (clazz.equals(Notification.class)) {
             return (BaseObjectManager<T>) notificationManager;
+        } else if (clazz.equals(Order.class)) {
+            return (BaseObjectManager<T>) orderManager;
         }
         return null;
     }
