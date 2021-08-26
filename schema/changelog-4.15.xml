@@ -60,6 +60,10 @@
 
     <addForeignKeyConstraint baseTableName="tc_device_order" baseColumnNames="deviceid" constraintName="fk_device_order_deviceid" referencedTableName="tc_devices" referencedColumnNames="id" onDelete="CASCADE" />
     <addForeignKeyConstraint baseTableName="tc_device_order" baseColumnNames="orderid" constraintName="fk_device_order_orderid" referencedTableName="tc_orders" referencedColumnNames="id" onDelete="CASCADE" />
+    
+    <addColumn tableName="tc_servers">
+      <column name="osKey" type="VARCHAR(128)" />
+    </addColumn>
 
   </changeSet>
 
