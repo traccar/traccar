@@ -1,0 +1,44 @@
+image: openjdk:8-jdk
+
+variables:
+  SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+  GIT_DEPTH: "0" 
+
+stages:
+  - build
+  - test
+  - code-analysis
+
+before_script:
+  - chmod +x gradlew
+
+buildJob:
+  stage: build
+  script:
+    - ./gradlew build
+
+testJob:
+  stage: test
+  script:
+    - ./gradlew check
+    - ./gradlew codeCoverageReport
+  artifacts:
+    paths:
+      - build/reports/jacoco
+sonarcloud-check:
+  stage: code-analysis
+  dependencies:
+    - testJob
+  image: sonarsource/sonar-scanner-cli:latest
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  script:
+    - sonar-scanner
+    - apk add bash
+    - bash <(curl -s https://codecov.io/bash) -t fa4ea4b0-402c-4d17-962f-0842cee2a73f
+  only:
+    - merge_requests
+    - master
+    - develop
