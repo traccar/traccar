@@ -11,3 +11,5 @@ nbactions.xml
 out
 build
 src/main/java/org/traccar/protobuf
+*.db
+*.log
