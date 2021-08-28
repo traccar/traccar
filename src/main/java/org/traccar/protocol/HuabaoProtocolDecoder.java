@@ -71,7 +71,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         if (shortIndex) {
             buf.writeByte(1);
         } else {
-            buf.writeShort(1);
+            buf.writeShort(0);
         }
         buf.writeBytes(data);
         data.release();
