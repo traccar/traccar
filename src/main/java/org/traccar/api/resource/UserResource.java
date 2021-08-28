@@ -47,13 +47,22 @@ public class UserResource extends BaseObjectResource<User> {
     }
 
     @GET
-    public Collection<User> get(@QueryParam("userId") long userId) throws SQLException {
+    public Collection<User> get(
+        @QueryParam("userId")long userId,
+        @QueryParam("id")Set<Long>ids
+    )throws SQLException{
+        
+    
         UsersManager usersManager = Context.getUsersManager();
         Set<Long> result;
         if (Context.getPermissionsManager().getUserAdmin(getUserId())) {
             if (userId != 0) {
                 result = usersManager.getUserItems(userId);
             } else {
+                if(ids.size()>0){
+                    Set<Long>userIds=usersManager.getUserItemsByIds(ids);
+                    return usersManager.getItems(userIds);
+                }
                 result = usersManager.getAllItems();
             }
         } else if (Context.getPermissionsManager().getUserManager(getUserId())) {
@@ -63,6 +72,7 @@ public class UserResource extends BaseObjectResource<User> {
         }
         return usersManager.getItems(result);
     }
+    
 
     @Override
     @PermitAll

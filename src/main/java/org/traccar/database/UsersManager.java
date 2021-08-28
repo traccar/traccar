@@ -80,5 +80,16 @@ public class UsersManager extends SimpleObjectManager<User> {
     public User getUserByToken(String token) {
         return usersTokens.get(token);
     }
+    
+    public Set<Long>getUserItemsByIds(Set<Long>ids){
+        Set<Long>result=new HashSet<>();
+        for(Long userId:ids){
+            User cachedUser=getById(userId);
+            if(cachedUser!=null){
+                result.add(cachedUser.getId());
+            }
+        }
+        return result;
+    }
 
 }
