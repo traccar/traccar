@@ -1131,7 +1131,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == MSG_GPS_MODULAR) {
 
-            sendResponse(channel, false, type, buf.getShort(buf.writerIndex() - 6), null);
+            sendResponse(channel, true, type, buf.getShort(buf.writerIndex() - 6), null);
 
             return decodeExtendedModular(buf, deviceSession);
 
