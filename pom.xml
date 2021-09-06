@@ -376,6 +376,31 @@
         </plugins>
     </build>
 
+    <repositories>
+        <repository>
+            <id>maven-public</id>
+            <url>http://light:8081/repository/maven-public/</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>maven-public</id>
+            <url>http://light:8081/repository/maven-public/</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>nexus-snapshots</id>
+            <url>http://light:8081/repository/maven-snapshots/</url>
+        </snapshotRepository>
+        <repository>
+            <id>nexus-releases</id>
+            <url>http://light:8081/repository/maven-releases/</url>
+        </repository>
+    </distributionManagement>
+
     <profiles>
         <profile>
             <id>jar-with-dependencies</id>
@@ -400,6 +425,31 @@
                                 <phase>package</phase>
                                 <goals>
                                     <goal>single</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>security-checks</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.owasp</groupId>
+                        <artifactId>dependency-check-maven</artifactId>
+                        <version>6.2.2</version>
+                        <configuration>
+                            <skipProvidedScope>false</skipProvidedScope>
+                            <skipRuntimeScope>false</skipRuntimeScope>
+                            <failBuildOnCVSS>5</failBuildOnCVSS>
+                            <suppressionFile>${project.basedir}/src/conf/owasp-suppressions.xml</suppressionFile>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>check</goal>
                                 </goals>
                             </execution>
                         </executions>
