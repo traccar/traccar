@@ -15,7 +15,7 @@ public class StartekProtocolDecoderTest extends ProtocolTest {
                 "&&:23,860262050015424,129,OKA2"),
                 Position.KEY_RESULT, "129,OK");
 
-        verifyNull(decoder, text(
+        verifyPosition(decoder, text(
                 "&&X152,861157040151686,000,18,,210907163833,A,10.232715,-67.880423,11,1.4,0,275,437,34804,734|2|3EE4|00579406,28,00000015,00,00,0000|017D|0000|0000,1,010000,,9A"));
 
         verifyPosition(decoder, text(

@@ -77,7 +77,7 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
             .text(",")
             .number("d,")                        // extended
             .expression("([^,]+)?,")             // fuel
-            .expression("([^,]+)?")              // temperature
+            .expression("([^,]+)?,?")            // temperature
             .groupEnd("?")
             .groupEnd("?")
             .compile();
