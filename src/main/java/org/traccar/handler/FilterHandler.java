@@ -25,6 +25,9 @@ import org.traccar.config.Keys;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
+import java.sql.SQLException;
+import java.util.Date;
+
 @ChannelHandler.Sharable
 public class FilterHandler extends BaseDataHandler {
 
@@ -40,6 +43,7 @@ public class FilterHandler extends BaseDataHandler {
     private int filterDistance;
     private int filterMaxSpeed;
     private long filterMinPeriod;
+    private boolean filterRelative;
     private long skipLimit;
     private boolean skipAttributes;
 
@@ -54,14 +58,15 @@ public class FilterHandler extends BaseDataHandler {
         filterDistance = config.getInteger(Keys.FILTER_DISTANCE);
         filterMaxSpeed = config.getInteger(Keys.FILTER_MAX_SPEED);
         filterMinPeriod = config.getInteger(Keys.FILTER_MIN_PERIOD) * 1000;
+        filterRelative = config.getBoolean(Keys.FILTER_RELATIVE);
         skipLimit = config.getLong(Keys.FILTER_SKIP_LIMIT) * 1000;
         skipAttributes = config.getBoolean(Keys.FILTER_SKIP_ATTRIBUTES_ENABLE);
     }
 
     private boolean filterInvalid(Position position) {
         return filterInvalid && (!position.getValid()
-           || position.getLatitude() > 90 || position.getLongitude() > 180
-           || position.getLatitude() < -90 || position.getLongitude() < -180);
+                || position.getLatitude() > 90 || position.getLongitude() > 180
+                || position.getLatitude() < -90 || position.getLongitude() < -180);
     }
 
     private boolean filterZero(Position position) {
@@ -144,19 +149,12 @@ public class FilterHandler extends BaseDataHandler {
 
         StringBuilder filterType = new StringBuilder();
 
-        Position last = null;
-        if (Context.getIdentityManager() != null) {
-            last = Context.getIdentityManager().getLastPosition(position.getDeviceId());
-        }
-
+        // general filtering
         if (filterInvalid(position)) {
             filterType.append("Invalid ");
         }
         if (filterZero(position)) {
             filterType.append("Zero ");
-        }
-        if (filterDuplicate(position, last) && !skipLimit(position, last) && !skipAttributes(position)) {
-            filterType.append("Duplicate ");
         }
         if (filterFuture(position)) {
             filterType.append("Future ");
@@ -167,19 +165,56 @@ public class FilterHandler extends BaseDataHandler {
         if (filterApproximate(position)) {
             filterType.append("Approximate ");
         }
-        if (filterStatic(position) && !skipLimit(position, last) && !skipAttributes(position)) {
-            filterType.append("Static ");
-        }
-        if (filterDistance(position, last) && !skipLimit(position, last) && !skipAttributes(position)) {
-            filterType.append("Distance ");
-        }
-        if (filterMaxSpeed(position, last)) {
-            filterType.append("MaxSpeed ");
-        }
-        if (filterMinPeriod(position, last)) {
-            filterType.append("MinPeriod ");
-        }
+        if (filterRelative) {
+            try {
+                if (filterStatic(position) && !skipAttributes(position)) {
+                    filterType.append("Static ");
+                }
 
+                Date newfixTime = position.getFixTime();
+                Position duplicate = Context.getDataManager().getPositionByTime(position.getDeviceId(), newfixTime);
+                if (filterDuplicate(position, duplicate) && !skipLimit(position, duplicate)
+                        && !skipAttributes(position)) {
+                    filterType.append("Duplicate ");
+                }
+
+                Position previous = Context.getDataManager().getPrevPosition(position.getDeviceId(), newfixTime);
+                Position next = Context.getDataManager().getNextPosition(position.getDeviceId(), newfixTime);
+                if ((filterDistance(position, previous) || filterDistance(next, position))
+                        && !skipAttributes(position)) {
+                    filterType.append("Distance ");
+                }
+                if (filterMaxSpeed(position, previous) || filterMaxSpeed(next, position)) {
+                    filterType.append("MaxSpeed ");
+                }
+                if (filterMinPeriod(position, previous) || filterMinPeriod(next, position)) {
+                    filterType.append("MinPeriod ");
+                }
+            } catch (SQLException e) {
+                LOGGER.warn("Error filtering position", e);
+            }
+        } else {
+            Position last = null;
+            if (Context.getIdentityManager() != null) {
+                last = Context.getIdentityManager().getLastPosition(position.getDeviceId());
+            }
+
+            if (filterDuplicate(position, last) && !skipLimit(position, last) && !skipAttributes(position)) {
+                filterType.append("Duplicate ");
+            }
+            if (filterStatic(position) && !skipLimit(position, last) && !skipAttributes(position)) {
+                filterType.append("Static ");
+            }
+            if (filterDistance(position, last) && !skipLimit(position, last) && !skipAttributes(position)) {
+                filterType.append("Distance ");
+            }
+            if (filterMaxSpeed(position, last)) {
+                filterType.append("MaxSpeed ");
+            }
+            if (filterMinPeriod(position, last)) {
+                filterType.append("MinPeriod ");
+            }
+        }
         if (filterType.length() > 0) {
 
             StringBuilder message = new StringBuilder();

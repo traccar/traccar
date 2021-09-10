@@ -887,8 +887,19 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
-     * Time limit for the filtering in seconds. If the time difference between last position and a new one is more than
-     * this limit, the new position will not be filtered out.
+     * If FALSE, then filter compares duplicates, distance or period only with the last received location.
+     * Server expects all locations to come sequentially.
+     *
+     * If TRUE, then filter compares duplicates, distance or period with Position's fixTime strictly before and after.
+     * Server expects locations to come at random order, since tracking device might go offline.
+     */
+    public static final ConfigKey<Boolean> FILTER_RELATIVE = new ConfigKey<>(
+            "filter.relative",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Time limit for the filtering in seconds. If the time difference between the last position was received by server
+     * and a new position is received by server is more than this limit, the new position will not be filtered out.
      */
     public static final ConfigKey<Long> FILTER_SKIP_LIMIT = new ConfigKey<>(
             "filter.skipLimit",
@@ -896,6 +907,7 @@ public final class Keys {
 
     /**
      * Enable attributes skipping. Attribute skipping can be enabled in the config or device attributes.
+     * If position contains any attribute mentioned in "filter.skipAttributes" config key, position is not filtered out.
      */
     public static final ConfigKey<Boolean> FILTER_SKIP_ATTRIBUTES_ENABLE = new ConfigKey<>(
             "filter.skipAttributes.enable",
