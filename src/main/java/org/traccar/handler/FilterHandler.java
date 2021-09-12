@@ -146,6 +146,9 @@ public class FilterHandler extends BaseDataHandler {
     }
 
     private boolean filter(Position position) {
+        if (skipAttributes(position)) {
+            return false;
+        }
 
         StringBuilder filterType = new StringBuilder();
 
@@ -165,58 +168,43 @@ public class FilterHandler extends BaseDataHandler {
         if (filterApproximate(position)) {
             filterType.append("Approximate ");
         }
-        if (filterRelative) {
-            try {
-                if (filterStatic(position) && !skipAttributes(position)) {
-                    filterType.append("Static ");
-                }
+        if (filterStatic(position)) {
+            filterType.append("Static ");
+        }
 
-                Date newfixTime = position.getFixTime();
-                Position duplicate = Context.getDataManager().getPositionByTime(position.getDeviceId(), newfixTime);
-                if (filterDuplicate(position, duplicate) && !skipLimit(position, duplicate)
-                        && !skipAttributes(position)) {
-                    filterType.append("Duplicate ");
+        // relative filtering
+        if (filterDuplicate || filterDistance != 0 || filterMaxSpeed != 0 || filterMinPeriod != 0) {
+            Position previous = null;
+            if (filterRelative) {
+                try {
+                    Date newFixTime = position.getFixTime();
+                    previous = Context.getDataManager().getPrevPosition(position.getDeviceId(), newFixTime);
+                } catch (SQLException e) {
+                    LOGGER.warn("Error filtering position", e);
                 }
-
-                Position previous = Context.getDataManager().getPrevPosition(position.getDeviceId(), newfixTime);
-                Position next = Context.getDataManager().getNextPosition(position.getDeviceId(), newfixTime);
-                if ((filterDistance(position, previous) || filterDistance(next, position))
-                        && !skipAttributes(position)) {
-                    filterType.append("Distance ");
+            } else {
+                if (Context.getIdentityManager() != null) {
+                    previous = Context.getIdentityManager().getLastPosition(position.getDeviceId());
                 }
-                if (filterMaxSpeed(position, previous) || filterMaxSpeed(next, position)) {
-                    filterType.append("MaxSpeed ");
-                }
-                if (filterMinPeriod(position, previous) || filterMinPeriod(next, position)) {
-                    filterType.append("MinPeriod ");
-                }
-            } catch (SQLException e) {
-                LOGGER.warn("Error filtering position", e);
             }
-        } else {
-            Position last = null;
-            if (Context.getIdentityManager() != null) {
-                last = Context.getIdentityManager().getLastPosition(position.getDeviceId());
+            if (skipLimit(position, previous)) {
+                return false;
             }
-
-            if (filterDuplicate(position, last) && !skipLimit(position, last) && !skipAttributes(position)) {
+            if (filterDuplicate(position, previous)) {
                 filterType.append("Duplicate ");
             }
-            if (filterStatic(position) && !skipLimit(position, last) && !skipAttributes(position)) {
-                filterType.append("Static ");
-            }
-            if (filterDistance(position, last) && !skipLimit(position, last) && !skipAttributes(position)) {
+            if (filterDistance(position, previous)) {
                 filterType.append("Distance ");
             }
-            if (filterMaxSpeed(position, last)) {
+            if (filterMaxSpeed(position, previous)) {
                 filterType.append("MaxSpeed ");
             }
-            if (filterMinPeriod(position, last)) {
+            if (filterMinPeriod(position, previous)) {
                 filterType.append("MinPeriod ");
             }
         }
-        if (filterType.length() > 0) {
 
+        if (filterType.length() > 0) {
             StringBuilder message = new StringBuilder();
             message.append("Position filtered by ");
             message.append(filterType.toString());

@@ -872,8 +872,11 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
-     * Filter records by Maximum Speed value in knots. Can be used to filter jumps to far locations even if they're
-     * marked as valid. Shouldn't be too low. Start testing with values at about 25000.
+     * Filter records by Maximum Speed value in knots. Can be used to filter jumps to far locations even if Position
+     * appears valid or if Position `speed` field reported by the device is also within limits. Calculates speed from
+     * the distance to the previous position and the elapsed time.
+     *
+     * Tip: Shouldn't be too low. Start testing with values at about 25000.
      */
     public static final ConfigKey<Integer> FILTER_MAX_SPEED = new ConfigKey<>(
             "filter.maxSpeed",
