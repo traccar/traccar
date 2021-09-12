@@ -80,7 +80,15 @@ public class PortmanProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.PREFIX_TEMP + 1, parser.next());
         position.set(Position.KEY_STATUS, parser.nextHexLong());
         position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
-        position.set(Position.KEY_EVENT, parser.nextInt());
+
+        int event = parser.nextInt();
+        position.set(Position.KEY_EVENT, event);
+        if (event == 253) {
+            position.set(Position.KEY_IGNITION, true);
+        } else if (event == 254) {
+            position.set(Position.KEY_IGNITION, false);
+        }
+
         position.set(Position.KEY_SATELLITES, parser.nextInt());
         position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
         position.set(Position.KEY_RSSI, parser.nextInt());
