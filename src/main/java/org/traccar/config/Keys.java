@@ -890,11 +890,12 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
-     * If FALSE, then filter compares duplicates, distance or period only with the last received location.
-     * Server expects all locations to come sequentially.
+     * If false, the server expects all locations to come sequentially (for each device). Filter checks for duplicates,
+     * distance, speed, or time period only against the location that was last received by server.
      *
-     * If TRUE, then filter compares duplicates, distance or period with Position's fixTime strictly before and after.
-     * Server expects locations to come at random order, since tracking device might go offline.
+     * If true, the server expects locations to come at random order (since tracking device might go offline).
+     * Filter checks for duplicates, distance, speed, or time period against the preceding Position's.
+     * Important: setting to true can cause potential performance issues.
      */
     public static final ConfigKey<Boolean> FILTER_RELATIVE = new ConfigKey<>(
             "filter.relative",

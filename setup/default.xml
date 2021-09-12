@@ -22,7 +22,6 @@
 
     <entry key='filter.enable'>true</entry>
     <entry key='filter.future'>86400</entry>
-    <entry key='filter.relative'>false</entry>
 
     <entry key='event.ignoreDuplicateAlerts'>true</entry>
     <entry key='processing.computedAttributes.enable'>true</entry>
@@ -53,12 +52,8 @@
         SELECT * FROM tc_positions WHERE deviceId = :deviceId AND fixTime = :time LIMIT 1
     </entry>
 
-    <entry key='database.selectPrevPosition'>
+    <entry key='database.selectPrecedingPosition'>
         SELECT * FROM tc_positions WHERE deviceId = :deviceId AND fixTime lte :time ORDER BY fixTime DESC LIMIT 1
-    </entry>
-
-    <entry key='database.selectNextPosition'>
-        SELECT * FROM tc_positions WHERE deviceId = :deviceId AND fixTime gt :time ORDER BY fixTime ASC LIMIT 1
     </entry>
 
     <entry key='database.selectLatestPositions'>

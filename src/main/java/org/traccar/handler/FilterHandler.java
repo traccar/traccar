@@ -146,6 +146,7 @@ public class FilterHandler extends BaseDataHandler {
     }
 
     private boolean filter(Position position) {
+
         if (skipAttributes(position)) {
             return false;
         }
@@ -173,49 +174,57 @@ public class FilterHandler extends BaseDataHandler {
         }
 
         // relative filtering
-        if (filterDuplicate || filterDistance != 0 || filterMaxSpeed != 0 || filterMinPeriod != 0) {
-            Position previous = null;
+        long deviceId = position.getDeviceId();
+        if (filterDuplicate || filterDistance > 0 || filterMaxSpeed > 0 || filterMinPeriod > 0) {
+            Position preceding = null;
             if (filterRelative) {
                 try {
                     Date newFixTime = position.getFixTime();
-                    previous = Context.getDataManager().getPrevPosition(position.getDeviceId(), newFixTime);
+                    preceding = Context.getDataManager().getPrecedingPosition(deviceId, newFixTime);
                 } catch (SQLException e) {
-                    LOGGER.warn("Error filtering position", e);
+                    LOGGER.warn("Error retrieving preceding position; fallbacking to last received position.", e);
+                    preceding = getLastReceivedPosition(deviceId);
                 }
             } else {
-                if (Context.getIdentityManager() != null) {
-                    previous = Context.getIdentityManager().getLastPosition(position.getDeviceId());
-                }
+                preceding = getLastReceivedPosition(deviceId);
             }
-            if (skipLimit(position, previous)) {
+            if (skipLimit(position, preceding)) {
                 return false;
             }
-            if (filterDuplicate(position, previous)) {
+            if (filterDuplicate(position, preceding)) {
                 filterType.append("Duplicate ");
             }
-            if (filterDistance(position, previous)) {
+            if (filterDistance(position, preceding)) {
                 filterType.append("Distance ");
             }
-            if (filterMaxSpeed(position, previous)) {
+            if (filterMaxSpeed(position, preceding)) {
                 filterType.append("MaxSpeed ");
             }
-            if (filterMinPeriod(position, previous)) {
+            if (filterMinPeriod(position, preceding)) {
                 filterType.append("MinPeriod ");
             }
         }
 
         if (filterType.length() > 0) {
+
             StringBuilder message = new StringBuilder();
             message.append("Position filtered by ");
             message.append(filterType.toString());
             message.append("filters from device: ");
-            message.append(Context.getIdentityManager().getById(position.getDeviceId()).getUniqueId());
+            message.append(Context.getIdentityManager().getById(deviceId).getUniqueId());
 
             LOGGER.info(message.toString());
             return true;
         }
 
         return false;
+    }
+
+    private Position getLastReceivedPosition(long deviceId) {
+        if (Context.getIdentityManager() != null) {
+            return Context.getIdentityManager().getLastPosition(deviceId);
+        }
+        return null;
     }
 
     @Override
