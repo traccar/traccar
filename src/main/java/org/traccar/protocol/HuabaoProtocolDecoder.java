@@ -59,6 +59,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_OIL_CONTROL = 0XA006;
     public static final int MSG_TIME_SYNC_REQUEST = 0x0109;
     public static final int MSG_TIME_SYNC_RESPONSE = 0x8109;
+    public static final int MSG_PHOTO = 0x8888;
 
     public static final int RESULT_SUCCESS = 0;
 
@@ -176,7 +177,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                         formatMessage(MSG_TERMINAL_REGISTER_RESPONSE, id, false, response), remoteAddress));
             }
 
-        } else if (type == MSG_TERMINAL_AUTH || type == MSG_HEARTBEAT) {
+        } else if (type == MSG_TERMINAL_AUTH || type == MSG_HEARTBEAT || type == MSG_PHOTO) {
 
             sendGeneralResponse(channel, remoteAddress, id, type, index);
 
