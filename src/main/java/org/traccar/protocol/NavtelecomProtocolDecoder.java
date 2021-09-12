@@ -78,6 +78,7 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
             buf.skipBytes(6);
 
             ByteBuf payload = Unpooled.buffer();
+            payload.writeCharSequence("*<FLEX", StandardCharsets.US_ASCII);
             payload.writeByte(buf.readUnsignedByte()); // protocol
             payload.writeByte(buf.readUnsignedByte()); // protocol version
             payload.writeByte(buf.readUnsignedByte()); // struct version
