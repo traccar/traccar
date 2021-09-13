@@ -328,18 +328,6 @@ public class DataManager {
                 .executeQuery(Position.class);
     }
 
-    public Position getPositionByTime(long deviceId, Date date) throws SQLException {
-        Collection<Position> positions = QueryBuilder.create(dataSource, getQuery("database.selectPositionByTime"))
-                .setLong("deviceId", deviceId)
-                .setDate("time", date)
-                .executeQuery(Position.class);
-        if (positions.isEmpty()) {
-            return null;
-        } else {
-            return positions.iterator().next();
-        }
-    }
-
     public Position getPrecedingPosition(long deviceId, Date date) throws SQLException {
         Collection<Position> positions = QueryBuilder.create(dataSource, getQuery("database.selectPrecedingPosition"))
                 .setLong("deviceId", deviceId)

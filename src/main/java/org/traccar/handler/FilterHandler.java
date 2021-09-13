@@ -153,7 +153,6 @@ public class FilterHandler extends BaseDataHandler {
 
         StringBuilder filterType = new StringBuilder();
 
-        // general filtering
         if (filterInvalid(position)) {
             filterType.append("Invalid ");
         }
@@ -173,7 +172,6 @@ public class FilterHandler extends BaseDataHandler {
             filterType.append("Static ");
         }
 
-        // relative filtering
         long deviceId = position.getDeviceId();
         if (filterDuplicate || filterDistance > 0 || filterMaxSpeed > 0 || filterMinPeriod > 0) {
             Position preceding = null;
