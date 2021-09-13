@@ -49,7 +49,7 @@
     </entry>
 
     <entry key='database.selectPrecedingPosition'>
-        SELECT * FROM tc_positions WHERE deviceId = :deviceId AND fixTime lte :time ORDER BY fixTime DESC LIMIT 1
+        SELECT * FROM tc_positions WHERE deviceId = :deviceId AND fixTime &lt;= :time ORDER BY fixTime DESC LIMIT 1
     </entry>
 
     <entry key='database.selectLatestPositions'>
