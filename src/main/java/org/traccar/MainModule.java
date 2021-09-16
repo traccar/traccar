@@ -23,6 +23,7 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.AttributesManager;
 import org.traccar.database.CalendarManager;
+import org.traccar.database.ConnectionManager;
 import org.traccar.database.DataManager;
 import org.traccar.database.DeviceManager;
 import org.traccar.database.GeofenceManager;
@@ -103,6 +104,11 @@ public class MainModule extends AbstractModule {
     @Provides
     public static IdentityManager provideIdentityManager() {
         return Context.getIdentityManager();
+    }
+
+    @Provides
+    public static ConnectionManager provideConnectionManager() {
+        return Context.getConnectionManager();
     }
 
     @Provides
@@ -393,8 +399,9 @@ public class MainModule extends AbstractModule {
     @Singleton
     @Provides
     public static GeofenceEventHandler provideGeofenceEventHandler(
-            IdentityManager identityManager, GeofenceManager geofenceManager, CalendarManager calendarManager) {
-        return new GeofenceEventHandler(identityManager, geofenceManager, calendarManager);
+            IdentityManager identityManager, GeofenceManager geofenceManager, CalendarManager calendarManager,
+            ConnectionManager connectionManager) {
+        return new GeofenceEventHandler(identityManager, geofenceManager, calendarManager, connectionManager);
     }
 
     @Singleton
