@@ -1,7 +1,7 @@
 plugins {
     id "java"
     id "checkstyle"
-    id "com.google.protobuf" version "0.8.12"
+    id "com.google.protobuf" version "0.8.17"
     id "application"
 }
 
@@ -14,7 +14,7 @@ ext {
     jettyVersion = "9.4.30.v20200611"
     jerseyVersion = "2.31"
     jacksonVersion = "2.10.1" // same version as jersey-media-json-jackson dependency
-    protobufVersion = "3.12.2"
+    protobufVersion = "3.18.0"
 }
 
 sourceCompatibility = "1.8"
