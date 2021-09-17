@@ -78,8 +78,11 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_HEARTBEAT = 0x23;
     public static final int MSG_ADDRESS_REQUEST = 0x2A;
     public static final int MSG_ADDRESS_RESPONSE = 0x97;
-    public static final int MSG_AZ735_GPS = 0x32;
-    public static final int MSG_AZ735_ALARM = 0x33;
+    public static final int MSG_GPS_LBS_5 = 0x31;
+    public static final int MSG_GPS_LBS_STATUS_4 = 0x32;
+    public static final int MSG_WIFI_5 = 0x33;
+    public static final int MSG_AZ735_GPS = 0x32; // only extended
+    public static final int MSG_AZ735_ALARM = 0x33; // only extended
     public static final int MSG_X1_GPS = 0x34;
     public static final int MSG_X1_PHOTO_INFO = 0x35;
     public static final int MSG_X1_PHOTO_DATA = 0x36;
@@ -120,9 +123,11 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             case MSG_GPS_LBS_2:
             case MSG_GPS_LBS_3:
             case MSG_GPS_LBS_4:
+            case MSG_GPS_LBS_5:
             case MSG_GPS_LBS_STATUS_1:
             case MSG_GPS_LBS_STATUS_2:
             case MSG_GPS_LBS_STATUS_3:
+            case MSG_GPS_LBS_STATUS_4:
             case MSG_GPS_PHONE:
             case MSG_GPS_LBS_EXTEND:
             case MSG_GPS_2:
@@ -142,9 +147,11 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             case MSG_GPS_LBS_2:
             case MSG_GPS_LBS_3:
             case MSG_GPS_LBS_4:
+            case MSG_GPS_LBS_5:
             case MSG_GPS_LBS_STATUS_1:
             case MSG_GPS_LBS_STATUS_2:
             case MSG_GPS_LBS_STATUS_3:
+            case MSG_GPS_LBS_STATUS_4:
             case MSG_GPS_2:
             case MSG_FENCE_SINGLE:
             case MSG_FENCE_MULTI:
@@ -163,6 +170,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             case MSG_GPS_LBS_STATUS_1:
             case MSG_GPS_LBS_STATUS_2:
             case MSG_GPS_LBS_STATUS_3:
+            case MSG_GPS_LBS_STATUS_4:
                 return true;
             default:
                 return false;
@@ -690,9 +698,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             return null; // space10x multi-lbs message
 
         } else if (type == MSG_LBS_MULTIPLE_1 || type == MSG_LBS_MULTIPLE_2 || type == MSG_LBS_EXTEND
-                || type == MSG_LBS_WIFI || type == MSG_LBS_2 || type == MSG_WIFI_3) {
+                || type == MSG_LBS_WIFI || type == MSG_LBS_2 || type == MSG_WIFI_3 || type == MSG_WIFI_5) {
 
-            boolean longFormat = type == MSG_LBS_2 || type == MSG_WIFI_3;
+            boolean longFormat = type == MSG_LBS_2 || type == MSG_WIFI_3 || type == MSG_WIFI_5;
 
             DateBuilder dateBuilder = new DateBuilder(deviceSession.getTimeZone())
                     .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
@@ -703,7 +711,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             int mcc = buf.readUnsignedShort();
             int mnc = BitUtil.check(mcc, 15) ? buf.readUnsignedShort() : buf.readUnsignedByte();
             Network network = new Network();
-            for (int i = 0; i < 7; i++) {
+
+            int cellCount = type == MSG_WIFI_5 ? 6 : 7;
+            for (int i = 0; i < cellCount; i++) {
                 int lac = longFormat ? buf.readInt() : buf.readUnsignedShort();
                 int cid = longFormat ? (int) buf.readLong() : buf.readUnsignedMedium();
                 int rssi = -buf.readUnsignedByte();
