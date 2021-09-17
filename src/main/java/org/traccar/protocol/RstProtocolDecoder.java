@@ -122,7 +122,7 @@ public class RstProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.PREFIX_OUT + 2, parser.nextHexInt());
             position.set(Position.KEY_POWER, parser.nextDouble());
             position.set(Position.KEY_BATTERY, parser.nextDouble());
-            position.set(Position.KEY_ODOMETER, parser.nextInt()*1000);
+            position.set(Position.KEY_ODOMETER, parser.nextInt() * 1000);
             position.set(Position.KEY_RSSI, parser.nextInt());
             position.set(Position.PREFIX_TEMP + 1, (int) parser.nextHexInt().byteValue());
 
