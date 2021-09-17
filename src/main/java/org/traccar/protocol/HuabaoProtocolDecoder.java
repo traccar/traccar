@@ -399,8 +399,8 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case 0xEE:
                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());
-                    position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
-                    position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.01);
+                    position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.001);
+                    position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
                     position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                     break;
                 default:
