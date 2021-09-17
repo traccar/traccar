@@ -26,8 +26,11 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnectionStatistics;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
-import org.eclipse.jetty.server.handler.gzip.GzipHandler;
-import org.eclipse.jetty.server.session.*;
+import org.eclipse.jetty.server.session.DatabaseAdaptor;
+import org.eclipse.jetty.server.session.DefaultSessionCache;
+import org.eclipse.jetty.server.session.JDBCSessionDataStoreFactory;
+import org.eclipse.jetty.server.session.SessionCache;
+import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -105,12 +108,6 @@ public class WebServer {
         HandlerList handlers = new HandlerList();
         initClientProxy(config, handlers);
         handlers.addHandler(servletHandler);
-        GzipHandler gzipHandler = new GzipHandler();
-        LOGGER.info(String.join(",", gzipHandler.getIncludedMimeTypes()));
-        gzipHandler.addIncludedMimeTypes("application/javascript");
-        LOGGER.warn("adding mime types");
-        LOGGER.info(String.join(",", gzipHandler.getIncludedMimeTypes()));
-        handlers.addHandler(gzipHandler);
         server.setHandler(handlers);
 
         if (config.getBoolean(Keys.WEB_REQUEST_LOG_ENABLE)) {

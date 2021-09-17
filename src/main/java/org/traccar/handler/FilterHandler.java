@@ -184,7 +184,7 @@ public class FilterHandler extends BaseDataHandler {
 
             StringBuilder message = new StringBuilder();
             message.append("Position filtered by ");
-            message.append(filterType.toString());
+            message.append(filterType);
             message.append("filters from device: ");
             message.append(Context.getIdentityManager().getById(position.getDeviceId()).getUniqueId());
 
