@@ -329,15 +329,10 @@ public class DataManager {
     }
 
     public Position getPrecedingPosition(long deviceId, Date date) throws SQLException {
-        Collection<Position> positions = QueryBuilder.create(dataSource, getQuery("database.selectPrecedingPosition"))
+        return QueryBuilder.create(dataSource, getQuery("database.selectPrecedingPosition"))
                 .setLong("deviceId", deviceId)
                 .setDate("time", date)
-                .executeQuery(Position.class);
-        if (positions.isEmpty()) {
-            return null;
-        } else {
-            return positions.iterator().next();
-        }
+                .executeQuerySingle(Position.class);
     }
 
     public void updateLatestPosition(Position position) throws SQLException {
