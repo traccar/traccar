@@ -23,8 +23,6 @@
       </column>
     </createTable>
 
-    <addUniqueConstraint tableName="tc_orders" columnNames="uniqueid" constraintName="uk_orders_uniqueid" />
-
     <createTable tableName="tc_user_order">
       <column name="userid" type="INT">
         <constraints nullable="false" />
