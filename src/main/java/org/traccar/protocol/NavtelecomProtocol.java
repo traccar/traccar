@@ -28,7 +28,7 @@ public class NavtelecomProtocol extends BaseProtocol {
         addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 1024, 12, 2, 2, 0, true));
+                pipeline.addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 65535, 12, 2, 2, 0, true));
                 pipeline.addLast(new NavtelecomProtocolDecoder(NavtelecomProtocol.this));
             }
         });
