@@ -150,8 +150,20 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
                 continue;
             }
             switch (dataTags[i]) {
+                case "#ALT#":
+                case "#ALTD#":
+                    position.setAltitude(Double.parseDouble(data[i]));
+                    break;
+                case "#DAL#":
+                case "#DID#":
+                    position.set(Position.KEY_DRIVER_UNIQUE_ID, data[i]);
+                    break;
                 case "#EDT#":
                     position.setDeviceTime(dateFormat.parse(data[i]));
+                    break;
+                case "#EDV1#":
+                case "#EDV2#":
+                    position.set("external" + dataTags[i].charAt(4), data[i]);
                     break;
                 case "#EID#":
                     event = Integer.parseInt(data[i]);
@@ -165,6 +177,9 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case "#EDSC#":
                     position.set("reason", data[i]);
+                    break;
+                case "#IARM#":
+                    position.set(Position.KEY_ARMED, Integer.parseInt(data[i]) > 0);
                     break;
                 case "#PDT#":
                     position.setFixTime(dateFormat.parse(data[i]));
@@ -185,10 +200,14 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
                     position.setCourse(Integer.parseInt(data[i]));
                     break;
                 case "#ODO#":
+                case "#ODOD#":
                     position.set(Position.KEY_ODOMETER, (long) (Double.parseDouble(data[i]) * 1000));
                     break;
                 case "#BATC#":
                     position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(data[i]));
+                    break;
+                case "#BATH#":
+                    position.set("batteryHealth", Integer.parseInt(data[i]));
                     break;
                 case "#TVI#":
                     position.set(Position.KEY_DEVICE_TEMP, Double.parseDouble(data[i]));
@@ -217,6 +236,9 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
                 case "#OUTD#":
                     position.set(Position.PREFIX_OUT + (dataTags[i].charAt(4) - 'A' + 1), Integer.parseInt(data[i]));
                     break;
+                case "#PDOP#":
+                    position.set(Position.KEY_PDOP, Double.parseDouble(data[i]));
+                    break;
                 case "#LAC#":
                     if (!data[i].isEmpty()) {
                         lac = Integer.parseInt(data[i]);
@@ -241,17 +263,22 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case "#IGN#":
                 case "#IGNL#":
-                    position.set(Position.KEY_IGNITION, data[i].equals("1"));
-                    break;
                 case "#ENG#":
-                    position.set("engine", data[i].equals("1"));
+                    position.set(Position.KEY_IGNITION, Integer.parseInt(data[i]) > 0);
                     break;
                 case "#DUR#":
                 case "#TDUR#":
                     position.set(Position.KEY_HOURS, Integer.parseInt(data[i]));
                     break;
+                case "#SAT#":
+                case "#SATN#":
+                    position.set(Position.KEY_SATELLITES_VISIBLE, Integer.parseInt(data[i]));
+                    break;
                 case "#SATU#":
                     position.set(Position.KEY_SATELLITES, Integer.parseInt(data[i]));
+                    break;
+                case "#STRT#":
+                    position.set("starter", Double.parseDouble(data[i]));
                     break;
                 case "#TS1#":
                     position.set("sensor1State", Integer.parseInt(data[i]));
