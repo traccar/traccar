@@ -11,6 +11,9 @@ public class MxtProtocolDecoderTest extends ProtocolTest {
         var decoder = new MxtProtocolDecoder(null);
 
         verifyPosition(decoder, binary(
+                "01a631a7627b00087dc41c40850006aab70affecdf23fd32200080000600000000000000000000001b2ff03b1bb9c4c60214f40100050000006c2d0000f427600051051101de0704"));
+
+        verifyPosition(decoder, binary(
                 "01a631144c7e0008643ad2f456fb2d49747cfe4cbe0ffd002008800000001021000fd43d3f1403000000ff300000f42760001031102445a81fda04"));
 
         verifyPosition(decoder, binary(
