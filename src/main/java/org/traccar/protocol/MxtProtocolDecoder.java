@@ -97,7 +97,7 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
             long date = buf.readUnsignedIntLE();
 
             long days = BitUtil.from(date, 6 + 6 + 5);
-            if (days < 7 * 1024) {
+            if (days < 7 * 780) {
                 days += 7 * 1024;
             }
 
