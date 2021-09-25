@@ -140,8 +140,6 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             return Position.ALARM_FUEL_LEAK;
         }
         switch (value) {
-            case "tracker":
-                return null;
             case "help me":
                 return Position.ALARM_SOS;
             case "low battery":
@@ -152,10 +150,6 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_MOVEMENT;
             case "speed":
                 return Position.ALARM_OVERSPEED;
-            case "acc on":
-                return Position.ALARM_POWER_ON;
-            case "acc off":
-                return Position.ALARM_POWER_OFF;
             case "door alarm":
                 return Position.ALARM_DOOR;
             case "ac alarm":
@@ -170,6 +164,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_FOOT_BRAKE;
             case "DTC":
                 return Position.ALARM_FAULT;
+            case "tracker":
             default:
                 return null;
         }
