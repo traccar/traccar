@@ -95,12 +95,16 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
 
     private BitSet bits;
 
-    private static int getItemLength(int id) {
+    public static int getItemLength(int id) {
         Integer length = ITEM_LENGTH_MAP.get(id);
         if (length == null) {
             throw new IllegalArgumentException(String.format("Unknown item: %d", id));
         }
         return length;
+    }
+
+    public BitSet getBits() {
+        return bits;
     }
 
     private void sendResponse(
