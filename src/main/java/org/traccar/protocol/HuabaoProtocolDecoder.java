@@ -333,6 +333,10 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                                 Position.KEY_VIN, buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
                     }
                     break;
+                case 0xA7:
+                    position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
+                    position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort());
+                    break;
                 case 0xAC:
                     position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
                     break;
