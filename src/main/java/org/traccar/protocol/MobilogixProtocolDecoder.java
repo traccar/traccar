@@ -39,7 +39,7 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
             .text("[")
             .number("(dddd)-(dd)-(dd) ")         // date (yyyymmdd)
             .number("(dd):(dd):(dd),")           // time (hhmmss)
-            .number("Td,")                       // type
+            .number("Td+,")                      // type
             .number("d+,")                       // device type
             .expression("[^,]+,")                // protocol version
             .expression("([^,]+),")              // serial number
@@ -80,6 +80,7 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position(getProtocolName());
 
+        position.set(Position.KEY_EVENT, type);
         position.setTime(parser.nextDateTime());
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
