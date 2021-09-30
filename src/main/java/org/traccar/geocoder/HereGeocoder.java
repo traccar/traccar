@@ -54,7 +54,7 @@ public class HereGeocoder extends JsonGeocoder {
             Address address = new Address();
 
             if (result.containsKey("Label")) {
-                address.setFormattedAddress(json.getString("Label"));
+                address.setFormattedAddress(result.getString("Label"));
             }
 
             if (result.containsKey("HouseNumber")) {
