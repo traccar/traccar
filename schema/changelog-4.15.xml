@@ -64,7 +64,7 @@
     <modifyDataType tableName="tc_positions" columnName="fixtime" newDataType="TIMESTAMP(6)" />
     <modifyDataType tableName="tc_positions" columnName="servertime" newDataType="TIMESTAMP(6)" />
     <modifyDataType tableName="tc_positions" columnName="devicetime" newDataType="TIMESTAMP(6)" />
-    <modifyDataType tableName="tc_events" columnName="servertime" newDataType="TIMESTAMP(6)" />
+    <modifyDataType tableName="tc_events" columnName="eventtime" newDataType="TIMESTAMP(6)" />
     <modifyDataType tableName="tc_devices" columnName="lastupdate" newDataType="TIMESTAMP(6)" />
 
   </changeSet>
