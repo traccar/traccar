@@ -48,14 +48,16 @@ public class OpenCellIdGeolocationProvider implements GeolocationProvider {
                         callback.onSuccess(
                                 json.getJsonNumber("lat").doubleValue(),
                                 json.getJsonNumber("lon").doubleValue(), 0);
-                    } else if (json.containsKey("error")) {
-                        String errorMessage = json.getJsonString("error").getString();
-                        if (json.containsKey("code")) {
-                            errorMessage += " Error code: " + json.getInt("code");
-                        }
-                        callback.onFailure(new GeolocationException(errorMessage));
                     } else {
-                        callback.onFailure(new GeolocationException("Coordinates are missing."));
+                        if (json.containsKey("error")) {
+                            String errorMessage = json.getJsonString("error").getString();
+                            if (json.containsKey("code")) {
+                                errorMessage += " (" + json.getInt("code") + ")";
+                            }
+                            callback.onFailure(new GeolocationException(errorMessage));
+                        } else {
+                            callback.onFailure(new GeolocationException("Coordinates are missing"));
+                        }
                     }
                 }
 
