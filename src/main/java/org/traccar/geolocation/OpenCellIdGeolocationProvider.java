@@ -50,7 +50,7 @@ public class OpenCellIdGeolocationProvider implements GeolocationProvider {
                                 json.getJsonNumber("lon").doubleValue(), 0);
                     } else {
                         if (json.containsKey("error")) {
-                            String errorMessage = json.getJsonString("error").getString();
+                            String errorMessage = json.getString("error");
                             if (json.containsKey("code")) {
                                 errorMessage += " (" + json.getInt("code") + ")";
                             }
