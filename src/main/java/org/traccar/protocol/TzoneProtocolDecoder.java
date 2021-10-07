@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.Protocol;
+import org.traccar.helper.BcdUtil;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -256,9 +257,28 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
         int blockLength = buf.readUnsignedShort();
         int blockEnd = buf.readerIndex() + blockLength;
 
-        if (blockLength > 0 && (hardware == 0x10A || hardware == 0x10B || hardware == 0x406)) {
-            position.setNetwork(new Network(
-                    CellTower.fromLacCid(buf.readUnsignedShort(), buf.readUnsignedShort())));
+        if (blockLength > 0) {
+            if (hardware == 0x10A || hardware == 0x10B || hardware == 0x406) {
+
+                position.setNetwork(new Network(
+                        CellTower.fromLacCid(buf.readUnsignedShort(), buf.readUnsignedShort())));
+
+            } else if (hardware == 0x407) {
+
+                Network network = new Network();
+                int count = buf.readUnsignedByte();
+                for (int i = 0; i < count; i++) {
+                    buf.readUnsignedByte(); // signal information
+
+                    int mcc = BcdUtil.readInteger(buf, 4);
+                    int mnc = BcdUtil.readInteger(buf, 4) % 1000;
+
+                    network.addCellTower(CellTower.from(
+                            mcc, mnc, buf.readUnsignedShort(), buf.readUnsignedInt()));
+                }
+                position.setNetwork(network);
+
+            }
         }
 
         buf.readerIndex(blockEnd);
@@ -272,21 +292,30 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
             position.set("terminalInfo", buf.readUnsignedByte());
 
-            int status = buf.readUnsignedByte();
-            position.set(Position.PREFIX_OUT + 1, BitUtil.check(status, 0));
-            position.set(Position.PREFIX_OUT + 2, BitUtil.check(status, 1));
-            status = buf.readUnsignedByte();
-            position.set(Position.PREFIX_IN + 1, BitUtil.check(status, 4));
-            if (BitUtil.check(status, 0)) {
-                position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+            if (hardware != 0x407) {
+                int status = buf.readUnsignedByte();
+                position.set(Position.PREFIX_OUT + 1, BitUtil.check(status, 0));
+                position.set(Position.PREFIX_OUT + 2, BitUtil.check(status, 1));
+                status = buf.readUnsignedByte();
+                position.set(Position.PREFIX_IN + 1, BitUtil.check(status, 4));
+                if (BitUtil.check(status, 0)) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+                }
             }
 
             position.set(Position.KEY_RSSI, buf.readUnsignedByte());
             position.set("gsmStatus", buf.readUnsignedByte());
             position.set(Position.KEY_BATTERY, buf.readUnsignedShort());
-            position.set(Position.KEY_POWER, buf.readUnsignedShort());
-            position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
-            position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort());
+
+            if (hardware != 0x407) {
+                position.set(Position.KEY_POWER, buf.readUnsignedShort());
+                position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
+                position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort());
+            } else {
+                position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedShort());
+                position.set("humidity", buf.readUnsignedShort());
+                position.set("lightSensor", buf.readUnsignedByte());
+            }
         }
 
         if (blockLength >= 15) {
