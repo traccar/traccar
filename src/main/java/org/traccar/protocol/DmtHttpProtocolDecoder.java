@@ -159,11 +159,17 @@ public class DmtHttpProtocolDecoder extends BaseHttpProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.setValid(true);
-        position.setTime(new Date(OffsetDateTime.parse(root.getString("date")).toInstant().toEpochMilli()));
-        position.setLatitude(root.getJsonNumber("lat").doubleValue());
-        position.setLongitude(root.getJsonNumber("lng").doubleValue());
-        position.setAccuracy(root.getJsonNumber("posAcc").doubleValue());
+        Date time = new Date(OffsetDateTime.parse(root.getString("date")).toInstant().toEpochMilli());
+
+        if (root.containsKey("lat") && root.containsKey("lng")) {
+            position.setValid(true);
+            position.setTime(time);
+            position.setLatitude(root.getJsonNumber("lat").doubleValue());
+            position.setLongitude(root.getJsonNumber("lng").doubleValue());
+            position.setAccuracy(root.getJsonNumber("posAcc").doubleValue());
+        } else {
+            getLastLocation(position, time);
+        }
 
         position.set(Position.KEY_INDEX, root.getInt("sqn"));
         position.set(Position.KEY_EVENT, root.getInt("reason"));

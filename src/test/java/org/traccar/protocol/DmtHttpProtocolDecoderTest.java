@@ -11,6 +11,9 @@ public class DmtHttpProtocolDecoderTest extends ProtocolTest {
 
         var decoder = new DmtHttpProtocolDecoder(null);
 
+        verifyAttributes(decoder, request(HttpMethod.POST, "/",
+                buffer("{\"date\":\"2021-10-04T18:15:47Z\",\"device\":{\"sn\":\"403809\",\"prod\":85,\"rev\":1,\"fw\":\"1.12\",\"iccid\":\"89011702278483601922\",\"imei\":\"352656106127312\"},\"sqn\":40927,\"reason\":11,\"analogues\":[{\"id\":1,\"val\":4265},{\"id\":3,\"val\":3800},{\"id\":4,\"val\":12},{\"id\":5,\"val\":4251}],\"inputs\":1,\"outputs\":0,\"status\":137}")));
+
         verifyPosition(decoder, request(HttpMethod.POST, "/",
                 buffer("{\"date\":\"2021-10-04T18:14:55Z\",\"device\":{\"sn\":\"403809\",\"prod\":85,\"rev\":1,\"fw\":\"1.12\",\"iccid\":\"89011702278483601922\",\"imei\":\"352656106127312\"},\"sqn\":40925,\"reason\":1,\"lat\":26.87366,\"lng\":-80.10618,\"posAcc\":47.7,\"posInfo\":{\"GDOP\":4.68,\"BSat\":2,\"GSat\":4,\"Src\":1},\"analogues\":[{\"id\":1,\"val\":4265},{\"id\":3,\"val\":3800},{\"id\":4,\"val\":16},{\"id\":5,\"val\":4255}],\"inputs\":1,\"outputs\":0,\"status\":137}")));
 
