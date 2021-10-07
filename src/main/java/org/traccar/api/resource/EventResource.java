@@ -7,7 +7,9 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
@@ -25,6 +27,9 @@ public class EventResource extends BaseResource {
     @GET
     public Event get(@PathParam("id") long id) throws SQLException {
         Event event = Context.getDataManager().getObject(Event.class, id);
+        if (event == null) {
+            throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).build());
+        }
         Context.getPermissionsManager().checkDevice(getUserId(), event.getDeviceId());
         if (event.getGeofenceId() != 0) {
             Context.getPermissionsManager().checkPermission(Geofence.class, getUserId(), event.getGeofenceId());
