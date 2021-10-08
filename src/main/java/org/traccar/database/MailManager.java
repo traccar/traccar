@@ -122,7 +122,7 @@ public final class MailManager {
         }
 
         message.addRecipient(Message.RecipientType.TO, new InternetAddress(user.getEmail()));
-        message.setSubject(subject);
+        message.setSubject(subject, "UTF-8");
         message.setSentDate(new Date());
 
         if (attachment != null) {
