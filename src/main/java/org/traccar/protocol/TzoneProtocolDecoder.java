@@ -288,7 +288,7 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
         blockLength = buf.readUnsignedShort();
         blockEnd = buf.readerIndex() + blockLength;
 
-        if (blockLength >= 13) {
+        if (hardware == 0x407 || blockLength >= 13) {
             position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
             position.set("terminalInfo", buf.readUnsignedByte());
 
@@ -312,9 +312,16 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
                 position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort());
             } else {
-                position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedShort());
-                position.set("humidity", buf.readUnsignedShort());
-                position.set("lightSensor", buf.readUnsignedByte());
+                int temperature = buf.readUnsignedShort();
+                if (!BitUtil.check(temperature, 15)) {
+                    double value = BitUtil.to(temperature, 14) * 0.01;
+                    position.set(Position.PREFIX_TEMP + 1, BitUtil.check(temperature, 14) ? -value : value);
+                }
+                int humidity = buf.readUnsignedShort();
+                if (!BitUtil.check(humidity, 15)) {
+                    position.set("humidity", BitUtil.to(humidity, 15));
+                }
+                position.set("lightSensor", buf.readUnsignedByte() == 0);
             }
         }
 
