@@ -1143,7 +1143,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             sendResponse(channel, true, type, buf.getShort(buf.writerIndex() - 6), null);
 
-            return decodeExtendedModular(buf, deviceSession);
+            return decodeExtendedModular(channel, buf, deviceSession);
 
         } else {
 
@@ -1154,7 +1154,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
-    private Object decodeExtendedModular(ByteBuf buf, DeviceSession deviceSession) {
+    private Object decodeExtendedModular(Channel channel, ByteBuf buf, DeviceSession deviceSession) {
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
@@ -1254,6 +1254,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     break;
             }
         }
+
+        sendResponse(channel, true, MSG_GPS_MODULAR, buf.readUnsignedShort(), null);
 
         return position;
     }
