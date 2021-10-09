@@ -1253,6 +1253,10 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
+        if (position.getFixTime() == null) {
+            getLastLocation(position, null);
+        }
+
         sendResponse(channel, false, MSG_GPS_MODULAR, buf.readUnsignedShort(), null);
 
         return position;
