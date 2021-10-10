@@ -101,4 +101,13 @@ public class GeocoderTest {
         String address = geocoder.getAddress(40.733, -73.989, null);
         assertEquals("120 East 13th Street, New York, New York 10003, United States", address);
     }
+
+    @Ignore
+    @Test
+    public void testMapTiler() {
+        Geocoder geocoder = new MapTilerGeocoder("mnbnwLErpdspq13f0kC6", 0, new AddressFormat());
+        String address = geocoder.getAddress(40.733, -73.989, null);
+        assertEquals("East 13th Street, New York City, New York, United States", address);
+    }
+
 }

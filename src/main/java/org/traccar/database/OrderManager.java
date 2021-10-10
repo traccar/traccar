@@ -13,22 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.protocol;
+package org.traccar.database;
 
-import org.traccar.BaseProtocol;
-import org.traccar.PipelineBuilder;
-import org.traccar.TrackerServer;
+import org.traccar.model.Order;
 
-public class NavtelecomProtocol extends BaseProtocol {
+public class OrderManager extends ExtendedObjectManager<Order> {
 
-    public NavtelecomProtocol() {
-        addServer(new TrackerServer(false, getName()) {
-            @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast(new NavtelecomFrameDecoder());
-                pipeline.addLast(new NavtelecomProtocolDecoder(NavtelecomProtocol.this));
-            }
-        });
+    public OrderManager(DataManager dataManager) {
+        super(dataManager, Order.class);
     }
 
 }

@@ -54,7 +54,9 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_GPS = 0x02;
     public static final int MSG_HEARTBEAT = 0x03;
     public static final int MSG_ALARM = 0x04;
-    public static final int MSG_NETWORK = 0x05;
+    public static final int MSG_NETWORK = 0x05; // 0x2727
+    public static final int MSG_DRIVER_BEHAVIOR_1 = 0x05; // 0x2626
+    public static final int MSG_DRIVER_BEHAVIOR_2 = 0x06; // 0x2626
     public static final int MSG_BLE = 0x10;
     public static final int MSG_COMMAND = 0x81;
 
@@ -140,7 +142,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
             return decodePosition(channel, deviceSession, buf, type, index, imei);
 
-        } else if (type == MSG_NETWORK) {
+        } else if (type == MSG_NETWORK && header == 0x2727) {
 
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
@@ -156,6 +158,52 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             buf.readCharSequence(buf.readUnsignedByte(), StandardCharsets.US_ASCII); // imsi
             position.set(Position.KEY_ICCID, buf.readCharSequence(
                     buf.readUnsignedByte(), StandardCharsets.US_ASCII).toString());
+
+            return position;
+
+        } else if ((type == MSG_DRIVER_BEHAVIOR_1 || type == MSG_DRIVER_BEHAVIOR_2) && header == 0x2626) {
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            switch (buf.readUnsignedByte()) {
+                case 0:
+                case 4:
+                    position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+                    break;
+                case 1:
+                case 3:
+                case 5:
+                    position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+                    break;
+                case 2:
+                    if (type == MSG_DRIVER_BEHAVIOR_1) {
+                        position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+                    } else {
+                        position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+            position.setTime(readDate(buf));
+
+            if (type == MSG_DRIVER_BEHAVIOR_2) {
+                int status = buf.readUnsignedByte();
+                position.setValid(!BitUtil.check(status, 7));
+                buf.skipBytes(5); // acceleration
+            } else {
+                position.setValid(true);
+            }
+
+            position.setAltitude(buf.readFloatLE());
+            position.setLongitude(buf.readFloatLE());
+            position.setLatitude(buf.readFloatLE());
+            position.setSpeed(UnitsConverter.knotsFromKph(BcdUtil.readInteger(buf, 4) * 0.1));
+            position.setCourse(buf.readUnsignedShort());
+
+            position.set(Position.KEY_RPM, buf.readUnsignedShort());
 
             return position;
 
@@ -389,10 +437,40 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedShort(); // distance upload interval
             buf.readUnsignedByte(); // heartbeat
 
-        } else if (buf.readableBytes() >= 2) {
+        } else {
 
-            position.set(Position.KEY_POWER, BcdUtil.readInteger(buf, 4) * 0.01);
-
+            if (buf.readableBytes() >= 2) {
+                position.set(Position.KEY_POWER, BcdUtil.readInteger(buf, 4) * 0.01);
+            }
+            if (buf.readableBytes() >= 19) {
+                position.set(Position.KEY_OBD_SPEED, BcdUtil.readInteger(buf, 4) * 0.01);
+                position.set(Position.KEY_FUEL_USED, buf.readUnsignedInt() * 0.001);
+                position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedInt() * 0.001);
+                position.set(Position.KEY_RPM, buf.readUnsignedShort());
+                int value;
+                value = buf.readUnsignedByte();
+                if (value != 0xff) {
+                    position.set("airInput", value);
+                }
+                if (value != 0xff) {
+                    position.set("airPressure", value);
+                }
+                if (value != 0xff) {
+                    position.set(Position.KEY_COOLANT_TEMP, value - 40);
+                }
+                if (value != 0xff) {
+                    position.set("airTemp", value - 40);
+                }
+                if (value != 0xff) {
+                    position.set(Position.KEY_ENGINE_LOAD, value);
+                }
+                if (value != 0xff) {
+                    position.set(Position.KEY_THROTTLE, value);
+                }
+                if (value != 0xff) {
+                    position.set(Position.KEY_FUEL_LEVEL, value);
+                }
+            }
         }
 
         sendResponse(channel, header, type, index, imei, alarm);

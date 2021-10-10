@@ -59,6 +59,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_OIL_CONTROL = 0XA006;
     public static final int MSG_TIME_SYNC_REQUEST = 0x0109;
     public static final int MSG_TIME_SYNC_RESPONSE = 0x8109;
+    public static final int MSG_PHOTO = 0x8888;
 
     public static final int RESULT_SUCCESS = 0;
 
@@ -71,7 +72,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         if (shortIndex) {
             buf.writeByte(1);
         } else {
-            buf.writeShort(1);
+            buf.writeShort(0);
         }
         buf.writeBytes(data);
         data.release();
@@ -176,7 +177,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                         formatMessage(MSG_TERMINAL_REGISTER_RESPONSE, id, false, response), remoteAddress));
             }
 
-        } else if (type == MSG_TERMINAL_AUTH || type == MSG_HEARTBEAT) {
+        } else if (type == MSG_TERMINAL_AUTH || type == MSG_HEARTBEAT || type == MSG_PHOTO) {
 
             sendGeneralResponse(channel, remoteAddress, id, type, index);
 
@@ -332,6 +333,13 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                                 Position.KEY_VIN, buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
                     }
                     break;
+                case 0xA7:
+                    position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
+                    position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort());
+                    break;
+                case 0xAC:
+                    position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+                    break;
                 case 0xD0:
                     long userStatus = buf.readUnsignedInt();
                     if (BitUtil.check(userStatus, 3)) {
@@ -388,6 +396,16 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                             }
                         }
                     }
+                    break;
+                case 0xED:
+                    String license = buf.readCharSequence(length, StandardCharsets.US_ASCII).toString().trim();
+                    position.set("driverLicense", license);
+                    break;
+                case 0xEE:
+                    position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+                    position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.001);
+                    position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
+                    position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                     break;
                 default:
                     break;

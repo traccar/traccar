@@ -16,6 +16,9 @@ public class StartekProtocolDecoderTest extends ProtocolTest {
                 Position.KEY_RESULT, "129,OK");
 
         verifyPosition(decoder, text(
+                "&&X152,861157040151686,000,18,,210907163833,A,10.232715,-67.880423,11,1.4,0,275,437,34804,734|2|3EE4|00579406,28,00000015,00,00,0000|017D|0000|0000,1,010000,,9A"));
+
+        verifyPosition(decoder, text(
                 "&&o125,861157040554384,000,0,,210702235150,A,27.263505,153.037061,11,1.2,0,0,31,5125,505|1|7032|8C89802,20,0000002D,00,00,01E2|019DF0"));
 
         verifyAttribute(decoder, text(

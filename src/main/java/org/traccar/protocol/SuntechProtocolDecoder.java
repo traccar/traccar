@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -448,7 +448,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
         String type = values[index++];
 
-        if (!type.equals("STT") && !type.equals("ALT")) {
+        if (!type.equals("STT") && !type.equals("ALT") && !type.equals("BLE")) {
             return null;
         }
 
@@ -461,7 +461,12 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
         position.set(Position.KEY_TYPE, type);
 
-        int mask = Integer.parseInt(values[index++], 16);
+        int mask;
+        if (type.equals("BLE")) {
+            mask = 0b1100000110110;
+        } else {
+            mask = Integer.parseInt(values[index++], 16);
+        }
 
         if (BitUtil.check(mask, 1)) {
             index += 1; // model
@@ -510,63 +515,83 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             position.setLongitude(Double.parseDouble(values[index++]));
         }
 
-        if (BitUtil.check(mask, 13)) {
-            position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(values[index++])));
-        }
+        if (type.equals("BLE")) {
 
-        if (BitUtil.check(mask, 14)) {
-            position.setCourse(Double.parseDouble(values[index++]));
-        }
+            position.setValid(true);
 
-        if (BitUtil.check(mask, 15)) {
-            position.set(Position.KEY_SATELLITES, Integer.parseInt(values[index++]));
-        }
+            int count = Integer.parseInt(values[index++]);
 
-        if (BitUtil.check(mask, 16)) {
-            position.setValid(values[index++].equals("1"));
-        }
-
-        if (BitUtil.check(mask, 17)) {
-            position.set(Position.KEY_INPUT, Integer.parseInt(values[index++]));
-        }
-
-        if (BitUtil.check(mask, 18)) {
-            position.set(Position.KEY_OUTPUT, Integer.parseInt(values[index++]));
-        }
-
-        if (type.equals("ALT")) {
-            if (BitUtil.check(mask, 19)) {
-                position.set("alertId", values[index++]);
+            for (int i = 1; i <= count; i++) {
+                position.set("tag" + i + "Rssi", Integer.parseInt(values[index++]));
+                index += 1; // rssi min
+                index += 1; // rssi max
+                position.set("tag" + i + "Id", values[index++]);
+                position.set("tag" + i + "Samples", Integer.parseInt(values[index++]));
+                position.set("tag" + i + "Major", Integer.parseInt(values[index++]));
+                position.set("tag" + i + "Minor", Integer.parseInt(values[index++]));
             }
-            if (BitUtil.check(mask, 20)) {
-                position.set("alertModifier", values[index++]);
-            }
-            if (BitUtil.check(mask, 21)) {
-                position.set("alertData", values[index++]);
-            }
+
         } else {
-            if (BitUtil.check(mask, 19)) {
-                position.set("mode", Integer.parseInt(values[index++]));
-            }
-            if (BitUtil.check(mask, 20)) {
-                position.set("reason", Integer.parseInt(values[index++]));
-            }
-            if (BitUtil.check(mask, 21)) {
-                position.set(Position.KEY_INDEX, Integer.parseInt(values[index++]));
-            }
-        }
 
-        if (BitUtil.check(mask, 22)) {
-            index += 1; // reserved
-        }
+            if (BitUtil.check(mask, 13)) {
+                position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(values[index++])));
+            }
 
-        if (BitUtil.check(mask, 23)) {
-            int assignMask = Integer.parseInt(values[index++], 16);
-            for (int i = 0; i <= 30; i++) {
-                if (BitUtil.check(assignMask, i)) {
-                    position.set(Position.PREFIX_IO + (i + 1), values[index++]);
+            if (BitUtil.check(mask, 14)) {
+                position.setCourse(Double.parseDouble(values[index++]));
+            }
+
+            if (BitUtil.check(mask, 15)) {
+                position.set(Position.KEY_SATELLITES, Integer.parseInt(values[index++]));
+            }
+
+            if (BitUtil.check(mask, 16)) {
+                position.setValid(values[index++].equals("1"));
+            }
+
+            if (BitUtil.check(mask, 17)) {
+                position.set(Position.KEY_INPUT, Integer.parseInt(values[index++]));
+            }
+
+            if (BitUtil.check(mask, 18)) {
+                position.set(Position.KEY_OUTPUT, Integer.parseInt(values[index++]));
+            }
+
+            if (type.equals("ALT")) {
+                if (BitUtil.check(mask, 19)) {
+                    position.set("alertId", values[index++]);
+                }
+                if (BitUtil.check(mask, 20)) {
+                    position.set("alertModifier", values[index++]);
+                }
+                if (BitUtil.check(mask, 21)) {
+                    position.set("alertData", values[index++]);
+                }
+            } else {
+                if (BitUtil.check(mask, 19)) {
+                    position.set("mode", Integer.parseInt(values[index++]));
+                }
+                if (BitUtil.check(mask, 20)) {
+                    position.set("reason", Integer.parseInt(values[index++]));
+                }
+                if (BitUtil.check(mask, 21)) {
+                    position.set(Position.KEY_INDEX, Integer.parseInt(values[index++]));
                 }
             }
+
+            if (BitUtil.check(mask, 22)) {
+                index += 1; // reserved
+            }
+
+            if (BitUtil.check(mask, 23)) {
+                int assignMask = Integer.parseInt(values[index++], 16);
+                for (int i = 0; i <= 30; i++) {
+                    if (BitUtil.check(assignMask, i)) {
+                        position.set(Position.PREFIX_IO + (i + 1), values[index++]);
+                    }
+                }
+            }
+
         }
 
         return position;

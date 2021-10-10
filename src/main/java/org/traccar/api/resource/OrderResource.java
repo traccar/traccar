@@ -13,22 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.protocol;
+package org.traccar.api.resource;
 
-import org.traccar.BaseProtocol;
-import org.traccar.PipelineBuilder;
-import org.traccar.TrackerServer;
+import org.traccar.api.SimpleObjectResource;
+import org.traccar.model.Order;
 
-public class NavtelecomProtocol extends BaseProtocol {
+import javax.ws.rs.Consumes;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
-    public NavtelecomProtocol() {
-        addServer(new TrackerServer(false, getName()) {
-            @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast(new NavtelecomFrameDecoder());
-                pipeline.addLast(new NavtelecomProtocolDecoder(NavtelecomProtocol.this));
-            }
-        });
+@Path("orders")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+public class OrderResource extends SimpleObjectResource<Order> {
+
+    public OrderResource() {
+        super(Order.class);
     }
 
 }

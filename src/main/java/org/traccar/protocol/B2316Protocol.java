@@ -15,18 +15,21 @@
  */
 package org.traccar.protocol;
 
+import io.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 
-public class NavtelecomProtocol extends BaseProtocol {
+public class B2316Protocol extends BaseProtocol {
 
-    public NavtelecomProtocol() {
-        addServer(new TrackerServer(false, getName()) {
+    public B2316Protocol() {
+        addServer(new TrackerServer(true, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast(new NavtelecomFrameDecoder());
-                pipeline.addLast(new NavtelecomProtocolDecoder(NavtelecomProtocol.this));
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new B2316ProtocolDecoder(B2316Protocol.this));
             }
         });
     }

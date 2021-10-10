@@ -12,6 +12,7 @@
 
     <entry key='web.port'>8082</entry>
     <entry key='web.path'>./web</entry>
+    <entry key='web.persistSession'>false</entry>
 
     <entry key='geocoder.enable'>false</entry>
     <entry key='geocoder.type'>google</entry>
@@ -294,5 +295,6 @@
     <entry key='flexiblereport.port'>5227</entry>
     <entry key='thinkpower.port'>5228</entry>
     <entry key='stb.port'>5229</entry>
+    <entry key='b2316.port'>5230</entry>
 
 </properties>

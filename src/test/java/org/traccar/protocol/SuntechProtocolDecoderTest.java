@@ -82,6 +82,15 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
 
         var decoder = new SuntechProtocolDecoder(null);
 
+        verifyPosition(decoder, buffer(
+                "BLE;1140000053;114;1.0.1;20211001;17:27:09;+28.433465;-82.565891;1;-43;-46;-41;ACB89523EF68;247;0;0"));
+
+        verifyPosition(decoder, buffer(
+                "BLE;0820012345;82;1.0.0;20191203;17:00:51;+32.691615;-117.297160;2;-32;-100;33;AABBCCDDEEFF;12;18;52;1;-44;44;112233445566;32;69;101"));
+
+        verifyNull(decoder, buffer(
+                "BSA;0820012345;001FFF;82;1.0.0;1;20191203;17:00:51;+32.691615;-117.297160;1;-55;68:11:6A:FD:1A:A7;6AA5;1DE8"));
+
         verifyAttribute(decoder, buffer(
                 "ST300UEX;511331307;45;311;20210420;12:41:01;12361;-01.280825;-047.931773;000.000;000.00;16;1;0;12.54;000000;23;GTSL|6|1|0|9255143|2|;6F;000276;0.0;1;00000000000000;0"),
                 Position.KEY_DRIVER_UNIQUE_ID, "9255143");

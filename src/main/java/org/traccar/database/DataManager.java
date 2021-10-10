@@ -41,6 +41,7 @@ import org.traccar.model.Group;
 import org.traccar.model.Maintenance;
 import org.traccar.model.ManagedUser;
 import org.traccar.model.Notification;
+import org.traccar.model.Order;
 import org.traccar.model.Permission;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
@@ -388,6 +389,8 @@ public class DataManager {
                 return Maintenance.class;
             case "notification":
                 return Notification.class;
+            case "order":
+                return Order.class;
             default:
                 throw new ClassNotFoundException();
         }
