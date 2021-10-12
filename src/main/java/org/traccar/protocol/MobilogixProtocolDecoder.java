@@ -39,7 +39,7 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
             .text("[")
             .number("(dddd)-(dd)-(dd) ")         // date (yyyymmdd)
             .number("(dd):(dd):(dd),")           // time (hhmmss)
-            .number("Td,")                       // type
+            .number("Td+,")                      // type
             .number("d+,")                       // device type
             .expression("[^,]+,")                // protocol version
             .expression("([^,]+),")              // serial number
@@ -86,6 +86,7 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
         if (deviceSession == null) {
             return null;
         }
+        position.set(Position.KEY_TYPE, type);
         position.setDeviceId(deviceSession.getDeviceId());
 
         int status = parser.nextHexInt();
