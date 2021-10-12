@@ -296,5 +296,6 @@
     <entry key='thinkpower.port'>5228</entry>
     <entry key='stb.port'>5229</entry>
     <entry key='b2316.port'>5230</entry>
+    <entry key='hoopo.port'>5231</entry>
 
 </properties>
