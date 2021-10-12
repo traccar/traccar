@@ -461,10 +461,8 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position(getProtocolName());
 
-        String type = null;
         if (pattern == PATTERN4) {
-            type = parser.next();
-            position.set(Position.KEY_ALARM, decodeAlarm4(Integer.parseInt(type, 16)));
+            position.set(Position.KEY_ALARM, decodeAlarm4(parser.nextHexInt()));
         }
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
@@ -485,8 +483,8 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (channel != null) {
-            if (type != null) {
-                String response = "$$0014" + type + sentence.substring(sentence.length() - 6, sentence.length() - 2);
+            if (pattern == PATTERN4) {
+                String response = "$$0014AA" + sentence.substring(sentence.length() - 6, sentence.length() - 2);
                 response += String.format("%02X", Checksum.xor(response)).toUpperCase();
                 channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
             } else {
