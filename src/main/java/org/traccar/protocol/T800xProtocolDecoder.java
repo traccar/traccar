@@ -140,7 +140,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             sendResponse(channel, header, type, index, imei, 0);
         }
 
-        if (type == MSG_GPS || type == MSG_GPS_2 ||type == MSG_ALARM || type == MSG_ALARM_2) {
+        if (type == MSG_GPS || type == MSG_GPS_2 || type == MSG_ALARM || type == MSG_ALARM_2) {
 
             return decodePosition(channel, deviceSession, buf, type, index, imei);
 
