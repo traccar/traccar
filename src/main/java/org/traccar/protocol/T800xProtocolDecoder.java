@@ -58,6 +58,8 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_DRIVER_BEHAVIOR_1 = 0x05; // 0x2626
     public static final int MSG_DRIVER_BEHAVIOR_2 = 0x06; // 0x2626
     public static final int MSG_BLE = 0x10;
+    public static final int MSG_GPS_2 = 0x13;
+    public static final int MSG_ALARM_2 = 0x14;
     public static final int MSG_COMMAND = 0x81;
 
     private void sendResponse(Channel channel, short header, int type, int index, ByteBuf imei, int alarm) {
@@ -134,11 +136,11 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        if (type != MSG_GPS && type != MSG_ALARM) {
+        if (type != MSG_GPS && type != MSG_GPS_2 && type != MSG_ALARM) {
             sendResponse(channel, header, type, index, imei, 0);
         }
 
-        if (type == MSG_GPS || type == MSG_ALARM) {
+        if (type == MSG_GPS || type == MSG_GPS_2 ||type == MSG_ALARM || type == MSG_ALARM_2) {
 
             return decodePosition(channel, deviceSession, buf, type, index, imei);
 
@@ -343,12 +345,19 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             position.set("ac", BitUtil.check(io, 13));
             position.set(Position.PREFIX_IN + 3, BitUtil.check(io, 12));
             position.set(Position.PREFIX_IN + 4, BitUtil.check(io, 11));
-            position.set(Position.PREFIX_OUT + 1, BitUtil.check(io, 7));
-            position.set(Position.PREFIX_OUT + 2, BitUtil.check(io, 8));
-            position.set(Position.PREFIX_OUT + 3, BitUtil.check(io, 9));
+
+            if (type == MSG_GPS_2 || type == MSG_ALARM_2) {
+                position.set(Position.KEY_OUTPUT, buf.readUnsignedByte());
+                buf.readUnsignedByte(); // reserved
+            } else {
+                position.set(Position.PREFIX_OUT + 1, BitUtil.check(io, 7));
+                position.set(Position.PREFIX_OUT + 2, BitUtil.check(io, 8));
+                position.set(Position.PREFIX_OUT + 3, BitUtil.check(io, 9));
+            }
 
             if (header != 0x2626) {
-                for (int i = 1; i <= 2; i++) {
+                int adcCount = type == MSG_GPS_2 || type == MSG_ALARM_2 ? 5 : 2;
+                for (int i = 1; i <= adcCount; i++) {
                     String value = ByteBufUtil.hexDump(buf.readSlice(2));
                     if (!value.equals("ffff")) {
                         position.set(Position.PREFIX_ADC + i, Integer.parseInt(value) * 0.01);
