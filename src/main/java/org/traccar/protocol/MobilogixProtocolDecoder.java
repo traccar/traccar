@@ -80,13 +80,13 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position(getProtocolName());
 
-        position.set(Position.KEY_EVENT, type);
         position.setTime(parser.nextDateTime());
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
             return null;
         }
+        position.set(Position.KEY_TYPE, type);
         position.setDeviceId(deviceSession.getDeviceId());
 
         int status = parser.nextHexInt();
