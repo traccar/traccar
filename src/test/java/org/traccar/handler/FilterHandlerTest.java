@@ -26,6 +26,7 @@ public class FilterHandlerTest extends BaseTest {
         config.setString(Keys.FILTER_FUTURE, String.valueOf(5 * 60));
         config.setString(Keys.FILTER_APPROXIMATE, String.valueOf(true));
         config.setString(Keys.FILTER_STATIC, String.valueOf(true));
+        config.setString(Keys.FILTER_STATIC_NORTH, String.valueOf(true));
         config.setString(Keys.FILTER_DISTANCE, String.valueOf(10));
         config.setString(Keys.FILTER_MAX_SPEED, String.valueOf(500));
         config.setString(Keys.FILTER_SKIP_LIMIT, String.valueOf(10));
