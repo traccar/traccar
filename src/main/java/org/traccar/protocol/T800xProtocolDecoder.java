@@ -483,7 +483,9 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        sendResponse(channel, header, type, index, imei, alarm);
+        if (type == MSG_ALARM || type == MSG_ALARM_2) {
+            sendResponse(channel, header, type, index, imei, alarm);
+        }
 
         return position;
     }
