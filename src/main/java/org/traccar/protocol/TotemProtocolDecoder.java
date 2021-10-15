@@ -227,8 +227,22 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_GEOFENCE_EXIT;
             case 0x05:
                 return Position.ALARM_GEOFENCE_ENTER;
+            case 0x06:
+                return Position.ALARM_TOW;
+            case 0x07:
+                return Position.ALARM_GPS_ANTENNA_CUT;
+            case 0x10:
+                return Position.ALARM_POWER_CUT;
+            case 0x11:
+                return Position.ALARM_POWER_RESTORED;
+            case 0x12:
+                return Position.ALARM_LOW_POWER;
+            case 0x13:
+                return Position.ALARM_LOW_BATTERY;
             case 0x40:
                 return Position.ALARM_SHOCK;
+            case 0x41:
+                return Position.ALARM_IDLE;
             case 0x42:
                 return Position.ALARM_ACCELERATION;
             case 0x43:
@@ -357,6 +371,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_CHARGE, BitUtil.check(status, 32 - 4));
         position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 5) ? Position.ALARM_GEOFENCE_EXIT : null);
         position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 6) ? Position.ALARM_GEOFENCE_ENTER : null);
+        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 7) ? Position.ALARM_GPS_ANTENNA_CUT : null);
         position.set(Position.PREFIX_OUT + 1, BitUtil.check(status, 32 - 9));
         position.set(Position.PREFIX_OUT + 2, BitUtil.check(status, 32 - 10));
         position.set(Position.PREFIX_OUT + 3, BitUtil.check(status, 32 - 11));
@@ -365,6 +380,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.PREFIX_IN + 3, BitUtil.check(status, 32 - 14));
         position.set(Position.PREFIX_IN + 4, BitUtil.check(status, 32 - 15));
         position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 16) ? Position.ALARM_SHOCK : null);
+        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 17) ? Position.ALARM_IDLE : null);
         position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 18) ? Position.ALARM_LOW_BATTERY : null);
         position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 22) ? Position.ALARM_JAMMING : null);
 
