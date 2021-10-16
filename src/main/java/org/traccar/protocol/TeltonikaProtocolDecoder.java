@@ -299,11 +299,6 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                         break;
                 }
                 break;
-            case 389:
-                if (BitUtil.between(readValue(buf, length, false), 4, 8) == 1) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_SOS);
-                }
-                break;
             default:
                 position.set(Position.PREFIX_IO + id, readValue(buf, length, false));
                 break;
