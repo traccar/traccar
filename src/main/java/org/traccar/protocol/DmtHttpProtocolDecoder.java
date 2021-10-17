@@ -184,6 +184,25 @@ public class DmtHttpProtocolDecoder extends BaseHttpProtocolDecoder {
         position.set(Position.KEY_OUTPUT, root.getInt("outputs"));
         position.set(Position.KEY_STATUS, root.getInt("status"));
 
+        if (root.containsKey("counters")) {
+            JsonArray counters = root.getJsonArray("counters");
+            for (int i = 0; i < counters.size(); i++) {
+                JsonObject counter = counters.getJsonObject(i);
+                switch (counter.getInt("id")) {
+                    case 0:
+                        position.set(Position.KEY_BATTERY, counter.getInt("val") * 0.001);
+                        break;
+                    case 1:
+                        position.set(Position.KEY_BATTERY_LEVEL, counter.getInt("val") * 0.01);
+                        break;
+                    default:
+                        position.set("counter" + counter.getInt("id"), counter.getInt("val"));
+                        break;
+                }
+
+            }
+        }
+
         return position;
     }
 
