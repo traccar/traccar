@@ -375,14 +375,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.PREFIX_OUT + 1, BitUtil.check(status, 32 - 9));
         position.set(Position.PREFIX_OUT + 2, BitUtil.check(status, 32 - 10));
         position.set(Position.PREFIX_OUT + 3, BitUtil.check(status, 32 - 11));
-        position.set(Position.PREFIX_OUT + 4, BitUtil.check(status, 32 - 12));
-        position.set(Position.PREFIX_IN + 2, BitUtil.check(status, 32 - 13));
-        position.set(Position.PREFIX_IN + 3, BitUtil.check(status, 32 - 14));
-        position.set(Position.PREFIX_IN + 4, BitUtil.check(status, 32 - 15));
-        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 16) ? Position.ALARM_SHOCK : null);
-        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 17) ? Position.ALARM_IDLE : null);
-        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 18) ? Position.ALARM_LOW_BATTERY : null);
-        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 22) ? Position.ALARM_JAMMING : null);
+        position.set(Position.KEY_STATUS, status); // see https://github.com/traccar/traccar/pull/4762
 
         position.setTime(parser.nextDateTime());
 
