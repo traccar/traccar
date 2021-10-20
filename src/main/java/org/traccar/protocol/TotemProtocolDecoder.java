@@ -375,13 +375,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.PREFIX_OUT + 1, BitUtil.check(status, 32 - 9));
         position.set(Position.PREFIX_OUT + 2, BitUtil.check(status, 32 - 10));
         position.set(Position.PREFIX_OUT + 3, BitUtil.check(status, 32 - 11));
-
-        /**
-          * Different Devices have different meaning for bits 12-22
-          * But unfortunately we cannot reliably detect this, so we store the whole status in KEY_STATUS
-          * See: https://github.com/traccar/traccar/pull/4762
-          */
-        position.set(Position.KEY_STATUS, status);
+        position.set(Position.KEY_STATUS, status); // see https://github.com/traccar/traccar/pull/4762
 
         position.setTime(parser.nextDateTime());
 
