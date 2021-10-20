@@ -129,7 +129,7 @@
       <column name="uniqueid" type="VARCHAR(128)">
         <constraints nullable="false" unique="true" />
       </column>
-      <column name="lastupdate" type="timestamp" />
+      <column name="lastupdate" type="TIMESTAMP(6)" />
       <column name="positionid" type="INT" />
       <column name="groupid" type="INT" />
       <column name="attributes" type="VARCHAR(4000)" />
@@ -162,7 +162,7 @@
       <column name="type" type="VARCHAR(128)">
         <constraints nullable="false" />
       </column>
-      <column name="servertime" type="TIMESTAMP">
+      <column name="servertime" type="TIMESTAMP(6)">
         <constraints nullable="false" />
       </column>
       <column name="deviceid" type="INT" />
@@ -296,13 +296,13 @@
       <column name="deviceid" type="INT">
         <constraints nullable="false" />
       </column>
-      <column name="servertime" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+      <column name="servertime" type="TIMESTAMP(6)" defaultValueComputed="CURRENT_TIMESTAMP">
         <constraints nullable="false" />
       </column>
-      <column name="devicetime" type="TIMESTAMP">
+      <column name="devicetime" type="TIMESTAMP(6)">
         <constraints nullable="false" />
       </column>
-      <column name="fixtime" type="TIMESTAMP">
+      <column name="fixtime" type="TIMESTAMP(6)">
         <constraints nullable="false" />
       </column>
       <column name="valid" type="BOOLEAN">
