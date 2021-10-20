@@ -395,7 +395,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
           * 22 | Reserved   | Reserved   | GSM Jamming
           */
         for (int i = 12; i < 23; i++) {
-            position.set(Position.PREFIX_IO + i, BitUtil.check(status, 32 - i)); 
+            position.set(Position.PREFIX_IO + i, BitUtil.check(status, 32 - i));
         }
 
         position.setTime(parser.nextDateTime());
