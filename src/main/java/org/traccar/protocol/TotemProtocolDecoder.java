@@ -372,31 +372,16 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 5) ? Position.ALARM_GEOFENCE_EXIT : null);
         position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 6) ? Position.ALARM_GEOFENCE_ENTER : null);
         position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 7) ? Position.ALARM_GPS_ANTENNA_CUT : null);
-        position.set(Position.PREFIX_IO + 8, BitUtil.check(status, 32 - 8)); // GPS Module Error
         position.set(Position.PREFIX_OUT + 1, BitUtil.check(status, 32 - 9));
         position.set(Position.PREFIX_OUT + 2, BitUtil.check(status, 32 - 10));
         position.set(Position.PREFIX_OUT + 3, BitUtil.check(status, 32 - 11));
 
         /**
           * Different Devices have different meaning for bits 12-22
-          * But unfortunately we cannot reliably detect this, so we use generic IO<bit> notation
-          *
-          *    | AT05       | AT07       | AT09
-          * 12 | Reserved   | IN2        | OUT4
-          * 13 | IN2        | IN4        | IN2
-          * 14 | IN3        | Shock      | IN3
-          * 15 | IN4        | Idle       | IN4
-          * 16 | Shock      | Low Batt.  | Shock
-          * 17 | Idle       | Drv. Auth. | Idle
-          * 18 | Low Batt.  | GPS Status | Low Batt.
-          * 19 | Drv. Auth. | Batt. chrg.| Drv. Auth.
-          * 20 | GPS Status | GSM Jamming| GPS Status
-          * 21 | Batt. chrg.| Reserved   | Batt. chrg.
-          * 22 | Reserved   | Reserved   | GSM Jamming
+          * But unfortunately we cannot reliably detect this, so we store the whole status in KEY_STATUS
+          * See: https://github.com/traccar/traccar/pull/4762
           */
-        for (int i = 12; i < 23; i++) {
-            position.set(Position.PREFIX_IO + i, BitUtil.check(status, 32 - i));
-        }
+        position.set(Position.KEY_STATUS, status);
 
         position.setTime(parser.nextDateTime());
 
