@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+  logicalFilePath="changelog-fractional-time">
+
+  <changeSet author="author" id="changelog-fractional-time">
+
+    <modifyDataType tableName="tc_positions" columnName="fixtime" newDataType="TIMESTAMP(6)" />
+    <modifyDataType tableName="tc_positions" columnName="servertime" newDataType="TIMESTAMP(6)" />
+    <modifyDataType tableName="tc_positions" columnName="devicetime" newDataType="TIMESTAMP(6)" />
+    <modifyDataType tableName="tc_events" columnName="eventtime" newDataType="TIMESTAMP(6)" />
+    <modifyDataType tableName="tc_devices" columnName="lastupdate" newDataType="TIMESTAMP(6)" />
+
+  </changeSet>
+
+</databaseChangeLog>
