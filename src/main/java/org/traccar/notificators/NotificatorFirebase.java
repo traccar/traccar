@@ -37,6 +37,8 @@ public class NotificatorFirebase extends Notificator {
     private final String key;
 
     public static class Notification {
+        @JsonProperty("title")
+        private String title;
         @JsonProperty("body")
         private String body;
         @JsonProperty("sound")
@@ -67,6 +69,7 @@ public class NotificatorFirebase extends Notificator {
         if (user.getAttributes().containsKey("notificationTokens")) {
 
             Notification notification = new Notification();
+            notification.title=Context.getConfig().getString(Keys.NOTIFICATOR_FIREBASE_TITLE);
             notification.body = NotificationFormatter.formatShortMessage(userId, event, position).trim();
             notification.sound = "default";
 
@@ -77,15 +80,15 @@ public class NotificatorFirebase extends Notificator {
             Context.getClient().target(url).request()
                     .header("Authorization", "key=" + key)
                     .async().post(Entity.json(message), new InvocationCallback<Object>() {
-                @Override
-                public void completed(Object o) {
-                }
+                        @Override
+                        public void completed(Object o) {
+                        }
 
-                @Override
-                public void failed(Throwable throwable) {
-                    LOGGER.warn("Firebase notification error", throwable);
-                }
-            });
+                        @Override
+                        public void failed(Throwable throwable) {
+                            LOGGER.warn("Firebase notification error", throwable);
+                        }
+                    });
         }
     }
 
