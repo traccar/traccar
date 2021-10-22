@@ -27,7 +27,7 @@ public class StbProtocol extends BaseProtocol {
         addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast(new StbFrameDecoder());
+                pipeline.addLast(new JsonFrameDecoder());
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new StbProtocolDecoder(StbProtocol.this));

@@ -20,7 +20,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseFrameDecoder;
 
-public class StbFrameDecoder extends BaseFrameDecoder {
+public class JsonFrameDecoder extends BaseFrameDecoder {
 
     @Override
     protected Object decode(

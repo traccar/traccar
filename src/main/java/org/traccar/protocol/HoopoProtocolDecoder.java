@@ -16,9 +16,7 @@
 package org.traccar.protocol;
 
 import io.netty.channel.Channel;
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import org.traccar.BaseHttpProtocolDecoder;
+import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.model.Position;
@@ -27,11 +25,10 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import java.io.StringReader;
 import java.net.SocketAddress;
-import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.Date;
 
-public class HoopoProtocolDecoder extends BaseHttpProtocolDecoder {
+public class HoopoProtocolDecoder extends BaseProtocolDecoder {
 
     public HoopoProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -41,13 +38,10 @@ public class HoopoProtocolDecoder extends BaseHttpProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        FullHttpRequest request = (FullHttpRequest) msg;
-        String content = request.content().toString(StandardCharsets.UTF_8);
-        JsonObject json = Json.createReader(new StringReader(content)).readObject();
+        JsonObject json = Json.createReader(new StringReader((String) msg)).readObject();
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, json.getString("deviceId"));
         if (deviceSession == null) {
-            sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
             return null;
         }
 
@@ -71,8 +65,6 @@ public class HoopoProtocolDecoder extends BaseHttpProtocolDecoder {
             return position;
 
         }
-
-        sendResponse(channel, HttpResponseStatus.OK);
 
         return null;
     }
