@@ -60,7 +60,7 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         String sentence = (String) msg;
-        String type = sentence.substring(21, 21 + 2);
+        String type = sentence.substring(21, sentence.indexOf(',', 21));
 
         if (channel != null) {
             String time = sentence.substring(1, 20);
@@ -68,12 +68,12 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
             if (type.equals("T1")) {
                 response = String.format("[%s,S1,1]", time);
             } else {
-                response = String.format("[%s,S%c]", time, type.charAt(1));
+                response = String.format("[%s,S%s]", time, type.substring(1));
             }
             channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
 
-        Parser parser = new Parser(PATTERN, (String) msg);
+        Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
             return null;
         }
