@@ -297,5 +297,6 @@
     <entry key='stb.port'>5229</entry>
     <entry key='b2316.port'>5230</entry>
     <entry key='hoopo.port'>5231</entry>
+    <entry key='dualcam.port'>5232</entry>
 
 </properties>
