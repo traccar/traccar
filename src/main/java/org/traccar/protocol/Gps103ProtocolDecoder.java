@@ -157,7 +157,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             case "accident alarm":
                 return Position.ALARM_ACCIDENT;
             case "sensor alarm":
-                return Position.ALARM_SHOCK;
+                return Position.ALARM_VIBRATION;
             case "bonnet alarm":
                 return Position.ALARM_BONNET;
             case "footbrake alarm":

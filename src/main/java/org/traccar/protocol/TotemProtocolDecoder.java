@@ -240,7 +240,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             case 0x13:
                 return Position.ALARM_LOW_BATTERY;
             case 0x40:
-                return Position.ALARM_SHOCK;
+                return Position.ALARM_VIBRATION;
             case 0x41:
                 return Position.ALARM_IDLE;
             case 0x42:

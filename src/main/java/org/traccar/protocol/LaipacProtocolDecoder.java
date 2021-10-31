@@ -93,7 +93,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
             case "H":
                 return Position.ALARM_POWER_OFF;
             case "8":
-                return Position.ALARM_SHOCK;
+                return Position.ALARM_VIBRATION;
             case "7":
             case "4":
                 return Position.ALARM_GEOFENCE_EXIT;

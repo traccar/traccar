@@ -161,7 +161,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             case 7:
                 return Position.ALARM_MOVEMENT;
             case 8:
-                return Position.ALARM_SHOCK;
+                return Position.ALARM_VIBRATION;
             default:
                 return null;
         }
@@ -178,7 +178,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             case 14:
                 return Position.ALARM_LOW_BATTERY;
             case 15:
-                return Position.ALARM_SHOCK;
+                return Position.ALARM_VIBRATION;
             case 16:
                 return Position.ALARM_ACCIDENT;
             case 40:

@@ -190,7 +190,7 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
                 return true;
             case "shock.event.trigger":
                 if (value == JsonValue.TRUE) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_SHOCK);
+                    position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
                 }
                 return true;
             case "overspeeding.event.trigger":

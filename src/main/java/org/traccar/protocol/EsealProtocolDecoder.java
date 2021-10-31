@@ -75,7 +75,7 @@ public class EsealProtocolDecoder extends BaseProtocolDecoder {
             case "Event-Door":
                 return Position.ALARM_DOOR;
             case "Event-Shock":
-                return Position.ALARM_SHOCK;
+                return Position.ALARM_VIBRATION;
             case "Event-Drop":
                 return Position.ALARM_FALL_DOWN;
             case "Event-Lock":

@@ -319,7 +319,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
         switch (BitUtil.between(status, 3, 6)) {
             case 1:
-                position.set(Position.KEY_ALARM, Position.ALARM_SHOCK);
+                position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
                 break;
             case 2:
                 position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
