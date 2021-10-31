@@ -31,6 +31,7 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.model.WifiAccessPoint;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -72,6 +73,37 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
             .expression(",([^,]+)")              // rfid
             .expression(",([^*]*)").optional(2)  // sensors
             .any()
+            .compile();
+
+    private static final Pattern PATTERN_NEW = new PatternBuilder()
+            .text("$$")
+            .number("d+,")                       // length
+            .number("(d+),")                     // imei
+            .number("x+,")                       // index
+            .text("A03,")                        // type
+            .number("(d+)?,")                    // alarm
+            .number("(dd)(dd)(dd)")              // date (yymmdd)
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
+            .number("(d+)|")                     // mcc
+            .number("(d+)|")                     // mnc
+            .number("(x+)|")                     // lac
+            .number("(x+),")                     // cid
+            .number("(d+.d+),")                  // battery
+            .number("(d+),")                     // battery level
+            .number("(x+),")                     // status
+            .groupBegin()
+            .text("0,")                          // gps location
+            .number("([AV]),")                   // validity
+            .number("(d+),")                     // speed
+            .number("(d+),")                     // satellites
+            .number("(-?d+.d+),")                // latitude
+            .number("(-?d+.d+)")                 // longitude
+            .or()
+            .text("1,")                          // wifi location
+            .expression("([^*]+)")               // wifi
+            .groupEnd()
+            .text("*")
+            .number("xx")                        // checksum
             .compile();
 
     private static final Pattern PATTERN_PHOTO = new PatternBuilder()
@@ -158,6 +190,61 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
             }
         }
         return null;
+    }
+
+
+    private Object decodeLocationNew(
+            Channel channel, SocketAddress remoteAddress, String sentence) {
+
+        Parser parser = new Parser(PATTERN_NEW, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        position.set(Position.KEY_ALARM, decodeAlarm(parser.nextInt()));
+
+        position.setDeviceTime(parser.nextDateTime());
+
+        Network network = new Network();
+        network.addCellTower(CellTower.from(
+                parser.nextInt(), parser.nextInt(), parser.nextHexInt(), parser.nextHexInt()));
+
+        position.set(Position.KEY_BATTERY, parser.nextDouble());
+        position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
+        position.set(Position.KEY_STATUS, parser.nextHexInt());
+
+        if (parser.hasNext(5)) {
+
+            position.setValid(parser.next().equals("A"));
+            position.setFixTime(position.getDeviceTime());
+            position.set(Position.KEY_SATELLITES, parser.nextInt());
+            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt()));
+            position.setLatitude(parser.nextDouble());
+            position.setLongitude(parser.nextDouble());
+
+        } else {
+
+            String[] points = parser.next().split("\\|");
+            for (String point : points) {
+                String[] wifi = point.split(":");
+                String mac = wifi[0].replaceAll("(..)", "$1:");
+                network.addWifiAccessPoint(WifiAccessPoint.from(
+                        mac.substring(0, mac.length() - 1), Integer.parseInt(wifi[1])));
+            }
+
+        }
+
+        position.setNetwork(network);
+
+        return position;
     }
 
     private Object decodeLocation(
@@ -300,6 +387,10 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
                     return position;
                 }
             }
+
+        } else if (type.equals("A03")) {
+
+            return decodeLocationNew(channel, remoteAddress, buf.toString(StandardCharsets.US_ASCII));
 
         } else {
 
