@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -187,7 +187,12 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
         int index = 0;
         String[] fragments = sentence.split(",");
 
-        position.setTime(new SimpleDateFormat("HHmmssddMMyy").parse(fragments[index++]));
+        if (fragments[index].matches("[0-9]{12}")) {
+            position.setTime(new SimpleDateFormat("HHmmssddMMyy").parse(fragments[index++]));
+        } else {
+            getLastLocation(position, null);
+            position.set(Position.KEY_RESULT, fragments[index++]);
+        }
 
         for (; index < fragments.length; index += 1) {
             if (!fragments[index].isEmpty()) {
