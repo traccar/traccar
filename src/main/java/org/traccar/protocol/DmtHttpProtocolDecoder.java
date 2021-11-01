@@ -180,9 +180,15 @@ public class DmtHttpProtocolDecoder extends BaseHttpProtocolDecoder {
             position.set(Position.PREFIX_ADC + adc.getInt("id"), adc.getInt("val"));
         }
 
-        position.set(Position.KEY_INPUT, root.getInt("inputs"));
-        position.set(Position.KEY_OUTPUT, root.getInt("outputs"));
-        position.set(Position.KEY_STATUS, root.getInt("status"));
+        int input = root.getInt("inputs");
+        int output = root.getInt("outputs");
+        int status = root.getInt("status");
+
+        position.set(Position.KEY_IGNITION, BitUtil.check(input, 0));
+
+        position.set(Position.KEY_INPUT, input);
+        position.set(Position.KEY_OUTPUT, output);
+        position.set(Position.KEY_STATUS, status);
 
         if (root.containsKey("counters")) {
             JsonArray counters = root.getJsonArray("counters");
