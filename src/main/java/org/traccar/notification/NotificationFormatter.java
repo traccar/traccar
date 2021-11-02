@@ -63,7 +63,7 @@ public final class NotificationFormatter {
         return TextTemplateFormatter.formatFullMessage(velocityContext, event.getType());
     }
 
-    public static String formatShortMessage(long userId, Event event, Position position) {
+    public static ShortMessage formatShortMessage(long userId, Event event, Position position) {
         VelocityContext velocityContext = prepareContext(userId, event, position);
         return TextTemplateFormatter.formatShortMessage(velocityContext, event.getType());
     }

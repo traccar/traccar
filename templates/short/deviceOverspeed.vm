@@ -7,4 +7,5 @@
 #else
 #set($speedString = $numberTool.format("0.0 kn", $position.speed))
 #end
+#set($title = "Overspeed")
 $device.name exceeds the speed $speedString#{if}($geofence) in $geofence.name#{else}#{end} at $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone)

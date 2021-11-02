@@ -1,1 +1,2 @@
+#set($title = "Moving")
 $device.name moving at $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone)

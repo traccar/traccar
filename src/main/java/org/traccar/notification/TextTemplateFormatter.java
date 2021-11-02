@@ -76,8 +76,9 @@ public final class TextTemplateFormatter {
         return new FullMessage((String) velocityContext.get("subject"), formattedMessage);
     }
 
-    public static String formatShortMessage(VelocityContext velocityContext, String name) {
-        return formatMessage(velocityContext, name, "short");
+    public static ShortMessage formatShortMessage(VelocityContext velocityContext, String name) {
+        String formattedMessage = formatMessage(velocityContext, name, "short");
+        return new ShortMessage((String) velocityContext.get("title"), formattedMessage);
     }
 
     private static String formatMessage(

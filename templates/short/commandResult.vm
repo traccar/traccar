@@ -1,1 +1,2 @@
+#set($title = "Command Result")
 $device.name command result received: $position.getString("result") at $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone)

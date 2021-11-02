@@ -24,7 +24,9 @@ import org.traccar.config.Keys;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
+import org.traccar.notification.FullMessage;
 import org.traccar.notification.NotificationFormatter;
+import org.traccar.notification.ShortMessage;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.InvocationCallback;
@@ -68,9 +70,11 @@ public class NotificatorFirebase extends Notificator {
         final User user = Context.getPermissionsManager().getUser(userId);
         if (user.getAttributes().containsKey("notificationTokens")) {
 
+            ShortMessage shortMessage = NotificationFormatter.formatShortMessage(userId, event, position);
+
             Notification notification = new Notification();
-            notification.title=Context.getConfig().getString(Keys.NOTIFICATOR_FIREBASE_TITLE);
-            notification.body = NotificationFormatter.formatShortMessage(userId, event, position).trim();
+            notification.title= shortMessage.getTitle();
+            notification.body = shortMessage.getBody();
             notification.sound = "default";
 
             Message message = new Message();

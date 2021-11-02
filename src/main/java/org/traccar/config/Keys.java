@@ -745,13 +745,6 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
-     * Firebase push notifications title.
-     */
-    public static final ConfigKey<String> NOTIFICATOR_FIREBASE_TITLE = new ConfigKey<>(
-            "notificator.firebase.title",
-            Collections.singletonList(KeyType.GLOBAL));
-
-    /**
      * Pushover notification user name.
      */
     public static final ConfigKey<String> NOTIFICATOR_PUSHOVER_USER = new ConfigKey<>(
