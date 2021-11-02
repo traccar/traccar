@@ -21,8 +21,8 @@ public class ShortMessage {
     private String title;
     private String body;
 
-    public ShortMessage(String subject, String body) {
-        this.title = subject;
+    public ShortMessage(String title, String body) {
+        this.title = title;
         this.body = body;
     }
 
