@@ -71,17 +71,12 @@ public final class TextTemplateFormatter {
         return template;
     }
 
-    public static FullMessage formatFullMessage(VelocityContext velocityContext, String name) {
-        String formattedMessage = formatMessage(velocityContext, name, "full");
-        return new FullMessage((String) velocityContext.get("subject"), formattedMessage);
+    public static Message formatMessage(VelocityContext velocityContext, String name, String templatePath) {
+        String formattedMessage = format(velocityContext, name, templatePath);
+        return new Message((String) velocityContext.get("subject"), formattedMessage);
     }
 
-    public static ShortMessage formatShortMessage(VelocityContext velocityContext, String name) {
-        String formattedMessage = formatMessage(velocityContext, name, "short");
-        return new ShortMessage((String) velocityContext.get("title"), formattedMessage);
-    }
-
-    private static String formatMessage(
+    private static String format(
             VelocityContext velocityContext, String name, String templatePath) {
 
         StringWriter writer = new StringWriter();

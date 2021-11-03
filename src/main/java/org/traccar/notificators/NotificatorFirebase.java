@@ -24,9 +24,8 @@ import org.traccar.config.Keys;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
-import org.traccar.notification.FullMessage;
+import org.traccar.notification.Message;
 import org.traccar.notification.NotificationFormatter;
-import org.traccar.notification.ShortMessage;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.InvocationCallback;
@@ -47,7 +46,7 @@ public class NotificatorFirebase extends Notificator {
         private String sound;
     }
 
-    public static class Message {
+    public static class Payload {
         @JsonProperty("registration_ids")
         private String[] tokens;
         @JsonProperty("notification")
@@ -70,20 +69,20 @@ public class NotificatorFirebase extends Notificator {
         final User user = Context.getPermissionsManager().getUser(userId);
         if (user.getAttributes().containsKey("notificationTokens")) {
 
-            ShortMessage shortMessage = NotificationFormatter.formatShortMessage(userId, event, position);
+            Message shortMessage = NotificationFormatter.formatMessage(userId, event, position, "short");
 
             Notification notification = new Notification();
-            notification.title= shortMessage.getTitle();
+            notification.title = shortMessage.getSubject();
             notification.body = shortMessage.getBody();
             notification.sound = "default";
 
-            Message message = new Message();
-            message.tokens = user.getString("notificationTokens").split("[, ]");
-            message.notification = notification;
+            Payload payload = new Payload();
+            payload.tokens = user.getString("notificationTokens").split("[, ]");
+            payload.notification = notification;
 
             Context.getClient().target(url).request()
                     .header("Authorization", "key=" + key)
-                    .async().post(Entity.json(message), new InvocationCallback<Object>() {
+                    .async().post(Entity.json(payload), new InvocationCallback<Object>() {
                         @Override
                         public void completed(Object o) {
                         }

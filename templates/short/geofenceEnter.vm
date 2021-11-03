@@ -1,2 +1,2 @@
-#set($title = "Geofence entered")
+#set($subject = "$device.name: has entered geofence")
 $device.name has entered geofence $geofence.name at $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone)

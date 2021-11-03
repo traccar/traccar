@@ -22,9 +22,9 @@ import org.traccar.database.StatisticsManager;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
+import org.traccar.notification.Message;
 import org.traccar.notification.MessageException;
 import org.traccar.notification.NotificationFormatter;
-import org.traccar.notification.ShortMessage;
 
 public final class NotificatorSms extends Notificator {
 
@@ -32,7 +32,7 @@ public final class NotificatorSms extends Notificator {
     public void sendAsync(long userId, Event event, Position position) {
         final User user = Context.getPermissionsManager().getUser(userId);
         if (user.getPhone() != null) {
-            ShortMessage shortMessage = NotificationFormatter.formatShortMessage(userId, event, position);
+            Message shortMessage = NotificationFormatter.formatMessage(userId, event, position, "short");
             Main.getInjector().getInstance(StatisticsManager.class).registerSms();
             Context.getSmsManager().sendMessageAsync(user.getPhone(),
                     shortMessage.getBody(), false);
@@ -43,7 +43,7 @@ public final class NotificatorSms extends Notificator {
     public void sendSync(long userId, Event event, Position position) throws MessageException, InterruptedException {
         final User user = Context.getPermissionsManager().getUser(userId);
         if (user.getPhone() != null) {
-            ShortMessage shortMessage = NotificationFormatter.formatShortMessage(userId, event, position);
+            Message shortMessage = NotificationFormatter.formatMessage(userId, event, position, "short");
             Main.getInjector().getInstance(StatisticsManager.class).registerSms();
             Context.getSmsManager().sendMessageSync(user.getPhone(),
                     shortMessage.getBody(), false);

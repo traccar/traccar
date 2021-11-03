@@ -1,2 +1,2 @@
-#set($title = "Offline")
+#set($subject = "$device.name: offline")
 $device.name offline at $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone)

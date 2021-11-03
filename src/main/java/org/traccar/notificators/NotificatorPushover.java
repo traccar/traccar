@@ -23,8 +23,8 @@ import org.traccar.config.Keys;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
+import org.traccar.notification.Message;
 import org.traccar.notification.NotificationFormatter;
-import org.traccar.notification.ShortMessage;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.InvocationCallback;
@@ -37,7 +37,7 @@ public class NotificatorPushover extends Notificator {
     private final String token;
     private final String user;
 
-    public static class Message {
+    public static class Payload {
         @JsonProperty("token")
         private String token;
         @JsonProperty("user")
@@ -77,26 +77,26 @@ public class NotificatorPushover extends Notificator {
             return;
         }
 
-        ShortMessage shortMessage = NotificationFormatter.formatShortMessage(userId, event, position);
+        Message shortMessage = NotificationFormatter.formatMessage(userId, event, position, "short");
 
-        Message message = new Message();
-        message.token = token;
-        message.user = this.user;
-        message.device = device;
-        message.title= shortMessage.getTitle();
-        message.message = shortMessage.getBody();
+        Payload payload = new Payload();
+        payload.token = token;
+        payload.user = this.user;
+        payload.device = device;
+        payload.title = shortMessage.getSubject();
+        payload.message = shortMessage.getBody();
 
         Context.getClient().target(url).request()
-                .async().post(Entity.json(message), new InvocationCallback<Object>() {
-            @Override
-            public void completed(Object o) {
-            }
+                .async().post(Entity.json(payload), new InvocationCallback<Object>() {
+                    @Override
+                    public void completed(Object o) {
+                    }
 
-            @Override
-            public void failed(Throwable throwable) {
-                LOGGER.warn("Pushover API error", throwable);
-            }
-        });
+                    @Override
+                    public void failed(Throwable throwable) {
+                        LOGGER.warn("Pushover API error", throwable);
+                    }
+                });
     }
 
     @Override

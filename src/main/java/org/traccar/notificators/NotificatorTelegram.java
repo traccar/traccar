@@ -24,8 +24,8 @@ import org.traccar.model.User;
 import org.traccar.config.Keys;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+import org.traccar.notification.Message;
 import org.traccar.notification.NotificationFormatter;
-import org.traccar.notification.ShortMessage;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.InvocationCallback;
@@ -75,15 +75,15 @@ public class NotificatorTelegram extends Notificator {
     private void executeRequest(String url, Object message) {
         Context.getClient().target(url).request()
                 .async().post(Entity.json(message), new InvocationCallback<Object>() {
-            @Override
-            public void completed(Object o) {
-            }
+                    @Override
+                    public void completed(Object o) {
+                    }
 
-            @Override
-            public void failed(Throwable throwable) {
-                LOGGER.warn("Telegram API error", throwable);
-            }
-        });
+                    @Override
+                    public void failed(Throwable throwable) {
+                        LOGGER.warn("Telegram API error", throwable);
+                    }
+                });
     }
 
     private LocationMessage createLocationMessage(String messageChatId, Position position) {
@@ -99,7 +99,7 @@ public class NotificatorTelegram extends Notificator {
     @Override
     public void sendSync(long userId, Event event, Position position) {
         User user = Context.getPermissionsManager().getUser(userId);
-        ShortMessage shortMessage = NotificationFormatter.formatShortMessage(userId, event, position);
+        Message shortMessage = NotificationFormatter.formatMessage(userId, event, position, "short");
 
         TextMessage message = new TextMessage();
         message.chatId = user.getString("telegramChatId");
