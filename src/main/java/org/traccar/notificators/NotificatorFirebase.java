@@ -83,15 +83,15 @@ public class NotificatorFirebase extends Notificator {
             Context.getClient().target(url).request()
                     .header("Authorization", "key=" + key)
                     .async().post(Entity.json(message), new InvocationCallback<Object>() {
-                        @Override
-                        public void completed(Object o) {
-                        }
+                @Override
+                public void completed(Object o) {
+                }
 
-                        @Override
-                        public void failed(Throwable throwable) {
-                            LOGGER.warn("Firebase notification error", throwable);
-                        }
-                    });
+                @Override
+                public void failed(Throwable throwable) {
+                    LOGGER.warn("Firebase notification error", throwable);
+                }
+            });
         }
     }
 
