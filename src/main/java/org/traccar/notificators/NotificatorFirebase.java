@@ -72,7 +72,7 @@ public class NotificatorFirebase extends Notificator {
             NotificationMessage shortMessage = NotificationFormatter.formatMessage(userId, event, position,"short");
 
             Notification notification = new Notification();
-            notification.title= shortMessage.getSubject();
+            notification.title = shortMessage.getSubject();
             notification.body = shortMessage.getBody();
             notification.sound = "default";
 
