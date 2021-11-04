@@ -53,7 +53,7 @@ public class PasswordResource extends BaseResource {
                 Context.getUsersManager().updateItem(user);
                 VelocityContext velocityContext = TextTemplateFormatter.prepareContext(null);
                 velocityContext.put("token", token);
-                NotificationMessage fullMessage = TextTemplateFormatter.formatMessage(velocityContext, "passwordReset","full");
+                NotificationMessage fullMessage = TextTemplateFormatter.formatMessage(velocityContext, "passwordReset", "full");
                 Context.getMailManager().sendMessage(userId, fullMessage.getSubject(), fullMessage.getBody());
                 break;
             }
