@@ -74,8 +74,7 @@ public final class TextTemplateFormatter {
     public static NotificationMessage formatMessage(VelocityContext velocityContext, String name, String templatePath) {
         StringWriter writer = new StringWriter();
         getTemplate(name, templatePath).merge(velocityContext, writer);
-        String formattedMessage = writer.toString();
-        return new NotificationMessage((String) velocityContext.get("subject"), formattedMessage);
+        return new NotificationMessage((String) velocityContext.get("subject"), writer.toString());
     }
 
 }
