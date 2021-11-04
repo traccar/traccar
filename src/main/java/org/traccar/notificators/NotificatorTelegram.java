@@ -99,7 +99,7 @@ public class NotificatorTelegram extends Notificator {
     @Override
     public void sendSync(long userId, Event event, Position position) {
         User user = Context.getPermissionsManager().getUser(userId);
-        NotificationMessage shortMessage = NotificationFormatter.formatMessage(userId, event, position,"short");
+        NotificationMessage shortMessage = NotificationFormatter.formatMessage(userId, event, position, "short");
 
         TextMessage message = new TextMessage();
         message.chatId = user.getString("telegramChatId");
