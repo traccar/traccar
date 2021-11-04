@@ -53,6 +53,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_TERMINAL_CONTROL = 0x8105;
     public static final int MSG_TERMINAL_AUTH = 0x0102;
     public static final int MSG_LOCATION_REPORT = 0x0200;
+    public static final int MSG_ACCELERATION = 0x2070;
     public static final int MSG_LOCATION_REPORT_2 = 0x5501;
     public static final int MSG_LOCATION_REPORT_BLIND = 0x5502;
     public static final int MSG_LOCATION_BATCH = 0x0704;
@@ -136,6 +137,11 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
+    private int readSignedWord(ByteBuf buf) {
+        int value = buf.readUnsignedShort();
+        return BitUtil.check(value, 15) ? -BitUtil.to(value, 15) : BitUtil.to(value, 15);
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -215,6 +221,33 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 channel.writeAndFlush(new NetworkMessage(
                         formatMessage(MSG_TERMINAL_REGISTER_RESPONSE, id, false, response), remoteAddress));
             }
+
+        } else if (type == MSG_ACCELERATION) {
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            StringBuilder data = new StringBuilder("[");
+            while (buf.readableBytes() > 2) {
+                buf.skipBytes(6); // time
+                if (data.length() > 1) {
+                    data.append(",");
+                }
+                data.append("[");
+                data.append(readSignedWord(buf));
+                data.append(",");
+                data.append(readSignedWord(buf));
+                data.append(",");
+                data.append(readSignedWord(buf));
+                data.append("]");
+            }
+            data.append("]");
+
+            position.set(Position.KEY_G_SENSOR, data.toString());
+
+            return position;
 
         }
 
