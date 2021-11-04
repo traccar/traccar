@@ -1,2 +1,2 @@
-#set($title = "Unknown")
+#set($subject = "Unknown type")
 Unknown type

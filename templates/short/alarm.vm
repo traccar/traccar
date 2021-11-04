@@ -1,2 +1,2 @@
-#set($title = "Alarm")
+#set($subject = "$device.name: alarm!")
 $device.name alarm: $position.getString("alarm") at $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone)

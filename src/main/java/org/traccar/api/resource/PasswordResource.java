@@ -19,7 +19,7 @@ import org.apache.velocity.VelocityContext;
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.model.User;
-import org.traccar.notification.FullMessage;
+import org.traccar.notification.NotificationMessage;
 import org.traccar.notification.TextTemplateFormatter;
 
 import javax.annotation.security.PermitAll;
@@ -53,8 +53,8 @@ public class PasswordResource extends BaseResource {
                 Context.getUsersManager().updateItem(user);
                 VelocityContext velocityContext = TextTemplateFormatter.prepareContext(null);
                 velocityContext.put("token", token);
-                FullMessage message = TextTemplateFormatter.formatFullMessage(velocityContext, "passwordReset");
-                Context.getMailManager().sendMessage(userId, message.getSubject(), message.getBody());
+                NotificationMessage fullMessage = TextTemplateFormatter.formatMessage(velocityContext, "passwordReset","full");
+                Context.getMailManager().sendMessage(userId, fullMessage.getSubject(), fullMessage.getBody());
                 break;
             }
         }

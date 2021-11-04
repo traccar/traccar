@@ -24,7 +24,7 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.notification.NotificationFormatter;
-import org.traccar.notification.ShortMessage;
+import org.traccar.notification.NotificationMessage;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.InvocationCallback;
@@ -77,13 +77,13 @@ public class NotificatorPushover extends Notificator {
             return;
         }
 
-        ShortMessage shortMessage = NotificationFormatter.formatShortMessage(userId, event, position);
+        NotificationMessage shortMessage = NotificationFormatter.formatMessage(userId, event, position,"short");
 
         Message message = new Message();
         message.token = token;
         message.user = this.user;
         message.device = device;
-        message.title= shortMessage.getTitle();
+        message.title= shortMessage.getSubject();
         message.message = shortMessage.getBody();
 
         Context.getClient().target(url).request()

@@ -16,18 +16,18 @@
  */
 package org.traccar.notification;
 
-public class ShortMessage {
+public class NotificationMessage {
 
-    private String title;
+    private String subject;
     private String body;
 
-    public ShortMessage(String title, String body) {
-        this.title = title;
+    public NotificationMessage(String subject, String body) {
+        this.subject = subject;
         this.body = body;
     }
 
-    public String getTitle() {
-        return title;
+    public String getSubject() {
+        return subject;
     }
 
     public String getBody() {

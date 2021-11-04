@@ -71,22 +71,11 @@ public final class TextTemplateFormatter {
         return template;
     }
 
-    public static FullMessage formatFullMessage(VelocityContext velocityContext, String name) {
-        String formattedMessage = formatMessage(velocityContext, name, "full");
-        return new FullMessage((String) velocityContext.get("subject"), formattedMessage);
-    }
-
-    public static ShortMessage formatShortMessage(VelocityContext velocityContext, String name) {
-        String formattedMessage = formatMessage(velocityContext, name, "short");
-        return new ShortMessage((String) velocityContext.get("title"), formattedMessage);
-    }
-
-    private static String formatMessage(
-            VelocityContext velocityContext, String name, String templatePath) {
-
+    public static NotificationMessage formatMessage(VelocityContext velocityContext, String name, String templatePath) {
         StringWriter writer = new StringWriter();
         getTemplate(name, templatePath).merge(velocityContext, writer);
-        return writer.toString();
+        String formattedMessage = writer.toString();
+        return new NotificationMessage((String) velocityContext.get("subject"), formattedMessage);
     }
 
 }
