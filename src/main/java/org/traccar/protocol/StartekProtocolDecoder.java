@@ -80,6 +80,7 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
             .expression("([^,]+)?,?")            // temperature
             .groupEnd("?")
             .groupEnd("?")
+            .any()
             .compile();
 
     private String decodeAlarm(int value) {
