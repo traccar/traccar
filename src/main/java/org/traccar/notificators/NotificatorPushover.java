@@ -77,13 +77,13 @@ public class NotificatorPushover extends Notificator {
             return;
         }
 
-        NotificationMessage shortMessage = NotificationFormatter.formatMessage(userId, event, position,"short");
+        NotificationMessage shortMessage = NotificationFormatter.formatMessage(userId, event, position, "short");
 
         Message message = new Message();
         message.token = token;
         message.user = this.user;
         message.device = device;
-        message.title= shortMessage.getSubject();
+        message.title = shortMessage.getSubject();
         message.message = shortMessage.getBody();
 
         Context.getClient().target(url).request()

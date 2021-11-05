@@ -32,7 +32,7 @@ public final class NotificatorSms extends Notificator {
     public void sendAsync(long userId, Event event, Position position) {
         final User user = Context.getPermissionsManager().getUser(userId);
         if (user.getPhone() != null) {
-            NotificationMessage shortMessage = NotificationFormatter.formatMessage(userId, event, position,"short");
+            NotificationMessage shortMessage = NotificationFormatter.formatMessage(userId, event, position, "short");
             Main.getInjector().getInstance(StatisticsManager.class).registerSms();
             Context.getSmsManager().sendMessageAsync(user.getPhone(),
                     shortMessage.getBody(), false);
@@ -43,7 +43,7 @@ public final class NotificatorSms extends Notificator {
     public void sendSync(long userId, Event event, Position position) throws MessageException, InterruptedException {
         final User user = Context.getPermissionsManager().getUser(userId);
         if (user.getPhone() != null) {
-            NotificationMessage shortMessage = NotificationFormatter.formatMessage(userId, event, position,"short");
+            NotificationMessage shortMessage = NotificationFormatter.formatMessage(userId, event, position, "short");
             Main.getInjector().getInstance(StatisticsManager.class).registerSms();
             Context.getSmsManager().sendMessageSync(user.getPhone(),
                     shortMessage.getBody(), false);

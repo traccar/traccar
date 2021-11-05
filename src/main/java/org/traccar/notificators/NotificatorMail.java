@@ -30,7 +30,7 @@ public final class NotificatorMail extends Notificator {
     @Override
     public void sendSync(long userId, Event event, Position position) throws MessageException {
         try {
-            NotificationMessage fullMessage = NotificationFormatter.formatMessage(userId, event, position,"full");
+            NotificationMessage fullMessage = NotificationFormatter.formatMessage(userId, event, position, "full");
             Context.getMailManager().sendMessage(userId, fullMessage.getSubject(), fullMessage.getBody());
         } catch (MessagingException e) {
             throw new MessageException(e);

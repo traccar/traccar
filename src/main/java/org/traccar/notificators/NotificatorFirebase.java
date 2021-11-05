@@ -69,7 +69,7 @@ public class NotificatorFirebase extends Notificator {
         final User user = Context.getPermissionsManager().getUser(userId);
         if (user.getAttributes().containsKey("notificationTokens")) {
 
-            NotificationMessage shortMessage = NotificationFormatter.formatMessage(userId, event, position,"short");
+            NotificationMessage shortMessage = NotificationFormatter.formatMessage(userId, event, position, "short");
 
             Notification notification = new Notification();
             notification.title = shortMessage.getSubject();
