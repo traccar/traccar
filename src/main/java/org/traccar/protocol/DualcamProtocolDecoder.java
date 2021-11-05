@@ -64,18 +64,16 @@ public class DualcamProtocolDecoder extends BaseProtocolDecoder {
                 DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, uniqueId);
                 long settings = buf.readUnsignedInt();
                 if (channel != null && deviceSession != null) {
-                    if (BitUtil.check(settings, 26)) {
-                        ByteBuf response = Unpooled.buffer();
+                    ByteBuf response = Unpooled.buffer();
+                    if (BitUtil.between(settings, 26, 28) > 0) {
                         response.writeShort(MSG_FILE_REQUEST);
-                        String file = "%photof";
+                        String file = BitUtil.check(settings, 26) ? "%photof" : "%photor";
                         response.writeShort(file.length());
                         response.writeCharSequence(file, StandardCharsets.US_ASCII);
-                        channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
                     } else {
-                        ByteBuf response = Unpooled.buffer();
                         response.writeShort(MSG_COMPLETE);
-                        channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
                     }
+                    channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
                 }
                 break;
             case MSG_START:
