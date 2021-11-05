@@ -93,7 +93,7 @@ public class DualcamProtocolDecoder extends BaseProtocolDecoder {
                 break;
             case MSG_DATA:
                 buf.readUnsignedShort(); // length
-                photo.writeBytes(buf, buf.readableBytes());
+                photo.writeBytes(buf, buf.readableBytes() - 2);
                 if (currentPacket == packetCount) {
                     deviceSession = getDeviceSession(channel, remoteAddress);
                     Position position = new Position(getProtocolName());
