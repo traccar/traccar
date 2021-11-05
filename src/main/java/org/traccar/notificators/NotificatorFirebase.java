@@ -24,6 +24,7 @@ import org.traccar.config.Keys;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
+import org.traccar.notification.NotificationMessage;
 import org.traccar.notification.NotificationFormatter;
 
 import javax.ws.rs.client.Entity;
@@ -37,6 +38,8 @@ public class NotificatorFirebase extends Notificator {
     private final String key;
 
     public static class Notification {
+        @JsonProperty("title")
+        private String title;
         @JsonProperty("body")
         private String body;
         @JsonProperty("sound")
@@ -66,8 +69,11 @@ public class NotificatorFirebase extends Notificator {
         final User user = Context.getPermissionsManager().getUser(userId);
         if (user.getAttributes().containsKey("notificationTokens")) {
 
+            NotificationMessage shortMessage = NotificationFormatter.formatMessage(userId, event, position, "short");
+
             Notification notification = new Notification();
-            notification.body = NotificationFormatter.formatShortMessage(userId, event, position).trim();
+            notification.title = shortMessage.getSubject();
+            notification.body = shortMessage.getBody();
             notification.sound = "default";
 
             Message message = new Message();

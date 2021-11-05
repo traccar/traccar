@@ -24,6 +24,7 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.notification.NotificationFormatter;
+import org.traccar.notification.NotificationMessage;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.InvocationCallback;
@@ -43,6 +44,8 @@ public class NotificatorPushover extends Notificator {
         private String user;
         @JsonProperty("device")
         private String device;
+        @JsonProperty("title")
+        private String title;
         @JsonProperty("message")
         private String message;
     }
@@ -74,11 +77,14 @@ public class NotificatorPushover extends Notificator {
             return;
         }
 
+        NotificationMessage shortMessage = NotificationFormatter.formatMessage(userId, event, position, "short");
+
         Message message = new Message();
         message.token = token;
         message.user = this.user;
         message.device = device;
-        message.message = NotificationFormatter.formatShortMessage(userId, event, position);
+        message.title = shortMessage.getSubject();
+        message.message = shortMessage.getBody();
 
         Context.getClient().target(url).request()
                 .async().post(Entity.json(message), new InvocationCallback<Object>() {

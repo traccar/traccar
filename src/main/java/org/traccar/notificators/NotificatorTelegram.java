@@ -25,6 +25,7 @@ import org.traccar.config.Keys;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.notification.NotificationFormatter;
+import org.traccar.notification.NotificationMessage;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.InvocationCallback;
@@ -98,12 +99,14 @@ public class NotificatorTelegram extends Notificator {
     @Override
     public void sendSync(long userId, Event event, Position position) {
         User user = Context.getPermissionsManager().getUser(userId);
+        NotificationMessage shortMessage = NotificationFormatter.formatMessage(userId, event, position, "short");
+
         TextMessage message = new TextMessage();
         message.chatId = user.getString("telegramChatId");
         if (message.chatId == null) {
             message.chatId = chatId;
         }
-        message.text = NotificationFormatter.formatShortMessage(userId, event, position);
+        message.text = shortMessage.getBody();
         executeRequest(urlSendText, message);
         if (sendLocation && position != null) {
             executeRequest(urlSendLocation, createLocationMessage(message.chatId, position));

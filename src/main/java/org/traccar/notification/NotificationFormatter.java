@@ -58,14 +58,9 @@ public final class NotificationFormatter {
         return velocityContext;
     }
 
-    public static FullMessage formatFullMessage(long userId, Event event, Position position) {
+    public static NotificationMessage formatMessage(long userId, Event event, Position position, String templatePath) {
         VelocityContext velocityContext = prepareContext(userId, event, position);
-        return TextTemplateFormatter.formatFullMessage(velocityContext, event.getType());
-    }
-
-    public static String formatShortMessage(long userId, Event event, Position position) {
-        VelocityContext velocityContext = prepareContext(userId, event, position);
-        return TextTemplateFormatter.formatShortMessage(velocityContext, event.getType());
+        return TextTemplateFormatter.formatMessage(velocityContext, event.getType(), templatePath);
     }
 
 }

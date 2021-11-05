@@ -1,1 +1,2 @@
+#set($subject = "$device.name: ignition ON")
 $device.name ignition ON at $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone)
