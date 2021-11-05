@@ -25,8 +25,8 @@ public class DualcamProtocol extends BaseProtocol {
         addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
+                pipeline.addLast(new DualcamFrameDecoder());
                 pipeline.addLast(new DualcamProtocolDecoder(DualcamProtocol.this));
-                pipeline.addLast(new DishaProtocolDecoder(DualcamProtocol.this));
             }
         });
     }

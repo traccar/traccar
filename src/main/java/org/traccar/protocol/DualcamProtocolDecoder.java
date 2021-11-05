@@ -110,6 +110,7 @@ public class DualcamProtocolDecoder extends BaseProtocolDecoder {
                         response.writeShort(MSG_INIT_REQUEST);
                         channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
                     }
+                    return position;
                 } else {
                     currentPacket += 1;
                 }
