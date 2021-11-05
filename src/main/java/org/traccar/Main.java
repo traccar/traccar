@@ -44,6 +44,10 @@ public final class Main {
         return injector;
     }
 
+    public static void initInjector() {
+        injector = Guice.createInjector(new MainModule());
+    }
+
     private Main() {
     }
 
@@ -135,7 +139,7 @@ public final class Main {
     public static void run(String configFile) {
         try {
             Context.init(configFile);
-            injector = Guice.createInjector(new MainModule());
+            initInjector();
             logSystemInfo();
             LOGGER.info("Version: " + Main.class.getPackage().getImplementationVersion());
             LOGGER.info("Starting server...");
