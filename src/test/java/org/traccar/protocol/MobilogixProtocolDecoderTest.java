@@ -11,6 +11,9 @@ public class MobilogixProtocolDecoderTest extends ProtocolTest {
 
         var decoder = new MobilogixProtocolDecoder(null);
 
+        verifyAttributes(decoder, text(
+                "[2021-08-20 19:27:14,T14,1,V1.3.5,201909000982,53,12.18"));
+
         verifyNull(decoder, text(
                 "[2020-12-01 14:00:22,T1,1,V1.1.1,201951132031,,,12345678,724108005415815,359366080211420"));
 
@@ -29,7 +32,7 @@ public class MobilogixProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "[2021-10-25 20:54:11,T12,1,V1.2.3,201951132044,3F,9.23,991,-25.909262,-47.045387,1,341"));
 
-        verifyNull(decoder, text(
+        verifyAttributes(decoder, text(
                 "[2021-10-25 20:48:14,T14,1,V1.2.3,201951132044,51,0.50"));
 
         verifyPosition(decoder, text(

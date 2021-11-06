@@ -40,11 +40,13 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
             .number("(dddd)-(dd)-(dd) ")         // date (yyyymmdd)
             .number("(dd):(dd):(dd),")           // time (hhmmss)
             .number("Td+,")                      // type
-            .number("d+,")                       // device type
+            .number("(d),")                      // archive
             .expression("[^,]+,")                // protocol version
             .expression("([^,]+),")              // serial number
             .number("(xx),")                     // status
-            .number("(d+.d+),")                  // battery
+            .number("(d+.d+)")                   // battery
+            .groupBegin()
+            .text(",")
             .number("(d)")                       // valid
             .number("(d)")                       // rssi
             .number("(d),")                      // satellites
@@ -52,8 +54,30 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
             .number("(-?d+.d+),")                // longitude
             .number("(d+.?d*),")                 // speed
             .number("(d+.?d*)")                  // course
+            .groupEnd("?")
             .any()
             .compile();
+
+    private String decodeAlarm(String type) {
+        switch (type) {
+            case "T8":
+                return Position.ALARM_LOW_BATTERY;
+            case "T9":
+                return Position.ALARM_VIBRATION;
+            case "T10":
+                return Position.ALARM_POWER_CUT;
+            case "T11":
+                return Position.ALARM_LOW_POWER;
+            case "T12":
+                return Position.ALARM_GEOFENCE_EXIT;
+            case "T13":
+                return Position.ALARM_OVERSPEED;
+            case "T15":
+                return Position.ALARM_TOW;
+            default:
+                return null;
+        }
+    }
 
     @Override
     protected Object decode(
@@ -80,7 +104,10 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position(getProtocolName());
 
-        position.setTime(parser.nextDateTime());
+        position.setDeviceTime(parser.nextDateTime());
+        if (parser.nextInt() == 0) {
+            position.set(Position.KEY_ARCHIVE, true);
+        }
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
@@ -89,6 +116,7 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.set(Position.KEY_TYPE, type);
+        position.set(Position.KEY_ALARM, decodeAlarm(type));
 
         int status = parser.nextHexInt();
         position.set(Position.KEY_IGNITION, BitUtil.check(status, 2));
@@ -97,15 +125,24 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_BATTERY, parser.nextDouble());
 
-        position.setValid(parser.nextInt() > 0);
+        if (parser.hasNext(7)) {
 
-        position.set(Position.KEY_RSSI, parser.nextInt());
-        position.set(Position.KEY_SATELLITES, parser.nextInt());
+            position.setValid(parser.nextInt() > 0);
+            position.setFixTime(position.getDeviceTime());
 
-        position.setLatitude(parser.nextDouble());
-        position.setLongitude(parser.nextDouble());
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
-        position.setCourse(parser.nextDouble());
+            position.set(Position.KEY_RSSI, parser.nextInt());
+            position.set(Position.KEY_SATELLITES, parser.nextInt());
+
+            position.setLatitude(parser.nextDouble());
+            position.setLongitude(parser.nextDouble());
+            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+            position.setCourse(parser.nextDouble());
+
+        } else {
+
+            getLastLocation(position, position.getDeviceTime());
+
+        }
 
         return position;
     }
