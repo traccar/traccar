@@ -21,6 +21,15 @@ import org.traccar.database.QueryIgnore;
 
 public class Position extends Message {
 
+
+    public static final String crash = "crash";
+    public static final String  limited_crash_trace_nc = "limitedCrashTraceNotCalibrate";
+    public static final String limited_crash_trace_c = "limitedCrashTraceCalibrate";
+    public static final String full_crash_trace_cn = "fullCrashTraceNotCalibrate";
+    public static final String full_crash_trace_n = "fullCrashTraceCalibrate";
+    public static final String crash_detected  = "crashDetected";
+    public static final String battery_present = "batteryPresent";
+    public static final String battery_unplug = "batteryUnplug";
     public static final String KEY_ORIGINAL = "raw";
     public static final String KEY_INDEX = "index";
     public static final String KEY_HDOP = "hdop";
