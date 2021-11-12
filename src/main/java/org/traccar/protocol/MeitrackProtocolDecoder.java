@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,15 +68,23 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // runtime
             .number("(d+)|")                     // mcc
             .number("(d+)|")                     // mnc
-            .number("(x+)|")                     // lac
-            .number("(x+),")                     // cid
+            .number("(x+)?|")                    // lac
+            .number("(x+)?,")                    // cid
             .number("(xx)")                      // input
             .number("(xx),")                     // output
+            .groupBegin()
+            .number("(d+.d+)|")                  // battery
+            .number("(d+.d+)|")                  // power
+            .number("d+.d+|")                    // rtc voltage
+            .number("d+.d+|")                    // mcu voltage
+            .number("d+.d+,")                    // gps voltage
+            .or()
             .number("(x+)?|")                    // adc1
             .number("(x+)?|")                    // adc2
             .number("(x+)?|")                    // adc3
             .number("(x+)|")                     // battery
             .number("(x+)?,")                    // power
+            .groupEnd()
             .groupBegin()
             .expression("([^,]+)?,").optional()  // event specific
             .expression("[^,]*,")                // reserved
@@ -174,51 +182,65 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_ODOMETER, parser.nextInt());
         position.set("runtime", parser.next());
 
-        position.setNetwork(new Network(CellTower.from(
-                parser.nextInt(), parser.nextInt(), parser.nextHexInt(), parser.nextHexInt(), rssi)));
+        int mcc = parser.nextInt();
+        int mnc = parser.nextInt();
+        int lac = parser.nextHexInt(0);
+        int cid = parser.nextHexInt(0);
+        if (mcc != 0 && mnc != 0) {
+            position.setNetwork(new Network(CellTower.from(mcc, mnc, lac, cid, rssi)));
+        }
 
         position.set(Position.KEY_INPUT, parser.nextHexInt());
         position.set(Position.KEY_OUTPUT, parser.nextHexInt());
 
-        for (int i = 1; i <= 3; i++) {
-            position.set(Position.PREFIX_ADC + i, parser.nextHexInt());
-        }
+        if (parser.hasNext(2)) {
 
-        String deviceModel = Context.getIdentityManager().getById(deviceSession.getDeviceId()).getModel();
-        if (deviceModel == null) {
-            deviceModel = "";
-        }
-        switch (deviceModel.toUpperCase()) {
-            case "MVT340":
-            case "MVT380":
-                position.set(Position.KEY_BATTERY, parser.nextHexInt(0) * 3.0 * 2.0 / 1024.0);
-                position.set(Position.KEY_POWER, parser.nextHexInt(0) * 3.0 * 16.0 / 1024.0);
-                break;
-            case "MT90":
-                position.set(Position.KEY_BATTERY, parser.nextHexInt(0) * 3.3 * 2.0 / 4096.0);
-                position.set(Position.KEY_POWER, parser.nextHexInt(0));
-                break;
-            case "T1":
-            case "T3":
-            case "MVT100":
-            case "MVT600":
-            case "MVT800":
-            case "TC68":
-            case "TC68S":
-                position.set(Position.KEY_BATTERY, parser.nextHexInt(0) * 3.3 * 2.0 / 4096.0);
-                position.set(Position.KEY_POWER, parser.nextHexInt(0) * 3.3 * 16.0 / 4096.0);
-                break;
-            case "T311":
-            case "T322X":
-            case "T333":
-            case "T355":
-                position.set(Position.KEY_BATTERY, parser.nextHexInt(0) / 100.0);
-                position.set(Position.KEY_POWER, parser.nextHexInt(0) / 100.0);
-                break;
-            default:
-                position.set(Position.KEY_BATTERY, parser.nextHexInt(0));
-                position.set(Position.KEY_POWER, parser.nextHexInt(0));
-                break;
+            position.set(Position.KEY_BATTERY, parser.nextDouble());
+            position.set(Position.KEY_POWER, parser.nextDouble());
+
+        } else {
+
+            for (int i = 1; i <= 3; i++) {
+                position.set(Position.PREFIX_ADC + i, parser.nextHexInt());
+            }
+
+            String deviceModel = Context.getIdentityManager().getById(deviceSession.getDeviceId()).getModel();
+            if (deviceModel == null) {
+                deviceModel = "";
+            }
+            switch (deviceModel.toUpperCase()) {
+                case "MVT340":
+                case "MVT380":
+                    position.set(Position.KEY_BATTERY, parser.nextHexInt(0) * 3.0 * 2.0 / 1024.0);
+                    position.set(Position.KEY_POWER, parser.nextHexInt(0) * 3.0 * 16.0 / 1024.0);
+                    break;
+                case "MT90":
+                    position.set(Position.KEY_BATTERY, parser.nextHexInt(0) * 3.3 * 2.0 / 4096.0);
+                    position.set(Position.KEY_POWER, parser.nextHexInt(0));
+                    break;
+                case "T1":
+                case "T3":
+                case "MVT100":
+                case "MVT600":
+                case "MVT800":
+                case "TC68":
+                case "TC68S":
+                    position.set(Position.KEY_BATTERY, parser.nextHexInt(0) * 3.3 * 2.0 / 4096.0);
+                    position.set(Position.KEY_POWER, parser.nextHexInt(0) * 3.3 * 16.0 / 4096.0);
+                    break;
+                case "T311":
+                case "T322X":
+                case "T333":
+                case "T355":
+                    position.set(Position.KEY_BATTERY, parser.nextHexInt(0) / 100.0);
+                    position.set(Position.KEY_POWER, parser.nextHexInt(0) / 100.0);
+                    break;
+                default:
+                    position.set(Position.KEY_BATTERY, parser.nextHexInt(0));
+                    position.set(Position.KEY_POWER, parser.nextHexInt(0));
+                    break;
+            }
+
         }
 
         String eventData = parser.next();
