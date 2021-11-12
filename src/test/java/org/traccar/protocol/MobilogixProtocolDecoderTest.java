@@ -14,6 +14,9 @@ public class MobilogixProtocolDecoderTest extends ProtocolTest {
         verifyAttributes(decoder, text(
                 "[2021-08-20 19:27:14,T14,1,V1.3.5,201909000982,53,12.18"));
 
+        verifyAttributes(decoder, text(
+                "\r\n[2021-08-20 19:27:14,T14,1,V1.3.5,201909000982,53,12.18"));
+
         verifyNull(decoder, text(
                 "[2020-12-01 14:00:22,T1,1,V1.1.1,201951132031,,,12345678,724108005415815,359366080211420"));
 
