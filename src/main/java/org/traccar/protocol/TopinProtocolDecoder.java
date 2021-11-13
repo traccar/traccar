@@ -50,6 +50,7 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_STATUS = 0x13;
     public static final int MSG_WIFI_OFFLINE = 0x17;
     public static final int MSG_TIME_UPDATE = 0x30;
+    public static final int MSG_SOS_NUMBER = 0x41;
     public static final int MSG_WIFI = 0x69;
     public static final int MSG_VIBRATION_ON = 0x92;
     public static final int MSG_VIBRATION_OFF = 0x93;
