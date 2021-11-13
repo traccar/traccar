@@ -501,11 +501,15 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         List<Position> positions = new LinkedList<>();
 
         int count = buf.readUnsignedShort();
-        buf.readUnsignedByte(); // location type
+        int locationType = buf.readUnsignedByte();
 
         for (int i = 0; i < count; i++) {
             int endIndex = buf.readUnsignedShort() + buf.readerIndex();
-            positions.add(decodeLocation(deviceSession, buf));
+            Position position = decodeLocation(deviceSession, buf);
+            if (locationType == 0) {
+                position.set(Position.KEY_ARCHIVE, true);
+            }
+            positions.add(position);
             buf.readerIndex(endIndex);
         }
 
