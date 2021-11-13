@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class TopinProtocolDecoderTest extends ProtocolTest {
 
@@ -15,6 +16,10 @@ public class TopinProtocolDecoderTest extends ProtocolTest {
 
         verifyNull(decoder, binary(
                 "78780d0103593390754169634d0d0a"));
+
+        verifyAttribute(decoder, binary(
+                "787801940D0A"),
+                Position.KEY_ALARM, Position.ALARM_VIBRATION);
 
         verifyAttributes(decoder, binary(
                 "78780A13424008196400041F000D0A"));

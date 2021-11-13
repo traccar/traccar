@@ -51,6 +51,9 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_WIFI_OFFLINE = 0x17;
     public static final int MSG_TIME_UPDATE = 0x30;
     public static final int MSG_WIFI = 0x69;
+    public static final int MSG_VIBRATION_ON = 0x92;
+    public static final int MSG_VIBRATION_OFF = 0x93;
+    public static final int MSG_VIBRATION = 0x94;
 
     private void sendResponse(Channel channel, int length, int type, ByteBuf content) {
         if (channel != null) {
@@ -247,6 +250,17 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
             ByteBuf content = Unpooled.buffer();
             content.writeBytes(time);
             sendResponse(channel, length, type, content);
+
+            return position;
+
+        } else if (type == MSG_VIBRATION) {
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
 
             return position;
 
