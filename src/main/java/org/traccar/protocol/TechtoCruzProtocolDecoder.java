@@ -27,9 +27,9 @@ import org.traccar.model.Position;
 import java.net.SocketAddress;
 import java.util.regex.Pattern;
 
-public class CruzTechoProtocolDecoder extends BaseProtocolDecoder {
+public class TechtoCruzProtocolDecoder extends BaseProtocolDecoder {
 
-    public CruzTechoProtocolDecoder(Protocol protocol) {
+    public TechtoCruzProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
