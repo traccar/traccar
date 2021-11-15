@@ -299,5 +299,6 @@
     <entry key='hoopo.port'>5231</entry>
     <entry key='dualcam.port'>5232</entry>
     <entry key='xexun2.port'>5233</entry>
+    <entry key='cruztecho.port'>5234</entry>
 
 </properties>
