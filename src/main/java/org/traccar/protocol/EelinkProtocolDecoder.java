@@ -218,6 +218,17 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             buf.skipBytes(7); // bss2
         }
 
+        if (BitUtil.check(flags, 7)) {
+            buf.readUnsignedByte(); // rat
+            short noc = buf.readUnsignedByte(); // noc
+            if (noc > 0) {
+                buf.skipBytes(19); // lte-srv
+                for (short i = 1; i < noc; i++) {
+                    buf.skipBytes(5); // lte-nbr
+                }
+            }
+        }
+
         if (type == MSG_WARNING) {
 
             position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
