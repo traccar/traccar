@@ -124,6 +124,14 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private String readTagId(ByteBuf buf) {
+        StringBuilder tagId = new StringBuilder();
+        for (int i = 0; i < 6; i++) {
+            tagId.insert(0, ByteBufUtil.hexDump(buf.readSlice(1)));
+        }
+        return tagId.toString();
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -214,7 +222,7 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         }
                         break;
                     case 0x23:
-                        position.set("tagId", ByteBufUtil.hexDump(buf.readSlice(6)));
+                        position.set("tagId", readTagId(buf));
                         position.setLatitude(buf.readIntLE() * 0.0000001);
                         position.setLongitude(buf.readIntLE() * 0.0000001);
                         position.setValid(true);
@@ -228,9 +236,9 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         break;
                     case 0x28:
                         int beaconFlags = buf.readUnsignedByte();
-                        position.set("tagId", ByteBufUtil.hexDump(buf.readSlice(6)));
-                        position.set("tagRssi", buf.readUnsignedByte());
-                        buf.readUnsignedByte(); // 1m rssi
+                        position.set("tagId", readTagId(buf));
+                        position.set("tagRssi", (int) buf.readByte());
+                        position.set("tag1mRssi", (int) buf.readByte());
                         if (BitUtil.check(beaconFlags, 7)) {
                             position.setLatitude(buf.readIntLE() * 0.0000001);
                             position.setLongitude(buf.readIntLE() * 0.0000001);
