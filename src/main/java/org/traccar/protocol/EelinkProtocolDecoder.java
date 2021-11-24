@@ -421,7 +421,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             ByteBuf content = Unpooled.buffer();
             if (type == MSG_LOGIN) {
                 content.writeInt((int) (System.currentTimeMillis() / 1000));
-                content.writeByte(1); // protocol version
+                content.writeShort(1); // protocol version
                 content.writeByte(0); // action mask
             }
             ByteBuf response = EelinkProtocolEncoder.encodeContent(
