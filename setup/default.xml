@@ -14,8 +14,10 @@
     <entry key='web.path'>./web</entry>
     <entry key='web.persistSession'>false</entry>
 
-    <entry key='geocoder.enable'>false</entry>
-    <entry key='geocoder.type'>google</entry>
+    <entry key='geocoder.enable'>true</entry>
+    <entry key='geocoder.type'>nominatim</entry>
+    <entry key='geocoder.url'>https://us1.locationiq.com/v1/reverse.php</entry>
+    <entry key='geocoder.key'>pk.b34237342901fc175252c790d1674dcc</entry>
 
     <entry key='logger.level'>info</entry>
     <entry key='logger.file'>./logs/tracker-server.log</entry>
