@@ -47,9 +47,9 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d+)")                   // battery
             .groupBegin()
             .text(",")
-            .number("(d)")                       // valid
+            .number("(d)")                       // satellites
             .number("(d)")                       // rssi
-            .number("(d),")                      // satellites
+            .number("(d),")                      // valid
             .number("(-?d+.d+),")                // latitude
             .number("(-?d+.d+),")                // longitude
             .number("(d+.?d*),")                 // speed
@@ -127,11 +127,11 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext(7)) {
 
+            position.set(Position.KEY_SATELLITES, parser.nextInt());
+            position.set(Position.KEY_RSSI, 6 * parser.nextInt() - 111);
+
             position.setValid(parser.nextInt() > 0);
             position.setFixTime(position.getDeviceTime());
-
-            position.set(Position.KEY_RSSI, parser.nextInt());
-            position.set(Position.KEY_SATELLITES, parser.nextInt());
 
             position.setLatitude(parser.nextDouble());
             position.setLongitude(parser.nextDouble());
