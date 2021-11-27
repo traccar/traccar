@@ -302,5 +302,6 @@
     <entry key='dualcam.port'>5232</entry>
     <entry key='xexun2.port'>5233</entry>
     <entry key='techtocruz.port'>5234</entry>
+    <entry key='flexapi.port'>5235</entry>
 
 </properties>
