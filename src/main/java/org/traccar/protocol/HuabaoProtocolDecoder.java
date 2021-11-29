@@ -322,6 +322,10 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 case 0x8E:
                     position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte());
                     break;
+                case 0xA0:
+                    String codes = buf.readCharSequence(length, StandardCharsets.US_ASCII).toString();
+                    position.set(Position.KEY_DTCS, codes.replace(',', ' '));
+                    break;
                 case 0xCC:
                     position.set(Position.KEY_ICCID, buf.readCharSequence(20, StandardCharsets.US_ASCII).toString());
                     break;
