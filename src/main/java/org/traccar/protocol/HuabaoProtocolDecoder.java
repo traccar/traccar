@@ -581,7 +581,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         for (int i = 0; i < count; i++) {
             int endIndex = buf.readUnsignedShort() + buf.readerIndex();
             Position position = decodeLocation(deviceSession, buf);
-            if (locationType == 0) {
+            if (locationType > 0) {
                 position.set(Position.KEY_ARCHIVE, true);
             }
             positions.add(position);
