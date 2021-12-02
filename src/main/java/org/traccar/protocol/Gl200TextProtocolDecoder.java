@@ -1129,7 +1129,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         } else if (type.equals("DIS")) {
             position.set(Position.PREFIX_IN + reportType / 0x10, reportType % 0x10 == 1);
         } else if (type.equals("IGL")) {
-            position.set(Position.KEY_IGNITION, reportType % 0x10 == 1);
+            int ignCheck = Context.getConfig().getBoolean(Keys.PROTOCOL_REVERSE_IGNITION_IGL.withPrefix(getProtocolName())) ? 0 : 1;
+            position.set(Position.KEY_IGNITION, reportType % 0x10 == ignCheck);
         } else if (type.equals("HBM")) {
             switch (reportType % 0x10) {
                 case 0:

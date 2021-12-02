@@ -106,6 +106,14 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
+     * Reverse ignition status for IGL messages from GL200. Some Queclink devices (notably the GV50M) report the wrong
+     * ignition status in IGL messages, leading to an Ignition Off event when ignition is turned on and vice versa.
+     */
+    public static final ConfigSuffix<Boolean> PROTOCOL_REVERSE_IGNITION_IGL = new ConfigSuffix<>(
+            ".ReverseIgnitionIGL",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
      * Decode additional TK103 attributes. Not supported for some devices.
      */
     public static final ConfigSuffix<Boolean> PROTOCOL_DECODE_LOW = new ConfigSuffix<>(
