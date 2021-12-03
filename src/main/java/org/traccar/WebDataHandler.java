@@ -59,6 +59,7 @@ public class WebDataHandler extends BaseDataHandler {
 
     private static final String KEY_POSITION = "position";
     private static final String KEY_DEVICE = "device";
+    private static final String ATTRIBUTE_DEVICE_ALLOW_FORWARDING = "allowForwarding";
 
     private final IdentityManager identityManager;
     private final ObjectMapper objectMapper;
@@ -286,6 +287,13 @@ public class WebDataHandler extends BaseDataHandler {
 
     @Override
     protected Position handlePosition(Position position) {
+
+        Device device = identityManager.getById(position.getDeviceId());
+
+        Object allowForwarding = device.getAttributes().get(ATTRIBUTE_DEVICE_ALLOW_FORWARDING);
+        if ((allowForwarding != null) && (!(Boolean) allowForwarding)) {
+            return position;
+        }
 
         AsyncRequestAndCallback request = new AsyncRequestAndCallback(position);
         request.send();
