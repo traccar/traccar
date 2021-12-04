@@ -232,6 +232,11 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
+    private double decodeBleTemp(ByteBuf buf) {
+        int value = buf.readUnsignedShort();
+        return (BitUtil.check(value, 15) ? -BitUtil.to(value, 15) : BitUtil.to(value, 15)) * 0.01;
+    }
+
     private Position decodeBle(
             Channel channel, DeviceSession deviceSession, ByteBuf buf, int type, int index, ByteBuf imei) {
 
@@ -281,7 +286,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
                     position.set("tag" + i + "Id", ByteBufUtil.hexDump(buf.readSlice(6)));
                     position.set("tag" + i + "Battery", buf.readUnsignedByte() * 0.01 + 2);
                     buf.readUnsignedByte(); // battery level
-                    position.set("tag" + i + "Temp", buf.readUnsignedShort() * 0.01);
+                    position.set("tag" + i + "Temp", decodeBleTemp(buf));
                     position.set("tag" + i + "Humidity", buf.readUnsignedShort() * 0.01);
                     position.set("tag" + i + "LightSensor", buf.readUnsignedShort());
                     position.set("tag" + i + "Rssi", buf.readUnsignedByte() - 128);
@@ -290,7 +295,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
                     position.set("tag" + i + "Id", ByteBufUtil.hexDump(buf.readSlice(6)));
                     position.set("tag" + i + "Battery", buf.readUnsignedByte() * 0.01 + 2);
                     buf.readUnsignedByte(); // battery level
-                    position.set("tag" + i + "Temp", buf.readUnsignedShort() * 0.01);
+                    position.set("tag" + i + "Temp", decodeBleTemp(buf));
                     position.set("tag" + i + "Door", buf.readUnsignedByte() > 0);
                     position.set("tag" + i + "Rssi", buf.readUnsignedByte() - 128);
                     break;
