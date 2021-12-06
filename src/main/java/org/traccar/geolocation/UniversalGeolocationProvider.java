@@ -25,7 +25,7 @@ import javax.ws.rs.client.InvocationCallback;
 
 public class UniversalGeolocationProvider implements GeolocationProvider {
 
-    private String url;
+    private final String url;
 
     public UniversalGeolocationProvider(String url, String key) {
         this.url = url + "?key=" + key;
