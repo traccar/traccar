@@ -77,7 +77,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private String decodeAlarm(int value) {
+    private String decodeAlarm1(int value) {
         switch (value) {
             case 1:
                 return Position.ALARM_POWER_CUT;
@@ -102,6 +102,28 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_POWER_RESTORED;
             case 24:
                 return Position.ALARM_LOW_POWER;
+            default:
+                return null;
+        }
+    }
+
+    private String decodeAlarm2(int value) {
+        switch (value) {
+            case 1:
+            case 4:
+                return Position.ALARM_REMOVING;
+            case 2:
+                return Position.ALARM_TAMPERING;
+            case 3:
+                return Position.ALARM_SOS;
+            case 5:
+                return Position.ALARM_FALL_DOWN;
+            case 6:
+                return Position.ALARM_LOW_BATTERY;
+            case 14:
+                return Position.ALARM_GEOFENCE_ENTER;
+            case 15:
+                return Position.ALARM_GEOFENCE_EXIT;
             default:
                 return null;
         }
@@ -374,7 +396,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
         }
 
         int alarm = buf.readUnsignedByte();
-        position.set(Position.KEY_ALARM, decodeAlarm(alarm));
+        position.set(Position.KEY_ALARM, header != 0x2727 ? decodeAlarm1(alarm) : decodeAlarm2(alarm));
 
         if (header != 0x2727) {
 
