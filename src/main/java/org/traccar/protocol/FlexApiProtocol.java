@@ -27,7 +27,7 @@ public class FlexApiProtocol extends BaseProtocol {
         addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast(new LineBasedFrameDecoder(1024));
+                pipeline.addLast(new LineBasedFrameDecoder(5120));
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new FlexApiProtocolDecoder(FlexApiProtocol.this));
             }
