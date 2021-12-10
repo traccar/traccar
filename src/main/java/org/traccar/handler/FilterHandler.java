@@ -37,6 +37,7 @@ public class FilterHandler extends BaseDataHandler {
     private boolean filterApproximate;
     private int filterAccuracy;
     private boolean filterStatic;
+    private boolean filterStaticNorth;
     private int filterDistance;
     private int filterMaxSpeed;
     private long filterMinPeriod;
@@ -51,6 +52,7 @@ public class FilterHandler extends BaseDataHandler {
         filterAccuracy = config.getInteger(Keys.FILTER_ACCURACY);
         filterApproximate = config.getBoolean(Keys.FILTER_APPROXIMATE);
         filterStatic = config.getBoolean(Keys.FILTER_STATIC);
+        filterStaticNorth = config.getBoolean(Keys.FILTER_STATIC_NORTH);
         filterDistance = config.getInteger(Keys.FILTER_DISTANCE);
         filterMaxSpeed = config.getInteger(Keys.FILTER_MAX_SPEED);
         filterMinPeriod = config.getInteger(Keys.FILTER_MIN_PERIOD) * 1000;
@@ -94,6 +96,10 @@ public class FilterHandler extends BaseDataHandler {
 
     private boolean filterStatic(Position position) {
         return filterStatic && position.getSpeed() == 0.0;
+    }
+
+    private boolean filterStaticNorth(Position position) {
+        return filterStaticNorth && position.getSpeed() == 0.0 && position.getCourse() == 0;
     }
 
     private boolean filterDistance(Position position, Position last) {
@@ -169,6 +175,9 @@ public class FilterHandler extends BaseDataHandler {
         }
         if (filterStatic(position) && !skipLimit(position, last) && !skipAttributes(position)) {
             filterType.append("Static ");
+        }
+        if (filterStaticNorth(position) && !skipLimit(position, last) && !skipAttributes(position)) {
+            filterType.append("StaticNorth ");
         }
         if (filterDistance(position, last) && !skipLimit(position, last) && !skipAttributes(position)) {
             filterType.append("Distance ");

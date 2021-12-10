@@ -885,6 +885,13 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
+     * Filter positions with exactly zero speed values and zero course (north).
+     */
+    public static final ConfigKey<Boolean> FILTER_STATIC_NORTH = new ConfigKey<>(
+            "filter.staticNorth",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
      * Filter records by distance. The values is specified in meters. If the new position is less far than this value
      * from the last one it gets filtered out.
      */
