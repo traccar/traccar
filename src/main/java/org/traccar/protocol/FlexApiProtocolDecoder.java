@@ -68,10 +68,18 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, new Date(payload.getInt("obd.ts") * 1000L));
 
-            position.set(Position.KEY_OBD_SPEED, payload.getJsonNumber("obd.speed").doubleValue());
-            position.set(Position.KEY_OBD_ODOMETER, payload.getInt("obd.odo"));
-            position.set(Position.KEY_RPM, payload.getInt("obd.rpm"));
-            position.set(Position.KEY_VIN, payload.getString("obd.vin"));
+            if (payload.containsKey("obd.speed")) {
+                position.set(Position.KEY_OBD_SPEED, payload.getJsonNumber("obd.speed").doubleValue());
+            }
+            if (payload.containsKey("obd.odo")) {
+                position.set(Position.KEY_OBD_ODOMETER, payload.getInt("obd.odo"));
+            }
+            if (payload.containsKey("obd.rpm")) {
+                position.set(Position.KEY_RPM, payload.getInt("obd.rpm"));
+            }
+            if (payload.containsKey("obd.vin")) {
+                position.set(Position.KEY_VIN, payload.getString("obd.vin"));
+            }
 
         } else {
 
