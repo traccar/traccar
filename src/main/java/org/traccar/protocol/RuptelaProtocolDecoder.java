@@ -102,6 +102,12 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
             case 5:
                 position.set(Position.KEY_IGNITION, readValue(buf, length, false) == 1);
                 break;
+            case 29:
+                position.set(Position.KEY_POWER, readValue(buf, length, false));
+                break;
+            case 30:
+                position.set(Position.KEY_BATTERY, readValue(buf, length, false) * 0.001);
+                break;
             case 74:
                 position.set(Position.PREFIX_TEMP + 3, readValue(buf, length, true) * 0.1);
                 break;
@@ -110,21 +116,18 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
             case 80:
                 position.set(Position.PREFIX_TEMP + (id - 78), readValue(buf, length, true) * 0.1);
                 break;
-            case 198:
-                if (readValue(buf, length, false) > 0) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
-                }
-                break;
-            case 199:
-            case 200:
+            case 134:
                 if (readValue(buf, length, false) > 0) {
                     position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
                 }
                 break;
-            case 201:
+            case 136:
                 if (readValue(buf, length, false) > 0) {
                     position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
                 }
+                break;
+            case 197:
+                position.set(Position.KEY_RPM, readValue(buf, length, false) * 0.125);
                 break;
             default:
                 position.set(Position.PREFIX_IO + id, readValue(buf, length, false));
