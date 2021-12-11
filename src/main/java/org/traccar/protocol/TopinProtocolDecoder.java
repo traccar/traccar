@@ -193,10 +193,12 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, null);
 
+            ByteBuf content = buf.retainedSlice(buf.readerIndex(), buf.readableBytes() - 2);
+
             position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
             position.set(Position.KEY_VERSION_FW, buf.readUnsignedByte());
             buf.readUnsignedByte(); // timezone
-            int interval = buf.readUnsignedByte();
+            buf.readUnsignedByte(); // interval
             if (buf.readableBytes() >= 1 + 2) {
                 position.set(Position.KEY_RSSI, buf.readUnsignedByte());
             }
@@ -210,8 +212,6 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_HEART_RATE, buf.readUnsignedByte());
             }
 
-            ByteBuf content = Unpooled.buffer();
-            content.writeByte(interval);
             sendResponse(channel, length, type, content);
 
             return position;
