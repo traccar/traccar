@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,8 +57,19 @@ public class SessionResource extends BaseResource {
     @PermitAll
     @GET
     public User get(@QueryParam("token") String token) throws SQLException, UnsupportedEncodingException {
+
+        if (token != null) {
+            User user = Context.getUsersManager().getUserByToken(token);
+            if (user != null) {
+                Context.getPermissionsManager().checkUserEnabled(user.getId());
+                request.getSession().setAttribute(USER_ID_KEY, user.getId());
+                return user;
+            }
+        }
+
         Long userId = (Long) request.getSession().getAttribute(USER_ID_KEY);
         if (userId == null) {
+
             Cookie[] cookies = request.getCookies();
             String email = null, password = null;
             if (cookies != null) {
@@ -77,24 +88,20 @@ public class SessionResource extends BaseResource {
             if (email != null && password != null) {
                 User user = Context.getPermissionsManager().login(email, password);
                 if (user != null) {
-                    userId = user.getId();
-                    request.getSession().setAttribute(USER_ID_KEY, userId);
-                }
-            } else if (token != null) {
-                User user = Context.getUsersManager().getUserByToken(token);
-                if (user != null) {
-                    userId = user.getId();
-                    request.getSession().setAttribute(USER_ID_KEY, userId);
+                    Context.getPermissionsManager().checkUserEnabled(user.getId());
+                    request.getSession().setAttribute(USER_ID_KEY, user.getId());
+                    return user;
                 }
             }
-        }
 
-        if (userId != null) {
+        } else {
+
             Context.getPermissionsManager().checkUserEnabled(userId);
             return Context.getPermissionsManager().getUser(userId);
-        } else {
-            throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).build());
+
         }
+
+        throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).build());
     }
 
     @PermitAll
