@@ -23,6 +23,7 @@ import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -190,8 +191,13 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             position.setNetwork(new Network(CellTower.from(mcc, mnc, lac, cid, rssi)));
         }
 
-        position.set(Position.KEY_INPUT, parser.nextHexInt());
-        position.set(Position.KEY_OUTPUT, parser.nextHexInt());
+        int input = parser.nextHexInt();
+        int output = parser.nextHexInt();
+
+        position.set(Position.KEY_IGNITION, BitUtil.check(input, 2));
+
+        position.set(Position.KEY_INPUT, input);
+        position.set(Position.KEY_OUTPUT, output);
 
         if (parser.hasNext(2)) {
 
