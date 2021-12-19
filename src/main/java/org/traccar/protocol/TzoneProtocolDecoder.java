@@ -19,8 +19,11 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.Context;
 import org.traccar.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.config.Keys;
 import org.traccar.helper.BcdUtil;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
@@ -30,11 +33,27 @@ import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
 public class TzoneProtocolDecoder extends BaseProtocolDecoder {
 
     public TzoneProtocolDecoder(Protocol protocol) {
         super(protocol);
+    }
+
+    private void sendResponse(Channel channel, SocketAddress remoteAddress, int index) {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        String ack = String.format("@ACK,%d#", index);
+        String time = String.format("@UTC time:%s", dateFormat.format(new Date()));
+
+        if (channel != null) {
+            channel.writeAndFlush(new NetworkMessage(ack + time, remoteAddress));
+        }
     }
 
     private String decodeAlarm(Short value) {
@@ -346,6 +365,10 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
 
             decodeTags(position, buf);
 
+        }
+
+        if (Context.getConfig().getBoolean(Keys.PROTOCOL_ACK.withPrefix(getProtocolName()))) {
+            sendResponse(channel, remoteAddress, buf.getUnsignedShort(buf.writerIndex() - 6));
         }
 
         return position;
