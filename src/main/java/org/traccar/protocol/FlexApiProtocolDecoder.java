@@ -89,10 +89,6 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_VIN, payload.getString("obd.vin"));
             }
 
-        } else if (topic.contains("cellular1")) {
-
-            getLastLocation(position, new Date(payload.getInt("modem1.ts") * 1000L));
-
         } else {
 
             return null;
