@@ -55,9 +55,17 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
         if (topic.contains("gnss")) {
 
             position.setValid(true);
-            position.setTime(new Date(payload.getInt("time") * 1000L));
-            position.setLatitude(payload.getJsonNumber("lat").doubleValue());
-            position.setLongitude(payload.getJsonNumber("log").doubleValue());
+
+            if (payload.containsKey("time")) {
+                position.setTime(new Date(payload.getInt("time") * 1000L));
+                position.setLatitude(payload.getJsonNumber("lat").doubleValue());
+                position.setLongitude(payload.getJsonNumber("log").doubleValue());
+            } else {
+                position.setTime(new Date(payload.getInt("gnss.ts") * 1000L));
+                position.setLatitude(payload.getJsonNumber("gnss.latitude").doubleValue());
+                position.setLongitude(payload.getJsonNumber("gnss.longitude").doubleValue());
+            }
+
             position.setAltitude(payload.getJsonNumber("gnss.altitude").doubleValue());
             position.setSpeed(payload.getJsonNumber("gnss.speed").doubleValue());
             position.setCourse(payload.getJsonNumber("gnss.heading").doubleValue());
@@ -80,6 +88,10 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
             if (payload.containsKey("obd.vin")) {
                 position.set(Position.KEY_VIN, payload.getString("obd.vin"));
             }
+
+        } else if (topic.contains("cellular1")) {
+
+            getLastLocation(position, new Date(payload.getInt("modem1.ts") * 1000L));
 
         } else {
 
