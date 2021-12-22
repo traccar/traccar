@@ -17,6 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
@@ -33,6 +34,7 @@ import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -51,8 +53,10 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
         String ack = String.format("@ACK,%d#", index);
         String time = String.format("@UTC time:%s", dateFormat.format(new Date()));
 
+        ByteBuf response = Unpooled.copiedBuffer(ack + time, StandardCharsets.US_ASCII);
+
         if (channel != null) {
-            channel.writeAndFlush(new NetworkMessage(ack + time, remoteAddress));
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
     }
 
