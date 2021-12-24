@@ -303,5 +303,6 @@
     <entry key='xexun2.port'>5233</entry>
     <entry key='techtocruz.port'>5234</entry>
     <entry key='flexapi.port'>5235</entry>
+    <entry key='dsf22.port'>5236</entry>
 
 </properties>
