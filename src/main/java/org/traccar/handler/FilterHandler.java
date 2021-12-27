@@ -168,7 +168,7 @@ public class FilterHandler extends BaseDataHandler {
 
         // filter out excessive data
         long deviceId = position.getDeviceId();
-        if (filterDuplicate || filterDistance > 0 || filterMaxSpeed > 0 || filterMinPeriod > 0) {
+        if (filterDuplicate || filterStatic || filterDistance > 0 || filterMaxSpeed > 0 || filterMinPeriod > 0) {
             Position preceding = null;
             if (filterRelative) {
                 try {
