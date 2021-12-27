@@ -147,12 +147,9 @@ public class FilterHandler extends BaseDataHandler {
 
     private boolean filter(Position position) {
 
-        if (skipAttributes(position)) {
-            return false;
-        }
-
         StringBuilder filterType = new StringBuilder();
 
+        // filter out invalid data
         if (filterInvalid(position)) {
             filterType.append("Invalid ");
         }
@@ -168,10 +165,8 @@ public class FilterHandler extends BaseDataHandler {
         if (filterApproximate(position)) {
             filterType.append("Approximate ");
         }
-        if (filterStatic(position)) {
-            filterType.append("Static ");
-        }
 
+        // filter out excessive data
         long deviceId = position.getDeviceId();
         if (filterDuplicate || filterDistance > 0 || filterMaxSpeed > 0 || filterMinPeriod > 0) {
             Position preceding = null;
@@ -186,13 +181,13 @@ public class FilterHandler extends BaseDataHandler {
             } else {
                 preceding = getLastReceivedPosition(deviceId);
             }
-            if (skipLimit(position, preceding)) {
-                return false;
-            }
             if (filterDuplicate(position, preceding)) {
                 filterType.append("Duplicate ");
             }
-            if (filterDistance(position, preceding)) {
+            if (filterStatic(position) && !skipLimit(position, preceding) && !skipAttributes(position)) {
+                filterType.append("Static ");
+            }
+            if (filterDistance(position, preceding) && !skipLimit(position, preceding) && !skipAttributes(position)) {
                 filterType.append("Distance ");
             }
             if (filterMaxSpeed(position, preceding)) {
