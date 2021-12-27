@@ -893,8 +893,11 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
-     * Filter records by Maximum Speed value in knots. Can be used to filter jumps to far locations even if they're
-     * marked as valid. Shouldn't be too low. Start testing with values at about 25000.
+     * Filter records by Maximum Speed value in knots. Can be used to filter jumps to far locations even if Position
+     * appears valid or if Position `speed` field reported by the device is also within limits. Calculates speed from
+     * the distance to the previous position and the elapsed time.
+     *
+     * Tip: Shouldn't be too low. Start testing with values at about 25000.
      */
     public static final ConfigKey<Integer> FILTER_MAX_SPEED = new ConfigKey<>(
             "filter.maxSpeed",
@@ -908,8 +911,20 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
-     * Time limit for the filtering in seconds. If the time difference between last position and a new one is more than
-     * this limit, the new position will not be filtered out.
+     * If false, the server expects all locations to come sequentially (for each device). Filter checks for duplicates,
+     * distance, speed, or time period only against the location that was last received by server.
+     *
+     * If true, the server expects locations to come at random order (since tracking device might go offline).
+     * Filter checks for duplicates, distance, speed, or time period against the preceding Position's.
+     * Important: setting to true can cause potential performance issues.
+     */
+    public static final ConfigKey<Boolean> FILTER_RELATIVE = new ConfigKey<>(
+            "filter.relative",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Time limit for the filtering in seconds. If the time difference between the last position was received by server
+     * and a new position is received by server is more than this limit, the new position will not be filtered out.
      */
     public static final ConfigKey<Long> FILTER_SKIP_LIMIT = new ConfigKey<>(
             "filter.skipLimit",
@@ -917,6 +932,7 @@ public final class Keys {
 
     /**
      * Enable attributes skipping. Attribute skipping can be enabled in the config or device attributes.
+     * If position contains any attribute mentioned in "filter.skipAttributes" config key, position is not filtered out.
      */
     public static final ConfigKey<Boolean> FILTER_SKIP_ATTRIBUTES_ENABLE = new ConfigKey<>(
             "filter.skipAttributes.enable",
