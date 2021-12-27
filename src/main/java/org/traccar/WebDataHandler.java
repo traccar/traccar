@@ -288,8 +288,11 @@ public class WebDataHandler extends BaseDataHandler {
     @Override
     protected Position handlePosition(Position position) {
 
-        AsyncRequestAndCallback request = new AsyncRequestAndCallback(position);
-        request.send();
+        Device device = identityManager.getById(position.getDeviceId());
+        if (device != null && device.getAttributes().containsKey("integration")) {
+            AsyncRequestAndCallback request = new AsyncRequestAndCallback(position);
+            request.send();
+        }
 
         return position;
     }
