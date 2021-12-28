@@ -1,9 +1,9 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import sys
 import math
 import urllib
-import httplib
+import http.client as httplib
 import time
 import random
 
@@ -49,7 +49,7 @@ def send(conn, lat, lon, course, speed, alarm, ignition, accuracy, rpm, fuel, dr
         params = params + (('fuel', fuel),)
     if driverUniqueId:
         params = params + (('driverUniqueId', driverUniqueId),)
-    conn.request('GET', '?' + urllib.urlencode(params))
+    conn.request('GET', '?' + urllib.parse.urlencode(params))
     conn.getresponse().read()
 
 def course(lat1, lon1, lat2, lon2):
