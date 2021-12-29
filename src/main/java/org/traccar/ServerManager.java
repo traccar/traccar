@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public class ServerManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerManager.class);
 
-    private final List<TrackerServer> serverList = new LinkedList<>();
+    private final List<TrackerConnector> connectorList = new LinkedList<>();
     private final Map<String, BaseProtocol> protocolList = new ConcurrentHashMap<>();
 
     private void loadPackage(String packageName) throws IOException, URISyntaxException, ReflectiveOperationException {
@@ -75,7 +75,7 @@ public class ServerManager {
             if (BaseProtocol.class.isAssignableFrom(protocolClass) && Context.getConfig().hasKey(
                     Keys.PROTOCOL_PORT.withPrefix(BaseProtocol.nameFromClass(protocolClass)))) {
                 BaseProtocol protocol = (BaseProtocol) protocolClass.getDeclaredConstructor().newInstance();
-                serverList.addAll(protocol.getServerList());
+                connectorList.addAll(protocol.getConnectorList());
                 protocolList.put(protocol.getName(), protocol);
             }
         }
@@ -90,18 +90,18 @@ public class ServerManager {
     }
 
     public void start() throws Exception {
-        for (TrackerServer server: serverList) {
+        for (TrackerConnector connector: connectorList) {
             try {
-                server.start();
+                connector.start();
             } catch (BindException e) {
-                LOGGER.warn("Port {} is disabled due to conflict", server.getPort());
+                LOGGER.warn("Port disabled due to conflict", e);
             }
         }
     }
 
     public void stop() {
-        for (TrackerServer server: serverList) {
-            server.stop();
+        for (TrackerConnector connector: connectorList) {
+            connector.stop();
         }
         GlobalTimer.release();
     }

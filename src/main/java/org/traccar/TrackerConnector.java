@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,24 +15,16 @@
  */
 package org.traccar;
 
-import io.netty.channel.Channel;
-import org.traccar.model.Command;
+import io.netty.channel.group.ChannelGroup;
 
-import java.net.SocketAddress;
-import java.util.Collection;
+public interface TrackerConnector {
 
-public interface Protocol {
+    boolean isDatagram();
 
-    String getName();
+    ChannelGroup getChannelGroup();
 
-    Collection<TrackerConnector> getConnectorList();
+    void start() throws Exception;
 
-    Collection<String> getSupportedDataCommands();
-
-    void sendDataCommand(Channel channel, SocketAddress remoteAddress, Command command);
-
-    Collection<String> getSupportedTextCommands();
-
-    void sendTextCommand(String destAddress, Command command) throws Exception;
+    void stop();
 
 }

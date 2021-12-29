@@ -54,12 +54,12 @@ import java.util.Map;
 
 public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
 
-    private final TrackerServer server;
+    private final TrackerConnector connector;
     private final String protocol;
     private int timeout;
 
-    public BasePipelineFactory(TrackerServer server, String protocol) {
-        this.server = server;
+    public BasePipelineFactory(TrackerConnector connector, String protocol) {
+        this.connector = connector;
         this.protocol = protocol;
         timeout = Context.getConfig().getInteger(Keys.PROTOCOL_TIMEOUT.withPrefix(protocol));
         if (timeout == 0) {
@@ -97,10 +97,10 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
     protected void initChannel(Channel channel) {
         final ChannelPipeline pipeline = channel.pipeline();
 
-        if (timeout > 0 && !server.isDatagram()) {
+        if (timeout > 0 && !connector.isDatagram()) {
             pipeline.addLast(new IdleStateHandler(timeout, 0, 0));
         }
-        pipeline.addLast(new OpenChannelHandler(server));
+        pipeline.addLast(new OpenChannelHandler(connector));
         pipeline.addLast(new NetworkMessageHandler());
         pipeline.addLast(new StandardLoggingHandler(protocol));
 

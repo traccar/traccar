@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,19 @@ import org.traccar.config.Keys;
 
 import java.net.InetSocketAddress;
 
-public abstract class TrackerServer {
+public abstract class TrackerServer implements TrackerConnector {
 
     private final boolean datagram;
+
+    @SuppressWarnings("rawtypes")
     private final AbstractBootstrap bootstrap;
 
+    private final int port;
+    private final String address;
+
+    private final ChannelGroup channelGroup = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+
+    @Override
     public boolean isDatagram() {
         return datagram;
     }
@@ -69,32 +77,20 @@ public abstract class TrackerServer {
 
     protected abstract void addProtocolHandlers(PipelineBuilder pipeline);
 
-    private int port;
-
     public int getPort() {
         return port;
     }
-
-    public void setPort(int port) {
-        this.port = port;
-    }
-
-    private String address;
 
     public String getAddress() {
         return address;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    private final ChannelGroup channelGroup = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
-
+    @Override
     public ChannelGroup getChannelGroup() {
         return channelGroup;
     }
 
+    @Override
     public void start() throws Exception {
         InetSocketAddress endpoint;
         if (address == null) {
@@ -109,6 +105,7 @@ public abstract class TrackerServer {
         }
     }
 
+    @Override
     public void stop() {
         channelGroup.close().awaitUninterruptibly();
     }
