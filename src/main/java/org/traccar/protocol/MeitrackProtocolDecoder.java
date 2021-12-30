@@ -191,13 +191,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             position.setNetwork(new Network(CellTower.from(mcc, mnc, lac, cid, rssi)));
         }
 
-        int input = parser.nextHexInt();
-        int output = parser.nextHexInt();
-
-        position.set(Position.KEY_IGNITION, BitUtil.check(input, 2));
-
-        position.set(Position.KEY_INPUT, input);
-        position.set(Position.KEY_OUTPUT, output);
+        position.set(Position.KEY_INPUT, parser.nextHexInt());
+        position.set(Position.KEY_OUTPUT, parser.nextHexInt());
 
         if (parser.hasNext(2)) {
 
@@ -428,9 +423,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.KEY_OUTPUT, buf.readUnsignedByte());
                         break;
                     case 0x15:
-                        int input = buf.readUnsignedByte();
-                        position.set(Position.KEY_IGNITION, BitUtil.check(input, 2));
-                        position.set(Position.KEY_INPUT, input);
+                        position.set(Position.KEY_INPUT, buf.readUnsignedByte());
                         break;
                     case 0x97:
                         position.set(Position.KEY_THROTTLE, buf.readUnsignedByte());
