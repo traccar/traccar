@@ -424,6 +424,14 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     case 0x07:
                         position.set(Position.KEY_RSSI, buf.readUnsignedByte());
                         break;
+                    case 0x14:
+                        position.set(Position.KEY_OUTPUT, buf.readUnsignedByte());
+                        break;
+                    case 0x15:
+                        int input = buf.readUnsignedByte();
+                        position.set(Position.KEY_IGNITION, BitUtil.check(input, 2));
+                        position.set(Position.KEY_INPUT, input);
+                        break;
                     case 0x97:
                         position.set(Position.KEY_THROTTLE, buf.readUnsignedByte());
                         break;
@@ -451,6 +459,9 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                         break;
                     case 0x0B:
                         position.setAltitude(buf.readShortLE());
+                        break;
+                    case 0x16:
+                        position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShortLE() * 0.01);
                         break;
                     case 0x19:
                         position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.01);
