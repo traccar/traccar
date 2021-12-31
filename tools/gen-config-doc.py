@@ -29,7 +29,7 @@ def get_config_key_descriptions():
                 {key} <span class="badge badge-dark">config</span>
               </h5>
               <p class="card-text">
-                {description}{f" Default: {default}" if default else ""}
+                {description}{f" Default: {default}." if default else ""}
               </p>
           </div>
         </div>"""
