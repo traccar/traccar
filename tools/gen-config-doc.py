@@ -1,7 +1,12 @@
 #!/usr/bin/python
 
 import re
+import os
 
+
+_KEYS_FILE = os.path.join(
+    os.path.dirname(__file__), "../src/main/java/org/traccar/config/Keys.java"
+)
 
 def get_config_key_descriptions():
     desc_re = re.compile(r"(/\*\*\n|\s+\*/|\s+\*)")
@@ -9,7 +14,7 @@ def get_config_key_descriptions():
     key_split_re = re.compile(r",\s+", re.DOTALL)
     snippets = []
 
-    with open("../src/main/java/org/traccar/config/Keys.java", "r") as f:
+    with open(_KEYS_FILE, "r") as f:
         code = f.read()
         config = re.findall(
             r"(/\*\*.*?\*/)\n\s+(public static final Config.*?;)", code, re.DOTALL
