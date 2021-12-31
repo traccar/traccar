@@ -18,7 +18,12 @@ def get_config_key_descriptions():
             try:
                 key_match = key_match_re.search(i[1])
                 if key_match:
-                    description = desc_re.sub("", i[0]).strip()
+                    description = "<br /> ".join(
+                        [
+                            x.strip().replace("\n", "")
+                            for x in desc_re.sub("\n", i[0]).strip().split("\n\n")
+                        ]
+                    )
                     terms = [x.strip() for x in key_split_re.split(key_match.group(1))]
                     key = terms[0].replace('"', "")
                     default = terms[2] if len(terms) == 3 else None
@@ -29,7 +34,7 @@ def get_config_key_descriptions():
                 {key} <span class="badge badge-dark">config</span>
               </h5>
               <p class="card-text">
-                {description}{f" Default: {default}." if default else ""}
+                {description}{f"<br/ > Default: {default}." if default else ""}
               </p>
           </div>
         </div>"""
