@@ -40,6 +40,7 @@ import org.glassfish.jersey.servlet.ServletContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
+import org.traccar.Main;
 import org.traccar.api.DateParameterConverterProvider;
 import org.traccar.config.Config;
 import org.traccar.api.AsyncSocketServlet;
@@ -216,6 +217,7 @@ public class WebServer {
 
     public void start() {
         try {
+            LOGGER.warn("Version: " + Main.class.getPackage().getImplementationVersion());
             LOGGER.warn("Starting web server");
             server.start();
         } catch (Exception error) {
