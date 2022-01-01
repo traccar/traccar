@@ -63,7 +63,7 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        String sentence = (String) msg;
+        String sentence = ((String)msg).replaceAll("(\\r\\n)", "");
         String type = sentence.substring(21, 21 + 2);
 
         if (channel != null) {
@@ -72,7 +72,7 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
             if (type.equals("T1")) {
                 response = String.format("[%s,S1,1]", time);
             } else {
-                LOGGER.warn("Mobilogix " + type + " " + sentence);
+                LOGGER.warn("Mobilogix type:{}, sentence:{}", type, sentence);
                 response = String.format("[%s,S%c]", time, type.charAt(1));
             }
             channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
@@ -80,6 +80,7 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
 
         Parser parser = new Parser(PATTERN, (String) msg);
         if (!parser.matches()) {
+            LOGGER.warn("Mobilogix ignoring:{}", sentence);
             return null;
         }
 
