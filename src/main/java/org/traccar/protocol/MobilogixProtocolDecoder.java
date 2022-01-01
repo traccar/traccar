@@ -80,6 +80,7 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
 
         Parser parser = new Parser(PATTERN, (String) msg);
         if (!parser.matches()) {
+            LOGGER.warn("Mobilogix ignoring:{}", sentence);
             return null;
         }
 
