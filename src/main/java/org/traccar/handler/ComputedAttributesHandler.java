@@ -112,7 +112,7 @@ public class ComputedAttributesHandler extends BaseDataHandler {
                 try {
                     result = computeAttribute(attribute, position);
                 } catch (JexlException error) {
-                    LOGGER.warn("Attribute computation error", error);
+                    LOGGER.warn("Attribute computation error on deviceId {} {}", position.getDeviceId(), error);
                 }
                 if (result != null) {
                     try {
