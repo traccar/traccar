@@ -11,9 +11,11 @@ phases:
     commands:
       - echo Build started on `date`
       - mvn install
+      - cp target/tracker-server.jar staging
   post_build:
     commands:
       - echo Build completed on `date`
 artifacts:
   files:
     - target/tracker-server.jar
+  name: SourceArtifact
