@@ -11,11 +11,10 @@ phases:
     commands:
       - echo Build started on `date`
       - mvn install
+      - copy target/tracker-server.jar $CODEBUILD_SRC_DIR_SourceArtifact
   post_build:
     commands:
       - echo Build completed on `date`
 artifacts:
   files:
-    - target/tracker-server.jar
     - $CODEBUILD_SRC_DIR_SourceArtifact/**/*
-  discard-paths: yes
