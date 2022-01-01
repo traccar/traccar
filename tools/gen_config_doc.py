@@ -2,7 +2,7 @@
 
 import re
 import os
-
+import argparse
 
 _KEYS_FILE = os.path.join(
     os.path.dirname(__file__), "../src/main/java/org/traccar/config/Keys.java"
@@ -72,6 +72,31 @@ def get_html():
     )
 
 
+def get_pug():
+    return ("\n").join(
+        [
+            f"""  div(class='card mt-3')
+    div(class='card-body')
+      h5(class='card-title') {x["key"]} #[span(class='badge badge-dark') config]
+      p(class='card-text') {"#[br] ".join(x["description"])}"""
+            for x in get_config_keys()
+        ]
+    )
+
+
 if __name__ == "__main__":
-    html = get_html()
-    print(html)
+    parser = argparse.ArgumentParser(
+        description="Parses Keys.java to extract keys to be used in configuration files"
+    )
+    parser.add_argument(
+        "--format", choices=["pug", "html"], default="pug", help="default: 'pug'"
+    )
+    args = parser.parse_args()
+
+    def get_output():
+        if args.format == 'html':
+            return get_html()
+        
+        return get_pug()
+
+    print(get_output())
