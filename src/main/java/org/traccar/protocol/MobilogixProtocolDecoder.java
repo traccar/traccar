@@ -16,6 +16,8 @@
 package org.traccar.protocol;
 
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
@@ -30,6 +32,8 @@ import java.net.SocketAddress;
 import java.util.regex.Pattern;
 
 public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MobilogixProtocolDecoder.class);
 
     public MobilogixProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -68,6 +72,7 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
             if (type.equals("T1")) {
                 response = String.format("[%s,S1,1]", time);
             } else {
+                LOGGER.warn("Mobilogix " + type + " " + sentence);
                 response = String.format("[%s,S%c]", time, type.charAt(1));
             }
             channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
