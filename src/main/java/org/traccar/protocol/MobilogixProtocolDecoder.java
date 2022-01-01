@@ -72,7 +72,7 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
             if (type.equals("T1")) {
                 response = String.format("[%s,S1,1]", time);
             } else {
-                LOGGER.warn("Mobilogix " + type + " " + sentence);
+                LOGGER.warn("Mobilogix type:{}, sentence:{}", type, sentence);
                 response = String.format("[%s,S%c]", time, type.charAt(1));
             }
             channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
