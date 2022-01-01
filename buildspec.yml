@@ -17,4 +17,4 @@ phases:
 artifacts:
   files:
     - target/tracker-server.jar
-  name: SourceArtifact
+    - $CODEBUILD_SRC_DIR_traccarsource/**/*
