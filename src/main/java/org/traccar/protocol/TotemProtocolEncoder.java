@@ -32,6 +32,16 @@ public class TotemProtocolEncoder extends StringProtocolEncoder {
         initDevicePassword(command, "000000");
 
         switch (command.getType()) {
+            case Command.TYPE_CUSTOM:
+                return formatCommand(command, "*%s,%s#", Command.KEY_DEVICE_PASSWORD, Command.KEY_DATA);
+            case Command.TYPE_REBOOT_DEVICE:
+                return formatCommand(command, "*%s,006#", Command.KEY_DEVICE_PASSWORD);
+            case Command.TYPE_FACTORY_RESET:
+                return formatCommand(command, "*%s,007#", Command.KEY_DEVICE_PASSWORD);
+            case Command.TYPE_GET_VERSION:
+                return formatCommand(command, "*%s,056#", Command.KEY_DEVICE_PASSWORD);
+            case Command.TYPE_POSITION_SINGLE:
+                return formatCommand(command, "*%s,012#", Command.KEY_DEVICE_PASSWORD);
             // Assuming PIN 8 (Output C) is the power wire, like manual says but it can be PIN 5,7,8
             case Command.TYPE_ENGINE_STOP:
                 return formatCommand(command, "*%s,025,C,1#", Command.KEY_DEVICE_PASSWORD);
