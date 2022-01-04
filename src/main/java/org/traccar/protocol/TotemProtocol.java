@@ -25,7 +25,7 @@ import org.traccar.model.Command;
 public class TotemProtocol extends BaseProtocol {
 
     public TotemProtocol() {
-        String[] supportedCommands = new String[]{
+        setSupportedDataCommands(
                 Command.TYPE_CUSTOM,
                 Command.TYPE_REBOOT_DEVICE,
                 Command.TYPE_FACTORY_RESET,
@@ -33,11 +33,18 @@ public class TotemProtocol extends BaseProtocol {
                 Command.TYPE_POSITION_SINGLE,
                 Command.TYPE_ENGINE_RESUME,
                 Command.TYPE_ENGINE_STOP
-        };
-        setSupportedDataCommands(supportedCommands);
+        );
 
         setTextCommandEncoder(new TotemProtocolSmsEncoder(this));
-        setSupportedTextCommands(supportedCommands);
+        setSupportedTextCommands(
+                Command.TYPE_CUSTOM,
+                Command.TYPE_REBOOT_DEVICE,
+                Command.TYPE_FACTORY_RESET,
+                Command.TYPE_GET_VERSION,
+                Command.TYPE_POSITION_SINGLE,
+                Command.TYPE_ENGINE_RESUME,
+                Command.TYPE_ENGINE_STOP
+        );
 
         addServer(new TrackerServer(false, getName()) {
             @Override
