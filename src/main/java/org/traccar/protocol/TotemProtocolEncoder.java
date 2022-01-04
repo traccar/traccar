@@ -27,23 +27,26 @@ public class TotemProtocolEncoder extends StringProtocolEncoder {
         super(protocol);
     }
 
-    protected String getCommandString(Command command) {
+    public static String formatContent(Command command) {
         switch (command.getType()) {
             case Command.TYPE_CUSTOM:
-                return formatCommand(command, "%s,%s", Command.KEY_DEVICE_PASSWORD, Command.KEY_DATA);
+                return String.format("%s,%s",
+                                     command.getAttributes().get(Command.KEY_DEVICE_PASSWORD),
+                                     command.getAttributes().get(Command.KEY_DATA)
+                                    );
             case Command.TYPE_REBOOT_DEVICE:
-                return formatCommand(command, "%s,006", Command.KEY_DEVICE_PASSWORD);
+                return String.format("%s,006", command.getAttributes().get(Command.KEY_DEVICE_PASSWORD));
             case Command.TYPE_FACTORY_RESET:
-                return formatCommand(command, "%s,007", Command.KEY_DEVICE_PASSWORD);
+                return String.format("%s,007", command.getAttributes().get(Command.KEY_DEVICE_PASSWORD));
             case Command.TYPE_GET_VERSION:
-                return formatCommand(command, "%s,056", Command.KEY_DEVICE_PASSWORD);
+                return String.format("%s,056", command.getAttributes().get(Command.KEY_DEVICE_PASSWORD));
             case Command.TYPE_POSITION_SINGLE:
-                return formatCommand(command, "%s,012", Command.KEY_DEVICE_PASSWORD);
+                return String.format("%s,012", command.getAttributes().get(Command.KEY_DEVICE_PASSWORD));
             // Assuming PIN 8 (Output C) is the power wire, like manual says but it can be PIN 5,7,8
             case Command.TYPE_ENGINE_STOP:
-                return formatCommand(command, "%s,025,C,1", Command.KEY_DEVICE_PASSWORD);
+                return String.format("%s,025,C,1", command.getAttributes().get(Command.KEY_DEVICE_PASSWORD));
             case Command.TYPE_ENGINE_RESUME:
-                return formatCommand(command, "%s,025,C,0", Command.KEY_DEVICE_PASSWORD);
+                return String.format("%s,025,C,0", command.getAttributes().get(Command.KEY_DEVICE_PASSWORD));
             default:
                 return null;
         }
@@ -54,7 +57,7 @@ public class TotemProtocolEncoder extends StringProtocolEncoder {
 
         initDevicePassword(command, "000000");
 
-        String commandString = getCommandString(command);
+        String commandString = formatContent(command);
         String builtCommand = String.format("$$%04dCF%s", 10 + commandString.getBytes().length, commandString);
 
         return String.format("%s%02X", builtCommand, Checksum.xor(builtCommand));

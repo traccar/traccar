@@ -16,10 +16,11 @@
  */
 package org.traccar.protocol;
 
+import org.traccar.StringProtocolEncoder;
 import org.traccar.model.Command;
 import org.traccar.Protocol;
 
-public class TotemProtocolSmsEncoder extends TotemProtocolEncoder {
+public class TotemProtocolSmsEncoder extends StringProtocolEncoder {
 
     public TotemProtocolSmsEncoder(Protocol protocol) {
         super(protocol);
@@ -30,7 +31,7 @@ public class TotemProtocolSmsEncoder extends TotemProtocolEncoder {
 
         initDevicePassword(command, "000000");
 
-        return String.format("*%s#", super.getCommandString(command));
+        return String.format("*%s#", TotemProtocolEncoder.formatContent(command));
     }
 
 }
