@@ -1,4 +1,5 @@
 /*
+ * Copyright 2015 Irving Gonzalez
  * Copyright 2016 - 2019 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
