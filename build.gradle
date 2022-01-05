@@ -43,7 +43,7 @@ enforce {
 dependencies {
     implementation "commons-codec:commons-codec:1.15"
     implementation "com.h2database:h2:1.4.200"
-    implementation "mysql:mysql-connector-java:8.0.26"
+    implementation "mysql:mysql-connector-java:8.0.27"
     implementation "org.postgresql:postgresql:42.2.23"
     implementation "com.microsoft.sqlserver:mssql-jdbc:9.4.0.jre11"
     implementation "com.zaxxer:HikariCP:5.0.0"
