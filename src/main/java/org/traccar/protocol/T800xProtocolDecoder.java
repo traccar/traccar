@@ -411,7 +411,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
         if (BitUtil.check(status, 6)) {
 
-            position.setValid(!BitUtil.check(status, 7));
+            position.setValid(true);
             position.setTime(readDate(buf));
             position.setAltitude(buf.readFloatLE());
             position.setLongitude(buf.readFloatLE());
