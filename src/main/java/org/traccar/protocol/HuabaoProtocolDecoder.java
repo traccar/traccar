@@ -34,7 +34,10 @@ import org.traccar.model.Position;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
@@ -149,7 +152,19 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         ByteBuf buf = (ByteBuf) msg;
 
         if (buf.getByte(buf.readerIndex()) == '(') {
-            return decodeResult(channel, remoteAddress, buf.toString(StandardCharsets.US_ASCII));
+            String sentence = buf.toString(StandardCharsets.US_ASCII);
+            if (sentence.contains("BASE,2")) {
+                DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+                dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                String response = sentence.replace("TIME", dateFormat.format(new Date()));
+                if (channel != null) {
+                    channel.writeAndFlush(new NetworkMessage(
+                            Unpooled.copiedBuffer(response, StandardCharsets.US_ASCII), remoteAddress));
+                }
+                return null;
+            } else {
+                return decodeResult(channel, remoteAddress, sentence);
+            }
         }
 
         buf.readUnsignedByte(); // start marker

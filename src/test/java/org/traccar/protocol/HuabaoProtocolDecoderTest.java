@@ -11,6 +11,9 @@ public class HuabaoProtocolDecoderTest extends ProtocolTest {
 
         var decoder = new HuabaoProtocolDecoder(null);
 
+        verifyNull(decoder, buffer(
+                "(794104004140,1,001,BASE,2,TIME)"));
+
         verifyNull(decoder, binary(
                 "7E01000021013345678906000F002C012F373031313142534A2D4D3742203030303030303001D4C1423838383838B47E"));
 
