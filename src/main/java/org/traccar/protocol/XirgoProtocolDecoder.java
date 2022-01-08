@@ -17,6 +17,8 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import io.netty.channel.socket.nio.NioDatagramChannel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
@@ -36,6 +38,8 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
 
     private Boolean newFormat;
     private String form;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(XirgoProtocolDecoder.class);
 
     public XirgoProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -177,6 +181,7 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         String sentence = (String) msg;
+        LOGGER.warn("xirgo: {}", msg);
 
         if (channel instanceof NioDatagramChannel) {
             Matcher matcher = Pattern.compile("\\$\\$\\d+,(\\d+),.*,(\\d+)##").matcher(sentence);
