@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,13 @@ public final class Keys {
      */
     public static final ConfigSuffix<Integer> PROTOCOL_PORT = new ConfigSuffix<>(
             ".port",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * List of devices for polling protocols. List should contain unique ids separated by commas.
+     */
+    public static final ConfigSuffix<String> PROTOCOL_DEVICES = new ConfigSuffix<>(
+            ".devices",
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
