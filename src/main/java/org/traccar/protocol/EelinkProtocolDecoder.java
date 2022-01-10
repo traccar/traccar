@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2014 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -216,6 +216,24 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
         if (BitUtil.check(flags, 6)) {
             buf.skipBytes(7); // bss2
+        }
+
+        if (BitUtil.check(flags, 7)) {
+            buf.readUnsignedByte(); // radio access technology
+            int count = buf.readUnsignedByte();
+            if (count > 0) {
+                buf.readUnsignedShort(); // mcc
+                buf.readUnsignedShort(); // mnc
+                buf.readUnsignedShort(); // lac
+                buf.readUnsignedShort(); // tac
+                buf.readUnsignedInt(); // cid
+                buf.readUnsignedShort(); // ta
+            }
+            for (int i = 0; i < count; i++) {
+                buf.readUnsignedShort(); // physical cid
+                buf.readUnsignedShort(); // e-arfcn
+                buf.readUnsignedByte(); // rssi
+            }
         }
 
         if (type == MSG_WARNING) {
