@@ -58,6 +58,7 @@ public class Position extends Message {
     public static final String KEY_VERSION_FW = "versionFw";
     public static final String KEY_VERSION_HW = "versionHw";
     public static final String KEY_TYPE = "type";
+	public static final String KEY_IMMOBILIZER = "immobilizer";
     public static final String KEY_IGNITION = "ignition";
     public static final String KEY_FLAGS = "flags";
     public static final String KEY_ANTENNA = "antenna";
