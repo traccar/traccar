@@ -309,5 +309,6 @@
     <entry key='flexapi.port'>5235</entry>
     <entry key='dsf22.port'>5236</entry>
     <entry key='jido.port'>5237</entry>
+    <entry key='armoli.port'>5238</entry>
 
 </properties>
