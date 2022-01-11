@@ -52,7 +52,11 @@ public class BaseObjectManager<T extends BaseModel> {
     }
 
     protected final void readUnlock() {
-        lock.readLock().unlock();
+		try {
+			lock.readLock().unlock();
+		} catch (IllegalMonitorStateException e) {
+			e.printStackTrace();
+		}
     }
 
     protected final void writeLock() {
@@ -60,7 +64,11 @@ public class BaseObjectManager<T extends BaseModel> {
     }
 
     protected final void writeUnlock() {
-        lock.writeLock().unlock();
+		try {
+			lock.writeLock().unlock();
+		} catch (IllegalMonitorStateException e) {
+			e.printStackTrace();
+		}
     }
 
     protected final DataManager getDataManager() {
