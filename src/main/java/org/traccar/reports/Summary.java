@@ -35,11 +35,10 @@ public final class Summary {
     private Summary() {
     }
 
-    private static SummaryReport calculateSummaryResult(long deviceId, Date from, Date to) throws SQLException {
+    public static SummaryReport calculateSummaryResult(long deviceId, Collection<Position> positions) throws SQLException {
         SummaryReport result = new SummaryReport();
         result.setDeviceId(deviceId);
         result.setDeviceName(Context.getIdentityManager().getById(deviceId).getName());
-        Collection<Position> positions = Context.getDataManager().getPositions(deviceId, from, to);
         if (positions != null && !positions.isEmpty()) {
             Position firstPosition = null;
             Position previousPosition = null;
@@ -93,7 +92,7 @@ public final class Summary {
         ArrayList<SummaryReport> result = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            result.add(calculateSummaryResult(deviceId, from, to));
+            result.add(calculateSummaryResult(deviceId, Context.getDataManager().getPositions(deviceId, from, to)));
         }
         return result;
     }
