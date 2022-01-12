@@ -11,6 +11,9 @@ public class FlexApiProtocolDecoderTest extends ProtocolTest {
         var decoder = new FlexApiProtocolDecoder(null);
 
         verifyAttributes(decoder, text(
+                "${\"topic\":\"v1/VF3102021113001/motion/info\",\"payload\":{\"motion.ts\":1641885877,\"motion.ax\":0.006344,\"motion.ay\":0.289384,\"motion.az\":-0.939156,\"motion.gx\":0.420000,\"motion.gy\":0.420000,\"motion.gz\":-0.280000}}xx"));
+
+        verifyAttributes(decoder, text(
                 "${\"topic\":\"v1/VF3102021113001/gnss/info\",\"payload\":{\"gnss.ts\":1639713510,\"gnss.latitude\":30.587509,\"gnss.longitude\":104.053650,\"gnss.altitude\":391,\"gnss.speed\":0,\"gnss.heading\":0,\"gnss.hdop\":1.100000,\"gnss.fix\":4,\"gnss.num_sv\":10}}xx"));
 
         verifyNull(decoder, text(
@@ -25,7 +28,7 @@ public class FlexApiProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "${\"topic\":\"v1/VF3102021111601/gnss/info\",\"payload\":{\"time\":1637225390,\"lat\":30.587942,\"log\":104.053543,\"gnss.altitude\":480.399994,\"gnss.speed\":0,\"gnss.heading\":0,\"gnss.hdop\":0.900000,\"gnss.fix\":4,\"gnss.num_sv\":11}}xx"));
 
-        verifyNull(decoder, text(
+        verifyAttributes(decoder, text(
                 "${\"topic\":\"v1/VF3102021111601/motion/info\",\"payload\":{\"motion.ts\":1637225450,\"motion.ax\":0.009272,\"motion.ay\":0.278404,\"motion.az\":-0.941596,\"motion.gx\":0.420000,\"motion.gy\":-0.490000,\"motion.gz\":0.140000}}xx"));
 
         verifyNull(decoder, text(

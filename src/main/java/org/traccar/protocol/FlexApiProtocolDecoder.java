@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2021 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,6 +88,17 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
             if (payload.containsKey("obd.vin")) {
                 position.set(Position.KEY_VIN, payload.getString("obd.vin"));
             }
+
+        } else if (topic.contains("motion")) {
+
+            getLastLocation(position, new Date(payload.getInt("motion.ts") * 1000L));
+
+            position.set("ax", payload.getJsonNumber("motion.ax").doubleValue());
+            position.set("ay", payload.getJsonNumber("motion.ay").doubleValue());
+            position.set("az", payload.getJsonNumber("motion.az").doubleValue());
+            position.set("gx", payload.getJsonNumber("motion.gx").doubleValue());
+            position.set("gy", payload.getJsonNumber("motion.gy").doubleValue());
+            position.set("gz", payload.getJsonNumber("motion.gz").doubleValue());
 
         } else {
 
