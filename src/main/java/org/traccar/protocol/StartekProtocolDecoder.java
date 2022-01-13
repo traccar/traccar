@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2021 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,14 +70,23 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
             .number("(x+),")                     // outputs
             .number("(x+)|")                     // power
             .number("(x+)")                      // battery
-            .groupBegin()
-            .text("|")
-            .expression("([^,]+)").optional()    // adc
+            .expression("([^,]+)?")              // adc
             .groupBegin()
             .text(",")
             .number("d,")                        // extended
             .expression("([^,]+)?,")             // fuel
-            .expression("([^,]+)?,?")            // temperature
+            .expression("([^,]+)?")              // temperature
+            .groupBegin()
+            .text(",")
+            .number("(d+)|")                     // rpm
+            .number("(d+)|")                     // engine load
+            .number("d+|")                       // maf flow
+            .number("d+|")                       // intake pressure
+            .number("d+|")                       // intake temperature
+            .number("(d+)|")                     // throttle
+            .number("(d+)|")                     // coolant temperature
+            .number("(d+)|")                     // instant fuel
+            .number("(d+)")                      // fuel level
             .groupEnd("?")
             .groupEnd("?")
             .any()
@@ -181,7 +190,7 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext()) {
             String[] adc = parser.next().split("\\|");
-            for (int i = 0; i < adc.length; i++) {
+            for (int i = 1; i < adc.length; i++) {
                 position.set(Position.PREFIX_ADC + (i + 1), Integer.parseInt(adc[i], 16) * 0.01);
             }
         }
@@ -206,6 +215,15 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
                 }
                 position.set(Position.PREFIX_TEMP + index, convertedValue * 0.1);
             }
+        }
+
+        if (parser.hasNext(6)) {
+            position.set(Position.KEY_RPM, parser.nextInt());
+            position.set(Position.KEY_ENGINE_LOAD, parser.nextInt());
+            position.set(Position.KEY_THROTTLE, parser.nextInt());
+            position.set(Position.KEY_COOLANT_TEMP, parser.nextInt() - 40);
+            position.set(Position.KEY_FUEL_CONSUMPTION, parser.nextInt() * 0.1);
+            position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
         }
 
         return position;
