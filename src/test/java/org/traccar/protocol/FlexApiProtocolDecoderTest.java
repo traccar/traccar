@@ -16,7 +16,7 @@ public class FlexApiProtocolDecoderTest extends ProtocolTest {
         verifyAttributes(decoder, text(
                 "${\"topic\":\"v1/VF3102021113001/gnss/info\",\"payload\":{\"gnss.ts\":1639713510,\"gnss.latitude\":30.587509,\"gnss.longitude\":104.053650,\"gnss.altitude\":391,\"gnss.speed\":0,\"gnss.heading\":0,\"gnss.hdop\":1.100000,\"gnss.fix\":4,\"gnss.num_sv\":10}}xx"));
 
-        verifyNull(decoder, text(
+        verifyAttributes(decoder, text(
                 "${\"topic\":\"v1/VF3102021113001/cellular1/info\",\"payload\":{\"modem1.ts\":1639713510,\"modem1.imei\":\"863674047326655\",\"modem1.imsi\":\"\",\"modem1.iccid\":\"\",\"modem1.phone_num\":\"\",\"modem1.signal_lvl\":0,\"modem1.reg_status\":0,\"modem1.operator\":\"\",\"modem1.network\":0,\"modem1.lac\":\"\",\"modem1.cell_id\":\"\",\"modem1.rssi\":0,\"modem1.rsrp\":0,\"modem1.rsrq\":0,\"cellular1.status\":2,\"cellular1.ip\":\"0.0.0.0\",\"cellular1.netmask\":\"255.255.255.255\",\"cellular1.gateway\":\"0.0.0.0\",\"cellular1.dns1\":\"0.0.0.0\",\"cellular1.up_at\":602}}xx"));
 
         verifyAttributes(decoder, text(
@@ -31,13 +31,13 @@ public class FlexApiProtocolDecoderTest extends ProtocolTest {
         verifyAttributes(decoder, text(
                 "${\"topic\":\"v1/VF3102021111601/motion/info\",\"payload\":{\"motion.ts\":1637225450,\"motion.ax\":0.009272,\"motion.ay\":0.278404,\"motion.az\":-0.941596,\"motion.gx\":0.420000,\"motion.gy\":-0.490000,\"motion.gz\":0.140000}}xx"));
 
-        verifyNull(decoder, text(
+        verifyAttributes(decoder, text(
                 "${\"topic\":\"v1/VF3102021111601/sysinfo/info\",\"payload\":{\"sysinfo.ts\":1637224740,\"sysinfo.model_name\":\"310\",\"sysinfo.oem_name\":\"inhand\",\"sysinfo.serial_number\":\"VF3102021111601\",\"sysinfo.firmware_version\":\"VT3_V1.1.32\",\"sysinfo.product_number\":\"FQ58\",\"sysinfo.description\":\"www.inhand.com.cn\"}}xx"));
 
-        verifyNull(decoder, text(
+        verifyAttributes(decoder, text(
                 "${\"topic\":\"v1/VF3102021111601/io/info\",\"payload\":{\"io.ts\":1637227722,\"io.AI1\":0,\"io.DI1\":1,\"io.DI2\":0,\"io.DI3\":0,\"io.DI4\":0,\"io.DI1_pullup\":0,\"io.DI2_pullup\":0,\"io.DI3_pullup\":0,\"io.DI4_pullup\":0,\"io.DO1\":0,\"io.DO2\":0,\"io.DO3\":0,\"io.IGT\":1}}xx"));
 
-        verifyNull(decoder, text(
+        verifyAttributes(decoder, text(
                 "${\"topic\":\"v1/VF3102021111601/cellular1/info\",\"payload\":{\"modem1.ts\":1637225330,\"modem1.imei\":\"863674047324999\",\"modem1.imsi\":\"460111150414721\",\"modem1.iccid\":\"89860319482086580401\",\"modem1.phone_num\":\"\",\"modem1.signal_lvl\":25,\"modem1.reg_status\":1,\"modem1.operator\":\"46011\",\"modem1.network\":3,\"modem1.lac\":\"EA00\",\"modem1.cell_id\":\"E779B81\",\"modem1.rssi\":0,\"modem1.rsrp\":0,\"modem1.rsrq\":0,\"cellular1.status\":3,\"cellular1.ip\":\"10.136.143.193\",\"cellular1.netmask\":\"255.255.255.255\",\"cellular1.gateway\":\"10.64.64.64\",\"cellular1.dns1\":\"223.5.5.5\",\"cellular1.up_at\":450}}xx"));
 
     }
