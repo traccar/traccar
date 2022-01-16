@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpVersion;
@@ -37,6 +38,7 @@ public class OrbcommProtocolPoller extends BaseProtocolPoller {
 
     private final String accessId;
     private final String password;
+    private final String host;
 
     private Date startTime = new Date();
 
@@ -48,6 +50,7 @@ public class OrbcommProtocolPoller extends BaseProtocolPoller {
         super(protocol);
         accessId = Context.getConfig().getString(Keys.ORBCOMM_ACCESS_ID);
         password = Context.getConfig().getString(Keys.ORBCOMM_PASSWORD);
+        host = Context.getConfig().getString(Keys.PROTOCOL_ADDRESS.withPrefix(protocol.getName()));
     }
 
     @Override
@@ -63,6 +66,8 @@ public class OrbcommProtocolPoller extends BaseProtocolPoller {
 
         HttpRequest request = new DefaultFullHttpRequest(
                 HttpVersion.HTTP_1_1, HttpMethod.POST, encoder.toString(), Unpooled.buffer());
+        request.headers().add(HttpHeaderNames.HOST, host);
+        request.headers().add(HttpHeaderNames.CONTENT_LENGTH, 0);
         channel.writeAndFlush(request);
     }
 
