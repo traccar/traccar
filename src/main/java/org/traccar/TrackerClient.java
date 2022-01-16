@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,38 +15,36 @@
  */
 package org.traccar;
 
-import io.netty.bootstrap.AbstractBootstrap;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.Channel;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
-import io.netty.channel.socket.nio.NioDatagramChannel;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.ssl.SslHandler;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import org.traccar.config.Keys;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
-import java.net.InetSocketAddress;
+import java.util.concurrent.TimeUnit;
 
-public abstract class TrackerServer implements TrackerConnector {
+public abstract class TrackerClient implements TrackerConnector {
 
-    private final boolean datagram;
     private final boolean secure;
+    private final long interval;
 
-    @SuppressWarnings("rawtypes")
-    private final AbstractBootstrap bootstrap;
+    private final Bootstrap bootstrap;
 
     private final int port;
     private final String address;
+    private final String[] devices;
 
     private final ChannelGroup channelGroup = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
     @Override
     public boolean isDatagram() {
-        return datagram;
+        return false;
     }
 
     @Override
@@ -54,12 +52,13 @@ public abstract class TrackerServer implements TrackerConnector {
         return secure;
     }
 
-    public TrackerServer(boolean datagram, String protocol) {
-        this.datagram = datagram;
+    public TrackerClient(String protocol) {
 
         secure = Context.getConfig().getBoolean(Keys.PROTOCOL_SSL.withPrefix(protocol));
+        interval = Context.getConfig().getLong(Keys.PROTOCOL_INTERVAL.withPrefix(protocol));
         address = Context.getConfig().getString(Keys.PROTOCOL_ADDRESS.withPrefix(protocol));
-        port = Context.getConfig().getInteger(Keys.PROTOCOL_PORT.withPrefix(protocol));
+        port = Context.getConfig().getInteger(Keys.PROTOCOL_PORT.withPrefix(protocol), secure ? 443 : 80);
+        devices = Context.getConfig().getString(Keys.PROTOCOL_DEVICES.withPrefix(protocol)).split("[, ]");
 
         BasePipelineFactory pipelineFactory = new BasePipelineFactory(this, protocol) {
             @Override
@@ -67,6 +66,7 @@ public abstract class TrackerServer implements TrackerConnector {
                 try {
                     if (isSecure()) {
                         SSLEngine engine = SSLContext.getDefault().createSSLEngine();
+                        engine.setUseClientMode(true);
                         pipeline.addLast(new SslHandler(engine));
                     }
                 } catch (Exception e) {
@@ -76,35 +76,24 @@ public abstract class TrackerServer implements TrackerConnector {
 
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                TrackerServer.this.addProtocolHandlers(pipeline);
+                try {
+                    TrackerClient.this.addProtocolHandlers(pipeline);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
         };
 
-        if (datagram) {
-
-            bootstrap = new Bootstrap()
-                    .group(EventLoopGroupFactory.getWorkerGroup())
-                    .channel(NioDatagramChannel.class)
-                    .handler(pipelineFactory);
-
-        } else {
-
-            bootstrap = new ServerBootstrap()
-                    .group(EventLoopGroupFactory.getBossGroup(), EventLoopGroupFactory.getWorkerGroup())
-                    .channel(NioServerSocketChannel.class)
-                    .childHandler(pipelineFactory);
-
-        }
+        bootstrap = new Bootstrap()
+                .group(EventLoopGroupFactory.getWorkerGroup())
+                .channel(NioSocketChannel.class)
+                .handler(pipelineFactory);
     }
 
-    protected abstract void addProtocolHandlers(PipelineBuilder pipeline);
+    protected abstract void addProtocolHandlers(PipelineBuilder pipeline) throws Exception;
 
-    public int getPort() {
-        return port;
-    }
-
-    public String getAddress() {
-        return address;
+    public String[] getDevices() {
+        return devices;
     }
 
     @Override
@@ -114,17 +103,18 @@ public abstract class TrackerServer implements TrackerConnector {
 
     @Override
     public void start() throws Exception {
-        InetSocketAddress endpoint;
-        if (address == null) {
-            endpoint = new InetSocketAddress(port);
-        } else {
-            endpoint = new InetSocketAddress(address, port);
-        }
-
-        Channel channel = bootstrap.bind(endpoint).syncUninterruptibly().channel();
-        if (channel != null) {
-            getChannelGroup().add(channel);
-        }
+        bootstrap.connect(address, port)
+                .syncUninterruptibly().channel().closeFuture().addListener(new GenericFutureListener<>() {
+                    @Override
+                    public void operationComplete(Future<? super Void> future) {
+                        if (interval > 0) {
+                            GlobalEventExecutor.INSTANCE.schedule(() -> {
+                                bootstrap.connect(address, port)
+                                        .syncUninterruptibly().channel().closeFuture().addListener(this);
+                            }, interval, TimeUnit.SECONDS);
+                        }
+                    }
+                });
     }
 
     @Override

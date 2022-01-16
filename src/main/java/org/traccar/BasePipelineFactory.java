@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,12 +54,12 @@ import java.util.Map;
 
 public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
 
-    private final TrackerServer server;
+    private final TrackerConnector connector;
     private final String protocol;
     private int timeout;
 
-    public BasePipelineFactory(TrackerServer server, String protocol) {
-        this.server = server;
+    public BasePipelineFactory(TrackerConnector connector, String protocol) {
+        this.connector = connector;
         this.protocol = protocol;
         timeout = Context.getConfig().getInteger(Keys.PROTOCOL_TIMEOUT.withPrefix(protocol));
         if (timeout == 0) {
@@ -67,10 +67,12 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
         }
     }
 
+    protected abstract void addTransportHandlers(PipelineBuilder pipeline);
+
     protected abstract void addProtocolHandlers(PipelineBuilder pipeline);
 
     @SafeVarargs
-    private final void addHandlers(ChannelPipeline pipeline, Class<? extends ChannelHandler>... handlerClasses) {
+    private void addHandlers(ChannelPipeline pipeline, Class<? extends ChannelHandler>... handlerClasses) {
         for (Class<? extends ChannelHandler> handlerClass : handlerClasses) {
             if (handlerClass != null) {
                 pipeline.addLast(Main.getInjector().getInstance(handlerClass));
@@ -97,10 +99,12 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
     protected void initChannel(Channel channel) {
         final ChannelPipeline pipeline = channel.pipeline();
 
-        if (timeout > 0 && !server.isDatagram()) {
+        addTransportHandlers(pipeline::addLast);
+
+        if (timeout > 0 && !connector.isDatagram()) {
             pipeline.addLast(new IdleStateHandler(timeout, 0, 0));
         }
-        pipeline.addLast(new OpenChannelHandler(server));
+        pipeline.addLast(new OpenChannelHandler(connector));
         pipeline.addLast(new NetworkMessageHandler());
         pipeline.addLast(new StandardLoggingHandler(protocol));
 

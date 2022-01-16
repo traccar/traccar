@@ -35,7 +35,7 @@ public abstract class BaseProtocol implements Protocol {
     private final String name;
     private final Set<String> supportedDataCommands = new HashSet<>();
     private final Set<String> supportedTextCommands = new HashSet<>();
-    private final List<TrackerServer> serverList = new LinkedList<>();
+    private final List<TrackerConnector> connectorList = new LinkedList<>();
 
     private StringProtocolEncoder textCommandEncoder = null;
 
@@ -54,12 +54,16 @@ public abstract class BaseProtocol implements Protocol {
     }
 
     protected void addServer(TrackerServer server) {
-        serverList.add(server);
+        connectorList.add(server);
+    }
+
+    protected void addClient(TrackerClient client) {
+        connectorList.add(client);
     }
 
     @Override
-    public Collection<TrackerServer> getServerList() {
-        return serverList;
+    public Collection<TrackerConnector> getConnectorList() {
+        return connectorList;
     }
 
     public void setSupportedDataCommands(String... commands) {
