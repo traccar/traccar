@@ -44,11 +44,14 @@ public class OrbcommProtocolDecoder extends BaseProtocolDecoder {
         String content = response.content().toString(StandardCharsets.UTF_8);
         JsonObject json = Json.createReader(new StringReader(content)).readObject();
 
-        OrbcommProtocolPoller poller = BasePipelineFactory.getHandler(channel.pipeline(), OrbcommProtocolPoller.class);
-        if (poller != null) {
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-            poller.setStartTime(dateFormat.parse(json.getString("NextStartUTC")));
+        if (channel != null) {
+            OrbcommProtocolPoller poller =
+                    BasePipelineFactory.getHandler(channel.pipeline(), OrbcommProtocolPoller.class);
+            if (poller != null) {
+                DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                poller.setStartTime(dateFormat.parse(json.getString("NextStartUTC")));
+            }
         }
 
         return null;
