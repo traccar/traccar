@@ -67,6 +67,8 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
         }
     }
 
+    protected abstract void addTransportHandlers(PipelineBuilder pipeline);
+
     protected abstract void addProtocolHandlers(PipelineBuilder pipeline);
 
     @SafeVarargs
@@ -96,6 +98,8 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
     @Override
     protected void initChannel(Channel channel) {
         final ChannelPipeline pipeline = channel.pipeline();
+
+        addTransportHandlers(pipeline::addLast);
 
         if (timeout > 0 && !connector.isDatagram()) {
             pipeline.addLast(new IdleStateHandler(timeout, 0, 0));

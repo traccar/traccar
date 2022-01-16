@@ -16,17 +16,23 @@
 package org.traccar;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.ChannelInitializer;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.ssl.SslHandler;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import org.traccar.config.Keys;
 
-import java.util.List;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
+import java.util.concurrent.TimeUnit;
 
 public abstract class TrackerClient implements TrackerConnector {
+
+    private final boolean secure;
+    private final long interval;
 
     private final Bootstrap bootstrap;
 
@@ -41,31 +47,54 @@ public abstract class TrackerClient implements TrackerConnector {
         return false;
     }
 
+    @Override
+    public boolean isSecure() {
+        return secure;
+    }
+
     public TrackerClient(String protocol) {
 
+        secure = Context.getConfig().getBoolean(Keys.PROTOCOL_SSL.withPrefix(protocol));
+        interval = Context.getConfig().getLong(Keys.PROTOCOL_INTERVAL.withPrefix(protocol));
         address = Context.getConfig().getString(Keys.PROTOCOL_ADDRESS.withPrefix(protocol));
-        port = Context.getConfig().getInteger(Keys.PROTOCOL_PORT.withPrefix(protocol));
+        port = Context.getConfig().getInteger(Keys.PROTOCOL_PORT.withPrefix(protocol), secure ? 443 : 80);
         devices = Context.getConfig().getString(Keys.PROTOCOL_DEVICES.withPrefix(protocol)).split("[, ]");
 
         BasePipelineFactory pipelineFactory = new BasePipelineFactory(this, protocol) {
             @Override
+            protected void addTransportHandlers(PipelineBuilder pipeline) {
+                try {
+                    if (isSecure()) {
+                        SSLEngine engine = SSLContext.getDefault().createSSLEngine();
+                        engine.setUseClientMode(true);
+                        pipeline.addLast(new SslHandler(engine));
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                TrackerClient.this.addProtocolHandlers(pipeline);
+                try {
+                    TrackerClient.this.addProtocolHandlers(pipeline);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
         };
 
         bootstrap = new Bootstrap()
                 .group(EventLoopGroupFactory.getWorkerGroup())
                 .channel(NioSocketChannel.class)
-                .handler(new ChannelInitializer<SocketChannel>() {
-                    @Override
-                    protected void initChannel(SocketChannel channel) {
-                        pipelineFactory.initChannel(channel);
-                    }
-                });
+                .handler(pipelineFactory);
     }
 
-    protected abstract void addProtocolHandlers(PipelineBuilder pipeline);
+    protected abstract void addProtocolHandlers(PipelineBuilder pipeline) throws Exception;
+
+    public String[] getDevices() {
+        return devices;
+    }
 
     @Override
     public ChannelGroup getChannelGroup() {
@@ -74,7 +103,18 @@ public abstract class TrackerClient implements TrackerConnector {
 
     @Override
     public void start() throws Exception {
-        bootstrap.connect(address, port).sync();
+        bootstrap.connect(address, port)
+                .syncUninterruptibly().channel().closeFuture().addListener(new GenericFutureListener<>() {
+                    @Override
+                    public void operationComplete(Future<? super Void> future) {
+                        if (interval > 0) {
+                            GlobalEventExecutor.INSTANCE.schedule(() -> {
+                                bootstrap.connect(address, port)
+                                        .syncUninterruptibly().channel().closeFuture().addListener(this);
+                            }, interval, TimeUnit.SECONDS);
+                        }
+                    }
+                });
     }
 
     @Override

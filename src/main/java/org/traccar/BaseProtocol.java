@@ -57,7 +57,9 @@ public abstract class BaseProtocol implements Protocol {
         connectorList.add(server);
     }
 
-    // TODO addClient
+    protected void addClient(TrackerClient client) {
+        connectorList.add(client);
+    }
 
     @Override
     public Collection<TrackerConnector> getConnectorList() {

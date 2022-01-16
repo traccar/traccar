@@ -38,10 +38,25 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
-     * List of devices for polling protocols. List should contain unique ids separated by commas.
+     * List of devices for polling protocols. List should contain unique ids separated by commas. Used only for polling
+     * protocols.
      */
     public static final ConfigSuffix<String> PROTOCOL_DEVICES = new ConfigSuffix<>(
             ".devices",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Polling interval in seconds. Used only for polling protocols.
+     */
+    public static final ConfigSuffix<Long> PROTOCOL_INTERVAL = new ConfigSuffix<>(
+            ".interval",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Enable SSL support for the protocol. Not all protocols support this.
+     */
+    public static final ConfigSuffix<Boolean> PROTOCOL_SSL = new ConfigSuffix<>(
+            ".ssl",
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
@@ -180,6 +195,20 @@ public final class Keys {
      */
     public static final ConfigSuffix<Boolean> PROTOCOL_IGNORE_SESSIONS_CACHE = new ConfigSuffix<>(
             ".ignoreSessionCache",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * ORBCOMM API access id.
+     */
+    public static final ConfigKey<String> ORBCOMM_ACCESS_ID = new ConfigKey<>(
+            "orbcomm.accessId",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * ORBCOMM API password.
+     */
+    public static final ConfigKey<String> ORBCOMM_PASSWORD = new ConfigKey<>(
+            "orbcomm.password",
             Collections.singletonList(KeyType.GLOBAL));
 
     /**

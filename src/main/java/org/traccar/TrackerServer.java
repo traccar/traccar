@@ -23,14 +23,18 @@ import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.ssl.SslHandler;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import org.traccar.config.Keys;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
 import java.net.InetSocketAddress;
 
 public abstract class TrackerServer implements TrackerConnector {
 
     private final boolean datagram;
+    private final boolean secure;
 
     @SuppressWarnings("rawtypes")
     private final AbstractBootstrap bootstrap;
@@ -45,13 +49,31 @@ public abstract class TrackerServer implements TrackerConnector {
         return datagram;
     }
 
+    @Override
+    public boolean isSecure() {
+        return secure;
+    }
+
     public TrackerServer(boolean datagram, String protocol) {
         this.datagram = datagram;
 
+        secure = Context.getConfig().getBoolean(Keys.PROTOCOL_SSL.withPrefix(protocol));
         address = Context.getConfig().getString(Keys.PROTOCOL_ADDRESS.withPrefix(protocol));
         port = Context.getConfig().getInteger(Keys.PROTOCOL_PORT.withPrefix(protocol));
 
         BasePipelineFactory pipelineFactory = new BasePipelineFactory(this, protocol) {
+            @Override
+            protected void addTransportHandlers(PipelineBuilder pipeline) {
+                try {
+                    if (isSecure()) {
+                        SSLEngine engine = SSLContext.getDefault().createSSLEngine();
+                        pipeline.addLast(new SslHandler(engine));
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 TrackerServer.this.addProtocolHandlers(pipeline);
@@ -99,7 +121,7 @@ public abstract class TrackerServer implements TrackerConnector {
             endpoint = new InetSocketAddress(address, port);
         }
 
-        Channel channel = bootstrap.bind(endpoint).sync().channel();
+        Channel channel = bootstrap.bind(endpoint).syncUninterruptibly().channel();
         if (channel != null) {
             getChannelGroup().add(channel);
         }

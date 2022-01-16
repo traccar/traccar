@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.traccar.config.Keys;
 import java.io.File;
 import java.io.IOException;
 import java.net.BindException;
+import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -95,6 +96,8 @@ public class ServerManager {
                 connector.start();
             } catch (BindException e) {
                 LOGGER.warn("Port disabled due to conflict", e);
+            } catch (ConnectException e) {
+                LOGGER.warn("Connection failed", e);
             }
         }
     }
