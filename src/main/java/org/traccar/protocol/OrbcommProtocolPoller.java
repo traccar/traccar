@@ -65,7 +65,7 @@ public class OrbcommProtocolPoller extends BaseProtocolPoller {
         encoder.addParam("start_utc", dateFormat.format(startTime));
 
         HttpRequest request = new DefaultFullHttpRequest(
-                HttpVersion.HTTP_1_1, HttpMethod.POST, encoder.toString(), Unpooled.buffer());
+                HttpVersion.HTTP_1_1, HttpMethod.GET, encoder.toString(), Unpooled.buffer());
         request.headers().add(HttpHeaderNames.HOST, host);
         request.headers().add(HttpHeaderNames.CONTENT_LENGTH, 0);
         channel.writeAndFlush(request);
