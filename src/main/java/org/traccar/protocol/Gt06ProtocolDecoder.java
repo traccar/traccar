@@ -70,6 +70,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_GPS_LBS_STATUS_3 = 0x27;
     public static final int MSG_LBS_MULTIPLE_1 = 0x28;
     public static final int MSG_LBS_MULTIPLE_2 = 0x2E;
+    public static final int MSG_LBS_MULTIPLE_3 = 0x24;
     public static final int MSG_LBS_WIFI = 0x2C;
     public static final int MSG_LBS_EXTEND = 0x18;
     public static final int MSG_LBS_STATUS = 0x19;
@@ -699,8 +700,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             return null; // space10x multi-lbs message
 
-        } else if (type == MSG_LBS_MULTIPLE_1 || type == MSG_LBS_MULTIPLE_2 || type == MSG_LBS_EXTEND
-                || type == MSG_LBS_WIFI || type == MSG_LBS_2 || type == MSG_WIFI_3 || type == MSG_WIFI_5) {
+        } else if (type == MSG_LBS_MULTIPLE_1 || type == MSG_LBS_MULTIPLE_2 || type == MSG_LBS_MULTIPLE_3
+                || type == MSG_LBS_EXTEND || type == MSG_LBS_WIFI || type == MSG_LBS_2
+                || type == MSG_WIFI_3 || type == MSG_WIFI_5) {
 
             boolean longFormat = type == MSG_LBS_2 || type == MSG_WIFI_3 || type == MSG_WIFI_5;
 
@@ -726,7 +728,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             buf.readUnsignedByte(); // time leads
 
-            if (type != MSG_LBS_MULTIPLE_1 && type != MSG_LBS_MULTIPLE_2 && type != MSG_LBS_2) {
+            if (type != MSG_LBS_MULTIPLE_1 && type != MSG_LBS_MULTIPLE_2 && type != MSG_LBS_MULTIPLE_3
+                    && type != MSG_LBS_2) {
                 int wifiCount = buf.readUnsignedByte();
                 for (int i = 0; i < wifiCount; i++) {
                     String mac = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");
