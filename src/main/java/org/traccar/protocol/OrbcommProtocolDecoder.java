@@ -19,15 +19,20 @@ import io.netty.channel.Channel;
 import io.netty.handler.codec.http.FullHttpResponse;
 import org.traccar.BasePipelineFactory;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.Protocol;
+import org.traccar.helper.UnitsConverter;
+import org.traccar.model.Position;
 
 import javax.json.Json;
+import javax.json.JsonArray;
 import javax.json.JsonObject;
 import java.io.StringReader;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.LinkedList;
 import java.util.TimeZone;
 
 public class OrbcommProtocolDecoder extends BaseProtocolDecoder {
@@ -54,7 +59,58 @@ public class OrbcommProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        return null;
+        LinkedList<Position> positions = new LinkedList<>();
+
+        JsonArray messages = json.getJsonArray("Messages");
+        for (int i = 0; i < messages.size(); i++) {
+            JsonObject message = messages.getJsonObject(i);
+            DeviceSession deviceSession = getDeviceSession(
+                    channel, remoteAddress, true, message.getJsonNumber("ID").toString());
+            if (deviceSession != null) {
+
+                Position position = new Position(getProtocolName());
+                position.setDeviceId(deviceSession.getDeviceId());
+
+                DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                position.setDeviceTime(dateFormat.parse(message.getString("MessageUTC")));
+
+                JsonArray fields = message.getJsonObject("Payload").getJsonArray("Fields");
+                for (int j = 0; j < fields.size(); j++) {
+                    JsonObject field = fields.getJsonObject(j);
+                    String value = field.getString("Value");
+                    switch (field.getString("Name")) {
+                        case "latitude":
+                            position.setLatitude(Integer.parseInt(value) / 60000.0);
+                            break;
+                        case "longitude":
+                            position.setLongitude(Integer.parseInt(value) / 60000.0);
+                            break;
+                        case "speed":
+                            position.setSpeed(UnitsConverter.knotsFromKph(Integer.parseInt(value)));
+                            break;
+                        case "heading":
+                            position.setCourse(Integer.parseInt(value) * 0.1);
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
+
+                if (position.getLatitude() != 0 && position.getLongitude() != 0) {
+                    position.setValid(true);
+                    position.setFixTime(position.getDeviceTime());
+                } else {
+                    getLastLocation(position, position.getDeviceTime());
+                }
+
+                positions.add(position);
+
+            }
+        }
+
+        return positions.isEmpty() ? null : positions;
     }
 
 }
