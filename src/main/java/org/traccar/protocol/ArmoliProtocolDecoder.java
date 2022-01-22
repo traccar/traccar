@@ -68,12 +68,19 @@ public class ArmoliProtocolDecoder extends BaseProtocolDecoder {
         char type = sentence.charAt(1);
 
         Position position = new Position(getProtocolName());
+        DeviceSession deviceSession;
 
         if (type != 'M') {
             if (type == 'W') {
-                getLastLocation(position, null);
-                position.set(Position.KEY_RESULT, sentence.substring(sentence.indexOf(',') + 1, sentence.length() - 2));
-                return position;
+                deviceSession = getDeviceSession(channel, remoteAddress);
+                if (deviceSession != null) {
+                    position.setDeviceId(deviceSession.getDeviceId());
+                    getLastLocation(position, null);
+                    position.set(
+                            Position.KEY_RESULT,
+                            sentence.substring(sentence.indexOf(',') + 1, sentence.length() - 2));
+                    return position;
+                }
             } else if (channel != null && (type == 'Q' || type == 'L')) {
                 channel.writeAndFlush(new NetworkMessage("[TX,];;", remoteAddress));
             }
@@ -85,7 +92,7 @@ public class ArmoliProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
             return null;
         }
