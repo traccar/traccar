@@ -50,6 +50,13 @@ public class ArmoliProtocolDecoder extends BaseProtocolDecoder {
             .number("(xx)")                      // status
             .number("(xx)")                      // max speed
             .number("(x{6})")                    // distance
+            .number("(dd)?")                     // hdop
+            .number("xx")                        // idle
+            .number(":(x+)").optional()          // alarms
+            .number("G(x{6})").optional()        // g-sensor
+            .number("H(x{3})").optional()        // power
+            .number("E(x{3})").optional()        // battery
+            .number("!(x+)").optional()          // driver
             .any()
             .compile();
 
@@ -60,8 +67,14 @@ public class ArmoliProtocolDecoder extends BaseProtocolDecoder {
         String sentence = (String) msg;
         char type = sentence.charAt(1);
 
+        Position position = new Position(getProtocolName());
+
         if (type != 'M') {
-            if (channel != null && (type == 'Q' || type == 'L')) {
+            if (type == 'W') {
+                getLastLocation(position, null);
+                position.set(Position.KEY_RESULT, sentence.substring(sentence.indexOf(',') + 1, sentence.length() - 2));
+                return position;
+            } else if (channel != null && (type == 'Q' || type == 'L')) {
                 channel.writeAndFlush(new NetworkMessage("[TX,];;", remoteAddress));
             }
             return null;
@@ -77,7 +90,6 @@ public class ArmoliProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
@@ -95,6 +107,25 @@ public class ArmoliProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_STATUS, parser.nextHexInt());
         position.set("maxSpeed", parser.nextHexInt());
         position.set(Position.KEY_ODOMETER, parser.nextHexInt());
+
+        if (parser.hasNext()) {
+            position.set(Position.KEY_HDOP, parser.nextInt() * 0.1);
+        }
+        if (parser.hasNext()) {
+            position.set("alarms", parser.next());
+        }
+        if (parser.hasNext()) {
+            position.set(Position.KEY_G_SENSOR, parser.next());
+        }
+        if (parser.hasNext()) {
+            position.set(Position.KEY_POWER, parser.nextHexInt() * 0.01);
+        }
+        if (parser.hasNext()) {
+            position.set(Position.KEY_BATTERY, parser.nextHexInt() * 0.01);
+        }
+        if (parser.hasNext()) {
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
+        }
 
         return position;
     }

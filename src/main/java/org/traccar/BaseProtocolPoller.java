@@ -29,8 +29,8 @@ public abstract class BaseProtocolPoller extends ChannelDuplexHandler {
     private final long interval;
     private Future<?> timeout;
 
-    public BaseProtocolPoller(Protocol protocol) {
-        interval = Context.getConfig().getLong(Keys.PROTOCOL_INTERVAL.withPrefix(protocol.getName()));
+    public BaseProtocolPoller(Protocol protocol, long interval) {
+        this.interval = interval;
     }
 
     protected abstract void sendRequest(Channel channel, SocketAddress remoteAddress);

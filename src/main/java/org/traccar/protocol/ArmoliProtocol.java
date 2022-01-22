@@ -32,6 +32,7 @@ public class ArmoliProtocol extends BaseProtocol {
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new ArmoliProtocolDecoder(ArmoliProtocol.this));
+                pipeline.addLast(new ArmoliProtocolPoller(ArmoliProtocol.this));
             }
         });
     }
