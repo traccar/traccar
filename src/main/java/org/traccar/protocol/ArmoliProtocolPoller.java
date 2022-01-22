@@ -24,7 +24,7 @@ import java.net.SocketAddress;
 public class ArmoliProtocolPoller extends BaseProtocolPoller {
 
     public ArmoliProtocolPoller(Protocol protocol) {
-        super(protocol, 180000);
+        super(180000);
     }
 
     @Override

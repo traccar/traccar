@@ -47,7 +47,7 @@ public class OrbcommProtocolPoller extends BaseProtocolPoller {
     }
 
     public OrbcommProtocolPoller(Protocol protocol) {
-        super(protocol, Context.getConfig().getLong(Keys.PROTOCOL_INTERVAL.withPrefix(protocol.getName())));
+        super(Context.getConfig().getLong(Keys.PROTOCOL_INTERVAL.withPrefix(protocol.getName())));
         accessId = Context.getConfig().getString(Keys.ORBCOMM_ACCESS_ID);
         password = Context.getConfig().getString(Keys.ORBCOMM_PASSWORD);
         host = Context.getConfig().getString(Keys.PROTOCOL_ADDRESS.withPrefix(protocol.getName()));
