@@ -174,15 +174,44 @@ public class DmtHttpProtocolDecoder extends BaseHttpProtocolDecoder {
         position.set(Position.KEY_INDEX, root.getInt("sqn"));
         position.set(Position.KEY_EVENT, root.getInt("reason"));
 
-        JsonArray analogues = root.getJsonArray("analogues");
-        for (int i = 0; i < analogues.size(); i++) {
-            JsonObject adc = analogues.getJsonObject(i);
-            position.set(Position.PREFIX_ADC + adc.getInt("id"), adc.getInt("val"));
+        if (root.containsKey("analogues")) {
+            JsonArray analogues = root.getJsonArray("analogues");
+            for (int i = 0; i < analogues.size(); i++) {
+                JsonObject adc = analogues.getJsonObject(i);
+                position.set(Position.PREFIX_ADC + adc.getInt("id"), adc.getInt("val"));
+            }
         }
 
-        position.set(Position.KEY_INPUT, root.getInt("inputs"));
-        position.set(Position.KEY_OUTPUT, root.getInt("outputs"));
-        position.set(Position.KEY_STATUS, root.getInt("status"));
+        if (root.containsKey("inputs")) {
+            int input = root.getInt("inputs");
+            position.set(Position.KEY_IGNITION, BitUtil.check(input, 0));
+            position.set(Position.KEY_INPUT, input);
+        }
+        if (root.containsKey("outputs")) {
+            position.set(Position.KEY_OUTPUT, root.getInt("outputs"));
+        }
+        if (root.containsKey("status")) {
+            position.set(Position.KEY_STATUS, root.getInt("status"));
+        }
+
+        if (root.containsKey("counters")) {
+            JsonArray counters = root.getJsonArray("counters");
+            for (int i = 0; i < counters.size(); i++) {
+                JsonObject counter = counters.getJsonObject(i);
+                switch (counter.getInt("id")) {
+                    case 0:
+                        position.set(Position.KEY_BATTERY, counter.getInt("val") * 0.001);
+                        break;
+                    case 1:
+                        position.set(Position.KEY_BATTERY_LEVEL, counter.getInt("val") * 0.01);
+                        break;
+                    default:
+                        position.set("counter" + counter.getInt("id"), counter.getInt("val"));
+                        break;
+                }
+
+            }
+        }
 
         return position;
     }

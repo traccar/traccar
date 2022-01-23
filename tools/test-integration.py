@@ -8,6 +8,7 @@ import urllib2
 import json
 import socket
 import time
+import threading
 
 messages = {
     'gps103' : 'imei:123456789012345,help me,1201011201,,F,120100.000,A,6000.0000,N,13000.0000,E,0.00,;',
@@ -141,6 +142,7 @@ def send_message(port, message):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(('127.0.0.1', port))
     s.send(message)
+    time.sleep(5)
     s.close()
 
 def get_protocols(cookie, device_id):
@@ -155,40 +157,41 @@ def get_protocols(cookie, device_id):
         protocols.append(position['protocol'])
     return protocols
 
-ports = load_ports()
+if __name__ == "__main__":
+    ports = load_ports()
 
-cookie = login()
-remove_devices(cookie)
+    cookie = login()
+    remove_devices(cookie)
 
-devices = {
-    '123456789012345' : add_device(cookie, '123456789012345'),
-    '123456789012' : add_device(cookie, '123456789012'),
-    '1234567890' : add_device(cookie, '1234567890'),
-    '123456' : add_device(cookie, '123456'),
-    '1234' : add_device(cookie, '1234')
-}
+    devices = {
+        '123456789012345' : add_device(cookie, '123456789012345'),
+        '123456789012' : add_device(cookie, '123456789012'),
+        '1234567890' : add_device(cookie, '1234567890'),
+        '123456' : add_device(cookie, '123456'),
+        '1234' : add_device(cookie, '1234')
+    }
 
+    all = set(ports.keys())
+    protocols = set(messages.keys())
 
-all = set(ports.keys())
-protocols = set(messages.keys())
+    print 'Total: %d' % len(all)
+    print 'Missing: %d' % len(all - protocols)
+    print 'Covered: %d' % len(protocols)
 
-print 'Total: %d' % len(all)
-print 'Missing: %d' % len(all - protocols)
-print 'Covered: %d' % len(protocols)
+    #if all - protocols:
+    #    print '\nMissing: %s\n' % repr(list((all - protocols)))
 
-#if all - protocols:
-#    print '\nMissing: %s\n' % repr(list((all - protocols)))
+    for protocol in messages:
+        thread = threading.Thread(target = send_message, args = (ports[protocol], messages[protocol]))
+        thread.start()
 
-for protocol in messages:
-    send_message(ports[protocol], messages[protocol])
+    time.sleep(10)
 
-time.sleep(10)
+    for device in devices:
+        protocols -= set(get_protocols(cookie, devices[device]))
 
-for device in devices:
-    protocols -= set(get_protocols(cookie, devices[device]))
+    print 'Success: %d' % (len(messages) - len(protocols))
+    print 'Failed: %d' % len(protocols)
 
-print 'Success: %d' % (len(messages) - len(protocols))
-print 'Failed: %d' % len(protocols)
-
-if protocols:
-    print '\nFailed: %s' % repr(list(protocols))
+    if protocols:
+        print '\nFailed: %s' % repr(list(protocols))

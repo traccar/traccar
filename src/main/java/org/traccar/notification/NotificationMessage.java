@@ -16,12 +16,12 @@
  */
 package org.traccar.notification;
 
-public class FullMessage {
+public class NotificationMessage {
 
     private String subject;
     private String body;
 
-    public FullMessage(String subject, String body) {
+    public NotificationMessage(String subject, String body) {
         this.subject = subject;
         this.body = body;
     }

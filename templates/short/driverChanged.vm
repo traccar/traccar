@@ -1,3 +1,4 @@
+#set($subject = "$device.name: driver has changed")
 #if($driver)
 #set($driverName = $driver.name)
 #else

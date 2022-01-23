@@ -235,9 +235,6 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             case 67:
                 position.set(Position.KEY_BATTERY, readValue(buf, length, false) * 0.001);
                 break;
-            case 69:
-                position.set("gpsStatus", readValue(buf, length, false));
-                break;
             case 72:
             case 73:
             case 74:
@@ -300,11 +297,6 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                         break;
                     default:
                         break;
-                }
-                break;
-            case 389:
-                if (BitUtil.between(readValue(buf, length, false), 4, 8) == 1) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_SOS);
                 }
                 break;
             default:

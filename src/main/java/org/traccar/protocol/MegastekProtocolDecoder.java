@@ -423,7 +423,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             case "psr":
                 return Position.ALARM_POWER_RESTORED;
             case "hit":
-                return Position.ALARM_SHOCK;
+                return Position.ALARM_VIBRATION;
             case "belt on":
             case "belton":
                 return Position.ALARM_LOCK;

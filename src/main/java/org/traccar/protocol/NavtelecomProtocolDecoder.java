@@ -235,12 +235,11 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                     positions.add(position);
                 }
 
-                int checksum = buf.readUnsignedByte();
                 if (channel != null) {
                     ByteBuf response = Unpooled.buffer();
                     response.writeCharSequence(type, StandardCharsets.US_ASCII);
                     response.writeByte(count);
-                    response.writeByte(checksum);
+                    response.writeByte(Checksum.xor(response.nioBuffer()));
                     channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
                 }
 

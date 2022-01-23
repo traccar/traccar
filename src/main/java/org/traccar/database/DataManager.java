@@ -333,6 +333,13 @@ public class DataManager {
                 .executeQuery(Position.class);
     }
 
+    public Position getPrecedingPosition(long deviceId, Date date) throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.selectPrecedingPosition"))
+                .setLong("deviceId", deviceId)
+                .setDate("time", date)
+                .executeQuerySingle(Position.class);
+    }
+
     public void updateLatestPosition(Position position) throws SQLException {
         QueryBuilder.create(dataSource, getQuery("database.updateLatestPosition"))
                 .setDate("now", new Date())

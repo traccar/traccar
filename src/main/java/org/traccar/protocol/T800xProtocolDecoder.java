@@ -58,6 +58,8 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_DRIVER_BEHAVIOR_1 = 0x05; // 0x2626
     public static final int MSG_DRIVER_BEHAVIOR_2 = 0x06; // 0x2626
     public static final int MSG_BLE = 0x10;
+    public static final int MSG_GPS_2 = 0x13;
+    public static final int MSG_ALARM_2 = 0x14;
     public static final int MSG_COMMAND = 0x81;
 
     private void sendResponse(Channel channel, short header, int type, int index, ByteBuf imei, int alarm) {
@@ -75,7 +77,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private String decodeAlarm(int value) {
+    private String decodeAlarm1(int value) {
         switch (value) {
             case 1:
                 return Position.ALARM_POWER_CUT;
@@ -100,6 +102,28 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_POWER_RESTORED;
             case 24:
                 return Position.ALARM_LOW_POWER;
+            default:
+                return null;
+        }
+    }
+
+    private String decodeAlarm2(int value) {
+        switch (value) {
+            case 1:
+            case 4:
+                return Position.ALARM_REMOVING;
+            case 2:
+                return Position.ALARM_TAMPERING;
+            case 3:
+                return Position.ALARM_SOS;
+            case 5:
+                return Position.ALARM_FALL_DOWN;
+            case 6:
+                return Position.ALARM_LOW_BATTERY;
+            case 14:
+                return Position.ALARM_GEOFENCE_ENTER;
+            case 15:
+                return Position.ALARM_GEOFENCE_EXIT;
             default:
                 return null;
         }
@@ -134,11 +158,12 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        if (type != MSG_GPS && type != MSG_ALARM) {
+        boolean positionType = type == MSG_GPS || type == MSG_GPS_2 || type == MSG_ALARM || type == MSG_ALARM_2;
+        if (!positionType) {
             sendResponse(channel, header, type, index, imei, 0);
         }
 
-        if (type == MSG_GPS || type == MSG_ALARM) {
+        if (positionType) {
 
             return decodePosition(channel, deviceSession, buf, type, index, imei);
 
@@ -229,6 +254,11 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
+    private double decodeBleTemp(ByteBuf buf) {
+        int value = buf.readUnsignedShort();
+        return (BitUtil.check(value, 15) ? -BitUtil.to(value, 15) : BitUtil.to(value, 15)) * 0.01;
+    }
+
     private Position decodeBle(
             Channel channel, DeviceSession deviceSession, ByteBuf buf, int type, int index, ByteBuf imei) {
 
@@ -278,7 +308,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
                     position.set("tag" + i + "Id", ByteBufUtil.hexDump(buf.readSlice(6)));
                     position.set("tag" + i + "Battery", buf.readUnsignedByte() * 0.01 + 2);
                     buf.readUnsignedByte(); // battery level
-                    position.set("tag" + i + "Temp", buf.readUnsignedShort() * 0.01);
+                    position.set("tag" + i + "Temp", decodeBleTemp(buf));
                     position.set("tag" + i + "Humidity", buf.readUnsignedShort() * 0.01);
                     position.set("tag" + i + "LightSensor", buf.readUnsignedShort());
                     position.set("tag" + i + "Rssi", buf.readUnsignedByte() - 128);
@@ -287,7 +317,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
                     position.set("tag" + i + "Id", ByteBufUtil.hexDump(buf.readSlice(6)));
                     position.set("tag" + i + "Battery", buf.readUnsignedByte() * 0.01 + 2);
                     buf.readUnsignedByte(); // battery level
-                    position.set("tag" + i + "Temp", buf.readUnsignedShort() * 0.01);
+                    position.set("tag" + i + "Temp", decodeBleTemp(buf));
                     position.set("tag" + i + "Door", buf.readUnsignedByte() > 0);
                     position.set("tag" + i + "Rssi", buf.readUnsignedByte() - 128);
                     break;
@@ -343,12 +373,19 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             position.set("ac", BitUtil.check(io, 13));
             position.set(Position.PREFIX_IN + 3, BitUtil.check(io, 12));
             position.set(Position.PREFIX_IN + 4, BitUtil.check(io, 11));
-            position.set(Position.PREFIX_OUT + 1, BitUtil.check(io, 7));
-            position.set(Position.PREFIX_OUT + 2, BitUtil.check(io, 8));
-            position.set(Position.PREFIX_OUT + 3, BitUtil.check(io, 9));
+
+            if (type == MSG_GPS_2 || type == MSG_ALARM_2) {
+                position.set(Position.KEY_OUTPUT, buf.readUnsignedByte());
+                buf.readUnsignedByte(); // reserved
+            } else {
+                position.set(Position.PREFIX_OUT + 1, BitUtil.check(io, 7));
+                position.set(Position.PREFIX_OUT + 2, BitUtil.check(io, 8));
+                position.set(Position.PREFIX_OUT + 3, BitUtil.check(io, 9));
+            }
 
             if (header != 0x2626) {
-                for (int i = 1; i <= 2; i++) {
+                int adcCount = type == MSG_GPS_2 || type == MSG_ALARM_2 ? 5 : 2;
+                for (int i = 1; i <= adcCount; i++) {
                     String value = ByteBufUtil.hexDump(buf.readSlice(2));
                     if (!value.equals("ffff")) {
                         position.set(Position.PREFIX_ADC + i, Integer.parseInt(value) * 0.01);
@@ -359,7 +396,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
         }
 
         int alarm = buf.readUnsignedByte();
-        position.set(Position.KEY_ALARM, decodeAlarm(alarm));
+        position.set(Position.KEY_ALARM, header != 0x2727 ? decodeAlarm1(alarm) : decodeAlarm2(alarm));
 
         if (header != 0x2727) {
 
@@ -374,7 +411,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
         if (BitUtil.check(status, 6)) {
 
-            position.setValid(!BitUtil.check(status, 7));
+            position.setValid(true);
             position.setTime(readDate(buf));
             position.setAltitude(buf.readFloatLE());
             position.setLongitude(buf.readFloatLE());
@@ -473,7 +510,9 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        sendResponse(channel, header, type, index, imei, alarm);
+        if (type == MSG_ALARM || type == MSG_ALARM_2) {
+            sendResponse(channel, header, type, index, imei, alarm);
+        }
 
         return position;
     }

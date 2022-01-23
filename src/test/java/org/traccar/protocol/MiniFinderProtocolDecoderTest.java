@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class MiniFinderProtocolDecoderTest extends ProtocolTest {
 
@@ -19,7 +20,11 @@ public class MiniFinderProtocolDecoderTest extends ProtocolTest {
         verifyNull(decoder, text(
                 "!1,123456789012345"));
 
-        verifyNull(decoder, text(
+        verifyAttribute(decoder, text(
+                "!5,17,V,50"),
+                Position.KEY_BATTERY_LEVEL, 50);
+
+        verifyAttributes(decoder, text(
                 "!5,17,V"));
 
         verifyNull(decoder, text(

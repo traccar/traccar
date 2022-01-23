@@ -20,6 +20,9 @@ public class WatchProtocolDecoderTest extends ProtocolTest {
                 Position.PREFIX_TEMP + 1, 35.29);
 
         verifyPosition(decoder, buffer(
+                "[SG*9059056143*0053*UD,251021,223408,A,41.46500,N,081.53128,W,0.926,000,0,00,70,70,0,50,00000000,0,1,,,,00]"));
+
+        verifyPosition(decoder, buffer(
                 "[3G*2104326058*00E9*UD_LTE,300621,135101,A,32.162652,N,34.888748,E,30.84,265.158,65.621,18,100,83,0,0,00000000,1,1,425,01,10223,8012811,100,3,ES4104,22:74:1d:39:64:ff,-46,metropoline-wifi,a8:3f:a1:e0:66:ba,-89,Egged.co.il,00:0c:42:51:cf:cd,-81,1.7055488]"));
 
         verifyPosition(decoder, buffer(

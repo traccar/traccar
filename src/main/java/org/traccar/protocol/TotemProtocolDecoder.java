@@ -227,8 +227,22 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_GEOFENCE_EXIT;
             case 0x05:
                 return Position.ALARM_GEOFENCE_ENTER;
+            case 0x06:
+                return Position.ALARM_TOW;
+            case 0x07:
+                return Position.ALARM_GPS_ANTENNA_CUT;
+            case 0x10:
+                return Position.ALARM_POWER_CUT;
+            case 0x11:
+                return Position.ALARM_POWER_RESTORED;
+            case 0x12:
+                return Position.ALARM_LOW_POWER;
+            case 0x13:
+                return Position.ALARM_LOW_BATTERY;
             case 0x40:
-                return Position.ALARM_SHOCK;
+                return Position.ALARM_VIBRATION;
+            case 0x41:
+                return Position.ALARM_IDLE;
             case 0x42:
                 return Position.ALARM_ACCELERATION;
             case 0x43:
@@ -357,16 +371,11 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_CHARGE, BitUtil.check(status, 32 - 4));
         position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 5) ? Position.ALARM_GEOFENCE_EXIT : null);
         position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 6) ? Position.ALARM_GEOFENCE_ENTER : null);
+        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 7) ? Position.ALARM_GPS_ANTENNA_CUT : null);
         position.set(Position.PREFIX_OUT + 1, BitUtil.check(status, 32 - 9));
         position.set(Position.PREFIX_OUT + 2, BitUtil.check(status, 32 - 10));
         position.set(Position.PREFIX_OUT + 3, BitUtil.check(status, 32 - 11));
-        position.set(Position.PREFIX_OUT + 4, BitUtil.check(status, 32 - 12));
-        position.set(Position.PREFIX_IN + 2, BitUtil.check(status, 32 - 13));
-        position.set(Position.PREFIX_IN + 3, BitUtil.check(status, 32 - 14));
-        position.set(Position.PREFIX_IN + 4, BitUtil.check(status, 32 - 15));
-        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 16) ? Position.ALARM_SHOCK : null);
-        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 18) ? Position.ALARM_LOW_BATTERY : null);
-        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 22) ? Position.ALARM_JAMMING : null);
+        position.set(Position.KEY_STATUS, status); // see https://github.com/traccar/traccar/pull/4762
 
         position.setTime(parser.nextDateTime());
 
@@ -461,10 +470,8 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position(getProtocolName());
 
-        String type = null;
         if (pattern == PATTERN4) {
-            type = parser.next();
-            position.set(Position.KEY_ALARM, decodeAlarm4(Integer.parseInt(type, 16)));
+            position.set(Position.KEY_ALARM, decodeAlarm4(parser.nextHexInt()));
         }
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
@@ -485,8 +492,8 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (channel != null) {
-            if (type != null) {
-                String response = "$$0014" + type + sentence.substring(sentence.length() - 6, sentence.length() - 2);
+            if (pattern == PATTERN4) {
+                String response = "$$0014AA" + sentence.substring(sentence.length() - 6, sentence.length() - 2);
                 response += String.format("%02X", Checksum.xor(response)).toUpperCase();
                 channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
             } else {

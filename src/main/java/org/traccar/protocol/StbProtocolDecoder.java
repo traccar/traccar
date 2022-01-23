@@ -26,9 +26,7 @@ import org.traccar.Protocol;
 import org.traccar.model.Position;
 
 import javax.json.Json;
-import javax.json.JsonNumber;
 import javax.json.JsonObject;
-import javax.json.JsonString;
 import javax.json.JsonValue;
 import java.io.StringReader;
 import java.net.SocketAddress;
@@ -97,39 +95,34 @@ public class StbProtocolDecoder extends BaseProtocolDecoder {
                     String id = propertyObject.getString("id");
                     switch (id) {
                         case "01101001":
-                            locationType = propertyObject.getInt("value");
+                            locationType = Integer.parseInt(propertyObject.getString("value"));
                             break;
                         case "01102001":
-                            position.setLongitude(propertyObject.getJsonNumber("value").doubleValue());
+                            position.setLongitude(
+                                    Double.parseDouble(propertyObject.getString("value")));
                             break;
                         case "01103001":
-                            position.setLatitude(propertyObject.getJsonNumber("value").doubleValue());
+                            position.setLatitude(
+                                    Double.parseDouble(propertyObject.getString("value")));
                             break;
                         case "01118001":
-                            position.set(Position.KEY_DEVICE_TEMP, propertyObject.getJsonNumber("value").doubleValue());
+                            position.set(
+                                    Position.KEY_DEVICE_TEMP, Double.parseDouble(propertyObject.getString("value")));
                             break;
                         case "01122001":
-                            position.set("batteryControl", propertyObject.getInt("value"));
+                            position.set(
+                                    "batteryControl", Integer.parseInt(propertyObject.getString("value")));
                             break;
                         case "02301001":
-                            position.set("switchCabinetCommand", propertyObject.getInt("value"));
+                            position.set(
+                                    "switchCabinetCommand", Integer.parseInt(propertyObject.getString("value")));
                             break;
                         default:
                             String key = "id" + id;
                             if (propertyObject.containsKey("doorId")) {
                                 key += "Door" + propertyObject.getString("doorId");
                             }
-                            JsonValue value = propertyObject.get("value");
-                            switch (value.getValueType()) {
-                                case STRING:
-                                    position.set(key, ((JsonString) value).getString());
-                                    break;
-                                case NUMBER:
-                                    position.set(key, ((JsonNumber) value).doubleValue());
-                                    break;
-                                default:
-                                    break;
-                            }
+                            position.set(key, propertyObject.getString("value"));
                             break;
                     }
                 }

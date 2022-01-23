@@ -139,7 +139,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("(x+)?,")                    // lac
             .number("(x+)?,")                    // cid
             .groupEnd()
-            .number("(?:d+|(d+.d))?,")           // odometer
+            .number("(?:d+|(d+.d))?,")           // rssi / odometer
             .compile();
 
     private static final Pattern PATTERN_OBD = new PatternBuilder()
@@ -184,7 +184,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .expression("(?:([0-9A-Z]{17}),)?")  // vin
             .expression("[^,]*,")                // device name
             .number("(d+)?,")                    // power
-            .number("d{1,2},").optional()        // report type
+            .number("(d{1,2}),").optional()      // report type
             .number("d{1,2},").optional()        // count
             .number("d*,").optional()            // reserved
             .number("(d+),").optional()          // battery
@@ -208,11 +208,11 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("(?:d+.?d*|Inf|NaN)?,")      // fuel consumption
             .number("(d+)?,")                    // fuel level
             .or()
-            .number("(d{1,7}.d)?,").optional()   // odometer
-            .number("(d{1,3})?,")                // battery
-            .or()
             .number("(-?d),")                    // rssi
             .number("(d{1,3}),")                 // battery
+            .or()
+            .number("(d{1,7}.d)?,").optional()   // odometer
+            .number("(d{1,3})?,")                // battery
             .groupEnd()
             .any()
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
@@ -835,6 +835,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         String vin = parser.next();
         Integer power = parser.nextInt();
+        Integer reportType = parser.nextInt();
         Integer battery = parser.nextInt();
 
         Parser itemParser = new Parser(PATTERN_LOCATION, parser.next());
@@ -877,11 +878,17 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_RPM, parser.nextInt());
         position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
 
+        if (parser.hasNext(2)) {
+            if (reportType != null) {
+                position.set(Position.KEY_MOTION, BitUtil.check(reportType, 0));
+                position.set(Position.KEY_CHARGE, BitUtil.check(reportType, 1));
+            }
+            position.set(Position.KEY_RSSI, parser.nextInt());
+            position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
+        }
         if (parser.hasNext()) {
             position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
         }
-        position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
-        position.set(Position.KEY_RSSI, parser.nextInt());
         position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
 
         decodeDeviceTime(position, parser);

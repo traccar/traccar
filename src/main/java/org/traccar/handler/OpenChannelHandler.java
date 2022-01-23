@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,26 +17,26 @@ package org.traccar.handler;
 
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
-import org.traccar.TrackerServer;
+import org.traccar.TrackerConnector;
 
 public class OpenChannelHandler extends ChannelDuplexHandler {
 
-    private final TrackerServer server;
+    private final TrackerConnector connector;
 
-    public OpenChannelHandler(TrackerServer server) {
-        this.server = server;
+    public OpenChannelHandler(TrackerConnector connector) {
+        this.connector = connector;
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
-        server.getChannelGroup().add(ctx.channel());
+        connector.getChannelGroup().add(ctx.channel());
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
-        server.getChannelGroup().remove(ctx.channel());
+        connector.getChannelGroup().remove(ctx.channel());
     }
 
 }

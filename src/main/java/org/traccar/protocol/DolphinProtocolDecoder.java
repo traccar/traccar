@@ -101,6 +101,10 @@ public class DolphinProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_SATELLITES, point.getSatellites());
                 position.set(Position.KEY_HDOP, point.getHDOP());
 
+                for (int j = 0; j < point.getIOListIDCount(); j++) {
+                    position.set(Position.PREFIX_IO + point.getIOListIDValue(j), point.getIOListValue(j));
+                }
+
                 positions.add(position);
 
             }

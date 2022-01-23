@@ -56,7 +56,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
     public static final int MSG_LOGIN = 0x01;
     public static final int MSG_GPS = 0x10;
-    public static final int MSG_LBS = 0x11;
+    public static final int MSG_GPS_LBS_6 = 0x11;
     public static final int MSG_GPS_LBS_1 = 0x12;
     public static final int MSG_GPS_LBS_2 = 0x22;
     public static final int MSG_GPS_LBS_3 = 0x37;
@@ -70,6 +70,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_GPS_LBS_STATUS_3 = 0x27;
     public static final int MSG_LBS_MULTIPLE_1 = 0x28;
     public static final int MSG_LBS_MULTIPLE_2 = 0x2E;
+    public static final int MSG_LBS_MULTIPLE_3 = 0x24;
     public static final int MSG_LBS_WIFI = 0x2C;
     public static final int MSG_LBS_EXTEND = 0x18;
     public static final int MSG_LBS_STATUS = 0x19;
@@ -124,6 +125,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             case MSG_GPS_LBS_3:
             case MSG_GPS_LBS_4:
             case MSG_GPS_LBS_5:
+            case MSG_GPS_LBS_6:
             case MSG_GPS_LBS_STATUS_1:
             case MSG_GPS_LBS_STATUS_2:
             case MSG_GPS_LBS_STATUS_3:
@@ -141,13 +143,13 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
     private static boolean hasLbs(int type) {
         switch (type) {
-            case MSG_LBS:
             case MSG_LBS_STATUS:
             case MSG_GPS_LBS_1:
             case MSG_GPS_LBS_2:
             case MSG_GPS_LBS_3:
             case MSG_GPS_LBS_4:
             case MSG_GPS_LBS_5:
+            case MSG_GPS_LBS_6:
             case MSG_GPS_LBS_STATUS_1:
             case MSG_GPS_LBS_STATUS_2:
             case MSG_GPS_LBS_STATUS_3:
@@ -275,7 +277,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         return true;
     }
 
-    private boolean decodeLbs(Position position, ByteBuf buf, boolean hasLength) {
+    private boolean decodeLbs(Position position, ByteBuf buf, int type, boolean hasLength) {
 
         int length = 0;
         if (hasLength) {
@@ -296,10 +298,11 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         int mcc = buf.readUnsignedShort();
-        int mnc = BitUtil.check(mcc, 15) ? buf.readUnsignedShort() : buf.readUnsignedByte();
+        int mnc = BitUtil.check(mcc, 15) || type == MSG_GPS_LBS_6 ? buf.readUnsignedShort() : buf.readUnsignedByte();
+        int lac = buf.readUnsignedShort();
+        long cid = type == MSG_GPS_LBS_6 ? buf.readUnsignedInt() : buf.readUnsignedMedium();
 
-        position.setNetwork(new Network(CellTower.from(
-                BitUtil.to(mcc, 15), mnc, buf.readUnsignedShort(), buf.readUnsignedMedium())));
+        position.setNetwork(new Network(CellTower.from(BitUtil.to(mcc, 15), mnc, lac, cid)));
 
         if (length > 9) {
             buf.skipBytes(length - 9);
@@ -319,7 +322,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
         switch (BitUtil.between(status, 3, 6)) {
             case 1:
-                position.set(Position.KEY_ALARM, Position.ALARM_SHOCK);
+                position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
                 break;
             case 2:
                 position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
@@ -697,8 +700,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             return null; // space10x multi-lbs message
 
-        } else if (type == MSG_LBS_MULTIPLE_1 || type == MSG_LBS_MULTIPLE_2 || type == MSG_LBS_EXTEND
-                || type == MSG_LBS_WIFI || type == MSG_LBS_2 || type == MSG_WIFI_3 || type == MSG_WIFI_5) {
+        } else if (type == MSG_LBS_MULTIPLE_1 || type == MSG_LBS_MULTIPLE_2 || type == MSG_LBS_MULTIPLE_3
+                || type == MSG_LBS_EXTEND || type == MSG_LBS_WIFI || type == MSG_LBS_2
+                || type == MSG_WIFI_3 || type == MSG_WIFI_5) {
 
             boolean longFormat = type == MSG_LBS_2 || type == MSG_WIFI_3 || type == MSG_WIFI_5;
 
@@ -724,7 +728,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             buf.readUnsignedByte(); // time leads
 
-            if (type != MSG_LBS_MULTIPLE_1 && type != MSG_LBS_MULTIPLE_2 && type != MSG_LBS_2) {
+            if (type != MSG_LBS_MULTIPLE_1 && type != MSG_LBS_MULTIPLE_2 && type != MSG_LBS_MULTIPLE_3
+                    && type != MSG_LBS_2) {
                 int wifiCount = buf.readUnsignedByte();
                 for (int i = 0; i < wifiCount; i++) {
                     String mac = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");
@@ -885,7 +890,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (hasLbs(type)) {
-            decodeLbs(position, buf, hasStatus(type));
+            decodeLbs(position, buf, type, hasStatus(type));
         }
 
         if (hasStatus(type)) {
@@ -1053,7 +1058,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 getLastLocation(position, position.getDeviceTime());
             }
 
-            if (decodeLbs(position, buf, true)) {
+            if (decodeLbs(position, buf, type, true)) {
                 position.set(Position.KEY_RSSI, buf.readUnsignedByte());
             }
 

@@ -20,33 +20,27 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseFrameDecoder;
 
-public class StbFrameDecoder extends BaseFrameDecoder {
+public class DualcamFrameDecoder extends BaseFrameDecoder {
+
+    private static final int MESSAGE_MINIMUM_LENGTH = 4;
 
     @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
-        int startIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '{');
-        if (startIndex >= 0) {
+        if (buf.readableBytes() < MESSAGE_MINIMUM_LENGTH) {
+            return null;
+        }
 
-            buf.readerIndex(startIndex);
+        int length;
+        if (buf.getUnsignedShort(buf.readerIndex()) == 0) {
+            length = 16;
+        } else {
+            length = 4 + buf.getUnsignedShort(buf.readerIndex() + 2);
+        }
 
-            int currentIndex = startIndex + 1;
-            int nesting = 1;
-            while (currentIndex < buf.writerIndex() && nesting > 0) {
-                byte currentByte = buf.getByte(currentIndex);
-                if (currentByte == '{') {
-                    nesting += 1;
-                } else if (currentByte == '}') {
-                    nesting -= 1;
-                }
-                currentIndex += 1;
-            }
-
-            if (nesting == 0) {
-                return buf.readRetainedSlice(currentIndex - startIndex);
-            }
-
+        if (buf.readableBytes() >= length) {
+            return buf.readRetainedSlice(length);
         }
 
         return null;

@@ -34,7 +34,10 @@ import org.traccar.model.Position;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
@@ -53,6 +56,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_TERMINAL_CONTROL = 0x8105;
     public static final int MSG_TERMINAL_AUTH = 0x0102;
     public static final int MSG_LOCATION_REPORT = 0x0200;
+    public static final int MSG_ACCELERATION = 0x2070;
     public static final int MSG_LOCATION_REPORT_2 = 0x5501;
     public static final int MSG_LOCATION_REPORT_BLIND = 0x5502;
     public static final int MSG_LOCATION_BATCH = 0x0704;
@@ -136,6 +140,11 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
+    private int readSignedWord(ByteBuf buf) {
+        int value = buf.readUnsignedShort();
+        return BitUtil.check(value, 15) ? -BitUtil.to(value, 15) : BitUtil.to(value, 15);
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -143,7 +152,19 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         ByteBuf buf = (ByteBuf) msg;
 
         if (buf.getByte(buf.readerIndex()) == '(') {
-            return decodeResult(channel, remoteAddress, buf.toString(StandardCharsets.US_ASCII));
+            String sentence = buf.toString(StandardCharsets.US_ASCII);
+            if (sentence.contains("BASE,2")) {
+                DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+                dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                String response = sentence.replace("TIME", dateFormat.format(new Date()));
+                if (channel != null) {
+                    channel.writeAndFlush(new NetworkMessage(
+                            Unpooled.copiedBuffer(response, StandardCharsets.US_ASCII), remoteAddress));
+                }
+                return null;
+            } else {
+                return decodeResult(channel, remoteAddress, sentence);
+            }
         }
 
         buf.readUnsignedByte(); // start marker
@@ -216,6 +237,33 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                         formatMessage(MSG_TERMINAL_REGISTER_RESPONSE, id, false, response), remoteAddress));
             }
 
+        } else if (type == MSG_ACCELERATION) {
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            StringBuilder data = new StringBuilder("[");
+            while (buf.readableBytes() > 2) {
+                buf.skipBytes(6); // time
+                if (data.length() > 1) {
+                    data.append(",");
+                }
+                data.append("[");
+                data.append(readSignedWord(buf));
+                data.append(",");
+                data.append(readSignedWord(buf));
+                data.append(",");
+                data.append(readSignedWord(buf));
+                data.append("]");
+            }
+            data.append("]");
+
+            position.set(Position.KEY_G_SENSOR, data.toString());
+
+            return position;
+
         }
 
         return null;
@@ -231,6 +279,76 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             return position;
         }
         return null;
+    }
+
+    private void decodeExtension(Position position, ByteBuf buf, int endIndex) {
+        while (buf.readerIndex() < endIndex) {
+            int type = buf.readUnsignedByte();
+            int length = buf.readUnsignedByte();
+            switch (type) {
+                case 0x01:
+                    position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 100L);
+                    break;
+                case 0x02:
+                    position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedShort() * 0.1);
+                    break;
+                case 0x03:
+                    position.set(Position.KEY_OBD_SPEED, buf.readUnsignedShort() * 0.1);
+                    break;
+                case 0x80:
+                    position.set(Position.KEY_OBD_SPEED, buf.readUnsignedByte());
+                    break;
+                case 0x81:
+                    position.set(Position.KEY_RPM, buf.readUnsignedShort());
+                    break;
+                case 0x82:
+                    position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.1);
+                    break;
+                case 0x83:
+                    position.set(Position.KEY_ENGINE_LOAD, buf.readUnsignedByte());
+                    break;
+                case 0x84:
+                    position.set(Position.KEY_COOLANT_TEMP, buf.readUnsignedByte() - 40);
+                    break;
+                case 0x85:
+                    position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedShort());
+                    break;
+                case 0x86:
+                    position.set("intakeTemp", buf.readUnsignedByte() - 40);
+                    break;
+                case 0x87:
+                    position.set("intakeFlow", buf.readUnsignedShort());
+                    break;
+                case 0x88:
+                    position.set("intakePressure", buf.readUnsignedByte());
+                    break;
+                case 0x89:
+                    position.set(Position.KEY_THROTTLE, buf.readUnsignedByte());
+                    break;
+                case 0x8B:
+                    position.set(Position.KEY_VIN, buf.readCharSequence(17, StandardCharsets.US_ASCII).toString());
+                    break;
+                case 0x8C:
+                    position.set(Position.KEY_OBD_ODOMETER, buf.readUnsignedInt() * 100L);
+                    break;
+                case 0x8D:
+                    position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedShort() * 1000L);
+                    break;
+                case 0x8E:
+                    position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte());
+                    break;
+                case 0xA0:
+                    String codes = buf.readCharSequence(length, StandardCharsets.US_ASCII).toString();
+                    position.set(Position.KEY_DTCS, codes.replace(',', ' '));
+                    break;
+                case 0xCC:
+                    position.set(Position.KEY_ICCID, buf.readCharSequence(20, StandardCharsets.US_ASCII).toString());
+                    break;
+                default:
+                    buf.skipBytes(length);
+                    break;
+            }
+        }
     }
 
     private Position decodeLocation(DeviceSession deviceSession, ByteBuf buf) {
@@ -312,6 +430,11 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                         String lockStatus = sentence.substring(8, 8 + 7);
                         position.set(Position.KEY_BATTERY, Integer.parseInt(lockStatus.substring(2, 5)) * 0.01);
                     }
+                    break;
+                case 0x80:
+                    buf.readUnsignedByte(); // content
+                    endIndex = buf.writerIndex() - 2;
+                    decodeExtension(position, buf, endIndex);
                     break;
                 case 0x91:
                     position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.1);
@@ -468,11 +591,15 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         List<Position> positions = new LinkedList<>();
 
         int count = buf.readUnsignedShort();
-        buf.readUnsignedByte(); // location type
+        int locationType = buf.readUnsignedByte();
 
         for (int i = 0; i < count; i++) {
             int endIndex = buf.readUnsignedShort() + buf.readerIndex();
-            positions.add(decodeLocation(deviceSession, buf));
+            Position position = decodeLocation(deviceSession, buf);
+            if (locationType > 0) {
+                position.set(Position.KEY_ARCHIVE, true);
+            }
+            positions.add(position);
             buf.readerIndex(endIndex);
         }
 

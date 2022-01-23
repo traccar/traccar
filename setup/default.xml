@@ -14,8 +14,12 @@
     <entry key='web.path'>./web</entry>
     <entry key='web.persistSession'>false</entry>
 
-    <entry key='geocoder.enable'>false</entry>
-    <entry key='geocoder.type'>google</entry>
+    <entry key='geocoder.enable'>true</entry>
+    <entry key='geocoder.type'>nominatim</entry>
+    <entry key='geocoder.url'>https://us1.locationiq.com/v1/reverse.php</entry>
+    <entry key='geocoder.key'>pk.689d849289c8c63708068b2ff1f63b2d</entry>
+    <entry key='geocoder.onRequest'>true</entry>
+    <entry key='geocoder.ignorePositions'>true</entry>
 
     <entry key='logger.level'>info</entry>
     <entry key='logger.file'>./logs/tracker-server.log</entry>
@@ -47,6 +51,10 @@
 
     <entry key='database.selectPositions'>
         SELECT * FROM tc_positions WHERE deviceId = :deviceId AND fixTime BETWEEN :from AND :to ORDER BY fixTime
+    </entry>
+
+    <entry key='database.selectPrecedingPosition'>
+        SELECT * FROM tc_positions WHERE deviceId = :deviceId AND fixTime &lt;= :time ORDER BY fixTime DESC LIMIT 1
     </entry>
 
     <entry key='database.selectLatestPositions'>
@@ -296,5 +304,13 @@
     <entry key='thinkpower.port'>5228</entry>
     <entry key='stb.port'>5229</entry>
     <entry key='b2316.port'>5230</entry>
+    <entry key='hoopo.port'>5231</entry>
+    <entry key='dualcam.port'>5232</entry>
+    <entry key='xexun2.port'>5233</entry>
+    <entry key='techtocruz.port'>5234</entry>
+    <entry key='flexapi.port'>5235</entry>
+    <entry key='dsf22.port'>5236</entry>
+    <entry key='jido.port'>5237</entry>
+    <entry key='armoli.port'>5238</entry>
 
 </properties>

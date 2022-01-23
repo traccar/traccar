@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     static boolean isLongFormat(ByteBuf buf, int flagIndex) {
-        return buf.getUnsignedByte(flagIndex) >> 4 == 0x7;
+        return buf.getUnsignedByte(flagIndex) >> 4 >= 7;
     }
 
     static void decodeBinaryLocation(ByteBuf buf, Position position) {
@@ -141,6 +141,8 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         int version = BitUtil.from(buf.readUnsignedByte(), 4);
         buf.readUnsignedShort(); // length
 
+        boolean responseRequired = false;
+
         while (buf.readableBytes() > 1) {
 
             Position position = new Position(getProtocolName());
@@ -160,6 +162,9 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_ALARM, BitUtil.check(status, 2) ? Position.ALARM_GEOFENCE_EXIT : null);
                 position.set(Position.KEY_ALARM, BitUtil.check(status, 3) ? Position.ALARM_POWER_CUT : null);
                 position.set(Position.KEY_ALARM, BitUtil.check(status, 4) ? Position.ALARM_VIBRATION : null);
+                if (BitUtil.check(status, 5)) {
+                    responseRequired = true;
+                }
                 position.set(Position.KEY_BLOCKED, BitUtil.check(status, 7));
                 position.set(Position.KEY_ALARM, BitUtil.check(status, 8 + 3) ? Position.ALARM_LOW_BATTERY : null);
                 position.set(Position.KEY_ALARM, BitUtil.check(status, 8 + 6) ? Position.ALARM_FAULT : null);
@@ -176,7 +181,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
                 cellTower.setSignalStrength((int) buf.readUnsignedByte());
                 position.setNetwork(new Network(cellTower));
 
-                if (protocolVersion == 0x17) {
+                if (protocolVersion == 0x17 || protocolVersion == 0x19) {
                     buf.readUnsignedByte(); // geofence id
                     buf.skipBytes(3); // reserved
                     buf.skipBytes(buf.readableBytes() - 1);
@@ -232,7 +237,15 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         }
 
-        buf.readUnsignedByte(); // index
+        int index = buf.readUnsignedByte();
+
+        if (channel != null && responseRequired) {
+            if (protocolVersion < 0x19) {
+                channel.writeAndFlush(new NetworkMessage("(P35)", remoteAddress));
+            } else {
+                channel.writeAndFlush(new NetworkMessage("(P69,0," + index + ")", remoteAddress));
+            }
+        }
 
         return positions;
     }

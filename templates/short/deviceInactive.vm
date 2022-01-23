@@ -1,3 +1,4 @@
+#set($subject = "$device.name: inactive")
 #set($lastUpdate = $dateTool.getDate())
 #set($ignore = $lastUpdate.setTime($event.getLong("lastUpdate")))
 $device.name inactive from $dateTool.format("YYYY-MM-dd HH:mm:ss", $lastUpdate, $locale, $timezone)

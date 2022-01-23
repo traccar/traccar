@@ -60,7 +60,7 @@ public class C2stekProtocolDecoder extends BaseProtocolDecoder {
     private String decodeAlarm(int alarm) {
         switch (alarm) {
             case 0x2:
-                return Position.ALARM_SHOCK;
+                return Position.ALARM_VIBRATION;
             case 0x3:
                 return Position.ALARM_POWER_CUT;
             case 0x4:

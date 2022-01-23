@@ -143,8 +143,8 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
         int cellCount = Integer.parseInt(values[index++]);
         index += 1; // timing advance
-        int mcc = Integer.parseInt(values[index++]);
-        int mnc = Integer.parseInt(values[index++]);
+        int mcc = !values[index].isEmpty() ? Integer.parseInt(values[index++]) : 0;
+        int mnc = !values[index].isEmpty() ? Integer.parseInt(values[index++]) : 0;
 
         for (int i = 0; i < cellCount; i++) {
             network.addCellTower(CellTower.from(mcc, mnc,
