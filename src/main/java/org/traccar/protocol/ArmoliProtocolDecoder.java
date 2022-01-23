@@ -78,7 +78,7 @@ public class ArmoliProtocolDecoder extends BaseProtocolDecoder {
                     getLastLocation(position, null);
                     position.set(
                             Position.KEY_RESULT,
-                            sentence.substring(sentence.indexOf(',') + 1, sentence.length() - 2));
+                            sentence.substring(sentence.indexOf(',') + 1, sentence.length() - 1));
                     return position;
                 }
             } else if (channel != null && (type == 'Q' || type == 'L')) {

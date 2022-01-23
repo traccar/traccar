@@ -28,7 +28,7 @@ public class ArmoliProtocol extends BaseProtocol {
         addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, '\r'));
+                pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, ";\r", ";"));
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new ArmoliProtocolDecoder(ArmoliProtocol.this));
