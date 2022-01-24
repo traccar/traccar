@@ -81,7 +81,7 @@ public final class NotificatorMqtt extends Notificator {
             values.put("D", String.valueOf(event.getDeviceId()));
             values.put("G", String.valueOf(event.getGeofenceId()));
             values.put("P", String.valueOf(event.getPositionId()));
-            values.put("M", NotificationFormatter.formatShortMessage(userId, event, position));
+            values.put("M", NotificationFormatter.formatMessage(userId, event, position, "short").getBody());
             StrSubstitutor sub = new StrSubstitutor(values, "%", "%");
 
             // Read configured topic to publish to, if any, or set default
@@ -92,7 +92,7 @@ public final class NotificatorMqtt extends Notificator {
             // Read configured payload to publish, if any, or set default
             String payload = (StringUtils.isNotBlank(Context.getConfig().getString("notificator.mqtt.payload")))
                     ? Context.getConfig().getString("notificator.mqtt.payload")
-                    : NotificationFormatter.formatShortMessage(userId, event, position);
+                    : NotificationFormatter.formatMessage(userId, event, position, "short").getBody();
 
             // Replace placeholders with real values
             topic = sub.replace(topic);
