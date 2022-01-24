@@ -33,6 +33,7 @@ import org.traccar.database.DeviceManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
+import org.traccar.model.Position;
 import org.traccar.reports.model.DeviceReport;
 import org.traccar.reports.model.StopReport;
 
@@ -41,7 +42,7 @@ public final class Stops {
     private Stops() {
     }
 
-    private static Collection<StopReport> detectStops(long deviceId, Date from, Date to) throws SQLException {
+    public static Collection<StopReport> detectStops(long deviceId, Collection<Position> positionCollection) throws SQLException {
         boolean ignoreOdometer = Context.getDeviceManager()
                 .lookupAttributeBoolean(deviceId, "report.ignoreOdometer", false, false, true);
 
@@ -49,7 +50,7 @@ public final class Stops {
         DeviceManager deviceManager = Main.getInjector().getInstance(DeviceManager.class);
 
         return ReportUtils.detectTripsAndStops(
-                identityManager, deviceManager, Context.getDataManager().getPositions(deviceId, from, to),
+                identityManager, deviceManager, positionCollection,
                 Context.getTripsConfig(), ignoreOdometer, StopReport.class);
     }
 
@@ -60,7 +61,7 @@ public final class Stops {
         ArrayList<StopReport> result = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            result.addAll(detectStops(deviceId, from, to));
+            result.addAll(detectStops(deviceId, Context.getDataManager().getPositions(deviceId, from, to)));
         }
         return result;
     }
@@ -73,7 +74,7 @@ public final class Stops {
         ArrayList<String> sheetNames = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            Collection<StopReport> stops = detectStops(deviceId, from, to);
+            Collection<StopReport> stops = detectStops(deviceId, Context.getDataManager().getPositions(deviceId, from, to));
             DeviceReport deviceStops = new DeviceReport();
             Device device = Context.getIdentityManager().getById(deviceId);
             deviceStops.setDeviceName(device.getName());
