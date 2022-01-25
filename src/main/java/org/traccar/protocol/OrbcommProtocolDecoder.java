@@ -27,6 +27,7 @@ import org.traccar.model.Position;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.JsonValue;
 import java.io.StringReader;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -49,7 +50,7 @@ public class OrbcommProtocolDecoder extends BaseProtocolDecoder {
         String content = response.content().toString(StandardCharsets.UTF_8);
         JsonObject json = Json.createReader(new StringReader(content)).readObject();
 
-        if (channel != null) {
+        if (channel != null && !json.getString("NextStartUTC").isEmpty()) {
             OrbcommProtocolPoller poller =
                     BasePipelineFactory.getHandler(channel.pipeline(), OrbcommProtocolPoller.class);
             if (poller != null) {
@@ -57,6 +58,10 @@ public class OrbcommProtocolDecoder extends BaseProtocolDecoder {
                 dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
                 poller.setStartTime(dateFormat.parse(json.getString("NextStartUTC")));
             }
+        }
+
+        if (json.get("Messages").getValueType() == JsonValue.ValueType.NULL) {
+            return null;
         }
 
         LinkedList<Position> positions = new LinkedList<>();

@@ -10,6 +10,9 @@ public class OrbcommProtocolDecoderTest extends ProtocolTest {
 
         var decoder = new OrbcommProtocolDecoder(null);
 
+        verifyNull(decoder, response(
+                buffer("{\"ErrorID\":0,\"NextStartUTC\":\"\",\"Messages\":null}")));
+
         verifyPositions(decoder, response(
                 buffer("{\"ErrorID\":0,\"NextStartUTC\":\"2022-01-20 21:17:19\",\"Messages\":[{\"ID\":21545955455454,\"MessageUTC\":\"2022-01-20 21:17:19\",\"ReceiveUTC\":\"2022-01-20 21:17:19\",\"SIN\":19,\"MobileID\":\"01097623SKY2C68\",\"Payload\":{\"Name\":\"simpleReport\",\"SIN\":19,\"MIN\":1,\"Fields\":[{\"Name\":\"latitude\",\"Value\":\"2717900\",\"Type\":\"signedint\"},{\"Name\":\"longitude\",\"Value\":\"-4555211\",\"Type\":\"signedint\"},{\"Name\":\"speed\",\"Value\":\"0\",\"Type\":\"unsignedint\"},{\"Name\":\"heading\",\"Value\":\"1439\",\"Type\":\"unsignedint\"}]},\"RegionName\":\"\",\"OTAMessageSize\":17,\"CustomerID\":0,\"Transport\":1,\"MobileOwnerID\":60000934}]}")));
 
