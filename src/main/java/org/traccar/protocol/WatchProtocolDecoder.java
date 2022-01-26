@@ -90,7 +90,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
         } else if (BitUtil.check(status, 2)) {
             return Position.ALARM_GEOFENCE_ENTER;
         } else if (BitUtil.check(status, 14)) {
-            return Position.ALARM_POWER_CUT; // some 2G devices raise this alarm when the device is unplugged from its charger
+            return Position.ALARM_POWER_CUT; // raised by some 2G devices when unplugged from their charger
         } else if (BitUtil.check(status, 16)) {
             return Position.ALARM_SOS;
         } else if (BitUtil.check(status, 17)) {
