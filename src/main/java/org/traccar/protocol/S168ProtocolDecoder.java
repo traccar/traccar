@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,9 @@ public class S168ProtocolDecoder extends BaseProtocolDecoder {
         String content = values[4];
         String[] fragments = content.split(";");
         for (String fragment : fragments) {
+            if (fragment.isEmpty()) {
+                continue;
+            }
 
             int dataIndex = fragment.indexOf(':');
             String type = fragment.substring(0, dataIndex);
