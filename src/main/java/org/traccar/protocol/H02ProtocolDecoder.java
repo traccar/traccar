@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -176,17 +176,19 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // coding scheme
             .groupEnd()
             .groupBegin()
-            .number("-(d+)-(d+.d+),")            // latitude
+            .number("-(d+)-(d+.d+),([NS]),")     // latitude
             .or()
-            .number("(d+)(dd.d+),")              // latitude
+            .number("(d+)(dd.d+),([NS]),")       // latitude
+            .or()
+            .number("(d+)(dd)(d{4}),([NS]),")    // latitude
             .groupEnd()
-            .expression("([NS]),")
             .groupBegin()
-            .number("-(d+)-(d+.d+),")            // longitude
+            .number("-(d+)-(d+.d+),([EW]),")     // longitude
             .or()
-            .number("(d+)(dd.d+),")              // longitude
+            .number("(d+)(dd.d+),([EW]),")       // longitude
+            .or()
+            .number("(d+)(dd)(d{4}),([EW]),")    // longitude
             .groupEnd()
-            .expression("([EW]),")
             .number(" *(d+.?d*),")               // speed
             .number("(d+.?d*)?,")                // course
             .number("(?:d+,)?")                  // battery
@@ -349,18 +351,24 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             position.setValid(true);
         }
 
-        if (parser.hasNext(2)) {
-            position.setLatitude(-parser.nextCoordinate());
-        }
-        if (parser.hasNext(2)) {
+        if (parser.hasNext(3)) {
             position.setLatitude(parser.nextCoordinate());
         }
-
-        if (parser.hasNext(2)) {
-            position.setLongitude(-parser.nextCoordinate());
+        if (parser.hasNext(3)) {
+            position.setLatitude(parser.nextCoordinate());
         }
-        if (parser.hasNext(2)) {
+        if (parser.hasNext(4)) {
+            position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN_HEM));
+        }
+
+        if (parser.hasNext(3)) {
             position.setLongitude(parser.nextCoordinate());
+        }
+        if (parser.hasNext(3)) {
+            position.setLongitude(parser.nextCoordinate());
+        }
+        if (parser.hasNext(4)) {
+            position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN_HEM));
         }
 
         position.setSpeed(parser.nextDouble(0));
