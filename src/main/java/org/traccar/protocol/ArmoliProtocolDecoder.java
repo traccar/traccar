@@ -20,6 +20,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.helper.ObdDecoder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -51,12 +52,13 @@ public class ArmoliProtocolDecoder extends BaseProtocolDecoder {
             .number("(xx)")                      // max speed
             .number("(x{6})")                    // distance
             .number("(dd)?")                     // hdop
-            .number("xx")                        // idle
+            .number("x{4}")                      // idle
             .number(":(x+)").optional()          // alarms
             .number("G(x{6})").optional()        // g-sensor
             .number("H(x{3})").optional()        // power
             .number("E(x{3})").optional()        // battery
             .number("!(x+)").optional()          // driver
+            .expression("@A([>0-9A-F]+)").optional() // obd
             .any()
             .compile();
 
@@ -132,6 +134,15 @@ public class ArmoliProtocolDecoder extends BaseProtocolDecoder {
         }
         if (parser.hasNext()) {
             position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
+        }
+        if (parser.hasNext()) {
+            String[] values = parser.next().split(">");
+            for (int i = 1; i < values.length; i++) {
+                String value = values[i];
+                position.add(ObdDecoder.decodeData(
+                        Integer.parseInt(value.substring(4, 6), 16),
+                        Long.parseLong(value.substring(6), 16), true));
+            }
         }
 
         return position;

@@ -11,11 +11,15 @@ public class ArmoliProtocolDecoderTest extends ProtocolTest {
 
         var decoder = new ArmoliProtocolDecoder(null);
 
+        verifyAttribute(decoder, text(
+                "[M869867039550712160821153237N41.033508E029.2697032F00036000000410006B336FFFFG458563@A6D>04410C2482>03410F56>03412F19>0441210000>034130FF>0441313A7>03410D30>04411F01B6>0341048C>04410C1C98];"),
+                Position.KEY_RPM, 1830L);
+
         verifyPosition(decoder, text(
                 "[M869867038698074210122125205N38.735641E035.4727751E003340000000C00000E9E07FF:106AG505283H60E]"));
 
         verifyAttribute(decoder, text(
-                        "[W869867038698074,O,1234,2657,1]"),
+                "[W869867038698074,O,1234,2657,1]"),
                 Position.KEY_RESULT, "O,1234,2657,1");
 
         verifyNull(decoder, text(
