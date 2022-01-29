@@ -1,9 +1,16 @@
 #set($subject = "$device.name: alarm!")
+#{if} ($position.getString("alarm") == "lowBattery")
+#set($batteryPercentage = $position.getString('batteryLevel'))
+#set($batteryVolts = $position.getString('battery'))
+#set($batteryString = " (#{if}(${batteryPercentage})${batteryPercentage}% #{else}#${end}#{if}(${batteryVolts})${batteryVolts}V#{else}#${end})")
+#{else}
+#set($batteryString = "")
+#{end}
 <!DOCTYPE html>
 <html>
 <body>
 Device: $device.name<br>
-Alarm:  $position.getString("alarm")<br>
+Alarm:  $position.getString("alarm")$batteryString<br>
 Time: $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone)<br>
 Point: <a href="$webUrl?eventId=$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
 </body>
