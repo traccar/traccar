@@ -790,7 +790,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                 position.setCourse(crash.readUnsignedShort() * 0.01);
 
                 StringBuilder value = new StringBuilder("[");
-                for (int i = 0; i < 100; i++){
+                for (int i = 0; i < 100; i++) {
                     if (value.length() > 1) {
                         value.append(",");
                     }
