@@ -181,7 +181,7 @@ public class FilterHandler extends BaseDataHandler {
             } else {
                 preceding = getLastReceivedPosition(deviceId);
             }
-            if (filterDuplicate(position, preceding)) {
+            if (filterDuplicate(position, preceding) && !skipLimit(position, preceding) && !skipAttributes(position)) {
                 filterType.append("Duplicate ");
             }
             if (filterStatic(position) && !skipLimit(position, preceding) && !skipAttributes(position)) {
