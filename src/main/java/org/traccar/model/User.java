@@ -224,6 +224,16 @@ public class User extends ExtendedModel {
 
     private String poiLayer;
 
+    private boolean disableReports;
+
+    public boolean getDisableReports() {
+        return disableReports;
+    }
+
+    public void setDisableReports(boolean disableReports) {
+        this.disableReports = disableReports;
+    }
+
     public String getPoiLayer() {
         return poiLayer;
     }

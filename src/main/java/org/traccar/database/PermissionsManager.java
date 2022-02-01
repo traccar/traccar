@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -274,6 +274,11 @@ public class PermissionsManager {
         return user != null && user.getLimitCommands();
     }
 
+    public boolean getUserDisableReport(long userId) {
+        User user = getUser(userId);
+        return user != null && user.getDisableReports();
+    }
+
     public void checkReadonly(long userId) throws SecurityException {
         if (!getUserAdmin(userId) && (server.getReadonly() || getUserReadonly(userId))) {
             throw new SecurityException("Account is readonly");
@@ -289,6 +294,12 @@ public class PermissionsManager {
     public void checkLimitCommands(long userId) throws SecurityException {
         if (!getUserAdmin(userId) && (server.getLimitCommands() || getUserLimitCommands(userId))) {
             throw new SecurityException("Account has limit sending commands");
+        }
+    }
+
+    public void checkDisableReports(long userId) throws SecurityException {
+        if (!getUserAdmin(userId) && (server.getDisableReports() || getUserDisableReport(userId))) {
+            throw new SecurityException("Account has reports disabled");
         }
     }
 
@@ -326,7 +337,8 @@ public class PermissionsManager {
         if (before.getReadonly() != after.getReadonly()
                 || before.getDeviceReadonly() != after.getDeviceReadonly()
                 || before.getDisabled() != after.getDisabled()
-                || before.getLimitCommands() != after.getLimitCommands()) {
+                || before.getLimitCommands() != after.getLimitCommands()
+                || before.getDisableReports() != after.getDisableReports()) {
             if (userId == after.getId()) {
                 checkAdmin(userId);
             }

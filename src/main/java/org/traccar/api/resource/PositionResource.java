@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ public class PositionResource extends BaseResource {
         } else {
             Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
             if (from != null && to != null) {
+                Context.getPermissionsManager().checkDisableReports(getUserId());
                 return Context.getDataManager().getPositions(deviceId, from, to);
             } else {
                 return Collections.singleton(Context.getDeviceManager().getLastPosition(deviceId));
