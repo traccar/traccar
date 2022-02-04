@@ -19,6 +19,7 @@ package org.traccar.protocol;
 import org.traccar.StringProtocolEncoder;
 import org.traccar.model.Command;
 import org.traccar.Protocol;
+import org.traccar.helper.Checksum;
 
 public class TotemProtocolEncoder extends StringProtocolEncoder {
 
@@ -26,30 +27,41 @@ public class TotemProtocolEncoder extends StringProtocolEncoder {
         super(protocol);
     }
 
+    public static String formatContent(Command command) {
+        switch (command.getType()) {
+            case Command.TYPE_CUSTOM:
+                return String.format("%s,%s",
+                                     command.getAttributes().get(Command.KEY_DEVICE_PASSWORD),
+                                     command.getAttributes().get(Command.KEY_DATA)
+                                    );
+            case Command.TYPE_REBOOT_DEVICE:
+                return String.format("%s,006", command.getAttributes().get(Command.KEY_DEVICE_PASSWORD));
+            case Command.TYPE_FACTORY_RESET:
+                return String.format("%s,007", command.getAttributes().get(Command.KEY_DEVICE_PASSWORD));
+            case Command.TYPE_GET_VERSION:
+                return String.format("%s,056", command.getAttributes().get(Command.KEY_DEVICE_PASSWORD));
+            case Command.TYPE_POSITION_SINGLE:
+                return String.format("%s,012", command.getAttributes().get(Command.KEY_DEVICE_PASSWORD));
+            // Assuming PIN 8 (Output C) is the power wire, like manual says but it can be PIN 5,7,8
+            case Command.TYPE_ENGINE_STOP:
+                return String.format("%s,025,C,1", command.getAttributes().get(Command.KEY_DEVICE_PASSWORD));
+            case Command.TYPE_ENGINE_RESUME:
+                return String.format("%s,025,C,0", command.getAttributes().get(Command.KEY_DEVICE_PASSWORD));
+            default:
+                return null;
+        }
+    }
+
     @Override
     protected Object encodeCommand(Command command) {
 
         initDevicePassword(command, "000000");
 
-        switch (command.getType()) {
-            case Command.TYPE_CUSTOM:
-                return formatCommand(command, "*%s,%s#", Command.KEY_DEVICE_PASSWORD, Command.KEY_DATA);
-            case Command.TYPE_REBOOT_DEVICE:
-                return formatCommand(command, "*%s,006#", Command.KEY_DEVICE_PASSWORD);
-            case Command.TYPE_FACTORY_RESET:
-                return formatCommand(command, "*%s,007#", Command.KEY_DEVICE_PASSWORD);
-            case Command.TYPE_GET_VERSION:
-                return formatCommand(command, "*%s,056#", Command.KEY_DEVICE_PASSWORD);
-            case Command.TYPE_POSITION_SINGLE:
-                return formatCommand(command, "*%s,012#", Command.KEY_DEVICE_PASSWORD);
-            // Assuming PIN 8 (Output C) is the power wire, like manual says but it can be PIN 5,7,8
-            case Command.TYPE_ENGINE_STOP:
-                return formatCommand(command, "*%s,025,C,1#", Command.KEY_DEVICE_PASSWORD);
-            case Command.TYPE_ENGINE_RESUME:
-                return formatCommand(command, "*%s,025,C,0#", Command.KEY_DEVICE_PASSWORD);
-            default:
-                return null;
-        }
+        String commandString = formatContent(command);
+        String builtCommand = String.format("$$%04dCF%s", 10 + commandString.getBytes().length, commandString);
+
+        return String.format("%s%02X", builtCommand, Checksum.xor(builtCommand));
+
     }
 
 }

@@ -34,6 +34,18 @@ public class TotemProtocol extends BaseProtocol {
                 Command.TYPE_ENGINE_RESUME,
                 Command.TYPE_ENGINE_STOP
         );
+
+        setTextCommandEncoder(new TotemProtocolSmsEncoder(this));
+        setSupportedTextCommands(
+                Command.TYPE_CUSTOM,
+                Command.TYPE_REBOOT_DEVICE,
+                Command.TYPE_FACTORY_RESET,
+                Command.TYPE_GET_VERSION,
+                Command.TYPE_POSITION_SINGLE,
+                Command.TYPE_ENGINE_RESUME,
+                Command.TYPE_ENGINE_STOP
+        );
+
         addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
