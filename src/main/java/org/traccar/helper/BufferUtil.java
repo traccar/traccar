@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -50,7 +50,7 @@ public final class BufferUtil {
             wrappedHaystack.writerIndex(endIndex - haystack.readerIndex());
         }
         int result = ByteBufUtil.indexOf(needle, wrappedHaystack);
-        return result < 0 ? result : haystack.readerIndex() + startIndex + result;
+        return result < 0 ? result : startIndex + result;
     }
 
 }
