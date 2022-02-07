@@ -95,6 +95,10 @@ public class S168ProtocolDecoder extends BaseProtocolDecoder {
                                 values[index++].replace('-', ':'), Integer.parseInt(values[index++])));
                     }
                     break;
+                case "STATUS":
+                    position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(values[index++]));
+                    position.set(Position.KEY_RSSI, Integer.parseInt(values[index++]));
+                    break;
                 default:
                     break;
             }
@@ -103,8 +107,15 @@ public class S168ProtocolDecoder extends BaseProtocolDecoder {
         if (network.getCellTowers() != null || network.getWifiAccessPoints() != null) {
             position.setNetwork(network);
         }
+        if (!position.getAttributes().containsKey(Position.KEY_SATELLITES)) {
+            getLastLocation(position, null);
+        }
 
-        return position.getAttributes().containsKey(Position.KEY_SATELLITES) ? position : null;
+        if (position.getNetwork() != null || !position.getAttributes().isEmpty()) {
+            return position;
+        } else {
+            return null;
+        }
     }
 
 }

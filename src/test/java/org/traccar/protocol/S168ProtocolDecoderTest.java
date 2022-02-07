@@ -10,6 +10,9 @@ public class S168ProtocolDecoderTest extends ProtocolTest {
 
         var decoder = new S168ProtocolDecoder(null);
 
+        verifyAttributes(decoder, text(
+                "S168#861118010104168#00ec#0016#SYNC:0093;STATUS:91,51"));
+
         verifyPosition(decoder, text(
                 "S168#861118010104168#0715#0124#LOCA:W;CELL:6,1cc,0,5847,2c54cc1,1d,5847,cc98145,1b,5847,6259d03,e,5847,cc98141,1d,5847,6259e03,27,5847,32113ce,28;GDATA:V,0,220205152238,0.0,0.0,0,0,0;ALERT:0000;STATUS:99,52;WIFI:5,8C-AB-8E-9D-73-18,-56,60-3A-7C-E2-D3-85,-72,62-3A-7C-A2-D3-85,-72,00-00-00-00-00-00,-75,50-70-97-B1-80-1F,-82"));
 
