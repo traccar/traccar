@@ -17,8 +17,8 @@ package org.traccar.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import org.traccar.database.QueryExtended;
-import org.traccar.database.QueryIgnore;
+import org.traccar.storage.QueryExtended;
+import org.traccar.storage.QueryIgnore;
 import org.traccar.helper.Hashing;
 
 import java.util.Date;

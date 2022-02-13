@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.database;
+package org.traccar.storage;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;

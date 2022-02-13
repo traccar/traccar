@@ -19,7 +19,7 @@ import java.text.ParseException;
 
 import org.traccar.Context;
 import org.traccar.config.Keys;
-import org.traccar.database.QueryIgnore;
+import org.traccar.storage.QueryIgnore;
 import org.traccar.geofence.GeofenceCircle;
 import org.traccar.geofence.GeofenceGeometry;
 import org.traccar.geofence.GeofencePolygon;

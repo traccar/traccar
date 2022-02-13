@@ -17,7 +17,7 @@ package org.traccar.model;
 
 import java.util.Date;
 
-import org.traccar.database.QueryIgnore;
+import org.traccar.storage.QueryIgnore;
 
 public class Position extends Message {
 

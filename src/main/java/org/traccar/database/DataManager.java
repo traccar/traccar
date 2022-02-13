@@ -47,6 +47,9 @@ import org.traccar.model.Position;
 import org.traccar.model.Server;
 import org.traccar.model.Statistics;
 import org.traccar.model.User;
+import org.traccar.storage.QueryBuilder;
+import org.traccar.storage.QueryExtended;
+import org.traccar.storage.QueryIgnore;
 
 import javax.sql.DataSource;
 import java.beans.Introspector;
