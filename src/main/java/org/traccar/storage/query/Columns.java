@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-abstract public class Columns {
+public abstract class Columns {
 
-    abstract public List<String> getColumns(Class<?> clazz);
+    public abstract List<String> getColumns(Class<?> clazz);
 
     protected List<String> getAllColumns(Class<?> clazz) {
         List<String> columns = new LinkedList<>();
