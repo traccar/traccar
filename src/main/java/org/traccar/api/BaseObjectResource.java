@@ -41,6 +41,7 @@ import org.traccar.model.Group;
 import org.traccar.model.GroupedModel;
 import org.traccar.model.ScheduledModel;
 import org.traccar.model.User;
+import org.traccar.storage.StorageException;
 
 public abstract class BaseObjectResource<T extends BaseModel> extends BaseResource {
 
@@ -87,7 +88,7 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
     }
 
     @POST
-    public Response add(T entity) throws SQLException {
+    public Response add(T entity) throws StorageException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         if (baseClass.equals(Device.class)) {
             Context.getPermissionsManager().checkDeviceReadonly(getUserId());
@@ -120,7 +121,7 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
 
     @Path("{id}")
     @PUT
-    public Response update(T entity) throws SQLException {
+    public Response update(T entity) throws StorageException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         if (baseClass.equals(Device.class)) {
             Context.getPermissionsManager().checkDeviceReadonly(getUserId());
@@ -150,7 +151,7 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
 
     @Path("{id}")
     @DELETE
-    public Response remove(@PathParam("id") long id) throws SQLException {
+    public Response remove(@PathParam("id") long id) throws StorageException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         if (baseClass.equals(Device.class)) {
             Context.getPermissionsManager().checkDeviceReadonly(getUserId());

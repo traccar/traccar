@@ -2,6 +2,7 @@ package org.traccar.storage;
 
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Limit;
 import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
@@ -24,7 +25,7 @@ public class DatabaseStorage extends Storage {
     @Override
     public <T> List<T> getObjects(Class<T> clazz, Request request) throws StorageException {
         StringBuilder query = new StringBuilder("SELECT ");
-        query.append(formatColumns(request.getColumns(), clazz, c -> c));
+        query.append(formatColumns(request.getColumns(), clazz, "get", c -> c));
         query.append(" FROM ").append(getTableName(clazz));
         query.append(formatCondition(request.getCondition()));
         query.append(formatOrder(request.getOrder()));
@@ -44,9 +45,9 @@ public class DatabaseStorage extends Storage {
         StringBuilder query = new StringBuilder("INSERT INTO ");
         query.append(getTableName(entity.getClass()));
         query.append("(");
-        query.append(formatColumns(request.getColumns(), entity.getClass(), c -> c));
+        query.append(formatColumns(request.getColumns(), entity.getClass(), "set", c -> c));
         query.append(") VALUES (");
-        query.append(formatColumns(request.getColumns(), entity.getClass(), c -> ':' + c));
+        query.append(formatColumns(request.getColumns(), entity.getClass(), "set", c -> ':' + c));
         query.append(")");
         try {
             QueryBuilder builder = QueryBuilder.create(dataSource, query.toString(), true);
@@ -62,7 +63,7 @@ public class DatabaseStorage extends Storage {
         StringBuilder query = new StringBuilder("UPDATE ");
         query.append(getTableName(entity.getClass()));
         query.append(" SET ");
-        query.append(formatColumns(request.getColumns(), entity.getClass(), c -> c + " = :" + c));
+        query.append(formatColumns(request.getColumns(), entity.getClass(), "set", c -> c + " = :" + c));
         query.append(formatCondition(request.getCondition()));
         try {
             QueryBuilder builder = QueryBuilder.create(dataSource, query.toString());
@@ -101,31 +102,46 @@ public class DatabaseStorage extends Storage {
     }
 
     private Map<String, Object> getConditionVariables(Condition genericCondition) {
-        Map<String, Object> result = new HashMap<>();
-        if (genericCondition instanceof Condition.Equals) {
-            Condition.Equals condition = (Condition.Equals) genericCondition;
-            result.put(condition.getVariable(), condition.getValue());
+        Map<String, Object> results = new HashMap<>();
+        if (genericCondition instanceof Condition.Compare) {
+            Condition.Compare condition = (Condition.Compare) genericCondition;
+            if (condition.getValue() != null) {
+                results.put(condition.getVariable(), condition.getValue());
+            }
         } else if (genericCondition instanceof Condition.Between) {
             Condition.Between condition = (Condition.Between) genericCondition;
-            result.put(condition.getFromVariable(), condition.getFromValue());
-            result.put(condition.getToVariable(), condition.getToValue());
+            results.put(condition.getFromVariable(), condition.getFromValue());
+            results.put(condition.getToVariable(), condition.getToValue());
+        } else if (genericCondition instanceof Condition.Binary) {
+            Condition.Binary condition = (Condition.Binary) genericCondition;
+            results.putAll(getConditionVariables(condition.getFirst()));
+            results.putAll(getConditionVariables(condition.getSecond()));
         }
-        return result;
+        return results;
     }
 
-    private String formatColumns(Columns columns, Class<?> clazz, Function<String, String> mapper) {
-        return columns.getColumns(clazz).stream().map(mapper).collect(Collectors.joining(", "));
+    private String formatColumns(
+            Columns columns, Class<?> clazz, String type, Function<String, String> mapper) {
+        return columns.getColumns(clazz, type).stream().map(mapper).collect(Collectors.joining(", "));
     }
 
     private String formatCondition(Condition genericCondition) {
+        return formatCondition(genericCondition, true);
+    }
+
+    private String formatCondition(Condition genericCondition, boolean appendWhere) {
         StringBuilder result = new StringBuilder();
         if (genericCondition != null) {
-            result.append(" WHERE ");
-            if (genericCondition instanceof Condition.Equals) {
+            if (appendWhere) {
+                result.append(" WHERE ");
+            }
+            if (genericCondition instanceof Condition.Compare) {
 
-                Condition.Equals condition = (Condition.Equals) genericCondition;
+                Condition.Compare condition = (Condition.Compare) genericCondition;
                 result.append(condition.getColumn());
-                result.append(" == :");
+                result.append(" ");
+                result.append(condition.getOperator());
+                result.append(" :");
                 result.append(condition.getVariable());
 
             } else if (genericCondition instanceof Condition.Between) {
@@ -137,12 +153,14 @@ public class DatabaseStorage extends Storage {
                 result.append(" AND :");
                 result.append(condition.getToVariable());
 
-            } else if (genericCondition instanceof Condition.And) {
+            } else if (genericCondition instanceof Condition.Binary) {
 
-                Condition.And condition = (Condition.And) genericCondition;
-                result.append(formatCondition(condition.getFirst()));
-                result.append(" AND ");
-                result.append(formatCondition(condition.getSecond()));
+                Condition.Binary condition = (Condition.Binary) genericCondition;
+                result.append(formatCondition(condition.getFirst(), false));
+                result.append(" ");
+                result.append(condition.getOperator());
+                result.append(" ");
+                result.append(formatCondition(condition.getSecond(), false));
 
             }
         }
@@ -157,6 +175,15 @@ public class DatabaseStorage extends Storage {
             if (order.getDescending()) {
                 result.append(" DESC");
             }
+        }
+        return result.toString();
+    }
+
+    private String formatLimit(Limit limit) {
+        StringBuilder result = new StringBuilder();
+        if (limit != null) {
+            result.append(" LIMIT ");
+            result.append(limit.getValue());
         }
         return result.toString();
     }

@@ -20,7 +20,9 @@ import java.util.List;
 
 import org.traccar.storage.QueryExtended;
 import org.traccar.storage.QueryIgnore;
+import org.traccar.storage.StorageName;
 
+@StorageName("tc_devices")
 public class Device extends GroupedModel {
 
     private String name;
@@ -54,13 +56,13 @@ public class Device extends GroupedModel {
         return status != null ? status : STATUS_OFFLINE;
     }
 
+    @QueryIgnore
     public void setStatus(String status) {
         this.status = status;
     }
 
     private Date lastUpdate;
 
-    @QueryExtended
     public Date getLastUpdate() {
         if (lastUpdate != null) {
             return new Date(lastUpdate.getTime());
@@ -69,6 +71,7 @@ public class Device extends GroupedModel {
         }
     }
 
+    @QueryExtended
     public void setLastUpdate(Date lastUpdate) {
         if (lastUpdate != null) {
             this.lastUpdate = new Date(lastUpdate.getTime());
@@ -84,6 +87,7 @@ public class Device extends GroupedModel {
         return positionId;
     }
 
+    @QueryIgnore
     public void setPositionId(long positionId) {
         this.positionId = positionId;
     }
@@ -95,6 +99,7 @@ public class Device extends GroupedModel {
         return geofenceIds;
     }
 
+    @QueryIgnore
     public void setGeofenceIds(List<Long> geofenceIds) {
         this.geofenceIds = geofenceIds;
     }

@@ -33,8 +33,8 @@ import org.traccar.model.Order;
 import org.traccar.model.Permission;
 import org.traccar.model.Server;
 import org.traccar.model.User;
+import org.traccar.storage.StorageException;
 
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -156,7 +156,7 @@ public class PermissionsManager {
     public void refreshServer() {
         try {
             server = dataManager.getServer();
-        } catch (SQLException error) {
+        } catch (StorageException error) {
             LOGGER.warn("Refresh server config error", error);
         }
     }
@@ -193,7 +193,7 @@ public class PermissionsManager {
                     }
                 }
 
-            } catch (SQLException | ClassNotFoundException error) {
+            } catch (StorageException | ClassNotFoundException error) {
                 LOGGER.warn("Refresh device permissions error", error);
             }
 
@@ -499,12 +499,12 @@ public class PermissionsManager {
         return server;
     }
 
-    public void updateServer(Server server) throws SQLException {
+    public void updateServer(Server server) throws StorageException {
         dataManager.updateObject(server);
         this.server = server;
     }
 
-    public User login(String email, String password) throws SQLException {
+    public User login(String email, String password) throws StorageException {
         User user = dataManager.login(email, password);
         if (user != null) {
             checkUserEnabled(user.getId());

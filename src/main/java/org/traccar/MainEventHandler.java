@@ -27,8 +27,8 @@ import org.traccar.config.Keys;
 import org.traccar.database.StatisticsManager;
 import org.traccar.helper.DateUtil;
 import org.traccar.model.Position;
+import org.traccar.storage.StorageException;
 
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -57,7 +57,7 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
             Position position = (Position) msg;
             try {
                 Context.getDeviceManager().updateLatestPosition(position);
-            } catch (SQLException error) {
+            } catch (StorageException error) {
                 LOGGER.warn("Failed to update device", error);
             }
 

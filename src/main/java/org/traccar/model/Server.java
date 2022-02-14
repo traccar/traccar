@@ -18,7 +18,9 @@ package org.traccar.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.traccar.Context;
 import org.traccar.storage.QueryIgnore;
+import org.traccar.storage.StorageName;
 
+@StorageName("tc_servers")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Server extends ExtendedModel {
 

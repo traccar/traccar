@@ -276,8 +276,7 @@ public final class QueryBuilder {
         Method[] methods = object.getClass().getMethods();
 
         for (Method method : methods) {
-            if (method.getName().startsWith("get") && method.getParameterTypes().length == 0
-                    && !method.isAnnotationPresent(QueryIgnore.class)) {
+            if (method.getName().startsWith("get") && method.getParameterTypes().length == 0) {
                 String name = method.getName().substring(3);
                 try {
                     if (method.getReturnType().equals(boolean.class)) {
@@ -412,8 +411,7 @@ public final class QueryBuilder {
                     Method[] methods = clazz.getMethods();
 
                     for (final Method method : methods) {
-                        if (method.getName().startsWith("set") && method.getParameterTypes().length == 1
-                                && !method.isAnnotationPresent(QueryIgnore.class)) {
+                        if (method.getName().startsWith("set") && method.getParameterTypes().length == 1) {
 
                             final String name = method.getName().substring(3);
 

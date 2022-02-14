@@ -23,12 +23,12 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.DateUtil;
 import org.traccar.model.Statistics;
+import org.traccar.storage.StorageException;
 
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Form;
-import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -106,7 +106,7 @@ public class StatisticsManager {
 
             try {
                 dataManager.addObject(statistics);
-            } catch (SQLException e) {
+            } catch (StorageException e) {
                 LOGGER.warn("Error saving statistics", e);
             }
 

@@ -20,9 +20,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.traccar.storage.QueryExtended;
 import org.traccar.storage.QueryIgnore;
 import org.traccar.helper.Hashing;
+import org.traccar.storage.StorageName;
 
 import java.util.Date;
 
+@StorageName("tc_users")
 public class User extends ExtendedModel {
 
     private String name;

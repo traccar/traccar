@@ -15,8 +15,6 @@
  */
 package org.traccar.api.resource;
 
-import java.sql.SQLException;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -31,16 +29,16 @@ import org.traccar.api.BaseResource;
 import org.traccar.model.Event;
 import org.traccar.model.Geofence;
 import org.traccar.model.Maintenance;
+import org.traccar.storage.StorageException;
 
 @Path("events")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-
 public class EventResource extends BaseResource {
 
     @Path("{id}")
     @GET
-    public Event get(@PathParam("id") long id) throws SQLException {
+    public Event get(@PathParam("id") long id) throws StorageException {
         Event event = Context.getDataManager().getObject(Event.class, id);
         if (event == null) {
             throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).build());

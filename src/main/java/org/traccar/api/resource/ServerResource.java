@@ -19,6 +19,7 @@ import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Server;
+import org.traccar.storage.StorageException;
 
 import javax.annotation.security.PermitAll;
 import javax.ws.rs.Consumes;
@@ -29,7 +30,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.sql.SQLException;
 
 @Path("server")
 @Produces(MediaType.APPLICATION_JSON)
@@ -38,7 +38,7 @@ public class ServerResource extends BaseResource {
 
     @PermitAll
     @GET
-    public Server get(@QueryParam("force") boolean force) throws SQLException {
+    public Server get(@QueryParam("force") boolean force) throws StorageException {
         if (force) {
             return Context.getDataManager().getServer();
         } else {
@@ -47,7 +47,7 @@ public class ServerResource extends BaseResource {
     }
 
     @PUT
-    public Response update(Server entity) throws SQLException {
+    public Response update(Server entity) throws StorageException {
         Context.getPermissionsManager().checkAdmin(getUserId());
         Context.getPermissionsManager().updateServer(entity);
         LogAction.edit(getUserId(), entity);

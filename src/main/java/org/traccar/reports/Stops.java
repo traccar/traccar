@@ -21,7 +21,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -35,13 +34,14 @@ import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.reports.model.DeviceReport;
 import org.traccar.reports.model.StopReport;
+import org.traccar.storage.StorageException;
 
 public final class Stops {
 
     private Stops() {
     }
 
-    private static Collection<StopReport> detectStops(long deviceId, Date from, Date to) throws SQLException {
+    private static Collection<StopReport> detectStops(long deviceId, Date from, Date to) throws StorageException {
         boolean ignoreOdometer = Context.getDeviceManager()
                 .lookupAttributeBoolean(deviceId, "report.ignoreOdometer", false, false, true);
 
@@ -55,7 +55,7 @@ public final class Stops {
 
     public static Collection<StopReport> getObjects(
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
-            Date from, Date to) throws SQLException {
+            Date from, Date to) throws StorageException {
         ReportUtils.checkPeriodLimit(from, to);
         ArrayList<StopReport> result = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
@@ -67,7 +67,7 @@ public final class Stops {
 
     public static void getExcel(
             OutputStream outputStream, long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
-            Date from, Date to) throws SQLException, IOException {
+            Date from, Date to) throws StorageException, IOException {
         ReportUtils.checkPeriodLimit(from, to);
         ArrayList<DeviceReport> devicesStops = new ArrayList<>();
         ArrayList<String> sheetNames = new ArrayList<>();

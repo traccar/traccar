@@ -37,6 +37,7 @@ import org.traccar.model.DeviceAccumulators;
 import org.traccar.model.Group;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
+import org.traccar.storage.StorageException;
 
 public class DeviceManager extends BaseObjectManager<Device> implements IdentityManager, ManagableObjects {
 
@@ -94,13 +95,13 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
             }
 
             return device.getId();
-        } catch (SQLException e) {
+        } catch (StorageException e) {
             LOGGER.warn("Automatic device registration error", e);
             return 0;
         }
     }
 
-    public void updateDeviceCache(boolean force) throws SQLException {
+    public void updateDeviceCache(boolean force) {
         long lastUpdate = devicesLastUpdate.get();
         if ((force || System.currentTimeMillis() - lastUpdate > dataRefreshDelay)
                 && devicesLastUpdate.compareAndSet(lastUpdate, System.currentTimeMillis())) {
@@ -144,24 +145,11 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         return defaultPassword;
     }
 
-    public Device getDeviceByPhone(String phone) {
-        try {
-            readLock();
-            return devicesByPhone.get(phone);
-        } finally {
-            readUnlock();
-        }
-    }
-
     @Override
     public Set<Long> getAllItems() {
         Set<Long> result = super.getAllItems();
         if (result.isEmpty()) {
-            try {
-                updateDeviceCache(true);
-            } catch (SQLException e) {
-                LOGGER.warn("Update device cache error", e);
-            }
+            updateDeviceCache(true);
             result = super.getAllItems();
         }
         return result;
@@ -309,7 +297,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         positions.remove(deviceId);
     }
 
-    public void updateDeviceStatus(Device device) throws SQLException {
+    public void updateDeviceStatus(Device device) throws StorageException {
         getDataManager().updateDeviceStatus(device);
         Device cachedDevice = getById(device.getId());
         if (cachedDevice != null) {
@@ -323,7 +311,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
                 for (Position position : getDataManager().getLatestPositions()) {
                     positions.put(position.getDeviceId(), position);
                 }
-            } catch (SQLException error) {
+            } catch (StorageException error) {
                 LOGGER.warn("Load latest positions error", error);
             }
         }
@@ -334,7 +322,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         return lastPosition == null || position.getFixTime().compareTo(lastPosition.getFixTime()) >= 0;
     }
 
-    public void updateLatestPosition(Position position) throws SQLException {
+    public void updateLatestPosition(Position position) throws StorageException {
 
         if (isLatestPosition(position)) {
 
@@ -451,7 +439,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         return result;
     }
 
-    public void resetDeviceAccumulators(DeviceAccumulators deviceAccumulators) throws SQLException {
+    public void resetDeviceAccumulators(DeviceAccumulators deviceAccumulators) throws StorageException {
         Position last = positions.get(deviceAccumulators.getDeviceId());
         if (last != null) {
             if (deviceAccumulators.getTotalDistance() != null) {

@@ -26,7 +26,9 @@ import org.traccar.geofence.GeofencePolygon;
 import org.traccar.geofence.GeofencePolyline;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.traccar.storage.StorageName;
 
+@StorageName("tc_geofences")
 public class Geofence extends ScheduledModel {
 
     public static final String TYPE_GEOFENCE_CILCLE = "geofenceCircle";

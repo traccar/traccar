@@ -18,7 +18,9 @@ package org.traccar.model;
 import org.traccar.storage.QueryIgnore;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.traccar.storage.StorageName;
 
+@StorageName("tc_commands")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Command extends Message implements Cloneable {
 
@@ -102,6 +104,12 @@ public class Command extends Message implements Cloneable {
     @Override
     public long getDeviceId() {
         return super.getDeviceId();
+    }
+
+    @QueryIgnore
+    @Override
+    public void setDeviceId(long deviceId) {
+        super.setDeviceId(deviceId);
     }
 
     private String description;
