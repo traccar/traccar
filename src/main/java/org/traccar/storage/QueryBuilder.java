@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -255,6 +254,23 @@ public final class QueryBuilder {
         return this;
     }
 
+    public QueryBuilder setValue(String name, Object value) throws SQLException {
+        if (value instanceof Boolean) {
+            setBoolean(name, (Boolean) value);
+        } else if (value instanceof Integer) {
+            setInteger(name, (Integer) value);
+        } else if (value instanceof Long) {
+            setLong(name, (Long) value);
+        } else if (value instanceof Double) {
+            setDouble(name, (Double) value);
+        } else if (value instanceof String) {
+            setString(name, (String) value);
+        } else if (value instanceof Date) {
+            setDate(name, (Date) value);
+        }
+        return this;
+    }
+
     public QueryBuilder setObject(Object object) throws SQLException {
 
         Method[] methods = object.getClass().getMethods();
@@ -295,7 +311,7 @@ public final class QueryBuilder {
     }
 
     public <T> T executeQuerySingle(Class<T> clazz) throws SQLException {
-        Collection<T> result = executeQuery(clazz);
+        List<T> result = executeQuery(clazz);
         if (!result.isEmpty()) {
             return result.iterator().next();
         } else {
@@ -380,7 +396,7 @@ public final class QueryBuilder {
         }
     }
 
-    public <T> Collection<T> executeQuery(Class<T> clazz) throws SQLException {
+    public <T> List<T> executeQuery(Class<T> clazz) throws SQLException {
         List<T> result = new LinkedList<>();
 
         if (query != null) {
@@ -458,7 +474,7 @@ public final class QueryBuilder {
         return 0;
     }
 
-    public Collection<Permission> executePermissionsQuery() throws SQLException, ClassNotFoundException {
+    public List<Permission> executePermissionsQuery() throws SQLException, ClassNotFoundException {
         List<Permission> result = new LinkedList<>();
         if (query != null) {
             try {
