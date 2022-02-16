@@ -472,7 +472,7 @@ public final class QueryBuilder {
         return 0;
     }
 
-    public List<Permission> executePermissionsQuery() throws SQLException, ClassNotFoundException {
+    public List<Permission> executePermissionsQuery() throws SQLException {
         List<Permission> result = new LinkedList<>();
         if (query != null) {
             try {

@@ -1,5 +1,6 @@
 package org.traccar.storage;
 
+import org.traccar.model.Permission;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Limit;
@@ -29,6 +30,7 @@ public class DatabaseStorage extends Storage {
         query.append(" FROM ").append(getTableName(clazz));
         query.append(formatCondition(request.getCondition()));
         query.append(formatOrder(request.getOrder()));
+        query.append(formatLimit(request.getLimit()));
         try {
             QueryBuilder builder = QueryBuilder.create(dataSource, query.toString());
             for (Map.Entry<String, Object> variable : getConditionVariables(request.getCondition()).entrySet()) {
@@ -86,6 +88,54 @@ public class DatabaseStorage extends Storage {
             QueryBuilder builder = QueryBuilder.create(dataSource, query.toString());
             for (Map.Entry<String, Object> variable : getConditionVariables(request.getCondition()).entrySet()) {
                 builder.setValue(variable.getKey(), variable.getValue());
+            }
+            builder.executeUpdate();
+        } catch (SQLException e) {
+            throw new StorageException(e);
+        }
+    }
+
+    @Override
+    public List<Permission> getPermissions(Class<?> ownerClass, Class<?> propertyClass) throws StorageException {
+        StringBuilder query = new StringBuilder("SELECT * FROM ");
+        query.append(Permission.getStorageName(ownerClass, propertyClass));
+        try {
+            QueryBuilder builder = QueryBuilder.create(dataSource, query.toString());
+            return builder.executePermissionsQuery();
+        } catch (SQLException e) {
+            throw new StorageException(e);
+        }
+    }
+
+    @Override
+    public void addPermission(Permission permission) throws StorageException {
+        StringBuilder query = new StringBuilder("INSERT INTO ");
+        query.append(permission.getStorageName());
+        query.append(" VALUES (");
+        query.append(permission.get().keySet().stream().map(key -> ':' + key).collect(Collectors.joining(", ")));
+        query.append(")");
+        try {
+            QueryBuilder builder = QueryBuilder.create(dataSource, query.toString(), true);
+            for (var entry : permission.get().entrySet()) {
+                builder.setLong(entry.getKey(), entry.getValue());
+            }
+            builder.executeUpdate();
+        } catch (SQLException e) {
+            throw new StorageException(e);
+        }
+    }
+
+    @Override
+    public void removePermission(Permission permission) throws StorageException {
+        StringBuilder query = new StringBuilder("DELETE FROM ");
+        query.append(permission.getStorageName());
+        query.append(" WHERE ");
+        query.append(permission
+                .get().keySet().stream().map(key -> key + " = :" + key).collect(Collectors.joining(" AND ")));
+        try {
+            QueryBuilder builder = QueryBuilder.create(dataSource, query.toString(), true);
+            for (var entry : permission.get().entrySet()) {
+                builder.setLong(entry.getKey(), entry.getValue());
             }
             builder.executeUpdate();
         } catch (SQLException e) {

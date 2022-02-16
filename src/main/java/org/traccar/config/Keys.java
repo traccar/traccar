@@ -343,13 +343,6 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
-     * Automatically generate SQL database queries when possible.
-     */
-    public static final ConfigKey<Boolean> DATABASE_GENERATE_QUERIES = new ConfigKey<>(
-            "database.generateQueries",
-            Collections.singletonList(KeyType.GLOBAL));
-
-    /**
      * Database connection pool size. Default value is defined by the HikariCP library.
      */
     public static final ConfigKey<Integer> DATABASE_MAX_POOL_SIZE = new ConfigKey<>(

@@ -24,30 +24,18 @@ import liquibase.database.DatabaseFactory;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.traccar.Context;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.model.Attribute;
 import org.traccar.model.BaseModel;
-import org.traccar.model.Calendar;
-import org.traccar.model.Command;
 import org.traccar.model.Device;
-import org.traccar.model.Driver;
 import org.traccar.model.Event;
-import org.traccar.model.Geofence;
-import org.traccar.model.Group;
-import org.traccar.model.Maintenance;
-import org.traccar.model.ManagedUser;
-import org.traccar.model.Notification;
 import org.traccar.model.Permission;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
 import org.traccar.model.Statistics;
 import org.traccar.model.User;
 import org.traccar.storage.DatabaseStorage;
-import org.traccar.storage.QueryBuilder;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
@@ -57,25 +45,15 @@ import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
 import javax.sql.DataSource;
-import java.beans.Introspector;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.net.URL;
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
 public class DataManager {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(DataManager.class);
-
-    public static final String ACTION_SELECT_ALL = "selectAll";
-    public static final String ACTION_SELECT = "select";
-    public static final String ACTION_INSERT = "insert";
-    public static final String ACTION_UPDATE = "update";
-    public static final String ACTION_DELETE = "delete";
 
     private final Config config;
 
@@ -86,8 +64,6 @@ public class DataManager {
     }
 
     private final Storage storage;
-
-    private boolean generateQueries;
 
     private final boolean forceLdap;
 
@@ -137,70 +113,7 @@ public class DataManager {
             hikariConfig.setMaximumPoolSize(maxPoolSize);
         }
 
-        generateQueries = config.getBoolean(Keys.DATABASE_GENERATE_QUERIES);
-
         dataSource = new HikariDataSource(hikariConfig);
-    }
-
-    public static String constructPermissionQuery(String action, Class<?> owner, Class<?> property) {
-        switch (action) {
-            case ACTION_SELECT_ALL:
-                return "SELECT " + makeNameId(owner) + ", " + makeNameId(property) + " FROM "
-                        + getPermissionsTableName(owner, property);
-            case ACTION_INSERT:
-                return "INSERT INTO " + getPermissionsTableName(owner, property)
-                        + " (" + makeNameId(owner) + ", " + makeNameId(property) + ") VALUES (:"
-                        + makeNameId(owner) + ", :" + makeNameId(property) + ")";
-            case ACTION_DELETE:
-                return "DELETE FROM " + getPermissionsTableName(owner, property)
-                        + " WHERE " + makeNameId(owner) + " = :" + makeNameId(owner)
-                        + " AND " + makeNameId(property) + " = :" + makeNameId(property);
-            default:
-                throw new IllegalArgumentException("Unknown action");
-        }
-    }
-
-    public String getQuery(String action, Class<?> owner, Class<?> property) {
-        String queryName;
-        switch (action) {
-            case ACTION_SELECT_ALL:
-                queryName = "database.select" + owner.getSimpleName() + property.getSimpleName() + "s";
-                break;
-            case ACTION_INSERT:
-                queryName = "database.link" + owner.getSimpleName() + property.getSimpleName();
-                break;
-            default:
-                queryName = "database.unlink" + owner.getSimpleName() + property.getSimpleName();
-                break;
-        }
-        String query = config.getString(queryName);
-        if (query == null) {
-            if (generateQueries) {
-                query = constructPermissionQuery(
-                        action, owner, property.equals(User.class) ? ManagedUser.class : property);
-            } else {
-                LOGGER.info("Query not provided: " + queryName);
-            }
-        }
-        return query;
-    }
-
-    private static String getPermissionsTableName(Class<?> owner, Class<?> property) {
-        String propertyName = property.getSimpleName();
-        if (propertyName.equals("ManagedUser")) {
-            propertyName = "User";
-        }
-        return "tc_" + Introspector.decapitalize(owner.getSimpleName())
-                + "_" + Introspector.decapitalize(propertyName);
-    }
-
-    private static String getObjectsTableName(Class<?> clazz) {
-        String result = "tc_" + Introspector.decapitalize(clazz.getSimpleName());
-        // Add "s" ending if object name is not plural already
-        if (!result.endsWith("s")) {
-            result += "s";
-        }
-        return result;
     }
 
     private void initDatabaseSchema() throws LiquibaseException {
@@ -318,61 +231,17 @@ public class DataManager {
                 new Order("captureTime")));
     }
 
-    public static Class<?> getClassByName(String name) throws ClassNotFoundException {
-        switch (name.toLowerCase().replace("id", "")) {
-            case "device":
-                return Device.class;
-            case "group":
-                return Group.class;
-            case "user":
-                return User.class;
-            case "manageduser":
-                return ManagedUser.class;
-            case "geofence":
-                return Geofence.class;
-            case "driver":
-                return Driver.class;
-            case "attribute":
-                return Attribute.class;
-            case "calendar":
-                return Calendar.class;
-            case "command":
-                return Command.class;
-            case "maintenance":
-                return Maintenance.class;
-            case "notification":
-                return Notification.class;
-            case "order":
-                return org.traccar.model.Order.class;
-            default:
-                throw new ClassNotFoundException();
-        }
-    }
-
-    private static String makeNameId(Class<?> clazz) {
-        String name = clazz.getSimpleName();
-        return Introspector.decapitalize(name) + (!name.contains("Id") ? "Id" : "");
-    }
-
     public Collection<Permission> getPermissions(Class<? extends BaseModel> owner, Class<? extends BaseModel> property)
             throws StorageException, ClassNotFoundException {
-        try {
-            return QueryBuilder.create(dataSource, getQuery(ACTION_SELECT_ALL, owner, property))
-                    .executePermissionsQuery();
-        } catch (SQLException e) {
-            throw new StorageException(e);
-        }
+        return storage.getPermissions(owner, property);
     }
 
     public void linkObject(Class<?> owner, long ownerId, Class<?> property, long propertyId, boolean link)
             throws StorageException {
-        try {
-        QueryBuilder.create(dataSource, getQuery(link ? ACTION_INSERT : ACTION_DELETE, owner, property))
-                .setLong(makeNameId(owner), ownerId)
-                .setLong(makeNameId(property), propertyId)
-                .executeUpdate();
-        } catch (SQLException e) {
-            throw new StorageException(e);
+        if (link) {
+            storage.addPermission(new Permission(owner, ownerId, property, propertyId));
+        } else {
+            storage.removePermission(new Permission(owner, ownerId, property, propertyId));
         }
     }
 

@@ -1,5 +1,6 @@
 package org.traccar.storage;
 
+import org.traccar.model.Permission;
 import org.traccar.storage.query.Request;
 
 import java.util.List;
@@ -22,6 +23,21 @@ public class MemoryStorage extends Storage {
 
     @Override
     public void removeObject(Class<?> clazz, Request request) throws StorageException {
+    }
+
+    @Override
+    public List<Permission> getPermissions(Class<?> ownerClass, Class<?> propertyClass) throws StorageException {
+        return null;
+    }
+
+    @Override
+    public void addPermission(Permission permission) throws StorageException {
+
+    }
+
+    @Override
+    public void removePermission(Permission permission) throws StorageException {
+
     }
 
 }
