@@ -84,7 +84,7 @@ public class OrbcommProtocolDecoder extends BaseProtocolDecoder {
                 for (int j = 0; j < fields.size(); j++) {
                     JsonObject field = fields.getJsonObject(j);
                     String value = field.getString("Value");
-                    switch (field.getString("Name")) {
+                    switch (field.getString("Name").toLowerCase()) {
                         case "latitude":
                             position.setLatitude(Integer.parseInt(value) / 60000.0);
                             break;
@@ -97,7 +97,6 @@ public class OrbcommProtocolDecoder extends BaseProtocolDecoder {
                         case "heading":
                             position.setCourse(Integer.parseInt(value) * 0.1);
                             break;
-
                         default:
                             break;
                     }
