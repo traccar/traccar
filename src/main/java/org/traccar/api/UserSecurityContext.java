@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.security.Principal;
 
 public class UserSecurityContext implements SecurityContext {
 
-    private UserPrincipal principal;
+    private final UserPrincipal principal;
 
     public UserSecurityContext(UserPrincipal principal) {
         this.principal = principal;
