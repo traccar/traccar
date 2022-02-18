@@ -84,6 +84,7 @@ import javax.ws.rs.client.Client;
 import io.netty.util.Timer;
 import org.traccar.speedlimit.OverpassSpeedLimitProvider;
 import org.traccar.speedlimit.SpeedLimitProvider;
+import org.traccar.storage.Storage;
 
 public class MainModule extends AbstractModule {
 
@@ -95,6 +96,11 @@ public class MainModule extends AbstractModule {
     @Provides
     public static Config provideConfig() {
         return Context.getConfig();
+    }
+
+    @Provides
+    public static Storage provideStorage() {
+        return Context.getDataManager().getStorage();
     }
 
     @Provides

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,13 @@ import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Server;
+import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Request;
 
 import javax.annotation.security.PermitAll;
+import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -36,14 +40,13 @@ import javax.ws.rs.core.Response;
 @Consumes(MediaType.APPLICATION_JSON)
 public class ServerResource extends BaseResource {
 
+    @Inject
+    private Storage storage;
+
     @PermitAll
     @GET
-    public Server get(@QueryParam("force") boolean force) throws StorageException {
-        if (force) {
-            return Context.getDataManager().getServer();
-        } else {
-            return Context.getPermissionsManager().getServer();
-        }
+    public Server get() throws StorageException {
+        return storage.getObject(Server.class, new Request(new Columns.All()));
     }
 
     @PUT

@@ -65,6 +65,10 @@ public class DataManager {
 
     private final Storage storage;
 
+    public Storage getStorage() {
+        return storage;
+    }
+
     private final boolean forceLdap;
 
     public DataManager(Config config) throws Exception {

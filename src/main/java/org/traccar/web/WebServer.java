@@ -35,12 +35,18 @@ import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer;
+import org.glassfish.jersey.inject.hk2.ImmediateHk2InjectionManager;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.server.spi.Container;
+import org.glassfish.jersey.server.spi.ContainerLifecycleListener;
 import org.glassfish.jersey.servlet.ServletContainer;
+import org.jvnet.hk2.guice.bridge.api.GuiceBridge;
+import org.jvnet.hk2.guice.bridge.api.GuiceIntoHK2Bridge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
+import org.traccar.Main;
 import org.traccar.api.DateParameterConverterProvider;
 import org.traccar.config.Config;
 import org.traccar.api.AsyncSocketServlet;
@@ -174,6 +180,24 @@ public class WebServer {
                 JacksonFeature.class, ObjectMapperProvider.class, ResourceErrorHandler.class,
                 SecurityRequestFilter.class, CorsResponseFilter.class, DateParameterConverterProvider.class);
         resourceConfig.packages(ServerResource.class.getPackage().getName());
+        resourceConfig.register(new ContainerLifecycleListener() {
+            @Override
+            public void onStartup(Container container) {
+                var injectionManager = container.getApplicationHandler().getInjectionManager();
+                var serviceLocator = ((ImmediateHk2InjectionManager) injectionManager).getServiceLocator();
+                GuiceBridge.getGuiceBridge().initializeGuiceBridge(serviceLocator);
+                var guiceBridge = serviceLocator.getService(GuiceIntoHK2Bridge.class);
+                guiceBridge.bridgeGuiceInjector(Main.getInjector());
+            }
+
+            @Override
+            public void onReload(Container container) {
+            }
+
+            @Override
+            public void onShutdown(Container container) {
+            }
+        });
         servletHandler.addServlet(new ServletHolder(new ServletContainer(resourceConfig)), "/api/*");
     }
 
