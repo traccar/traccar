@@ -59,7 +59,7 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
             .number("(d)")                       // acc
             .number("(dd)")                      // arm status
             .number("(dd)")                      // working mode
-            .number("(?:d{3,5})?,")              // (ignored)
+            .number("(?:d{3,5})?,")
             .number("(d+),")                     // mcc
             .number("(d+),")                     // mnc
             .number("(d+),")                     // lac
