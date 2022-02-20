@@ -7,7 +7,6 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public abstract class Columns {
@@ -50,10 +49,10 @@ public abstract class Columns {
     }
 
     public static class Exclude extends Columns {
-        private final Set<String> columns;
+        private final List<String> columns;
 
         public Exclude(String... columns) {
-            this.columns = Arrays.stream(columns).collect(Collectors.toSet());
+            this.columns = Arrays.stream(columns).collect(Collectors.toList());
         }
 
         @Override

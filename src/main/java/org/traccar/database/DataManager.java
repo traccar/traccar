@@ -153,7 +153,7 @@ public class DataManager {
         } else {
             if (ldapProvider != null && ldapProvider.login(email, password)) {
                 user = ldapProvider.getUser(email);
-                Context.getUsersManager().addItem(user);
+                addLdapUser(user);
                 return user;
             }
         }
@@ -257,6 +257,11 @@ public class DataManager {
 
     public void addObject(BaseModel entity) throws StorageException {
         entity.setId(storage.addObject(entity, new Request(new Columns.Exclude("id"))));
+    }
+
+    public void addLdapUser(User user) throws StorageException {
+        user.setId(storage.addObject(user, new Request(new Columns.Exclude("id", "password"))));
+        Context.getUsersManager().addNewItem(user);
     }
 
     public void updateObject(BaseModel entity) throws StorageException {
