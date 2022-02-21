@@ -53,7 +53,7 @@ import org.traccar.api.AsyncSocketServlet;
 import org.traccar.api.CorsResponseFilter;
 import org.traccar.api.MediaFilter;
 import org.traccar.api.ResourceErrorHandler;
-import org.traccar.api.SecurityRequestFilter;
+import org.traccar.api.security.SecurityRequestFilter;
 import org.traccar.api.resource.ServerResource;
 import org.traccar.config.Keys;
 
