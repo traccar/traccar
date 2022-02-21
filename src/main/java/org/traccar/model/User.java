@@ -249,6 +249,7 @@ public class User extends ExtendedModel {
         return null;
     }
 
+    @QueryIgnore
     public void setPassword(String password) {
         if (password != null && !password.isEmpty()) {
             Hashing.HashingResult hashingResult = Hashing.createHash(password);
