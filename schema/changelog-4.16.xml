@@ -16,6 +16,12 @@
       <column name="disablereports" type="BOOLEAN" defaultValueBoolean="false" />
     </addColumn>
 
+    <renameColumn tableName="tc_orders" oldColumnName="toAddress" newColumnName="toaddresstmp" />
+    <renameColumn tableName="tc_orders" oldColumnName="fromAddress" newColumnName="fromaddresstmp" />
+
+    <renameColumn tableName="tc_orders" oldColumnName="toaddresstmp" newColumnName="toaddress" />
+    <renameColumn tableName="tc_orders" oldColumnName="fromaddresstmp" newColumnName="fromaddress" />
+
   </changeSet>
 
 </databaseChangeLog>
