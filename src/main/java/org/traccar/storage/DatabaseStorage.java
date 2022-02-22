@@ -1,3 +1,18 @@
+/*
+ * Copyright 2022 Anton Tananaev (anton@traccar.org)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.traccar.storage;
 
 import org.traccar.model.Permission;
@@ -10,6 +25,7 @@ import org.traccar.storage.query.Request;
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -96,9 +112,20 @@ public class DatabaseStorage extends Storage {
     }
 
     @Override
-    public List<Permission> getPermissions(Class<?> ownerClass, Class<?> propertyClass) throws StorageException {
+    public List<Permission> getPermissions(
+            Class<?> ownerClass, long ownerId, Class<?> propertyClass, long propertyId) throws StorageException {
         StringBuilder query = new StringBuilder("SELECT * FROM ");
         query.append(Permission.getStorageName(ownerClass, propertyClass));
+        var conditions = new LinkedList<Condition>();
+        if (ownerId > 0) {
+            conditions.add(new Condition.Equals(
+                    Permission.getKey(ownerClass), Permission.getKey(ownerClass), ownerId));
+        }
+        if (propertyId > 0) {
+            conditions.add(new Condition.Equals(
+                    Permission.getKey(propertyClass), Permission.getKey(propertyClass), propertyId));
+        }
+        query.append(formatCondition(Condition.merge(conditions)));
         try {
             QueryBuilder builder = QueryBuilder.create(dataSource, query.toString());
             return builder.executePermissionsQuery();
@@ -154,18 +181,21 @@ public class DatabaseStorage extends Storage {
     private Map<String, Object> getConditionVariables(Condition genericCondition) {
         Map<String, Object> results = new HashMap<>();
         if (genericCondition instanceof Condition.Compare) {
-            Condition.Compare condition = (Condition.Compare) genericCondition;
+            var condition = (Condition.Compare) genericCondition;
             if (condition.getValue() != null) {
                 results.put(condition.getVariable(), condition.getValue());
             }
         } else if (genericCondition instanceof Condition.Between) {
-            Condition.Between condition = (Condition.Between) genericCondition;
+            var condition = (Condition.Between) genericCondition;
             results.put(condition.getFromVariable(), condition.getFromValue());
             results.put(condition.getToVariable(), condition.getToValue());
         } else if (genericCondition instanceof Condition.Binary) {
-            Condition.Binary condition = (Condition.Binary) genericCondition;
+            var condition = (Condition.Binary) genericCondition;
             results.putAll(getConditionVariables(condition.getFirst()));
             results.putAll(getConditionVariables(condition.getSecond()));
+        } else if (genericCondition instanceof Condition.Permission) {
+            var condition = (Condition.Permission) genericCondition;
+            results.put(Permission.getKey(condition.getOwnerClass()), condition.getOwnerId());
         }
         return results;
     }
@@ -187,7 +217,7 @@ public class DatabaseStorage extends Storage {
             }
             if (genericCondition instanceof Condition.Compare) {
 
-                Condition.Compare condition = (Condition.Compare) genericCondition;
+                var condition = (Condition.Compare) genericCondition;
                 result.append(condition.getColumn());
                 result.append(" ");
                 result.append(condition.getOperator());
@@ -196,7 +226,7 @@ public class DatabaseStorage extends Storage {
 
             } else if (genericCondition instanceof Condition.Between) {
 
-                Condition.Between condition = (Condition.Between) genericCondition;
+                var condition = (Condition.Between) genericCondition;
                 result.append(condition.getColumn());
                 result.append(" BETWEEN :");
                 result.append(condition.getFromVariable());
@@ -205,12 +235,25 @@ public class DatabaseStorage extends Storage {
 
             } else if (genericCondition instanceof Condition.Binary) {
 
-                Condition.Binary condition = (Condition.Binary) genericCondition;
+                var condition = (Condition.Binary) genericCondition;
                 result.append(formatCondition(condition.getFirst(), false));
                 result.append(" ");
                 result.append(condition.getOperator());
                 result.append(" ");
                 result.append(formatCondition(condition.getSecond(), false));
+
+            } else if (genericCondition instanceof Condition.Permission) {
+
+                var condition = (Condition.Permission) genericCondition;
+                result.append("id IN (SELECT ");
+                result.append(Permission.getKey(condition.getPropertyClass()));
+                result.append(" FROM ");
+                result.append(Permission.getStorageName(condition.getOwnerClass(), condition.getPropertyClass()));
+                result.append(" WHERE ");
+                result.append(Permission.getKey(condition.getOwnerClass()));
+                result.append(" = :");
+                result.append(Permission.getKey(condition.getOwnerClass()));
+                result.append(")");
 
             }
         }

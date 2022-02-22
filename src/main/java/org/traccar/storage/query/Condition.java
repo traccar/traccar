@@ -1,6 +1,20 @@
 package org.traccar.storage.query;
 
+import java.util.List;
+
 public interface Condition {
+
+    static Condition merge(List<Condition> conditions) {
+        Condition result = null;
+        var iterator = conditions.iterator();
+        if (iterator.hasNext()) {
+            result = iterator.next();
+            while (iterator.hasNext()) {
+                result = new Condition.And(result, iterator.next());
+            }
+        }
+        return result;
+    }
 
     class Equals extends Compare {
         public Equals(String column, String variable) {
@@ -111,6 +125,30 @@ public interface Condition {
 
         public String getOperator() {
             return operator;
+        }
+    }
+
+    class Permission implements Condition {
+        private final Class<?> ownerClass;
+        private final long ownerId;
+        private final Class<?> propertyClass;
+
+        public Permission(Class<?> ownerClass, long ownerId, Class<?> propertyClass) {
+            this.ownerClass = ownerClass;
+            this.ownerId = ownerId;
+            this.propertyClass = propertyClass;
+        }
+
+        public Class<?> getOwnerClass() {
+            return ownerClass;
+        }
+
+        public long getOwnerId() {
+            return ownerId;
+        }
+
+        public Class<?> getPropertyClass() {
+            return propertyClass;
         }
     }
 

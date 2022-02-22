@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,11 @@
  */
 package org.traccar.api;
 
+import org.traccar.api.security.PermissionsService;
 import org.traccar.api.security.UserPrincipal;
+import org.traccar.storage.Storage;
 
+import javax.inject.Inject;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.SecurityContext;
 
@@ -25,6 +28,12 @@ public class BaseResource {
     @Context
     private SecurityContext securityContext;
 
+    @Inject
+    protected Storage storage;
+
+    @Inject
+    protected PermissionsService permissionsService;
+
     protected long getUserId() {
         UserPrincipal principal = (UserPrincipal) securityContext.getUserPrincipal();
         if (principal != null) {
@@ -32,4 +41,5 @@ public class BaseResource {
         }
         return 0;
     }
+
 }

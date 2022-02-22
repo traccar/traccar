@@ -444,9 +444,4 @@ public class MainModule extends AbstractModule {
         return GlobalTimer.getTimer();
     }
 
-    @Override
-    protected void configure() {
-        binder().requireExplicitBindings();
-    }
-
 }

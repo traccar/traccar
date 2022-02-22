@@ -79,6 +79,12 @@ public class User extends ExtendedModel {
 
     private boolean administrator;
 
+    @QueryIgnore
+    @JsonIgnore
+    public boolean getManager() {
+        return userLimit != 0;
+    }
+
     public boolean getAdministrator() {
         return administrator;
     }

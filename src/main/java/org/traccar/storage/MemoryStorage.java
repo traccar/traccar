@@ -38,8 +38,11 @@ public class MemoryStorage extends Storage {
     }
 
     @Override
-    public List<Permission> getPermissions(Class<?> ownerClass, Class<?> propertyClass) {
+    public List<Permission> getPermissions(
+            Class<?> ownerClass, long ownerId, Class<?> propertyClass, long propertyId) {
         return getPermissionsSet(ownerClass, propertyClass).stream()
+                .filter(pair -> ownerId == 0 || pair.getFirst().equals(ownerId))
+                .filter(pair -> propertyId == 0 || pair.getSecond().equals(propertyId))
                 .map(pair -> new Permission(ownerClass, pair.getFirst(), propertyClass, pair.getSecond()))
                 .collect(Collectors.toList());
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,8 +16,21 @@
  */
 package org.traccar.api;
 
-import java.sql.SQLException;
-import java.util.Set;
+import org.traccar.Context;
+import org.traccar.database.BaseObjectManager;
+import org.traccar.database.ExtendedObjectManager;
+import org.traccar.database.SimpleObjectManager;
+import org.traccar.helper.LogAction;
+import org.traccar.model.BaseModel;
+import org.traccar.model.Calendar;
+import org.traccar.model.Device;
+import org.traccar.model.Group;
+import org.traccar.model.Permission;
+import org.traccar.model.User;
+import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Request;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -27,59 +40,20 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
-import org.traccar.Context;
-import org.traccar.database.BaseObjectManager;
-import org.traccar.database.ExtendedObjectManager;
-import org.traccar.database.ManagableObjects;
-import org.traccar.database.SimpleObjectManager;
-import org.traccar.helper.LogAction;
-import org.traccar.model.BaseModel;
-import org.traccar.model.Calendar;
-import org.traccar.model.Command;
-import org.traccar.model.Device;
-import org.traccar.model.Group;
-import org.traccar.model.GroupedModel;
-import org.traccar.model.ScheduledModel;
-import org.traccar.model.User;
-import org.traccar.storage.StorageException;
-
 public abstract class BaseObjectResource<T extends BaseModel> extends BaseResource {
 
-    private final Class<T> baseClass;
+    protected final Class<T> baseClass;
 
     public BaseObjectResource(Class<T> baseClass) {
         this.baseClass = baseClass;
     }
 
-    protected final Class<T> getBaseClass() {
-        return baseClass;
-    }
-
-    protected final Set<Long> getSimpleManagerItems(BaseObjectManager<T> manager, boolean all,  long userId) {
-        Set<Long> result;
-        if (all) {
-            if (Context.getPermissionsManager().getUserAdmin(getUserId())) {
-                result = manager.getAllItems();
-            } else {
-                Context.getPermissionsManager().checkManager(getUserId());
-                result = ((ManagableObjects) manager).getManagedItems(getUserId());
-            }
-        } else {
-            if (userId == 0) {
-                userId = getUserId();
-            }
-            Context.getPermissionsManager().checkUser(getUserId(), userId);
-            result = ((ManagableObjects) manager).getUserItems(userId);
-        }
-        return result;
-    }
-
     @Path("{id}")
     @GET
-    public Response getSingle(@PathParam("id") long id) throws SQLException {
-        Context.getPermissionsManager().checkPermission(baseClass, getUserId(), id);
-        BaseObjectManager<T> manager = Context.getManager(baseClass);
-        T entity = manager.getById(id);
+    public Response getSingle(@PathParam("id") long id) throws StorageException {
+        permissionsService.checkPermission(baseClass, getUserId(), id);
+        T entity = storage.getObject(baseClass, new Request(
+                new Columns.All(), new Condition.Equals("id", "id", id)));
         if (entity != null) {
             return Response.ok(entity).build();
         } else {
@@ -89,25 +63,13 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
 
     @POST
     public Response add(T entity) throws StorageException {
-        Context.getPermissionsManager().checkReadonly(getUserId());
-        if (baseClass.equals(Device.class)) {
-            Context.getPermissionsManager().checkDeviceReadonly(getUserId());
-            Context.getPermissionsManager().checkDeviceLimit(getUserId());
-        } else if (baseClass.equals(Command.class)) {
-            Context.getPermissionsManager().checkLimitCommands(getUserId());
-        } else if (entity instanceof GroupedModel && ((GroupedModel) entity).getGroupId() != 0) {
-            Context.getPermissionsManager().checkPermission(
-                    Group.class, getUserId(), ((GroupedModel) entity).getGroupId());
-        } else if (entity instanceof ScheduledModel && ((ScheduledModel) entity).getCalendarId() != 0) {
-            Context.getPermissionsManager().checkPermission(
-                    Calendar.class, getUserId(), ((ScheduledModel) entity).getCalendarId());
-        }
+        permissionsService.checkEdit(getUserId(), entity, true);
 
         BaseObjectManager<T> manager = Context.getManager(baseClass);
         manager.addItem(entity);
         LogAction.create(getUserId(), entity);
 
-        Context.getDataManager().linkObject(User.class, getUserId(), baseClass, entity.getId(), true);
+        storage.addPermission(new Permission(User.class, getUserId(), baseClass, entity.getId()));
         LogAction.link(getUserId(), User.class, getUserId(), baseClass, entity.getId());
 
         if (manager instanceof SimpleObjectManager) {
@@ -122,22 +84,8 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
     @Path("{id}")
     @PUT
     public Response update(T entity) throws StorageException {
-        Context.getPermissionsManager().checkReadonly(getUserId());
-        if (baseClass.equals(Device.class)) {
-            Context.getPermissionsManager().checkDeviceReadonly(getUserId());
-        } else if (baseClass.equals(User.class)) {
-            User before = Context.getPermissionsManager().getUser(entity.getId());
-            Context.getPermissionsManager().checkUserUpdate(getUserId(), before, (User) entity);
-        } else if (baseClass.equals(Command.class)) {
-            Context.getPermissionsManager().checkLimitCommands(getUserId());
-        } else if (entity instanceof GroupedModel && ((GroupedModel) entity).getGroupId() != 0) {
-            Context.getPermissionsManager().checkPermission(
-                    Group.class, getUserId(), ((GroupedModel) entity).getGroupId());
-        } else if (entity instanceof ScheduledModel && ((ScheduledModel) entity).getCalendarId() != 0) {
-            Context.getPermissionsManager().checkPermission(
-                    Calendar.class, getUserId(), ((ScheduledModel) entity).getCalendarId());
-        }
-        Context.getPermissionsManager().checkPermission(baseClass, getUserId(), entity.getId());
+        permissionsService.checkEdit(getUserId(), entity, false);
+        permissionsService.checkPermission(baseClass, getUserId(), entity.getId());
 
         Context.getManager(baseClass).updateItem(entity);
         LogAction.edit(getUserId(), entity);
@@ -152,13 +100,8 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
     @Path("{id}")
     @DELETE
     public Response remove(@PathParam("id") long id) throws StorageException {
-        Context.getPermissionsManager().checkReadonly(getUserId());
-        if (baseClass.equals(Device.class)) {
-            Context.getPermissionsManager().checkDeviceReadonly(getUserId());
-        } else if (baseClass.equals(Command.class)) {
-            Context.getPermissionsManager().checkLimitCommands(getUserId());
-        }
-        Context.getPermissionsManager().checkPermission(baseClass, getUserId(), id);
+        permissionsService.checkEdit(getUserId(), baseClass, false);
+        permissionsService.checkPermission(baseClass, getUserId(), id);
 
         BaseObjectManager<T> manager = Context.getManager(baseClass);
         manager.removeItem(id);

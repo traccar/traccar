@@ -19,6 +19,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
+import org.traccar.config.Keys;
 import org.traccar.model.Permission;
 
 import javax.sql.DataSource;
@@ -309,15 +310,6 @@ public final class QueryBuilder {
         void process(T object, ResultSet resultSet) throws SQLException;
     }
 
-    public <T> T executeQuerySingle(Class<T> clazz) throws SQLException {
-        List<T> result = executeQuery(clazz);
-        if (!result.isEmpty()) {
-            return result.iterator().next();
-        } else {
-            return null;
-        }
-    }
-
     private <T> void addProcessors(
             List<ResultSetProcessor<T>> processors,
             final Class<?> parameterType, final Method method, final String name) {
@@ -395,12 +387,20 @@ public final class QueryBuilder {
         }
     }
 
+    private void logQuery() {
+        if (Context.getConfig().getBoolean(Keys.LOGGER_QUERIES)) {
+            LOGGER.info(query);
+        }
+    }
+
     public <T> List<T> executeQuery(Class<T> clazz) throws SQLException {
         List<T> result = new LinkedList<>();
 
         if (query != null) {
 
             try {
+
+                logQuery();
 
                 try (ResultSet resultSet = statement.executeQuery()) {
 
@@ -457,6 +457,7 @@ public final class QueryBuilder {
 
         if (query != null) {
             try {
+                logQuery();
                 statement.execute();
                 if (returnGeneratedKeys) {
                     ResultSet resultSet = statement.getGeneratedKeys();
@@ -476,6 +477,7 @@ public final class QueryBuilder {
         List<Permission> result = new LinkedList<>();
         if (query != null) {
             try {
+                logQuery();
                 try (ResultSet resultSet = statement.executeQuery()) {
                     ResultSetMetaData resultMetaData = resultSet.getMetaData();
                     while (resultSet.next()) {

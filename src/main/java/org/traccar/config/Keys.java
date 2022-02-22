@@ -1272,6 +1272,13 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
+     * Log executed SQL queries.
+     */
+    public static final ConfigKey<Boolean> LOGGER_QUERIES = new ConfigKey<>(
+            "logger.queries",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
      * Log file name. For rotating logs, a date is added at the end of the file name for non-current logs.
      */
     public static final ConfigKey<String> LOGGER_FILE = new ConfigKey<>(

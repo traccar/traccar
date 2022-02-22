@@ -71,7 +71,7 @@ public class Permission {
         data.put(getKey(propertyClass), propertyId);
     }
 
-    private static String getKey(Class<?> clazz) {
+    public static String getKey(Class<?> clazz) {
         return Introspector.decapitalize(clazz.getSimpleName()) + "Id";
     }
 
