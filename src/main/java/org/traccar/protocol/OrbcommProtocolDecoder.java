@@ -95,7 +95,8 @@ public class OrbcommProtocolDecoder extends BaseProtocolDecoder {
                             position.setSpeed(UnitsConverter.knotsFromKph(Integer.parseInt(value)));
                             break;
                         case "heading":
-                            position.setCourse(Integer.parseInt(value) * 0.1);
+                            int heading = Integer.parseInt(value);
+                            position.setCourse(heading <= 360 ? heading : 0);
                             break;
                         default:
                             break;
