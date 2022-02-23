@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public class C2stekProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)#")                     // battery
             .number("d+#")                       // geo area alarm
             .number("(x+)#")                     // alarm
-            .number("([01])")                    // armed
+            .number("([01])?")                   // armed
             .number("([01])")                    // door
             .number("([01])#")                   // ignition
             .any()
@@ -111,7 +111,9 @@ public class C2stekProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_BATTERY, parser.nextInt() * 0.001);
         position.set(Position.KEY_ALARM, decodeAlarm(parser.nextHexInt()));
 
-        position.set(Position.KEY_ARMED, parser.nextInt() > 0);
+        if (parser.hasNext()) {
+            position.set(Position.KEY_ARMED, parser.nextInt() > 0);
+        }
         position.set(Position.KEY_DOOR, parser.nextInt() > 0);
         position.set(Position.KEY_IGNITION, parser.nextInt() > 0);
 
