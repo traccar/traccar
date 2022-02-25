@@ -266,6 +266,7 @@ public class User extends ExtendedModel {
         return hashedPassword;
     }
 
+    @QueryExtended
     public void setHashedPassword(String hashedPassword) {
         this.hashedPassword = hashedPassword;
     }
@@ -278,6 +279,7 @@ public class User extends ExtendedModel {
         return salt;
     }
 
+    @QueryExtended
     public void setSalt(String salt) {
         this.salt = salt;
     }
