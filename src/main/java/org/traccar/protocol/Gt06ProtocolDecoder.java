@@ -964,6 +964,10 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         if (buf.readableBytes() == 4 + 6) {
             position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
         }
+        
+        if (type == MSG_GPS_2 && buf.readableBytes() >= 5) {
+            position.set(Position.KEY_IGNITION, buf.readUnsignedByte() > 0);
+        }
     }
 
     private Object decodeExtended(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
