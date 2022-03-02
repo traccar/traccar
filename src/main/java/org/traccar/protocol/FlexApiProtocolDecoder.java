@@ -68,11 +68,13 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
                 position.setLongitude(payload.getJsonNumber("gnss.longitude").doubleValue());
             }
 
+            position.setValid(payload.getInt("gnss.fix") > 0);
             position.setAltitude(payload.getJsonNumber("gnss.altitude").doubleValue());
             position.setSpeed(payload.getJsonNumber("gnss.speed").doubleValue());
             position.setCourse(payload.getJsonNumber("gnss.heading").doubleValue());
 
             position.set(Position.KEY_SATELLITES, payload.getInt("gnss.num_sv"));
+            position.set(Position.KEY_HDOP, payload.getJsonNumber("gnss.hdop").doubleValue());
 
         } else if (topic.contains("/cellular1/")) {
 
@@ -84,12 +86,26 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
 
             String operator = payload.getString("modem1.operator");
             if (!operator.isEmpty()) {
-                position.setNetwork(new Network(CellTower.from(
+                CellTower cellTower = CellTower.from(
                         Integer.parseInt(operator.substring(0, 3)),
                         Integer.parseInt(operator.substring(3)),
                         Integer.parseInt(payload.getString("modem1.lac"), 16),
                         Integer.parseInt(payload.getString("modem1.cell_id"), 16),
-                        payload.getInt("modem1.rssi"))));
+                        payload.getInt("modem1.rssi"));
+                switch (payload.getInt("modem1.network")) {
+                    case 1:
+                        cellTower.setRadioType("gsm");
+                        break;
+                    case 2:
+                        cellTower.setRadioType("wcdma");
+                        break;
+                    case 3:
+                        cellTower.setRadioType("lte");
+                        break;
+                    default:
+                        break;
+                }
+                position.setNetwork(new Network(cellTower));
             }
 
         } else if (topic.contains("/obd/")) {
@@ -124,8 +140,8 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, new Date(payload.getInt("io.ts") * 1000L));
 
-            if (payload.containsKey("io.IGN")) {
-                position.set(Position.KEY_IGNITION, payload.getInt("io.IGN") > 0);
+            if (payload.containsKey("io.IGT")) {
+                position.set(Position.KEY_IGNITION, payload.getInt("io.IGT") > 0);
             }
 
             for (String key : payload.keySet()) {
