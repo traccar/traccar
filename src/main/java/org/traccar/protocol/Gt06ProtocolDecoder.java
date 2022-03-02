@@ -965,7 +965,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
         }
         
-        if (type == MSG_GPS_2 && buf.readableBytes() >= 5) {
+        if (type == MSG_GPS_2 && (buf.readableBytes() == 9 || buf.readableBytes() == 13)) {
             position.set(Position.KEY_IGNITION, buf.readUnsignedByte() > 0);
         }
     }
