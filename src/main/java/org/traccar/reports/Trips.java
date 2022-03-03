@@ -32,6 +32,7 @@ import org.traccar.database.DeviceManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
+import org.traccar.model.Position;
 import org.traccar.reports.model.DeviceReport;
 import org.traccar.reports.model.TripReport;
 
@@ -40,7 +41,7 @@ public final class Trips {
     private Trips() {
     }
 
-    private static Collection<TripReport> detectTrips(long deviceId, Date from, Date to) throws SQLException {
+    public static Collection<TripReport> detectTrips(long deviceId, Collection<Position> positionCollection) throws SQLException {
         boolean ignoreOdometer = Context.getDeviceManager()
                 .lookupAttributeBoolean(deviceId, "report.ignoreOdometer", false, false, true);
 
@@ -48,7 +49,7 @@ public final class Trips {
         DeviceManager deviceManager = Main.getInjector().getInstance(DeviceManager.class);
 
         return ReportUtils.detectTripsAndStops(
-                identityManager, deviceManager, Context.getDataManager().getPositions(deviceId, from, to),
+                identityManager, deviceManager, positionCollection,
                 Context.getTripsConfig(), ignoreOdometer, TripReport.class);
     }
 
@@ -58,7 +59,7 @@ public final class Trips {
         ArrayList<TripReport> result = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            result.addAll(detectTrips(deviceId, from, to));
+            result.addAll(detectTrips(deviceId, Context.getDataManager().getPositions(deviceId, from, to)));
         }
         return result;
     }
@@ -71,7 +72,7 @@ public final class Trips {
         ArrayList<String> sheetNames = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            Collection<TripReport> trips = detectTrips(deviceId, from, to);
+            Collection<TripReport> trips = detectTrips(deviceId, Context.getDataManager().getPositions(deviceId, from, to));
             DeviceReport deviceTrips = new DeviceReport();
             Device device = Context.getIdentityManager().getById(deviceId);
             deviceTrips.setDeviceName(device.getName());
