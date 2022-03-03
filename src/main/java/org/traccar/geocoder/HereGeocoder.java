@@ -15,6 +15,7 @@
  */
 package org.traccar.geocoder;
 
+import javax.json.JsonArray;
 import javax.json.JsonObject;
 
 public class HereGeocoder extends JsonGeocoder {
@@ -41,10 +42,14 @@ public class HereGeocoder extends JsonGeocoder {
 
     @Override
     public Address parseAddress(JsonObject json) {
-        JsonObject result = json
+        JsonArray array = json
                 .getJsonObject("Response")
-                .getJsonArray("View")
-                .getJsonObject(0)
+                .getJsonArray("View");
+        if (array.isEmpty()) {
+            return null;
+        }
+
+        JsonObject result = array.getJsonObject(0)
                 .getJsonArray("Result")
                 .getJsonObject(0)
                 .getJsonObject("Location")
