@@ -129,6 +129,7 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_MOTION, BitUtil.check(status, 3));
         position.set(Position.KEY_INPUT, BitUtil.check(status, 5));
         position.set(Position.KEY_STATUS, status);
+
         position.set(Position.KEY_BATTERY, parser.nextDouble());
 
         if (parser.hasNext(7)) {
