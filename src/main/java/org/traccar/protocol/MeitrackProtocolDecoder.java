@@ -23,6 +23,7 @@ import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.*;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -91,10 +92,12 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)?,")                    // protocol
             .number("(x{4})?")                   // fuel
             .groupBegin()
-            .number(",(x{6}(?:|x{6})*)?")        // temperature
+            .number(",(x{6}(?:\\|x{6})*)?")      // temperature
+            .number(",(d+)?")                    //Max acceleration value
+            .number(",(d+)?")                    //Max deceleration value
             .groupBegin()
             .number(",(d+)")                     // data count
-            .expression(",([^*]*)")              // data
+            .expression(",([^])")              // data
             .groupEnd("?")
             .groupEnd("?")
             .or()
@@ -264,8 +267,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (parser.hasNext()) {
+            int index=0;
             for (String temp : parser.next().split("\\|")) {
-                int index = Integer.parseInt(temp.substring(0, 2), 16);
                 if (protocol >= 3) {
                     double value = (short) Integer.parseInt(temp.substring(2), 16);
                     position.set(Position.PREFIX_TEMP + index, value * 0.01);
@@ -274,9 +277,15 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     value += (value < 0 ? -0.01 : 0.01) * Integer.parseInt(temp.substring(4), 16);
                     position.set(Position.PREFIX_TEMP + index, value);
                 }
+                index++;
             }
         }
-
+        if(parser.hasNext()){
+            position.set(Position.KEY_MAX_ACCELERATION,parser.nextInt());
+        }
+        if(parser.hasNext()){
+            position.set(Position.KEY_MAX_DECELERATION,parser.nextInt());
+        }
         if (parser.hasNext(2)) {
             parser.nextInt(); // count
             decodeDataFields(position, parser.next().split(","));
