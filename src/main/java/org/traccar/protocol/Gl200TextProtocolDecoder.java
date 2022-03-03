@@ -377,6 +377,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("(?:[0-9A-Z]{2}xxxx)?,").optional() // protocol version
             .number("(d{15}|x{14}),")            // imei
             .any()
+            .text(",")
             .number("(d{1,2})?,")                // hdop
             .number("(d{1,3}.d)?,")              // speed
             .number("(d{1,3})?,")                // course
