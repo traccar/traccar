@@ -239,7 +239,7 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                     ByteBuf response = Unpooled.buffer();
                     response.writeCharSequence(type, StandardCharsets.US_ASCII);
                     response.writeByte(count);
-                    response.writeByte(Checksum.crc8(Checksum.CRC8_ROHC, response.nioBuffer()));
+                    response.writeByte(Checksum.crc8(Checksum.CRC8_EGTS, response.nioBuffer()));
                     channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
                 }
 
