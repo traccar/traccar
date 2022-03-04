@@ -28,7 +28,6 @@ checkstyle {
 }
 
 protobuf {
-    generatedFilesBaseDir = "$projectDir/src"
     protoc {
         artifact = "com.google.protobuf:protoc:$protobufVersion"
     }
