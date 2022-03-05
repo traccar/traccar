@@ -15,9 +15,8 @@
  */
 package org.traccar.protocol;
 
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpRequestDecoder;
-import io.netty.handler.codec.http.HttpResponseEncoder;
+import io.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
@@ -28,9 +27,9 @@ public class TeraTrackProtocol extends BaseProtocol {
         addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast(new HttpResponseEncoder());
-                pipeline.addLast(new HttpRequestDecoder());
-                pipeline.addLast(new HttpObjectAggregator(65535));
+                pipeline.addLast(new JsonFrameDecoder());
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new TeraTrackProtocolDecoder(TeraTrackProtocol.this));
             }
         });
