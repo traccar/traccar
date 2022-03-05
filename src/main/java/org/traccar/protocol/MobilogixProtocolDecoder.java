@@ -29,6 +29,9 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
@@ -105,9 +108,10 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
         if (!parser.matches()) {
             if (type.equals("T5")) {
                 Position position = new Position(getProtocolName());
-                LOGGER.warn("Mobilogix {}", position.getDeviceTime());
-                position.setDeviceTime(parser.nextDateTime());
                 String[] values = sentence.split(",");
+                DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                position.setDeviceTime(dateFormat.parse(values[0].substring(1)));
                 position.set(Position.KEY_RESULT, values[2]);
                 LOGGER.warn("Mobilogix {}", values[2]);
                 LOGGER.warn("Mobilogix {}", values[3]);
