@@ -103,6 +103,19 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
 
         Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
+            if (type.equals("T5")) {
+                Position position = new Position(getProtocolName());
+                position.setDeviceTime(parser.nextDateTime());
+                String[] values = sentence.split(",");
+                position.set(Position.KEY_RESULT, values[2]);
+                DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, values[3]);
+                if (deviceSession == null) {
+                    return null;
+                }
+                position.setDeviceId(deviceSession.getDeviceId());
+                getLastLocation(position, position.getDeviceTime());
+                return position;
+            }
             LOGGER.warn("Mobilogix ignoring:{}", sentence);
             return null;
         }
