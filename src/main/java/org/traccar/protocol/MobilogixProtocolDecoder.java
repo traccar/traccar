@@ -113,10 +113,7 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
                 dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
                 position.setDeviceTime(dateFormat.parse(values[0].substring(1)));
                 position.set(Position.KEY_RESULT, values[2]);
-                LOGGER.warn("Mobilogix {}", values[2]);
-                LOGGER.warn("Mobilogix {}", values[3]);
                 DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, values[3]);
-                LOGGER.warn("Mobilogix session: {}", deviceSession);
                 if (deviceSession == null) {
                     return null;
                 }
