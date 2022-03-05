@@ -105,10 +105,14 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
         if (!parser.matches()) {
             if (type.equals("T5")) {
                 Position position = new Position(getProtocolName());
+                LOGGER.warn("Mobilogix {}", position.getDeviceTime());
                 position.setDeviceTime(parser.nextDateTime());
                 String[] values = sentence.split(",");
                 position.set(Position.KEY_RESULT, values[2]);
+                LOGGER.warn("Mobilogix {}", values[2]);
+                LOGGER.warn("Mobilogix {}", values[3]);
                 DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, values[3]);
+                LOGGER.warn("Mobilogix session: {}", deviceSession);
                 if (deviceSession == null) {
                     return null;
                 }
