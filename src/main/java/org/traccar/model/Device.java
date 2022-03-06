@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,20 +64,12 @@ public class Device extends GroupedModel {
     private Date lastUpdate;
 
     public Date getLastUpdate() {
-        if (lastUpdate != null) {
-            return new Date(lastUpdate.getTime());
-        } else {
-            return null;
-        }
+        return this.lastUpdate;
     }
 
     @QueryExtended
     public void setLastUpdate(Date lastUpdate) {
-        if (lastUpdate != null) {
-            this.lastUpdate = new Date(lastUpdate.getTime());
-        } else {
-            this.lastUpdate = null;
-        }
+        this.lastUpdate = lastUpdate;
     }
 
     private long positionId;
