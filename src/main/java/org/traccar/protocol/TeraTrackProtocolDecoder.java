@@ -57,12 +57,8 @@ public class TeraTrackProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(dateFormat.parse(json.getString("DateTime")));
 
         position.setValid(true);
-
-        double latitude = Double.parseDouble(json.getString("Latitude"));
-        position.setLatitude(json.getString("LatitudeState").equals("0") ? -latitude : latitude);
-        double longitude = Double.parseDouble(json.getString("Longitude"));
-        position.setLongitude(json.getString("LongitudeState").equals("0") ? -longitude : longitude);
-
+        position.setLatitude(Double.parseDouble(json.getString("Latitude")));
+        position.setLongitude(Double.parseDouble(json.getString("Longitude")));
         position.setSpeed(UnitsConverter.knotsFromKph(Integer.parseInt(json.getString("Speed"))));
 
         position.set(Position.KEY_ODOMETER, Integer.parseInt(json.getString("Mileage")));
