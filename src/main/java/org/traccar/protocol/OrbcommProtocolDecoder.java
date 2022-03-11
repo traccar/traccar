@@ -33,6 +33,7 @@ import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.TimeZone;
 
@@ -85,6 +86,9 @@ public class OrbcommProtocolDecoder extends BaseProtocolDecoder {
                     JsonObject field = fields.getJsonObject(j);
                     String value = field.getString("Value");
                     switch (field.getString("Name").toLowerCase()) {
+                        case "eventtime":
+                            position.setDeviceTime(new Date(Long.parseLong(value) * 1000));
+                            break;
                         case "latitude":
                             position.setLatitude(Integer.parseInt(value) / 60000.0);
                             break;
