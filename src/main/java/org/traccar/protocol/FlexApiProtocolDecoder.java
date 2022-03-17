@@ -24,10 +24,12 @@ import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import javax.json.Json;
+import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import java.io.StringReader;
 import java.net.SocketAddress;
 import java.util.Date;
+import java.util.Optional;
 
 public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
 
@@ -56,33 +58,42 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
 
         if (topic.contains("/gnss/")) {
 
-            position.setValid(true);
-
-            if (payload.containsKey("time")) {
-                position.setTime(new Date(payload.getInt("time") * 1000L));
-                position.setLatitude(payload.getJsonNumber("lat").doubleValue());
-                position.setLongitude(payload.getJsonNumber("log").doubleValue());
+            if (payload.getInt("gnss.fix") > 0) {
+                position.setValid(true);
+                if (payload.containsKey("time")) {
+                    position.setTime(new Date(payload.getInt("time") * 1000L));
+                    position.setLatitude(payload.getJsonNumber("lat").doubleValue());
+                    position.setLongitude(payload.getJsonNumber("log").doubleValue());
+                } else {
+                    position.setTime(new Date(payload.getInt("gnss.ts") * 1000L));
+                    position.setLatitude(payload.getJsonNumber("gnss.latitude").doubleValue());
+                    position.setLongitude(payload.getJsonNumber("gnss.longitude").doubleValue());
+                }
+                Optional.ofNullable(payload.getJsonNumber("gnss.altitude"))
+                        .map(JsonNumber::doubleValue).ifPresent(position::setAltitude);
+                Optional.ofNullable(payload.getJsonNumber("gnss.speed"))
+                        .map(JsonNumber::doubleValue).ifPresent(position::setSpeed);
+                Optional.ofNullable(payload.getJsonNumber("gnss.heading"))
+                        .map(JsonNumber::doubleValue).ifPresent(position::setCourse);
+                Optional.ofNullable(payload.getJsonNumber("gnss.num_sv"))
+                        .map(JsonNumber::intValue).ifPresent(value -> position.set(Position.KEY_SATELLITES, value));
+                Optional.ofNullable(payload.getJsonNumber("gnss.hdop"))
+                        .map(JsonNumber::doubleValue).ifPresent(value -> position.set(Position.KEY_HDOP, value));
             } else {
-                position.setTime(new Date(payload.getInt("gnss.ts") * 1000L));
-                position.setLatitude(payload.getJsonNumber("gnss.latitude").doubleValue());
-                position.setLongitude(payload.getJsonNumber("gnss.longitude").doubleValue());
+                position.setValid(false);
             }
 
-            position.setValid(payload.getInt("gnss.fix") > 0);
-            position.setAltitude(payload.getJsonNumber("gnss.altitude").doubleValue());
-            position.setSpeed(payload.getJsonNumber("gnss.speed").doubleValue());
-            position.setCourse(payload.getJsonNumber("gnss.heading").doubleValue());
-
-            position.set(Position.KEY_SATELLITES, payload.getInt("gnss.num_sv"));
-            position.set(Position.KEY_HDOP, payload.getJsonNumber("gnss.hdop").doubleValue());
 
         } else if (topic.contains("/cellular1/")) {
 
             getLastLocation(position, new Date(payload.getInt("modem1.ts") * 1000L));
 
-            position.set("imei", payload.getString("modem1.imei"));
-            position.set("imsi", payload.getString("modem1.imsi"));
-            position.set(Position.KEY_ICCID, payload.getString("modem1.iccid"));
+            Optional.ofNullable(payload.getString("modem1.imei"))
+                    .ifPresent(value -> position.set("imei", value));
+            Optional.ofNullable(payload.getString("modem1.imsi"))
+                    .ifPresent(value -> position.set("imsi", value));
+            Optional.ofNullable(payload.getString("modem1.iccid"))
+                    .ifPresent(value -> position.set(Position.KEY_ICCID, value));
 
             String operator = payload.getString("modem1.operator");
             if (!operator.isEmpty()) {
@@ -134,14 +145,18 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
         } else if (topic.contains("/motion/")) {
 
             getLastLocation(position, new Date(payload.getInt("motion.ts") * 1000L));
-
-            position.set("ax", payload.getJsonNumber("motion.ax").doubleValue());
-            position.set("ay", payload.getJsonNumber("motion.ay").doubleValue());
-            position.set("az", payload.getJsonNumber("motion.az").doubleValue());
-            position.set("gx", payload.getJsonNumber("motion.gx").doubleValue());
-            position.set("gy", payload.getJsonNumber("motion.gy").doubleValue());
-            position.set("gz", payload.getJsonNumber("motion.gz").doubleValue());
-
+            Optional.ofNullable(payload.getJsonNumber("motion.ax"))
+                    .map(JsonNumber::doubleValue).ifPresent(value -> position.set("ax", value));
+            Optional.ofNullable(payload.getJsonNumber("motion.ay"))
+                    .map(JsonNumber::doubleValue).ifPresent(value -> position.set("ay", value));
+            Optional.ofNullable(payload.getJsonNumber("motion.az"))
+                    .map(JsonNumber::doubleValue).ifPresent(value -> position.set("az", value));
+            Optional.ofNullable(payload.getJsonNumber("motion.gx"))
+                    .map(JsonNumber::doubleValue).ifPresent(value -> position.set("gx", value));
+            Optional.ofNullable(payload.getJsonNumber("motion.gy"))
+                    .map(JsonNumber::doubleValue).ifPresent(value -> position.set("gy", value));
+            Optional.ofNullable(payload.getJsonNumber("motion.gz"))
+                    .map(JsonNumber::doubleValue).ifPresent(value -> position.set("gz", value));
         } else if (topic.contains("/io/")) {
 
             getLastLocation(position, new Date(payload.getInt("io.ts") * 1000L));
