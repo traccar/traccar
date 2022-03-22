@@ -81,6 +81,9 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
                         .map(JsonNumber::doubleValue).ifPresent(value -> position.set(Position.KEY_HDOP, value));
             } else {
                 position.setValid(false);
+                Optional.ofNullable(payload.getJsonNumber("gnss.num_sv"))
+                        .map(JsonNumber::intValue).ifPresent(value -> position.set(Position.KEY_SATELLITES, value));
+                position.setTime(new Date());
             }
 
 
