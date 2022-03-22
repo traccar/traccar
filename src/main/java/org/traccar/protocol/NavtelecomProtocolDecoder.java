@@ -195,6 +195,9 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
 
                     for (int j = 0; j < bits.length(); j++) {
                         if (bits.get(j)) {
+
+                            int tmp = 0;                                                                                    // To parse a value by multiple conditions
+
                             switch (j + 1) {
                                 case 1:
                                     position.set(Position.KEY_INDEX, buf.readUnsignedIntLE());
@@ -205,8 +208,12 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                 case 3:
                                     position.setDeviceTime(new Date(buf.readUnsignedIntLE() * 1000));
                                     break;
+                                case 8:
+                                    tmp = buf.readUnsignedByte();
+                                    position.setValid((tmp & 0b00000010) == 0b00000010);
+                                    position.set(Position.KEY_SATELLITES, ((tmp & 0b11111100) >> 2));
+                                    break;
                                 case 9:
-                                    position.setValid(true);
                                     position.setFixTime(new Date(buf.readUnsignedIntLE() * 1000));
                                     break;
                                 case 10:
@@ -220,6 +227,159 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                     break;
                                 case 13:
                                     position.setSpeed(UnitsConverter.knotsFromKph(buf.readFloatLE()));
+                                    break;
+                                case 14:
+                                    position.setCourse(buf.readUnsignedShortLE());
+                                    break;
+                                case 15:
+                                    position.set(Position.KEY_ODOMETER,buf.readFloatLE());
+                                    break;
+                                case 19:
+                                    position.set(Position.KEY_POWER,buf.readShortLE() * 0.001);
+                                    break;
+                                case 20:
+                                    position.set(Position.KEY_BATTERY,buf.readShortLE() * 0.001);
+                                    break;
+                                case 21:
+                                    position.set(Position.PREFIX_ADC + 1,buf.readUnsignedShortLE() * 0.001);
+                                    break;
+                                case 22:
+                                    position.set(Position.PREFIX_ADC + 2,buf.readUnsignedShortLE() * 0.001);
+                                    break;
+                                case 23:
+                                    position.set(Position.PREFIX_ADC + 3,buf.readUnsignedShortLE() * 0.001);
+                                    break;
+                                case 24:
+                                    position.set(Position.PREFIX_ADC + 4,buf.readUnsignedShortLE() * 0.001);
+                                    break;
+                                case 25:
+                                    position.set(Position.PREFIX_ADC + 5,buf.readUnsignedShortLE() * 0.001);
+                                    break;
+                                case 26:
+                                    position.set(Position.PREFIX_ADC + 6,buf.readUnsignedShortLE() * 0.001);
+                                    break;
+                                case 29:
+                                    tmp = buf.readUnsignedByte();
+                                    position.set(Position.PREFIX_IN + 1, (tmp & 0b00000001) == 0b00000001);
+                                    position.set(Position.PREFIX_IN + 2, (tmp & 0b00000010) == 0b00000010);
+                                    position.set(Position.PREFIX_IN + 3, (tmp & 0b00000100) == 0b00000100);
+                                    position.set(Position.PREFIX_IN + 4, (tmp & 0b00001000) == 0b00001000);
+                                    position.set(Position.PREFIX_IN + 5, (tmp & 0b00010000) == 0b00010000);
+                                    position.set(Position.PREFIX_IN + 6, (tmp & 0b00100000) == 0b00100000);
+                                    position.set(Position.PREFIX_IN + 7, (tmp & 0b01000000) == 0b01000000);
+                                    position.set(Position.PREFIX_IN + 8, (tmp & 0b10000000) == 0b10000000);
+                                    break;
+                                case 31:
+                                    tmp = buf.readUnsignedByte();
+                                    position.set(Position.PREFIX_OUT + 1, (tmp & 0b00000001) == 0b00000001);
+                                    position.set(Position.PREFIX_OUT + 2, (tmp & 0b00000010) == 0b00000010);
+                                    position.set(Position.PREFIX_OUT + 3, (tmp & 0b00000100) == 0b00000100);
+                                    position.set(Position.PREFIX_OUT + 4, (tmp & 0b00001000) == 0b00001000);
+                                    break;
+                                case 33:
+                                    position.set(Position.PREFIX_COUNT + 1,buf.readUnsignedIntLE());
+                                    break;
+                                case 34:
+                                    position.set(Position.PREFIX_COUNT + 2,buf.readUnsignedIntLE());
+                                    break;
+                                case 35:
+                                    position.set("freq" + 1,buf.readUnsignedShortLE());
+                                    break;
+                                case 36:
+                                    position.set("freq" + 2,buf.readUnsignedShortLE());
+                                    break;
+                                case 37:
+                                    position.set("engine_hours",buf.readUnsignedIntLE());
+                                    break;
+                                case 38:
+                                    tmp = buf.readUnsignedShortLE();
+                                    if (tmp < 65500) {                                                                      // Do not write error codes
+                                        position.set("rs485fuel_level" + 1,tmp);
+                                    }
+                                    break;
+                                case 39:
+                                    tmp = buf.readUnsignedShortLE();
+                                    if (tmp < 65500) {                                                                      // Do not write error codes
+                                        position.set("rs485fuel_level" + 2,tmp);
+                                    }
+                                    break;
+                                case 40:
+                                    tmp = buf.readUnsignedShortLE();
+                                    if (tmp < 65500) {                                                                      // Do not write error codes
+                                        position.set("rs485fuel_level" + 3,tmp);
+                                    }
+                                    break;
+                                case 41:
+                                    tmp = buf.readUnsignedShortLE();
+                                    if (tmp < 65500) {                                                                      // Do not write error codes
+                                        position.set("rs485fuel_level" + 4,tmp);
+                                    }
+                                    break;
+                                case 42:
+                                    tmp = buf.readUnsignedShortLE();
+                                    if (tmp < 65500) {                                                                      // Do not write error codes
+                                        position.set("rs485fuel_level" + 5,tmp);
+                                    }
+                                    break;
+                                case 43:
+                                    tmp = buf.readUnsignedShortLE();
+                                    if (tmp < 65500) {                                                                      // Do not write error codes
+                                        position.set("rs485fuel_level" + 6,tmp);
+                                    }
+                                    break;
+                                case 44:
+                                    tmp = buf.readUnsignedShortLE();
+                                    if (tmp < 65500) {                                                                      // Do not write error codes
+                                        position.set("rs232fuel_level",tmp);
+                                    }
+                                    break;
+                                case 45:
+                                    tmp = buf.readByte();
+                                    if (tmp != 0x80) {                                                                      // Do not write error codes
+                                        position.set(Position.PREFIX_TEMP + 1,tmp);
+                                    }
+                                    break;
+                                case 46:
+                                    tmp = buf.readByte();
+                                    if (tmp != 0x80) {                                                                      // Do not write error codes
+                                        position.set(Position.PREFIX_TEMP + 2,tmp);
+                                    }
+                                    break;
+                                case 47:
+                                    tmp = buf.readByte();
+                                    if (tmp != 0x80) {                                                                      // Do not write error codes
+                                        position.set(Position.PREFIX_TEMP + 3,tmp);
+                                    }
+                                    break;
+                                case 48:
+                                    tmp = buf.readByte();
+                                    if (tmp != 0x80) {                                                                      // Do not write error codes
+                                        position.set(Position.PREFIX_TEMP + 4,tmp);
+                                    }
+                                    break;
+                                case 49:
+                                    tmp = buf.readByte();
+                                    if (tmp != 0x80) {                                                                      // Do not write error codes
+                                        position.set(Position.PREFIX_TEMP + 5,tmp);
+                                    }
+                                    break;
+                                case 50:
+                                    tmp = buf.readByte();
+                                    if (tmp != 0x80) {                                                                      // Do not write error codes
+                                        position.set(Position.PREFIX_TEMP + 6,tmp);
+                                    }
+                                    break;
+                                case 51:
+                                    tmp = buf.readByte();
+                                    if (tmp != 0x80) {                                                                      // Do not write error codes
+                                        position.set(Position.PREFIX_TEMP + 7,tmp);
+                                    }
+                                    break;
+                                case 52:
+                                    tmp = buf.readByte();
+                                    if (tmp != 0x80) {                                                                      // Do not write error codes
+                                        position.set(Position.PREFIX_TEMP + 8,tmp);
+                                    }
                                     break;
                                 default:
                                     buf.skipBytes(getItemLength(j + 1));
