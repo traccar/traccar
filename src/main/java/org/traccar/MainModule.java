@@ -181,7 +181,7 @@ public class MainModule extends AbstractModule {
                 case "mapquest":
                     return new MapQuestGeocoder(url, key, cacheSize, addressFormat);
                 case "opencage":
-                    return new OpenCageGeocoder(url, key, cacheSize, addressFormat);
+                    return new OpenCageGeocoder(url, key, language, cacheSize, addressFormat);
                 case "bingmaps":
                     return new BingMapsGeocoder(url, key, cacheSize, addressFormat);
                 case "factual":
