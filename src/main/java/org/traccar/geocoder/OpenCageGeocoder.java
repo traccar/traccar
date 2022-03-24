@@ -26,10 +26,10 @@ public class OpenCageGeocoder extends JsonGeocoder {
             url = "https://api.opencagedata.com/geocode/v1";
         }
         url += "/json?q=%f,%f&no_annotations=1&key=" + key;
-        if (language != null) {
-            url += "&language=" + language;
-        } else {
+        if (language == null) {
             url += "&language=en";
+        } else {
+            url += "&language=" + language;
         }
         return url;
     }
