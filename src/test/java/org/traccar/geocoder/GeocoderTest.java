@@ -41,7 +41,7 @@ public class GeocoderTest {
     @Test
     public void testOpenCage() {
         Geocoder geocoder = new OpenCageGeocoder(
-                "http://api.opencagedata.com/geocode/v1", "SECRET", 0, new AddressFormat());
+                "http://api.opencagedata.com/geocode/v1", "SECRET", "en", 0, new AddressFormat());
         String address = geocoder.getAddress(34.116302, -118.051519, null);
         assertEquals("Charleston Road, California, US", address);
     }
