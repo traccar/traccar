@@ -287,31 +287,31 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                     break;
                                 case 38:
                                     value = buf.readUnsignedShortLE();
-                                    position.set("rs485fuel_level" + 1, (value < 65500) ? value : null);
+                                    position.set("rs485Fuel" + 1, (value < 65500) ? value : null);
                                     break;
                                 case 39:
                                     value = buf.readUnsignedShortLE();
-                                    position.set("rs485fuel_level" + 2, (value < 65500) ? value : null);
+                                    position.set("rs485Fuel" + 2, (value < 65500) ? value : null);
                                     break;
                                 case 40:
                                     value = buf.readUnsignedShortLE();
-                                    position.set("rs485fuel_level" + 3, (value < 65500) ? value : null);
+                                    position.set("rs485Fuel" + 3, (value < 65500) ? value : null);
                                     break;
                                 case 41:
                                     value = buf.readUnsignedShortLE();
-                                    position.set("rs485fuel_level" + 4, (value < 65500) ? value : null);
+                                    position.set("rs485Fuel" + 4, (value < 65500) ? value : null);
                                     break;
                                 case 42:
                                     value = buf.readUnsignedShortLE();
-                                    position.set("rs485fuel_level" + 5, (value < 65500) ? value : null);
+                                    position.set("rs485Fuel" + 5, (value < 65500) ? value : null);
                                     break;
                                 case 43:
                                     value = buf.readUnsignedShortLE();
-                                    position.set("rs485fuel_level" + 6, (value < 65500) ? value : null);
+                                    position.set("rs485Fuel" + 6, (value < 65500) ? value : null);
                                     break;
                                 case 44:
                                     value = buf.readUnsignedShortLE();
-                                    position.set("rs232fuel_level", (value < 65500) ? value : null);
+                                    position.set("rs232Fuel", (value < 65500) ? value : null);
                                     break;
                                 case 45:
                                     value = buf.readByte();
