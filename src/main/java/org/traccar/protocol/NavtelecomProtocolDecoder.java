@@ -193,7 +193,7 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                     Position position = new Position(getProtocolName());
                     position.setDeviceId(deviceSession.getDeviceId());
 
-                    for (int j = 0; j < bits.length(); j++) {
+                    for (int j = 0, l = 2; j < bits.length(); j++, l++) {
                         if (bits.get(j)) {
 
                             int value = 0;
@@ -241,22 +241,12 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                     position.set(Position.KEY_BATTERY, buf.readShortLE() * 0.001);
                                     break;
                                 case 21:
-                                    position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShortLE() * 0.001);
-                                    break;
                                 case 22:
-                                    position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShortLE() * 0.001);
-                                    break;
                                 case 23:
-                                    position.set(Position.PREFIX_ADC + 3, buf.readUnsignedShortLE() * 0.001);
-                                    break;
                                 case 24:
-                                    position.set(Position.PREFIX_ADC + 4, buf.readUnsignedShortLE() * 0.001);
-                                    break;
                                 case 25:
-                                    position.set(Position.PREFIX_ADC + 5, buf.readUnsignedShortLE() * 0.001);
-                                    break;
                                 case 26:
-                                    position.set(Position.PREFIX_ADC + 6, buf.readUnsignedShortLE() * 0.001);
+                                    position.set(Position.PREFIX_ADC + (l - 21), buf.readUnsignedShortLE() * 0.001);
                                     break;
                                 case 29:
                                     value = buf.readUnsignedByte();
@@ -271,79 +261,39 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                     }
                                     break;
                                 case 33:
-                                    position.set(Position.PREFIX_COUNT + 1, buf.readUnsignedIntLE());
-                                    break;
                                 case 34:
-                                    position.set(Position.PREFIX_COUNT + 2, buf.readUnsignedIntLE());
+                                    position.set(Position.PREFIX_COUNT + (l - 33), buf.readUnsignedIntLE());
                                     break;
                                 case 35:
-                                    position.set("freq" + 1, buf.readUnsignedShortLE());
-                                    break;
                                 case 36:
-                                    position.set("freq" + 2, buf.readUnsignedShortLE());
+                                    position.set("freq" + (l - 35), buf.readUnsignedShortLE());
                                     break;
                                 case 37:
                                     position.set("engine_hours", buf.readUnsignedIntLE());
                                     break;
                                 case 38:
-                                    value = buf.readUnsignedShortLE();
-                                    position.set("rs485Fuel" + 1, (value < 65500) ? value : null);
-                                    break;
                                 case 39:
-                                    value = buf.readUnsignedShortLE();
-                                    position.set("rs485Fuel" + 2, (value < 65500) ? value : null);
-                                    break;
                                 case 40:
-                                    value = buf.readUnsignedShortLE();
-                                    position.set("rs485Fuel" + 3, (value < 65500) ? value : null);
-                                    break;
                                 case 41:
-                                    value = buf.readUnsignedShortLE();
-                                    position.set("rs485Fuel" + 4, (value < 65500) ? value : null);
-                                    break;
                                 case 42:
-                                    value = buf.readUnsignedShortLE();
-                                    position.set("rs485Fuel" + 5, (value < 65500) ? value : null);
-                                    break;
                                 case 43:
                                     value = buf.readUnsignedShortLE();
-                                    position.set("rs485Fuel" + 6, (value < 65500) ? value : null);
+                                    position.set("rs485Fuel" + (l - 38), (value < 65500) ? value : null);
                                     break;
                                 case 44:
                                     value = buf.readUnsignedShortLE();
                                     position.set("rs232Fuel", (value < 65500) ? value : null);
                                     break;
                                 case 45:
-                                    value = buf.readByte();
-                                    position.set(Position.PREFIX_TEMP + 1, (value != 0x80) ? value : null);
-                                    break;
                                 case 46:
-                                    value = buf.readByte();
-                                    position.set(Position.PREFIX_TEMP + 2, (value != 0x80) ? value : null);
-                                    break;
                                 case 47:
-                                    value = buf.readByte();
-                                    position.set(Position.PREFIX_TEMP + 3, (value != 0x80) ? value : null);
-                                    break;
                                 case 48:
-                                    value = buf.readByte();
-                                    position.set(Position.PREFIX_TEMP + 4, (value != 0x80) ? value : null);
-                                    break;
                                 case 49:
-                                    value = buf.readByte();
-                                    position.set(Position.PREFIX_TEMP + 5, (value != 0x80) ? value : null);
-                                    break;
                                 case 50:
-                                    value = buf.readByte();
-                                    position.set(Position.PREFIX_TEMP + 6, (value != 0x80) ? value : null);
-                                    break;
                                 case 51:
-                                    value = buf.readByte();
-                                    position.set(Position.PREFIX_TEMP + 7, (value != 0x80) ? value : null);
-                                    break;
                                 case 52:
                                     value = buf.readByte();
-                                    position.set(Position.PREFIX_TEMP + 8, (value != 0x80) ? value : null);
+                                    position.set(Position.PREFIX_TEMP + (l - 45), (value != 0x80) ? value : null);
                                     break;
                                 default:
                                     buf.skipBytes(getItemLength(j + 1));
