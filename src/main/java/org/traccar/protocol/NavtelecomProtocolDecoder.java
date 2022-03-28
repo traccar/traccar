@@ -269,7 +269,7 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                     position.set("freq" + (j + 2 - 35), buf.readUnsignedShortLE());
                                     break;
                                 case 37:
-                                    position.set("engine_hours", buf.readUnsignedIntLE());
+                                    position.set(Position.KEY_HOURS, buf.readUnsignedIntLE());
                                     break;
                                 case 38:
                                 case 39:
