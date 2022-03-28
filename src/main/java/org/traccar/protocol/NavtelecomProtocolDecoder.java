@@ -211,7 +211,7 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                 case 8:
                                     value = buf.readUnsignedByte();
                                     position.setValid(BitUtil.check(value, 1));
-                                    position.set(Position.KEY_SATELLITES, ((value & 0b11111100) >> 2));
+                                    position.set(Position.KEY_SATELLITES, BitUtil.from(value, 2));
                                     break;
                                 case 9:
                                     position.setFixTime(new Date(buf.readUnsignedIntLE() * 1000));
