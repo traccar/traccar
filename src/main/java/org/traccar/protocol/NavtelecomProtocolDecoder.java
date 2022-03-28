@@ -193,7 +193,7 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                     Position position = new Position(getProtocolName());
                     position.setDeviceId(deviceSession.getDeviceId());
 
-                    for (int j = 0, l = 2; j < bits.length(); j++, l++) {
+                    for (int j = 0; j < bits.length(); j++) {
                         if (bits.get(j)) {
 
                             int value = 0;
@@ -246,7 +246,7 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                 case 24:
                                 case 25:
                                 case 26:
-                                    position.set(Position.PREFIX_ADC + (l - 21), buf.readUnsignedShortLE() * 0.001);
+                                    position.set(Position.PREFIX_ADC + (j + 2 - 21), buf.readUnsignedShortLE() * 0.001);
                                     break;
                                 case 29:
                                     value = buf.readUnsignedByte();
@@ -262,11 +262,11 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                     break;
                                 case 33:
                                 case 34:
-                                    position.set(Position.PREFIX_COUNT + (l - 33), buf.readUnsignedIntLE());
+                                    position.set(Position.PREFIX_COUNT + (j + 2 - 33), buf.readUnsignedIntLE());
                                     break;
                                 case 35:
                                 case 36:
-                                    position.set("freq" + (l - 35), buf.readUnsignedShortLE());
+                                    position.set("freq" + (j + 2 - 35), buf.readUnsignedShortLE());
                                     break;
                                 case 37:
                                     position.set("engine_hours", buf.readUnsignedIntLE());
@@ -278,7 +278,7 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                 case 42:
                                 case 43:
                                     value = buf.readUnsignedShortLE();
-                                    position.set("rs485Fuel" + (l - 38), (value < 65500) ? value : null);
+                                    position.set("rs485Fuel" + (j + 2 - 38), (value < 65500) ? value : null);
                                     break;
                                 case 44:
                                     value = buf.readUnsignedShortLE();
@@ -293,7 +293,7 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                 case 51:
                                 case 52:
                                     value = buf.readByte();
-                                    position.set(Position.PREFIX_TEMP + (l - 45), (value != 0x80) ? value : null);
+                                    position.set(Position.PREFIX_TEMP + (j + 2 - 45), (value != 0x80) ? value : null);
                                     break;
                                 default:
                                     buf.skipBytes(getItemLength(j + 1));
