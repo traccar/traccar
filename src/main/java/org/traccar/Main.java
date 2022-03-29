@@ -120,7 +120,7 @@ public final class Main {
             Context.init(configFile);
             injector = Guice.createInjector(new MainModule());
             logSystemInfo();
-            LOGGER.info("Version: pre." + Main.class.getPackage().getImplementationVersion() );
+            LOGGER.info("Version: " + Main.class.getPackage().getImplementationVersion());
             LOGGER.info("Starting server...");
 
             Context.getServerManager().start();
