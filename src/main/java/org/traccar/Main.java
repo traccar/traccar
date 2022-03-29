@@ -47,23 +47,23 @@ public final class Main {
         try {
             OperatingSystemMXBean operatingSystemBean = ManagementFactory.getOperatingSystemMXBean();
             LOGGER.info("Operating system"
-                                + " name: " + operatingSystemBean.getName()
-                                + " version: " + operatingSystemBean.getVersion()
-                                + " architecture: " + operatingSystemBean.getArch());
+                    + " name: " + operatingSystemBean.getName()
+                    + " version: " + operatingSystemBean.getVersion()
+                    + " architecture: " + operatingSystemBean.getArch());
 
             RuntimeMXBean runtimeBean = ManagementFactory.getRuntimeMXBean();
             LOGGER.info("Java runtime"
-                                + " name: " + runtimeBean.getVmName()
-                                + " vendor: " + runtimeBean.getVmVendor()
-                                + " version: " + runtimeBean.getVmVersion());
+                    + " name: " + runtimeBean.getVmName()
+                    + " vendor: " + runtimeBean.getVmVendor()
+                    + " version: " + runtimeBean.getVmVersion());
 
             MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
             LOGGER.info("Memory limit"
-                                + " heap: " + memoryBean.getHeapMemoryUsage().getMax() / (1024 * 1024) + "mb"
-                                + " non-heap: " + memoryBean.getNonHeapMemoryUsage().getMax() / (1024 * 1024) + "mb");
+                    + " heap: " + memoryBean.getHeapMemoryUsage().getMax() / (1024 * 1024) + "mb"
+                    + " non-heap: " + memoryBean.getNonHeapMemoryUsage().getMax() / (1024 * 1024) + "mb");
 
             LOGGER.info("Character encoding: "
-                                + System.getProperty("file.encoding") + " charset: " + Charset.defaultCharset());
+                    + System.getProperty("file.encoding") + " charset: " + Charset.defaultCharset());
 
         } catch (Exception error) {
             LOGGER.warn("Failed to get system info");
