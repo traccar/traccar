@@ -21,6 +21,8 @@ import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 
+import java.nio.charset.StandardCharsets;
+
 public class FlexApiProtocol extends BaseProtocol {
 
     public FlexApiProtocol() {
@@ -28,7 +30,7 @@ public class FlexApiProtocol extends BaseProtocol {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new LineBasedFrameDecoder(5120));
-                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new StringDecoder(StandardCharsets.US_ASCII));
                 pipeline.addLast(new FlexApiProtocolDecoder(FlexApiProtocol.this));
             }
         });
