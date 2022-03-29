@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2021 Anton Tananaev (anton@traccar.org)
+Supp * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -712,11 +712,17 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, dateBuilder.getDate());
 
+            boolean hasCellCount = type == MSG_LBS_MULTIPLE_3 && dataLength == 44;
+
+            if (hasCellCount) {
+                buf.readUnsignedByte(); // ta
+            }
+
             int mcc = buf.readUnsignedShort();
             int mnc = BitUtil.check(mcc, 15) ? buf.readUnsignedShort() : buf.readUnsignedByte();
             Network network = new Network();
 
-            int cellCount = type == MSG_WIFI_5 ? 6 : 7;
+            int cellCount = hasCellCount ? buf.readUnsignedByte() : type == MSG_WIFI_5 ? 6 : 7;
             for (int i = 0; i < cellCount; i++) {
                 int lac = longFormat ? buf.readInt() : buf.readUnsignedShort();
                 int cid = longFormat ? (int) buf.readLong() : buf.readUnsignedMedium();
@@ -726,7 +732,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
 
-            buf.readUnsignedByte(); // time leads
+            if (!hasCellCount) {
+                buf.readUnsignedByte(); // ta
+            }
 
             if (type != MSG_LBS_MULTIPLE_1 && type != MSG_LBS_MULTIPLE_2 && type != MSG_LBS_MULTIPLE_3
                     && type != MSG_LBS_2) {

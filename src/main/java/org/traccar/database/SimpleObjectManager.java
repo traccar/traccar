@@ -16,7 +16,6 @@
  */
 package org.traccar.database;
 
-import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -28,6 +27,7 @@ import org.traccar.Context;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Permission;
 import org.traccar.model.User;
+import org.traccar.storage.StorageException;
 
 public abstract class SimpleObjectManager<T extends BaseModel> extends BaseObjectManager<T>
         implements ManagableObjects {
@@ -83,7 +83,7 @@ public abstract class SimpleObjectManager<T extends BaseModel> extends BaseObjec
                     Set<Long> items = userItems.computeIfAbsent(permission.getOwnerId(), key -> new HashSet<>());
                     items.add(permission.getPropertyId());
                 }
-            } catch (SQLException | ClassNotFoundException error) {
+            } catch (StorageException | ClassNotFoundException error) {
                 LOGGER.warn("Error getting permissions", error);
             } finally {
                 writeUnlock();
@@ -92,7 +92,7 @@ public abstract class SimpleObjectManager<T extends BaseModel> extends BaseObjec
     }
 
     @Override
-    public void removeItem(long itemId) throws SQLException {
+    public void removeItem(long itemId) throws StorageException {
         super.removeItem(itemId);
         refreshUserItems();
     }

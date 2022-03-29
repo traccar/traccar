@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.traccar.geocoder.AddressFormat;
 import org.traccar.geocoder.BanGeocoder;
 import org.traccar.geocoder.BingMapsGeocoder;
 import org.traccar.geocoder.FactualGeocoder;
+import org.traccar.geocoder.GeoapifyGeocoder;
 import org.traccar.geocoder.GeocodeFarmGeocoder;
 import org.traccar.geocoder.GeocodeXyzGeocoder;
 import org.traccar.geocoder.Geocoder;
@@ -83,6 +84,7 @@ import javax.ws.rs.client.Client;
 import io.netty.util.Timer;
 import org.traccar.speedlimit.OverpassSpeedLimitProvider;
 import org.traccar.speedlimit.SpeedLimitProvider;
+import org.traccar.storage.Storage;
 
 public class MainModule extends AbstractModule {
 
@@ -94,6 +96,11 @@ public class MainModule extends AbstractModule {
     @Provides
     public static Config provideConfig() {
         return Context.getConfig();
+    }
+
+    @Provides
+    public static Storage provideStorage() {
+        return Context.getDataManager().getStorage();
     }
 
     @Provides
@@ -174,7 +181,7 @@ public class MainModule extends AbstractModule {
                 case "mapquest":
                     return new MapQuestGeocoder(url, key, cacheSize, addressFormat);
                 case "opencage":
-                    return new OpenCageGeocoder(url, key, cacheSize, addressFormat);
+                    return new OpenCageGeocoder(url, key, language, cacheSize, addressFormat);
                 case "bingmaps":
                     return new BingMapsGeocoder(url, key, cacheSize, addressFormat);
                 case "factual":
@@ -197,6 +204,8 @@ public class MainModule extends AbstractModule {
                     return new MapboxGeocoder(key, cacheSize, addressFormat);
                 case "maptiler":
                     return new MapTilerGeocoder(key, cacheSize, addressFormat);
+                case "geoapify":
+                    return new GeoapifyGeocoder(key, language, cacheSize, addressFormat);
                 default:
                     return new GoogleGeocoder(key, language, cacheSize, addressFormat);
             }

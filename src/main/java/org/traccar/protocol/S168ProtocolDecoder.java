@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,10 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.model.WifiAccessPoint;
 
 import java.net.SocketAddress;
 import java.text.DateFormat;
@@ -48,9 +51,14 @@ public class S168ProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
+        Network network = new Network();
+
         String content = values[4];
         String[] fragments = content.split(";");
         for (String fragment : fragments) {
+            if (fragment.isEmpty()) {
+                continue;
+            }
 
             int dataIndex = fragment.indexOf(':');
             String type = fragment.substring(0, dataIndex);
@@ -70,12 +78,44 @@ public class S168ProtocolDecoder extends BaseProtocolDecoder {
                     position.setCourse(Integer.parseInt(values[index++]));
                     position.setAltitude(Integer.parseInt(values[index++]));
                     break;
+                case "CELL":
+                    int cellCount = Integer.parseInt(values[index++]);
+                    int mcc = Integer.parseInt(values[index++], 16);
+                    int mnc = Integer.parseInt(values[index++], 16);
+                    for (int i = 0; i < cellCount; i++) {
+                        network.addCellTower(CellTower.from(
+                                mcc, mnc, Integer.parseInt(values[index++], 16), Integer.parseInt(values[index++], 16),
+                                Integer.parseInt(values[index++], 16)));
+                    }
+                    break;
+                case "WIFI":
+                    int wifiCount = Integer.parseInt(values[index++]);
+                    for (int i = 0; i < wifiCount; i++) {
+                        network.addWifiAccessPoint(WifiAccessPoint.from(
+                                values[index++].replace('-', ':'), Integer.parseInt(values[index++])));
+                    }
+                    break;
+                case "STATUS":
+                    position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(values[index++]));
+                    position.set(Position.KEY_RSSI, Integer.parseInt(values[index++]));
+                    break;
                 default:
                     break;
             }
         }
 
-        return position.getAttributes().containsKey(Position.KEY_SATELLITES) ? position : null;
+        if (network.getCellTowers() != null || network.getWifiAccessPoints() != null) {
+            position.setNetwork(network);
+        }
+        if (!position.getAttributes().containsKey(Position.KEY_SATELLITES)) {
+            getLastLocation(position, null);
+        }
+
+        if (position.getNetwork() != null || !position.getAttributes().isEmpty()) {
+            return position;
+        } else {
+            return null;
+        }
     }
 
 }

@@ -18,6 +18,7 @@ package org.traccar.api.resource;
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.model.Statistics;
+import org.traccar.storage.StorageException;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -25,7 +26,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Date;
 
@@ -36,7 +36,7 @@ public class StatisticsResource extends BaseResource {
 
     @GET
     public Collection<Statistics> get(
-            @QueryParam("from") Date from, @QueryParam("to") Date to) throws SQLException {
+            @QueryParam("from") Date from, @QueryParam("to") Date to) throws StorageException {
         Context.getPermissionsManager().checkAdmin(getUserId());
         return Context.getDataManager().getStatistics(from, to);
     }

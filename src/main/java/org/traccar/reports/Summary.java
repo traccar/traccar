@@ -20,7 +20,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -31,6 +30,7 @@ import org.traccar.Context;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 import org.traccar.reports.model.SummaryReport;
+import org.traccar.storage.StorageException;
 
 public final class Summary {
 
@@ -97,7 +97,7 @@ public final class Summary {
     }
 
     private static Collection<SummaryReport> calculateSummaryResults(
-            long userId, long deviceId, Date from, Date to, boolean daily) throws SQLException {
+            long userId, long deviceId, Date from, Date to, boolean daily) throws StorageException {
 
         ArrayList<Position> positions = new ArrayList<>(Context.getDataManager().getPositions(deviceId, from, to));
 
@@ -122,7 +122,7 @@ public final class Summary {
     }
 
     public static Collection<SummaryReport> getObjects(long userId, Collection<Long> deviceIds,
-            Collection<Long> groupIds, Date from, Date to, boolean daily) throws SQLException {
+            Collection<Long> groupIds, Date from, Date to, boolean daily) throws StorageException {
         ReportUtils.checkPeriodLimit(from, to);
         ArrayList<SummaryReport> result = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
@@ -134,7 +134,7 @@ public final class Summary {
 
     public static void getExcel(OutputStream outputStream,
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
-            Date from, Date to, boolean daily) throws SQLException, IOException {
+            Date from, Date to, boolean daily) throws StorageException, IOException {
         ReportUtils.checkPeriodLimit(from, to);
         Collection<SummaryReport> summaries = getObjects(userId, deviceIds, groupIds, from, to, daily);
         String templatePath = Context.getConfig().getString("report.templatesPath",

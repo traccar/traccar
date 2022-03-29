@@ -21,6 +21,7 @@ import org.traccar.helper.DataConverter;
 import org.traccar.helper.ServletHelper;
 import org.traccar.helper.LogAction;
 import org.traccar.model.User;
+import org.traccar.storage.StorageException;
 
 import javax.annotation.security.PermitAll;
 import javax.servlet.http.Cookie;
@@ -40,7 +41,6 @@ import javax.ws.rs.core.Response;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.sql.SQLException;
 
 @Path("session")
 @Produces(MediaType.APPLICATION_JSON)
@@ -56,7 +56,7 @@ public class SessionResource extends BaseResource {
 
     @PermitAll
     @GET
-    public User get(@QueryParam("token") String token) throws SQLException, UnsupportedEncodingException {
+    public User get(@QueryParam("token") String token) throws StorageException, UnsupportedEncodingException {
 
         if (token != null) {
             User user = Context.getUsersManager().getUserByToken(token);
@@ -107,7 +107,7 @@ public class SessionResource extends BaseResource {
     @PermitAll
     @POST
     public User add(
-            @FormParam("email") String email, @FormParam("password") String password) throws SQLException {
+            @FormParam("email") String email, @FormParam("password") String password) throws StorageException {
         User user = Context.getPermissionsManager().login(email, password);
         if (user != null) {
             request.getSession().setAttribute(USER_ID_KEY, user.getId());

@@ -86,7 +86,6 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
                 position.setTime(new Date());
             }
 
-
         } else if (topic.contains("/cellular1/")) {
 
             getLastLocation(position, new Date(payload.getInt("modem1.ts") * 1000L));

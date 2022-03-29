@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.traccar.model.User;
+import org.traccar.storage.StorageException;
 
 public class UsersManager extends SimpleObjectManager<User> {
 
@@ -56,6 +57,14 @@ public class UsersManager extends SimpleObjectManager<User> {
         if (cachedUser.getToken() != null && !cachedUser.getToken().equals(user.getToken())) {
             usersTokens.remove(cachedUser.getToken());
         }
+    }
+
+    @Override
+    public void updateItem(User user) throws StorageException {
+        if (user.getHashedPassword() != null) {
+            getDataManager().updateUserPassword(user);
+        }
+        super.updateItem(user);
     }
 
     @Override

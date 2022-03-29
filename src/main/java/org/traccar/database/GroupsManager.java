@@ -16,12 +16,12 @@
  */
 package org.traccar.database;
 
-import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.traccar.Context;
 import org.traccar.model.Group;
+import org.traccar.storage.StorageException;
 
 public class GroupsManager extends BaseObjectManager<Group> implements ManagableObjects {
 
@@ -57,7 +57,7 @@ public class GroupsManager extends BaseObjectManager<Group> implements Managable
     }
 
     @Override
-    public void updateItem(Group group) throws SQLException {
+    public void updateItem(Group group) throws StorageException {
         checkGroupCycles(group);
         super.updateItem(group);
     }

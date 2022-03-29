@@ -16,8 +16,6 @@
  */
 package org.traccar.api.resource;
 
-import java.sql.SQLException;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.POST;
@@ -34,6 +32,7 @@ import org.traccar.api.ExtendedObjectResource;
 import org.traccar.model.Attribute;
 import org.traccar.model.Position;
 import org.traccar.handler.ComputedAttributesHandler;
+import org.traccar.storage.StorageException;
 
 @Path("attributes/computed")
 @Produces(MediaType.APPLICATION_JSON)
@@ -75,21 +74,21 @@ public class AttributeResource extends ExtendedObjectResource<Attribute> {
     }
 
     @POST
-    public Response add(Attribute entity) throws SQLException {
+    public Response add(Attribute entity) throws StorageException {
         Context.getPermissionsManager().checkAdmin(getUserId());
         return super.add(entity);
     }
 
     @Path("{id}")
     @PUT
-    public Response update(Attribute entity) throws SQLException {
+    public Response update(Attribute entity) throws StorageException {
         Context.getPermissionsManager().checkAdmin(getUserId());
         return super.update(entity);
     }
 
     @Path("{id}")
     @DELETE
-    public Response remove(@PathParam("id") long id) throws SQLException {
+    public Response remove(@PathParam("id") long id) throws StorageException {
         Context.getPermissionsManager().checkAdmin(getUserId());
         return super.remove(id);
     }

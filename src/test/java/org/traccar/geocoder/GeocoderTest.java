@@ -41,7 +41,7 @@ public class GeocoderTest {
     @Test
     public void testOpenCage() {
         Geocoder geocoder = new OpenCageGeocoder(
-                "http://api.opencagedata.com/geocode/v1", "SECRET", 0, new AddressFormat());
+                "http://api.opencagedata.com/geocode/v1", "SECRET", null, 0, new AddressFormat());
         String address = geocoder.getAddress(34.116302, -118.051519, null);
         assertEquals("Charleston Road, California, US", address);
     }
@@ -105,9 +105,17 @@ public class GeocoderTest {
     @Ignore
     @Test
     public void testMapTiler() {
-        Geocoder geocoder = new MapTilerGeocoder("mnbnwLErpdspq13f0kC6", 0, new AddressFormat());
+        Geocoder geocoder = new MapTilerGeocoder("", 0, new AddressFormat());
         String address = geocoder.getAddress(40.733, -73.989, null);
         assertEquals("East 13th Street, New York City, New York, United States", address);
+    }
+
+    @Ignore
+    @Test
+    public void testGeoapify() {
+        Geocoder geocoder = new GeoapifyGeocoder("", null, 0, new AddressFormat());
+        String address = geocoder.getAddress(40.733, -73.989, null);
+        assertEquals("114 East 13th Street, New York, New York, US", address);
     }
 
 }

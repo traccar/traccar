@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?> 
+<?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -29,5 +29,6 @@
   <include file="changelog-4.11.xml" relativeToChangelogFile="true" />
   <include file="changelog-4.13.xml" relativeToChangelogFile="true" />
   <include file="changelog-4.15.xml" relativeToChangelogFile="true" />
+  <include file="changelog-4.16.xml" relativeToChangelogFile="true" />
 
 </databaseChangeLog>

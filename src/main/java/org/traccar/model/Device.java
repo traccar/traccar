@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,11 @@ package org.traccar.model;
 import java.util.Date;
 import java.util.List;
 
-import org.traccar.database.QueryExtended;
-import org.traccar.database.QueryIgnore;
+import org.traccar.storage.QueryExtended;
+import org.traccar.storage.QueryIgnore;
+import org.traccar.storage.StorageName;
 
+@StorageName("tc_devices")
 public class Device extends GroupedModel {
 
     private String name;
@@ -54,27 +56,20 @@ public class Device extends GroupedModel {
         return status != null ? status : STATUS_OFFLINE;
     }
 
+    @QueryIgnore
     public void setStatus(String status) {
         this.status = status;
     }
 
     private Date lastUpdate;
 
-    @QueryExtended
     public Date getLastUpdate() {
-        if (lastUpdate != null) {
-            return new Date(lastUpdate.getTime());
-        } else {
-            return null;
-        }
+        return this.lastUpdate;
     }
 
+    @QueryExtended
     public void setLastUpdate(Date lastUpdate) {
-        if (lastUpdate != null) {
-            this.lastUpdate = new Date(lastUpdate.getTime());
-        } else {
-            this.lastUpdate = null;
-        }
+        this.lastUpdate = lastUpdate;
     }
 
     private long positionId;
@@ -84,6 +79,7 @@ public class Device extends GroupedModel {
         return positionId;
     }
 
+    @QueryIgnore
     public void setPositionId(long positionId) {
         this.positionId = positionId;
     }
@@ -95,6 +91,7 @@ public class Device extends GroupedModel {
         return geofenceIds;
     }
 
+    @QueryIgnore
     public void setGeofenceIds(List<Long> geofenceIds) {
         this.geofenceIds = geofenceIds;
     }

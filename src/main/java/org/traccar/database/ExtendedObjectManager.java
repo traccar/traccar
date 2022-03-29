@@ -16,7 +16,6 @@
  */
 package org.traccar.database;
 
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -30,6 +29,7 @@ import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.model.Permission;
 import org.traccar.model.BaseModel;
+import org.traccar.storage.StorageException;
 
 public abstract class ExtendedObjectManager<T extends BaseModel> extends SimpleObjectManager<T> {
 
@@ -87,7 +87,7 @@ public abstract class ExtendedObjectManager<T extends BaseModel> extends SimpleO
     }
 
     @Override
-    public void removeItem(long itemId) throws SQLException {
+    public void removeItem(long itemId) throws StorageException {
         super.removeItem(itemId);
         refreshExtendedPermissions();
     }
@@ -133,7 +133,7 @@ public abstract class ExtendedObjectManager<T extends BaseModel> extends SimpleO
                     }
                 }
 
-            } catch (SQLException | ClassNotFoundException error) {
+            } catch (StorageException | ClassNotFoundException error) {
                 LOGGER.warn("Refresh permissions error", error);
             } finally {
                 writeUnlock();

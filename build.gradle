@@ -28,7 +28,6 @@ checkstyle {
 }
 
 protobuf {
-    generatedFilesBaseDir = "$projectDir/src"
     protoc {
         artifact = "com.google.protobuf:protoc:$protobufVersion"
     }
@@ -62,6 +61,7 @@ dependencies {
     implementation "org.glassfish.jersey.containers:jersey-container-servlet:$jerseyVersion"
     implementation "org.glassfish.jersey.media:jersey-media-json-jackson:$jerseyVersion"
     implementation "org.glassfish.jersey.inject:jersey-hk2:$jerseyVersion"
+    implementation "org.glassfish.hk2:guice-bridge:2.6.1" // same version as jersey-hk2
     implementation "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:$jacksonVersion"
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr353:$jacksonVersion"
     implementation "org.liquibase:liquibase-core:4.7.0"

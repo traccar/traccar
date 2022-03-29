@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2021 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
@@ -46,7 +45,7 @@ public class Dsf22ProtocolDecoder extends BaseProtocolDecoder {
 
         buf.skipBytes(2); // header
 
-        String id = ByteBufUtil.hexDump(buf.readSlice(2));
+        String id = String.valueOf(buf.readUnsignedShortLE());
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
         if (deviceSession == null) {
             return null;
@@ -61,12 +60,12 @@ public class Dsf22ProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceId(deviceSession.getDeviceId());
 
             position.setValid(true);
-            position.setLatitude(buf.readInt());
-            position.setLongitude(buf.readInt());
-            position.setTime(new Date(946684800000L + buf.readUnsignedInt()));
+            position.setLatitude(buf.readIntLE() / 10000000.0);
+            position.setLongitude(buf.readIntLE() / 10000000.0);
+            position.setTime(new Date(buf.readUnsignedIntLE() * 1000));
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
 
-            position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedShort() * 0.001);
+            position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedShortLE() * 0.001);
 
             int status = buf.readUnsignedByte();
             position.set(Position.KEY_IGNITION, BitUtil.check(status, 0));

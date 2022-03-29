@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+  logicalFilePath="changelog-4.16">
+
+  <changeSet author="author" id="changelog-4.16">
+
+    <addColumn tableName="tc_servers">
+      <column name="disablereports" type="BOOLEAN" defaultValueBoolean="false" />
+    </addColumn>
+
+    <addColumn tableName="tc_users">
+      <column name="disablereports" type="BOOLEAN" defaultValueBoolean="false" />
+    </addColumn>
+
+    <renameColumn tableName="tc_orders" oldColumnName="toAddress" newColumnName="toaddresstmp" />
+    <renameColumn tableName="tc_orders" oldColumnName="fromAddress" newColumnName="fromaddresstmp" />
+
+    <renameColumn tableName="tc_orders" oldColumnName="toaddresstmp" newColumnName="toaddress" />
+    <renameColumn tableName="tc_orders" oldColumnName="fromaddresstmp" newColumnName="fromaddress" />
+
+  </changeSet>
+
+</databaseChangeLog>

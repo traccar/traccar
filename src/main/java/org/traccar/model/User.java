@@ -17,12 +17,14 @@ package org.traccar.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import org.traccar.database.QueryExtended;
-import org.traccar.database.QueryIgnore;
+import org.traccar.storage.QueryExtended;
+import org.traccar.storage.QueryIgnore;
 import org.traccar.helper.Hashing;
+import org.traccar.storage.StorageName;
 
 import java.util.Date;
 
+@StorageName("tc_users")
 public class User extends ExtendedModel {
 
     private String name;
@@ -224,6 +226,16 @@ public class User extends ExtendedModel {
 
     private String poiLayer;
 
+    private boolean disableReports;
+
+    public boolean getDisableReports() {
+        return disableReports;
+    }
+
+    public void setDisableReports(boolean disableReports) {
+        this.disableReports = disableReports;
+    }
+
     public String getPoiLayer() {
         return poiLayer;
     }
@@ -237,6 +249,7 @@ public class User extends ExtendedModel {
         return null;
     }
 
+    @QueryIgnore
     public void setPassword(String password) {
         if (password != null && !password.isEmpty()) {
             Hashing.HashingResult hashingResult = Hashing.createHash(password);
@@ -253,6 +266,7 @@ public class User extends ExtendedModel {
         return hashedPassword;
     }
 
+    @QueryExtended
     public void setHashedPassword(String hashedPassword) {
         this.hashedPassword = hashedPassword;
     }
@@ -265,6 +279,7 @@ public class User extends ExtendedModel {
         return salt;
     }
 
+    @QueryExtended
     public void setSalt(String salt) {
         this.salt = salt;
     }
