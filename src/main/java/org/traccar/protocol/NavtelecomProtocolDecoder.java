@@ -251,13 +251,13 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                 case 29:
                                     value = buf.readUnsignedByte();
                                     for (int k = 0; k <= 7; k++) {
-                                        position.set(Position.PREFIX_IN + (k + 1), BitUtil.check(value, k) ? 1 : 0);
+                                        position.set(Position.PREFIX_IN + (k + 1), BitUtil.check(value, k));
                                     }
                                     break;
                                 case 31:
                                     value = buf.readUnsignedByte();
                                     for (int k = 0; k <= 3; k++) {
-                                        position.set(Position.PREFIX_OUT + (k + 1), BitUtil.check(value, k) ? 1 : 0);
+                                        position.set(Position.PREFIX_OUT + (k + 1), BitUtil.check(value, k));
                                     }
                                     break;
                                 case 33:
