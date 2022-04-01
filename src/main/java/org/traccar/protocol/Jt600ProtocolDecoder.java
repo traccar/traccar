@@ -374,6 +374,64 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private static final Pattern PATTERN_P45 = new PatternBuilder()
+            .text("(")
+            .number("(d+),")                     // id
+            .text("P45,")                        // type
+            .number("(dd)(dd)(dd),")             // date (ddmmyy)
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
+            .number("(d+.d+),([NS]),")           // latitude
+            .number("(d+.d+),([EW]),")           // longitude
+            .expression("([AV]),")               // validity
+            .number("(d+),")                     // speed
+            .number("(d+),")                     // course
+            .number("d+,")                       // event source
+            .number("d+,")                       // unlock verification
+            .number("(d+),")                     // rfid
+            .number("d+,")                       // password verification
+            .number("d+,")                       // incorrect password count
+            .number("(d+),")                     // index
+            .any()
+            .compile();
+
+    private Position decodeP45(String sentence, Channel channel, SocketAddress remoteAddress) {
+
+        Parser parser = new Parser(PATTERN_P45, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
+
+        position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
+        position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
+        position.setValid(parser.next().equals("A"));
+
+        position.setSpeed(UnitsConverter.knotsFromMph(parser.nextDouble()));
+        position.setCourse(parser.nextDouble());
+
+        String rfid = parser.next();
+        if (!rfid.equals("0000000000")) {
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, rfid);
+        }
+
+        int index = parser.nextInt();
+
+        if (channel != null) {
+            channel.writeAndFlush(new NetworkMessage("(P69,0," + index + ")", remoteAddress));
+        }
+
+        return position;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -387,6 +445,8 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
             String sentence = buf.toString(StandardCharsets.US_ASCII);
             if (sentence.contains("W01")) {
                 return decodeW01(sentence, channel, remoteAddress);
+            } else if (sentence.contains("P45")) {
+                return decodeP45(sentence, channel, remoteAddress);
             } else {
                 return decodeU01(sentence, channel, remoteAddress);
             }
