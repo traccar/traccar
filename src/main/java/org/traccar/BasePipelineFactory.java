@@ -106,7 +106,9 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
         }
         pipeline.addLast(new OpenChannelHandler(connector));
         pipeline.addLast(new NetworkMessageHandler());
-        pipeline.addLast(new StandardLoggingHandler(protocol));
+        pipeline.addLast(new StandardLoggingHandler(StandardLoggingHandler.NetworkLogFormat.valueOf(
+                Context.getConfig().getString("logger.networkLogFormat",
+                        StandardLoggingHandler.NetworkLogFormat.RawOrHex.name()))));
 
         addProtocolHandlers(handler -> {
             if (!(handler instanceof BaseProtocolDecoder || handler instanceof BaseProtocolEncoder)) {
