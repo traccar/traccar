@@ -60,6 +60,12 @@ public class UsersManager extends SimpleObjectManager<User> {
     }
 
     @Override
+    public void addItem(User user) throws StorageException {
+        super.addItem(user);
+        getDataManager().updateUserPassword(user);
+    }
+
+    @Override
     public void updateItem(User user) throws StorageException {
         if (user.getHashedPassword() != null) {
             getDataManager().updateUserPassword(user);
