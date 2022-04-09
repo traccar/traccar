@@ -15,6 +15,9 @@
  */
 package org.traccar.storage;
 
+import org.traccar.model.Device;
+import org.traccar.model.Group;
+import org.traccar.model.GroupedModel;
 import org.traccar.model.Permission;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
@@ -43,7 +46,7 @@ public class DatabaseStorage extends Storage {
     public <T> List<T> getObjects(Class<T> clazz, Request request) throws StorageException {
         StringBuilder query = new StringBuilder("SELECT ");
         query.append(formatColumns(request.getColumns(), clazz, "get", c -> c));
-        query.append(" FROM ").append(getTableName(clazz));
+        query.append(" FROM ").append(getStorageName(clazz));
         query.append(formatCondition(request.getCondition()));
         query.append(formatOrder(request.getOrder()));
         query.append(formatLimit(request.getLimit()));
@@ -61,7 +64,7 @@ public class DatabaseStorage extends Storage {
     @Override
     public <T> long addObject(T entity, Request request) throws StorageException {
         StringBuilder query = new StringBuilder("INSERT INTO ");
-        query.append(getTableName(entity.getClass()));
+        query.append(getStorageName(entity.getClass()));
         query.append("(");
         query.append(formatColumns(request.getColumns(), entity.getClass(), "set", c -> c));
         query.append(") VALUES (");
@@ -79,7 +82,7 @@ public class DatabaseStorage extends Storage {
     @Override
     public <T> void updateObject(T entity, Request request) throws StorageException {
         StringBuilder query = new StringBuilder("UPDATE ");
-        query.append(getTableName(entity.getClass()));
+        query.append(getStorageName(entity.getClass()));
         query.append(" SET ");
         query.append(formatColumns(request.getColumns(), entity.getClass(), "set", c -> c + " = :" + c));
         query.append(formatCondition(request.getCondition()));
@@ -98,7 +101,7 @@ public class DatabaseStorage extends Storage {
     @Override
     public void removeObject(Class<?> clazz, Request request) throws StorageException {
         StringBuilder query = new StringBuilder("DELETE FROM ");
-        query.append(getTableName(clazz));
+        query.append(getStorageName(clazz));
         query.append(formatCondition(request.getCondition()));
         try {
             QueryBuilder builder = QueryBuilder.create(dataSource, query.toString());
@@ -170,7 +173,7 @@ public class DatabaseStorage extends Storage {
         }
     }
 
-    private String getTableName(Class<?> clazz) throws StorageException {
+    private String getStorageName(Class<?> clazz) throws StorageException {
         StorageName storageName = clazz.getAnnotation(StorageName.class);
         if (storageName == null) {
             throw new StorageException("StorageName annotation is missing");
@@ -195,7 +198,11 @@ public class DatabaseStorage extends Storage {
             results.putAll(getConditionVariables(condition.getSecond()));
         } else if (genericCondition instanceof Condition.Permission) {
             var condition = (Condition.Permission) genericCondition;
-            results.put(Permission.getKey(condition.getOwnerClass()), condition.getOwnerId());
+            if (condition.getOwnerId() > 0) {
+                results.put(Permission.getKey(condition.getOwnerClass()), condition.getOwnerId());
+            } else {
+                results.put(Permission.getKey(condition.getPropertyClass()), condition.getPropertyId());
+            }
         }
         return results;
     }
@@ -205,11 +212,11 @@ public class DatabaseStorage extends Storage {
         return columns.getColumns(clazz, type).stream().map(mapper).collect(Collectors.joining(", "));
     }
 
-    private String formatCondition(Condition genericCondition) {
+    private String formatCondition(Condition genericCondition) throws StorageException {
         return formatCondition(genericCondition, true);
     }
 
-    private String formatCondition(Condition genericCondition, boolean appendWhere) {
+    private String formatCondition(Condition genericCondition, boolean appendWhere) throws StorageException {
         StringBuilder result = new StringBuilder();
         if (genericCondition != null) {
             if (appendWhere) {
@@ -245,14 +252,8 @@ public class DatabaseStorage extends Storage {
             } else if (genericCondition instanceof Condition.Permission) {
 
                 var condition = (Condition.Permission) genericCondition;
-                result.append("id IN (SELECT ");
-                result.append(Permission.getKey(condition.getPropertyClass()));
-                result.append(" FROM ");
-                result.append(Permission.getStorageName(condition.getOwnerClass(), condition.getPropertyClass()));
-                result.append(" WHERE ");
-                result.append(Permission.getKey(condition.getOwnerClass()));
-                result.append(" = :");
-                result.append(Permission.getKey(condition.getOwnerClass()));
+                result.append("id IN (");
+                result.append(formatPermissionQuery(condition));
                 result.append(")");
 
             }
@@ -278,6 +279,85 @@ public class DatabaseStorage extends Storage {
             result.append(" LIMIT ");
             result.append(limit.getValue());
         }
+        return result.toString();
+    }
+
+    private String formatPermissionQuery(Condition.Permission condition) throws StorageException {
+        StringBuilder result = new StringBuilder();
+
+        String outputKey;
+        String conditionKey;
+        if (condition.getOwnerId() > 0) {
+            outputKey = Permission.getKey(condition.getPropertyClass());
+            conditionKey = Permission.getKey(condition.getOwnerClass());
+        } else {
+            outputKey = Permission.getKey(condition.getOwnerClass());
+            conditionKey = Permission.getKey(condition.getPropertyClass());
+        }
+
+        result.append("SELECT ");
+        result.append(outputKey);
+        result.append(" FROM ");
+        result.append(Permission.getStorageName(condition.getOwnerClass(), condition.getPropertyClass()));
+        result.append(" WHERE ");
+        result.append(conditionKey);
+        result.append(" = :");
+        result.append(conditionKey);
+
+        if (condition.getIncludeGroups()) {
+
+            boolean expandDevices;
+            String groupStorageName;
+            if (GroupedModel.class.isAssignableFrom(condition.getOwnerClass())) {
+                expandDevices = Device.class.isAssignableFrom(condition.getOwnerClass());
+                groupStorageName = Permission.getStorageName(Group.class, condition.getPropertyClass());
+            } else {
+                expandDevices = Device.class.isAssignableFrom(condition.getPropertyClass());
+                groupStorageName = Permission.getStorageName(condition.getOwnerClass(), Group.class);
+            }
+
+            result.append(" UNION ");
+
+            result.append("SELECT DISTINCT ");
+            result.append(expandDevices? "devices." : "groups."); // TODO handle reverse search (e.g. users by device)
+            result.append(outputKey);
+            result.append(" FROM ");
+            result.append(groupStorageName);
+
+            result.append(" INNER JOIN (");
+            result.append("SELECT id as parentid, id as groupid FROM ");
+            result.append(getStorageName(Group.class));
+            result.append(" UNION ");
+            result.append("SELECT groupid as parentid, id as groupid FROM ");
+            result.append(getStorageName(Group.class));
+            result.append(" WHERE groupid IS NOT NULL");
+            result.append(" UNION ");
+            result.append("SELECT g2.groupid as parentid, g1.id as groupid FROM ");
+            result.append(getStorageName(Group.class));
+            result.append(" AS g2");
+            result.append(" INNER JOIN ");
+            result.append(getStorageName(Group.class));
+            result.append(" AS g1 ON g2.id = g1.groupid");
+            result.append(" WHERE g2.groupid IS NOT NULL");
+            result.append(") AS groups ON ");
+            result.append(groupStorageName);
+            result.append(".groupid = groups.parentid");
+
+            if (expandDevices) {
+                result.append(" INNER JOIN (");
+                result.append("SELECT groupid as parentid, id as deviceid FROM ");
+                result.append(getStorageName(Device.class));
+                result.append(" WHERE groupid IS NOT NULL");
+                result.append(") AS devices ON groups.groupid = devices.parentid");
+            }
+
+            result.append(" WHERE ");
+            result.append(conditionKey); // TODO handle search for device / group
+            result.append(" = :");
+            result.append(conditionKey);
+
+        }
+
         return result.toString();
     }
 

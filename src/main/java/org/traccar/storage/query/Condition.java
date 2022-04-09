@@ -1,4 +1,21 @@
+/*
+ * Copyright 2022 Anton Tananaev (anton@traccar.org)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.traccar.storage.query;
+
+import org.traccar.model.GroupedModel;
 
 import java.util.List;
 
@@ -132,11 +149,28 @@ public interface Condition {
         private final Class<?> ownerClass;
         private final long ownerId;
         private final Class<?> propertyClass;
+        private final long propertyId;
+        private final boolean excludeGroups;
 
-        public Permission(Class<?> ownerClass, long ownerId, Class<?> propertyClass) {
+        private Permission(
+                Class<?> ownerClass, long ownerId, Class<?> propertyClass, long propertyId, boolean excludeGroups) {
             this.ownerClass = ownerClass;
             this.ownerId = ownerId;
             this.propertyClass = propertyClass;
+            this.propertyId = propertyId;
+            this.excludeGroups = excludeGroups;
+        }
+
+        public Permission(Class<?> ownerClass, long ownerId, Class<?> propertyClass) {
+            this(ownerClass, ownerId, propertyClass, 0, false);
+        }
+
+        public Permission(Class<?> ownerClass, Class<?> propertyClass, long propertyId) {
+            this(ownerClass, 0, propertyClass, propertyId, false);
+        }
+
+        public Permission excludeGroups() {
+            return new Permission(this.ownerClass, this.ownerId, this.propertyClass, this.propertyId, true);
         }
 
         public Class<?> getOwnerClass() {
@@ -149,6 +183,16 @@ public interface Condition {
 
         public Class<?> getPropertyClass() {
             return propertyClass;
+        }
+
+        public long getPropertyId() {
+            return propertyId;
+        }
+
+        public boolean getIncludeGroups() {
+            boolean ownerGroupModel = GroupedModel.class.isAssignableFrom(ownerClass);
+            boolean propertyGroupModel = GroupedModel.class.isAssignableFrom(propertyClass);
+            return (ownerGroupModel || propertyGroupModel) && !excludeGroups;
         }
     }
 
