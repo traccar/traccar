@@ -46,7 +46,11 @@ public class ExtendedObjectResource<T extends BaseModel> extends BaseObjectResou
         if (all) {
             permissionsService.checkAdmin(getUserId());
         } else {
-            permissionsService.checkUser(getUserId(), userId);
+            if (userId == 0) {
+                userId = getUserId();
+            } else {
+                permissionsService.checkUser(getUserId(), userId);
+            }
             conditions.add(new Condition.Permission(User.class, userId, baseClass));
         }
 
