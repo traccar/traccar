@@ -15,6 +15,7 @@
  */
 package org.traccar.api.security;
 
+import org.traccar.model.BaseModel;
 import org.traccar.model.Calendar;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
@@ -99,8 +100,7 @@ public class PermissionsService {
             if (object instanceof GroupedModel) {
                 long groupId = ((GroupedModel) object).getGroupId();
                 if (groupId > 0) {
-                    denied = storage.getPermissions(User.class, userId, Group.class, groupId).isEmpty();
-                    // TODO TEST NESTED GROUP PERMISSION
+                    checkPermission(Group.class, userId, groupId);
                 }
             }
             if (object instanceof ScheduledModel) {
@@ -124,12 +124,22 @@ public class PermissionsService {
         }
     }
 
-    public void checkPermission(
-            Class<?> clazz, long userId, long objectId) throws StorageException, SecurityException {
-        if (!getUser(userId).getAdministrator()
-                && storage.getPermissions(User.class, userId, clazz, objectId).isEmpty()) {
-            // TODO handle nested objects
-            throw new SecurityException(clazz.getSimpleName() + " access denied");
+    public <T extends BaseModel> void checkPermission(
+            Class<T> clazz, long userId, long objectId) throws StorageException, SecurityException {
+        if (!getUser(userId).getAdministrator()) {
+            var objects = storage.getObjects(clazz, new Request(
+                    new Columns.Include("id"),
+                    new Condition.Permission(User.class, userId, clazz)));
+            boolean found = false;
+            for (var object : objects) {
+                if (object.getId() == objectId) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                throw new SecurityException(clazz.getSimpleName() + " access denied");
+            }
         }
     }
 
