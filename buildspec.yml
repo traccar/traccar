@@ -10,7 +10,7 @@ phases:
   build:
     commands:
       - echo Build started
-      - mvn install
+      - ./gradlew build -x checkstyleMain
       - cp target/tracker-server.jar $CODEBUILD_SRC_DIR_SourceArtifact
   post_build:
     commands:
