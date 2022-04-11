@@ -15,7 +15,7 @@
         <jetty.version>9.4.30.v20200611</jetty.version>
         <jersey.version>2.31</jersey.version>
         <jackson.version>2.10.1</jackson.version> <!-- same version as jersey-media-json-jackson dependency -->
-        <protobuf.version>3.12.2</protobuf.version>
+        <protobuf.version>3.18.0</protobuf.version>
     </properties>
 
     <dependencies>
@@ -61,9 +61,19 @@
             <version>4.1.50.Final</version>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-jdk14</artifactId>
-            <version>1.7.30</version>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-api</artifactId>
+          <version>2.17.2</version>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-core</artifactId>
+          <version>2.17.2</version>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-slf4j-impl</artifactId>
+          <version>2.17.2</version>
         </dependency>
         <dependency>
             <groupId>com.google.inject</groupId>
