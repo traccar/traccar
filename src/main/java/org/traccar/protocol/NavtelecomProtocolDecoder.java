@@ -251,13 +251,13 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                 case 29:
                                     value = buf.readUnsignedByte();
                                     for (int k = 0; k <= 7; k++) {
-                                        position.set(Position.PREFIX_IN + (k + 1), BitUtil.check(value, k));
+                                        position.set(Position.PREFIX_IN + (k + 1), BitUtil.check(value, k) ? 1 : 0);
                                     }
                                     break;
                                 case 31:
                                     value = buf.readUnsignedByte();
                                     for (int k = 0; k <= 3; k++) {
-                                        position.set(Position.PREFIX_OUT + (k + 1), BitUtil.check(value, k));
+                                        position.set(Position.PREFIX_OUT + (k + 1), BitUtil.check(value, k) ? 1 : 0);
                                     }
                                     break;
                                 case 33:
@@ -295,7 +295,88 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                     value = buf.readByte();
                                     position.set(Position.PREFIX_TEMP + (j + 2 - 45), (value != 0x80) ? value : null);
                                     break;
-                                default:
+                                case 53:
+                                    int Carburanttype = buf.readUnsignedShortLE();
+                                    boolean isSet = (Carburanttype & (1 << 15)) != 0;
+                                    if (isSet) {
+                                        position.set("Fuel.level.tank", "volume");
+                                        position.set("fuel", BitUtil.to(Carburanttype,14));
+                                    }else{
+                                        position.set("Fuel.level.tank", "Percent");
+                                        position.set("fuel", BitUtil.to(Carburanttype,14));
+                                    }
+                                    break;
+                                case 54:
+                                    float can_fuel_consumpt = buf.readFloatLE();
+                                    if(can_fuel_consumpt > 0)
+                                    {
+                                        position.set("fuelConsumption",can_fuel_consumpt );
+                                    }
+                                    break;
+                                case 55:
+                                    int rpm_status = buf.readUnsignedShortLE();
+                                    if (rpm_status > 0 && rpm_status < 65534) {
+                                        position.set("rpm", rpm_status);
+                                    }
+                                    break;
+                                case 56:
+                                    position.set("coolantTemp", Integer.valueOf((int)buf.readByte()));
+                                    break;
+                                case 57:
+                                    position.set("obdOdometer", Float.valueOf(buf.readFloatLE()));
+                                    break;
+                                case 63:
+                                    position.set("accPedal", Short.valueOf(buf.readUnsignedByte()));
+                                    break;
+                                case 64:
+                                    position.set("brakePedal", Short.valueOf(buf.readUnsignedByte()));
+                                    break;
+                                case 65:
+                                    position.set("Engineload", Short.valueOf(buf.readUnsignedByte()));
+                                    break;
+                                case 66:
+                                    int can_dfl_level = buf.readUnsignedShortLE();
+                                    boolean iSet = (can_dfl_level  & (1 << 15)) != 0;
+                                    if (iSet) {
+                                        position.set("AdBlue.level.tank", "volume");
+                                        position.set("AdBlue", BitUtil.to(can_dfl_level ,14));
+                                    }else{
+                                        position.set("AdBlue.level.tank", "Percent");
+                                        position.set("AdBlue", BitUtil.to(can_dfl_level ,14));
+                                    }
+                                    break;
+                                case 67:
+                                    position.set("hours", Long.valueOf(buf.readUnsignedIntLE()));
+                                    break;
+                                case 68:
+                                    position.set("maintenanceDistance", Short.valueOf(buf.readShortLE()));
+                                    break;
+                                case 69:
+                                    int obdSpeed = buf.readUnsignedByte();
+                                    if (obdSpeed > 0x00 && obdSpeed < 0xFF) {
+                                        position.set("obdSpeed", obdSpeed);
+                                    }
+                                    break;
+                                case 108:
+                                    position.set("excessDuration", Integer.valueOf(buf.readUnsignedShortLE()));
+                                    break;
+                                case 109:
+                                    position.set("maxAcceleration", Short.valueOf(buf.readShortLE()));
+                                    position.set("maxBraking", Short.valueOf(buf.readShortLE()));
+                                    position.set("maxCornering", Short.valueOf(buf.readShortLE()));
+                                    break;
+                                case 201:
+                                    position.set("statusFlags", Integer.valueOf(buf.readUnsignedShortLE()));
+                                    break;
+                                case 203:
+                                    position.set("emergencyIndicators", Long.valueOf(buf.readUnsignedIntLE()));
+                                    break;
+                                case 204:
+                                    for (int l = 1; l <= 5; ++l) {
+                                        position.set("faultInfo" + l, Short.valueOf(buf.readUnsignedByte()));
+                                    }
+                                    break;
+                                    default:
                                     buf.skipBytes(getItemLength(j + 1));
                                     break;
                             }
