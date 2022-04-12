@@ -12,7 +12,7 @@ phases:
       - echo Build started
       - ./gradlew build -x checkstyleMain
       - cp target/tracker-server.jar $CODEBUILD_SRC_DIR_SourceArtifact
-      - cp target/lib/* $CODEBUILD_SRC_DIR_SourceArtifact/lib
+      - if [ -d $CODEBUILD_SRC_DIR_SourceArtifact/lib ]; then cp target/lib/* $CODEBUILD_SRC_DIR_SourceArtifact/lib; fi
   post_build:
     commands:
       - echo Build completed
