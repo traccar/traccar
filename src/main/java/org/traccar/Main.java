@@ -19,7 +19,6 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.api.HealthCheckService;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
@@ -31,7 +30,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Timer;
 
 public final class Main {
 
@@ -110,14 +108,6 @@ public final class Main {
         }
     }
 
-    private static void scheduleHealthCheck() {
-        HealthCheckService service = new HealthCheckService();
-        if (service.isEnabled()) {
-            new Timer().scheduleAtFixedRate(
-                    service.createTask(), service.getPeriod(), service.getPeriod());
-        }
-    }
-
     public static void run(String configFile) {
         try {
             Context.init(configFile);
@@ -136,8 +126,6 @@ public final class Main {
             for (LifecycleObject service : services) {
                 service.start();
             }
-
-            scheduleHealthCheck();
 
             Thread.setDefaultUncaughtExceptionHandler((t, e) -> LOGGER.error("Thread exception", e));
 
