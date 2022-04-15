@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import org.jvnet.hk2.guice.bridge.api.GuiceIntoHK2Bridge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
+import org.traccar.LifecycleObject;
 import org.traccar.Main;
 import org.traccar.api.DateParameterConverterProvider;
 import org.traccar.config.Config;
@@ -69,7 +70,7 @@ import java.io.Writer;
 import java.net.InetSocketAddress;
 import java.util.EnumSet;
 
-public class WebServer {
+public class WebServer implements LifecycleObject {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WebServer.class);
 
@@ -238,6 +239,7 @@ public class WebServer {
         }
     }
 
+    @Override
     public void start() {
         try {
             server.start();
@@ -246,6 +248,7 @@ public class WebServer {
         }
     }
 
+    @Override
     public void stop() {
         try {
             server.stop();

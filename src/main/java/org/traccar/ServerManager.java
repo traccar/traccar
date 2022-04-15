@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ServerManager {
+public class ServerManager implements LifecycleObject {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerManager.class);
 
@@ -50,6 +50,7 @@ public class ServerManager {
         return protocolList.get(name);
     }
 
+    @Override
     public void start() throws Exception {
         for (TrackerConnector connector: connectorList) {
             try {
@@ -62,6 +63,7 @@ public class ServerManager {
         }
     }
 
+    @Override
     public void stop() {
         for (TrackerConnector connector: connectorList) {
             connector.stop();

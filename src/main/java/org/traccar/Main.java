@@ -27,6 +27,9 @@ import java.lang.management.MemoryMXBean;
 import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.RuntimeMXBean;
 import java.nio.charset.Charset;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
 
@@ -123,11 +126,16 @@ public final class Main {
             LOGGER.info("Version: " + Main.class.getPackage().getImplementationVersion());
             LOGGER.info("Starting server...");
 
-            Context.getServerManager().start();
+            List<LifecycleObject> services = new LinkedList<>();
+            services.add(Context.getServerManager());
             if (Context.getWebServer() != null) {
-                Context.getWebServer().start();
+                services.add(Context.getWebServer());
             }
-            Context.getScheduleManager().start();
+            services.add(Context.getScheduleManager());
+
+            for (LifecycleObject service : services) {
+                service.start();
+            }
 
             scheduleHealthCheck();
 
@@ -136,11 +144,10 @@ public final class Main {
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 LOGGER.info("Shutting down server...");
 
-                Context.getScheduleManager().stop();
-                if (Context.getWebServer() != null) {
-                    Context.getWebServer().stop();
+                Collections.reverse(services);
+                for (LifecycleObject service : services) {
+                    service.stop();
                 }
-                Context.getServerManager().stop();
             }));
         } catch (Exception e) {
             LOGGER.error("Main method error", e);
