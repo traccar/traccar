@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.api;
+package org.traccar.schedule;
 
 import com.sun.jna.Library;
 import com.sun.jna.Native;
@@ -25,16 +25,16 @@ import org.traccar.config.Keys;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class HealthCheckService implements Runnable {
+public class TaskHealthCheck implements Runnable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HealthCheckService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TaskHealthCheck.class);
 
     private SystemD systemD;
 
     private boolean enabled;
     private long period;
 
-    public HealthCheckService() {
+    public TaskHealthCheck() {
         if (!Context.getConfig().getBoolean(Keys.WEB_DISABLE_HEALTH_CHECK)
                 && System.getProperty("os.name").toLowerCase().startsWith("linux")) {
             try {

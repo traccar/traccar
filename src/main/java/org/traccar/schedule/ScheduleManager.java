@@ -16,7 +16,6 @@
 package org.traccar.schedule;
 
 import org.traccar.LifecycleObject;
-import org.traccar.api.HealthCheckService;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -31,7 +30,7 @@ public class ScheduleManager implements LifecycleObject {
 
         new TaskDeviceInactivityCheck().schedule(executor);
         new TaskWebSocketKeepalive().schedule(executor);
-        new HealthCheckService().schedule(executor);
+        new TaskHealthCheck().schedule(executor);
     }
 
     @Override
