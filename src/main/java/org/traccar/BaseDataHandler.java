@@ -17,9 +17,13 @@ package org.traccar;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.model.Position;
 
 public abstract class BaseDataHandler extends ChannelInboundHandlerAdapter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BaseDataHandler.class);
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -29,6 +33,7 @@ public abstract class BaseDataHandler extends ChannelInboundHandlerAdapter {
                 ctx.fireChannelRead(position);
             }
         } else {
+            LOGGER.warn("msg is not position {}", msg);
             super.channelRead(ctx, msg);
         }
     }
