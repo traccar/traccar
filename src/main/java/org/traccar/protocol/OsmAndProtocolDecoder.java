@@ -20,10 +20,9 @@ import io.netty.channel.Channel;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.QueryStringDecoder;
-import org.traccar.BaseHttpProtocolDecoder;
-import org.traccar.Context;
-import org.traccar.DeviceSession;
-import org.traccar.Protocol;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.traccar.*;
 import org.traccar.database.CommandsManager;
 import org.traccar.helper.DateUtil;
 import org.traccar.model.CellTower;
@@ -41,6 +40,8 @@ import java.util.List;
 import java.util.Map;
 
 public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(OsmAndProtocolDecoder.class);
 
     public OsmAndProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -134,7 +135,11 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
                         break;
                     case "bearing":
                     case "heading":
-                        position.setCourse(Double.parseDouble(value));
+                        try {
+                            position.setCourse(Double.parseDouble(value));
+                        } catch(Exception e) {
+                            LOGGER.warn("{} parsing heading / bearing on deviceId {}", e.getMessage(), position.getDeviceId());
+                        }
                         break;
                     case "altitude":
                         position.setAltitude(Double.parseDouble(value));
