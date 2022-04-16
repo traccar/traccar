@@ -134,7 +134,7 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
                         try {
                             position.setSpeed(convertSpeed(Double.parseDouble(value), "kn"));
                         } catch (Exception e) {
-                            LOGGER.warn("{} {} parsing speed on deviceId {}", e, e.getMessage(), position.getDeviceId());
+                            LOGGER.warn("{} parsing speed on deviceId {}", e, position.getDeviceId());
                         }
                         break;
                     case "bearing":
@@ -142,7 +142,7 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
                         try {
                             position.setCourse(Double.parseDouble(value));
                         } catch(Exception e) {
-                            LOGGER.warn("{} {} parsing heading / bearing on deviceId {}", e, e.getMessage(), position.getDeviceId());
+                            LOGGER.warn("{} parsing heading / bearing on deviceId {}", e, position.getDeviceId());
                         }
                         break;
                     case "altitude":
