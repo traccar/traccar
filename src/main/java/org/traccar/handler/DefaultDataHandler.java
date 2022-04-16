@@ -39,7 +39,7 @@ public class DefaultDataHandler extends BaseDataHandler {
         try {
             dataManager.addObject(position);
         } catch(com.mysql.cj.jdbc.exceptions.MysqlDataTruncation error) {
-            LOGGER.warn("Failed to store position {}", error.getMessage());
+            LOGGER.warn("Failed to store position, deviceId: {}, {}", position.getDeviceId(), error.getMessage());
         } catch (Exception error) {
             LOGGER.warn("Failed to store position", error);
         }
