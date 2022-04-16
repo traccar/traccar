@@ -131,14 +131,18 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
                                 wifi[0].replace('-', ':'), Integer.parseInt(wifi[1])));
                         break;
                     case "speed":
-                        position.setSpeed(convertSpeed(Double.parseDouble(value), "kn"));
+                        try {
+                            position.setSpeed(convertSpeed(Double.parseDouble(value), "kn"));
+                        } catch (Exception e) {
+                            LOGGER.warn("{} {} parsing speed on deviceId {}", e, e.getMessage(), position.getDeviceId());
+                        }
                         break;
                     case "bearing":
                     case "heading":
                         try {
                             position.setCourse(Double.parseDouble(value));
                         } catch(Exception e) {
-                            LOGGER.warn("{} parsing heading / bearing on deviceId {}", e.getMessage(), position.getDeviceId());
+                            LOGGER.warn("{} {} parsing heading / bearing on deviceId {}", e, e.getMessage(), position.getDeviceId());
                         }
                         break;
                     case "altitude":
