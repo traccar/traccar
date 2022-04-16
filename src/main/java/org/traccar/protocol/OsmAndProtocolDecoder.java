@@ -94,10 +94,18 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
                         }
                         break;
                     case "lat":
-                        position.setLatitude(value.equals(".") ? 0 : Double.parseDouble(value));
+                        try {
+                            position.setLatitude(Double.parseDouble(value));
+                        } catch (Exception e) {
+                            position.setLatitude(0);
+                        }
                         break;
                     case "lon":
-                        position.setLongitude(value.equals(".") ? 0 : Double.parseDouble(value));
+                        try {
+                            position.setLongitude(Double.parseDouble(value));
+                        } catch (Exception e) {
+                            position.setLongitude(0);
+                        }
                         break;
                     case "location":
                         String[] location = value.split(",");
