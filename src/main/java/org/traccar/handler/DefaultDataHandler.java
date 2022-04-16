@@ -44,6 +44,10 @@ public class DefaultDataHandler extends BaseDataHandler {
             LOGGER.warn("Failed to store position", error);
         }
 
+        if (position.getAttributes().containsKey("source")) {
+            LOGGER.warn("saved imported position {} for device {}", position.getId(), position.getDeviceId());
+        }
+
         return position;
     }
 
