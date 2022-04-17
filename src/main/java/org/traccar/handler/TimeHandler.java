@@ -18,6 +18,9 @@ package org.traccar.handler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.traccar.BaseDataHandler;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.config.Config;
@@ -33,6 +36,7 @@ public class TimeHandler extends ChannelInboundHandlerAdapter {
 
     private final boolean useServerTime;
     private final Set<String> protocols;
+    private static final Logger LOGGER = LoggerFactory.getLogger(TimeHandler.class);
 
     public TimeHandler(Config config) {
         useServerTime = config.getString(Keys.TIME_OVERRIDE).equalsIgnoreCase("serverTime");
@@ -46,11 +50,14 @@ public class TimeHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-
         if (msg instanceof Position && (protocols == null
                 || protocols.contains(ctx.pipeline().get(BaseProtocolDecoder.class).getProtocolName()))) {
 
             Position position = (Position) msg;
+            if (position.getAttributes().containsKey("source") && position.getAttributes().get("source").equals("import")) {
+                LOGGER.warn("channelRead {} {} {}", this.getClass(), position.getDeviceId(), position.getFixTime());
+            }
+
             if (useServerTime) {
                 position.setDeviceTime(position.getServerTime());
             }

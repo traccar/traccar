@@ -20,6 +20,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.BaseDataHandler;
 import org.traccar.Context;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
@@ -54,6 +55,9 @@ public class GeocoderHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(final ChannelHandlerContext ctx, Object message) {
         if (message instanceof Position && !ignorePositions) {
             final Position position = (Position) message;
+            if (position.getAttributes().containsKey("source") && position.getAttributes().get("source").equals("import")) {
+                LOGGER.warn("channelRead {} {} {}", this.getClass(), position.getDeviceId(), position.getFixTime());
+            }
             if (processInvalidPositions || position.getValid()) {
                 if (geocoderReuseDistance != 0) {
                     Position lastPosition = identityManager.getLastPosition(position.getDeviceId());
