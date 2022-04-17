@@ -28,10 +28,11 @@ public abstract class BaseDataHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof Position) {
-            if (((Position) msg).getAttributes().containsKey("source")) {
-                LOGGER.warn("channelRead {} {}", this.getClass(), msg);
+            Position position = ((Position) msg);
+            if (position.getAttributes().containsKey("source")) {
+                LOGGER.warn("channelRead {} {} {}", this.getClass(), position.getDeviceId(), position.getFixTime());
             }
-            Position position = handlePosition((Position) msg);
+            position = handlePosition((Position) msg);
             if (position != null) {
                 ctx.fireChannelRead(position);
             }
