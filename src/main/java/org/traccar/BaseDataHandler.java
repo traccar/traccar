@@ -34,6 +34,9 @@ public abstract class BaseDataHandler extends ChannelInboundHandlerAdapter {
             }
             position = handlePosition((Position) msg);
             if (position != null) {
+                if (position.getAttributes().containsKey("source") && position.getAttributes().get("source").equals("import")) {
+                    LOGGER.warn("fireChannelRead {} {} {}", this.getClass(), position.getDeviceId(), position.getFixTime());
+                }
                 ctx.fireChannelRead(position);
             }
         } else {
