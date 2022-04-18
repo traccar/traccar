@@ -17,6 +17,8 @@
 package org.traccar.handler;
 
 import io.netty.channel.ChannelHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.BaseDataHandler;
 import org.traccar.model.Position;
 
@@ -25,12 +27,17 @@ public class MotionHandler extends BaseDataHandler {
 
     private double speedThreshold;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MotionHandler.class);
+
     public MotionHandler(double speedThreshold) {
         this.speedThreshold = speedThreshold;
     }
 
     @Override
     protected Position handlePosition(Position position) {
+        if (position.getAttributes().containsKey("source") && position.getAttributes().get("source").equals("import")) {
+            LOGGER.warn("channelRead {} {} {}", this.getClass(), position.getDeviceId(), position.getFixTime());
+        }
         if (!position.getAttributes().containsKey(Position.KEY_MOTION)) {
             position.set(Position.KEY_MOTION, position.getSpeed() > speedThreshold);
         }
