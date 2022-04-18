@@ -46,6 +46,9 @@ public class GeolocationHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(final ChannelHandlerContext ctx, Object message) {
         if (message instanceof Position) {
             final Position position = (Position) message;
+            if (position.getAttributes().containsKey("source") && position.getAttributes().get("source").equals("import")) {
+                LOGGER.warn("channelRead {} {} {}", this.getClass(), position.getDeviceId(), position.getFixTime());
+            }
             if ((position.getOutdated() || processInvalidPositions && !position.getValid())
                     && position.getNetwork() != null) {
                 if (statisticsManager != null) {
