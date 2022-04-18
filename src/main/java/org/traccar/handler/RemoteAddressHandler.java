@@ -18,12 +18,16 @@ package org.traccar.handler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.model.Position;
 
 import java.net.InetSocketAddress;
 
 @ChannelHandler.Sharable
 public class RemoteAddressHandler extends ChannelInboundHandlerAdapter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RemoteAddressHandler.class);
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
@@ -34,6 +38,9 @@ public class RemoteAddressHandler extends ChannelInboundHandlerAdapter {
         if (msg instanceof Position) {
             Position position = (Position) msg;
             position.set(Position.KEY_IP, hostAddress);
+            if (position.getAttributes().containsKey("source") && position.getAttributes().get("source").equals("import")) {
+                LOGGER.warn("channelRead {} {} {}", this.getClass(), position.getDeviceId(), position.getFixTime());
+            }
         }
 
         ctx.fireChannelRead(msg);
