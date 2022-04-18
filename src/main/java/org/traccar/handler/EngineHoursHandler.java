@@ -17,8 +17,6 @@
 package org.traccar.handler;
 
 import io.netty.channel.ChannelHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.traccar.BaseDataHandler;
 import org.traccar.database.IdentityManager;
 import org.traccar.model.Position;
@@ -28,17 +26,12 @@ public class EngineHoursHandler extends BaseDataHandler {
 
     private final IdentityManager identityManager;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EngineHoursHandler.class);
-
     public EngineHoursHandler(IdentityManager identityManager) {
         this.identityManager = identityManager;
     }
 
     @Override
     protected Position handlePosition(Position position) {
-        if (position.getAttributes().containsKey("source") && position.getAttributes().get("source").equals("import")) {
-            LOGGER.warn("channelRead {} {} {}", this.getClass(), position.getDeviceId(), position.getFixTime());
-        }
         if (!position.getAttributes().containsKey(Position.KEY_HOURS)) {
             Position last = identityManager.getLastPosition(position.getDeviceId());
             if (last != null) {

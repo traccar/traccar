@@ -17,8 +17,6 @@
 package org.traccar.handler;
 
 import io.netty.channel.ChannelHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.traccar.BaseDataHandler;
 import org.traccar.database.IdentityManager;
 import org.traccar.model.Position;
@@ -32,13 +30,8 @@ public class CopyAttributesHandler extends BaseDataHandler {
         this.identityManager = identityManager;
     }
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CopyAttributesHandler.class);
-
     @Override
     protected Position handlePosition(Position position) {
-        if (position.getAttributes().containsKey("source") && position.getAttributes().get("source").equals("import")) {
-            LOGGER.warn("channelRead {} {} {}", this.getClass(), position.getDeviceId(), position.getFixTime());
-        }
         String attributesString = identityManager.lookupAttributeString(
                 position.getDeviceId(), "processing.copyAttributes", "", false, true);
         Position last = identityManager.getLastPosition(position.getDeviceId());

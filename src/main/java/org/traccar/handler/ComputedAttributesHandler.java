@@ -104,9 +104,6 @@ public class ComputedAttributesHandler extends BaseDataHandler {
 
     @Override
     protected Position handlePosition(Position position) {
-        if (position.getAttributes().containsKey("source") && position.getAttributes().get("source").equals("import")) {
-            LOGGER.warn("channelRead {} {} {}", this.getClass(), position.getDeviceId(), position.getFixTime());
-        }
         Collection<Attribute> attributes = attributesManager.getItems(
                 attributesManager.getAllDeviceItems(position.getDeviceId()));
         for (Attribute attribute : attributes) {
