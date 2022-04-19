@@ -80,7 +80,7 @@ public class GeocoderHandler extends ChannelInboundHandlerAdapter {
                     @Override
                     public void onSuccess(String address) {
                         if (ctx.pipeline().toMap().isEmpty()) {
-                            LOGGER.warn("empty pipeline on {} {}", position.getDeviceId(), position.getFixTime());
+                            LOGGER.warn("empty pipeline on {} {} {}", position.getProtocol(), position.getDeviceId(), position.getFixTime());
                         }
                         position.setAddress(address);
                         ctx.fireChannelRead(position);
