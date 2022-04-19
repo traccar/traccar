@@ -77,6 +77,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
     private final void addHandlers(ChannelPipeline pipeline, Class<? extends ChannelHandler>... handlerClasses) {
         for (Class<? extends ChannelHandler> handlerClass : handlerClasses) {
             if (handlerClass != null) {
+                LOGGER.warn("adding handler {} on {}", handlerClass, this.getClass());
                 pipeline.addLast(Main.getInjector().getInstance(handlerClass));
             }
         }
