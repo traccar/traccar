@@ -77,14 +77,11 @@ public class GeocoderHandler extends ChannelInboundHandlerAdapter {
                         new Geocoder.ReverseGeocoderCallback() {
                     @Override
                     public void onSuccess(String address) {
-                        if (position.getAttributes().containsKey("source") && position.getAttributes().get("source").equals("import")) {
-                            LOGGER.warn("geocoderSuccess {} {} {} before fireChannelRead {}", ctx.pipeline().toMap(), this.getClass(), position.getDeviceId(), position.getFixTime());
+                        if (ctx.pipeline().toMap().isEmpty()) {
+                            LOGGER.warn("empty pipeline on {} {}", position.getDeviceId(), position.getFixTime());
                         }
                         position.setAddress(address);
                         ctx.fireChannelRead(position);
-                        if (position.getAttributes().containsKey("source") && position.getAttributes().get("source").equals("import")) {
-                            LOGGER.warn("after fireChannelRead {} {} {} {}", ctx.pipeline().toMap(), this.getClass(), position.getDeviceId(), position.getFixTime());
-                        }
                     }
 
                     @Override
