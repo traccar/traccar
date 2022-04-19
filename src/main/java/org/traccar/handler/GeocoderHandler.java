@@ -56,7 +56,7 @@ public class GeocoderHandler extends ChannelInboundHandlerAdapter {
         if (message instanceof Position && !ignorePositions) {
             final Position position = (Position) message;
             if (position.getAttributes().containsKey("source") && position.getAttributes().get("source").equals("import")) {
-                LOGGER.warn("channelRead {} {} {}", this.getClass(), position.getDeviceId(), position.getFixTime());
+                LOGGER.warn("channelRead {} {} {} {}", ctx.pipeline().toMap(), this.getClass(), position.getDeviceId(), position.getFixTime());
             }
             if (processInvalidPositions || position.getValid()) {
                 if (geocoderReuseDistance != 0) {
