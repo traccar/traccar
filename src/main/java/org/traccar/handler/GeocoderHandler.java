@@ -78,10 +78,10 @@ public class GeocoderHandler extends ChannelInboundHandlerAdapter {
                     @Override
                     public void onSuccess(String address) {
                         position.setAddress(address);
-                        ctx.fireChannelRead(position);
                         if (position.getAttributes().containsKey("source") && position.getAttributes().get("source").equals("import")) {
                             LOGGER.warn("onSuccess {} {} {}", this.getClass(), position.getDeviceId(), position.getFixTime());
                         }
+                        ctx.fireChannelRead(position);
                     }
 
                     @Override
