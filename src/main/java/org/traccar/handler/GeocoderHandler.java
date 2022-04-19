@@ -55,6 +55,11 @@ public class GeocoderHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(final ChannelHandlerContext ctx, Object message) {
         if (message instanceof Position && !ignorePositions) {
             final Position position = (Position) message;
+            if (position.getAttributes().containsKey("address")) {
+                position.setAddress(position.getAttributes().get("address").toString());
+                ctx.fireChannelRead(position);
+                return;
+            }
             if (processInvalidPositions || position.getValid()) {
                 if (geocoderReuseDistance != 0) {
                     Position lastPosition = identityManager.getLastPosition(position.getDeviceId());
