@@ -269,7 +269,7 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                     position.set("freq" + (j + 2 - 35), buf.readUnsignedShortLE());
                                     break;
                                 case 37:
-                                    position.set(Position.KEY_HOURS, buf.readUnsignedIntLE());
+                                    position.set(Position.KEY_HOURS, buf.readUnsignedIntLE() / 60);
                                     break;
                                 case 38:
                                 case 39:
@@ -294,6 +294,86 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                 case 52:
                                     value = buf.readByte();
                                     position.set(Position.PREFIX_TEMP + (j + 2 - 45), (value != 0x80) ? value : null);
+                                    break;
+                                case 53:
+                                    value = buf.readUnsignedShortLE();
+                                    if(value == 0x7FFF){
+                                        position.set(Position.KEY_FUEL_LEVEL + "Level", (Boolean) null);
+                                        position.set(Position.KEY_FUEL_LEVEL, (Boolean) null);
+                                    } else if (BitUtil.check(value, 7)){
+                                        position.set(Position.KEY_FUEL_LEVEL + "Level", BitUtil.to(value, 6));
+                                        position.set(Position.KEY_FUEL_LEVEL, (Boolean) null);
+                                    }
+                                    else{
+                                        position.set(Position.KEY_FUEL_LEVEL + "Level", (Boolean) null);
+                                        position.set(Position.KEY_FUEL_LEVEL, BitUtil.to(value, 6) / 10);
+                                    }
+                                    break;
+                                case 54:
+                                    position.set(Position.KEY_FUEL_USED, buf.readFloatLE());
+                                    break;
+                                case 55:
+                                    value = buf.readUnsignedShortLE();
+                                    position.set(Position.KEY_RPM, (value != 0xFFFF) ? value : null);
+                                    break;
+                                case 56:
+                                    value = buf.readByte();
+                                    position.set(Position.KEY_COOLANT_TEMP, (value != 0x80) ? value : null);
+                                    break;
+                                case 57:
+                                    position.set(Position.KEY_OBD_ODOMETER, buf.readFloatLE());
+                                    break;
+                                case 58:
+                                case 59:
+                                case 60:
+                                case 61:
+                                case 62:
+                                    value = buf.readUnsignedShortLE();
+                                    position.set(
+                                            Position.KEY_AXLE_WEIGHT + (j + 2 - 58), (value != 65535) ? value : null
+                                    );
+                                    break;
+                                case 63:
+                                    value = buf.readUnsignedByte();
+                                    position.set("obdAccelPos", (value != 0xFF) ? value : null);
+                                    break;
+                                case 64:
+                                    value = buf.readUnsignedByte();
+                                    position.set("obdBrakePos", (value != 0xFF) ? value : null);
+                                    break;
+                                case 65:
+                                    value = buf.readUnsignedByte();
+                                    position.set(Position.KEY_ENGINE_LOAD, (value != 0xFF) ? value : null);
+                                    break;
+                                case 66:
+                                    value = buf.readUnsignedShortLE();
+                                    if(value == 0x7FFF){
+                                        position.set("obdAdBlueLevel", (Boolean) null);
+                                        position.set("obdAdBlue", (Boolean) null);
+                                    } else if (BitUtil.check(value, 7)){
+                                        position.set("obdAdBlueLevel", BitUtil.to(value, 6));
+                                        position.set("obdAdBlue", (Boolean) null);
+                                    }
+                                    else{
+                                        position.set("obdAdBlueLevel", (Boolean) null);
+                                        position.set("obdAdBlue", BitUtil.to(value, 6) / 10);
+                                    }
+                                    break;
+                                case 67:
+                                    position.set("obdHours", buf.readUnsignedIntLE() / 60);
+                                    break;
+                                case 68:
+                                    value = buf.readUnsignedShortLE();
+                                    position.set(
+                                            Position.KEY_ODOMETER_SERVICE, (value != 0xFFFF) ? (value * 5000) : null
+                                    );
+                                    break;
+                                case 69:
+                                    value = buf.readUnsignedByte();
+                                    position.set(
+                                            Position.KEY_OBD_SPEED,
+                                            (value != 0xFF) ? UnitsConverter.knotsFromKph(value) : null
+                                    );
                                     break;
                                 default:
                                     buf.skipBytes(getItemLength(j + 1));
