@@ -86,7 +86,7 @@ public class GeocoderHandler extends ChannelInboundHandlerAdapter {
 
                     @Override
                     public void onFailure(Throwable e) {
-                        LOGGER.warn("Geocoding failed", e);
+                        LOGGER.warn("Geocoding failed {} {}", e, e);
                         ctx.fireChannelRead(position);
                         if (position.getAttributes().containsKey("source") && position.getAttributes().get("source").equals("import")) {
                             LOGGER.warn("onFailure {} {} {}", this.getClass(), position.getDeviceId(), position.getFixTime());
