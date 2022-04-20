@@ -297,14 +297,13 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                     break;
                                 case 53:
                                     value = buf.readUnsignedShortLE();
-                                    if(value == 0x7FFF){
+                                    if (value == 0x7FFF) {
                                         position.set(Position.KEY_FUEL_LEVEL + "Level", (Boolean) null);
                                         position.set(Position.KEY_FUEL_LEVEL, (Boolean) null);
-                                    } else if (BitUtil.check(value, 7)){
+                                    } else if (BitUtil.check(value, 7)) {
                                         position.set(Position.KEY_FUEL_LEVEL + "Level", BitUtil.to(value, 6));
                                         position.set(Position.KEY_FUEL_LEVEL, (Boolean) null);
-                                    }
-                                    else{
+                                    } else {
                                         position.set(Position.KEY_FUEL_LEVEL + "Level", (Boolean) null);
                                         position.set(Position.KEY_FUEL_LEVEL, BitUtil.to(value, 6) / 10);
                                     }
@@ -347,14 +346,13 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                     break;
                                 case 66:
                                     value = buf.readUnsignedShortLE();
-                                    if(value == 0x7FFF){
+                                    if (value == 0x7FFF) {
                                         position.set("obdAdBlueLevel", (Boolean) null);
                                         position.set("obdAdBlue", (Boolean) null);
-                                    } else if (BitUtil.check(value, 7)){
+                                    } else if (BitUtil.check(value, 7)) {
                                         position.set("obdAdBlueLevel", BitUtil.to(value, 6));
                                         position.set("obdAdBlue", (Boolean) null);
-                                    }
-                                    else{
+                                    } else {
                                         position.set("obdAdBlueLevel", (Boolean) null);
                                         position.set("obdAdBlue", BitUtil.to(value, 6) / 10);
                                     }
