@@ -44,6 +44,7 @@ import java.util.TimeZone;
 
 public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
+    private boolean universal;
     private String prefix;
 
     private int protocolType;
@@ -56,6 +57,10 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
     public SuntechProtocolDecoder(Protocol protocol) {
         super(protocol);
+    }
+
+    public boolean getUniversal() {
+        return universal;
     }
 
     public String getPrefix() {
@@ -831,6 +836,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
         if (buf.getByte(buf.readerIndex() + 1) == 0) {
 
+            universal = true;
             return decodeBinary(channel, remoteAddress, buf);
 
         } else {
@@ -841,6 +847,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             if (prefix.equals("CRR")) {
                 return decodeCrashReport(channel, remoteAddress, buf);
             } else if (prefix.length() < 5) {
+                universal = true;
                 return decodeUniversal(channel, remoteAddress, values);
             } else if (prefix.endsWith("HTE")) {
                 return decodeTravelReport(channel, remoteAddress, values);
