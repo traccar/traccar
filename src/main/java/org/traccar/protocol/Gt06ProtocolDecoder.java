@@ -113,6 +113,13 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_MULTIMEDIA_2 = 0x41;
     public static final int MSG_ALARM = 0x95;
 
+    private enum Variant {
+        VXT01,
+        STANDARD,
+    }
+
+    private Variant variant;
+
     private static boolean isSupported(int type) {
         return hasGps(type) || hasLbs(type) || hasStatus(type);
     }
@@ -333,8 +340,15 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             case 4:
                 position.set(Position.KEY_ALARM, Position.ALARM_SOS);
                 break;
+            case 6:
+                position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE);
+                break;
             case 7:
-                position.set(Position.KEY_ALARM, Position.ALARM_REMOVING);
+                if (variant == Variant.VXT01) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+                } else {
+                    position.set(Position.KEY_ALARM, Position.ALARM_REMOVING);
+                }
                 break;
             default:
                 break;
@@ -346,7 +360,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
         }
         position.set(Position.KEY_RSSI, buf.readUnsignedByte());
-        position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
 
         return true;
     }
@@ -445,7 +458,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private Object decodeBasic(Channel channel, SocketAddress remoteAddress, ByteBuf buf) throws Exception {
+    private Object decodeBasic(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
 
         int length = buf.readUnsignedByte();
         int dataLength = length - 5;
@@ -903,44 +916,47 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
         if (hasStatus(type)) {
             decodeStatus(position, buf, true);
+            position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
         }
 
-        if (type == MSG_GPS_LBS_1 && buf.readableBytes() > 75 + 6) {
-            position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
-            String data = buf.readCharSequence(buf.readUnsignedByte(), StandardCharsets.US_ASCII).toString();
-            buf.readUnsignedByte(); // alarm
-            buf.readUnsignedByte(); // swiped
-            position.set("driverLicense", data.trim());
-        }
-
-        if (type == MSG_GPS_LBS_1 && buf.readableBytes() == 18) {
-            decodeStatus(position, buf, false);
-            position.set("oil", buf.readUnsignedShort());
-            int temperature = buf.readUnsignedByte();
-            if (BitUtil.check(temperature, 7)) {
-                temperature = -BitUtil.to(temperature, 7);
-            }
-            position.set(Position.PREFIX_TEMP + 1, temperature);
-            position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 10);
-        }
-
-        if (type == MSG_GPS_LBS_1 && buf.readableBytes() == 2 + 6) {
-            int mask = buf.readUnsignedShort();
-            position.set(Position.KEY_IGNITION, BitUtil.check(mask, 8 + 7));
-            position.set(Position.PREFIX_IN + 2, BitUtil.check(mask, 8 + 6));
-            if (BitUtil.check(mask, 8 + 4)) {
-                int value = BitUtil.to(mask, 8 + 1);
-                if (BitUtil.check(mask, 8 + 1)) {
-                    value = -value;
-                }
-                position.set(Position.PREFIX_TEMP + 1, value);
-            } else {
-                int value = BitUtil.to(mask, 8 + 2);
-                if (BitUtil.check(mask, 8 + 5)) {
-                    position.set(Position.PREFIX_ADC + 1, value);
+        if (type == MSG_GPS_LBS_1) {
+            if (buf.readableBytes() > 75 + 6) {
+                position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+                String data = buf.readCharSequence(buf.readUnsignedByte(), StandardCharsets.US_ASCII).toString();
+                buf.readUnsignedByte(); // alarm
+                buf.readUnsignedByte(); // swiped
+                position.set("driverLicense", data.trim());
+            } else if (buf.readableBytes() == 8) {
+                int mask = buf.readUnsignedShort();
+                position.set(Position.KEY_IGNITION, BitUtil.check(mask, 8 + 7));
+                position.set(Position.PREFIX_IN + 2, BitUtil.check(mask, 8 + 6));
+                if (BitUtil.check(mask, 8 + 4)) {
+                    int value = BitUtil.to(mask, 8 + 1);
+                    if (BitUtil.check(mask, 8 + 1)) {
+                        value = -value;
+                    }
+                    position.set(Position.PREFIX_TEMP + 1, value);
                 } else {
-                    position.set(Position.PREFIX_ADC + 1, value * 0.1);
+                    int value = BitUtil.to(mask, 8 + 2);
+                    if (BitUtil.check(mask, 8 + 5)) {
+                        position.set(Position.PREFIX_ADC + 1, value);
+                    } else {
+                        position.set(Position.PREFIX_ADC + 1, value * 0.1);
+                    }
                 }
+            } else if (buf.readableBytes() == 11) {
+                decodeStatus(position, buf, false);
+                buf.readUnsignedByte(); // alarm extension
+            } else if (buf.readableBytes() == 18) {
+                decodeStatus(position, buf, false);
+                position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
+                position.set("oil", buf.readUnsignedShort());
+                int temperature = buf.readUnsignedByte();
+                if (BitUtil.check(temperature, 7)) {
+                    temperature = -BitUtil.to(temperature, 7);
+                }
+                position.set(Position.PREFIX_TEMP + 1, temperature);
+                position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 10);
             }
         }
 
@@ -1354,21 +1370,42 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
+    private void decodeVariant(ByteBuf buf) {
+        int header = buf.getUnsignedShort(buf.readerIndex());
+        int length;
+        int type;
+        if (header == 0x7878) {
+            length = buf.getUnsignedByte(buf.readerIndex() + 2);
+            type = buf.getUnsignedByte(buf.readerIndex() + 2 + 1);
+        } else {
+            length = buf.getUnsignedShort(buf.readerIndex() + 2);
+            type = buf.getUnsignedByte(buf.readerIndex() + 2 + 2);
+        }
+
+        if (header == 0x7878 && type == MSG_GPS_LBS_1 && length == 0x24) {
+            variant = Variant.VXT01;
+        } else if (header == 0x7878 && type == MSG_GPS_LBS_STATUS_1 && length == 0x24) {
+            variant = Variant.VXT01;
+        } else {
+            variant = Variant.STANDARD;
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ByteBuf buf = (ByteBuf) msg;
 
+        decodeVariant(buf);
+
         int header = buf.readShort();
 
         if (header == 0x7878) {
             return decodeBasic(channel, remoteAddress, buf);
-        } else if (header == 0x7979) {
+        } else {
             return decodeExtended(channel, remoteAddress, buf);
         }
-
-        return null;
     }
 
 }
