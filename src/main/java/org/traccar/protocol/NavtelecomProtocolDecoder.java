@@ -298,13 +298,13 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                 case 53:
                                     value = buf.readUnsignedShortLE();
                                     if (value == 0x7FFF) {
-                                        position.set(Position.KEY_FUEL_LEVEL + "Level", (Boolean) null);
+                                        position.set("fuelLevel", (Boolean) null);
                                         position.set(Position.KEY_FUEL_LEVEL, (Boolean) null);
                                     } else if (BitUtil.check(value, 7)) {
-                                        position.set(Position.KEY_FUEL_LEVEL + "Level", BitUtil.to(value, 6));
+                                        position.set("fuelLevel", BitUtil.to(value, 6));
                                         position.set(Position.KEY_FUEL_LEVEL, (Boolean) null);
                                     } else {
-                                        position.set(Position.KEY_FUEL_LEVEL + "Level", (Boolean) null);
+                                        position.set("fuelLevel", (Boolean) null);
                                         position.set(Position.KEY_FUEL_LEVEL, BitUtil.to(value, 6) / 10);
                                     }
                                     break;
@@ -329,8 +329,7 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                 case 62:
                                     value = buf.readUnsignedShortLE();
                                     position.set(
-                                            Position.KEY_AXLE_WEIGHT + (j + 2 - 58), (value != 65535) ? value : null
-                                    );
+                                            Position.KEY_AXLE_WEIGHT + (j + 2 - 58), (value != 65535) ? value : null);
                                     break;
                                 case 63:
                                     value = buf.readUnsignedByte();
@@ -363,15 +362,13 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                 case 68:
                                     value = buf.readUnsignedShortLE();
                                     position.set(
-                                            Position.KEY_ODOMETER_SERVICE, (value != 0xFFFF) ? (value * 5000) : null
-                                    );
+                                            Position.KEY_ODOMETER_SERVICE, (value != 0xFFFF) ? (value * 5000) : null);
                                     break;
                                 case 69:
                                     value = buf.readUnsignedByte();
                                     position.set(
                                             Position.KEY_OBD_SPEED,
-                                            (value != 0xFF) ? UnitsConverter.knotsFromKph(value) : null
-                                    );
+                                            (value != 0xFF) ? UnitsConverter.knotsFromKph(value) : null);
                                     break;
                                 default:
                                     buf.skipBytes(getItemLength(j + 1));
