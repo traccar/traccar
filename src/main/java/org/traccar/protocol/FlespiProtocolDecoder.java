@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,11 +54,11 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
         List<Position> positions = new LinkedList<>();
         for (int i = 0; i < result.size(); i++) {
             JsonObject message = result.getJsonObject(i);
-            JsonString ident = message.getJsonString("ident");
-            if (ident == null) {
+            JsonString identifier = message.getJsonString("ident");
+            if (identifier == null) {
                 continue;
             }
-            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, ident.getString());
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, identifier.getString());
             if (deviceSession == null) {
                 continue;
             }
