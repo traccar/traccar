@@ -228,6 +228,15 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
                     position.set(Position.KEY_ALARM, Position.ALARM_BONNET);
                 }
                 return true;
+            case "custom.wln_accel_max":
+                position.set("maxAcceleration", ((JsonNumber) value).doubleValue());
+                return true;
+            case "custom.wln_brk_max":
+                position.set("maxBraking", ((JsonNumber) value).doubleValue());
+                return true;
+            case "custom.wln_crn_max":
+                position.set("maxCornering", ((JsonNumber) value).doubleValue());
+                return true;
             default:
                 return false;
         }
