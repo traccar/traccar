@@ -1,5 +1,5 @@
 /*
-Supp * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,14 +107,17 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_OBD = 0x8C;                // FM08ABC
     public static final int MSG_DTC = 0x65;                // FM08ABC
     public static final int MSG_PID = 0x66;                // FM08ABC
-    public static final int MSG_BMS = 0x20;                // WD-209
-    public static final int MSG_MULTIMEDIA = 0x21;         // WD-209
-    public static final int MSG_BMS_2 = 0x40;              // WD-209
-    public static final int MSG_MULTIMEDIA_2 = 0x41;       // WD-209
+    public static final int MSG_BMS = 0x40;                // WD-209
+    public static final int MSG_MULTIMEDIA = 0x41;         // WD-209
     public static final int MSG_ALARM = 0x95;              // JC100
 
     private enum Variant {
         VXT01,
+        WANWAY_S20,
+        GT06E_CARD,
+        BENWAY,
+        S5,
+        SPACE10X,
         STANDARD,
     }
 
@@ -472,7 +475,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                         deviceSession.setTimeZone(timeZone);
                     }
                 }
-
             }
 
             if (deviceSession != null) {
@@ -646,10 +648,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             return position;
 
-        } else if (type == MSG_LBS_STATUS && dataLength >= 18) {
-
-            return null; // space10x multi-lbs message
-
         } else if (type == MSG_LBS_MULTIPLE_1 || type == MSG_LBS_MULTIPLE_2 || type == MSG_LBS_MULTIPLE_3
                 || type == MSG_LBS_EXTEND || type == MSG_LBS_WIFI || type == MSG_LBS_2
                 || type == MSG_WIFI_3 || type == MSG_WIFI_5) {
@@ -662,9 +660,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, dateBuilder.getDate());
 
-            boolean hasCellCount = type == MSG_LBS_MULTIPLE_3 && dataLength == 44;
-
-            if (hasCellCount) {
+            if (variant == Variant.WANWAY_S20) {
                 buf.readUnsignedByte(); // ta
             }
 
@@ -672,7 +668,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             int mnc = BitUtil.check(mcc, 15) ? buf.readUnsignedShort() : buf.readUnsignedByte();
             Network network = new Network();
 
-            int cellCount = hasCellCount ? buf.readUnsignedByte() : type == MSG_WIFI_5 ? 6 : 7;
+            int cellCount = variant == Variant.WANWAY_S20 ? buf.readUnsignedByte() : type == MSG_WIFI_5 ? 6 : 7;
             for (int i = 0; i < cellCount; i++) {
                 int lac = longFormat ? buf.readInt() : buf.readUnsignedShort();
                 int cid = longFormat ? (int) buf.readLong() : buf.readUnsignedMedium();
@@ -682,7 +678,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
 
-            if (!hasCellCount) {
+            if (variant != Variant.WANWAY_S20) {
                 buf.readUnsignedByte(); // ta
             }
 
@@ -714,7 +710,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
 
-        } else if (type == MSG_BMS || type == MSG_BMS_2) {
+        } else if (type == MSG_BMS) {
 
             buf.skipBytes(8); // serial number
 
@@ -769,6 +765,10 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (isSupported(type)) {
 
+            if (type == MSG_LBS_STATUS && variant == Variant.SPACE10X) {
+                return null; // multi-lbs message
+            }
+
             if (hasGps(type)) {
                 decodeGps(position, buf, false, deviceSession.getTimeZone());
             } else {
@@ -785,13 +785,13 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (type == MSG_GPS_LBS_1) {
-                if (buf.readableBytes() > 75 + 6) {
+                if (variant == Variant.GT06E_CARD) {
                     position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
                     String data = buf.readCharSequence(buf.readUnsignedByte(), StandardCharsets.US_ASCII).toString();
                     buf.readUnsignedByte(); // alarm
                     buf.readUnsignedByte(); // swiped
                     position.set("driverLicense", data.trim());
-                } else if (buf.readableBytes() == 8) {
+                } else if (variant == Variant.BENWAY) {
                     int mask = buf.readUnsignedShort();
                     position.set(Position.KEY_IGNITION, BitUtil.check(mask, 8 + 7));
                     position.set(Position.PREFIX_IN + 2, BitUtil.check(mask, 8 + 6));
@@ -809,10 +809,10 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                             position.set(Position.PREFIX_ADC + 1, value * 0.1);
                         }
                     }
-                } else if (buf.readableBytes() == 11) {
+                } else if (variant == Variant.VXT01) {
                     decodeStatus(position, buf, false);
                     buf.readUnsignedByte(); // alarm extension
-                } else if (buf.readableBytes() == 18) {
+                } else if (variant == Variant.S5) {
                     decodeStatus(position, buf, false);
                     position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
                     position.set("oil", buf.readUnsignedShort());
@@ -1231,7 +1231,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             return position;
 
-        } else if (type == MSG_MULTIMEDIA || type == MSG_MULTIMEDIA_2) {
+        } else if (type == MSG_MULTIMEDIA) {
 
             buf.skipBytes(8); // serial number
             long timestamp = buf.readUnsignedInt() * 1000;
@@ -1322,6 +1322,16 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             variant = Variant.VXT01;
         } else if (header == 0x7878 && type == MSG_GPS_LBS_STATUS_1 && length == 0x24) {
             variant = Variant.VXT01;
+        } else if (header == 0x7878 && type == MSG_LBS_MULTIPLE_3 && length == 0x31) {
+            variant = Variant.WANWAY_S20;
+        } else if (header == 0x7878 && type == MSG_GPS_LBS_1 && length >= 0x71) {
+            variant = Variant.GT06E_CARD;
+        } else if (header == 0x7878 && type == MSG_GPS_LBS_1 && length == 0x21) {
+            variant = Variant.BENWAY;
+        } else if (header == 0x7878 && type == MSG_GPS_LBS_1 && length == 0x2b) {
+            variant = Variant.S5;
+        } else if (header == 0x7878 && type == MSG_LBS_STATUS && length >= 0x17) {
+            variant = Variant.SPACE10X;
         } else {
             variant = Variant.STANDARD;
         }
