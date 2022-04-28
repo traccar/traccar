@@ -113,9 +113,10 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
                         Integer.parseInt(payload.getString("modem1.lac"), 16),
                         Integer.parseInt(payload.getString("modem1.cell_id"), 16));
 
-                if (imsi("modem1.rsrp")) {
+                if (payload.containsKey("modem1.rsrp")) {
                     cellTower.setSignalStrength(payload.getInt("modem1.rsrp"));
-                } else if (payload.containsKey("modem1.rssi")) {
+                }
+                if (payload.containsKey("modem1.rssi")) {
                     cellTower.setSignalStrength(payload.getInt("modem1.rssi"));
                 }
 
@@ -156,22 +157,22 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, new Date(payload.getInt("motion.ts") * 1000L));
             if (payload.containsKey("motion.ax")) {
-                position.set("ax", payload.containsKey("motion.ax").doubleValue());
+                position.set("ax", payload.getJsonNumber("motion.ax").doubleValue());
             }
             if (payload.containsKey("motion.ay")) {
-                position.set("ay", payload.containsKey("motion.ay").doubleValue());
+                position.set("ay", payload.getJsonNumber("motion.ay").doubleValue());
             }
             if (payload.containsKey("motion.az")) {
-                position.set("az", payload.containsKey("motion.az").doubleValue());
+                position.set("az", payload.getJsonNumber("motion.az").doubleValue());
             }
             if (payload.containsKey("motion.gx")) {
-                position.set("gx", payload.containsKey("motion.gx").doubleValue());
+                position.set("gx", payload.getJsonNumber("motion.gx").doubleValue());
             }
             if (payload.containsKey("motion.gy")) {
-                position.set("gy", payload.containsKey("motion.gy").doubleValue());
+                position.set("gy", payload.getJsonNumber("motion.gy").doubleValue());
             }
             if (payload.containsKey("motion.gz")) {
-                position.set("gz", payload.containsKey("motion.gz").doubleValue());
+                position.set("gz", payload.getJsonNumber("motion.gz").doubleValue());
             }
         } else if (topic.contains("/io/")) {
 
