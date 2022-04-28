@@ -271,7 +271,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
         Command command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_SOS_NUMBER);
-        command.set(Command.KEY_INDEX, "0");
+        command.set(Command.KEY_INDEX, 0);
         command.set(Command.KEY_PHONE, "+55555555555");
         command.set(Command.KEY_DEVICE_PASSWORD, "232323");
 

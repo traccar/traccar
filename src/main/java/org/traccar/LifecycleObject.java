@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,7 @@
  */
 package org.traccar;
 
-import io.netty.channel.group.ChannelGroup;
-
-public interface TrackerConnector extends LifecycleObject {
-
-    boolean isDatagram();
-
-    boolean isSecure();
-
-    ChannelGroup getChannelGroup();
-
+public interface LifecycleObject {
+    void start() throws Exception;
+    void stop();
 }

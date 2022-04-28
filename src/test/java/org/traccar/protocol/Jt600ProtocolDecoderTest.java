@@ -11,6 +11,9 @@ public class Jt600ProtocolDecoderTest extends ProtocolTest {
 
         var decoder = new Jt600ProtocolDecoder(null);
 
+        verifyPosition(decoder, buffer(
+                "(8000632862,P45,290322,132412,25.28217,S,57.54683,W,A,0,0,5,0,0000000000,0,0,9,0)"));
+
         verifyPositions(decoder, binary(
                 "2480413009781914003406102107544354193631006213423b00000000006c070000000020e064f91ea0671d00020f0f0f0f0f0f0f0f0f0f07f100ea0f6e"));
 

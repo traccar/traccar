@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,6 +121,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(value, 4) || BitUtil.check(value, 9)
                 || BitUtil.check(value, 10) || BitUtil.check(value, 11)) {
             return Position.ALARM_FAULT;
+        }
+        if (BitUtil.check(value, 7)) {
+            return Position.ALARM_LOW_BATTERY;
         }
         if (BitUtil.check(value, 8)) {
             return Position.ALARM_POWER_OFF;

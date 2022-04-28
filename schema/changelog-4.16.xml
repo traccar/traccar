@@ -16,11 +16,11 @@
       <column name="disablereports" type="BOOLEAN" defaultValueBoolean="false" />
     </addColumn>
 
-    <renameColumn tableName="tc_orders" oldColumnName="toAddress" newColumnName="toaddresstmp" />
-    <renameColumn tableName="tc_orders" oldColumnName="fromAddress" newColumnName="fromaddresstmp" />
+    <renameColumn tableName="tc_orders" oldColumnName="toAddress" newColumnName="toaddresstmp" columnDataType="VARCHAR(512)" />
+    <renameColumn tableName="tc_orders" oldColumnName="fromAddress" newColumnName="fromaddresstmp" columnDataType="VARCHAR(512)" />
 
-    <renameColumn tableName="tc_orders" oldColumnName="toaddresstmp" newColumnName="toaddress" />
-    <renameColumn tableName="tc_orders" oldColumnName="fromaddresstmp" newColumnName="fromaddress" />
+    <renameColumn tableName="tc_orders" oldColumnName="toaddresstmp" newColumnName="toaddress" columnDataType="VARCHAR(512)" />
+    <renameColumn tableName="tc_orders" oldColumnName="fromaddresstmp" newColumnName="fromaddress" columnDataType="VARCHAR(512)" />
 
   </changeSet>
 

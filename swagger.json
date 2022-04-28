@@ -2891,6 +2891,10 @@
             "type": "integer",
             "description": "Geofence Id, can be second parameter only"
           },
+          "notificationId": {
+            "type": "integer",
+            "description": "Notification Id, can be second parameter only"
+          },
           "calendarId": {
             "type": "integer",
             "description": "Calendar Id, can be second parameter only and only in combination with userId"
