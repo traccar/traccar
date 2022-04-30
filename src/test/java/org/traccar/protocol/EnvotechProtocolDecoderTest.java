@@ -11,7 +11,8 @@ public class EnvotechProtocolDecoderTest extends ProtocolTest {
         var decoder = new EnvotechProtocolDecoder(null);
 
         verifyPosition(decoder, text(
-                "$80SLM,02,F,AB0010,130410155921,431750216,000040,0000,,00000000,'13041015592110476673N10111459E001281*2A"));
+                "$80SLM,02,F,AB0010,130410155921,431750216,000040,0000,,00000000,'13041015592110476673N10111459E001281*2A"),
+                position("2010-04-13 15:59:21.000", true, 4.76673, 101.11459));
 
         verifyPosition(decoder, text(
                 "$80SLM,82,F,AB0010,130410155921,431750216,000040,0000,,00000000,'13041015592110476673N10111459E001281@B0,F,C456,038,00,M234567,,,1A2A3A4A5A6A*4E"));
