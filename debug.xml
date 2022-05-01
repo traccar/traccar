@@ -20,4 +20,7 @@
     <entry key='atrack.custom'>true</entry>
     <entry key='intellitrac.port'>6037</entry>
 
+    <!--<entry key='broadcast.address'>230.0.0.0</entry>
+    <entry key='broadcast.port'>5000</entry>-->
+
 </properties>

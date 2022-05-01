@@ -1309,4 +1309,18 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL),
             "time,position,speed,course,accuracy,result");
 
+    /**
+     * Multicast address for broadcasting synchronization events.
+     */
+    public static final ConfigKey<String> BROADCAST_ADDRESS = new ConfigKey<>(
+            "broadcast.address",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Multicast port for broadcasting synchronization events.
+     */
+    public static final ConfigKey<Integer> BROADCAST_PORT = new ConfigKey<>(
+            "broadcast.port",
+            Collections.singletonList(KeyType.GLOBAL));
+
 }

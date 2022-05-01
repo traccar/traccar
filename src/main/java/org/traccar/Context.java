@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr353.JSR353Module;
 import org.apache.velocity.app.VelocityEngine;
 import org.eclipse.jetty.util.URIUtil;
+import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.AttributesManager;
@@ -169,6 +170,12 @@ public final class Context {
 
     public static ScheduleManager getScheduleManager() {
         return scheduleManager;
+    }
+
+    private static BroadcastService broadcastService;
+
+    public static BroadcastService getBroadcastService() {
+        return broadcastService;
     }
 
     private static GeofenceManager geofenceManager;
@@ -334,6 +341,10 @@ public final class Context {
 
         serverManager = new ServerManager();
         scheduleManager = new ScheduleManager();
+
+        if (config.hasKey(Keys.BROADCAST_ADDRESS)) {
+            broadcastService = new BroadcastService(config, objectMapper);
+        }
 
         if (config.hasKey(Keys.EVENT_FORWARD_URL)) {
             eventForwarder = new EventForwarder();
