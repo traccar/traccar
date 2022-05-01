@@ -23,14 +23,12 @@ import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.broadcast.BroadcastMessage;
 import org.traccar.config.Keys;
 import org.traccar.database.StatisticsManager;
 import org.traccar.helper.DateUtil;
 import org.traccar.model.Position;
 import org.traccar.storage.StorageException;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -61,14 +59,6 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
                 Context.getDeviceManager().updateLatestPosition(position);
             } catch (StorageException error) {
                 LOGGER.warn("Failed to update device", error);
-            }
-
-            BroadcastMessage message = new BroadcastMessage();
-            message.setPosition(position);
-            try {
-                Context.getBroadcastService().sendMessage(message);
-            } catch (IOException e) {
-                e.printStackTrace();
             }
 
             String uniqueId = Context.getIdentityManager().getById(position.getDeviceId()).getUniqueId();
