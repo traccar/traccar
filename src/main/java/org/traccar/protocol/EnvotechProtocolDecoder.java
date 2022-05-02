@@ -99,7 +99,7 @@ public class EnvotechProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_INPUT, parser.nextHexInt());
         position.set(Position.PREFIX_OUT, parser.nextHexInt());
         position.set(Position.KEY_FUEL_LEVEL, parser.nextHexInt());
-        position.set(Position.KEY_STATUS, parser.nextHexInt());
+        position.set(Position.KEY_STATUS, parser.nextHexLong());
 
         position.setFixTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
         position.setValid(parser.nextInt() > 0);
