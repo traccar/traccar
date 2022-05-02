@@ -294,7 +294,9 @@ public final class Context {
         }
 
         objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new SanitizerModule());
+        if (config.getBoolean(Keys.WEB_SANITIZE)) {
+            objectMapper.registerModule(new SanitizerModule());
+        }
         objectMapper.registerModule(new JSR353Module());
         objectMapper.setConfig(
                 objectMapper.getSerializationConfig().without(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS));

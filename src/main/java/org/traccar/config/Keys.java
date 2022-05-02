@@ -553,6 +553,14 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
+     * Sanitize all strings returned via API. This is needed to fix XSS issues in the old web interface. New React-based
+     * interface doesn't require this.
+     */
+    public static final ConfigKey<Boolean> WEB_SANITIZE = new ConfigKey<>(
+            "web.sanitize",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
      * Path to the web app folder.
      */
     public static final ConfigKey<String> WEB_PATH = new ConfigKey<>(
