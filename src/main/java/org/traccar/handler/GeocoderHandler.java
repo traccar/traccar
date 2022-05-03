@@ -55,8 +55,10 @@ public class GeocoderHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(final ChannelHandlerContext ctx, Object message) {
         if (message instanceof Position && !ignorePositions) {
             final Position position = (Position) message;
-            if (position.getAttributes().containsKey("source") && position.getAttributes().get("source").equals("import")) {
-                LOGGER.warn("channelRead {} {} {}", this.getClass(), position.getDeviceId(), position.getFixTime());
+            if (position.getAttributes().containsKey("address")) {
+                position.setAddress(position.getAttributes().get("address").toString());
+                ctx.fireChannelRead(position);
+                return;
             }
             if (processInvalidPositions || position.getValid()) {
                 if (geocoderReuseDistance != 0) {
@@ -73,26 +75,19 @@ public class GeocoderHandler extends ChannelInboundHandlerAdapter {
                     statisticsManager.registerGeocoderRequest();
                 }
 
-                geocoder.getAddress(position.getLatitude(), position.getLongitude(),
-                        new Geocoder.ReverseGeocoderCallback() {
-                    @Override
-                    public void onSuccess(String address) {
+                try{
+                    String address = geocoder.getAddress(position.getLatitude(), position.getLongitude(), null);
+                    if (ctx.pipeline().toMap().isEmpty()) {
+                        LOGGER.warn("empty pipeline on {} {} {}", position.getProtocol(), position.getDeviceId(), position.getFixTime());
+                    }
+                    if(address != null){
                         position.setAddress(address);
-                        if (position.getAttributes().containsKey("source") && position.getAttributes().get("source").equals("import")) {
-                            LOGGER.warn("onSuccess {} {} {}", this.getClass(), position.getDeviceId(), position.getFixTime());
-                        }
-                        ctx.fireChannelRead(position);
                     }
-
-                    @Override
-                    public void onFailure(Throwable e) {
-                        LOGGER.warn("Geocoding failed {} {}", e, e);
-                        ctx.fireChannelRead(position);
-                        if (position.getAttributes().containsKey("source") && position.getAttributes().get("source").equals("import")) {
-                            LOGGER.warn("onFailure {} {} {}", this.getClass(), position.getDeviceId(), position.getFixTime());
-                        }
-                    }
-                });
+                }
+                catch(Throwable e){
+                    LOGGER.warn("Geocoding failed {} {}", e, e);
+                }
+                ctx.fireChannelRead(position);
             } else {
                 ctx.fireChannelRead(position);
             }
