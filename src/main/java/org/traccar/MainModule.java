@@ -283,7 +283,7 @@ public class MainModule extends AbstractModule {
     @Provides
     public static EngineHoursHandler provideEngineHoursHandler(Config config, IdentityManager identityManager) {
         if (config.getBoolean(Keys.PROCESSING_ENGINE_HOURS_ENABLE)) {
-            return new EngineHoursHandler(identityManager);
+            return new EngineHoursHandler(config, identityManager);
         }
         return null;
     }
