@@ -75,19 +75,26 @@ public class GeocoderHandler extends ChannelInboundHandlerAdapter {
                     statisticsManager.registerGeocoderRequest();
                 }
 
-                try{
-                    String address = geocoder.getAddress(position.getLatitude(), position.getLongitude(), null);
-                    if (ctx.pipeline().toMap().isEmpty()) {
-                        LOGGER.warn("empty pipeline on {} {} {}", position.getProtocol(), position.getDeviceId(), position.getFixTime());
-                    }
-                    if(address != null){
+                geocoder.getAddress(position.getLatitude(), position.getLongitude(),
+                        new Geocoder.ReverseGeocoderCallback() {
+                    @Override
+                    public void onSuccess(String address) {
+                        if (ctx.pipeline().toMap().isEmpty()) {
+                            LOGGER.warn("empty pipeline on {} {} {}", position.getProtocol(), position.getDeviceId(), position.getFixTime());
+                        }
                         position.setAddress(address);
+                        ctx.fireChannelRead(position);
                     }
-                }
-                catch(Throwable e){
-                    LOGGER.warn("Geocoding failed {} {}", e, e);
-                }
-                ctx.fireChannelRead(position);
+
+                    @Override
+                    public void onFailure(Throwable e) {
+                        LOGGER.warn("Geocoding failed {} {}", e, e);
+                        ctx.fireChannelRead(position);
+                        if (position.getAttributes().containsKey("source") && position.getAttributes().get("source").equals("import")) {
+                            LOGGER.warn("onFailure {} {} {}", this.getClass(), position.getDeviceId(), position.getFixTime());
+                        }
+                    }
+                });
             } else {
                 ctx.fireChannelRead(position);
             }
