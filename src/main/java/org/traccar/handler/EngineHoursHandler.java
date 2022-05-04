@@ -18,6 +18,7 @@ package org.traccar.handler;
 
 import io.netty.channel.ChannelHandler;
 import org.traccar.BaseDataHandler;
+import org.traccar.config.Config;
 import org.traccar.database.IdentityManager;
 import org.traccar.model.Position;
 
@@ -25,9 +26,11 @@ import org.traccar.model.Position;
 public class EngineHoursHandler extends BaseDataHandler {
 
     private final IdentityManager identityManager;
+    private final double speedThreshold;
 
-    public EngineHoursHandler(IdentityManager identityManager) {
+    public EngineHoursHandler(Config config, IdentityManager identityManager) {
         this.identityManager = identityManager;
+        speedThreshold = config.getDouble("event.motion.speedThreshold", 0.01);
     }
 
     @Override
@@ -36,12 +39,22 @@ public class EngineHoursHandler extends BaseDataHandler {
             Position last = identityManager.getLastPosition(position.getDeviceId());
             if (last != null) {
                 long hours = last.getLong(Position.KEY_HOURS);
+                long idleTime = last.getLong(Position.KEY_IDLE_TIME);
                 if (last.getBoolean(Position.KEY_IGNITION) && position.getBoolean(Position.KEY_IGNITION)) {
-                    hours += position.getFixTime().getTime() - last.getFixTime().getTime();
+                    long diff = position.getFixTime().getTime() - last.getFixTime().getTime();
+                    hours += diff;
+                    if (position.getSpeed() < speedThreshold) {
+                        idleTime += diff;
+                    } else {
+                        idleTime = 0;
+                    }
+                } else {
+                    idleTime = 0;
                 }
                 if (hours != 0) {
                     position.set(Position.KEY_HOURS, hours);
                 }
+                position.set(Position.KEY_IDLE_TIME, idleTime);
             }
         }
         return position;
