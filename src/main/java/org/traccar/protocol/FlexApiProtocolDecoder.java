@@ -24,12 +24,10 @@ import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import javax.json.Json;
-import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import java.io.StringReader;
 import java.net.SocketAddress;
 import java.util.Date;
-import java.util.Optional;
 
 public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
 
@@ -52,51 +50,30 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
         }
 
         Position position = new Position(getProtocolName());
+        position.set(Position.KEY_ORIGINAL, message);
         position.setDeviceId(deviceSession.getDeviceId());
 
         JsonObject payload = root.getJsonObject("payload");
 
         if (topic.contains("/gnss/")) {
-
-            if (payload.getInt("gnss.fix") > 0) {
-                position.setValid(true);
-                if (payload.containsKey("time")) {
-                    position.setTime(new Date(payload.getInt("time") * 1000L));
-                    position.setLatitude(payload.getJsonNumber("lat").doubleValue());
-                    position.setLongitude(payload.getJsonNumber("log").doubleValue());
-                } else {
-                    position.setTime(new Date(payload.getInt("gnss.ts") * 1000L));
-                    position.setLatitude(payload.getJsonNumber("gnss.latitude").doubleValue());
-                    position.setLongitude(payload.getJsonNumber("gnss.longitude").doubleValue());
-                }
-                Optional.ofNullable(payload.getJsonNumber("gnss.altitude"))
-                        .map(JsonNumber::doubleValue).ifPresent(position::setAltitude);
-                Optional.ofNullable(payload.getJsonNumber("gnss.speed"))
-                        .map(JsonNumber::doubleValue).ifPresent(position::setSpeed);
-                Optional.ofNullable(payload.getJsonNumber("gnss.heading"))
-                        .map(JsonNumber::doubleValue).ifPresent(position::setCourse);
-                Optional.ofNullable(payload.getJsonNumber("gnss.num_sv"))
-                        .map(JsonNumber::intValue).ifPresent(value -> position.set(Position.KEY_SATELLITES, value));
-                Optional.ofNullable(payload.getJsonNumber("gnss.hdop"))
-                        .map(JsonNumber::doubleValue).ifPresent(value -> position.set(Position.KEY_HDOP, value));
-            } else {
-                position.setValid(false);
-                Optional.ofNullable(payload.getJsonNumber("gnss.num_sv"))
-                        .map(JsonNumber::intValue).ifPresent(value -> position.set(Position.KEY_SATELLITES, value));
-                position.setTime(new Date());
-            }
-
-
+            parseGnss(position, payload);
         } else if (topic.contains("/cellular1/")) {
 
             getLastLocation(position, new Date(payload.getInt("modem1.ts") * 1000L));
 
-            Optional.ofNullable(payload.getString("modem1.imei"))
-                    .ifPresent(value -> position.set("imei", value));
-            Optional.ofNullable(payload.getString("modem1.imsi"))
-                    .ifPresent(value -> position.set("imsi", value));
-            Optional.ofNullable(payload.getString("modem1.iccid"))
-                    .ifPresent(value -> position.set(Position.KEY_ICCID, value));
+            if (payload.containsKey("modem1.imei")) {
+                position.set("imei", payload.getString("modem1.imei"));
+            }
+            if (payload.containsKey("modem1.rssi")) {
+                position.set(Position.KEY_RSSI, payload.getInt("modem1.rssi"));
+            }
+            if (payload.containsKey("modem1.imsi")) {
+                position.set("imsi", payload.getString("modem1.imsi"));
+            }
+            if (payload.containsKey("modem1.iccid")) {
+                position.set(Position.KEY_ICCID, payload.getString("modem1.iccid"));
+            }
+
 
             String operator = payload.getString("modem1.operator");
             if (!operator.isEmpty()) {
@@ -108,7 +85,8 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
 
                 if (payload.containsKey("modem1.rsrp")) {
                     cellTower.setSignalStrength(payload.getInt("modem1.rsrp"));
-                } else if (payload.containsKey("modem1.rssi")) {
+                }
+                if (payload.containsKey("modem1.rssi")) {
                     cellTower.setSignalStrength(payload.getInt("modem1.rssi"));
                 }
 
@@ -130,37 +108,30 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (topic.contains("/obd/")) {
 
-            getLastLocation(position, new Date(payload.getInt("obd.ts") * 1000L));
-
-            if (payload.containsKey("obd.speed")) {
-                position.set(Position.KEY_OBD_SPEED, payload.getJsonNumber("obd.speed").doubleValue());
-            }
-            if (payload.containsKey("obd.odo")) {
-                position.set(Position.KEY_OBD_ODOMETER, payload.getInt("obd.odo"));
-            }
-            if (payload.containsKey("obd.rpm")) {
-                position.set(Position.KEY_RPM, payload.getInt("obd.rpm"));
-            }
-            if (payload.containsKey("obd.vin")) {
-                position.set(Position.KEY_VIN, payload.getString("obd.vin"));
-            }
+            parseObd(position, payload);
 
         } else if (topic.contains("/motion/")) {
 
             getLastLocation(position, new Date(payload.getInt("motion.ts") * 1000L));
-            Optional.ofNullable(payload.getJsonNumber("motion.ax"))
-                    .map(JsonNumber::doubleValue).ifPresent(value -> position.set("ax", value));
-            Optional.ofNullable(payload.getJsonNumber("motion.ay"))
-                    .map(JsonNumber::doubleValue).ifPresent(value -> position.set("ay", value));
-            Optional.ofNullable(payload.getJsonNumber("motion.az"))
-                    .map(JsonNumber::doubleValue).ifPresent(value -> position.set("az", value));
-            Optional.ofNullable(payload.getJsonNumber("motion.gx"))
-                    .map(JsonNumber::doubleValue).ifPresent(value -> position.set("gx", value));
-            Optional.ofNullable(payload.getJsonNumber("motion.gy"))
-                    .map(JsonNumber::doubleValue).ifPresent(value -> position.set("gy", value));
-            Optional.ofNullable(payload.getJsonNumber("motion.gz"))
-                    .map(JsonNumber::doubleValue).ifPresent(value -> position.set("gz", value));
-        } else if (topic.contains("/io/")) {
+            if (payload.containsKey("motion.ax")) {
+                position.set("ax", payload.getJsonNumber("motion.ax").doubleValue());
+            }
+            if (payload.containsKey("motion.ay")) {
+                position.set("ay", payload.getJsonNumber("motion.ay").doubleValue());
+            }
+            if (payload.containsKey("motion.az")) {
+                position.set("az", payload.getJsonNumber("motion.az").doubleValue());
+            }
+            if (payload.containsKey("motion.gx")) {
+                position.set("gx", payload.getJsonNumber("motion.gx").doubleValue());
+            }
+            if (payload.containsKey("motion.gy")) {
+                position.set("gy", payload.getJsonNumber("motion.gy").doubleValue());
+            }
+            if (payload.containsKey("motion.gz")) {
+                position.set("gz", payload.getJsonNumber("motion.gz").doubleValue());
+            }
+        } else if (topic.contains("/io/") || (topic.contains("/event/notice") && "DI_CHG".equals(payload.getString("type")))) {
 
             getLastLocation(position, new Date(payload.getInt("io.ts") * 1000L));
 
@@ -168,15 +139,7 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_IGNITION, payload.getInt("io.IGT") > 0);
             }
 
-            for (String key : payload.keySet()) {
-                if (key.startsWith("io.AI")) {
-                    position.set(Position.PREFIX_ADC + key.substring(5), payload.getJsonNumber(key).doubleValue());
-                } else if (key.startsWith("io.DI") && !key.endsWith("_pullup")) {
-                    position.set(Position.PREFIX_IN + key.substring(5), payload.getInt(key) > 0);
-                } else if (key.startsWith("io.DO")) {
-                    position.set(Position.PREFIX_OUT + key.substring(5), payload.getInt(key) > 0);
-                }
-            }
+            parseIO(position, payload);
 
         } else if (topic.contains("/sysinfo/")) {
 
@@ -185,13 +148,79 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
             position.set("serial", payload.getString("sysinfo.serial_number"));
             position.set(Position.KEY_VERSION_FW, payload.getString("sysinfo.firmware_version"));
 
-        } else {
-
-            return null;
+        } else if (topic.contains("/summary/")) {
+            parseIO(position, payload);
+            parseGnss(position, payload);
+            parseObd(position, payload);
 
         }
 
         return position;
+    }
+
+    private void parseObd(Position position, JsonObject payload) {
+        getLastLocation(position, new Date(payload.getInt("obd.ts") * 1000L));
+
+        if (payload.containsKey("obd.speed")) {
+            position.set(Position.KEY_OBD_SPEED, payload.getJsonNumber("obd.speed").doubleValue());
+        }
+        if (payload.containsKey("obd.odo")) {
+            position.set(Position.KEY_OBD_ODOMETER, payload.getInt("obd.odo"));
+        }
+        if (payload.containsKey("obd.rpm")) {
+            position.set(Position.KEY_RPM, payload.getInt("obd.rpm"));
+        }
+        if (payload.containsKey("obd.vin")) {
+            position.set(Position.KEY_VIN, payload.getString("obd.vin"));
+        }
+    }
+
+    private void parseGnss(Position position, JsonObject payload) {
+        if (payload.getInt("gnss.fix") > 0) {
+            position.setValid(true);
+            if (payload.containsKey("time")) {
+                position.setTime(new Date(payload.getInt("time") * 1000L));
+                position.setLatitude(payload.getJsonNumber("lat").doubleValue());
+                position.setLongitude(payload.getJsonNumber("log").doubleValue());
+            } else {
+                position.setTime(new Date(payload.getInt("gnss.ts") * 1000L));
+                position.setLatitude(payload.getJsonNumber("gnss.latitude").doubleValue());
+                position.setLongitude(payload.getJsonNumber("gnss.longitude").doubleValue());
+            }
+            if (payload.containsKey("gnss.altitude")) {
+                position.setAltitude(payload.getJsonNumber("gnss.altitude").doubleValue());
+            }
+            if (payload.containsKey("gnss.speed")) {
+                position.setSpeed(payload.getJsonNumber("gnss.speed").doubleValue());
+            }
+            if (payload.containsKey("gnss.heading")) {
+                position.setCourse(payload.getJsonNumber("gnss.heading").doubleValue());
+            }
+            if (payload.containsKey("gnss.num_sv")) {
+                position.set(Position.KEY_SATELLITES, payload.getJsonNumber("gnss.num_sv").doubleValue());
+            }
+            if (payload.containsKey("gnss.hdop")) {
+                position.set(Position.KEY_HDOP, payload.getJsonNumber("gnss.hdop").doubleValue());
+            }
+        } else {
+            position.setValid(false);
+            if (payload.containsKey("gnss.num_sv")) {
+                position.set(Position.KEY_SATELLITES, payload.getJsonNumber("gnss.num_sv").intValue());
+            }
+            position.setTime(new Date());
+        }
+    }
+
+    private void parseIO(Position position, JsonObject payload) {
+        for (String key : payload.keySet()) {
+            if (key.startsWith("io.AI")) {
+                position.set(Position.PREFIX_ADC + key.substring(5), payload.getJsonNumber(key).doubleValue());
+            } else if (key.startsWith("io.DI") && !key.endsWith("_pullup")) {
+                position.set(Position.PREFIX_IN + key.substring(5), payload.getInt(key) > 0);
+            } else if (key.startsWith("io.DO")) {
+                position.set(Position.PREFIX_OUT + key.substring(5), payload.getInt(key) > 0);
+            }
+        }
     }
 
 }
