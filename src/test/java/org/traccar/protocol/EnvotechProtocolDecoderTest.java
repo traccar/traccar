@@ -11,6 +11,9 @@ public class EnvotechProtocolDecoderTest extends ProtocolTest {
         var decoder = new EnvotechProtocolDecoder(null);
 
         verifyPosition(decoder, text(
+                "$80IVM,03,E002215,E002215,110422061936,672763902,126423,0180,000000,00018600,0.0000'11042206193710406325S03966094E000118*42D6#"));
+
+        verifyPosition(decoder, text(
                 "$80SLM,62,000F,F015727,020522053200,611000000,000391,C080,000,80028900,85010000'02052205320110399426S03970217E000145*E0C2#"));
 
         verifyPosition(decoder, text(

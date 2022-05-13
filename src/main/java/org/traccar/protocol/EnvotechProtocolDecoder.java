@@ -48,7 +48,8 @@ public class EnvotechProtocolDecoder extends BaseProtocolDecoder {
             .number("(ddd),")                    // battery
             .number("(xx)")                      // inputs
             .number("(xx),")                     // outputs
-            .number("(xxx)?,")                   // fuel
+            .number("(xxx)?")                    // fuel
+            .number("(xxx)?,")                   // weight
             .number("(x{8}),")                   // status
             .expression("[^']*'")
             .number("(dd)(dd)(dd)")              // date (ddmmyy)
@@ -99,6 +100,7 @@ public class EnvotechProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_INPUT, parser.nextHexInt());
         position.set(Position.PREFIX_OUT, parser.nextHexInt());
         position.set(Position.KEY_FUEL_LEVEL, parser.nextHexInt());
+        position.set("weight", parser.nextHexInt());
         position.set(Position.KEY_STATUS, parser.nextHexLong());
 
         position.setFixTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
