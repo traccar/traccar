@@ -87,7 +87,9 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void parseMotion(Position position, JsonObject payload) {
-        getLastLocation(position, new Date(payload.getInt("motion.ts") * 1000L));
+        if (payload.containsKey("motion.ts")){
+            getLastLocation(position, new Date(payload.getInt("motion.ts") * 1000L));
+        }
         if (payload.containsKey("motion.ax")) {
             position.set("ax", payload.getJsonNumber("motion.ax").doubleValue());
         }
@@ -109,7 +111,10 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void parseCellular(Position position, JsonObject payload) {
-        getLastLocation(position, new Date(payload.getInt("modem1.ts") * 1000L));
+
+        if (payload.containsKey("modem1.ts")) {
+            getLastLocation(position, new Date(payload.getInt("modem1.ts") * 1000L));
+        }
 
         if (payload.containsKey("modem1.imei")) {
             position.set("imei", payload.getString("modem1.imei"));
@@ -158,8 +163,9 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void parseObd(Position position, JsonObject payload) {
-        getLastLocation(position, new Date(payload.getInt("obd.ts") * 1000L));
-
+        if (payload.containsKey("obd.ts")) {
+            getLastLocation(position, new Date(payload.getInt("obd.ts") * 1000L));
+        }
         if (payload.containsKey("obd.speed")) {
             position.set(Position.KEY_OBD_SPEED, payload.getJsonNumber("obd.speed").doubleValue());
         }
@@ -211,7 +217,9 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void parseIO(Position position, JsonObject payload) {
-        getLastLocation(position, new Date(payload.getInt("io.ts") * 1000L));
+        if (payload.containsKey("io.ts")) {
+            getLastLocation(position, new Date(payload.getInt("io.ts") * 1000L));
+        }
 
         if (payload.containsKey("io.IGT")) {
             position.set(Position.KEY_IGNITION, payload.getInt("io.IGT") > 0);
