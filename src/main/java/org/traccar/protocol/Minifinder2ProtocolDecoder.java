@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -262,6 +262,14 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                     case 0x30:
                         buf.readUnsignedInt(); // timestamp
                         position.set(Position.KEY_STEPS, buf.readUnsignedInt());
+                        break;
+                    case 0x31:
+                        int i = 1;
+                        while (buf.readerIndex() < endIndex) {
+                            position.set("activity" + i + "Time", buf.readUnsignedInt());
+                            position.set("activity" + i, buf.readUnsignedInt());
+                            i += 1;
+                        }
                         break;
                     case 0x40:
                         buf.readUnsignedIntLE(); // timestamp
